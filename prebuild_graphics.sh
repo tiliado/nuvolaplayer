@@ -19,7 +19,7 @@ prebuild_app_icon()
 prebuild_web_app_icon()
 {
 	source="$1"
-	size=26
+	size=48
 	name="$(basename "$source")"
 	name="${name%.svg}"
 	directory="$PREFIX/data/nuvolaplayer3/web_apps/$name"

@@ -51,16 +51,10 @@ class WebAppRegistryTest: Diorite.TestCase
 		// TODO
 	}
 	
-	private WebAppRegistry create_registry(string path)
+	private WebAppRegistry create_registry(string? path)
 	{
-		var storage = new Diorite.XdgStorage.for_project(Nuvola.get_appname());
-		var web_apps_storage = storage.get_child("web_apps");
-		web_apps_storage = new Diorite.Storage(
-			path, {},
-			web_apps_storage.user_config_dir.get_path(),
-			web_apps_storage.user_cache_dir.get_path()
-		);
-		return new WebAppRegistry(web_apps_storage, false);
+		var storage = new Diorite.XdgStorage.for_project(Nuvola.get_appname()).get_child("web_apps");
+		return new WebAppRegistry.with_data_path(storage, path);
 	}
 	
 	private string[] list_web_apps(string path)

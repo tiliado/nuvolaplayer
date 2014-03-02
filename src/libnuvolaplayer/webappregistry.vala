@@ -56,6 +56,16 @@ public class WebAppRegistry: GLib.Object
 		this.allow_management = allow_management;
 	}
 	
+	public WebAppRegistry.with_data_path(Diorite.Storage storage, string path)
+	{
+		this.storage = new Diorite.Storage(
+			path, {},
+			storage.user_config_dir.get_path(),
+			storage.user_cache_dir.get_path()
+		);
+		this.allow_management = false;
+	}
+	
 	/**
 	 * Emitted when a service has been installed
 	 * 

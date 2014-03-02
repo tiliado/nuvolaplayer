@@ -47,7 +47,7 @@ build()
 	$CC ${OUT}/tests/*.c -o ${OUT}/${LIBPREFIX}${NAME}${LIBSUFFIX} \
 	$LIB_CFLAGS $CFLAGS '-DG_LOG_DOMAIN="Diorite"' \
 	-I$BUILD "-L$(readlink -e "$BUILD")" -lnuvolaplayer3unstable \
-	$(pkg-config --cflags --libs dioriteglib glib-2.0 gmodule-2.0 gobject-2.0 gthread-2.0) \
+	$(pkg-config --cflags --libs dioriteglib gtk+-2.0 glib-2.0 gmodule-2.0 gobject-2.0 gthread-2.0) \
 	
 	
 	set +x

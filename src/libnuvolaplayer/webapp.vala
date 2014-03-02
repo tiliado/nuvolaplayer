@@ -65,6 +65,19 @@ public class WebApp : GLib.Object
 	public File config_dir {get; construct;}
 	public File data_dir {get; construct;}
 	public bool removable {get; construct;}
+	public string? icon
+	{
+		owned get
+		{
+			var file = data_dir.get_child("icon.svg");
+			if (file.query_file_type(0) == FileType.REGULAR)
+				return file.get_path();
+			file = data_dir.get_child("icon.png");
+			if (file.query_file_type(0) == FileType.REGULAR)
+				return file.get_path();
+			return null;
+		}
+	}
 	
 	public WebApp(WebAppMeta meta, File config_dir, File data_dir, bool removable)
 	{
@@ -72,6 +85,5 @@ public class WebApp : GLib.Object
 	}
 
 }
-
 
 } // namespace Nuvola

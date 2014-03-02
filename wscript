@@ -179,6 +179,7 @@ def build(ctx):
 	
 	NUVOLAPLAYER = APPNAME + SUFFIX
 	LIBNUVOLAPLAYER = "lib" + APPNAME + SUFFIX
+	UIDEMO="uidemo"
 	
 	ctx(features = "c cshlib",
 		target = NUVOLAPLAYER,
@@ -193,13 +194,24 @@ def build(ctx):
 		vala_target_glib = "2.32",
 	)
 	
-	
 	ctx.program(
 		target = NUVOLAPLAYER,
 		source = ctx.path.ant_glob('src/nuvolaplayer/*.vala') + ctx.path.ant_glob('src/nuvolaplayer/*.c'),
 		packages = packages,
 		uselib = uselib,
 		includes = ["src/lnuvolaplayer"],
+		use = [LIBNUVOLAPLAYER],
+		vala_defines = vala_defines,
+		cflags = ['-DG_LOG_DOMAIN="Nuvola"'],
+		vapi_dirs = ['vapi'],
+		vala_target_glib = "2.32",
+	)
+	
+	ctx.program(
+		target = UIDEMO,
+		source = ctx.path.ant_glob('tests/ui/*.vala'),
+		packages = packages,
+		uselib = uselib,
 		use = [LIBNUVOLAPLAYER],
 		vala_defines = vala_defines,
 		cflags = ['-DG_LOG_DOMAIN="Nuvola"'],
