@@ -1,0 +1,11 @@
+{
+	"id": "grooveshark",
+	"name": "Grooveshark",
+	"maintainer_name": "Orphaned service",
+	"maintainer_link": "https://answers.launchpad.net/nuvola-player/+faq/2012",
+	"version_major": 4,
+	"version_minor": 0,
+	"api_major": 3,
+	"api_minor": 0,
+	"custom": 5
+}

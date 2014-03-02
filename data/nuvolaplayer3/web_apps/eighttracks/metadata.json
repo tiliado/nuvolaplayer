@@ -1,0 +1,11 @@
+{
+	"id": "eighttracks",
+	"name": "8tracks",
+	"maintainer_name": "Michael J Coyne",
+	"maintainer_link": "https://launchpad.net/~mikeycgto",
+	"version_major": 5,
+	"version_minor": 0,
+	"api_major": 3,
+	"api_minor": 0,
+	"custom": 5
+}

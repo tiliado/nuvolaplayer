@@ -1,0 +1,11 @@
+{
+	"id": "lms",
+	"name": "Logitech Media Server",
+	"maintainer_name": "Steffen Coenen",
+	"maintainer_link": "https://launchpad.net/~5-steffen",
+	"version_major": 2,
+	"version_minor": 0,
+	"api_major": 3,
+	"api_minor": 0,
+	"custom": 5
+}
