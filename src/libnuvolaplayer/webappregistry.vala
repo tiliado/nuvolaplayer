@@ -135,18 +135,12 @@ public class WebAppRegistry: GLib.Object
 	
 	public WebAppMeta load_web_app_meta_from_dir(File dir) throws WebAppError
 	{
-		
-	
 		if (dir.query_file_type(0) != FileType.DIRECTORY)
 			throw new WebAppError.LOADING_FAILED(@"$(dir.get_path()) is not a directory");
-		
-		
+				
 		var metadata_file = dir.get_child(METADATA_FILENAME);
 		if (metadata_file.query_file_type(0) != FileType.REGULAR)
 			throw new WebAppError.LOADING_FAILED(@"$(metadata_file.get_path()) is not a file");
-		
-		
-		
 		
 		string metadata;
 		try
