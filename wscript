@@ -34,9 +34,11 @@ APPNAME = "nuvolaplayer"
 VERSION = "3.0.0~unstable"
 SUFFIX="3"
 
+UNIQUE_NAME="cz.fenryxo.NuvolaPlayer"
 if VERSION.endswith("~unstable"):
 	SUFFIX += "unstable"
 
+UNIQUE_NAME += SUFFIX
 VERSIONS, VERSION_SUFFIX = VERSION.split("~")
 if not VERSION_SUFFIX:
 	VERSION_SUFFIX = "stable"
@@ -158,6 +160,8 @@ def configure(ctx):
 	
 	ctx.define("NUVOLA_APPNAME", APPNAME + SUFFIX)
 	ctx.define("NUVOLA_NAME", NAME)
+	ctx.define("NUVOLA_UNIQUE_NAME", UNIQUE_NAME)
+	ctx.define("NUVOLA_APP_ICON", APPNAME)
 	ctx.define("NUVOLA_VERSION", VERSION)
 	ctx.define("NUVOLA_VERSION_MAJOR", VERSIONS[0])
 	ctx.define("NUVOLA_VERSION_MINOR", VERSIONS[1])

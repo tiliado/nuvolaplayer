@@ -24,58 +24,23 @@
 
 namespace Nuvola
 {
-private extern const string APPNAME;
-private extern const string NAME;
-private extern const string UNIQUE_NAME;
-private extern const string APP_ICON;
-private extern const string VERSION;
-private extern const int VERSION_MAJOR;
-private extern const int VERSION_MINOR;
-private extern const int VERSION_BUGFIX;
-private extern const string VERSION_SUFFIX;
 
-
-public string get_appname()
+public class WebAppListWindow : Gtk.ApplicationWindow
 {
-	return APPNAME;
-}
-
-public string get_display_name()
-{
-	return NAME;
-}
-
-public string get_version()
-{
-	return VERSION;
-}
-
-public string get_version_suffix()
-{
-	return VERSION_SUFFIX;
-}
-
-public int[] get_versions()
-{
-	return {VERSION_MAJOR, VERSION_MINOR, VERSION_BUGFIX};
-}
-
-public void list_web_apps()
-{
-	var storage = new Diorite.XdgStorage.for_project(APPNAME);
-	var web_apps_storage = storage.get_child("web_apps");
-	web_apps_storage = new Diorite.Storage(
-		"data/nuvolaplayer3/web_apps", {},
-		web_apps_storage.user_config_dir.get_path(),
-		web_apps_storage.user_cache_dir.get_path()
-	);
-	var web_apps_reg = new WebAppRegistry(web_apps_storage, false);
-	var web_apps = web_apps_reg.list_web_apps();
-	foreach (var web_app in web_apps.get_values())
+	public WebAppListWindow(Diorite.Application app)
 	{
-		message("Web app: %s, %u.%u, %s", web_app.meta.name, web_app.meta.version_major, web_app.meta.version_minor, web_app.data_dir.get_path());
+		app.add_window(this);
+		title = "Services - " + app.app_name;
+		try
+		{
+			icon = Gtk.IconTheme.get_default().load_icon(app.icon, 48, 0);
+		}
+		catch (Error e)
+		{
+			warning("Unable to load application icon.");
+		}
 	}
-}
 
+}
 
 } // namespace Nuvola
