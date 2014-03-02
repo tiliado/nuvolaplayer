@@ -1,0 +1,16 @@
+/* 
+ * Metadata for Google Play Web App.
+ *
+ * Feel free to add any custom fields.
+ */
+{
+	"id": "googleplay",
+	"name": "Google Play Music",
+	"maintainer_name": "Jiří Janoušek",
+	"maintainer_link": "https://launchpad.net/~fenryxo",
+	"version_major": 5,
+	"version_minor": 0,
+	"api_major": 3,
+	"api_minor": 0,
+	"custom": 5
+}

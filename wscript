@@ -29,8 +29,19 @@ top = '.'
 out = 'build'
 
 # Application name and version
+NAME="Nuvola Player"
 APPNAME = "nuvolaplayer"
 VERSION = "3.0.0~unstable"
+SUFFIX="3"
+
+if VERSION.endswith("~unstable"):
+	SUFFIX += "unstable"
+
+VERSIONS, VERSION_SUFFIX = VERSION.split("~")
+if not VERSION_SUFFIX:
+	VERSION_SUFFIX = "stable"
+VERSIONS = map(int, VERSIONS.split("."))
+
 
 import sys
 from waflib.Configure import conf
@@ -143,12 +154,21 @@ def configure(ctx):
 	ctx.check_dep('gthread-2.0', 'GTHREAD', '2.32')
 	ctx.check_dep('dioriteglib', 'DIORITEGLIB', '0.0.1')
 	ctx.check_dep('dioritegtk', 'DIORITEGGTK', '0.0.1')
+	ctx.check_dep('json-glib-1.0', 'JSON-GLIB', '0.7')
+	
+	ctx.define("NUVOLA_APPNAME", APPNAME + SUFFIX)
+	ctx.define("NUVOLA_NAME", NAME)
+	ctx.define("NUVOLA_VERSION", VERSION)
+	ctx.define("NUVOLA_VERSION_MAJOR", VERSIONS[0])
+	ctx.define("NUVOLA_VERSION_MINOR", VERSIONS[1])
+	ctx.define("NUVOLA_VERSION_BUGFIX", VERSIONS[2])
+	ctx.define("NUVOLA_VERSION_SUFFIX", VERSION_SUFFIX)
 
 def build(ctx):
 	#~ print ctx.env
 	PLATFORM = ctx.env.PLATFORM
-	packages = 'dioritegtk dioriteglib gtk+-3.0 gdk-3.0 posix glib-2.0 gio-2.0 '
-	uselib = 'DIORITEGGTK DIORITEGLIB GTK+ GDK GLIB GTHREAD GIO'
+	packages = 'dioritegtk dioriteglib gtk+-3.0 gdk-3.0 posix json-glib-1.0 glib-2.0 gio-2.0 '
+	uselib = 'DIORITEGGTK DIORITEGLIB GTK+ GDK JSON-GLIB GLIB GTHREAD GIO'
 	vala_defines = ctx.env.VALA_DEFINES
 	
 	if PLATFORM == WIN:
@@ -157,12 +177,30 @@ def build(ctx):
 	else:
 		CFLAGS=""
 	
-	ctx.program(
-		target = APPNAME,
-		source = ctx.path.ant_glob('src/*.vala') + ctx.path.ant_glob('src/*.c'),
+	NUVOLAPLAYER = APPNAME + SUFFIX
+	LIBNUVOLAPLAYER = "lib" + APPNAME + SUFFIX
+	
+	ctx(features = "c cshlib",
+		target = NUVOLAPLAYER,
+		name = LIBNUVOLAPLAYER,
+		source = ctx.path.ant_glob('src/libnuvolaplayer/*.vala') + ctx.path.ant_glob('src/libnuvolaplayer/*.c'),
 		packages = packages,
 		uselib = uselib,
-		includes = ["src"],
+		includes = ["src/libnuvolaplayer"],
+		vala_defines = vala_defines,
+		cflags = ['-DG_LOG_DOMAIN="LibNuvola"'],
+		vapi_dirs = ['vapi'],
+		vala_target_glib = "2.32",
+	)
+	
+	
+	ctx.program(
+		target = NUVOLAPLAYER,
+		source = ctx.path.ant_glob('src/nuvolaplayer/*.vala') + ctx.path.ant_glob('src/nuvolaplayer/*.c'),
+		packages = packages,
+		uselib = uselib,
+		includes = ["src/lnuvolaplayer"],
+		use = [LIBNUVOLAPLAYER],
 		vala_defines = vala_defines,
 		cflags = ['-DG_LOG_DOMAIN="Nuvola"'],
 		vapi_dirs = ['vapi'],

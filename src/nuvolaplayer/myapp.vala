@@ -52,6 +52,7 @@ public class MyApp : Diorite.Application
 		toolbar.vexpand = true;
 		main_window.add(toolbar);
 		main_window.show_all();
+		Nuvola.list_web_apps();
 	}
 	
 	private void append_actions()
