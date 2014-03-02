@@ -27,9 +27,11 @@ namespace Nuvola
 
 public class WebAppListWindow : Gtk.ApplicationWindow
 {
-	public WebAppListWindow(Diorite.Application app)
+	public Gtk.Grid grid {get; private set;}
+	public WebAppListView view {get; private set;}
+	
+	public WebAppListWindow(WebAppListController app, WebAppListView view)
 	{
-		app.add_window(this);
 		title = "Services - " + app.app_name;
 		try
 		{
@@ -39,6 +41,25 @@ public class WebAppListWindow : Gtk.ApplicationWindow
 		{
 			warning("Unable to load application icon.");
 		}
+		set_default_size(400, 400);
+		
+		app.add_window(this);
+		app.actions.window = this;
+		this.view = view;
+		view.select_path(new Gtk.TreePath.first());
+		var scroll = new Gtk.ScrolledWindow(null, null);
+		scroll.add(view);
+		scroll.vexpand = true;
+		scroll.hexpand = true;
+		var toolbar = app.actions.build_toolbar({"quit", " ", "menu"});
+		toolbar.hexpand = true;
+		toolbar.vexpand = false;
+		
+		grid = new Gtk.Grid();
+		grid.orientation = Gtk.Orientation.VERTICAL;
+		grid.add(toolbar);
+		grid.add(scroll);
+		add(grid);
 	}
 
 }

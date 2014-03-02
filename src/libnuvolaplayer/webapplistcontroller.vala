@@ -30,6 +30,7 @@ public class WebAppListController : Diorite.Application
 	public WebAppListWindow? main_window {get; private set; default = null;}
 	public Diorite.Storage? storage {get; private set; default = null;}
 	public WebAppRegistry? web_app_reg {get; private set; default = null;}
+	public Diorite.ActionsRegistry? actions {get; private set; default = null;}
 	private string? web_apps_dir = null;
 	
 	public WebAppListController(string? web_apps_dir)
@@ -49,6 +50,7 @@ public class WebAppListController : Diorite.Application
 	
 	private void start()
 	{
+		append_actions();
 		storage = new Diorite.XdgStorage.for_project(Nuvola.get_appname()).get_child("web_apps");
 		if (web_apps_dir != null && web_apps_dir != "")
 			web_app_reg = new WebAppRegistry.with_data_path(storage, web_apps_dir);
@@ -61,13 +63,28 @@ public class WebAppListController : Diorite.Application
 			model.append_web_app(web_app, WebAppListView.load_icon(web_app.icon, APP_ICON));
 	
 		var view = new WebAppListView(model);
-		view.select_path(new Gtk.TreePath.first());
-		var scroll = new Gtk.ScrolledWindow(null, null);
-		scroll.add(view);
-		main_window = new WebAppListWindow(this);
-		main_window.set_default_size(400, 400);
-		main_window.add(scroll);
+		main_window = new WebAppListWindow(this, view);
+		set_app_menu(actions.build_menu({"quit"}));
+		var menu = new Menu();
+		set_menubar(menu);
 		main_window.show_all();
+	}
+	
+	private void append_actions()
+	{
+		actions = new Diorite.ActionsRegistry(this, null);
+		Diorite.Action[] actions_spec = {
+		//          Action(group, scope, name, label?, mnemo_label?, icon?, keybinding?, callback?)
+		new Diorite.Action("main", "app", "quit", "Quit", "_Quit", "application-exit", "<ctrl>Q", on_quit),
+		new Diorite.Action("main", "win", "menu", "Menu", null, "emblem-system-symbolic", null, null)
+		};
+		actions.add_actions(actions_spec);
+		
+	}
+	
+	private void on_quit()
+	{
+		quit();
 	}
 }
 
