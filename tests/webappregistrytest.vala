@@ -51,10 +51,53 @@ class WebAppRegistryTest: Diorite.TestCase
 		// TODO
 	}
 	
-	private WebAppRegistry create_registry(string? path)
+	public void test_install_packages()
+	{
+		File tmp_dir = null;
+		try
+		{
+			tmp_dir = File.new_for_path(DirUtils.make_tmp("nuvolaplayerXXXXXX"));
+		}
+		catch (FileError e)
+		{
+			assert(false);
+		}
+		
+		try
+		{
+			var parent = File.new_for_path("../packages");
+			var packages = list_files(parent.get_path());
+			var web_app_reg = create_registry(tmp_dir.get_path(), true);
+			foreach(var package_name in packages)
+			{
+				mark = package_name;
+				WebApp? web_app = null;
+				try
+				{
+					web_app = web_app_reg.install_app(parent.get_child(package_name));
+				}
+				catch (WebAppError e)
+				{
+					critical("%s: %s", package_name, e.message);
+				}
+				expect(web_app != null);
+			}
+		}
+		finally
+		{
+			Diorite.System.try_purge_dir(tmp_dir);
+		}
+	}
+	
+	public void test_install_invalid_packages()
+	{
+		// TODO
+	}
+	
+	private WebAppRegistry create_registry(string? path, bool allow_management=false)
 	{
 		var storage = new Diorite.XdgStorage.for_project(Nuvola.get_appname()).get_child("web_apps");
-		return new WebAppRegistry.with_data_path(storage, path);
+		return new WebAppRegistry.with_data_path(storage, path, allow_management);
 	}
 	
 	private string[] list_web_apps(string path)
@@ -88,6 +131,37 @@ class WebAppRegistryTest: Diorite.TestCase
 			expect(false);
 		}
 		return apps;
+	}
+	
+	private string[] list_files(string path)
+	{
+		string[] files = {};
+		var parent = File.new_for_path(path);
+		expect(parent.query_exists());
+		if (!parent.query_exists())
+			return files;
+		
+		try
+		{
+			FileInfo file_info;
+			var enumerator = parent.enumerate_children(FileAttribute.STANDARD_NAME, 0);
+			while ((file_info = enumerator.next_file()) != null)
+			{
+				string name = file_info.get_name();
+				
+				var item = parent.get_child(name);
+				if (item.query_file_type(0) != FileType.REGULAR)
+					continue;
+				
+				files += name;
+			}
+		}
+		catch (GLib.Error e)
+		{
+			warning("Filesystem error: %s", e.message);
+			expect(false);
+		}
+		return files;
 	}
 
 }

@@ -157,6 +157,7 @@ def configure(ctx):
 	ctx.check_dep('dioriteglib', 'DIORITEGLIB', '0.0.1')
 	ctx.check_dep('dioritegtk', 'DIORITEGGTK', '0.0.1')
 	ctx.check_dep('json-glib-1.0', 'JSON-GLIB', '0.7')
+	ctx.check_dep('libarchive', 'LIBARCHIVE', '3.1')
 	
 	ctx.define("NUVOLA_APPNAME", APPNAME + SUFFIX)
 	ctx.define("NUVOLA_NAME", NAME)
@@ -171,8 +172,8 @@ def configure(ctx):
 def build(ctx):
 	#~ print ctx.env
 	PLATFORM = ctx.env.PLATFORM
-	packages = 'dioritegtk dioriteglib gtk+-3.0 gdk-3.0 posix json-glib-1.0 glib-2.0 gio-2.0 '
-	uselib = 'DIORITEGGTK DIORITEGLIB GTK+ GDK JSON-GLIB GLIB GTHREAD GIO'
+	packages = 'libarchive dioritegtk dioriteglib gtk+-3.0 gdk-3.0 posix json-glib-1.0 glib-2.0 gio-2.0 '
+	uselib = 'LIBARCHIVE DIORITEGGTK DIORITEGLIB GTK+ GDK JSON-GLIB GLIB GTHREAD GIO'
 	vala_defines = ctx.env.VALA_DEFINES
 	
 	if PLATFORM == WIN:

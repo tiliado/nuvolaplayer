@@ -56,14 +56,14 @@ public class WebAppRegistry: GLib.Object
 		this.allow_management = allow_management;
 	}
 	
-	public WebAppRegistry.with_data_path(Diorite.Storage storage, string path)
+	public WebAppRegistry.with_data_path(Diorite.Storage storage, string path, bool allow_management=false)
 	{
 		this.storage = new Diorite.Storage(
 			path, {},
 			storage.user_config_dir.get_path(),
 			storage.user_cache_dir.get_path()
 		);
-		this.allow_management = false;
+		this.allow_management = allow_management;
 	}
 	
 	/**
@@ -286,6 +286,175 @@ public class WebAppRegistry: GLib.Object
 		return result;
 	}
 	
+	public WebApp install_app(File package) throws WebAppError
+	{
+		if (!allow_management)
+			throw new WebAppError.NOT_ALLOWED("WebApp management is disabled");
+		File tmp_dir;
+		try
+		{
+			tmp_dir = File.new_for_path(DirUtils.make_tmp("nuvolaplayerXXXXXX"));
+		}
+		catch (FileError e)
+		{
+			throw new WebAppError.IOERROR(e.message);
+		}
+		try
+		{
+			extract_archive(package, tmp_dir);
+		
+			var control_file = tmp_dir.get_child("control");
+			string control_data;
+			try
+			{
+				control_data = Diorite.System.read_file(control_file);
+			}
+			catch (GLib.Error e)
+			{
+				throw new WebAppError.IOERROR("Cannot read '%s'. %s", control_file.get_path(), e.message);
+			}
+			
+			const string GROUP = "package";
+			control_data = "[%s]\n%s".printf(GROUP, control_data);
+			var control = new KeyFile();
+			string web_app_id;
+			try
+			{
+				control.load_from_data(control_data, -1, KeyFileFlags.NONE);
+				var format = control.get_integer(GROUP, "format");
+				web_app_id = control.get_string(GROUP, "app_id");
+				if (format != 3 || web_app_id == null || web_app_id == "")
+					throw new WebAppError.INVALID_FILE("Package has wrong format.");
+			}
+			catch (KeyFileError e)
+			{
+				throw new WebAppError.INVALID_FILE("Invalid control file '%s'. %s", control_file.get_path(), e.message);
+			}
+			
+			var web_app_dir = tmp_dir.get_child(web_app_id);
+			if (web_app_dir.query_file_type(0) != FileType.DIRECTORY)
+				throw new WebAppError.INVALID_FILE("Package does not contain directory '%s'.", web_app_id);
+			
+			load_web_app_from_dir(web_app_dir); // throws WebAppError
+			
+			var destination = storage.get_data_path(web_app_id);
+			if (destination.query_exists())
+			{
+				try
+				{
+					Diorite.System.purge_directory_content(destination, true);
+					destination.delete();
+				}
+				catch (GLib.Error e)
+				{
+					throw new WebAppError.IOERROR("Cannot purge dir '%s'. %s", destination.get_path(), e.message);
+				}
+			}
+			else
+			{
+				try
+				{
+					destination.get_parent().make_directory_with_parents();
+				}
+				catch (Error e)
+				{
+					// Not fatal
+				}
+			}
+			
+			try
+			{
+				var cancellable = new Cancellable();
+				web_app_dir.move(destination, FileCopyFlags.NONE, cancellable, null);
+			}
+			catch (GLib.Error e)
+			{
+				try
+				{
+					Diorite.System.purge_directory_content(destination, true);
+					destination.delete();
+				}
+				catch (GLib.Error e2)
+				{
+					warning("Cannot purge dir '%s'. %s", destination.get_path(), e2.message);
+				}
+				
+				throw new WebAppError.IOERROR("Cannot copy integration to '%s'. %s", destination.get_path(), e.message);
+			}
+			
+			var web_app = load_web_app_from_dir(destination); // throws WebAppError
+			app_installed(web_app.meta.id);
+			return web_app;
+		}
+		catch (ArchiveError e)
+		{
+			throw new WebAppError.EXTRACT_ERROR("Failed to extract package '%s'. %s", package.get_path(), e.message);
+		}
+		finally
+		{
+			Diorite.System.try_purge_dir(tmp_dir);
+		}
+	}
+	
+	private void extract_archive(File archive, File directory) throws ArchiveError
+	{
+		var current_dir = Environment.get_current_dir();
+		if (Environment.set_current_dir(directory.get_path()) < 0)
+			throw new ArchiveError.SYSTEM_ERROR("Failed to chdir to '%s'.", directory.get_path());
+		
+		Archive.Read reader;
+		try
+		{
+			reader = new Archive.Read();
+			if (reader.support_format_tar() != Archive.Result.OK)
+				throw new ArchiveError.READ_ERROR("Cannot enable tar format. %s", reader.error_string());
+			if (reader.support_compression_gzip() != Archive.Result.OK)
+				throw new ArchiveError.READ_ERROR("Cannot enable gzip compression. %s", reader.error_string());
+			if (reader.open_filename(archive.get_path(), 10240) != Archive.Result.OK)
+				throw new ArchiveError.READ_ERROR("Cannot open archive '%s'. %s", archive.get_path(), reader.error_string());
+			
+			var writer = new Archive.WriteDisk();
+			writer.set_options(Archive.ExtractFlags.TIME | Archive.ExtractFlags.SECURE_NODOTDOT | Archive.ExtractFlags.SECURE_SYMLINKS);
+			
+			while (true)
+			{
+				unowned Archive.Entry entry;
+				var result = reader.next_header(out entry);
+				if (result == Archive.Result.EOF)
+					break;
+				if (result != Archive.Result.OK)
+					throw new ArchiveError.READ_ERROR("Failed to read next header. %s", reader.error_string());
+				debug("Extract '%s'", entry.pathname());
+				if (writer.write_header(entry) != Archive.Result.OK)
+					throw new ArchiveError.WRITE_ERROR("Failed to write header. %s", writer.error_string());
+				
+				void* buff;
+				size_t size;
+				Archive.off_t offset;
+			
+				while (true)
+				{
+					result = reader.read_data_block (out buff, out size, out offset);
+					if (result == Archive.Result.EOF)
+						break;
+					if (result != Archive.Result.OK)
+						throw new ArchiveError.READ_ERROR("Failed to read data. %s", reader.error_string());
+					if (writer.write_data_block(buff, size, offset) != Archive.Result.OK)
+						throw new ArchiveError.WRITE_ERROR("Failed to write data. %s", writer.error_string()); 
+				}
+				
+				if (writer.finish_entry() != Archive.Result.OK)
+					throw new ArchiveError.WRITE_ERROR("Failed to finish entry. %s", writer.error_string());
+			}
+		}
+		finally
+		{
+			reader.close();
+			if (Environment.set_current_dir(current_dir) < 0)
+				warning("Failed to chdir back to '%s'.", current_dir);
+		}
+	}
+	
 	/**
 	 * Check if the service identifier is valid
 	 * 
@@ -318,7 +487,15 @@ public errordomain WebAppError
 	IOERROR,
 	NOT_ALLOWED,
 	SERVER_ERROR,
-	SERVER_ERROR_MESSAGE;
+	SERVER_ERROR_MESSAGE,
+	EXTRACT_ERROR;
+}
+
+public errordomain ArchiveError
+{
+	SYSTEM_ERROR,
+	READ_ERROR,
+	WRITE_ERROR;
 }
 
 } // namespace Nuvola
