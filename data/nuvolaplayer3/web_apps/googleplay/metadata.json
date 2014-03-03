@@ -1,8 +1,3 @@
-/* 
- * Metadata for Google Play Web App.
- *
- * Feel free to add any custom fields.
- */
 {
 	"id": "googleplay",
 	"name": "Google Play Music",
