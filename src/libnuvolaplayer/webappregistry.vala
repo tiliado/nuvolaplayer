@@ -396,6 +396,40 @@ public class WebAppRegistry: GLib.Object
 		}
 	}
 	
+	/**
+	 * Removes web app.
+	 * 
+	 * @param app    web_app to remove
+	 * @throw        WebAppError on failure
+	 */
+	public void remove_web_app(WebApp app) throws WebAppError
+	{
+		if (!allow_management)
+			throw new WebAppError.NOT_ALLOWED("Web app management is disabled");
+		
+		var dir = app.data_dir;
+		if (dir == null)
+			throw new WebAppError.IOERROR("Invalid web app directory");
+		
+		if (dir.query_exists())
+		{
+			try
+			{
+				Diorite.System.purge_directory_content(dir, true);
+				dir.delete();
+				app_removed(app.meta.id);
+			}
+			catch (GLib.Error e)
+			{
+				throw new WebAppError.IOERROR(e.message);
+			}
+		}
+		else
+		{
+			throw new WebAppError.IOERROR("'%s' does not exist.", dir.get_path());
+		}
+	}
+	
 	private void extract_archive(File archive, File directory) throws ArchiveError
 	{
 		var current_dir = Environment.get_current_dir();
