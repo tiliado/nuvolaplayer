@@ -365,7 +365,7 @@ public class WebAppRegistry: GLib.Object
 			try
 			{
 				var cancellable = new Cancellable();
-				web_app_dir.move(destination, FileCopyFlags.NONE, cancellable, null);
+				Diorite.System.copy_tree(web_app_dir, destination, cancellable);
 			}
 			catch (GLib.Error e)
 			{

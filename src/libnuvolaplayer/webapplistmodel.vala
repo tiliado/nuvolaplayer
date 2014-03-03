@@ -40,9 +40,15 @@ public class WebAppListModel : Gtk.ListStore
 		this.web_app_reg = web_app_reg;
 		//                         id            name            icon                version  maintainer_name maintainer_link    removable
 		set_column_types({typeof(string), typeof(string), typeof(Gdk.Pixbuf), typeof(string), typeof(string), typeof(string), typeof(bool)});
-		var web_apps = web_app_reg.list_web_apps();
-		foreach (var web_app in web_apps.get_values())
-			append_web_app(web_app, WebAppListView.load_icon(web_app.icon, APP_ICON));
+		load();
+		web_app_reg.app_installed.connect(on_app_installed_or_removed);
+		web_app_reg.app_removed.connect(on_app_installed_or_removed);
+	}
+	
+	public void reload()
+	{
+		clear();
+		load();
 	}
 	
 	public void append_web_app(WebApp web_app, Gdk.Pixbuf? icon)
@@ -58,6 +64,18 @@ public class WebAppListModel : Gtk.ListStore
 		Pos.MAINTAINER_LINK, web_app.meta.maintainer_link,
 		Pos.REMOVABLE, web_app.removable,
 		-1);
+	}
+	
+	private void load()
+	{
+		var web_apps = web_app_reg.list_web_apps();
+		foreach (var web_app in web_apps.get_values())
+			append_web_app(web_app, WebAppListView.load_icon(web_app.icon, APP_ICON));
+	}
+	
+	private void on_app_installed_or_removed()
+	{
+		reload();
 	}
 }
 
