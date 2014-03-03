@@ -39,7 +39,10 @@ public class WebAppListController : Diorite.Application
 	public Diorite.Storage? storage {get; private set; default = null;}
 	public WebAppRegistry? web_app_reg {get; private set; default = null;}
 	public Diorite.ActionsRegistry? actions {get; private set; default = null;}
+	public weak Gtk.Settings gtk_settings {get; private set;}
+	private Gtk.Menu pop_down_menu;
 	private string? web_apps_dir = null;
+	private bool show_menubar = false;
 	
 	public WebAppListController(string? web_apps_dir)
 	{
@@ -58,6 +61,7 @@ public class WebAppListController : Diorite.Application
 	
 	private void start()
 	{
+		gtk_settings = Gtk.Settings.get_default();
 		append_actions();
 		storage = new Diorite.XdgStorage.for_project(Nuvola.get_appname()).get_child("web_apps");
 		if (web_apps_dir != null && web_apps_dir != "")
@@ -71,10 +75,25 @@ public class WebAppListController : Diorite.Application
 	
 		var view = new WebAppListView(model);
 		main_window = new WebAppListWindow(this, view);
-		set_app_menu(actions.build_menu({Actions.QUIT}));
-		var menu = new Menu();
-		menu.append_submenu("_Apps", actions.build_menu({Actions.INSTALL_APP, Actions.REMOVE_APP}));
-		set_menubar(menu);
+		debug("Shell: app_menu = %s, menubar = %s",
+		gtk_settings.gtk_shell_shows_app_menu.to_string(),
+		gtk_settings.gtk_shell_shows_menubar.to_string());
+		
+		if (gtk_settings.gtk_shell_shows_app_menu)
+		{
+			set_app_menu(actions.build_menu({Actions.QUIT}));
+			show_menubar = gtk_settings.gtk_shell_shows_menubar;
+		}
+		
+		if (show_menubar)
+		{
+			var menu = new Menu();
+			menu.append_submenu("_Apps", actions.build_menu({Actions.INSTALL_APP, Actions.REMOVE_APP}));
+			set_menubar(menu);
+		}
+		var pop_down_model = actions.build_menu({Actions.QUIT});
+		pop_down_menu = new Gtk.Menu.from_model(pop_down_model);
+		pop_down_menu.attach_to_widget(main_window, null);
 		main_window.show_all();
 	}
 	
@@ -84,7 +103,7 @@ public class WebAppListController : Diorite.Application
 		Diorite.Action[] actions_spec = {
 		//          Action(group, scope, name, label?, mnemo_label?, icon?, keybinding?, callback?)
 		new Diorite.Action("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
-		new Diorite.Action("main", "win", Actions.MENU, "Menu", null, "emblem-system-symbolic", null, null),
+		new Diorite.Action("main", "win", Actions.MENU, "Menu", null, "emblem-system-symbolic", null, do_menu),
 		new Diorite.Action("main", "win", Actions.INSTALL_APP, "Install app", "_Install app", "list-add", "<ctrl>plus", do_install_app),
 		new Diorite.Action("main", "win", Actions.REMOVE_APP, "Remove app", "_Remove app", "list-remove", "<ctrl>minus", do_remove_app)
 		};
@@ -153,6 +172,12 @@ public class WebAppListController : Diorite.Application
 				+ "\n\n" + e.message);
 			error.run();
 		}
+	}
+	
+	private void do_menu()
+	{
+		var event = Gtk.get_current_event();
+		pop_down_menu.popup(null, null, null, event.button.button, event.button.time);
 	}
 }
 

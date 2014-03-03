@@ -60,6 +60,7 @@ public class WebAppListWindow : Gtk.ApplicationWindow
 		scroll.vexpand = true;
 		scroll.hexpand = true;
 		var toolbar = app.actions.build_toolbar({Actions.INSTALL_APP, Actions.REMOVE_APP, " ", Actions.MENU});
+		toolbar.get_style_context().add_class(Gtk.STYLE_CLASS_PRIMARY_TOOLBAR);
 		toolbar.hexpand = true;
 		toolbar.vexpand = false;
 		
