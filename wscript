@@ -168,6 +168,7 @@ def configure(ctx):
 	ctx.define("NUVOLA_VERSION_MINOR", VERSIONS[1])
 	ctx.define("NUVOLA_VERSION_BUGFIX", VERSIONS[2])
 	ctx.define("NUVOLA_VERSION_SUFFIX", VERSION_SUFFIX)
+	ctx.define("GETTEXT_PACKAGE", "nuvolaplayer3")
 
 def build(ctx):
 	#~ print ctx.env

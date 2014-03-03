@@ -86,7 +86,7 @@ public class WebAppListController : Diorite.Application
 		new Diorite.Action("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
 		new Diorite.Action("main", "win", Actions.MENU, "Menu", null, "emblem-system-symbolic", null, null),
 		new Diorite.Action("main", "win", Actions.INSTALL_APP, "Install app", "_Install app", "list-add", "<ctrl>plus", do_install_app),
-		new Diorite.Action("main", "win", Actions.REMOVE_APP, "Remove app", "_Remove app", "list-remove", "<ctrl>minus", null)
+		new Diorite.Action("main", "win", Actions.REMOVE_APP, "Remove app", "_Remove app", "list-remove", "<ctrl>minus", do_remove_app)
 		};
 		actions.add_actions(actions_spec);
 		
@@ -120,12 +120,38 @@ public class WebAppListController : Diorite.Application
 //~ 				reload(service.id);
 				info.run();
 			}
-			catch(WebAppError e){
+			catch (WebAppError e)
+			{
 				var error = new Diorite.ErrorDialog(("Installation failed"),
 					("Installation of service from package %s failed.").printf(file.get_path())
 					+ "\n\n" + e.message);
 				error.run();
 			}
+		}
+	}
+	
+	private void do_remove_app()
+	{
+		if (main_window.selected_web_app == null)
+			return;
+		
+		var web_app = web_app_reg.get_app(main_window.selected_web_app);
+		if (web_app == null)
+			return;
+		try
+		{
+			web_app_reg.remove_app(web_app);
+			var meta = web_app.meta;
+			var info = new Diorite.InfoDialog(("Removal successfull"),
+				("Service %1$s (version %2$d.%3$d) has been succesfuly removed").printf(meta.name, meta.version_major, meta.version_minor));
+			info.run();
+		}
+		catch (WebAppError e)
+		{
+			var error = new Diorite.ErrorDialog(("Removal failed"),
+				_("Removal of service %s failed.").printf(web_app.meta.name)
+				+ "\n\n" + e.message);
+			error.run();
 		}
 	}
 }

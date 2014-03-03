@@ -29,6 +29,8 @@ public class WebAppListWindow : Gtk.ApplicationWindow
 {
 	public Gtk.Grid grid {get; private set;}
 	public WebAppListView view {get; private set;}
+	public string? selected_web_app {get; private set; default = null;}
+	private WebAppListController app;
 	private Gtk.Grid details;
 	private Gtk.Label app_name;
 	private Gtk.Label app_version;
@@ -47,6 +49,7 @@ public class WebAppListWindow : Gtk.ApplicationWindow
 		}
 		set_default_size(500, 500);
 		
+		this.app = app;
 		app.add_window(this);
 		app.actions.window = this;
 		app.actions.get_action(Actions.REMOVE_APP).enabled = false;
@@ -91,6 +94,9 @@ public class WebAppListWindow : Gtk.ApplicationWindow
 		app_maintainer.hexpand = false;
 		app_maintainer.use_markup = true;
 		details.attach_next_to(app_maintainer, label, Gtk.PositionType.RIGHT, 1, 1);
+		details.show_all();
+		details.hide();
+		details.no_show_all = true;
 		
 		grid = new Gtk.Grid();
 		grid.orientation = Gtk.Orientation.VERTICAL;
@@ -112,6 +118,8 @@ public class WebAppListWindow : Gtk.ApplicationWindow
 		if (path == null)
 		{
 			details.hide();
+			selected_web_app = null;
+			app.actions.get_action(Actions.REMOVE_APP).enabled = false;
 			return;
 		}
 		
@@ -121,15 +129,19 @@ public class WebAppListWindow : Gtk.ApplicationWindow
 		if (!model.get_iter(out iter, path))
 		{
 			details.hide();
+			selected_web_app = null;
+			app.actions.get_action(Actions.REMOVE_APP).enabled = false;
 			return;
 		}
 		
+		string id;
 		string name;
 		string version;
 		string maintainer_name;
 		string maintainer_link;
 		bool removable;
 		model.get(iter,
+			WebAppListModel.Pos.ID, out id,
 			WebAppListModel.Pos.NAME, out name,
 			WebAppListModel.Pos.VERSION, out version,
 			WebAppListModel.Pos.MAINTAINER_NAME, out maintainer_name,
@@ -137,14 +149,13 @@ public class WebAppListWindow : Gtk.ApplicationWindow
 			WebAppListModel.Pos.REMOVABLE, out removable
 		);
 		
+		selected_web_app = id;
 		app_version.label = version;
 		app_name.label = name;
 		app_maintainer.label = "<a href=\"%s\">%s</a>".printf(
 		Markup.escape_text(maintainer_link), Markup.escape_text(maintainer_name));
 		details.show();
-//~ 		app.actions.get_action(Actions.REMOVE_APP).enabled = removable;
-		// button_remove.sensitive = service.removable;
-		// use_service_button.sensitive = service != null;
+		app.actions.get_action(Actions.REMOVE_APP).enabled = removable;
 	}
 	
 

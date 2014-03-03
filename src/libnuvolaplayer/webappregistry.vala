@@ -402,7 +402,7 @@ public class WebAppRegistry: GLib.Object
 	 * @param app    web_app to remove
 	 * @throw        WebAppError on failure
 	 */
-	public void remove_web_app(WebApp app) throws WebAppError
+	public void remove_app(WebApp app) throws WebAppError
 	{
 		if (!allow_management)
 			throw new WebAppError.NOT_ALLOWED("Web app management is disabled");
