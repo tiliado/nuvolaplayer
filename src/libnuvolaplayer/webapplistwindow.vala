@@ -29,6 +29,10 @@ public class WebAppListWindow : Gtk.ApplicationWindow
 {
 	public Gtk.Grid grid {get; private set;}
 	public WebAppListView view {get; private set;}
+	private Gtk.Grid details;
+	private Gtk.Label app_name;
+	private Gtk.Label app_version;
+	private Gtk.Label app_maintainer;
 	
 	public WebAppListWindow(WebAppListController app, WebAppListView view)
 	{
@@ -41,12 +45,12 @@ public class WebAppListWindow : Gtk.ApplicationWindow
 		{
 			warning("Unable to load application icon.");
 		}
-		set_default_size(400, 400);
+		set_default_size(500, 500);
 		
 		app.add_window(this);
 		app.actions.window = this;
 		this.view = view;
-		view.select_path(new Gtk.TreePath.first());
+		view.selection_changed.connect(on_selection_changed);
 		var scroll = new Gtk.ScrolledWindow(null, null);
 		scroll.add(view);
 		scroll.vexpand = true;
@@ -55,12 +59,92 @@ public class WebAppListWindow : Gtk.ApplicationWindow
 		toolbar.hexpand = true;
 		toolbar.vexpand = false;
 		
+		details = new Gtk.Grid();
+		details.orientation = Gtk.Orientation.HORIZONTAL;
+		details.halign = Gtk.Align.CENTER;
+		var label = new Gtk.Label("<b>Name:</b>");
+		label.hexpand = label.vexpand = false;
+		label.use_markup = true;
+		label.margin = 5;
+		details.add(label);
+		app_name = new Gtk.Label(null);
+		app_name.vexpand = false;
+		app_name.hexpand = false;
+		details.attach_next_to(app_name, label, Gtk.PositionType.RIGHT, 1, 1);
+		label = new Gtk.Label("<b>Version:</b>");
+		label.hexpand = label.vexpand = false;
+		label.use_markup = true;
+		label.margin = 5;
+		details.add(label);
+		app_version = new Gtk.Label(null);
+		app_version.vexpand = false;
+		app_version.hexpand = false;
+		details.attach_next_to(app_version, label, Gtk.PositionType.RIGHT, 1, 1);
+		label = new Gtk.Label("<b>Maintainer:</b>");
+		label.hexpand = label.vexpand = false;
+		label.use_markup = true;
+		label.margin = 5;
+		details.add(label);
+		app_maintainer = new Gtk.Label(null);
+		app_maintainer.vexpand = false;
+		app_maintainer.hexpand = false;
+		app_maintainer.use_markup = true;
+		details.attach_next_to(app_maintainer, label, Gtk.PositionType.RIGHT, 1, 1);
+		
 		grid = new Gtk.Grid();
 		grid.orientation = Gtk.Orientation.VERTICAL;
 		grid.add(toolbar);
 		grid.add(scroll);
+		grid.add(details);
 		add(grid);
+		
+		view.select_path(new Gtk.TreePath.first());
 	}
+	
+	private void on_selection_changed()
+	{
+		var items = view.get_selected_items();
+		Gtk.TreePath? path = null;
+		foreach (var my_path in items)
+			path = my_path;
+		
+		if (path == null)
+		{
+			details.hide();
+			return;
+		}
+		
+		
+		var model = view.get_model();
+		Gtk.TreeIter iter;
+		if (!model.get_iter(out iter, path))
+		{
+			details.hide();
+			return;
+		}
+		
+		string name;
+		string version;
+		string maintainer_name;
+		string maintainer_link;
+		bool removable;
+		model.get(iter,
+			WebAppListModel.Pos.NAME, out name,
+			WebAppListModel.Pos.VERSION, out version,
+			WebAppListModel.Pos.MAINTAINER_NAME, out maintainer_name,
+			WebAppListModel.Pos.MAINTAINER_LINK, out maintainer_link,
+			WebAppListModel.Pos.REMOVABLE, out removable
+		);
+		
+		app_version.label = version;
+		app_name.label = name;
+		app_maintainer.label = "<a href=\"%s\">%s</a>".printf(
+		Markup.escape_text(maintainer_link), Markup.escape_text(maintainer_name));
+		details.show();
+		// button_remove.sensitive = service.removable;
+		// use_service_button.sensitive = service != null;
+	}
+	
 
 }
 

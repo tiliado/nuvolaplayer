@@ -42,7 +42,7 @@ public class WebAppRegistry: GLib.Object
 	private static Regex id_regex;
 	
 	
-	public bool allow_management{ get; private set; }
+	public bool allow_management {get; private set;}
 	
 	/**
 	 * Creates new web app registry

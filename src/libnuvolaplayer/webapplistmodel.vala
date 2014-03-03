@@ -29,21 +29,29 @@ public class WebAppListModel : Gtk.ListStore
 {
 	public enum Pos
 	{
-		ID, NAME, ICON;
+		ID, NAME, ICON, VERSION, MAINTAINER_NAME, MAINTAINER_LINK, REMOVABLE;
 	}
 	
 	public WebAppListModel()
 	{
 		Object();
-		//                         id            name            icon
-		set_column_types({typeof(string), typeof(string), typeof(Gdk.Pixbuf)});
+		//                         id            name            icon                version  maintainer_name maintainer_link    removable
+		set_column_types({typeof(string), typeof(string), typeof(Gdk.Pixbuf), typeof(string), typeof(string), typeof(string), typeof(bool)});
 	}
 	
 	public void append_web_app(WebApp web_app, Gdk.Pixbuf? icon)
 	{
 		Gtk.TreeIter iter;
 		append(out iter);
-		@set(iter, Pos.ID, web_app.meta.id, Pos.NAME, web_app.meta.name, Pos.ICON, icon, -1);
+		@set(iter,
+		Pos.ID, web_app.meta.id,
+		Pos.NAME, web_app.meta.name,
+		Pos.ICON, icon,
+		Pos.VERSION, "%d.%d".printf(web_app.meta.version_major, web_app.meta.version_minor),
+		Pos.MAINTAINER_NAME, web_app.meta.maintainer_name,
+		Pos.MAINTAINER_LINK, web_app.meta.maintainer_link,
+		Pos.REMOVABLE, web_app.removable,
+		-1);
 	}
 }
 
