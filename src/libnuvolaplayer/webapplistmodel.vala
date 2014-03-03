@@ -27,16 +27,22 @@ namespace Nuvola
 
 public class WebAppListModel : Gtk.ListStore
 {
+	private WebAppRegistry web_app_reg;
+	
 	public enum Pos
 	{
 		ID, NAME, ICON, VERSION, MAINTAINER_NAME, MAINTAINER_LINK, REMOVABLE;
 	}
 	
-	public WebAppListModel()
+	public WebAppListModel(WebAppRegistry web_app_reg)
 	{
 		Object();
+		this.web_app_reg = web_app_reg;
 		//                         id            name            icon                version  maintainer_name maintainer_link    removable
 		set_column_types({typeof(string), typeof(string), typeof(Gdk.Pixbuf), typeof(string), typeof(string), typeof(string), typeof(bool)});
+		var web_apps = web_app_reg.list_web_apps();
+		foreach (var web_app in web_apps.get_values())
+			append_web_app(web_app, WebAppListView.load_icon(web_app.icon, APP_ICON));
 	}
 	
 	public void append_web_app(WebApp web_app, Gdk.Pixbuf? icon)

@@ -57,10 +57,8 @@ public class WebAppListController : Diorite.Application
 		else
 			web_app_reg = new WebAppRegistry(storage, true);
 		
-		var web_apps = web_app_reg.list_web_apps();
-		var model = new WebAppListModel();
-		foreach (var web_app in web_apps.get_values())
-			model.append_web_app(web_app, WebAppListView.load_icon(web_app.icon, APP_ICON));
+		
+		var model = new WebAppListModel(web_app_reg);
 	
 		var view = new WebAppListView(model);
 		main_window = new WebAppListWindow(this, view);

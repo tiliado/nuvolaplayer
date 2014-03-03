@@ -33,11 +33,7 @@ public void main(string[] args)
 	
 	var storage = new Diorite.XdgStorage.for_project(Nuvola.get_appname()).get_child("web_apps");
 	var web_app_reg = new WebAppRegistry.with_data_path(storage, "./data/nuvolaplayer3/web_apps");
-	var web_apps = web_app_reg.list_web_apps();
-	var model = new WebAppListModel();
-	foreach (var web_app in web_apps.get_values())
-		model.append_web_app(web_app, WebAppListView.load_icon(web_app.icon, "nuvolaplayer"));
-
+	var model = new WebAppListModel(web_app_reg);
 	var view = new WebAppListView(model);
 	var scroll = new Gtk.ScrolledWindow(null, null);
 	scroll.add(view);
