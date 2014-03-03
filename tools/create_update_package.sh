@@ -25,7 +25,8 @@
 set -eu
 
 WD=$PWD
-RESULT=$WD
+RESULT="$(readlink -f "$1")"
+shift
 
 for WEB_APP_DIR in "$@"; do
 
