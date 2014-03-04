@@ -27,6 +27,7 @@ namespace Nuvola
 
 namespace Actions
 {
+	public const string START_APP = "start-app";
 	public const string INSTALL_APP = "install-app";
 	public const string REMOVE_APP = "remove-app";
 	public const string MENU = "menu";
@@ -40,17 +41,18 @@ public class WebAppListController : Diorite.Application
 	public WebAppRegistry web_app_reg {get; private set; default = null;}
 	public Diorite.ActionsRegistry? actions {get; private set; default = null;}
 	public weak Gtk.Settings gtk_settings {get; private set;}
+	private string[] exec_cmd;
 	private Gtk.Menu pop_down_menu;
-	private string? web_apps_dir = null;
 	private bool show_menubar = false;
 	
-	public WebAppListController(Diorite.Storage storage, WebAppRegistry web_app_reg)
+	public WebAppListController(Diorite.Storage storage, WebAppRegistry web_app_reg, string[] exec_cmd)
 	{
 		base(UNIQUE_NAME, NAME, "%s.desktop".printf(APPNAME), APPNAME);
 		icon = APP_ICON;
 		version = VERSION;
 		this.storage = storage;
 		this.web_app_reg = web_app_reg;
+		this.exec_cmd = exec_cmd;
 	}
 	
 	public override void activate()
@@ -83,7 +85,7 @@ public class WebAppListController : Diorite.Application
 		if (show_menubar)
 		{
 			var menu = new Menu();
-			menu.append_submenu("_Apps", actions.build_menu({Actions.INSTALL_APP, Actions.REMOVE_APP}));
+			menu.append_submenu("_Apps", actions.build_menu({Actions.START_APP, "|", Actions.INSTALL_APP, Actions.REMOVE_APP}));
 			set_menubar(menu);
 		}
 		var pop_down_model = actions.build_menu({Actions.QUIT});
@@ -99,6 +101,7 @@ public class WebAppListController : Diorite.Application
 		//          Action(group, scope, name, label?, mnemo_label?, icon?, keybinding?, callback?)
 		new Diorite.Action("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
 		new Diorite.Action("main", "win", Actions.MENU, "Menu", null, "emblem-system-symbolic", null, do_menu),
+		new Diorite.Action("main", "win", Actions.START_APP, "Start app", "_Start app", "media-playback-start", "<ctrl>S", do_start_app),
 		new Diorite.Action("main", "win", Actions.INSTALL_APP, "Install app", "_Install app", "list-add", "<ctrl>plus", do_install_app),
 		new Diorite.Action("main", "win", Actions.REMOVE_APP, "Remove app", "_Remove app", "list-remove", "<ctrl>minus", do_remove_app)
 		};
@@ -173,6 +176,28 @@ public class WebAppListController : Diorite.Application
 	{
 		var event = Gtk.get_current_event();
 		pop_down_menu.popup(null, null, null, event.button.button, event.button.time);
+	}
+	
+	private void do_start_app()
+	{
+		if (main_window.selected_web_app == null)
+			return;
+		string[] argv = new string[exec_cmd.length + 2];
+		for (var i = 0; i < exec_cmd.length; i++)
+			argv[i] = exec_cmd[i];
+		argv[exec_cmd.length] = main_window.selected_web_app;
+		argv[exec_cmd.length + 1] = null;
+		
+		try
+		{
+			new Diorite.Subprocess(argv, Diorite.SubprocessFlags.INHERIT_FDS);
+			// TODO: Hide main window and wait a few seconds to check a subprocess is running.
+			quit();
+		}
+		catch (GLib.Error e)
+		{
+			warning("Failed to launch subproccess. %s", e.message);
+		}
 	}
 }
 

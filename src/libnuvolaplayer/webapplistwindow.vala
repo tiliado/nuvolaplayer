@@ -53,13 +53,14 @@ public class WebAppListWindow : Gtk.ApplicationWindow
 		app.add_window(this);
 		app.actions.window = this;
 		app.actions.get_action(Actions.REMOVE_APP).enabled = false;
+		app.actions.get_action(Actions.START_APP).enabled = false;
 		this.view = view;
 		view.selection_changed.connect(on_selection_changed);
 		var scroll = new Gtk.ScrolledWindow(null, null);
 		scroll.add(view);
 		scroll.vexpand = true;
 		scroll.hexpand = true;
-		var toolbar = app.actions.build_toolbar({Actions.INSTALL_APP, Actions.REMOVE_APP, " ", Actions.MENU});
+		var toolbar = app.actions.build_toolbar({Actions.START_APP, "|", Actions.INSTALL_APP, Actions.REMOVE_APP, " ", Actions.MENU});
 		toolbar.get_style_context().add_class(Gtk.STYLE_CLASS_PRIMARY_TOOLBAR);
 		toolbar.hexpand = true;
 		toolbar.vexpand = false;
@@ -121,6 +122,7 @@ public class WebAppListWindow : Gtk.ApplicationWindow
 			details.hide();
 			selected_web_app = null;
 			app.actions.get_action(Actions.REMOVE_APP).enabled = false;
+			app.actions.get_action(Actions.START_APP).enabled = false;
 			return;
 		}
 		
@@ -132,6 +134,7 @@ public class WebAppListWindow : Gtk.ApplicationWindow
 			details.hide();
 			selected_web_app = null;
 			app.actions.get_action(Actions.REMOVE_APP).enabled = false;
+			app.actions.get_action(Actions.START_APP).enabled = false;
 			return;
 		}
 		
@@ -157,6 +160,7 @@ public class WebAppListWindow : Gtk.ApplicationWindow
 		Markup.escape_text(maintainer_link), Markup.escape_text(maintainer_name));
 		details.show();
 		app.actions.get_action(Actions.REMOVE_APP).enabled = removable;
+		app.actions.get_action(Actions.START_APP).enabled = true;
 	}
 	
 

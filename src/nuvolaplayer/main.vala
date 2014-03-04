@@ -70,6 +70,7 @@ public int main(string[] args)
 		return 0;
 	}
 	
+	string[] exec_cmd = {args[0]};
 	FileStream? log = null;
 	
 	if (Args.log_file != null)
@@ -80,6 +81,8 @@ public int main(string[] args)
 			stderr.printf("Cannot open log file '%s' for writting.\n", Args.log_file);
 			return 1;
 		}
+		exec_cmd += "-L";
+		exec_cmd += Args.log_file;
 	}
 	
 	Diorite.Logger.init(log != null ? log : stderr, Args.debug ? GLib.LogLevelFlags.LEVEL_DEBUG
@@ -102,8 +105,29 @@ public int main(string[] args)
 		warning("Failed to load web app '%s'.", Args.app_id);
 	}
 	
-	var controller = new WebAppListController(storage, web_app_reg);
+	exec_cmd[0] = guess_executable(Environment.get_current_dir(), exec_cmd[0]);
+	if (Args.debug)
+		exec_cmd += "-D";
+	else if (Args.verbose)
+		exec_cmd += "-v";
+	if (Args.apps_dir != null && Args.apps_dir != "")
+	{
+		exec_cmd += "-A";
+		exec_cmd += Args.apps_dir;
+	}
+	
+	exec_cmd += "-a";
+	var controller = new WebAppListController(storage, web_app_reg, (owned) exec_cmd);
 	return controller.run(args);
+}
+
+private string guess_executable(string working_directory, string executable)
+{
+	if (Path.is_absolute(executable))
+		return executable;
+	if (Path.DIR_SEPARATOR_S in executable)
+		return Path.build_path(Path.DIR_SEPARATOR_S, working_directory, executable);
+	return Environment.find_program_in_path(executable) ?? executable;
 }
 
 } // namespace Nuvola
