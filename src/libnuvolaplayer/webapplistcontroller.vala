@@ -41,6 +41,7 @@ public class WebAppListController : Diorite.Application
 	public WebAppRegistry web_app_reg {get; private set; default = null;}
 	public Diorite.ActionsRegistry? actions {get; private set; default = null;}
 	public weak Gtk.Settings gtk_settings {get; private set;}
+	public bool app_menu_shown {get; private set; default = false;}
 	private string[] exec_cmd;
 	private Gtk.Menu pop_down_menu;
 	private bool show_menubar = false;
@@ -79,6 +80,7 @@ public class WebAppListController : Diorite.Application
 		if (gtk_settings.gtk_shell_shows_app_menu)
 		{
 			set_app_menu(actions.build_menu({Actions.QUIT}));
+			app_menu_shown = true;
 			show_menubar = gtk_settings.gtk_shell_shows_menubar;
 		}
 		
