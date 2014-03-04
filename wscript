@@ -34,11 +34,8 @@ APPNAME = "nuvolaplayer"
 VERSION = "3.0.0~unstable"
 SUFFIX="3"
 
-UNIQUE_NAME="cz.fenryxo.NuvolaPlayer"
-if VERSION.endswith("~unstable"):
-	SUFFIX += "unstable"
+UNIQUE_NAME="cz.fenryxo.NuvolaPlayer" + SUFFIX
 
-UNIQUE_NAME += SUFFIX
 VERSIONS, VERSION_SUFFIX = VERSION.split("~")
 if not VERSION_SUFFIX:
 	VERSION_SUFFIX = "stable"
