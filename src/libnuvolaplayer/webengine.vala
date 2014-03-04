@@ -39,9 +39,9 @@ public class WebEngine : GLib.Object
 		this.web_view = new WebKit.WebView();
 	}
 	
-	public void load_uri(string uri)
+	public void load()
 	{
-		web_view.load_uri(uri);
+		web_view.load_uri("http://google.com");
 	}
 }
 

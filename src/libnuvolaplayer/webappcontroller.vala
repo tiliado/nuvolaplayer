@@ -59,7 +59,7 @@ public class WebAppController : Diorite.Application
 		web_engine = new WebEngine(this, web_app);
 		var widget = web_engine.widget;
 		widget.hexpand = widget.vexpand = true;
-		web_engine.load_uri("http://google.com");
+		web_engine.load();
 		main_window.grid.add(widget);
 		main_window.show_all();
 	}
