@@ -46,6 +46,9 @@ public class WebAppWindow : Gtk.ApplicationWindow
 		this.app = app;
 		app.add_window(this);
 		app.actions.window = this;
+		grid = new Gtk.Grid();
+		grid.orientation = Gtk.Orientation.VERTICAL;
+		add(grid);
 	}
 
 }

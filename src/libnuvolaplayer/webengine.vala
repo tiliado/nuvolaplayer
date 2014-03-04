@@ -25,43 +25,23 @@
 namespace Nuvola
 {
 
-public class WebAppController : Diorite.Application
+public class WebEngine : GLib.Object
 {
-	public WebAppWindow? main_window {get; private set; default = null;}
-	public Diorite.Storage? storage {get; private set; default = null;}
-	public Diorite.ActionsRegistry? actions {get; private set; default = null;}
+	public Gtk.Widget widget {get {return web_view;}}
 	public WebApp web_app {get; private set;}
-	public WebEngine web_engine {get; private set;}
-	public weak Gtk.Settings gtk_settings {get; private set;}
+	private WebAppController app;
+	private WebKit.WebView web_view;
 	
-	public WebAppController(Diorite.Storage? storage, WebApp web_app)
+	public WebEngine(WebAppController app, WebApp web_app)
 	{
-		var app_id = web_app.meta.id;
-		base("%sX%s".printf(UNIQUE_NAME, app_id), "%s - %s".printf(web_app.meta.name, NAME), "%s-%s.desktop".printf(APPNAME, app_id), "%s-%s".printf(APPNAME, app_id));
-		icon = APP_ICON;
-		version = VERSION;
-		this.storage = storage;
+		this.app = app;
 		this.web_app = web_app;
+		this.web_view = new WebKit.WebView();
 	}
 	
-	public override void activate()
+	public void load_uri(string uri)
 	{
-		if (main_window == null)
-			start();
-		main_window.present();
-	}
-	
-	private void start()
-	{
-		gtk_settings = Gtk.Settings.get_default();
-		actions = new Diorite.ActionsRegistry(this, null);
-		main_window = new WebAppWindow(this);
-		web_engine = new WebEngine(this, web_app);
-		var widget = web_engine.widget;
-		widget.hexpand = widget.vexpand = true;
-		web_engine.load_uri("http://google.com");
-		main_window.grid.add(widget);
-		main_window.show_all();
+		web_view.load_uri(uri);
 	}
 }
 
