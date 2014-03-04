@@ -36,20 +36,21 @@ namespace Actions
 public class WebAppListController : Diorite.Application
 {
 	public WebAppListWindow? main_window {get; private set; default = null;}
-	public Diorite.Storage? storage {get; private set; default = null;}
-	public WebAppRegistry? web_app_reg {get; private set; default = null;}
+	public Diorite.Storage storage {get; private set; default = null;}
+	public WebAppRegistry web_app_reg {get; private set; default = null;}
 	public Diorite.ActionsRegistry? actions {get; private set; default = null;}
 	public weak Gtk.Settings gtk_settings {get; private set;}
 	private Gtk.Menu pop_down_menu;
 	private string? web_apps_dir = null;
 	private bool show_menubar = false;
 	
-	public WebAppListController(string? web_apps_dir)
+	public WebAppListController(Diorite.Storage storage, WebAppRegistry web_app_reg)
 	{
 		base(UNIQUE_NAME, NAME, "%s.desktop".printf(APPNAME), APPNAME);
 		icon = APP_ICON;
 		version = VERSION;
-		this.web_apps_dir = web_apps_dir;
+		this.storage = storage;
+		this.web_app_reg = web_app_reg;
 	}
 	
 	public override void activate()
@@ -63,12 +64,6 @@ public class WebAppListController : Diorite.Application
 	{
 		gtk_settings = Gtk.Settings.get_default();
 		append_actions();
-		storage = new Diorite.XdgStorage.for_project(Nuvola.get_appname()).get_child("web_apps");
-		if (web_apps_dir != null && web_apps_dir != "")
-			web_app_reg = new WebAppRegistry.with_data_path(storage, web_apps_dir);
-		else
-			web_app_reg = new WebAppRegistry(storage, true);
-		
 		actions.get_action(Actions.INSTALL_APP).enabled = web_app_reg.allow_management;
 		
 		var model = new WebAppListModel(web_app_reg);

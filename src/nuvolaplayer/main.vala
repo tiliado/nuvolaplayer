@@ -33,11 +33,13 @@ struct Args
 	static bool debug;
 	static bool verbose;
 	static bool version;
+	static string? app_id = null;
 	static string? apps_dir = null;
 	static string? log_file = null;
 	
 	public static const OptionEntry[] options =
 	{
+		{ "app-id", 'a', 0, OptionArg.STRING, ref Args.app_id, "Web app to run.", "ID" },
 		{ "apps-dir", 'A', 0, GLib.OptionArg.FILENAME, ref Args.apps_dir, "Search for web app integrations only in directory DIR and disable service management.", "DIR" },
 		{ "verbose", 'v', 0, OptionArg.NONE, ref Args.verbose, "Print informational messages", null },
 		{ "debug", 'D', 0, OptionArg.NONE, ref Args.debug, "Print debugging messages", null },
@@ -83,7 +85,24 @@ public int main(string[] args)
 	Diorite.Logger.init(log != null ? log : stderr, Args.debug ? GLib.LogLevelFlags.LEVEL_DEBUG
 	 : (Args.verbose ? GLib.LogLevelFlags.LEVEL_INFO: GLib.LogLevelFlags.LEVEL_WARNING));
 	
-	var controller = new WebAppListController(Args.apps_dir);
+	
+	var storage = new Diorite.XdgStorage.for_project(Nuvola.get_appname()).get_child("web_apps");
+	var web_app_reg = Args.apps_dir != null && Args.apps_dir != ""
+	? new WebAppRegistry.with_data_path(storage, Args.apps_dir)
+	: new WebAppRegistry(storage, true);
+	
+	if (Args.app_id != null)
+	{
+		var web_app = web_app_reg.get_app(Args.app_id);
+		if (web_app != null)
+		{
+			var controller = new WebAppController(storage, web_app);
+			return controller.run(args);
+		}
+		warning("Failed to load web app '%s'.", Args.app_id);
+	}
+	
+	var controller = new WebAppListController(storage, web_app_reg);
 	return controller.run(args);
 }
 
