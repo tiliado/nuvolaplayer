@@ -85,7 +85,6 @@ public int main(string[] args)
 	Diorite.Logger.init(log != null ? log : stderr, Args.debug ? GLib.LogLevelFlags.LEVEL_DEBUG
 	 : (Args.verbose ? GLib.LogLevelFlags.LEVEL_INFO: GLib.LogLevelFlags.LEVEL_WARNING));
 	
-	
 	var storage = new Diorite.XdgStorage.for_project(Nuvola.get_appname()).get_child("web_apps");
 	var web_app_reg = Args.apps_dir != null && Args.apps_dir != ""
 	? new WebAppRegistry.with_data_path(storage, Args.apps_dir)
@@ -96,6 +95,7 @@ public int main(string[] args)
 		var web_app = web_app_reg.get_app(Args.app_id);
 		if (web_app != null)
 		{
+			create_desktop_file(web_app);
 			var controller = new WebAppController(storage, web_app);
 			return controller.run(args);
 		}
