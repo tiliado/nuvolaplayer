@@ -25,38 +25,29 @@
 namespace Nuvola
 {
 
-public class WebAppController : Diorite.Application
+public class WebAppWindow : Gtk.ApplicationWindow
 {
-	public WebAppWindow? main_window {get; private set; default = null;}
-	public Diorite.Storage? storage {get; private set; default = null;}
-	public Diorite.ActionsRegistry? actions {get; private set; default = null;}
-	public WebApp web_app {get; private set;}
-	public weak Gtk.Settings gtk_settings {get; private set;}
+	public Gtk.Grid grid {get; private set;}
+	private WebAppController app;
 	
-	public WebAppController(Diorite.Storage? storage, WebApp web_app)
+	public WebAppWindow(WebAppController app)
 	{
-		var app_id = web_app.meta.id;
-		base("%sX%s".printf(UNIQUE_NAME, app_id), "%s - %s".printf(web_app.meta.name, NAME), "%s-%s.desktop".printf(APPNAME, app_id), "%s-%s".printf(APPNAME, app_id));
-		icon = APP_ICON;
-		version = VERSION;
-		this.storage = storage;
-		this.web_app = web_app;
+		title = app.app_name;
+		try
+		{
+			icon = Gtk.IconTheme.get_default().load_icon(app.icon, 48, 0);
+		}
+		catch (Error e)
+		{
+			warning("Unable to load application icon.");
+		}
+		set_default_size(500, 500);
+		
+		this.app = app;
+		app.add_window(this);
+		app.actions.window = this;
 	}
-	
-	public override void activate()
-	{
-		if (main_window == null)
-			start();
-		main_window.present();
-	}
-	
-	private void start()
-	{
-		gtk_settings = Gtk.Settings.get_default();
-		actions = new Diorite.ActionsRegistry(this, null);
-		main_window = new WebAppWindow(this);
-		main_window.show_all();
-	}
+
 }
 
 } // namespace Nuvola

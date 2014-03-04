@@ -41,10 +41,8 @@ public class WebAppListController : Diorite.Application
 	public WebAppRegistry web_app_reg {get; private set; default = null;}
 	public Diorite.ActionsRegistry? actions {get; private set; default = null;}
 	public weak Gtk.Settings gtk_settings {get; private set;}
-	public bool app_menu_shown {get; private set; default = false;}
 	private string[] exec_cmd;
 	private Gtk.Menu pop_down_menu;
-	private bool show_menubar = false;
 	
 	public WebAppListController(Diorite.Storage storage, WebAppRegistry web_app_reg, string[] exec_cmd)
 	{
@@ -73,23 +71,17 @@ public class WebAppListController : Diorite.Application
 	
 		var view = new WebAppListView(model);
 		main_window = new WebAppListWindow(this, view);
-		debug("Shell: app_menu = %s, menubar = %s",
-		gtk_settings.gtk_shell_shows_app_menu.to_string(),
-		gtk_settings.gtk_shell_shows_menubar.to_string());
 		
-		if (gtk_settings.gtk_shell_shows_app_menu)
-		{
+		if (app_menu_shown)
 			set_app_menu(actions.build_menu({Actions.QUIT}));
-			app_menu_shown = true;
-			show_menubar = gtk_settings.gtk_shell_shows_menubar;
-		}
 		
-		if (show_menubar)
+		if (menubar_shown)
 		{
 			var menu = new Menu();
 			menu.append_submenu("_Apps", actions.build_menu({Actions.START_APP, "|", Actions.INSTALL_APP, Actions.REMOVE_APP}));
 			set_menubar(menu);
 		}
+		
 		var pop_down_model = actions.build_menu({Actions.QUIT});
 		pop_down_menu = new Gtk.Menu.from_model(pop_down_model);
 		pop_down_menu.attach_to_widget(main_window, null);
