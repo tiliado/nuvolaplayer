@@ -128,6 +128,18 @@ public static void o_set_number(Context ctx, JS.Object obj, string property, dou
 }
 
 /**
+ * Sets null property of JavaScript object
+ * 
+ * @param ctx JavaScript context
+ * @param obj JavaScript object
+ * @param property property name
+ */
+public static void o_set_null(Context ctx, JS.Object obj, string property)
+{
+	obj.set_property(ctx, new JS.String(property), JS.Value.null(ctx));
+}
+
+/**
  * Sets boolean property of JavaScript object
  * 
  * @param ctx JavaScript context

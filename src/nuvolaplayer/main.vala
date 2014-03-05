@@ -88,10 +88,11 @@ public int main(string[] args)
 	Diorite.Logger.init(log != null ? log : stderr, Args.debug ? GLib.LogLevelFlags.LEVEL_DEBUG
 	 : (Args.verbose ? GLib.LogLevelFlags.LEVEL_INFO: GLib.LogLevelFlags.LEVEL_WARNING));
 	
-	var storage = new Diorite.XdgStorage.for_project(Nuvola.get_appname()).get_child("web_apps");
+	var storage = new Diorite.XdgStorage.for_project(Nuvola.get_appname());
+	var web_apps_storage = storage.get_child("web_apps");
 	var web_app_reg = Args.apps_dir != null && Args.apps_dir != ""
-	? new WebAppRegistry.with_data_path(storage, Args.apps_dir)
-	: new WebAppRegistry(storage, true);
+	? new WebAppRegistry.with_data_path(web_apps_storage, Args.apps_dir)
+	: new WebAppRegistry(web_apps_storage, true);
 	
 	if (Args.app_id != null)
 	{

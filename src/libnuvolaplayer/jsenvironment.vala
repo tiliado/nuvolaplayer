@@ -22,12 +22,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using Nuvola.JSTools;
+
 namespace Nuvola
 {
 
+public enum ValueType
+{
+	STRING, INT, DOUBLE, NULL, JS_VALUE;
+}
+
 public class JsEnvironment: GLib.Object
 {
-
 	public unowned JS.GlobalContext context {get; private set;}
 	private unowned JS.Object? _main_object = null;
 	public unowned JS.Object? main_object
@@ -102,6 +108,58 @@ public class JsEnvironment: GLib.Object
 		if (exception != null)
 			throw new JSError.EXCEPTION(JSTools.exception_to_string(context, exception));
 		return value;
+	}
+	
+	public unowned JS.Value call_function(string name, int argc, ...) throws JSError
+	{
+		unowned JS.Context ctx = context;
+		unowned JS.Object? func = o_get_object(ctx, main_object, name);
+		if (func == null)
+			throw new JSError.NOT_FOUND("Function '%s' not found.'", name);
+	
+		if(!func.is_function(ctx))
+			throw new JSError.WRONG_TYPE("'%s' is not a function.'", name);
+		
+		void*[] params = new void*[argc];
+		var args = va_list();
+		for (var i = 0; i < argc; i++)
+		{
+			ValueType type = args.arg();
+			if (type == ValueType.NULL)
+			{
+				params[i] = (void*) JS.Value.null(ctx);
+			}
+			else if (type == ValueType.JS_VALUE)
+			{
+				unowned JS.Value js_val = args.arg();
+				params[i] = (void*) js_val;
+			}
+			else if (type == ValueType.STRING)
+			{
+				string str_val = args.arg();
+				params[i] = (void*) JS.Value.string(ctx, new JS.String(str_val));
+			}
+			else if (type == ValueType.INT)
+			{
+				int int_val = args.arg();
+				params[i] = (void*) JS.Value.number(ctx, (double) int_val);
+			}
+			else if (type == ValueType.DOUBLE)
+			{
+				double double_val = args.arg();
+				params[i] = (void*) JS.Value.number(ctx, double_val);
+			}
+			else
+			{
+				throw new JSError.WRONG_TYPE("Unsupported type '%s'.", type.to_string());
+			}
+		}
+		
+		JS.Value? exception;
+		unowned JS.Value result = func.call_as_function(ctx, main_object, (JS.Value[]) params,  out exception);
+		if (exception != null)
+			throw new JSError.FUNC_FAILED("Function '%s' failed. %s", name, exception_to_string(ctx, exception) ?? "(null)");
+		return result;
 	}
 }
 

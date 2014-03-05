@@ -22,6 +22,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using Nuvola.JSTools;
+
 namespace Nuvola
 {
 
@@ -31,17 +33,76 @@ public class WebEngine : GLib.Object
 	public WebApp web_app {get; private set;}
 	private WebAppController app;
 	private WebKit.WebView web_view;
+	private JsEnvironment env;
+	private JSApi api;
+	private JS.GlobalContext ctx_ref;
 	
 	public WebEngine(WebAppController app, WebApp web_app)
 	{
 		this.app = app;
 		this.web_app = web_app;
 		this.web_view = new WebKit.WebView();
+		ctx_ref = JS.GlobalContext.create();
+		env = new JsEnvironment(ctx_ref, null);
+		api = new JSApi(app.storage);
+		api.inject(env);
+		message("%s", app.storage.user_data_dir.get_path());
+		File? main_js = app.storage.user_data_dir.get_child("js").get_child("main.js");
+		if (!main_js.query_exists())
+		{
+			main_js = null;
+			foreach (var dir in app.storage.data_dirs)
+			{
+				main_js = dir.get_child("js").get_child("main.js");
+				if (main_js.query_exists())
+					break;
+				main_js = null;
+			}
+		}
+		
+		if (main_js == null)
+		{
+			critical("Failed to find main.js.");
+			return;
+		}
+		
+		try
+		{
+			env.execute_script_from_file(main_js);
+		}
+		catch (JSError e)
+		{
+			warning("JS Error: %s", e.message);
+		}
+		
+		try
+		{
+			env.execute_script_from_file(web_app.data_dir.get_child("init.js"));
+		}
+		catch (JSError e)
+		{
+			warning("JS Error: %s", e.message);
+		}
 	}
 	
 	public void load()
 	{
-		web_view.load_uri("http://google.com");
+		unowned JS.Context ctx = env.context;
+		unowned JS.Object result = ctx.make_object();
+		o_set_null(ctx, result, "url");
+		try
+		{
+			env.call_function("emit", 2, ValueType.STRING, "home-page", ValueType.JS_VALUE, result);
+			var url = o_get_string(ctx, result, "url");
+			if (url == null || url == "")
+				critical("Failed to get valid home page url.");
+			else
+				web_view.load_uri(url);
+		}
+		catch (JSError e)
+		{
+			critical("Failed to get home url. %s", e.message);
+		}
 	}
 }
 

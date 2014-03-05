@@ -26,7 +26,7 @@ namespace JS{
 	public class GlobalContext : JS.Context
 	{
 		[CCode (cname = "JSGlobalContextCreate")]
-		public GlobalContext create(Class? klass=null);
+		public static GlobalContext create(Class? klass=null);
 		
 		[CCode (cname = "JSGlobalContextRelease")]
 		public void release();
