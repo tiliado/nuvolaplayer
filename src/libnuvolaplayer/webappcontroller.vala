@@ -56,12 +56,29 @@ public class WebAppController : Diorite.Application
 		gtk_settings = Gtk.Settings.get_default();
 		actions = new Diorite.ActionsRegistry(this, null);
 		main_window = new WebAppWindow(this);
+		fatal_error.connect(on_fatal_error);
+		show_error.connect(on_show_error);
 		web_engine = new WebEngine(this, web_app);
 		var widget = web_engine.widget;
 		widget.hexpand = widget.vexpand = true;
-		web_engine.load();
+		if (!web_engine.load())
+			return;
 		main_window.grid.add(widget);
 		main_window.show_all();
+	}
+	
+	private void on_fatal_error(string title, string message)
+	{
+		var dialog = new Diorite.ErrorDialog(title, message + "\n\nThe application has reached an inconsistent state and will quit for that reason.");
+		dialog.run();
+		dialog.destroy();
+	}
+	
+	private void on_show_error(string title, string message)
+	{
+		var dialog = new Diorite.ErrorDialog(title, message + "\n\nThe application might not function properly.");
+		dialog.run();
+		dialog.destroy();
 	}
 }
 
