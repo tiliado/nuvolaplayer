@@ -1,0 +1,13 @@
+WebKitGtk GObject Introspection Files
+=====================================
+
+ -  based on WebKitGtk 2.2.3 upstream tarball
+    http://www.webkitgtk.org/releases/webkitgtk-2.2.3.tar.xz
+ -  applied patch Missing introspection information for WebExtensions
+    http://trac.webkit.org/changeset/161063
+ -  applied patch GTK build fix after previous patch
+    http://trac.webkit.org/changeset/161065
+ -  built in clean Fedora 20 chroot
+    autoreconf
+    ./configure --enable-introspection --disable-glibtest
+    make -j 12
