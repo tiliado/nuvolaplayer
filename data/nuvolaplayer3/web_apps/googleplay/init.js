@@ -32,7 +32,7 @@ var Initialization = function()
 
 Initialization.prototype.onHomePage = function(object, result)
 {
-	result.url = "http://google.com";
+	result.url = Nuvola.meta.home_url;
 }
 
 Nuvola.initialization = new Initialization();
