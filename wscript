@@ -184,6 +184,8 @@ def build(ctx):
 	
 	NUVOLAPLAYER = APPNAME + SUFFIX
 	LIBNUVOLAPLAYER = "lib" + APPNAME + SUFFIX
+	NUVOLAPLAYEREXTENSION = APPNAME + SUFFIX + "extension"
+	NUVOLAPLAYEREXTENSION_DIR = "%s/%s" % (ctx.env.LIBDIR, APPNAME + SUFFIX)
 	UIDEMO="uidemo"
 	
 	ctx(features = "c cshlib",
@@ -194,7 +196,7 @@ def build(ctx):
 		uselib = uselib,
 		includes = ["src/libnuvolaplayer"],
 		vala_defines = vala_defines,
-		cflags = ['-DG_LOG_DOMAIN="LibNuvola"'],
+		defines = ['NUVOLA_WEBKIT_EXTENSION_DIR="%s"' % NUVOLAPLAYEREXTENSION_DIR, 'G_LOG_DOMAIN="LibNuvola"'],
 		vapi_dirs = ['vapi'],
 		vala_target_glib = "2.32",
 	)
@@ -207,7 +209,7 @@ def build(ctx):
 		includes = ["src/lnuvolaplayer"],
 		use = [LIBNUVOLAPLAYER],
 		vala_defines = vala_defines,
-		cflags = ['-DG_LOG_DOMAIN="Nuvola"'],
+		defines = ['G_LOG_DOMAIN="Nuvola"'],
 		vapi_dirs = ['vapi'],
 		vala_target_glib = "2.32",
 	)
@@ -219,9 +221,24 @@ def build(ctx):
 		uselib = uselib,
 		use = [LIBNUVOLAPLAYER],
 		vala_defines = vala_defines,
-		cflags = ['-DG_LOG_DOMAIN="Nuvola"'],
+		defines = ['G_LOG_DOMAIN="Nuvola"'],
 		vapi_dirs = ['vapi'],
 		vala_target_glib = "2.32",
+	)
+	
+	ctx(features = "c cshlib",
+		target = NUVOLAPLAYEREXTENSION,
+		name = NUVOLAPLAYEREXTENSION,
+		source = ctx.path.ant_glob('src/nuvolaplayerextension/*.vala') + ctx.path.ant_glob('src/nuvolaplayerextension/*.c'),
+		packages = "dioriteglib webkit2gtk-3.0 webkit2gtk-web-extension-3.0 javascriptcoregtk-3.0",
+		uselib = "DIORITEGLIB DIORITEGTK WEBKIT JSCORE",
+		includes = ["src/nuvolaplayerextension/"],
+		use = [LIBNUVOLAPLAYER],
+		vala_defines = vala_defines,
+		cflags = ['-DG_LOG_DOMAIN="NuvolaExt"'],
+		vapi_dirs = ['vapi'],
+		vala_target_glib = "2.32",
+		install_path = NUVOLAPLAYEREXTENSION_DIR,
 	)
 	
 	ctx.add_post_fun(post)
