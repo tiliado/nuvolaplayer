@@ -241,6 +241,9 @@ def build(ctx):
 		install_path = NUVOLAPLAYEREXTENSION_DIR,
 	)
 	
+	data_dir = ctx.path.find_dir('data')
+	ctx.install_files('${PREFIX}/share', data_dir.ant_glob('**'), cwd=data_dir, relative_trick=True)
+	
 	ctx.add_post_fun(post)
 
 def post(ctx):
