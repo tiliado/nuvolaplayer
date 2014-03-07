@@ -35,16 +35,10 @@ public class WebEngine : GLib.Object
 	public WebApp web_app {get; private set;}
 	private WebAppController app;
 	private WebKit.WebView web_view;
-	private JsEnvironment env;
+	private JsEnvironment? env = null;
 	private JSApi api;
-	private JS.GlobalContext? ctx_ref = null;
 	private Diorite.Ipc.MessageServer master = null;
 	private Diorite.Ipc.MessageClient slave = null;
-	private static const string MAIN_JS = "main.js";
-	private static const string INIT_JS = "init.js";
-	private static const string META_JSON = "metadata.json";
-	private static const string META_PROPERTY = "meta";
-	private static const string JS_DIR = "js";
 	private static const string MASTER_SUFFIX = ".master";
 	private static const string SLAVE_SUFFIX = ".slave";
 	
@@ -62,75 +56,18 @@ public class WebEngine : GLib.Object
 	
 	private bool inject_api()
 	{
-		if (ctx_ref != null)
+		if (env != null)
 			return true;
-		ctx_ref = JS.GlobalContext.create();
-		env = new JsEnvironment(ctx_ref, null);
-		api = new JSApi(app.storage);
-		api.inject(env);
-		File? main_js = app.storage.user_data_dir.get_child(JS_DIR).get_child(MAIN_JS);
-		if (!main_js.query_exists())
-		{
-			main_js = null;
-			foreach (var dir in app.storage.data_dirs)
-			{
-				main_js = dir.get_child(JS_DIR).get_child(MAIN_JS);
-				if (main_js.query_exists())
-					break;
-				main_js = null;
-			}
-		}
 		
-		if (main_js == null)
-		{
-			app.fatal_error("Initialization error", "%s failed to find a core component main.js. This probably means the application has not been installed correctly or that component has been accidentally deleted.".printf(app.app_name));
-			return false;
-		}
-		
+		env = new JsRuntime();
+		api = new JSApi(app.storage, web_app.data_dir, web_app.config_dir);
 		try
 		{
-			env.execute_script_from_file(main_js);
+			api.inject(env);
 		}
 		catch (JSError e)
 		{
-			app.fatal_error("Initialization error", "%s failed to initialize a core component main.js located at '%s'. Initialization exited with error:\n\n%s".printf(app.app_name, main_js.get_path(), e.message));
-			return false;
-		}
-		
-		var meta_json = web_app.data_dir.get_child(META_JSON);
-		if (!meta_json.query_exists())
-		{
-			app.fatal_error("Initialization error", "%s failed to find a web app component %s. This probably means the web app integration has not been installed correctly or that component has been accidentally deleted.".printf(app.app_name, META_JSON));
-			return false;
-		}
-		
-		string meta_json_data;
-		try
-		{
-			meta_json_data = Diorite.System.read_file(meta_json);
-		}
-		catch (GLib.Error e)
-		{
-			app.fatal_error("Initialization error", "%s failed load a web app component %s. This probably means the web app integration has not been installed correctly or that component has been accidentally deleted.\n\n%s".printf(app.app_name, META_JSON, e.message));
-			return false;
-		}
-		
-		unowned JS.Value meta = object_from_JSON(ctx_ref, meta_json_data);
-		env.main_object.set_property(ctx_ref, new JS.String(META_PROPERTY), meta);
-		
-		var init_js = web_app.data_dir.get_child(INIT_JS);
-		if (!init_js.query_exists())
-		{
-			app.fatal_error("Initialization error", "%s failed to find a web app component init.js. This probably means the web app integration has not been installed correctly or that component has been accidentally deleted.".printf(app.app_name));
-			return false;
-		}
-		try
-		{
-			env.execute_script_from_file(init_js);
-		}
-		catch (JSError e)
-		{
-			app.fatal_error("Initialization error", "%s failed to initialize a web app component init.js located at '%s'. Initialization exited with error:\n\n%s".printf(app.app_name, init_js.get_path(), e.message));
+			app.fatal_error("Initialization error", e.message);
 			return false;
 		}
 		return true;

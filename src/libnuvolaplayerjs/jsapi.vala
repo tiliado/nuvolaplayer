@@ -55,7 +55,9 @@ public errordomain JSError
 	/**
 	 * Execution of a script caused an exception.
 	 */
-	EXCEPTION;
+	EXCEPTION,
+	
+	INITIALIZATION_FAILED;
 }
 
 
@@ -69,10 +71,11 @@ public errordomain JSError
  */
 public class JSApi : GLib.Object
 {
-	/**
-	 * Name of file with init script.
-	 */
-	private static const string INIT_FILENAME = "init.js";
+	private static const string MAIN_JS = "main.js";
+	private static const string INIT_JS = "init.js";
+	private static const string META_JSON = "metadata.json";
+	private static const string META_PROPERTY = "meta";
+	private static const string JS_DIR = "js";
 	/**
 	 * Name of file with integration script.
 	 */
@@ -98,10 +101,14 @@ public class JSApi : GLib.Object
 	public static const string PREFERENCES_FRAME_ID = "__preferences__";
 	
 	private Diorite.Storage storage;
+	private File data_dir;
+	private File config_dir;
 	
-	public JSApi(Diorite.Storage storage)
+	public JSApi(Diorite.Storage storage, File data_dir, File config_dir)
 	{
 		this.storage = storage;
+		this.data_dir = data_dir;
+		this.config_dir = config_dir;
 	}
 	
 	/**
@@ -109,7 +116,7 @@ public class JSApi : GLib.Object
 	 * 
 	 * @param env    JavaScript environment to use for injection
 	 */
-	public void inject(JsEnvironment env)
+	public void inject(JsEnvironment env) throws JSError
 	{
 		unowned JS.Context ctx = env.context;
 		if (klass == null)
@@ -126,6 +133,61 @@ public class JSApi : GLib.Object
 		
 		env.main_object = main_object;
 		main_object.unprotect(ctx);
+		
+		File? main_js = storage.user_data_dir.get_child(JS_DIR).get_child(MAIN_JS);
+		if (!main_js.query_exists())
+		{
+			main_js = null;
+			foreach (var dir in storage.data_dirs)
+			{
+				main_js = dir.get_child(JS_DIR).get_child(MAIN_JS);
+				if (main_js.query_exists())
+					break;
+				main_js = null;
+			}
+		}
+		
+		if (main_js == null)
+			throw new JSError.INITIALIZATION_FAILED("Failed to find a core component main.js. This probably means the application has not been installed correctly or that component has been accidentally deleted.");
+		
+		try
+		{
+			env.execute_script_from_file(main_js);
+		}
+		catch (JSError e)
+		{
+			throw new JSError.INITIALIZATION_FAILED("Failed to initialize a core component main.js located at '%s'. Initialization exited with error:\n\n%s", main_js.get_path(), e.message);
+		}
+		
+		var meta_json = data_dir.get_child(META_JSON);
+		if (!meta_json.query_exists())
+			throw new JSError.INITIALIZATION_FAILED("Failed to find a web app component %s. This probably means the web app integration has not been installed correctly or that component has been accidentally deleted.", META_JSON);
+		
+		string meta_json_data;
+		try
+		{
+			meta_json_data = Diorite.System.read_file(meta_json);
+		}
+		catch (GLib.Error e)
+		{
+			throw new JSError.INITIALIZATION_FAILED("Failed load a web app component %s. This probably means the web app integration has not been installed correctly or that component has been accidentally deleted.\n\n%s", META_JSON, e.message);
+		}
+		
+		unowned JS.Value meta = object_from_JSON(ctx, meta_json_data);
+		env.main_object.set_property(ctx, new JS.String(META_PROPERTY), meta);
+		
+		var init_js = data_dir.get_child(INIT_JS);
+		if (!init_js.query_exists())
+			throw new JSError.INITIALIZATION_FAILED("Failed to find a web app component init.js. This probably means the web app integration has not been installed correctly or that component has been accidentally deleted.");
+		
+		try
+		{
+			env.execute_script_from_file(init_js);
+		}
+		catch (JSError e)
+		{
+			throw new JSError.INITIALIZATION_FAILED("Failed to initialize a web app component init.js located at '%s'. Initialization exited with error:\n\n%s", init_js.get_path(), e.message);
+		}
 	}
 	
 	/**
