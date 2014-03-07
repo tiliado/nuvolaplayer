@@ -27,17 +27,18 @@ namespace Nuvola
 
 public void create_desktop_file(WebApp web_app)
 {
+	var app_name = Nuvola.get_appname();
 	var meta = web_app.meta;
 	var storage = new Diorite.XdgStorage();
-	var filename = "%s-%s.desktop".printf(APPNAME, meta.id);
+	var filename = "%s-%s.desktop".printf(app_name, meta.id);
 	var file = storage.user_data_dir.get_child("applications").get_child(filename);
 	var key_file = new KeyFile();
 	const string GROUP = "Desktop Entry";
 	key_file.set_string(GROUP, "Name", meta.name);
-	key_file.set_string(GROUP, "Exec", "%s -a %s".printf(APPNAME, meta.id));
+	key_file.set_string(GROUP, "Exec", "%s -a %s".printf(app_name, meta.id));
 	key_file.set_string(GROUP, "Type", "Application");
 	key_file.set_string(GROUP, "Icon", "nuvolaplayer");
-	key_file.set_string(GROUP, "StartupWMClass", "%s-%s".printf(APPNAME, meta.id));
+	key_file.set_string(GROUP, "StartupWMClass", "%s-%s".printf(app_name, meta.id));
 	key_file.set_boolean(GROUP, "StartupNotify", true);
 	key_file.set_boolean(GROUP, "Terminal", false);
 	var data = key_file.to_data(null, null);

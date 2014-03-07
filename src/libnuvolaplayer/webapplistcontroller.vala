@@ -46,9 +46,10 @@ public class WebAppListController : Diorite.Application
 	
 	public WebAppListController(Diorite.Storage storage, WebAppRegistry web_app_reg, string[] exec_cmd)
 	{
-		base(UNIQUE_NAME, NAME, "%s.desktop".printf(APPNAME), APPNAME);
-		icon = APP_ICON;
-		version = VERSION;
+		var app_name = Nuvola.get_appname();
+		base(Nuvola.get_unique_name(), Nuvola.get_display_name(), "%s.desktop".printf(app_name), app_name);
+		icon = Nuvola.get_app_icon();
+		version = Nuvola.get_version();
 		this.storage = storage;
 		this.web_app_reg = web_app_reg;
 		this.exec_cmd = exec_cmd;

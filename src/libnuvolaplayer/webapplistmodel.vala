@@ -70,7 +70,7 @@ public class WebAppListModel : Gtk.ListStore
 	{
 		var web_apps = web_app_reg.list_web_apps();
 		foreach (var web_app in web_apps.get_values())
-			append_web_app(web_app, WebAppListView.load_icon(web_app.icon, APP_ICON));
+			append_web_app(web_app, WebAppListView.load_icon(web_app.icon, Nuvola.get_app_icon()));
 	}
 	
 	private void on_app_installed_or_removed()

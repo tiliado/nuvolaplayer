@@ -152,7 +152,7 @@ def configure(ctx):
 	ctx.check_dep('gdk-3.0', 'GDK', '3.4')
 	ctx.check_dep('gthread-2.0', 'GTHREAD', '2.32')
 	ctx.check_dep('dioriteglib', 'DIORITEGLIB', '0.0.1')
-	ctx.check_dep('dioritegtk', 'DIORITEGGTK', '0.0.1')
+	ctx.check_dep('dioritegtk', 'DIORITEGTK', '0.0.1')
 	ctx.check_dep('json-glib-1.0', 'JSON-GLIB', '0.7')
 	ctx.check_dep('libarchive', 'LIBARCHIVE', '3.1')
 	ctx.check_dep('webkit2gtk-3.0', 'WEBKIT', '2.2')
@@ -172,8 +172,6 @@ def configure(ctx):
 def build(ctx):
 	#~ print ctx.env
 	PLATFORM = ctx.env.PLATFORM
-	packages = 'javascriptcoregtk-3.0 webkit2gtk-3.0 libarchive dioritegtk dioriteglib gtk+-3.0 gdk-3.0 posix json-glib-1.0 glib-2.0 gio-2.0 '
-	uselib = 'JSCORE WEBKIT LIBARCHIVE DIORITEGGTK DIORITEGLIB GTK+ GDK JSON-GLIB GLIB GTHREAD GIO'
 	vala_defines = ctx.env.VALA_DEFINES
 	
 	if PLATFORM == WIN:
@@ -184,16 +182,31 @@ def build(ctx):
 	
 	NUVOLAPLAYER = APPNAME + SUFFIX
 	LIBNUVOLAPLAYER = "lib" + APPNAME + SUFFIX
+	LIBNUVOLAPLAYERJS = "lib" + APPNAME + "js" + SUFFIX
 	NUVOLAPLAYEREXTENSION = APPNAME + SUFFIX + "extension"
 	NUVOLAPLAYEREXTENSION_DIR = "%s/%s" % (ctx.env.LIBDIR, APPNAME + SUFFIX)
 	UIDEMO="uidemo"
 	
 	ctx(features = "c cshlib",
-		target = NUVOLAPLAYER,
+		target = LIBNUVOLAPLAYERJS[3:],
+		name = LIBNUVOLAPLAYERJS,
+		source = ctx.path.ant_glob('src/libnuvolaplayerjs/*.vala') + ctx.path.ant_glob('src/libnuvolaplayerjs/*.c'),
+		packages = "javascriptcoregtk-3.0 webkit2gtk-3.0 dioriteglib glib-2.0 gio-2.0",
+		uselib = "JSCORE WEBKIT DIORITEGLIB GLIB GTHREAD GIO",
+		includes = ["src/libnuvolaplayerjs"],
+		vala_defines = vala_defines,
+		defines = ['G_LOG_DOMAIN="LibNuvola"'],
+		vapi_dirs = ['vapi'],
+		vala_target_glib = "2.32",
+	)
+	
+	ctx(features = "c cshlib",
+		target = LIBNUVOLAPLAYER[3:],
 		name = LIBNUVOLAPLAYER,
 		source = ctx.path.ant_glob('src/libnuvolaplayer/*.vala') + ctx.path.ant_glob('src/libnuvolaplayer/*.c'),
-		packages = packages,
-		uselib = uselib,
+		packages = 'javascriptcoregtk-3.0 webkit2gtk-3.0 libarchive dioritegtk dioriteglib gtk+-3.0 gdk-3.0 posix json-glib-1.0 glib-2.0 gio-2.0',
+		uselib = 'JSCORE WEBKIT LIBARCHIVE DIORITEGTK DIORITEGLIB GTK+ GDK JSON-GLIB GLIB GTHREAD GIO',
+		use = [LIBNUVOLAPLAYERJS],
 		includes = ["src/libnuvolaplayer"],
 		vala_defines = vala_defines,
 		defines = ['NUVOLA_WEBKIT_EXTENSION_DIR="%s"' % NUVOLAPLAYEREXTENSION_DIR, 'G_LOG_DOMAIN="LibNuvola"'],
@@ -204,10 +217,10 @@ def build(ctx):
 	ctx.program(
 		target = NUVOLAPLAYER,
 		source = ctx.path.ant_glob('src/nuvolaplayer/*.vala') + ctx.path.ant_glob('src/nuvolaplayer/*.c'),
-		packages = packages,
-		uselib = uselib,
+		packages = "",
+		uselib = "",
 		includes = ["src/lnuvolaplayer"],
-		use = [LIBNUVOLAPLAYER],
+		use = [LIBNUVOLAPLAYER, LIBNUVOLAPLAYERJS],
 		vala_defines = vala_defines,
 		defines = ['G_LOG_DOMAIN="Nuvola"'],
 		vapi_dirs = ['vapi'],
@@ -217,8 +230,8 @@ def build(ctx):
 	ctx.program(
 		target = UIDEMO,
 		source = ctx.path.ant_glob('tests/ui/*.vala'),
-		packages = packages,
-		uselib = uselib,
+		packages = "dioritegtk dioriteglib gtk+-3.0 gdk-3.0",
+		uselib = "DIORITEGTK DIORITEGLIB GTK+ GDK GLIB GTHREAD",
 		use = [LIBNUVOLAPLAYER],
 		vala_defines = vala_defines,
 		defines = ['G_LOG_DOMAIN="Nuvola"'],
@@ -233,7 +246,7 @@ def build(ctx):
 		packages = "dioriteglib webkit2gtk-3.0 webkit2gtk-web-extension-3.0 javascriptcoregtk-3.0",
 		uselib = "DIORITEGLIB DIORITEGTK WEBKIT JSCORE",
 		includes = ["src/nuvolaplayerextension/"],
-		use = [LIBNUVOLAPLAYER],
+		use = [LIBNUVOLAPLAYERJS],
 		vala_defines = vala_defines,
 		cflags = ['-DG_LOG_DOMAIN="NuvolaExt"'],
 		vapi_dirs = ['vapi'],

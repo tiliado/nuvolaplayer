@@ -37,9 +37,12 @@ public class WebAppController : Diorite.Application
 	public WebAppController(Diorite.Storage? storage, WebApp web_app)
 	{
 		var app_id = web_app.meta.id;
-		base("%sX%s".printf(UNIQUE_NAME, app_id), "%s - %s".printf(web_app.meta.name, NAME), "%s-%s.desktop".printf(APPNAME, app_id), "%s-%s".printf(APPNAME, app_id));
-		icon = APP_ICON;
-		version = VERSION;
+		base("%sX%s".printf(Nuvola.get_unique_name(), app_id),
+		"%s - %s".printf(web_app.meta.name, Nuvola.get_display_name()),
+		"%s-%s.desktop".printf(Nuvola.get_appname(), app_id),
+		"%s-%s".printf(Nuvola.get_appname(), app_id));
+		icon = Nuvola.get_app_icon();
+		version = Nuvola.get_version();
 		this.storage = storage;
 		this.web_app = web_app;
 	}

@@ -34,6 +34,15 @@ private extern const int VERSION_MINOR;
 private extern const int VERSION_BUGFIX;
 private extern const string VERSION_SUFFIX;
 
+public string get_unique_name()
+{
+	return UNIQUE_NAME;
+}
+
+public string get_app_icon()
+{
+	return APP_ICON;
+}
 
 public string get_appname()
 {
@@ -59,23 +68,5 @@ public int[] get_versions()
 {
 	return {VERSION_MAJOR, VERSION_MINOR, VERSION_BUGFIX};
 }
-
-public void list_web_apps()
-{
-	var storage = new Diorite.XdgStorage.for_project(APPNAME);
-	var web_apps_storage = storage.get_child("web_apps");
-	web_apps_storage = new Diorite.Storage(
-		"data/nuvolaplayer3/web_apps", {},
-		web_apps_storage.user_config_dir.get_path(),
-		web_apps_storage.user_cache_dir.get_path()
-	);
-	var web_apps_reg = new WebAppRegistry(web_apps_storage, false);
-	var web_apps = web_apps_reg.list_web_apps();
-	foreach (var web_app in web_apps.get_values())
-	{
-		message("Web app: %s, %u.%u, %s", web_app.meta.name, web_app.meta.version_major, web_app.meta.version_minor, web_app.data_dir.get_path());
-	}
-}
-
 
 } // namespace Nuvola
