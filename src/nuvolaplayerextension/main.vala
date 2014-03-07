@@ -25,15 +25,48 @@
 namespace Nuvola
 {
 
+Diorite.Ipc.MessageClient master;
+Diorite.Ipc.MessageServer slave;
+
 public void on_web_page_created(WebKit.WebExtension extension, WebKit.WebPage web_page)
 {
-	warning("%s Page %u created for %s", Environment.get_variable("NUVOLA_HELLO"), (uint) web_page.get_id(), web_page.get_uri());
+	warning("Page %u created for %s", (uint) web_page.get_id(), web_page.get_uri());
+	Variant response;
+	try
+	{
+		response = master.send_message("get_data_dir", new Variant.byte(0));
+		message("get_data_dir: %s", response.get_string());
+		response = master.send_message("get_config_dir", new Variant.byte(0));
+		message("get_config_dir: %s", response.get_string());
+	}
+	catch (Diorite.Ipc.MessageError e)
+	{
+		warning("Master client error: %s", e.message);
+	}
+}
+
+private void* listen()
+{
+	debug("Slave is listening");
+	try
+	{
+		Nuvola.slave.listen();
+	}
+	catch (Diorite.IOError e)
+	{
+		warning("Slave server error: %s", e.message);
+	}
+	return null;
 }
 
 } // namespace Nuvola
 
-public void webkit_web_extension_initialize (WebKit.WebExtension extension)
+public void webkit_web_extension_initialize(WebKit.WebExtension extension)
 {
 	Diorite.Logger.init(stderr, GLib.LogLevelFlags.LEVEL_DEBUG);
+	Nuvola.master = new Diorite.Ipc.MessageClient(Environment.get_variable("NUVOLA_IPC_MASTER"), 5000);
+	Nuvola.slave = new Diorite.Ipc.MessageServer(Environment.get_variable("NUVOLA_IPC_SLAVE"));
+	new Thread<void*>("slave", Nuvola.listen);
+	Thread.yield();
 	extension.page_created.connect(Nuvola.on_web_page_created);
 }

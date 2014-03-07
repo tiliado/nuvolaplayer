@@ -38,16 +38,21 @@ public class WebEngine : GLib.Object
 	private JsEnvironment env;
 	private JSApi api;
 	private JS.GlobalContext? ctx_ref = null;
+	private Diorite.Ipc.MessageServer master = null;
+	private Diorite.Ipc.MessageClient slave = null;
 	private static const string MAIN_JS = "main.js";
 	private static const string INIT_JS = "init.js";
 	private static const string META_JSON = "metadata.json";
 	private static const string META_PROPERTY = "meta";
 	private static const string JS_DIR = "js";
+	private static const string MASTER_SUFFIX = ".master";
+	private static const string SLAVE_SUFFIX = ".slave";
 	
 	public WebEngine(WebAppController app, WebApp web_app)
 	{
 		var webkit_extension_dir = Environment.get_variable("NUVOLA_WEBKIT_EXTENSION_DIR") ?? WEBKIT_EXTENSION_DIR;
-		Environment.set_variable("NUVOLA_HELLO", "Hello!", true);
+		Environment.set_variable("NUVOLA_IPC_MASTER", app.path_name + MASTER_SUFFIX, true);
+		Environment.set_variable("NUVOLA_IPC_SLAVE", app.path_name + SLAVE_SUFFIX, true);
 		WebKit.WebContext.get_default().set_web_extensions_directory(webkit_extension_dir);
 		debug("Nuvola WebKit Extension directory: %s", webkit_extension_dir);
 		this.app = app;
@@ -136,6 +141,8 @@ public class WebEngine : GLib.Object
 		if (!inject_api())
 			return false;
 		
+		start_master();
+		
 		unowned JS.Context ctx = env.context;
 		unowned JS.Object result = ctx.make_object();
 		o_set_null(ctx, result, "url");
@@ -153,6 +160,43 @@ public class WebEngine : GLib.Object
 			app.fatal_error("Initialization error", "%s failed to retrieve a home page of  a web app. Initialization exited with error:\n\n%s".printf(app.app_name, e.message));
 			return false;
 		}
+		return true;
+	}
+	
+	private void start_master()
+	{
+		if (master != null)
+			return;
+		
+		master = new Diorite.Ipc.MessageServer(app.path_name + MASTER_SUFFIX);
+		master.add_handler("get_data_dir", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_get_data_dir);
+		master.add_handler("get_config_dir", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_get_config_dir);
+		new Thread<void*>(app.path_name, listen);
+		slave = new Diorite.Ipc.MessageClient(app.path_name + SLAVE_SUFFIX, 5000);
+	}
+	
+	private void* listen()
+	{
+		try
+		{
+			master.listen();
+		}
+		catch (Diorite.IOError e)
+		{
+			warning("Master server error: %s", e.message);
+		}
+		return null;
+	}
+	
+	private bool handle_get_data_dir(Diorite.Ipc.MessageServer server, Variant request, out Variant? response)
+	{
+		response = new Variant.string(web_app.data_dir.get_path());
+		return true;
+	}
+	
+	private bool handle_get_config_dir(Diorite.Ipc.MessageServer server, Variant request, out Variant? response)
+	{
+		response = new Variant.string(web_app.config_dir.get_path());
 		return true;
 	}
 }
