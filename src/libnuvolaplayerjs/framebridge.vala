@@ -22,19 +22,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-(function(Nuvola)
+namespace Nuvola
 {
 
-var Initialization = function()
+public class FrameBridge : JsEnvironment
 {
-	Nuvola.connect("home-page", this, "onHomePage");
+	private unowned WebKit.Frame frame;
+	
+	public FrameBridge(WebKit.Frame frame, JS.GlobalContext context)
+	{
+		base(context, null);
+		this.frame = frame;
+	}
 }
 
-Initialization.prototype.onHomePage = function(object, result)
-{
-	result.url = Nuvola.meta.home_url;
-}
-
-Nuvola.initialization = new Initialization();
-
-})(this);  // function(Nuvola)
+} // namespace Nuvola

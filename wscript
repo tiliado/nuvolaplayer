@@ -191,7 +191,7 @@ def build(ctx):
 		target = LIBNUVOLAPLAYERJS[3:],
 		name = LIBNUVOLAPLAYERJS,
 		source = ctx.path.ant_glob('src/libnuvolaplayerjs/*.vala') + ctx.path.ant_glob('src/libnuvolaplayerjs/*.c'),
-		packages = "javascriptcoregtk-3.0 webkit2gtk-3.0 dioriteglib glib-2.0 gio-2.0",
+		packages = "javascriptcoregtk-3.0 webkit2gtk-3.0 webkit2gtk-web-extension-3.0 dioriteglib glib-2.0 gio-2.0",
 		uselib = "JSCORE WEBKIT DIORITEGLIB GLIB GTHREAD GIO",
 		includes = ["src/libnuvolaplayerjs"],
 		vala_defines = vala_defines,

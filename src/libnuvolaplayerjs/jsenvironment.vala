@@ -56,14 +56,13 @@ public class JsEnvironment: GLib.Object
 	public JsEnvironment(JS.GlobalContext context, JS.Object? main_object)
 	{
 		this.context = context;
-		context.retain();
 		this.main_object = main_object;
 	}
 	
 	~JsEnvironment()
 	{
 		main_object = null;
-		context.release();
+		debug("~JsEnvironment %p", this);
 	}
 	
 	/**
