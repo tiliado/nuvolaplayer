@@ -97,7 +97,15 @@ public class WebEngine : GLib.Object
 			app.fatal_error("Initialization error", "%s failed to retrieve a home page of  a web app. Initialization exited with error:\n\n%s".printf(app.app_name, e.message));
 			return false;
 		}
+		
 		return true;
+	}
+	
+	public void call_function(string name, Variant? params) throws Diorite.Ipc.MessageError
+	{
+		assert(slave != null);
+		var data = new Variant("(smv)", name, params);
+		slave.send_message("call_function", data);
 	}
 	
 	private void start_master()

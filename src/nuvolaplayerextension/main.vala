@@ -42,6 +42,7 @@ public class WebExtension: GLib.Object
 		this.extension = extension;
 		this.master = master;
 		this.slave = slave;
+		slave.add_handler("call_function", this, (Diorite.Ipc.MessageHandler) WebExtension.handle_call_function);
 		bridges = new HashTable<unowned WebKit.Frame, FrameBridge>(direct_hash, direct_equal);
 		new Thread<void*>("slave", listen);
 		Thread.yield();
@@ -83,6 +84,28 @@ public class WebExtension: GLib.Object
 		var bridge = new FrameBridge(frame, context);
 		bridges.insert(frame, bridge);
 		js_api.inject(bridge);
+	}
+	
+	private bool handle_call_function(Diorite.Ipc.MessageServer server, Variant request, out Variant? response)
+	{
+		string name = null;
+		Variant? data = null;
+		request.get("(smv)", &name, &data);
+		debug("call method %s %s", name, (data != null ? data.get_type_string() : "[null]"));
+		var envs = bridges.get_values();
+		foreach (var env in envs)
+		{
+			try
+			{
+				env.call_function_variant(name, data);
+			}
+			catch (JSError e)
+			{
+				warning("Error during call of %s: %s", name, e.message);
+			}
+		}
+		response = null;
+		return true;
 	}
 }
 

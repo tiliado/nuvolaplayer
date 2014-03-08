@@ -266,4 +266,27 @@ public unowned JS.Value get_gobject_property(JS.Context ctx, GLib.Object o, Para
 	return JS.Value.undefined(ctx);
 }
 
+public unowned JS.Value value_from_variant(JS.Context ctx, Variant variant) throws JSError
+{
+	if (variant.is_container())
+		throw new JSError.WRONG_TYPE("Unsupported type '%s'.", variant.get_type_string());
+	
+	if (variant.is_of_type(VariantType.STRING))
+		return JS.Value.string(ctx, new JS.String(variant.get_string()));
+	
+	if (variant.is_of_type(VariantType.BOOLEAN))
+		return JS.Value.boolean(ctx, variant.get_boolean());
+		
+	if (variant.is_of_type(VariantType.DOUBLE))
+		return JS.Value.number(ctx, variant.get_double());
+	
+	if (variant.is_of_type(VariantType.INT32))
+		return JS.Value.number(ctx, (double) variant.get_int32());
+	
+	if (variant.is_of_type(VariantType.UINT32))
+		return JS.Value.number(ctx, (double) variant.get_uint32());
+	
+	throw new JSError.WRONG_TYPE("Unsupported type '%s'.", variant.get_type_string());
+}
+
 } // namespace Nuvola.JSTools
