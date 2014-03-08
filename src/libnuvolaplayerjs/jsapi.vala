@@ -79,7 +79,7 @@ public class JSApi : GLib.Object
 	/**
 	 * Name of file with integration script.
 	 */
-	private static const string INTEGRATION_FILENAME = "integration.js";
+	private static const string INTEGRATE_JS = "integrate.js";
 	/**
 	 * Name of file with settings script.
 	 */
@@ -187,6 +187,22 @@ public class JSApi : GLib.Object
 		catch (JSError e)
 		{
 			throw new JSError.INITIALIZATION_FAILED("Failed to initialize a web app component init.js located at '%s'. Initialization exited with error:\n\n%s", init_js.get_path(), e.message);
+		}
+	}
+	
+	public void integrate(JsEnvironment env) throws JSError
+	{
+		var integrate_js = data_dir.get_child(INTEGRATE_JS);
+		if (!integrate_js.query_exists())
+			throw new JSError.INITIALIZATION_FAILED("Failed to find a web app component %s. This probably means the web app integration has not been installed correctly or that component has been accidentally deleted.", INTEGRATE_JS);
+		
+		try
+		{
+			env.execute_script_from_file(integrate_js);
+		}
+		catch (JSError e)
+		{
+			throw new JSError.INITIALIZATION_FAILED("Failed to initialize a web app component %s located at '%s'. Initialization exited with error:\n\n%s", INTEGRATE_JS, integrate_js.get_path(), e.message);
 		}
 	}
 	

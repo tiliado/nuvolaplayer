@@ -87,6 +87,7 @@ public class WebExtension: GLib.Object
 		try
 		{
 			js_api.inject(bridge);
+			js_api.integrate(bridge);
 		}
 		catch (JSError e)
 		{
