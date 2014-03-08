@@ -41,6 +41,7 @@ public class WebEngine : GLib.Object
 	private Diorite.Ipc.MessageClient slave = null;
 	private static const string MASTER_SUFFIX = ".master";
 	private static const string SLAVE_SUFFIX = ".slave";
+	private string[] app_errors;
 	
 	public WebEngine(WebAppController app, WebApp web_app)
 	{
@@ -61,6 +62,7 @@ public class WebEngine : GLib.Object
 		ws.enable_page_cache = false;
 		ws.enable_smooth_scrolling = true;
 		ws.enable_write_console_messages_to_stdout = true;
+		app_errors = {};
 	}
 	
 	private bool inject_api()
@@ -125,6 +127,7 @@ public class WebEngine : GLib.Object
 		master = new Diorite.Ipc.MessageServer(app.path_name + MASTER_SUFFIX);
 		master.add_handler("get_data_dir", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_get_data_dir);
 		master.add_handler("get_config_dir", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_get_config_dir);
+		master.add_handler("show_error", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_show_error);
 		new Thread<void*>(app.path_name, listen);
 		slave = new Diorite.Ipc.MessageClient(app.path_name + SLAVE_SUFFIX, 5000);
 	}
@@ -152,6 +155,28 @@ public class WebEngine : GLib.Object
 	{
 		response = new Variant.string(web_app.config_dir.get_path());
 		return true;
+	}
+	
+	private bool handle_show_error(Diorite.Ipc.MessageServer server, Variant request, out Variant? response)
+	{
+		response = null;
+		lock (app_errors)
+		{
+			app_errors += request.get_string();
+		}
+		Idle.add(show_app_errors_cb);
+		return true;
+	}
+	
+	private bool show_app_errors_cb()
+	{
+		lock (app_errors)
+		{
+			foreach (var message in app_errors)
+				app.show_error("Integration error", message);
+			app_errors = {};
+		}
+		return false;
 	}
 }
 

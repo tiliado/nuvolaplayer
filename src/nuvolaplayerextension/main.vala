@@ -56,7 +56,8 @@ public class WebExtension: GLib.Object
 		}
 		catch (Diorite.Ipc.MessageError e)
 		{
-			warning("Master client error: %s", e.message);
+			critical("Master client error: %s", e.message);
+			return;
 		}
 		var storage = new Diorite.XdgStorage.for_project(Nuvola.get_appname());
 		js_api = new JSApi(storage, data_dir, config_dir);
@@ -83,7 +84,14 @@ public class WebExtension: GLib.Object
 		debug("Window object cleared: %s, %p, %p, %p", frame.get_uri(), frame, page, context);
 		var bridge = new FrameBridge(frame, context);
 		bridges.insert(frame, bridge);
-		js_api.inject(bridge);
+		try
+		{
+			js_api.inject(bridge);
+		}
+		catch (JSError e)
+		{
+			show_error("Failed to inject JavaScript API. %s".printf(e.message));
+		}
 	}
 	
 	private bool handle_call_function(Diorite.Ipc.MessageServer server, Variant request, out Variant? response)
@@ -106,6 +114,18 @@ public class WebExtension: GLib.Object
 		}
 		response = null;
 		return true;
+	}
+	
+	private void show_error(string message)
+	{
+		try
+		{
+			master.send_message("show_error", new Variant.string(message));
+		}
+		catch (Diorite.Ipc.MessageError e)
+		{
+			critical("Failed to send error message '%s'. %s", message, e.message);
+		}
 	}
 }
 
