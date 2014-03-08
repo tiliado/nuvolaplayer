@@ -47,11 +47,20 @@ public class WebEngine : GLib.Object
 		var webkit_extension_dir = Environment.get_variable("NUVOLA_WEBKIT_EXTENSION_DIR") ?? WEBKIT_EXTENSION_DIR;
 		Environment.set_variable("NUVOLA_IPC_MASTER", app.path_name + MASTER_SUFFIX, true);
 		Environment.set_variable("NUVOLA_IPC_SLAVE", app.path_name + SLAVE_SUFFIX, true);
-		WebKit.WebContext.get_default().set_web_extensions_directory(webkit_extension_dir);
 		debug("Nuvola WebKit Extension directory: %s", webkit_extension_dir);
+		var wc = WebKit.WebContext.get_default();
+		wc.set_web_extensions_directory(webkit_extension_dir);
+		wc.set_cache_model(WebKit.CacheModel.DOCUMENT_VIEWER);
+		
 		this.app = app;
 		this.web_app = web_app;
 		this.web_view = new WebKit.WebView();
+		var ws = web_view.get_settings();
+		ws.enable_developer_extras = true;
+		ws.enable_java = false;
+		ws.enable_page_cache = false;
+		ws.enable_smooth_scrolling = true;
+		ws.enable_write_console_messages_to_stdout = true;
 	}
 	
 	private bool inject_api()
