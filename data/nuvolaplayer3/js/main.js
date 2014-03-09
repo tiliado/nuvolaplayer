@@ -86,4 +86,17 @@ Nuvola.makeSignaling = function(obj_proto)
 Nuvola.makeSignaling(Nuvola);
 Nuvola.registerSignals(["home-page"]);
 
+Nuvola.Notification =
+{
+	update: function(title, text, iconName, iconURL)
+	{
+		Nuvola.sendMessage("Nuvola.Notification.update", title, text, iconName || "", iconURL || "");
+	},
+	
+	show: function()
+	{
+		Nuvola.sendMessage("Nuvola.Notification.show");
+	},
+}
+
 })(this);  // function(Nuvola)

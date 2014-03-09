@@ -289,4 +289,18 @@ public unowned JS.Value value_from_variant(JS.Context ctx, Variant variant) thro
 	throw new JSError.WRONG_TYPE("Unsupported type '%s'.", variant.get_type_string());
 }
 
+public Variant variant_from_value(JS.Context ctx, JS.Value val) throws JSError
+{
+	if (val.is_string(ctx))
+		return new Variant.string(utf8_string(val.to_jsstring(ctx)));
+	
+	if (val.is_number(ctx))
+		return new Variant.double(val.to_number(ctx));
+	
+	if (val.is_boolean(ctx))
+		return new Variant.boolean(val.to_boolean(ctx));
+	
+	throw new JSError.WRONG_TYPE("Unsupported type.");
+}
+
 } // namespace Nuvola.JSTools

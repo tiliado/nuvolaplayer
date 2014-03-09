@@ -42,6 +42,7 @@ public class WebEngine : GLib.Object
 	private static const string MASTER_SUFFIX = ".master";
 	private static const string SLAVE_SUFFIX = ".slave";
 	private string[] app_errors;
+	private Variant[] received_messages;
 	
 	public WebEngine(WebAppController app, WebApp web_app)
 	{
@@ -63,6 +64,12 @@ public class WebEngine : GLib.Object
 		ws.enable_smooth_scrolling = true;
 		ws.enable_write_console_messages_to_stdout = true;
 		app_errors = {};
+		received_messages = {};
+	}
+	
+	public virtual signal void message_received(string name, Variant? data)
+	{
+		debug("Message received from JSApi: %s:%s", name, data == null ? "null" : data.get_type_string());
 	}
 	
 	private bool inject_api()
@@ -128,6 +135,7 @@ public class WebEngine : GLib.Object
 		master.add_handler("get_data_dir", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_get_data_dir);
 		master.add_handler("get_config_dir", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_get_config_dir);
 		master.add_handler("show_error", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_show_error);
+		master.add_handler("send_message", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_send_message);
 		new Thread<void*>(app.path_name, listen);
 		slave = new Diorite.Ipc.MessageClient(app.path_name + SLAVE_SUFFIX, 5000);
 	}
@@ -175,6 +183,33 @@ public class WebEngine : GLib.Object
 			foreach (var message in app_errors)
 				app.show_error("Integration error", message);
 			app_errors = {};
+		}
+		return false;
+	}
+	
+	private bool handle_send_message(Diorite.Ipc.MessageServer server, Variant request, out Variant? response)
+	{
+		response = null;
+		lock (received_messages)
+		{
+			received_messages += request;
+		}
+		Idle.add(message_received_cb);
+		return true;
+	}
+	
+	private bool message_received_cb()
+	{
+		lock (received_messages)
+		{
+			foreach (var message in received_messages)
+			{
+				string name = null;
+				Variant? data = null;
+				message.get("(smv)", &name, &data);
+				message_received(name, data);
+			}
+			received_messages = {};
 		}
 		return false;
 	}

@@ -61,6 +61,7 @@ public class WebExtension: GLib.Object
 		}
 		var storage = new Diorite.XdgStorage.for_project(Nuvola.get_appname());
 		js_api = new JSApi(storage, data_dir, config_dir);
+		js_api.send_message.connect(on_send_message);
 		WebKit.ScriptWorld.get_default().window_object_cleared.connect(on_window_object_cleared);
 	}
 	
@@ -128,6 +129,19 @@ public class WebExtension: GLib.Object
 			critical("Failed to send error message '%s'. %s", message, e.message);
 		}
 	}
+	
+	private void on_send_message(string name, Variant? data)
+	{
+		try
+		{
+			master.send_message("send_message", new Variant("(smv)", name, data));
+		}
+		catch (Diorite.Ipc.MessageError e)
+		{
+			critical("Failed to send message '%s'. %s", name, e.message);
+		}
+	}
+	
 }
 
 public void on_web_page_created(WebKit.WebExtension extension, WebKit.WebPage web_page)

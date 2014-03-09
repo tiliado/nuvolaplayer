@@ -111,6 +111,8 @@ public class JSApi : GLib.Object
 		this.config_dir = config_dir;
 	}
 	
+	public signal void send_message(string name, Variant? data);
+	
 	/**
 	 * Creates the main object and injects it to the JavaScript context
 	 * 
@@ -121,7 +123,7 @@ public class JSApi : GLib.Object
 		unowned JS.Context ctx = env.context;
 		if (klass == null)
 			create_class();
-		unowned JS.Object main_object = ctx.make_object(klass, null);
+		unowned JS.Object main_object = ctx.make_object(klass, this);
 		main_object.protect(ctx);
 		
 		o_set_number(ctx, main_object, "API_VERSION_MAJOR", (double)API_VERSION_MAJOR);
@@ -212,6 +214,7 @@ public class JSApi : GLib.Object
 	 */
 	private static const JS.StaticFunction[] static_functions =
 	{
+		{"sendMessage", send_message_func, 0},
 		{null, null, 0}
 	};
 	
@@ -222,12 +225,12 @@ public class JSApi : GLib.Object
 	{
 		unowned ClassDefinition class_def =
 		{
-		    1,                                        
-		    JS.ClassAttribute.None,                      
-		    "Nuvola JavaScript API",               
-		    null,                                       
-		    null,            
-		    static_functions,         
+		    1,
+		    JS.ClassAttribute.None,
+		    "Nuvola JavaScript API",
+		    null,   
+		    null,
+		    static_functions,
 		    null, 
 		    null, 
 		    null, 
@@ -242,6 +245,54 @@ public class JSApi : GLib.Object
 		};
 		klass = JS.create_class(class_def);
 		klass.retain();
+	}
+	
+	static unowned JS.Value send_message_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)
+	{
+		unowned JS.Value undefined = JS.Value.undefined(ctx);
+		exception = null;
+		if (args.length == 0)
+		{
+			exception = create_exception(ctx, "At least one argument required.");
+			return undefined;
+		}
+		
+		var name = string_or_null(ctx, args[0]);
+		if (name == null)
+		{
+			exception = create_exception(ctx, "The first argument must be a non-null string");
+			return undefined;
+		}
+		
+		var js_api = (self.get_private() as JSApi);
+		if (js_api == null)
+		{
+			exception = create_exception(ctx, "JSApi is null");
+			return undefined;
+		}
+		
+		if (args.length == 1)
+		{
+			js_api.send_message(name, null);
+			return undefined;
+		}
+		
+		Variant[] tuple = new Variant[args.length - 1];
+		for (var i = 1; i < args.length; i++)
+		{
+			try
+			{
+				tuple[i - 1] = variant_from_value(ctx, args[i]);
+			}
+			catch (JSError e)
+			{
+				exception = create_exception(ctx, "Argument %d: %s".printf(i, e.message));
+				return undefined;
+			}
+		}
+	
+		js_api.send_message(name, new Variant.tuple(tuple));
+		return undefined;
 	}
 }
 
