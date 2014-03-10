@@ -25,6 +25,15 @@
 namespace Nuvola
 {
 
+namespace ConfigKey
+{
+	public const string WINDOW_X = "nuvola.window.x";
+	public const string WINDOW_Y = "nuvola.window.y";
+	public const string WINDOW_WIDTH = "nuvola.window.width";
+	public const string WINDOW_HEIGHT = "nuvola.window.height";
+	public const string WINDOW_MAXIMIZED = "nuvola.window.maximized";
+}
+
 public class WebAppController : Diorite.Application
 {
 	public WebAppWindow? main_window {get; private set; default = null;}
@@ -34,6 +43,8 @@ public class WebAppController : Diorite.Application
 	public WebEngine web_engine {get; private set;}
 	public weak Gtk.Settings gtk_settings {get; private set;}
 	public Config config {get; private set;}
+	private static const int MINIMAL_REMEMBERED_WINDOW_SIZE = 300;
+	private uint configure_event_cb_id = 0;
 	
 	public WebAppController(Diorite.Storage? storage, WebApp web_app)
 	{
@@ -69,7 +80,22 @@ public class WebAppController : Diorite.Application
 		if (!web_engine.load())
 			return;
 		main_window.grid.add(widget);
+		
+		int x = (int) config.get_int(ConfigKey.WINDOW_X, -1);
+		int y = (int) config.get_int(ConfigKey.WINDOW_Y, -1);
+		if (x >= 0 && y >= 0)
+			main_window.move(x, y);
+			
+		int w = (int) config.get_int(ConfigKey.WINDOW_WIDTH);
+		int h = (int) config.get_int(ConfigKey.WINDOW_HEIGHT);
+		main_window.resize(w > MINIMAL_REMEMBERED_WINDOW_SIZE ? w: 1010, h > MINIMAL_REMEMBERED_WINDOW_SIZE ? h : 600);
+		
+		if (config.get_bool(ConfigKey.WINDOW_MAXIMIZED, false))
+			main_window.maximize();
+		
 		main_window.show_all();
+		main_window.window_state_event.connect(on_window_state_event);
+		main_window.configure_event.connect(on_configure_event);
 	}
 	
 	private void on_fatal_error(string title, string message)
@@ -84,6 +110,42 @@ public class WebAppController : Diorite.Application
 		var dialog = new Diorite.ErrorDialog(title, message + "\n\nThe application might not function properly.");
 		dialog.run();
 		dialog.destroy();
+	}
+	
+	private bool on_window_state_event(Gdk.EventWindowState event)
+	{
+		bool m = (event.new_window_state & Gdk.WindowState.MAXIMIZED) != 0;
+		config.set_bool(ConfigKey.WINDOW_MAXIMIZED, m);
+		config.save();
+		return false;
+	} 
+	
+	private bool on_configure_event(Gdk.EventConfigure event)
+	{
+		if (configure_event_cb_id != 0)
+			Source.remove(configure_event_cb_id);
+		configure_event_cb_id = Timeout.add(200, on_configure_event_cb);
+		return false;
+	}
+	
+	private bool on_configure_event_cb()
+	{
+		configure_event_cb_id = 0;
+		if (!main_window.maximized)
+		{
+			int x;
+			int y;
+			int width;
+			int height;
+			main_window.get_position (out x, out y);
+			main_window.get_size(out width, out height);
+			config.set_int(ConfigKey.WINDOW_X, (int64) x);
+			config.set_int(ConfigKey.WINDOW_Y, (int64) y);
+			config.set_int(ConfigKey.WINDOW_WIDTH, (int64) width);
+			config.set_int(ConfigKey.WINDOW_HEIGHT, (int64) height);
+			config.save();
+		}
+		return false;
 	}
 }
 

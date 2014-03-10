@@ -28,10 +28,12 @@ namespace Nuvola
 public class WebAppWindow : Gtk.ApplicationWindow
 {
 	public Gtk.Grid grid {get; private set;}
+	public bool maximized {get; private set; default = false;}
 	private WebAppController app;
 	
 	public WebAppWindow(WebAppController app)
 	{
+		window_state_event.connect(on_window_state_event);
 		title = app.app_name;
 		try
 		{
@@ -49,6 +51,12 @@ public class WebAppWindow : Gtk.ApplicationWindow
 		grid = new Gtk.Grid();
 		grid.orientation = Gtk.Orientation.VERTICAL;
 		add(grid);
+	}
+	
+	private bool on_window_state_event(Gdk.EventWindowState event)
+	{
+		maximized = (event.new_window_state & Gdk.WindowState.MAXIMIZED) != 0;
+		return false;
 	}
 
 }
