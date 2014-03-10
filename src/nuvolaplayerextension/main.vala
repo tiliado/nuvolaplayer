@@ -34,7 +34,7 @@ public class WebExtension: GLib.Object
 	private Diorite.Ipc.MessageServer slave;
 	private HashTable<unowned WebKit.Frame, FrameBridge> bridges;
 	private File data_dir;
-	private File config_dir;
+	private File user_config_dir;
 	private JSApi js_api;
 	
 	public WebExtension(WebKit.WebExtension extension, Diorite.Ipc.MessageClient master, Diorite.Ipc.MessageServer slave)
@@ -51,8 +51,8 @@ public class WebExtension: GLib.Object
 		{
 			response = master.send_message("get_data_dir", new Variant.byte(0));
 			data_dir = File.new_for_path(response.get_string());
-			response = master.send_message("get_config_dir", new Variant.byte(0));
-			config_dir = File.new_for_path(response.get_string());
+			response = master.send_message("get_user_config_dir", new Variant.byte(0));
+			user_config_dir = File.new_for_path(response.get_string());
 		}
 		catch (Diorite.Ipc.MessageError e)
 		{
@@ -60,7 +60,7 @@ public class WebExtension: GLib.Object
 			return;
 		}
 		var storage = new Diorite.XdgStorage.for_project(Nuvola.get_appname());
-		js_api = new JSApi(storage, data_dir, config_dir);
+		js_api = new JSApi(storage, data_dir, user_config_dir);
 		js_api.send_message.connect(on_send_message);
 		WebKit.ScriptWorld.get_default().window_object_cleared.connect(on_window_object_cleared);
 	}

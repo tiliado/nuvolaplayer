@@ -187,8 +187,12 @@ public class WebAppRegistry: GLib.Object
 	public WebApp load_web_app_from_dir(File dir, bool removable=false) throws WebAppError
 	{
 		var meta = load_web_app_meta_from_dir(dir);
-		var config_dir = storage.get_config_path(meta.id);
-		return new WebApp(meta, config_dir, dir, removable);
+		return new WebApp(meta, dir,
+			storage.user_config_dir.get_parent().get_child("apps_data").get_child(meta.id),
+			storage.user_data_dir.get_parent().get_child("apps_data").get_child(meta.id),
+			storage.user_cache_dir.get_parent().get_child("apps_data").get_child(meta.id),
+			removable
+		);
 	}
 	
 	/**

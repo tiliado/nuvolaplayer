@@ -62,7 +62,9 @@ public class WebAppMeta : GLib.Object
 public class WebApp : GLib.Object
 {
 	public WebAppMeta meta {get; construct;}
-	public File config_dir {get; construct;}
+	public File user_config_dir {get; construct;}
+	public File user_data_dir {get; construct;}
+	public File user_cache_dir {get; construct;}
 	public File data_dir {get; construct;}
 	public bool removable {get; construct;}
 	public string? icon
@@ -79,9 +81,9 @@ public class WebApp : GLib.Object
 		}
 	}
 	
-	public WebApp(WebAppMeta meta, File config_dir, File data_dir, bool removable)
+	public WebApp(WebAppMeta meta, File data_dir, File user_config_dir, File user_data_dir, File user_cache_dir, bool removable)
 	{
-		Object(meta: meta, config_dir: config_dir, data_dir: data_dir, removable: removable);
+		Object(meta: meta, user_config_dir: user_config_dir, user_data_dir:user_data_dir, user_cache_dir:user_cache_dir, data_dir: data_dir, removable: removable);
 	}
 
 }

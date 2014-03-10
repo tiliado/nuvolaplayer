@@ -50,9 +50,15 @@ public class WebEngine : GLib.Object
 		Environment.set_variable("NUVOLA_IPC_MASTER", app.path_name + MASTER_SUFFIX, true);
 		Environment.set_variable("NUVOLA_IPC_SLAVE", app.path_name + SLAVE_SUFFIX, true);
 		debug("Nuvola WebKit Extension directory: %s", webkit_extension_dir);
+		
 		var wc = WebKit.WebContext.get_default();
 		wc.set_web_extensions_directory(webkit_extension_dir);
 		wc.set_cache_model(WebKit.CacheModel.DOCUMENT_VIEWER);
+		wc.set_favicon_database_directory(web_app.user_data_dir.get_child("favicons").get_path());
+		wc.set_disk_cache_directory(web_app.user_cache_dir.get_child("webcache").get_path());
+		
+		var cm = wc.get_cookie_manager();
+		cm.set_persistent_storage(web_app.user_data_dir.get_child("cookies.dat").get_path(), WebKit.CookiePersistentStorage.SQLITE);
 		
 		this.app = app;
 		this.web_app = web_app;
@@ -78,7 +84,7 @@ public class WebEngine : GLib.Object
 			return true;
 		
 		env = new JsRuntime();
-		api = new JSApi(app.storage, web_app.data_dir, web_app.config_dir);
+		api = new JSApi(app.storage, web_app.data_dir, web_app.user_config_dir);
 		try
 		{
 			api.inject(env);
@@ -133,7 +139,7 @@ public class WebEngine : GLib.Object
 		
 		master = new Diorite.Ipc.MessageServer(app.path_name + MASTER_SUFFIX);
 		master.add_handler("get_data_dir", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_get_data_dir);
-		master.add_handler("get_config_dir", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_get_config_dir);
+		master.add_handler("get_user_config_dir", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_get_user_config_dir);
 		master.add_handler("show_error", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_show_error);
 		master.add_handler("send_message", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_send_message);
 		new Thread<void*>(app.path_name, listen);
@@ -159,9 +165,9 @@ public class WebEngine : GLib.Object
 		return true;
 	}
 	
-	private bool handle_get_config_dir(Diorite.Ipc.MessageServer server, Variant request, out Variant? response)
+	private bool handle_get_user_config_dir(Diorite.Ipc.MessageServer server, Variant request, out Variant? response)
 	{
-		response = new Variant.string(web_app.config_dir.get_path());
+		response = new Variant.string(web_app.user_config_dir.get_path());
 		return true;
 	}
 	
