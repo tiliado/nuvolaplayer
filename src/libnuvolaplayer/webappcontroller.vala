@@ -33,6 +33,7 @@ public class WebAppController : Diorite.Application
 	public WebApp web_app {get; private set;}
 	public WebEngine web_engine {get; private set;}
 	public weak Gtk.Settings gtk_settings {get; private set;}
+	public Config config {get; private set;}
 	
 	public WebAppController(Diorite.Storage? storage, WebApp web_app)
 	{
@@ -57,11 +58,12 @@ public class WebAppController : Diorite.Application
 	private void start()
 	{
 		gtk_settings = Gtk.Settings.get_default();
+		config = new Config(web_app.user_config_dir.get_child("config.json"));
 		actions = new Diorite.ActionsRegistry(this, null);
 		main_window = new WebAppWindow(this);
 		fatal_error.connect(on_fatal_error);
 		show_error.connect(on_show_error);
-		web_engine = new WebEngine(this, web_app);
+		web_engine = new WebEngine(this, web_app, config);
 		var widget = web_engine.widget;
 		widget.hexpand = widget.vexpand = true;
 		if (!web_engine.load())

@@ -43,8 +43,9 @@ public class WebEngine : GLib.Object
 	private static const string SLAVE_SUFFIX = ".slave";
 	private string[] app_errors;
 	private Variant[] received_messages;
+	private Config config;
 	
-	public WebEngine(WebAppController app, WebApp web_app)
+	public WebEngine(WebAppController app, WebApp web_app, Config config)
 	{
 		var webkit_extension_dir = Environment.get_variable("NUVOLA_WEBKIT_EXTENSION_DIR") ?? WEBKIT_EXTENSION_DIR;
 		Environment.set_variable("NUVOLA_IPC_MASTER", app.path_name + MASTER_SUFFIX, true);
@@ -62,6 +63,7 @@ public class WebEngine : GLib.Object
 		
 		this.app = app;
 		this.web_app = web_app;
+		this.config = config;
 		this.web_view = new WebKit.WebView();
 		var ws = web_view.get_settings();
 		ws.enable_developer_extras = true;
