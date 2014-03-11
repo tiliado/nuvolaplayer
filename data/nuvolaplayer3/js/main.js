@@ -99,4 +99,22 @@ Nuvola.Notification =
 	},
 }
 
+Nuvola.TrayIcon =
+{
+	setTooltip: function(tooltip)
+	{
+		Nuvola.sendMessage("Nuvola.TrayIcon.setTooltip", tooltip || "");
+	},
+	
+	addAction: function(action)
+	{
+		Nuvola.sendMessage("Nuvola.TrayIcon.addAction", action || "");
+	},
+	
+	clearActions: function()
+	{
+		Nuvola.sendMessage("Nuvola.TrayIcon.clearActions");
+	},
+}
+
 })(this);  // function(Nuvola)

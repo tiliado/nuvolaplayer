@@ -72,6 +72,7 @@ public class WebAppController : Diorite.Application
 		gtk_settings = Gtk.Settings.get_default();
 		config = new Config(web_app.user_config_dir.get_child("config.json"));
 		actions = new Diorite.ActionsRegistry(this, null);
+		append_actions();
 		main_window = new WebAppWindow(this);
 		fatal_error.connect(on_fatal_error);
 		show_error.connect(on_show_error);
@@ -98,6 +99,21 @@ public class WebAppController : Diorite.Application
 		main_window.window_state_event.connect(on_window_state_event);
 		main_window.configure_event.connect(on_configure_event);
 		load_extensions();
+	}
+	
+	private void append_actions()
+	{
+		Diorite.Action[] actions_spec = {
+		//          Action(group, scope, name, label?, mnemo_label?, icon?, keybinding?, callback?)
+		new Diorite.Action("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit)
+		};
+		actions.add_actions(actions_spec);
+		
+	}
+	
+	private void do_quit()
+	{
+		quit();
 	}
 	
 	private void load_extensions()
