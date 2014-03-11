@@ -29,6 +29,6 @@ Nuvola.Notification.update("Hello world", "Sent from Google Play", "nuvolaplayer
 Nuvola.Notification.show();
 
 Nuvola.TrayIcon.setTooltip("Hello from Google Play!");
-Nuvola.TrayIcon.addAction("quit");
+Nuvola.TrayIcon.setActions(["quit", "quit"]);
 
 })(this);  // function(Nuvola)

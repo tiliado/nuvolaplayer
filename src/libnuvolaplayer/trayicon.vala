@@ -80,9 +80,9 @@ public class Extension: Nuvola.Extension
 		actions = {};
 	}
 	
-	public void add_action(string action)
+	public void set_actions(string[] actions)
 	{
-		actions += action;
+		this.actions = actions;
 	}
 	
 	/**
@@ -122,13 +122,18 @@ public class Extension: Nuvola.Extension
 			}
 			engine.message_handled();
 		}
-		else if (name == "Nuvola.TrayIcon.addAction")
+		else if (name == "Nuvola.TrayIcon.setActions")
 		{
-			string action = null;
-			if (data != null)
+			if (data != null && data.is_container())
 			{
-				data.get("(s)", &action);
-				add_action(action);
+				string[] actions = new string[data.n_children()];
+				int i = 0;
+				VariantIter iter = null;
+				data.get("(av)", &iter);
+				Variant item = null;
+				while (iter.next("v", &item))
+					actions[i++] = item.get_string();
+				set_actions((owned) actions);
 			}
 			engine.message_handled();
 		}

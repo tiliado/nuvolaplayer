@@ -106,14 +106,9 @@ Nuvola.TrayIcon =
 		Nuvola.sendMessage("Nuvola.TrayIcon.setTooltip", tooltip || "");
 	},
 	
-	addAction: function(action)
+	setActions: function(actions)
 	{
-		Nuvola.sendMessage("Nuvola.TrayIcon.addAction", action || "");
-	},
-	
-	clearActions: function()
-	{
-		Nuvola.sendMessage("Nuvola.TrayIcon.clearActions");
+		Nuvola.sendMessage("Nuvola.TrayIcon.setActions", actions);
 	},
 }
 

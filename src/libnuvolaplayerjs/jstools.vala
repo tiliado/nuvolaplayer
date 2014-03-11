@@ -291,6 +291,7 @@ public unowned JS.Value value_from_variant(JS.Context ctx, Variant variant) thro
 
 public Variant variant_from_value(JS.Context ctx, JS.Value val) throws JSError
 {
+	
 	if (val.is_string(ctx))
 		return new Variant.string(utf8_string(val.to_jsstring(ctx)));
 	
@@ -299,6 +300,25 @@ public Variant variant_from_value(JS.Context ctx, JS.Value val) throws JSError
 	
 	if (val.is_boolean(ctx))
 		return new Variant.boolean(val.to_boolean(ctx));
+	
+	unowned JS.Object glob_object = ctx.get_global_object();
+	unowned JS.Object object = o_get_object(ctx, glob_object, "Array");
+	object = o_get_object(ctx, object, "isArray");
+	void*[] params = new void*[1];
+	params[0] = (void*) val;
+	JS.Value? exception;
+	unowned JS.Value result = object.call_as_function(ctx, glob_object, (JS.Value[]) params,  out exception);
+	if (exception != null)
+		throw new JSError.WRONG_TYPE("Unsupported type. %s", exception_to_string(ctx, exception) ?? "(null)");
+	if (result.to_boolean(ctx))
+	{
+		VariantBuilder builder = new VariantBuilder(new VariantType ("av"));
+		object = (JS.Object) val;
+		int size = (int) o_get_number(ctx, object, "length");
+		for (uint i = 0; i < size; i++)
+			builder.add("v",  variant_from_value(ctx, object.get_property_at_index(ctx, i)));
+		return builder.end();
+	}
 	
 	throw new JSError.WRONG_TYPE("Unsupported type.");
 }

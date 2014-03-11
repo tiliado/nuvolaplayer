@@ -104,11 +104,11 @@ namespace JS{
 		[CCode (cname = "JSObjectSetPrivate")]
 		public bool set_private (void *data);
 		[CCode (cname = "JSObjectGetProperty", instance_pos=1.1)]
-		public unowned JS.Value get_property(Context ctx, JS.String propertyName,
-		                                          out JS.Object exception=null);
+		public unowned JS.Value get_property(Context ctx, JS.String propertyName, out JS.Object exception=null);
+		[CCode (cname = "JSObjectGetPropertyAtIndex", instance_pos=1.1)]
+		public unowned JS.Value get_property_at_index(Context ctx, uint propertyIndex, out JS.Object exception=null);
 		[CCode(cname = "JSObjectSetProperty", instance_pos = 1.9)]
 		public void set_property(Context ctx, JS.String property_name, JS.Value value, PropertyAttribute attributes = 0, out JS.Object exception = null);
-		
 		[CCode(cname = "JSObjectGetPrototype", instance_pos = 1.9)]
 		public unowned JS.Value get_prototype(Context ctx);
 		[CCode(cname = "JSObjectIsFunction", instance_pos = 1.9)]
