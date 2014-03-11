@@ -81,6 +81,9 @@ public class WebExtension: GLib.Object
 	
 	private void on_window_object_cleared(WebKit.ScriptWorld world, WebKit.WebPage page, WebKit.Frame frame)
 	{
+		if (!frame.is_main_frame())
+			return; // TODO: Add api not to ignore non-main frames
+		
 		unowned JS.GlobalContext context = frame.get_javascript_context_for_script_world(world);
 		debug("Window object cleared: %s, %p, %p, %p", frame.get_uri(), frame, page, context);
 		var bridge = new FrameBridge(frame, context);
