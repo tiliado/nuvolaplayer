@@ -43,6 +43,7 @@ public class WebAppController : Diorite.Application
 	public WebEngine web_engine {get; private set;}
 	public weak Gtk.Settings gtk_settings {get; private set;}
 	public Config config {get; private set;}
+	public ExtensionsManager extensions {get; private set;}
 	private static const int MINIMAL_REMEMBERED_WINDOW_SIZE = 300;
 	private uint configure_event_cb_id = 0;
 	
@@ -96,6 +97,16 @@ public class WebAppController : Diorite.Application
 		main_window.show_all();
 		main_window.window_state_event.connect(on_window_state_event);
 		main_window.configure_event.connect(on_configure_event);
+		load_extensions();
+	}
+	
+	private void load_extensions()
+	{
+		extensions = new ExtensionsManager(this);
+		var available_extensions = extensions.available_extensions;
+		foreach (var key in available_extensions.get_keys())
+			if (config.get_bool(ConfigKey.EXTENSION_ENABLED.printf(key), available_extensions.lookup(key).autoload))
+				extensions.load(key);
 	}
 	
 	private void on_fatal_error(string title, string message)
