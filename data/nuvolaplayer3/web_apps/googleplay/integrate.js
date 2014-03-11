@@ -25,7 +25,7 @@
 (function(Nuvola)
 {
 
-Nuvola.Notification.update("Title", "Text", null, "http://icon.png");
+Nuvola.Notification.update("Hello world", "Sent from Google Play", "nuvolaplayer", null);
 Nuvola.Notification.show();
 
 })(this);  // function(Nuvola)

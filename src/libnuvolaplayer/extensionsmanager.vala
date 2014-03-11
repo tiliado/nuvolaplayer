@@ -139,6 +139,7 @@ public class ExtensionsManager
 		
 		// Built-in extensions
 		available_extensions.insert("sample", Nuvola.Extensions.Sample.get_info());
+		available_extensions.insert("notifications", Nuvola.Extensions.Notifications.get_info());
 	}
 }
 

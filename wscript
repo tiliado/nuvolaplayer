@@ -157,6 +157,7 @@ def configure(ctx):
 	ctx.check_dep('libarchive', 'LIBARCHIVE', '3.1')
 	ctx.check_dep('webkit2gtk-3.0', 'WEBKIT', '2.2')
 	ctx.check_dep('javascriptcoregtk-3.0', 'JSCORE', '1.8')
+	ctx.check_dep('libnotify', 'NOTIFY', '0.7')
 	
 	ctx.define("NUVOLA_APPNAME", APPNAME + SUFFIX)
 	ctx.define("NUVOLA_NAME", NAME)
@@ -204,8 +205,8 @@ def build(ctx):
 		target = LIBNUVOLAPLAYER[3:],
 		name = LIBNUVOLAPLAYER,
 		source = ctx.path.ant_glob('src/libnuvolaplayer/*.vala') + ctx.path.ant_glob('src/libnuvolaplayer/*.c'),
-		packages = 'javascriptcoregtk-3.0 webkit2gtk-3.0 libarchive dioritegtk dioriteglib gtk+-3.0 gdk-3.0 posix json-glib-1.0 glib-2.0 gio-2.0',
-		uselib = 'JSCORE WEBKIT LIBARCHIVE DIORITEGTK DIORITEGLIB GTK+ GDK JSON-GLIB GLIB GTHREAD GIO',
+		packages = 'libnotify javascriptcoregtk-3.0 webkit2gtk-3.0 libarchive dioritegtk dioriteglib gtk+-3.0 gdk-3.0 posix json-glib-1.0 glib-2.0 gio-2.0',
+		uselib = 'NOTIFY JSCORE WEBKIT LIBARCHIVE DIORITEGTK DIORITEGLIB GTK+ GDK JSON-GLIB GLIB GTHREAD GIO',
 		use = [LIBNUVOLAPLAYERJS],
 		includes = ["src/libnuvolaplayer"],
 		vala_defines = vala_defines,

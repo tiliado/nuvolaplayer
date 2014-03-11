@@ -30,6 +30,8 @@ public abstract class Nuvola.Extension : GLib.Object
 	[Description(nick = "Id", blurb = "Extension id assigned by extensions manager.")]
 	public string id {get; construct;}
 	
+	public string prefix {owned get {return "extensions.%s.".printf(id);}}
+	
 	[Description(nick = "Preferences", blurb = "Whether the extension has preferences.")]
 	public bool has_preferences {get; protected set; default = false;}
 	

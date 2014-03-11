@@ -134,6 +134,11 @@ public class WebEngine : GLib.Object
 		slave.send_message("call_function", data);
 	}
 	
+	public void message_handled()
+	{
+		Signal.stop_emission_by_name(this, "message-received");
+	}
+	
 	private void start_master()
 	{
 		if (master != null)
