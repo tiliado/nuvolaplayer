@@ -317,6 +317,7 @@ public Variant variant_from_value(JS.Context ctx, JS.Value val) throws JSError
 		int size = (int) o_get_number(ctx, object, "length");
 		for (uint i = 0; i < size; i++)
 			builder.add("v",  variant_from_value(ctx, object.get_property_at_index(ctx, i)));
+		
 		return builder.end();
 	}
 	

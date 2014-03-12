@@ -25,10 +25,13 @@
 (function(Nuvola)
 {
 
+Nuvola.Actions.addAction("playback", "win", "play", "Play", null, "media-playback-start", null);
+Nuvola.Actions.addAction("playback", "win", "pause", "Pause", null, "media-playback-pause", null);
+
 Nuvola.Notification.update("Hello world", "Sent from Google Play", "nuvolaplayer", null);
 Nuvola.Notification.show();
 
 Nuvola.TrayIcon.setTooltip("Hello from Google Play!");
-Nuvola.TrayIcon.setActions(["quit", "quit"]);
+Nuvola.TrayIcon.setActions(["play", "pause", "quit"]);
 
 })(this);  // function(Nuvola)

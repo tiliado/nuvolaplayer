@@ -166,27 +166,27 @@ public class JsEnvironment: GLib.Object
 		unowned JS.Context ctx = context;
 		string[] names = name.split(".");
 		unowned JS.Object? object = main_object;
-		for (var i = 1; i < names.length; i++)
+		for (var i = 1; i < names.length - 1; i++)
 		{
 			object = o_get_object(ctx, object, names[i]);
 			if (object == null)
 				throw new JSError.NOT_FOUND("Attribute '%s' not found.'", names[i]);
 		}
 		
-		if(!object.is_function(ctx))
+		unowned JS.Object? func = o_get_object(ctx, object, names[names.length - 1]);
+		if (func == null)
+			throw new JSError.NOT_FOUND("Attribute '%s' not found.'", names[names.length - 1]);
+		if (!func.is_function(ctx))
 			throw new JSError.WRONG_TYPE("'%s' is not a function.'", name);
 		
 		assert(args.is_container()); // FIXME
 		void*[] params = new void*[args.n_children()];
 		int i = 0;
 		foreach (var item in args)
-		{
-			debug("Item: %s", item.get_type_string());
 			params[i++] = (void*) value_from_variant(ctx, item);
-		}
 		
 		JS.Value? exception;
-		unowned JS.Value result = object.call_as_function(ctx, main_object, (JS.Value[]) params,  out exception);
+		unowned JS.Value result = func.call_as_function(ctx, object, (JS.Value[]) params,  out exception);
 		if (exception != null)
 			throw new JSError.FUNC_FAILED("Function '%s' failed. %s", name, exception_to_string(ctx, exception) ?? "(null)");
 		return result;

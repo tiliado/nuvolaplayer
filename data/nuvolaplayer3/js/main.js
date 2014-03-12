@@ -112,4 +112,22 @@ Nuvola.TrayIcon =
 	},
 }
 
+Nuvola.Actions =
+{
+	addAction: function(group, scope, name, label, mnemo_label, icon, keybinding)
+	{
+		Nuvola.sendMessage("Nuvola.Actions.addAction", group, scope, name, label || "", mnemo_label || "", icon || "", keybinding || "");
+	},
+	
+	debug: function(arg1, arg2)
+	{
+		console.log(arg1 + ", " + arg2);
+	}
+}
+
+Nuvola.makeSignaling(Nuvola.Actions);
+Nuvola.Actions.registerSignals(["action-activated"]);
+Nuvola.Actions.connect("action-activated", Nuvola.Actions, "debug");
+
+
 })(this);  // function(Nuvola)

@@ -77,6 +77,7 @@ public class WebAppController : Diorite.Application
 		fatal_error.connect(on_fatal_error);
 		show_error.connect(on_show_error);
 		web_engine = new WebEngine(this, web_app, config);
+		web_engine.message_received.connect(on_message_received);
 		var widget = web_engine.widget;
 		widget.hexpand = widget.vexpand = true;
 		if (!web_engine.load())
@@ -173,6 +174,48 @@ public class WebAppController : Diorite.Application
 			config.save();
 		}
 		return false;
+	}
+	
+	private void on_message_received(WebEngine engine, string name, Variant? data)
+	{
+		if (name == "Nuvola.Actions.addAction")
+		{
+			string group = null;
+			string scope = null;
+			string action_name = null;
+			string? label = null;
+			string? mnemo_label = null;
+			string? icon = null;
+			string? keybinding = null;
+			if (data != null)
+			{
+				data.get("(sssssss)", &group, &scope, &action_name, &label, &mnemo_label, &icon, &keybinding);
+				if (label == "")
+					label = null;
+				if (mnemo_label == "")
+					mnemo_label = null;
+				if (icon == "")
+					icon = null;
+				if (keybinding == "")
+					keybinding = null;
+				var action = new Diorite.Action(group, scope, action_name, label, mnemo_label, icon, keybinding, null);
+				action.activated.connect(on_custom_action_activated);
+				actions.add_action(action);
+			}
+			web_engine.message_handled();
+		}
+	}
+	
+	private void on_custom_action_activated(Diorite.Action action, Variant? parameter)
+	{
+		try
+		{
+			web_engine.call_function("Nuvola.Actions.emit", new Variant("(ss)", "action-activated", action.name));
+		}
+		catch (Diorite.Ipc.MessageError e)
+		{
+			warning("Communication failed: %s", e.message);
+		}
 	}
 }
 

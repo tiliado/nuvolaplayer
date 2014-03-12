@@ -126,13 +126,14 @@ public class Extension: Nuvola.Extension
 		{
 			if (data != null && data.is_container())
 			{
-				string[] actions = new string[data.n_children()];
 				int i = 0;
 				VariantIter iter = null;
 				data.get("(av)", &iter);
+				string[] actions = new string[iter.n_children()];
 				Variant item = null;
 				while (iter.next("v", &item))
 					actions[i++] = item.get_string();
+				
 				set_actions((owned) actions);
 			}
 			engine.message_handled();
