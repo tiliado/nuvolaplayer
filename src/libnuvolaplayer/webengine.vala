@@ -106,13 +106,22 @@ public class WebEngine : GLib.Object
 		
 		start_master();
 		
-		unowned JS.Context ctx = env.context;
-		unowned JS.Object result = ctx.make_object();
-		o_set_null(ctx, result, "url");
 		try
 		{
-			env.call_function("emit", 2, ValueType.STRING, "home-page", ValueType.JS_VALUE, result);
-			var url = o_get_string(ctx, result, "url");
+			var builder = new VariantBuilder(new VariantType("a{smv}"));
+			builder.add("{smv}", "url", null);
+			var args = new Variant("(s@a{smv})", "home-page", builder.end());
+			env.call_function("emit", ref args);
+			VariantIter iter = args.iterator();
+			assert(iter.next("s", null));
+			assert(iter.next("a{smv}", &iter));
+			string key = null;
+			Variant value = null;
+			string? url = null;
+			while (iter.next("{smv}", &key, &value))
+				if (key == "url")
+					url = value != null ? value.get_string() : null;
+			
 			if (url == null || url == "")
 				app.show_error("Invalid home page URL", "The web app integration script has not provided a valid home page URL.");
 			else

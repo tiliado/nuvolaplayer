@@ -109,59 +109,7 @@ public class JsEnvironment: GLib.Object
 		return value;
 	}
 	
-	public unowned JS.Value call_function(string name, int argc, ...) throws JSError
-	{
-		unowned JS.Context ctx = context;
-		unowned JS.Object? func = o_get_object(ctx, main_object, name);
-		if (func == null)
-			throw new JSError.NOT_FOUND("Function '%s' not found.'", name);
-	
-		if(!func.is_function(ctx))
-			throw new JSError.WRONG_TYPE("'%s' is not a function.'", name);
-		
-		void*[] params = new void*[argc];
-		var args = va_list();
-		for (var i = 0; i < argc; i++)
-		{
-			ValueType type = args.arg();
-			if (type == ValueType.NULL)
-			{
-				params[i] = (void*) JS.Value.null(ctx);
-			}
-			else if (type == ValueType.JS_VALUE)
-			{
-				unowned JS.Value js_val = args.arg();
-				params[i] = (void*) js_val;
-			}
-			else if (type == ValueType.STRING)
-			{
-				string str_val = args.arg();
-				params[i] = (void*) JS.Value.string(ctx, new JS.String(str_val));
-			}
-			else if (type == ValueType.INT)
-			{
-				int int_val = args.arg();
-				params[i] = (void*) JS.Value.number(ctx, (double) int_val);
-			}
-			else if (type == ValueType.DOUBLE)
-			{
-				double double_val = args.arg();
-				params[i] = (void*) JS.Value.number(ctx, double_val);
-			}
-			else
-			{
-				throw new JSError.WRONG_TYPE("Unsupported type '%s'.", type.to_string());
-			}
-		}
-		
-		JS.Value? exception;
-		unowned JS.Value result = func.call_as_function(ctx, main_object, (JS.Value[]) params,  out exception);
-		if (exception != null)
-			throw new JSError.FUNC_FAILED("Function '%s' failed. %s", name, exception_to_string(ctx, exception) ?? "(null)");
-		return result;
-	}
-	
-	public unowned JS.Value call_function_variant(string name, Variant args) throws JSError
+	public unowned JS.Value call_function(string name, ref Variant args) throws JSError
 	{
 		unowned JS.Context ctx = context;
 		string[] names = name.split(".");
@@ -179,8 +127,10 @@ public class JsEnvironment: GLib.Object
 		if (!func.is_function(ctx))
 			throw new JSError.WRONG_TYPE("'%s' is not a function.'", name);
 		
+//~ 		debug("Args before: %s", args.print(true));
 		assert(args.is_container()); // FIXME
-		void*[] params = new void*[args.n_children()];
+		var size = args.n_children();
+		void*[] params = new void*[size];
 		int i = 0;
 		foreach (var item in args)
 			params[i++] = (void*) value_from_variant(ctx, item);
@@ -189,6 +139,12 @@ public class JsEnvironment: GLib.Object
 		unowned JS.Value result = func.call_as_function(ctx, object, (JS.Value[]) params,  out exception);
 		if (exception != null)
 			throw new JSError.FUNC_FAILED("Function '%s' failed. %s", name, exception_to_string(ctx, exception) ?? "(null)");
+		
+		Variant[] items = new Variant[size];
+		for (i = 0; i < size; i++)
+			items[i] = variant_from_value(ctx, (JS.Value) params[i]);
+		args = new Variant.tuple(items);
+//~ 		debug("Args after: %s", args.print(true));
 		return result;
 	}
 }

@@ -110,7 +110,7 @@ public class WebExtension: GLib.Object
 		{
 			try
 			{
-				env.call_function_variant(name, data);
+				env.call_function(name, ref data);
 			}
 			catch (JSError e)
 			{

@@ -115,6 +115,18 @@ namespace JS{
 		public bool is_function(Context ctx);
 		[CCode(cname = "JSObjectCallAsFunction", instance_pos = 1.9)]
 		public unowned Value call_as_function(Context ctx, void* this_object, [CCode (array_length_pos=2.9, array_length_type="size_t")] Value[] args, out Value exception);
+		[CCode(cname = "JSObjectCopyPropertyNames", instance_pos = 1.9)]
+		public Properties get_properties(Context ctx);
+	}
+	
+	[Compact]
+	[CCode (cname = "struct OpaqueJSPropertyNameArray", free_function = "JSPropertyNameArrayRelease")]
+	public class Properties {
+		public size_t size {get{ return get_count();}}
+		[CCode(cname = "JSPropertyNameArrayGetCount")]
+		public size_t get_count();
+		[CCode(cname = "JSPropertyNameArrayGetNameAtIndex")]
+		public unowned JS.String get(size_t index);
 	}
 	
 	[Compact]

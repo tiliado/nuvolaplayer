@@ -268,8 +268,19 @@ public unowned JS.Value get_gobject_property(JS.Context ctx, GLib.Object o, Para
 
 public unowned JS.Value value_from_variant(JS.Context ctx, Variant variant) throws JSError
 {
-	if (variant.is_container())
-		throw new JSError.WRONG_TYPE("Unsupported type '%s'.", variant.get_type_string());
+	var type = variant.get_type();
+	var object_type = new VariantType("a{s*}");
+	if (type.is_subtype_of(object_type))
+	{
+		unowned JS.Object object = ctx.make_object();
+		VariantIter iter = null;
+		variant.get("a{s*}", &iter);
+		string key = null;
+		Variant value = null;
+		while (iter.next("{s*}", &key, &value))
+			object.set_property(ctx, new JS.String(key), value_from_variant(ctx, value));
+		return object;
+	}
 	
 	if (variant.is_of_type(VariantType.STRING))
 		return JS.Value.string(ctx, new JS.String(variant.get_string()));
@@ -286,12 +297,23 @@ public unowned JS.Value value_from_variant(JS.Context ctx, Variant variant) thro
 	if (variant.is_of_type(VariantType.UINT32))
 		return JS.Value.number(ctx, (double) variant.get_uint32());
 	
+	if (type.is_subtype_of(VariantType.MAYBE))
+	{
+		Variant? maybe_variant = null;
+		variant.get("m*", &maybe_variant);
+		if (maybe_variant == null)
+			return JS.Value.null(ctx);
+		return value_from_variant(ctx, maybe_variant);
+	}
+	
 	throw new JSError.WRONG_TYPE("Unsupported type '%s'.", variant.get_type_string());
 }
 
 public Variant variant_from_value(JS.Context ctx, JS.Value val) throws JSError
 {
-	
+	if (val.is_null(ctx))
+		return new Variant("mv", null);
+		
 	if (val.is_string(ctx))
 		return new Variant.string(utf8_string(val.to_jsstring(ctx)));
 	
@@ -317,6 +339,22 @@ public Variant variant_from_value(JS.Context ctx, JS.Value val) throws JSError
 		int size = (int) o_get_number(ctx, object, "length");
 		for (uint i = 0; i < size; i++)
 			builder.add("v",  variant_from_value(ctx, object.get_property_at_index(ctx, i)));
+		
+		return builder.end();
+	}
+	
+	if (val.is_object(ctx))
+	{
+		object = (JS.Object) val;
+		var properties = object.get_properties(ctx);
+		var size = properties.get_count();
+		var builder = new VariantBuilder(new VariantType("a{smv}"));
+		for (size_t i = 0; i < size; i++)
+		{
+			unowned JS.String js_property = properties.get(i);
+			var value = variant_from_value(ctx, object.get_property(ctx, js_property));
+			builder.add("{smv}", utf8_string(js_property), value);
+		}
 		
 		return builder.end();
 	}
