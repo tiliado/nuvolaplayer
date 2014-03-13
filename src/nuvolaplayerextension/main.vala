@@ -36,6 +36,7 @@ public class WebExtension: GLib.Object
 	private File data_dir;
 	private File user_config_dir;
 	private JSApi js_api;
+	private Variant[] function_calls = {};
 	
 	public WebExtension(WebKit.WebExtension extension, Diorite.Ipc.MessageClient master, Diorite.Ipc.MessageServer slave)
 	{
@@ -101,24 +102,42 @@ public class WebExtension: GLib.Object
 	
 	private bool handle_call_function(Diorite.Ipc.MessageServer server, Variant request, out Variant? response)
 	{
-		string name = null;
-		Variant? data = null;
-		request.get("(smv)", &name, &data);
-		debug("call method %s %s", name, (data != null ? data.get_type_string() : "[null]"));
-		var envs = bridges.get_values();
-		foreach (var env in envs)
+		lock (function_calls)
 		{
-			try
-			{
-				env.call_function(name, ref data);
-			}
-			catch (JSError e)
-			{
-				warning("Error during call of %s: %s", name, e.message);
-			}
+			function_calls += request;
+			
 		}
+		Idle.add(function_call_cb);
 		response = null;
 		return true;
+	}
+	
+	private bool function_call_cb()
+	{
+		lock (function_calls)
+		{
+			foreach (var request in function_calls)
+			{
+				string name = null;
+				Variant? data = null;
+				request.get("(smv)", &name, &data);
+				debug("!!!!! call method %s %s", name, (data != null ? data.get_type_string() : "[null]"));
+				var envs = bridges.get_values();
+				foreach (var env in envs)
+				{
+					try
+					{
+						env.call_function(name, ref data);
+					}
+					catch (JSError e)
+					{
+						warning("Error during call of %s: %s", name, e.message);
+					}
+				}
+			}
+			function_calls = {};
+		}
+		return false;
 	}
 	
 	private void show_error(string message)

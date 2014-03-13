@@ -25,6 +25,8 @@
 (function(Nuvola)
 {
 
+Nuvola.Player.init();
+
 var Initialization = function()
 {
 	Nuvola.connect("home-page", this, "onHomePage");

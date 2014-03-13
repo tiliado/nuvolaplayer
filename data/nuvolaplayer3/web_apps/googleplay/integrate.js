@@ -25,13 +25,11 @@
 (function(Nuvola)
 {
 
-Nuvola.Actions.addAction("playback", "win", "play", "Play", null, "media-playback-start", null);
-Nuvola.Actions.addAction("playback", "win", "pause", "Pause", null, "media-playback-pause", null);
-
-Nuvola.Notification.update("Hello world", "Sent from Google Play", "nuvolaplayer", null);
-Nuvola.Notification.show();
-
-Nuvola.TrayIcon.setTooltip("Hello from Google Play!");
-Nuvola.TrayIcon.setActions(["play", "pause", "quit"]);
+var player = Nuvola.Player;
+player.song = "Whoa";
+player.artist = "Happy Band";
+player.album = "Best of";
+player.state = player.STATE_PAUSED;
+player.update();
 
 })(this);  // function(Nuvola)

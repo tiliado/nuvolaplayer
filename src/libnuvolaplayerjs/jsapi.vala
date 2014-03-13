@@ -177,7 +177,10 @@ public class JSApi : GLib.Object
 		
 		unowned JS.Value meta = object_from_JSON(ctx, meta_json_data);
 		env.main_object.set_property(ctx, new JS.String(META_PROPERTY), meta);
-		
+	}
+	
+	public void initialize(JsEnvironment env) throws JSError
+	{
 		var init_js = data_dir.get_child(INIT_JS);
 		if (!init_js.query_exists())
 			throw new JSError.INITIALIZATION_FAILED("Failed to find a web app component init.js. This probably means the web app integration has not been installed correctly or that component has been accidentally deleted.");

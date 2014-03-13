@@ -87,9 +87,11 @@ public class WebEngine : GLib.Object
 		
 		env = new JsRuntime();
 		api = new JSApi(app.storage, web_app.data_dir, web_app.user_config_dir);
+		api.send_message.connect(on_send_message);
 		try
 		{
 			api.inject(env);
+			api.initialize(env);
 		}
 		catch (JSError e)
 		{
@@ -234,6 +236,11 @@ public class WebEngine : GLib.Object
 			received_messages = {};
 		}
 		return false;
+	}
+	
+	private void on_send_message(string name, Variant? data)
+	{
+		message_received(name, data);
 	}
 }
 
