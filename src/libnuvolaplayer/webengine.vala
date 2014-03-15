@@ -125,9 +125,13 @@ public class WebEngine : GLib.Object
 					url = value != null ? value.get_string() : null;
 			
 			if (url == null || url == "")
-				app.show_error("Invalid home page URL", "The web app integration script has not provided a valid home page URL.");
-			else
+				app.show_error("Invalid home page URL", "The web app integration script has an empty home page URL.");
+			else if (url.has_prefix("http://") || url.has_prefix("https://"))
 				web_view.load_uri(url);
+			else if(url.has_prefix("nuvola://"))
+				web_view.load_uri(web_app.data_dir.get_child(url.substring(9)).get_uri());
+			else
+				app.show_error("Invalid home page URL", "The web app integration script has not provided a valid home page URL '%s'.".printf(url));
 		}
 		catch (JSError e)
 		{

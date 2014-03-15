@@ -1,0 +1,11 @@
+{
+	"id": "test",
+	"name": "Test",
+	"maintainer_name": "Jiří Janoušek",
+	"maintainer_link": "https://launchpad.net/~fenryxo",
+	"version_major": 1,
+	"version_minor": 0,
+	"api_major": 3,
+	"api_minor": 0,
+	"home_url": "nuvola://home.html"
+}
