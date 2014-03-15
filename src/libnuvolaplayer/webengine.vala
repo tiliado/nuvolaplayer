@@ -73,6 +73,7 @@ public class WebEngine : GLib.Object
 		ws.enable_write_console_messages_to_stdout = true;
 		app_errors = {};
 		received_messages = {};
+		web_view.decide_policy.connect(on_decide_policy);
 	}
 	
 	public virtual signal void message_received(string name, Variant? data)
@@ -245,6 +246,73 @@ public class WebEngine : GLib.Object
 	private void on_send_message(string name, Variant? data)
 	{
 		message_received(name, data);
+	}
+	
+	private bool on_decide_policy(WebKit.PolicyDecision decision, WebKit.PolicyDecisionType decision_type)
+	{
+		switch (decision_type)
+		{
+		case WebKit.PolicyDecisionType.NAVIGATION_ACTION:
+			WebKit.NavigationPolicyDecision navigation_decision = (WebKit.NavigationPolicyDecision) decision;
+			if (navigation_decision.mouse_button == 0)
+				return false;
+			var uri = navigation_decision.request.uri;
+			if (!uri.has_prefix("http://") && !uri.has_prefix("https://"))
+				return false;
+			var result = navigation_request(uri);
+			debug("Mouse Navigation: %s %s", uri, result.to_string());
+			if (result)
+			{
+				decision.use();
+				return true;
+			}
+			else
+			{
+				try
+				{
+					Gtk.show_uri(null, uri, Gdk.CURRENT_TIME);
+					decision.ignore();
+					return true;
+				}
+				catch (GLib.Error e)
+				{
+					critical("Failed to open '%s' in a default web browser. %s", uri, e.message);
+					return false;
+				}
+			}
+		case WebKit.PolicyDecisionType.NEW_WINDOW_ACTION:
+		case WebKit.PolicyDecisionType.RESPONSE:
+		default:
+			return false;
+		}
+	}
+	
+	private bool navigation_request(string url)
+	{
+		var builder = new VariantBuilder(new VariantType("a{smv}"));
+		builder.add("{smv}", "url", new Variant.string(url));
+		builder.add("{smv}", "approved", new Variant.boolean(true));
+		var args = new Variant("(s@a{smv})", "navigation-request", builder.end());
+		try
+		{
+			env.call_function("emit", ref args);
+		}
+		catch (JSError e)
+		{
+			app.show_error("Integration script error", "The web app integration script has not provided a valid response and caused an error: %s".printf(e.message));
+			return true;
+		}
+		VariantIter iter = args.iterator();
+		assert(iter.next("s", null));
+		assert(iter.next("a{smv}", &iter));
+		string key = null;
+		Variant value = null;
+		bool approved = false;
+		while (iter.next("{smv}", &key, &value))
+			if (key == "approved")
+				approved = value != null ? value.get_boolean() : false;
+		
+		return approved;
 	}
 }
 

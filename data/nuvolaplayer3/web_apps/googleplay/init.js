@@ -30,11 +30,18 @@ Nuvola.Player.init();
 var Initialization = function()
 {
 	Nuvola.connect("home-page", this, "onHomePage");
+	Nuvola.connect("navigation-request", this, "onNavigationRequest");
+	this.allowedURI = new RegExp(Nuvola.meta.allowed_uri);
 }
 
 Initialization.prototype.onHomePage = function(object, result)
 {
 	result.url = Nuvola.meta.home_url;
+}
+
+Initialization.prototype.onNavigationRequest = function(object, request)
+{
+	request.approved = this.allowedURI.test(request.url);
 }
 
 Nuvola.initialization = new Initialization();
