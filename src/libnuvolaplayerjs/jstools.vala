@@ -306,6 +306,9 @@ public unowned JS.Value value_from_variant(JS.Context ctx, Variant variant) thro
 		return value_from_variant(ctx, maybe_variant);
 	}
 	
+	if (variant.is_of_type(VariantType.VARIANT))
+		return value_from_variant(ctx, variant.get_variant());
+	
 	throw new JSError.WRONG_TYPE("Unsupported type '%s'.", variant.get_type_string());
 }
 
