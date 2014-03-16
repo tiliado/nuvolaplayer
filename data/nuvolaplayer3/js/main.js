@@ -249,4 +249,16 @@ Nuvola.Player =
 	}
 };
 
+Nuvola.Config = 
+{
+	get: function(key)
+	{
+		return Nuvola._getConfig(key);
+	},
+	set: function(key, value)
+	{
+		Nuvola._setConfig(key, value);
+	}
+};
+
 })(this);  // function(Nuvola)

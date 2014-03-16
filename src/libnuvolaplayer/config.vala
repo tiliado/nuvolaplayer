@@ -25,9 +25,9 @@
 namespace Nuvola
 {
 
-public class Config : GLib.Object
+public class Config : GLib.Object, KeyValueStorage
 {
-	private File file;
+	public File file {get; private set;}
 	private Json.Node? root;
 	
 	public Config(File file)
@@ -36,7 +36,6 @@ public class Config : GLib.Object
 		load();
 	}
 	
-	public signal void config_changed(string key);
 	public signal void reloaded();
 	
 	public bool reload()
@@ -80,7 +79,7 @@ public class Config : GLib.Object
 		return generator.to_data(null);
 	}
 	
-	public bool save()
+	public bool save() throws GLib.Error
 	{
 		var generator = new Json.Generator();
 		generator.root = root;
@@ -93,15 +92,54 @@ public class Config : GLib.Object
 		{
 		}
 		
+		generator.to_file(file.get_path());
+		return true;
+		
+	}
+	
+	public bool has_key(string key)
+	{
+		string? member_name;
+		unowned Json.Object? object = get_parent_object(key, out member_name);
+		return object != null && object.has_member(member_name);
+	}
+	
+	public Variant? get_value(string key)
+	{
+		string? member_name;
+		unowned Json.Object? object = get_parent_object(key, out member_name);
+		if (object == null || !object.has_member(member_name))
+			return null;
+		
 		try
 		{
-			generator.to_file(file.get_path());
-			return true;
+			return Json.gvariant_deserialize(object.get_member(member_name), null);
 		}
 		catch (GLib.Error e)
 		{
-			warning("Json save error: %s", e.message);
-			return false;
+			warning("Failed to deserialize key '%s'. %s", key, e.message);
+			return null;
+		}
+	}
+	
+	public void set_value(string key, Variant? value)
+	{
+		string? member_name;
+		unowned Json.Object? object = create_parent_object(key, out member_name);
+		return_if_fail(object != null);
+		if (value == null)
+		{
+			if (object.has_member(member_name))
+			{
+				object.remove_member(member_name);
+				config_changed(key);
+			}
+		}
+		else
+		{
+			var node = Json.gvariant_serialize(value);
+			object.set_member(member_name, (owned) node);
+			config_changed(key);
 		}
 	}
 	

@@ -71,6 +71,7 @@ public class WebAppController : Diorite.Application
 	{
 		gtk_settings = Gtk.Settings.get_default();
 		config = new Config(web_app.user_config_dir.get_child("config.json"));
+		config.config_changed.connect(on_config_changed);
 		actions = new Diorite.ActionsRegistry(this, null);
 		append_actions();
 		main_window = new WebAppWindow(this);
@@ -144,9 +145,20 @@ public class WebAppController : Diorite.Application
 	{
 		bool m = (event.new_window_state & Gdk.WindowState.MAXIMIZED) != 0;
 		config.set_bool(ConfigKey.WINDOW_MAXIMIZED, m);
-		config.save();
 		return false;
-	} 
+	}
+	
+	private void save_config()
+	{
+		try
+		{
+			config.save();
+		}
+		catch (GLib.Error e)
+		{
+			show_error("Failed to save configuration", "Failed to save configuration to file %s. %s".printf(config.file.get_path(), e.message));
+		}
+	}
 	
 	private bool on_configure_event(Gdk.EventConfigure event)
 	{
@@ -171,7 +183,6 @@ public class WebAppController : Diorite.Application
 			config.set_int(ConfigKey.WINDOW_Y, (int64) y);
 			config.set_int(ConfigKey.WINDOW_WIDTH, (int64) width);
 			config.set_int(ConfigKey.WINDOW_HEIGHT, (int64) height);
-			config.save();
 		}
 		return false;
 	}
@@ -216,6 +227,11 @@ public class WebAppController : Diorite.Application
 		{
 			warning("Communication failed: %s", e.message);
 		}
+	}
+	
+	private void on_config_changed(string key)
+	{
+		save_config();
 	}
 }
 

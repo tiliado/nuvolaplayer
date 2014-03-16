@@ -103,12 +103,14 @@ public class JSApi : GLib.Object
 	private Diorite.Storage storage;
 	private File data_dir;
 	private File config_dir;
+	private KeyValueStorage? config;
 	
-	public JSApi(Diorite.Storage storage, File data_dir, File config_dir)
+	public JSApi(Diorite.Storage storage, File data_dir, File config_dir, KeyValueStorage? config=null)
 	{
 		this.storage = storage;
 		this.data_dir = data_dir;
 		this.config_dir = config_dir;
+		this.config = config;
 	}
 	
 	public signal void send_message(string name, Variant? data);
@@ -218,6 +220,8 @@ public class JSApi : GLib.Object
 	private static const JS.StaticFunction[] static_functions =
 	{
 		{"sendMessage", send_message_func, 0},
+		{"_getConfig", get_config_func, 0},
+		{"_setConfig", set_config_func, 0},
 		{null, null, 0}
 	};
 	
@@ -295,6 +299,90 @@ public class JSApi : GLib.Object
 		}
 	
 		js_api.send_message(name, new Variant.tuple(tuple));
+		return undefined;
+	}
+	
+	static unowned JS.Value get_config_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)
+	{
+		unowned JS.Value undefined = JS.Value.undefined(ctx);
+		exception = null;
+		if (args.length != 1)
+		{
+			exception = create_exception(ctx, "One argument required.");
+			return undefined;
+		}
+		
+		var key = string_or_null(ctx, args[0]);
+		if (key == null)
+		{
+			exception = create_exception(ctx, "The first argument must be a non-null string");
+			return undefined;
+		}
+		
+		message("get_config %s", key);
+		
+		var js_api = (self.get_private() as JSApi);
+		if (js_api == null)
+		{
+			exception = create_exception(ctx, "JSApi is null");
+			return undefined;
+		}
+		
+		if (js_api.config == null)
+			return undefined;
+		
+		var value = js_api.config.get_value(key);
+		if (value == null)
+			return undefined;
+		
+		try
+		{
+			return value_from_variant(ctx, value);
+		}
+		catch (JSError e)
+		{
+			exception = create_exception(ctx, "Failed to convert Variant to JavaScript value. %s".printf(e.message));
+			return undefined;
+		}
+	}
+	
+	static unowned JS.Value set_config_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)
+	{
+		unowned JS.Value undefined = JS.Value.undefined(ctx);
+		exception = null;
+		if (args.length != 2)
+		{
+			exception = create_exception(ctx, "Two arguments required.");
+			return undefined;
+		}
+		
+		var key = string_or_null(ctx, args[0]);
+		if (key == null)
+		{
+			exception = create_exception(ctx, "The first argument must be a non-null string");
+			return undefined;
+		}
+		message("set_config %s", key);
+		var js_api = (self.get_private() as JSApi);
+		if (js_api == null)
+		{
+			exception = create_exception(ctx, "JSApi is null");
+			return undefined;
+		}
+		
+		if (js_api.config == null)
+			return undefined;
+		
+		try
+		{
+			var value = args[1].is_undefined(ctx) ? null : variant_from_value(ctx, args[1]);
+			js_api.config.set_value(key, value);
+		}
+		catch (JSError e)
+		{
+			exception = create_exception(ctx, "Failed to convert JavaScript value to Variant. %s".printf(e.message));
+		}
+		
 		return undefined;
 	}
 }

@@ -87,7 +87,7 @@ public class WebEngine : GLib.Object
 			return true;
 		
 		env = new JsRuntime();
-		api = new JSApi(app.storage, web_app.data_dir, web_app.user_config_dir);
+		api = new JSApi(app.storage, web_app.data_dir, web_app.user_config_dir, config);
 		api.send_message.connect(on_send_message);
 		try
 		{
