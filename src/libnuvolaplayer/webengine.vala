@@ -123,6 +123,24 @@ public class WebEngine : GLib.Object
 		return result;
 	}
 	
+	
+	private bool load_uri(string uri)
+	{
+		if (uri.has_prefix("http://") || uri.has_prefix("https://"))
+		{
+			web_view.load_uri(uri);
+			return true;
+		}
+		
+		if(uri.has_prefix("nuvola://"))
+		{
+			web_view.load_uri(web_app.data_dir.get_child(uri.substring(9)).get_uri());
+			return true;
+		}
+		
+		return false;
+	}
+	
 	public bool load()
 	{
 		if (!inject_api())
@@ -130,16 +148,17 @@ public class WebEngine : GLib.Object
 		
 		start_master();
 		
+		return go_home();
+	}
+	
+	public bool go_home()
+	{
 		try
 		{
 			var url = data_request("home-page", "url");
 			if (url == null)
 				app.show_error("Invalid home page URL", "The web app integration script has an empty home page URL.");
-			else if (url.has_prefix("http://") || url.has_prefix("https://"))
-				web_view.load_uri(url);
-			else if(url.has_prefix("nuvola://"))
-				web_view.load_uri(web_app.data_dir.get_child(url.substring(9)).get_uri());
-			else
+			else if (!load_uri(url))
 				app.show_error("Invalid home page URL", "The web app integration script has not provided a valid home page URL '%s'.".printf(url));
 		}
 		catch (JSError e)
