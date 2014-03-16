@@ -73,6 +73,7 @@ public class WebEngine : GLib.Object
 		ws.enable_write_console_messages_to_stdout = true;
 		app_errors = {};
 		received_messages = {};
+		web_view.notify["uri"].connect(on_uri_changed);
 		web_view.decide_policy.connect(on_decide_policy);
 	}
 	
@@ -340,6 +341,19 @@ public class WebEngine : GLib.Object
 				approved = value != null ? value.get_boolean() : false;
 		
 		return approved;
+	}
+	
+	private void on_uri_changed(GLib.Object o, ParamSpec p)
+	{
+		var args = new Variant("(sms)", "uri-changed", web_view.uri);
+		try
+		{
+			env.call_function("emit", ref args);
+		}
+		catch (JSError e)
+		{
+			app.show_error("Integration script error", "The web app integration caused an error: %s".printf(e.message));
+		}
 	}
 }
 

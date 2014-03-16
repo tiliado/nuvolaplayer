@@ -101,7 +101,7 @@ Nuvola.makeSignaling = function(obj_proto)
 }
 
 Nuvola.makeSignaling(Nuvola);
-Nuvola.registerSignals(["home-page", "navigation-request"]);
+Nuvola.registerSignals(["home-page", "navigation-request", "uri-changed"]);
 
 Nuvola.Notification =
 {
