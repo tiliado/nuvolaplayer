@@ -102,6 +102,27 @@ public class WebEngine : GLib.Object
 		return true;
 	}
 	
+	private string? data_request(string name, string key, string? default_value=null) throws JSError
+	{
+		string? result = null;
+		var builder = new VariantBuilder(new VariantType("a{smv}"));
+		builder.add("{smv}", key, default_value == null ? null : new Variant.string(default_value));
+		var args = new Variant("(s@a{smv})", name, builder.end());
+		env.call_function("emit", ref args);
+		VariantIter iter = args.iterator();
+		assert(iter.next("s", null));
+		assert(iter.next("a{smv}", &iter));
+		string dict_key = null;
+		Variant value = null;
+		while (iter.next("{smv}", &dict_key, &value))
+			if (dict_key == key)
+				result = value != null ? value.get_string() : null;
+		
+		if(result == "")
+			result = null;
+		return result;
+	}
+	
 	public bool load()
 	{
 		if (!inject_api())
@@ -111,21 +132,8 @@ public class WebEngine : GLib.Object
 		
 		try
 		{
-			var builder = new VariantBuilder(new VariantType("a{smv}"));
-			builder.add("{smv}", "url", null);
-			var args = new Variant("(s@a{smv})", "home-page", builder.end());
-			env.call_function("emit", ref args);
-			VariantIter iter = args.iterator();
-			assert(iter.next("s", null));
-			assert(iter.next("a{smv}", &iter));
-			string key = null;
-			Variant value = null;
-			string? url = null;
-			while (iter.next("{smv}", &key, &value))
-				if (key == "url")
-					url = value != null ? value.get_string() : null;
-			
-			if (url == null || url == "")
+			var url = data_request("home-page", "url");
+			if (url == null)
 				app.show_error("Invalid home page URL", "The web app integration script has an empty home page URL.");
 			else if (url.has_prefix("http://") || url.has_prefix("https://"))
 				web_view.load_uri(url);
