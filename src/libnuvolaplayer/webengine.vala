@@ -54,7 +54,6 @@ public class WebEngine : GLib.Object
 		
 		var wc = WebKit.WebContext.get_default();
 		wc.set_web_extensions_directory(webkit_extension_dir);
-		wc.set_cache_model(WebKit.CacheModel.DOCUMENT_VIEWER);
 		wc.set_favicon_database_directory(web_app.user_data_dir.get_child("favicons").get_path());
 		wc.set_disk_cache_directory(web_app.user_cache_dir.get_child("webcache").get_path());
 		
