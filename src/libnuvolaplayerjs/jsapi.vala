@@ -319,8 +319,6 @@ public class JSApi : GLib.Object
 			return undefined;
 		}
 		
-		message("get_config %s", key);
-		
 		var js_api = (self.get_private() as JSApi);
 		if (js_api == null)
 		{
@@ -362,7 +360,7 @@ public class JSApi : GLib.Object
 			exception = create_exception(ctx, "The first argument must be a non-null string");
 			return undefined;
 		}
-		message("set_config %s", key);
+		
 		var js_api = (self.get_private() as JSApi);
 		if (js_api == null)
 		{

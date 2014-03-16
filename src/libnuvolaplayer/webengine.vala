@@ -117,7 +117,8 @@ public class WebEngine : GLib.Object
 		Variant value = null;
 		while (iter.next("{smv}", &dict_key, &value))
 			if (dict_key == key)
-				result = value != null ? value.get_string() : null;
+				result =  value != null && value.is_of_type(VariantType.STRING)
+				?  value.get_string() : null;
 		
 		if(result == "")
 			result = null;
@@ -148,8 +149,30 @@ public class WebEngine : GLib.Object
 			return false;
 		
 		start_master();
+		return restore_session();
+	}
+	
+	private bool restore_session()
+	{
+		var result = false;
+		try
+		{
+			var url = data_request("last-page", "url");
+			if (url == null)
+				return go_home();
+			
+			result = load_uri(url);
+			if (!result)
+				app.show_error("Invalid page URL", "The web app integration script has not provided a valid page URL '%s'.".printf(url));
+		}
+		catch (JSError e)
+		{
+			app.show_error("Initialization error", "%s failed to retrieve a last visited page from previous session. Initialization exited with error:\n\n%s".printf(app.app_name, e.message));
+		}
 		
-		return go_home();
+		if (!result)
+			return go_home();
+		return true;
 	}
 	
 	public bool go_home()
