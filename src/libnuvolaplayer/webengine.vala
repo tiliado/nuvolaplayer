@@ -33,6 +33,8 @@ public class WebEngine : GLib.Object
 {
 	public Gtk.Widget widget {get {return web_view;}}
 	public WebApp web_app {get; private set;}
+	public bool can_go_back {get; private set; default = false;}
+	public bool can_go_forward {get; private set; default = false;}
 	private WebAppController app;
 	private WebKit.WebView web_view;
 	private JsEnvironment? env = null;
@@ -164,7 +166,7 @@ public class WebEngine : GLib.Object
 		{
 			var url = data_request("last-page", "url");
 			if (url == null)
-				return go_home();
+				return try_go_home();
 			
 			result = load_uri(url);
 			if (!result)
@@ -176,11 +178,16 @@ public class WebEngine : GLib.Object
 		}
 		
 		if (!result)
-			return go_home();
+			return try_go_home();
 		return true;
 	}
 	
-	public bool go_home()
+	public void go_home()
+	{
+		try_go_home();
+	}
+	
+	public bool try_go_home()
 	{
 		try
 		{
@@ -197,6 +204,21 @@ public class WebEngine : GLib.Object
 		}
 		
 		return true;
+	}
+	
+	public void go_back()
+	{
+		web_view.go_back();
+	}
+	
+	public void go_forward()
+	{
+		web_view.go_forward();
+	}
+	
+	public void reload()
+	{
+		web_view.reload();
 	}
 	
 	public void call_function(string name, Variant? params) throws Diorite.Ipc.MessageError
@@ -384,6 +406,8 @@ public class WebEngine : GLib.Object
 	
 	private void on_uri_changed(GLib.Object o, ParamSpec p)
 	{
+		can_go_back = web_view.can_go_back();
+		can_go_forward = web_view.can_go_forward();
 		var args = new Variant("(sms)", "uri-changed", web_view.uri);
 		try
 		{

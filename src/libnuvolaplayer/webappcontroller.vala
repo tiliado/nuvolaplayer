@@ -34,6 +34,14 @@ namespace ConfigKey
 	public const string WINDOW_MAXIMIZED = "nuvola.window.maximized";
 }
 
+namespace Actions
+{
+	public const string GO_HOME = "go-home";
+	public const string GO_BACK = "go-back";
+	public const string GO_FORWARD = "go-forward";
+	public const string GO_RELOAD = "go-reload";
+}
+
 public class WebAppController : Diorite.Application
 {
 	public WebAppWindow? main_window {get; private set; default = null;}
@@ -74,18 +82,21 @@ public class WebAppController : Diorite.Application
 		config = new Config(web_app.user_config_dir.get_child("config.json"));
 		config.config_changed.connect(on_config_changed);
 		actions = new Diorite.ActionsRegistry(this, null);
-		append_actions();
 		main_window = new WebAppWindow(this);
-		menu_bar = new MenuBar(actions, app_menu_shown && !menubar_shown);
-		menu_bar.set_up(this);
-		
 		fatal_error.connect(on_fatal_error);
 		show_error.connect(on_show_error);
 		web_engine = new WebEngine(this, web_app, config);
 		web_engine.async_message_received.connect(on_async_message_received);
 		web_engine.sync_message_received.connect(on_sync_message_received);
+		web_engine.notify.connect_after(on_web_engine_notify);
+		actions.action_changed.connect(on_action_changed);
 		var widget = web_engine.widget;
 		widget.hexpand = widget.vexpand = true;
+		
+		append_actions();
+		menu_bar = new MenuBar(actions, app_menu_shown && !menubar_shown);
+		menu_bar.set_up(this);
+		
 		if (!web_engine.load())
 			return;
 		main_window.grid.add(widget);
@@ -112,7 +123,11 @@ public class WebAppController : Diorite.Application
 	{
 		Diorite.Action[] actions_spec = {
 		//          Action(group, scope, name, label?, mnemo_label?, icon?, keybinding?, callback?)
-		new Diorite.Action("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit)
+		new Diorite.Action("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
+		new Diorite.Action("go", "app", Actions.GO_HOME, "Home", "_Home", "go-home", "<alt>Home", web_engine.go_home),
+		new Diorite.Action("go", "app", Actions.GO_BACK, "Back", "_Back", "go-previous", null, web_engine.go_back),
+		new Diorite.Action("go", "app", Actions.GO_FORWARD, "Forward", "_Forward", "go-next", null, web_engine.go_forward),
+		new Diorite.Action("go", "app", Actions.GO_RELOAD, "Reload", "_Reload", "view-refresh", null, web_engine.reload)
 		};
 		actions.add_actions(actions_spec);
 		
@@ -264,6 +279,29 @@ public class WebAppController : Diorite.Application
 			menu_bar[id] = new SubMenu(label, (owned) actions);
 			menu_bar.set_up(this);
 			break;
+		case "Nuvola.Actions.activate":
+			return_if_fail(data != null);
+			string? action_name = null;
+			data.get("(s)", &action_name);
+			return_if_fail(action_name != null);
+			var action = actions.get_action(action_name);
+			return_if_fail(action != null);
+			action.activate(null);
+			break;
+		}
+	}
+	
+	private void on_action_changed(Diorite.Action action, ParamSpec p)
+	{
+		if (p.name != "enabled")
+			return;
+		try
+		{
+			web_engine.call_function("Nuvola.Actions.emit", new Variant("(ssb)", "enabled-changed", action.name, action.enabled));
+		}
+		catch (Diorite.Ipc.MessageError e)
+		{
+			warning("Communication failed: %s", e.message);
 		}
 	}
 	
@@ -282,6 +320,19 @@ public class WebAppController : Diorite.Application
 	private void on_config_changed(string key)
 	{
 		save_config();
+	}
+	
+	private void on_web_engine_notify(GLib.Object o, ParamSpec p)
+	{
+		switch (p.name)
+		{
+		case "can-go-forward":
+			actions.get_action(Actions.GO_FORWARD).enabled = web_engine.can_go_forward;
+			break;
+		case "can-go-back":
+			actions.get_action(Actions.GO_BACK).enabled = web_engine.can_go_back;
+			break;
+		}
 	}
 }
 

@@ -180,11 +180,16 @@ Nuvola.Actions =
 	setEnabled: function(name, enabled)
 	{
 		return Nuvola._sendMessageSync("Nuvola.Actions.setEnabled", name, enabled);
-	}
+	},
+	
+	activate: function(name)
+	{
+		Nuvola._sendMessageAsync("Nuvola.Actions.activate", name);
+	},
 }
 
 Nuvola.makeSignaling(Nuvola.Actions);
-Nuvola.Actions.registerSignals(["action-activated"]);
+Nuvola.Actions.registerSignals(["action-activated", "enabled-changed"]);
 Nuvola.Actions.connect("action-activated", Nuvola.Actions, "debug");
 
 Nuvola.Player = 

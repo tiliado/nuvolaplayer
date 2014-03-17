@@ -122,7 +122,7 @@ public class WebExtension: GLib.Object
 				string name = null;
 				Variant? data = null;
 				request.get("(smv)", &name, &data);
-				debug("!!!!! call method %s %s", name, (data != null ? data.get_type_string() : "[null]"));
+				debug("!!!!! call method %s %s", name, (data != null ? data.print(true) : "null"));
 				var envs = bridges.get_values();
 				foreach (var env in envs)
 				{

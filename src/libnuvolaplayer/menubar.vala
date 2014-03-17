@@ -51,9 +51,13 @@ public class MenuBar
 			menubar.append_submenu("_Application", app_menu);
 			app.set_app_menu(null);
 		}
+		
+		menubar.append_submenu("_Go", actions_reg.build_menu({Actions.GO_HOME, Actions.GO_RELOAD, Actions.GO_BACK, Actions.GO_FORWARD}, true, false));
+		
 		var submenus = menus.get_values();
 		foreach (var submenu in submenus)
 			submenu.append_to_menu(actions_reg, menubar);
+		
 		app.set_menubar(menubar);
 	}
 	

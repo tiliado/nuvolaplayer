@@ -130,7 +130,7 @@ Integration.prototype.onActionActivated = function(object, name)
 	
 	switch (name)
 	{
-	case this.ACTION_TOGGLE_PLAY:
+	case player.ACTION_TOGGLE_PLAY:
 		SJBpost("playPause");
 		break;
 	case player.ACTION_PLAY:
