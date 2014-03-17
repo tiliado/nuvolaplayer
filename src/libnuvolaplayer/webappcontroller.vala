@@ -82,7 +82,8 @@ public class WebAppController : Diorite.Application
 		fatal_error.connect(on_fatal_error);
 		show_error.connect(on_show_error);
 		web_engine = new WebEngine(this, web_app, config);
-		web_engine.message_received.connect(on_message_received);
+		web_engine.async_message_received.connect(on_async_message_received);
+		web_engine.sync_message_received.connect(on_sync_message_received);
 		var widget = web_engine.widget;
 		widget.hexpand = widget.vexpand = true;
 		if (!web_engine.load())
@@ -191,7 +192,33 @@ public class WebAppController : Diorite.Application
 		return false;
 	}
 	
-	private void on_message_received(WebEngine engine, string name, Variant? data)
+	private void on_sync_message_received(WebEngine engine, string name, Variant? data, ref Variant? result)
+	{
+		switch (name)
+		{
+		case "Nuvola.Actions.isEnabled":
+			return_if_fail(data != null);
+			string? action_name = null;
+			data.get("(s)", &action_name);
+			return_if_fail(action_name != null);
+			var action = actions.get_action(action_name);
+			return_if_fail(action != null);
+			result = new Variant.boolean(action.enabled);
+			break;
+		case "Nuvola.Actions.setEnabled":
+			return_if_fail(data != null);
+			string? action_name = null;
+			bool enabled = false;
+			data.get("(sb)", &action_name, &enabled);
+			return_if_fail(action_name != null);
+			var action = actions.get_action(action_name);
+			return_if_fail(action != null);
+			action.enabled = enabled;
+			break;
+		}
+	}
+	
+	private void on_async_message_received(WebEngine engine, string name, Variant? data)
 	{
 		switch (name)
 		{
@@ -215,10 +242,10 @@ public class WebAppController : Diorite.Application
 				if (keybinding == "")
 					keybinding = null;
 				var action = new Diorite.Action(group, scope, action_name, label, mnemo_label, icon, keybinding, null);
+				action.enabled = false;
 				action.activated.connect(on_custom_action_activated);
 				actions.add_action(action);
 			}
-			web_engine.message_handled();
 			break;
 		case "Nuvola.MenuBar.setMenu":
 			return_if_fail(data != null && data.is_container());
@@ -236,7 +263,6 @@ public class WebAppController : Diorite.Application
 			
 			menu_bar[id] = new SubMenu(label, (owned) actions);
 			menu_bar.set_up(this);
-			engine.message_handled();
 			break;
 		}
 	}

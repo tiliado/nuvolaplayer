@@ -107,7 +107,7 @@ public class Extension : Nuvola.Extension
 		icons_supported =  capabilities.find_custom("action-icons", strcmp) != null;
 		debug(@"Notifications: persistence $persistence_supported, actions $actions_supported, icons $icons_supported");
 		_resident = config.get_bool(prefix + RESIDENT, true);
-		web_engine.message_received.connect(on_message_received);
+		web_engine.async_message_received.connect(on_async_message_received);
 	}
 	
 	/**
@@ -115,7 +115,7 @@ public class Extension : Nuvola.Extension
 	 */
 	public override void unload()
 	{
-		web_engine.message_received.disconnect(on_message_received);
+		web_engine.async_message_received.disconnect(on_async_message_received);
 		if (notification != null)
 		{
 			try
@@ -190,7 +190,7 @@ public class Extension : Nuvola.Extension
 		return false;
 	}
 	
-	private void on_message_received(WebEngine engine, string name, Variant? data)
+	private void on_async_message_received(WebEngine engine, string name, Variant? data)
 	{
 		if (name == "Nuvola.Notification.update")
 		{
@@ -203,12 +203,10 @@ public class Extension : Nuvola.Extension
 				data.get("(ssss)", &title, &message, &icon_name, &icon_path);
 				update(title, message, icon_name, icon_path);
 			}
-			engine.message_handled();
 		}
 		else if (name == "Nuvola.Notification.show")
 		{
 			show();
-			engine.message_handled();
 		}
 	}
 }

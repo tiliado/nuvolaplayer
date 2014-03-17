@@ -113,7 +113,8 @@ public class JSApi : GLib.Object
 		this.config = config;
 	}
 	
-	public signal void send_message(string name, Variant? data);
+	public signal void send_message_async(string name, Variant? data);
+	public signal void send_message_sync(string name, Variant? data, ref Variant? result);
 	
 	/**
 	 * Creates the main object and injects it to the JavaScript context
@@ -219,7 +220,8 @@ public class JSApi : GLib.Object
 	 */
 	private static const JS.StaticFunction[] static_functions =
 	{
-		{"sendMessage", send_message_func, 0},
+		{"_sendMessageAsync", send_message_async_func, 0},
+		{"_sendMessageSync", send_message_sync_func, 0},
 		{"_getConfig", get_config_func, 0},
 		{"_setConfig", set_config_func, 0},
 		{null, null, 0}
@@ -254,7 +256,17 @@ public class JSApi : GLib.Object
 		klass.retain();
 	}
 	
-	static unowned JS.Value send_message_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)
+	static unowned JS.Value send_message_async_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)
+	{
+		return send_message_func(ctx, function, self, args, out exception, true);
+	}
+	
+	static unowned JS.Value send_message_sync_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)
+	{
+		return send_message_func(ctx, function, self, args, out exception, false);
+	}
+	
+	static unowned JS.Value send_message_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception, bool @async)
 	{
 		unowned JS.Value undefined = JS.Value.undefined(ctx);
 		exception = null;
@@ -278,28 +290,43 @@ public class JSApi : GLib.Object
 			return undefined;
 		}
 		
-		if (args.length == 1)
+		Variant? data = null;
+		if (args.length > 1)
 		{
-			js_api.send_message(name, null);
+			Variant[] tuple = new Variant[args.length - 1];
+			for (var i = 1; i < args.length; i++)
+			{
+				try
+				{
+					tuple[i - 1] = variant_from_value(ctx, args[i]);
+				}
+				catch (JSError e)
+				{
+					exception = create_exception(ctx, "Argument %d: %s".printf(i, e.message));
+					return undefined;
+				}
+			}
+			data = new Variant.tuple(tuple);
+		}
+		
+		if (@async)
+		{
+			js_api.send_message_async(name, data);
 			return undefined;
 		}
 		
-		Variant[] tuple = new Variant[args.length - 1];
-		for (var i = 1; i < args.length; i++)
+		Variant? result = null;
+		js_api.send_message_sync(name, data, ref result);
+		debug("Async result: %s", result == null ? "(null)" : result.print(true));
+		try
 		{
-			try
-			{
-				tuple[i - 1] = variant_from_value(ctx, args[i]);
-			}
-			catch (JSError e)
-			{
-				exception = create_exception(ctx, "Argument %d: %s".printf(i, e.message));
-				return undefined;
-			}
+			return value_from_variant(ctx, result);
 		}
-	
-		js_api.send_message(name, new Variant.tuple(tuple));
-		return undefined;
+		catch (JSError e)
+		{
+			exception = create_exception(ctx, "Failed to parse response. %s".printf(e.message));
+			return undefined;
+		}
 	}
 	
 	static unowned JS.Value get_config_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)

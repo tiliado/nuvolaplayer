@@ -62,7 +62,8 @@ public class WebExtension: GLib.Object
 		}
 		var storage = new Diorite.XdgStorage.for_project(Nuvola.get_appname());
 		js_api = new JSApi(storage, data_dir, user_config_dir);
-		js_api.send_message.connect(on_send_message);
+		js_api.send_message_async.connect(on_send_message_async);
+		js_api.send_message_sync.connect(on_send_message_sync);
 		WebKit.ScriptWorld.get_default().window_object_cleared.connect(on_window_object_cleared);
 	}
 	
@@ -152,15 +153,28 @@ public class WebExtension: GLib.Object
 		}
 	}
 	
-	private void on_send_message(string name, Variant? data)
+	private void on_send_message_async(string name, Variant? data)
 	{
 		try
 		{
-			master.send_message("send_message", new Variant("(smv)", name, data));
+			master.send_message("send_message_async", new Variant("(smv)", name, data));
 		}
 		catch (Diorite.Ipc.MessageError e)
 		{
 			critical("Failed to send message '%s'. %s", name, e.message);
+		}
+	}
+	
+	private void on_send_message_sync(string name, Variant? data, ref Variant? result)
+	{
+		try
+		{
+			result = master.send_message("send_message_sync", new Variant("(smv)", name, data));
+		}
+		catch (Diorite.Ipc.MessageError e)
+		{
+			critical("Failed to send message '%s'. %s", name, e.message);
+			result = null;
 		}
 	}
 	

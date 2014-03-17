@@ -107,12 +107,12 @@ Nuvola.Notification =
 {
 	update: function(title, text, iconName, iconURL)
 	{
-		Nuvola.sendMessage("Nuvola.Notification.update", title, text, iconName || "", iconURL || "");
+		Nuvola._sendMessageAsync("Nuvola.Notification.update", title, text, iconName || "", iconURL || "");
 	},
 	
 	show: function()
 	{
-		Nuvola.sendMessage("Nuvola.Notification.show");
+		Nuvola._sendMessageAsync("Nuvola.Notification.show");
 	},
 }
 
@@ -120,12 +120,12 @@ Nuvola.TrayIcon =
 {
 	setTooltip: function(tooltip)
 	{
-		Nuvola.sendMessage("Nuvola.TrayIcon.setTooltip", tooltip || "");
+		Nuvola._sendMessageAsync("Nuvola.TrayIcon.setTooltip", tooltip || "");
 	},
 	
 	setActions: function(actions)
 	{
-		Nuvola.sendMessage("Nuvola.TrayIcon.setActions", actions);
+		Nuvola._sendMessageAsync("Nuvola.TrayIcon.setActions", actions);
 	},
 }
 
@@ -133,12 +133,22 @@ Nuvola.Actions =
 {
 	addAction: function(group, scope, name, label, mnemo_label, icon, keybinding)
 	{
-		Nuvola.sendMessage("Nuvola.Actions.addAction", group, scope, name, label || "", mnemo_label || "", icon || "", keybinding || "");
+		Nuvola._sendMessageAsync("Nuvola.Actions.addAction", group, scope, name, label || "", mnemo_label || "", icon || "", keybinding || "");
 	},
 	
 	debug: function(arg1, arg2)
 	{
 		console.log(arg1 + ", " + arg2);
+	},
+	
+	isEnabled: function(name)
+	{
+		return Nuvola._sendMessageSync("Nuvola.Actions.isEnabled", name);
+	},
+	
+	setEnabled: function(name, enabled)
+	{
+		return Nuvola._sendMessageSync("Nuvola.Actions.setEnabled", name, enabled);
 	}
 }
 
@@ -269,7 +279,7 @@ Nuvola.MenuBar =
 {
 	setMenu: function(id, label, actions)
 	{
-		Nuvola.sendMessage("Nuvola.MenuBar.setMenu", id, label, actions);
+		Nuvola._sendMessageAsync("Nuvola.MenuBar.setMenu", id, label, actions);
 	},
 }
 

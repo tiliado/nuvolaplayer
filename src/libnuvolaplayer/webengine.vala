@@ -76,9 +76,14 @@ public class WebEngine : GLib.Object
 		web_view.decide_policy.connect(on_decide_policy);
 	}
 	
-	public virtual signal void message_received(string name, Variant? data)
+	public virtual signal void async_message_received(string name, Variant? data)
 	{
-		debug("Message received from JSApi: %s:%s", name, data == null ? "null" : data.get_type_string());
+		debug("Async message received from JSApi: %s: %s", name, data == null ? "null" : data.print(true));
+	}
+	
+	public virtual signal void sync_message_received(string name, Variant? data, ref Variant? result)
+	{
+		debug("Sync message received from JSApi: %s: %s", name, data == null ? "null" : data.print(true));
 	}
 	
 	private bool inject_api()
@@ -88,7 +93,8 @@ public class WebEngine : GLib.Object
 		
 		env = new JsRuntime();
 		api = new JSApi(app.storage, web_app.data_dir, web_app.user_config_dir, config);
-		api.send_message.connect(on_send_message);
+		api.send_message_async.connect(on_send_message_async);
+		api.send_message_sync.connect(on_send_message_sync);
 		try
 		{
 			api.inject(env);
@@ -200,11 +206,6 @@ public class WebEngine : GLib.Object
 		slave.send_message("call_function", data);
 	}
 	
-	public void message_handled()
-	{
-		Signal.stop_emission_by_name(this, "message-received");
-	}
-	
 	private void start_master()
 	{
 		if (master != null)
@@ -214,7 +215,8 @@ public class WebEngine : GLib.Object
 		master.add_handler("get_data_dir", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_get_data_dir);
 		master.add_handler("get_user_config_dir", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_get_user_config_dir);
 		master.add_handler("show_error", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_show_error);
-		master.add_handler("send_message", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_send_message);
+		master.add_handler("send_message_sync", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_send_message_sync);
+		master.add_handler("send_message_async", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_send_message_async);
 		new Thread<void*>(app.path_name, listen);
 		slave = new Diorite.Ipc.MessageClient(app.path_name + SLAVE_SUFFIX, 5000);
 	}
@@ -266,18 +268,18 @@ public class WebEngine : GLib.Object
 		return false;
 	}
 	
-	private bool handle_send_message(Diorite.Ipc.MessageServer server, Variant request, out Variant? response)
+	private bool handle_send_message_async(Diorite.Ipc.MessageServer server, Variant request, out Variant? response)
 	{
 		response = null;
 		lock (received_messages)
 		{
 			received_messages += request;
 		}
-		Idle.add(message_received_cb);
+		Idle.add(async_message_received_cb);
 		return true;
 	}
 	
-	private bool message_received_cb()
+	private bool async_message_received_cb()
 	{
 		lock (received_messages)
 		{
@@ -286,16 +288,31 @@ public class WebEngine : GLib.Object
 				string name = null;
 				Variant? data = null;
 				message.get("(smv)", &name, &data);
-				message_received(name, data);
+				async_message_received(name, data);
 			}
 			received_messages = {};
 		}
 		return false;
 	}
 	
-	private void on_send_message(string name, Variant? data)
+	private bool handle_send_message_sync(Diorite.Ipc.MessageServer server, Variant request, out Variant? response)
 	{
-		message_received(name, data);
+		response = new Variant("mv", null);
+		string name = null;
+		Variant? data = null;
+		request.get("(smv)", &name, &data);
+		sync_message_received(name, data, ref response);
+		return true;
+	}
+	
+	private void on_send_message_async(string name, Variant? data)
+	{
+		async_message_received(name, data);
+	}
+	
+	private void on_send_message_sync(string name, Variant? data, ref Variant? result)
+	{
+		sync_message_received(name, data, ref result);
 	}
 	
 	private bool on_decide_policy(WebKit.PolicyDecision decision, WebKit.PolicyDecisionType decision_type)

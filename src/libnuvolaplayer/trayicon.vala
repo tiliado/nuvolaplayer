@@ -67,7 +67,7 @@ public class Extension: Nuvola.Extension
 		set_tooltip(controller.app_name);
 		icon.popup_menu.connect(on_popup_menu);
 		icon.activate.connect(() => {controller.activate();});
-		web_engine.message_received.connect(on_message_received);
+		web_engine.async_message_received.connect(on_async_message_received);
 	}
 	
 	public void set_tooltip(string tooltip)
@@ -90,7 +90,7 @@ public class Extension: Nuvola.Extension
 	 */
 	public override void unload()
 	{
-		web_engine.message_received.disconnect(on_message_received);
+		web_engine.async_message_received.disconnect(on_async_message_received);
 		clear_actions();
 		icon.visible = false;
 		icon = null;
@@ -110,7 +110,7 @@ public class Extension: Nuvola.Extension
 		menu.popup(null, null, icon.position_menu, button, time);
 	}
 	
-	private void on_message_received(WebEngine engine, string name, Variant? data)
+	private void on_async_message_received(WebEngine engine, string name, Variant? data)
 	{
 		if (name == "Nuvola.TrayIcon.setTooltip")
 		{
@@ -120,7 +120,6 @@ public class Extension: Nuvola.Extension
 				data.get("(s)", &text);
 				set_tooltip(text);
 			}
-			engine.message_handled();
 		}
 		else if (name == "Nuvola.TrayIcon.setActions")
 		{
@@ -136,12 +135,10 @@ public class Extension: Nuvola.Extension
 				
 				set_actions((owned) actions);
 			}
-			engine.message_handled();
 		}
 		else if (name == "Nuvola.TrayIcon.clearActions")
 		{
 			clear_actions();
-			engine.message_handled();
 		}
 	}
 }
