@@ -42,6 +42,11 @@ Nuvola.format = function ()
 	});
 };
 
+Nuvola.inArray = function(array, item)
+{
+	return array.indexOf(item) > -1;
+}
+
 Nuvola.makeSignaling = function(obj_proto)
 {
 	obj_proto.registerSignals = function(signals)
@@ -174,6 +179,8 @@ Nuvola.Player =
 	artist: null,
 	album: null,
 	artwork: null,
+	prevSong: null,
+	nextSong: null,
 	prevData: {},
 	
 	init: function()
@@ -198,7 +205,7 @@ Nuvola.Player =
 		}
 		
 		var changed = [];
-		var keys = ["song", "artist", "album", "artwork", "state"];
+		var keys = ["song", "artist", "album", "artwork", "state", "prevSong", "nextSong"];
 		for (var i = 0; i < keys.length; i++)
 		{
 			var key = keys[i];
@@ -244,6 +251,34 @@ Nuvola.Player =
 			Nuvola.TrayIcon.setActions([this.state === this.STATE_PAUSED ? this.ACTION_PLAY : this.ACTION_PAUSE, this.ACTION_PREV_SONG, this.ACTION_NEXT_SONG, "quit"]);
 		else
 			Nuvola.TrayIcon.setActions(["quit"]);
+		
+		if (Nuvola.inArray(changed, "state"))
+		{
+			switch (this.state)
+			{
+			case this.STATE_PLAYING:
+				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_TOGGLE_PLAY, true);
+				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_PLAY, false);
+				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_PAUSE, true);
+				break;
+			case this.STATE_PAUSED:
+				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_TOGGLE_PLAY, true);
+				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_PLAY, true);
+				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_PAUSE, false);
+				break;
+			default:
+				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_TOGGLE_PLAY, false);
+				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_PLAY, false);
+				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_PAUSE, false);
+				break;
+			}
+		}
+		
+		if (Nuvola.inArray(changed, "prevSong"))
+			Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_PREV_SONG, this.prevSong === true);
+		
+		if (Nuvola.inArray(changed, "nextSong"))
+			Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_NEXT_SONG, this.nextSong === true);
 	},
 	
 	onActionActivated: function(object, name)
