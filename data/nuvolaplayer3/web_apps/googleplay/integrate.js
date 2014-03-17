@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2011-2014 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -26,10 +26,134 @@
 {
 
 var player = Nuvola.Player;
-player.song = "Whoa";
-player.artist = "Happy Band";
-player.album = "Best of";
-player.state = player.STATE_PAUSED;
-player.update();
+
+/**
+ * Creates new integration object
+ */
+var Integration = function()
+{
+	Nuvola.Actions.connect("action-activated", this, "onActionActivated");
+};
+
+/**
+ * Updates current playback state
+ */
+Integration.prototype.update = function()
+{
+	try
+	{
+		player.artwork = document.getElementById('playingAlbumArt').src;
+	}
+	catch(e)
+	{
+		player.artwork = null;
+	}
+	
+	try
+	{
+		var elm = document.getElementById('playerSongTitle').firstChild;
+		player.song = elm.innerText || elm.textContent;
+	}
+	catch(e)
+	{
+		player.song = null;
+	}
+	
+	try
+	{
+		var elm = document.getElementById('player-artist').firstChild;
+		player.artist = elm.innerText || elm.textContent;
+	}
+	catch (e)
+	{
+		player.artist = null;
+	}
+	
+	try
+	{
+		var elm = artistDiv.nextSibling.nextSibling.firstChild;
+		player.album = elm.innerText || elm.textContent;
+	}
+	catch (e)
+	{
+		player.album = null;
+	}
+	
+	try
+	{
+		var buttons = document.querySelector("#player .player-middle");
+		var pp = buttons.childNodes[2];
+		if (pp.disabled === true)
+			player.state = player.STATE_UNKNOWN;
+		else if (pp.className == "flat-button playing")
+			player.state = player.STATE_PLAYING;
+		else
+			player.state = player.STATE_PAUSED;
+		
+		if (player.state !== player.STATE_UNKNOWN)
+		{
+			player.prevSong = buttons.childNodes[1].disabled === false;
+			player.nextSong = buttons.childNodes[3].disabled === false;
+		}
+		else
+		{
+			player.prevSong = player.nextSong = false;
+		}
+		
+	}
+	catch (e)
+	{
+		player.prevSong = player.nextSong = false;
+	}
+	
+	player.update();
+	setTimeout(this.update.bind(this), 500);
+}
+
+/**
+ * Command handler
+ * @param cmd command to execute
+ */
+Integration.prototype.onActionActivated = function(object, name)
+{
+	var buttons = document.querySelector("#player .player-middle");
+	if (buttons)
+	{
+		var prevSong = buttons.childNodes[1];
+		var nextSong = buttons.childNodes[3];
+	}
+	else
+	{
+		var prevSong = null;
+		var nextSong = null;
+	}
+	
+	switch (name)
+	{
+	case this.ACTION_TOGGLE_PLAY:
+		SJBpost("playPause");
+		break;
+	case player.ACTION_PLAY:
+		if (player.state != player.STATE_PLAYING)
+			SJBpost("playPause");
+		break;
+	
+	case player.ACTION_PAUSE:
+	case player.ACTION_STOP:
+		if (player.state == player.STATE_PLAYING)
+			SJBpost("playPause");
+		break;
+	case player.ACTION_PREV_SONG:
+		Nuvola.clickOnElement(prevSong);
+		break;
+	case player.ACTION_NEXT_SONG:
+		Nuvola.clickOnElement(nextSong);
+		break;
+	}
+}
+
+/* Store reference */ 
+Nuvola.integration = new Integration();
+Nuvola.integration.update();
 
 })(this);  // function(Nuvola)

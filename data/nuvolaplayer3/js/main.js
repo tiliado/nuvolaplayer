@@ -47,6 +47,32 @@ Nuvola.inArray = function(array, item)
 	return array.indexOf(item) > -1;
 }
 
+/**
+* Triggers mouse event on element
+* 
+* @param elm Element object
+* @param name Event name
+*/
+Nuvola.triggerMouseEvent = function(elm, name)
+{
+	var event = document.createEvent('MouseEvents');
+	event.initMouseEvent(name, true, true, document.defaultView, 1, 0, 0, 0, 0, false, false, false, false, 0, elm);
+	elm.dispatchEvent(event);
+}
+
+/**
+* Simulates click on element
+* 
+* @param elm Element object
+*/
+Nuvola.clickOnElement = function(elm)
+{
+	Nuvola.triggerMouseEvent(elm, 'mouseover');
+	Nuvola.triggerMouseEvent(elm, 'mousedown');
+	Nuvola.triggerMouseEvent(elm, 'mouseup');
+	Nuvola.triggerMouseEvent(elm, 'click');
+}
+
 Nuvola.makeSignaling = function(obj_proto)
 {
 	obj_proto.registerSignals = function(signals)
@@ -173,7 +199,6 @@ Nuvola.Player =
 	STATE_PAUSED: 1,
 	STATE_PLAYING: 2,
 	
-	_initialized: false,
 	state: 0,
 	song: null,
 	artist: null,
@@ -198,12 +223,6 @@ Nuvola.Player =
 	
 	update: function()
 	{
-		if (!this._initialized)
-		{
-			Nuvola.Actions.connect("action-activated", this, "onActionActivated");
-			this._initialized = true;
-		}
-		
 		var changed = [];
 		var keys = ["song", "artist", "album", "artwork", "state", "prevSong", "nextSong"];
 		for (var i = 0; i < keys.length; i++)
@@ -279,21 +298,6 @@ Nuvola.Player =
 		
 		if (Nuvola.inArray(changed, "nextSong"))
 			Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_NEXT_SONG, this.nextSong === true);
-	},
-	
-	onActionActivated: function(object, name)
-	{
-		switch (name)
-		{
-		case this.ACTION_PLAY:
-		case this.ACTION_TOGGLE_PLAY:
-		case this.ACTION_PAUSE:
-		case this.ACTION_STOP:
-		case this.ACTION_PREV_SONG:
-		case this.ACTION_NEXT_SONG:
-			alert(name);
-			break;
-		}
 	}
 };
 
