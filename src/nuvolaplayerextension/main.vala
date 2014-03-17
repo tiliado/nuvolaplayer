@@ -132,7 +132,7 @@ public class WebExtension: GLib.Object
 					}
 					catch (JSError e)
 					{
-						warning("Error during call of %s: %s", name, e.message);
+						show_error("Error during call of %s: %s".printf(name, e.message));
 					}
 				}
 			}
