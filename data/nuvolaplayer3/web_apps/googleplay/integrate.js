@@ -1,5 +1,6 @@
 /*
  * Copyright 2011-2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014 Martin Pöhlmann <martin.deimos@gmx.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -110,10 +111,6 @@ Integration.prototype.update = function()
 	setTimeout(this.update.bind(this), 500);
 }
 
-/**
- * Command handler
- * @param cmd command to execute
- */
 Integration.prototype.onActionActivated = function(object, name)
 {
 	var buttons = document.querySelector("#player .player-middle");
@@ -152,8 +149,49 @@ Integration.prototype.onActionActivated = function(object, name)
 	}
 }
 
+Integration.prototype.addNavigationButtons = function()
+{
+	/* Loading in progress? */
+	var loading = document.getElementById("loading-progress");
+	if (loading && loading.style.display != "none")
+	{
+		setTimeout(this.addNavigationButtons.bind(this), 250);
+		return;
+	}
+	
+	var queryBar = document.getElementById("gbq2");
+	if (!queryBar)
+	{
+		console.log("Could not find the query bar.");
+		return;
+	}
+	
+	var queryBarFirstChild = queryBar.firstChild;
+	
+	var navigateBack = Nuvola.makeElement("button", null, "<");
+	navigateBack.className = "button small vertical-align";
+	navigateBack.style.float = "left";
+	navigateBack.style.marginRight = "0px";
+	navigateBack.style.borderTopRightRadius = "2px";
+	navigateBack.style.borderBottomRightRadius = "2px";
+	queryBar.insertBefore(navigateBack, queryBarFirstChild);
+	
+	var navigateForward = Nuvola.makeElement("button", null, ">");
+	navigateForward.className = "button small vertical-align";
+	navigateForward.style.float = "left";
+	navigateForward.style.marginRight = "15px";
+	navigateForward.style.borderLeft = "none";
+	navigateForward.style.borderTopLeftRadius = "2px";
+	navigateForward.style.borderLeftRightRadius = "2px";
+	queryBar.insertBefore(navigateForward, queryBarFirstChild);
+	
+	Nuvola.Actions.attachButton(Nuvola.Browser.ACTION_GO_BACK, navigateBack);
+	Nuvola.Actions.attachButton(Nuvola.Browser.ACTION_GO_FORWARD, navigateForward);
+}
+
 /* Store reference */ 
 Nuvola.integration = new Integration();
+setTimeout(Nuvola.integration.addNavigationButtons.bind(Nuvola.integration), 1000);
 Nuvola.integration.update();
 
 })(this);  // function(Nuvola)

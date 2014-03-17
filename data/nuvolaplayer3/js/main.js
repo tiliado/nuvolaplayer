@@ -73,6 +73,36 @@ Nuvola.clickOnElement = function(elm)
 	Nuvola.triggerMouseEvent(elm, 'click');
 }
 
+/**
+ * Creates HTML text node
+ * @param text	text of the node
+ * @return		new text node
+ */
+Nuvola.makeText = function(text)
+{
+	return document.createTextNode(text);
+}
+
+/**
+ * Creates HTML element
+ * @param name			element name
+ * @param attributes	element attributes (optional)
+ * @param text			text of the element (optional)
+ * @return				new HTML element
+ */
+Nuvola.makeElement = function(name, attributes, text)
+{
+	var elm = document.createElement(name);
+	attributes = attributes || {};
+	for (var key in attributes)
+		elm.setAttribute(key, attributes[key]);
+	
+	if (text !== undefined && text !== null)
+		elm.appendChild(Nuvola.makeText(text));
+	
+	return elm;
+}
+
 Nuvola.makeSignaling = function(obj_proto)
 {
 	obj_proto.registerSignals = function(signals)
@@ -162,6 +192,8 @@ Nuvola.TrayIcon =
 
 Nuvola.Actions =
 {
+	buttons: {},
+	
 	addAction: function(group, scope, name, label, mnemo_label, icon, keybinding)
 	{
 		Nuvola._sendMessageAsync("Nuvola.Actions.addAction", group, scope, name, label || "", mnemo_label || "", icon || "", keybinding || "");
@@ -186,11 +218,29 @@ Nuvola.Actions =
 	{
 		Nuvola._sendMessageAsync("Nuvola.Actions.activate", name);
 	},
+	
+	attachButton: function(name, button)
+	{
+		this.buttons[name] = button;
+		button.disabled = !Nuvola.Actions.isEnabled(name);
+		button.setAttribute("data-action-name", name);
+		button.addEventListener('click', function()
+		{
+			Nuvola.Actions.activate(this.getAttribute("data-action-name"));
+		});
+	},
+	
+	onEnabledChanged: function(object, name, enabled)
+	{
+		if (this.buttons[name])
+			this.buttons[name].disabled = !enabled;
+	}
 }
 
 Nuvola.makeSignaling(Nuvola.Actions);
 Nuvola.Actions.registerSignals(["action-activated", "enabled-changed"]);
 Nuvola.Actions.connect("action-activated", Nuvola.Actions, "debug");
+Nuvola.Actions.connect("enabled-changed", Nuvola.Actions, "onEnabledChanged");
 
 Nuvola.Player = 
 {
@@ -325,6 +375,14 @@ Nuvola.MenuBar =
 	{
 		Nuvola._sendMessageAsync("Nuvola.MenuBar.setMenu", id, label, actions);
 	},
+}
+
+Nuvola.Browser =
+{
+	ACTION_GO_BACK: "go-back",
+	ACTION_GO_FORWARD: "go-forward",
+	ACTION_GO_HOME: "go-home",
+	ACTION_RELOAD: "reload"
 }
 
 })(this);  // function(Nuvola)
