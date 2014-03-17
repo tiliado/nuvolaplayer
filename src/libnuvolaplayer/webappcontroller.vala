@@ -75,6 +75,8 @@ public class WebAppController : Diorite.Application
 		actions = new Diorite.ActionsRegistry(this, null);
 		append_actions();
 		main_window = new WebAppWindow(this);
+		set_up_menubar();
+		
 		fatal_error.connect(on_fatal_error);
 		show_error.connect(on_show_error);
 		web_engine = new WebEngine(this, web_app, config);
@@ -111,6 +113,23 @@ public class WebAppController : Diorite.Application
 		};
 		actions.add_actions(actions_spec);
 		
+	}
+	
+	private void set_up_menubar()
+	{
+		var menubar = new Menu();
+		var app_menu = actions.build_menu({Actions.QUIT});
+		if (app_menu_shown && !menubar_shown)
+		{
+			set_app_menu(app_menu);
+		}
+		else
+		{
+			menubar.append_submenu("_Application", app_menu);
+			set_app_menu(null);
+		}
+
+		set_menubar(menubar);
 	}
 	
 	private void do_quit()
