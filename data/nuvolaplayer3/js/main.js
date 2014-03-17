@@ -168,12 +168,15 @@ Nuvola.Player =
 	
 	init: function()
 	{
+		Nuvola.TrayIcon.setActions(["quit"]);
 		Nuvola.Actions.addAction("playback", "win", this.ACTION_PLAY, "Play", null, "media-playback-start", null);
 		Nuvola.Actions.addAction("playback", "win", this.ACTION_PAUSE, "Pause", null, "media-playback-pause", null);
 		Nuvola.Actions.addAction("playback", "win", this.ACTION_TOGGLE_PLAY, "Toggle play/pause", null, null, null);
 		Nuvola.Actions.addAction("playback", "win", this.ACTION_STOP, "Stop", null, "media-playback-stop", null);
 		Nuvola.Actions.addAction("playback", "win", this.ACTION_PREV_SONG, "Previous song", null, "media-skip-backward", null);
 		Nuvola.Actions.addAction("playback", "win", this.ACTION_NEXT_SONG, "Next song", null, "media-skip-forward", null);
+		Nuvola.MenuBar.setMenu("playback", "_Control",
+		[this.ACTION_TOGGLE_PLAY, this.ACTION_PLAY, this.ACTION_PAUSE, this.ACTION_PREV_SONG, this.ACTION_NEXT_SONG]);
 	},
 	
 	update: function()
@@ -260,5 +263,14 @@ Nuvola.Config =
 		Nuvola._setConfig(key, value);
 	}
 };
+
+
+Nuvola.MenuBar =
+{
+	setMenu: function(id, label, actions)
+	{
+		Nuvola.sendMessage("Nuvola.MenuBar.setMenu", id, label, actions);
+	},
+}
 
 })(this);  // function(Nuvola)

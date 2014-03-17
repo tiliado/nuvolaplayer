@@ -46,6 +46,7 @@ public class WebAppController : Diorite.Application
 	public ExtensionsManager extensions {get; private set;}
 	private static const int MINIMAL_REMEMBERED_WINDOW_SIZE = 300;
 	private uint configure_event_cb_id = 0;
+	private MenuBar menu_bar;
 	
 	public WebAppController(Diorite.Storage? storage, WebApp web_app)
 	{
@@ -75,7 +76,8 @@ public class WebAppController : Diorite.Application
 		actions = new Diorite.ActionsRegistry(this, null);
 		append_actions();
 		main_window = new WebAppWindow(this);
-		set_up_menubar();
+		menu_bar = new MenuBar(actions, app_menu_shown && !menubar_shown);
+		menu_bar.set_up(this);
 		
 		fatal_error.connect(on_fatal_error);
 		show_error.connect(on_show_error);
@@ -113,23 +115,6 @@ public class WebAppController : Diorite.Application
 		};
 		actions.add_actions(actions_spec);
 		
-	}
-	
-	private void set_up_menubar()
-	{
-		var menubar = new Menu();
-		var app_menu = actions.build_menu({Actions.QUIT});
-		if (app_menu_shown && !menubar_shown)
-		{
-			set_app_menu(app_menu);
-		}
-		else
-		{
-			menubar.append_submenu("_Application", app_menu);
-			set_app_menu(null);
-		}
-
-		set_menubar(menubar);
 	}
 	
 	private void do_quit()
@@ -208,8 +193,9 @@ public class WebAppController : Diorite.Application
 	
 	private void on_message_received(WebEngine engine, string name, Variant? data)
 	{
-		if (name == "Nuvola.Actions.addAction")
+		switch (name)
 		{
+		case "Nuvola.Actions.addAction":
 			string group = null;
 			string scope = null;
 			string action_name = null;
@@ -233,6 +219,25 @@ public class WebAppController : Diorite.Application
 				actions.add_action(action);
 			}
 			web_engine.message_handled();
+			break;
+		case "Nuvola.MenuBar.setMenu":
+			return_if_fail(data != null && data.is_container());
+			
+			string? id = null;
+			string? label = null;
+			int i = 0;
+			VariantIter iter = null;
+			data.get("(ssav)", &id, &label, &iter);
+			return_if_fail(id != null && label != null && iter != null);
+			string[] actions = new string[iter.n_children()];
+			Variant item = null;
+			while (iter.next("v", &item))
+				actions[i++] = item.get_string();
+			
+			menu_bar[id] = new SubMenu(label, (owned) actions);
+			menu_bar.set_up(this);
+			engine.message_handled();
+			break;
 		}
 	}
 	
