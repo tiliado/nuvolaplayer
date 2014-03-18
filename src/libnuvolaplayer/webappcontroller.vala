@@ -230,6 +230,25 @@ public class WebAppController : Diorite.Application
 			return_if_fail(action != null);
 			action.enabled = enabled;
 			break;
+		case "Nuvola.Actions.getState":
+			return_if_fail(data != null);
+			string? action_name = null;
+			data.get("(s)", &action_name);
+			return_if_fail(action_name != null);
+			var action = actions.get_action(action_name);
+			return_if_fail(action != null);
+			result = action.state;
+			break;
+		case "Nuvola.Actions.setState":
+			return_if_fail(data != null);
+			string? action_name = null;
+			Variant? state = null;
+			data.get("(s@*)", &action_name, &state);
+			return_if_fail(action_name != null);
+			var action = actions.get_action(action_name);
+			return_if_fail(action != null);
+			action.state = state;
+			break;
 		}
 	}
 	
@@ -245,9 +264,10 @@ public class WebAppController : Diorite.Application
 			string? mnemo_label = null;
 			string? icon = null;
 			string? keybinding = null;
+			Variant? state = null;
 			if (data != null)
 			{
-				data.get("(sssssss)", &group, &scope, &action_name, &label, &mnemo_label, &icon, &keybinding);
+				data.get("(sssssss@*)", &group, &scope, &action_name, &label, &mnemo_label, &icon, &keybinding, &state);
 				if (label == "")
 					label = null;
 				if (mnemo_label == "")
@@ -256,7 +276,7 @@ public class WebAppController : Diorite.Application
 					icon = null;
 				if (keybinding == "")
 					keybinding = null;
-				var action = new Diorite.Action(group, scope, action_name, label, mnemo_label, icon, keybinding, null);
+				var action = new Diorite.Action(group, scope, action_name, label, mnemo_label, icon, keybinding, null, state);
 				action.enabled = false;
 				action.activated.connect(on_custom_action_activated);
 				actions.add_action(action);

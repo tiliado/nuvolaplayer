@@ -27,6 +27,8 @@
 {
 
 var player = Nuvola.Player;
+var ACTION_THUMBS_UP = "thumbs-up";
+var ACTION_THUMBS_DOWN = "thumbs-down";
 
 /**
  * Creates new integration object
@@ -34,6 +36,8 @@ var player = Nuvola.Player;
 var Integration = function()
 {
 	Nuvola.Actions.connect("action-activated", this, "onActionActivated");
+	this.thumbsUp = undefined;
+	this.thumbsDown = undefined;
 };
 
 /**
@@ -107,7 +111,42 @@ Integration.prototype.update = function()
 		player.prevSong = player.nextSong = false;
 	}
 	
+	// null = disabled; true/false toggled on/off
+	var thumbsUp, thumbsDown;
+	try
+	{
+		var thumbs = this.getThumbs();
+		if (thumbs[0].style.visibility == "hidden")
+		{
+			thumbsUp = thumbsDown = null;
+		}
+		else
+		{
+			thumbsUp = thumbs[1].className == "selected";
+			thumbsDown = thumbs[2].className == "selected";
+		}
+	}
+	catch (e)
+	{
+		thumbsUp = thumbsDown = null;
+	}
+	
 	player.update();
+	
+	if (this.thumbsUp !== thumbsUp)
+	{
+		this.thumbsUp = thumbsUp;
+		Nuvola.Actions.setEnabled(ACTION_THUMBS_UP, thumbsUp !== null);
+		Nuvola.Actions.setState(ACTION_THUMBS_UP, thumbsUp === true);
+	}
+	
+	if (this.thumbsDown !== thumbsDown)
+	{
+		this.thumbsDown = thumbsDown;
+		Nuvola.Actions.setEnabled(ACTION_THUMBS_DOWN, thumbsDown !== null);
+		Nuvola.Actions.setState(ACTION_THUMBS_DOWN, thumbsDown === true);
+	}
+	
 	setTimeout(this.update.bind(this), 500);
 }
 
@@ -145,6 +184,12 @@ Integration.prototype.onActionActivated = function(object, name)
 		break;
 	case player.ACTION_NEXT_SONG:
 		Nuvola.clickOnElement(nextSong);
+		break;
+	case ACTION_THUMBS_UP:
+		Nuvola.clickOnElement(this.getThumbs()[1]);
+		break;
+	case ACTION_THUMBS_DOWN:
+		Nuvola.clickOnElement(this.getThumbs()[2]);
 		break;
 	}
 }
@@ -187,6 +232,12 @@ Integration.prototype.addNavigationButtons = function()
 	
 	Nuvola.Actions.attachButton(Nuvola.Browser.ACTION_GO_BACK, navigateBack);
 	Nuvola.Actions.attachButton(Nuvola.Browser.ACTION_GO_FORWARD, navigateForward);
+}
+
+Integration.prototype.getThumbs = function()
+{
+	var elm = document.querySelector("#player-right-wrapper .thumbs.rating-container");
+	return [elm, elm.childNodes[0], elm.childNodes[1]];
 }
 
 /* Store reference */ 

@@ -26,7 +26,10 @@
 {
 
 var LAST_URI = "web_app.last_uri";
-Nuvola.Player.init();
+
+Nuvola.Actions.addAction("playback", "win", "thumbs-up", "Thumbs up", null, null, null, true);
+Nuvola.Actions.addAction("playback", "win", "thumbs-down", "Thumbs down", null, null, null, true);
+Nuvola.Player.init(["thumbs-up", "thumbs-down"]);
 
 var Initialization = function()
 {

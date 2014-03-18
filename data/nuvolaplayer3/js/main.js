@@ -194,9 +194,9 @@ Nuvola.Actions =
 {
 	buttons: {},
 	
-	addAction: function(group, scope, name, label, mnemo_label, icon, keybinding)
+	addAction: function(group, scope, name, label, mnemo_label, icon, keybinding, state)
 	{
-		Nuvola._sendMessageAsync("Nuvola.Actions.addAction", group, scope, name, label || "", mnemo_label || "", icon || "", keybinding || "");
+		Nuvola._sendMessageAsync("Nuvola.Actions.addAction", group, scope, name, label || "", mnemo_label || "", icon || "", keybinding || "", state || null);
 	},
 	
 	debug: function(arg1, arg2)
@@ -212,6 +212,16 @@ Nuvola.Actions =
 	setEnabled: function(name, enabled)
 	{
 		return Nuvola._sendMessageSync("Nuvola.Actions.setEnabled", name, enabled);
+	},
+	
+	getState: function(name)
+	{
+		return Nuvola._sendMessageSync("Nuvola.Actions.getState", name);
+	},
+	
+	setState: function(name, state)
+	{
+		return Nuvola._sendMessageSync("Nuvola.Actions.setState", name, state);
 	},
 	
 	activate: function(name)
@@ -263,7 +273,7 @@ Nuvola.Player =
 	nextSong: null,
 	prevData: {},
 	
-	init: function()
+	init: function(extraActions)
 	{
 		Nuvola.TrayIcon.setActions(["quit"]);
 		Nuvola.Actions.addAction("playback", "win", this.ACTION_PLAY, "Play", null, "media-playback-start", null);
@@ -272,8 +282,9 @@ Nuvola.Player =
 		Nuvola.Actions.addAction("playback", "win", this.ACTION_STOP, "Stop", null, "media-playback-stop", null);
 		Nuvola.Actions.addAction("playback", "win", this.ACTION_PREV_SONG, "Previous song", null, "media-skip-backward", null);
 		Nuvola.Actions.addAction("playback", "win", this.ACTION_NEXT_SONG, "Next song", null, "media-skip-forward", null);
-		Nuvola.MenuBar.setMenu("playback", "_Control",
-		[this.ACTION_TOGGLE_PLAY, this.ACTION_PLAY, this.ACTION_PAUSE, this.ACTION_PREV_SONG, this.ACTION_NEXT_SONG]);
+		
+		var baseActions = [this.ACTION_TOGGLE_PLAY, this.ACTION_PLAY, this.ACTION_PAUSE, this.ACTION_PREV_SONG, this.ACTION_NEXT_SONG];
+		Nuvola.MenuBar.setMenu("playback", "_Control", baseActions.concat(extraActions || []));
 	},
 	
 	update: function()
