@@ -266,8 +266,11 @@ public unowned JS.Value get_gobject_property(JS.Context ctx, GLib.Object o, Para
 	return JS.Value.undefined(ctx);
 }
 
-public unowned JS.Value value_from_variant(JS.Context ctx, Variant variant) throws JSError
+public unowned JS.Value value_from_variant(JS.Context ctx, Variant? variant) throws JSError
 {
+	if (variant == null)
+		return JS.Value.null(ctx);
+	
 	var type = variant.get_type();
 	var object_type = new VariantType("a{s*}");
 	if (type.is_subtype_of(object_type))

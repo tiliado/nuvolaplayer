@@ -211,6 +211,39 @@ public class WebAppController : Diorite.Application
 	{
 		switch (name)
 		{
+		case "Nuvola.Actions.addAction":
+			string group = null;
+			string scope = null;
+			string action_name = null;
+			string? label = null;
+			string? mnemo_label = null;
+			string? icon = null;
+			string? keybinding = null;
+			Variant? state = null;
+			if (data != null)
+			{
+				data.get("(sssssss@*)", &group, &scope, &action_name, &label, &mnemo_label, &icon, &keybinding, &state);
+				if (label == "")
+					label = null;
+				if (mnemo_label == "")
+					mnemo_label = null;
+				if (icon == "")
+					icon = null;
+				if (keybinding == "")
+					keybinding = null;
+				
+				Diorite.Action action;
+				if (state == null || state.get_type_string() == "mv")
+					action = new Diorite.Action(group, scope, action_name, label, mnemo_label, icon, keybinding, null);
+				else if(state.is_of_type(VariantType.BOOLEAN))
+					action = new Diorite.Action.toggle(group, scope, action_name, label, mnemo_label, icon, keybinding, null, state);
+				else
+					action = new Diorite.Action.radio(group, scope, action_name, label, mnemo_label, icon, keybinding, null, state);
+				action.enabled = false;
+				action.activated.connect(on_custom_action_activated);
+				actions.add_action(action);
+			}
+			break;
 		case "Nuvola.Actions.isEnabled":
 			return_if_fail(data != null);
 			string? action_name = null;
@@ -256,32 +289,6 @@ public class WebAppController : Diorite.Application
 	{
 		switch (name)
 		{
-		case "Nuvola.Actions.addAction":
-			string group = null;
-			string scope = null;
-			string action_name = null;
-			string? label = null;
-			string? mnemo_label = null;
-			string? icon = null;
-			string? keybinding = null;
-			Variant? state = null;
-			if (data != null)
-			{
-				data.get("(sssssss@*)", &group, &scope, &action_name, &label, &mnemo_label, &icon, &keybinding, &state);
-				if (label == "")
-					label = null;
-				if (mnemo_label == "")
-					mnemo_label = null;
-				if (icon == "")
-					icon = null;
-				if (keybinding == "")
-					keybinding = null;
-				var action = new Diorite.Action(group, scope, action_name, label, mnemo_label, icon, keybinding, null, state);
-				action.enabled = false;
-				action.activated.connect(on_custom_action_activated);
-				actions.add_action(action);
-			}
-			break;
 		case "Nuvola.MenuBar.setMenu":
 			return_if_fail(data != null && data.is_container());
 			
@@ -329,7 +336,7 @@ public class WebAppController : Diorite.Application
 	{
 		try
 		{
-			web_engine.call_function("Nuvola.Actions.emit", new Variant("(ss)", "action-activated", action.name));
+			web_engine.call_function("Nuvola.Actions.emit", new Variant("(ssmv)", "action-activated", action.name, parameter));
 		}
 		catch (Diorite.Ipc.MessageError e)
 		{

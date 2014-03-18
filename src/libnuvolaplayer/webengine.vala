@@ -223,7 +223,8 @@ public class WebEngine : GLib.Object
 	
 	public void call_function(string name, Variant? params) throws Diorite.Ipc.MessageError
 	{
-		assert(slave != null);
+		if (slave == null)
+			return;
 		var data = new Variant("(smv)", name, params);
 		slave.send_message("call_function", data);
 	}
