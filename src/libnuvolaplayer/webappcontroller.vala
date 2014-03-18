@@ -125,8 +125,8 @@ public class WebAppController : Diorite.Application
 		//          Action(group, scope, name, label?, mnemo_label?, icon?, keybinding?, callback?)
 		new Diorite.Action("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
 		new Diorite.Action("go", "app", Actions.GO_HOME, "Home", "_Home", "go-home", "<alt>Home", web_engine.go_home),
-		new Diorite.Action("go", "app", Actions.GO_BACK, "Back", "_Back", "go-previous", null, web_engine.go_back),
-		new Diorite.Action("go", "app", Actions.GO_FORWARD, "Forward", "_Forward", "go-next", null, web_engine.go_forward),
+		new Diorite.Action("go", "app", Actions.GO_BACK, "Back", "_Back", "go-previous", "<alt>Left", web_engine.go_back),
+		new Diorite.Action("go", "app", Actions.GO_FORWARD, "Forward", "_Forward", "go-next", "<alt>Right", web_engine.go_forward),
 		new Diorite.Action("go", "app", Actions.GO_RELOAD, "Reload", "_Reload", "view-refresh", null, web_engine.reload)
 		};
 		actions.add_actions(actions_spec);
