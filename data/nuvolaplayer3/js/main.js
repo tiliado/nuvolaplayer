@@ -196,7 +196,8 @@ Nuvola.Actions =
 	
 	addAction: function(group, scope, name, label, mnemo_label, icon, keybinding, state)
 	{
-		Nuvola._sendMessageSync("Nuvola.Actions.addAction", group, scope, name, label || "", mnemo_label || "", icon || "", keybinding || "", state || null);
+		var state = state !== undefined ? state: null;
+		Nuvola._sendMessageSync("Nuvola.Actions.addAction", group, scope, name, label || "", mnemo_label || "", icon || "", keybinding || "", state);
 	},
 	
 	debug: function(arg1, arg2)

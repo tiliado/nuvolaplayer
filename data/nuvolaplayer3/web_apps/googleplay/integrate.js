@@ -29,6 +29,7 @@
 var player = Nuvola.Player;
 var ACTION_THUMBS_UP = "thumbs-up";
 var ACTION_THUMBS_DOWN = "thumbs-down";
+var ACTION_RATING = "rating";
 
 /**
  * Creates new integration object
@@ -38,6 +39,7 @@ var Integration = function()
 	Nuvola.Actions.connect("action-activated", this, "onActionActivated");
 	this.thumbsUp = undefined;
 	this.thumbsDown = undefined;
+	this.starRating = undefined;
 };
 
 /**
@@ -131,6 +133,25 @@ Integration.prototype.update = function()
 		thumbsUp = thumbsDown = null;
 	}
 	
+	// null = disabled
+	var starRating;
+	try
+	{
+		var stars = this.getStars();
+		if (stars.style.visibility == "hidden")
+		{
+			starRating = null;
+		}
+		else
+		{
+			starRating = stars.childNodes[0].getAttribute("data-rating") * 1;
+		}
+	}
+	catch (e)
+	{
+		starRating = null;
+	}
+	
 	player.update();
 	
 	if (this.thumbsUp !== thumbsUp)
@@ -147,10 +168,17 @@ Integration.prototype.update = function()
 		Nuvola.Actions.setState(ACTION_THUMBS_DOWN, thumbsDown === true);
 	}
 	
+	if (this.starRating !== starRating)
+	{
+		this.starRating = starRating;
+		Nuvola.Actions.setEnabled(ACTION_RATING, starRating !== null);
+		Nuvola.Actions.setState(ACTION_RATING, starRating);
+	}
+	
 	setTimeout(this.update.bind(this), 500);
 }
 
-Integration.prototype.onActionActivated = function(object, name)
+Integration.prototype.onActionActivated = function(object, name, param)
 {
 	var buttons = document.querySelector("#player .player-middle");
 	if (buttons)
@@ -190,6 +218,19 @@ Integration.prototype.onActionActivated = function(object, name)
 		break;
 	case ACTION_THUMBS_DOWN:
 		Nuvola.clickOnElement(this.getThumbs()[2]);
+		break;
+	case ACTION_RATING:
+		var stars = this.getStars().childNodes;
+		var i = stars.length;
+		while (i--)
+		{
+			var star = stars[i];
+			if (star.getAttribute("data-rating") === ("" + param))
+			{
+				Nuvola.clickOnElement(star);
+				break;
+			}
+		}
 		break;
 	}
 }
@@ -238,6 +279,11 @@ Integration.prototype.getThumbs = function()
 {
 	var elm = document.querySelector("#player-right-wrapper .thumbs.rating-container");
 	return [elm, elm.childNodes[0], elm.childNodes[1]];
+}
+
+Integration.prototype.getStars = function()
+{
+	return document.querySelector("#player-right-wrapper .stars.rating-container");
 }
 
 /* Store reference */ 

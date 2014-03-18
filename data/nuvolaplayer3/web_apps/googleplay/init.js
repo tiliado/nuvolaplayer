@@ -29,7 +29,9 @@ var LAST_URI = "web_app.last_uri";
 
 Nuvola.Actions.addAction("playback", "win", "thumbs-up", "Thumbs up", null, null, null, true);
 Nuvola.Actions.addAction("playback", "win", "thumbs-down", "Thumbs down", null, null, null, true);
-Nuvola.Player.init(["thumbs-up", "thumbs-down"]);
+Nuvola.Actions.addAction("playback", "win", "rating", "Rating", null, null, null, 0.0);
+Nuvola.Player.init(["thumbs-up", "thumbs-down", "rating(0.0)|: 0 stars", "rating(1.0)|: 1 star",
+"rating(2.0)|: 2 stars", "rating(3.0)|: 3 stars", "rating(4.0)|: 4 stars", "rating(5.0)|: 5 stars"]);
 
 var Initialization = function()
 {
