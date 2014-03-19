@@ -273,8 +273,9 @@ Nuvola.Player =
 	prevSong: null,
 	nextSong: null,
 	prevData: {},
+	extraActions: [],
 	
-	init: function(extraActions)
+	init: function()
 	{
 		Nuvola.TrayIcon.setActions(["quit"]);
 		Nuvola.Actions.addAction("playback", "win", this.ACTION_PLAY, "Play", null, "media-playback-start", null);
@@ -283,9 +284,7 @@ Nuvola.Player =
 		Nuvola.Actions.addAction("playback", "win", this.ACTION_STOP, "Stop", null, "media-playback-stop", null);
 		Nuvola.Actions.addAction("playback", "win", this.ACTION_PREV_SONG, "Previous song", null, "media-skip-backward", null);
 		Nuvola.Actions.addAction("playback", "win", this.ACTION_NEXT_SONG, "Next song", null, "media-skip-forward", null);
-		
-		var baseActions = [this.ACTION_TOGGLE_PLAY, this.ACTION_PLAY, this.ACTION_PAUSE, this.ACTION_PREV_SONG, this.ACTION_NEXT_SONG];
-		Nuvola.MenuBar.setMenu("playback", "_Control", baseActions.concat(extraActions || []));
+		this.updateMenu();
 	},
 	
 	update: function()
@@ -365,8 +364,31 @@ Nuvola.Player =
 		
 		if (Nuvola.inArray(changed, "nextSong"))
 			Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_NEXT_SONG, this.nextSong === true);
+	},
+	
+	addExtraActions: function(actions)
+	{
+		var update = false;
+		for (var i = 0; i < actions.length; i++)
+		{
+			var action = actions[i];
+			if (!Nuvola.inArray(this.extraActions, action))
+			{
+				this.extraActions.push(action);
+				update = true;
+			}
+		}
+		if (update)
+			this.updateMenu();
+	},
+	
+	updateMenu: function()
+	{
+		Nuvola.MenuBar.setMenu("playback", "_Control", this.baseActions.concat(this.extraActions));
 	}
 };
+
+Nuvola.Player.baseActions = [Nuvola.Player.ACTION_TOGGLE_PLAY, Nuvola.Player.ACTION_PLAY, Nuvola.Player.ACTION_PAUSE, Nuvola.Player.ACTION_PREV_SONG, Nuvola.Player.ACTION_NEXT_SONG],
 
 Nuvola.Config = 
 {

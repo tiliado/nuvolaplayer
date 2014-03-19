@@ -30,6 +30,8 @@ var player = Nuvola.Player;
 var ACTION_THUMBS_UP = "thumbs-up";
 var ACTION_THUMBS_DOWN = "thumbs-down";
 var ACTION_RATING = "rating";
+var STARS_ACTIONS = ["rating(0.0)|: 0 stars", "rating(1.0)|: 1 star", "rating(2.0)|: 2 stars", "rating(3.0)|: 3 stars", "rating(4.0)|: 4 stars", "rating(5.0)|: 5 stars"]
+var THUMBS_ACTIONS = ["thumbs-up", "thumbs-down"];
 
 /**
  * Creates new integration object
@@ -40,6 +42,8 @@ var Integration = function()
 	this.thumbsUp = undefined;
 	this.thumbsDown = undefined;
 	this.starRating = undefined;
+	this.starRatingEnabled = undefined;
+	this.thumbRatingEnabled = undefined;
 };
 
 /**
@@ -124,6 +128,7 @@ Integration.prototype.update = function()
 		}
 		else
 		{
+			this.toggleThumbRating(true);
 			thumbsUp = thumbs[1].className == "selected";
 			thumbsDown = thumbs[2].className == "selected";
 		}
@@ -144,6 +149,7 @@ Integration.prototype.update = function()
 		}
 		else
 		{
+			this.toggleStarRating(true);
 			starRating = stars.childNodes[0].getAttribute("data-rating") * 1;
 		}
 	}
@@ -285,6 +291,27 @@ Integration.prototype.getStars = function()
 {
 	return document.querySelector("#player-right-wrapper .stars.rating-container");
 }
+
+Integration.prototype.toggleStarRating = function(enabled)
+{
+	if (enabled && this.starRatingEnabled !== true)
+	{
+		Nuvola.Player.addExtraActions(STARS_ACTIONS);
+		this.starRatingEnabled = true;
+	}
+}
+
+Integration.prototype.toggleThumbRating = function(enabled)
+{
+	if (enabled && this.thumbRatingEnabled !== true)
+	{
+		Nuvola.Player.addExtraActions(THUMBS_ACTIONS);
+		this.thumbRatingEnabled = true;
+	}
+}
+
+Nuvola.Player.init();
+
 
 /* Store reference */ 
 Nuvola.integration = new Integration();
