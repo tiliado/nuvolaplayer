@@ -237,6 +237,10 @@ public class WebEngine : GLib.Object
 		master = new Diorite.Ipc.MessageServer(app.path_name + MASTER_SUFFIX);
 		master.add_handler("get_data_dir", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_get_data_dir);
 		master.add_handler("get_user_config_dir", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_get_user_config_dir);
+		master.add_handler("config_save", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_config_save);
+		master.add_handler("config_has_key", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_config_has_key);
+		master.add_handler("config_get_value", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_config_get_value);
+		master.add_handler("config_set_value", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_config_set_value);
 		master.add_handler("show_error", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_show_error);
 		master.add_handler("send_message_sync", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_send_message_sync);
 		master.add_handler("send_message_async", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_send_message_async);
@@ -267,6 +271,49 @@ public class WebEngine : GLib.Object
 	{
 		response = new Variant.string(web_app.user_config_dir.get_path());
 		return true;
+	}
+	
+	private bool handle_config_has_key(Diorite.Ipc.MessageServer server, Variant request, out Variant? response)
+	{
+		if (!request.is_of_type(VariantType.STRING))
+			return server.create_error("Invalid request type: " + request.get_type_string(), out response);
+		response = new Variant.boolean(config.has_key(request.get_string()));
+		return true;
+	}
+	
+	private bool handle_config_get_value(Diorite.Ipc.MessageServer server, Variant request, out Variant? response)
+	{
+		if (!request.is_of_type(VariantType.STRING))
+			return server.create_error("Invalid request type: " + request.get_type_string(), out response);
+		response = config.get_value(request.get_string());
+		if (response == null)
+			response = new Variant("mv", null);
+		return true;
+	}
+	
+	private bool handle_config_set_value(Diorite.Ipc.MessageServer server, Variant request, out Variant? response)
+	{
+		if (!request.is_of_type(new VariantType("(smv)")))
+			return server.create_error("Invalid request type: " + request.get_type_string(), out response);
+		string? key = null;
+		Variant? value = null;
+		request.get("(smv)", &key, &value);
+		config.set_value(key, value);
+		response = null;
+		return true;
+	}
+	
+	private bool handle_config_save(Diorite.Ipc.MessageServer server, Variant request, out Variant? response)
+	{
+		try
+		{
+			response = new Variant.boolean(config.save());
+			return true;
+		}
+		catch (GLib.Error e)
+		{
+			return server.create_error("Failed to save configuration: " + e.message, out response);
+		}
 	}
 	
 	private bool handle_show_error(Diorite.Ipc.MessageServer server, Variant request, out Variant? response)

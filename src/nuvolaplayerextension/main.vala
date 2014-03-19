@@ -61,7 +61,7 @@ public class WebExtension: GLib.Object
 			return;
 		}
 		var storage = new Diorite.XdgStorage.for_project(Nuvola.get_appname());
-		js_api = new JSApi(storage, data_dir, user_config_dir);
+		js_api = new JSApi(storage, data_dir, user_config_dir, new ConfigProxy(master));
 		js_api.send_message_async.connect(on_send_message_async);
 		js_api.send_message_sync.connect(on_send_message_sync);
 		WebKit.ScriptWorld.get_default().window_object_cleared.connect(on_window_object_cleared);

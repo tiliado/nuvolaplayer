@@ -105,7 +105,7 @@ public class JSApi : GLib.Object
 	private File config_dir;
 	private KeyValueStorage? config;
 	
-	public JSApi(Diorite.Storage storage, File data_dir, File config_dir, KeyValueStorage? config=null)
+	public JSApi(Diorite.Storage storage, File data_dir, File config_dir, KeyValueStorage? config)
 	{
 		this.storage = storage;
 		this.data_dir = data_dir;
