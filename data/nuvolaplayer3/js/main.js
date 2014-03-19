@@ -332,10 +332,16 @@ Nuvola.Player =
 			Nuvola.TrayIcon.setTooltip("Nuvola Player");
 		}
 		
+		
+		var trayIconActions = [];
 		if (this.state === this.STATE_PLAYING || this.state === this.STATE_PAUSED)
-			Nuvola.TrayIcon.setActions([this.state === this.STATE_PAUSED ? this.ACTION_PLAY : this.ACTION_PAUSE, this.ACTION_PREV_SONG, this.ACTION_NEXT_SONG, "quit"]);
-		else
-			Nuvola.TrayIcon.setActions(["quit"]);
+		{
+			trayIconActions = [this.state === this.STATE_PAUSED ? this.ACTION_PLAY : this.ACTION_PAUSE, this.ACTION_PREV_SONG, this.ACTION_NEXT_SONG];
+			trayIconActions = trayIconActions.concat(this.extraActions);
+		}
+		
+		trayIconActions.push("quit");
+		Nuvola.TrayIcon.setActions(trayIconActions);
 		
 		if (Nuvola.inArray(changed, "state"))
 		{
