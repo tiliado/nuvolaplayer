@@ -370,6 +370,10 @@ Nuvola.Player =
 
 Nuvola.Config = 
 {
+	hasKey: function(key)
+	{
+		return Nuvola._hasConfigKey(key);
+	},
 	get: function(key)
 	{
 		return Nuvola._getConfig(key);

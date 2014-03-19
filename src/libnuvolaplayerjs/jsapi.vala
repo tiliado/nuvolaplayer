@@ -222,6 +222,7 @@ public class JSApi : GLib.Object
 	{
 		{"_sendMessageAsync", send_message_async_func, 0},
 		{"_sendMessageSync", send_message_sync_func, 0},
+		{"_hasConfigKey", has_config_key_func, 0},
 		{"_getConfig", get_config_func, 0},
 		{"_setConfig", set_config_func, 0},
 		{null, null, 0}
@@ -327,6 +328,36 @@ public class JSApi : GLib.Object
 			exception = create_exception(ctx, "Failed to parse response. %s".printf(e.message));
 			return undefined;
 		}
+	}
+	
+	static unowned JS.Value has_config_key_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)
+	{
+		unowned JS.Value _false = JS.Value.boolean(ctx, false);
+		exception = null;
+		if (args.length != 1)
+		{
+			exception = create_exception(ctx, "One argument required.");
+			return _false;
+		}
+		
+		var key = string_or_null(ctx, args[0]);
+		if (key == null)
+		{
+			exception = create_exception(ctx, "The first argument must be a non-null string");
+			return _false;
+		}
+		
+		var js_api = (self.get_private() as JSApi);
+		if (js_api == null)
+		{
+			exception = create_exception(ctx, "JSApi is null");
+			return _false;
+		}
+		
+		if (js_api.config == null)
+			return _false;
+		
+		return JS.Value.boolean(ctx, js_api.config.has_key(key));
 	}
 	
 	static unowned JS.Value get_config_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)
