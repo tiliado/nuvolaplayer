@@ -38,18 +38,14 @@ public class MenuBar
 		this.menus = new HashTable<string, SubMenu>(str_hash, str_equal);
 	}
 	
-	public void set_up(Gtk.Application app)
+	public void build_menus(out Menu? app_menu, out Menu? menubar)
 	{
-		var menubar = new Menu();
-		var app_menu = actions_reg.build_menu({Actions.QUIT}, true, false);
-		if (export_app_menu)
-		{
-			app.set_app_menu(app_menu);
-		}
-		else
+		menubar = new Menu();
+		app_menu = actions_reg.build_menu({Actions.QUIT}, true, false);
+		if (!export_app_menu)
 		{
 			menubar.append_submenu("_Application", app_menu);
-			app.set_app_menu(null);
+			app_menu = null;
 		}
 		
 		menubar.append_submenu("_Go", actions_reg.build_menu({Actions.GO_HOME, Actions.GO_RELOAD, Actions.GO_BACK, Actions.GO_FORWARD}, true, false));
@@ -57,8 +53,6 @@ public class MenuBar
 		var submenus = menus.get_values();
 		foreach (var submenu in submenus)
 			submenu.append_to_menu(actions_reg, menubar);
-		
-		app.set_menubar(menubar);
 	}
 	
 	public void set(string id, SubMenu submenu)

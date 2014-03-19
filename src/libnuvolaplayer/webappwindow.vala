@@ -29,10 +29,35 @@ public class WebAppWindow : Gtk.ApplicationWindow
 {
 	public Gtk.Grid grid {get; private set;}
 	public bool maximized {get; private set; default = false;}
+	private Gtk.MenuBar? _menu_bar = null;
+	public Gtk.MenuBar? menu_bar
+	{
+		get
+		{
+			return _menu_bar;
+		}
+		set
+		{
+			if (_menu_bar != null)
+			{
+				grid.remove(_menu_bar);
+				grid.remove_row(0);
+			}
+			_menu_bar = value;
+			if (_menu_bar != null)
+			{
+				grid.insert_row(0);
+				grid.attach(_menu_bar, 0, 0, 1, 1);
+				_menu_bar.show();
+			}
+		}
+	}
+	
 	private WebAppController app;
 	
 	public WebAppWindow(WebAppController app)
 	{
+		Object(show_menubar: false);
 		window_state_event.connect(on_window_state_event);
 		title = app.app_name;
 		try

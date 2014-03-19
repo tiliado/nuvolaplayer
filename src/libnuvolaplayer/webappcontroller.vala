@@ -95,7 +95,7 @@ public class WebAppController : Diorite.Application
 		
 		append_actions();
 		menu_bar = new MenuBar(actions, app_menu_shown && !menubar_shown);
-		menu_bar.set_up(this);
+		set_up_menus();
 		
 		if (!web_engine.load())
 			return;
@@ -304,7 +304,7 @@ public class WebAppController : Diorite.Application
 				actions[i++] = item.get_string();
 			
 			menu_bar[id] = new SubMenu(label, (owned) actions);
-			menu_bar.set_up(this);
+			set_up_menus();
 			break;
 		case "Nuvola.Actions.activate":
 			return_if_fail(data != null);
@@ -359,6 +359,21 @@ public class WebAppController : Diorite.Application
 		case "can-go-back":
 			actions.get_action(Actions.GO_BACK).enabled = web_engine.can_go_back;
 			break;
+		}
+	}
+	
+	private void set_up_menus()
+	{
+		Menu? app_menu_model = null;
+		Menu? menu_bar_model = null;
+		menu_bar.build_menus(out app_menu_model, out menu_bar_model);
+		if (app_menu_model != null)
+			set_app_menu(app_menu_model);
+		if (menu_bar_model != null)
+		{
+			if (!menubar_shown)
+				main_window.menu_bar = new Gtk.MenuBar.from_model(menu_bar_model);
+			set_menubar(menu_bar_model);
 		}
 	}
 }
