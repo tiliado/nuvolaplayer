@@ -2,6 +2,34 @@
 
 [CCode (cprefix = "WebKit", gir_namespace = "WebKit2WebExtension", gir_version = "3.0", lower_case_cprefix = "webkit_")]
 namespace WebKit {
+	/* https://bugs.webkit.org/show_bug.cgi?id=127179 */
+	[CCode (cheader_filename = "webkit2/webkit-web-extension.h", type_id = "webkit_uri_request_get_type ()")]
+	public class URIRequest : GLib.Object {
+		[CCode (has_construct_function = false)]
+		public URIRequest (string uri);
+		public unowned Soup.MessageHeaders get_http_headers ();
+		public unowned string get_uri ();
+		public void set_uri (string uri);
+		public string uri { get; set construct; }
+	}
+	[CCode (cheader_filename = "webkit2/webkit-web-extension.h", type_id = "webkit_uri_response_get_type ()")]
+	public class URIResponse : GLib.Object {
+		[CCode (has_construct_function = false)]
+		protected URIResponse ();
+		public uint64 get_content_length ();
+		public unowned string get_mime_type ();
+		public uint get_status_code ();
+		public unowned string get_suggested_filename ();
+		public unowned string get_uri ();
+		public uint64 content_length { get; }
+		public string mime_type { get; }
+		public uint status_code { get; }
+		public string suggested_filename { get; }
+		public string uri { get; }
+	}
+	
+	/*------------------------------------------------------*/
+	
 	namespace DOM {
 		[CCode (cheader_filename = "webkit2/webkit-web-extension.h", type_id = "webkit_dom_attr_get_type ()")]
 		[GIR (name = "DOMAttr")]

@@ -105,7 +105,6 @@ def options(ctx):
 
 # Configure build process
 def configure(ctx):
-	
 	ctx.env.PLATFORM = PLATFORM = ctx.options.platform.upper()
 	if PLATFORM not in (LINUX,):
 		print("Unsupported platform %s. Please try to talk to devs to consider support of your platform." % sys.platform)
@@ -118,7 +117,6 @@ def configure(ctx):
 	
 	ctx.load('compiler_c vala')
 	ctx.check_vala(min_version=(0,16,1))
-	
 	# Don't be quiet
 	ctx.env.VALAFLAGS.remove("--quiet")
 	ctx.env.append_value("VALAFLAGS", "-v")
@@ -191,8 +189,10 @@ def build(ctx):
 	ctx(features = "c cshlib",
 		target = LIBNUVOLAPLAYERJS[3:],
 		name = LIBNUVOLAPLAYERJS,
-		source = ctx.path.ant_glob('src/libnuvolaplayerjs/*.vala') + ctx.path.ant_glob('src/libnuvolaplayerjs/*.c'),
-		packages = "javascriptcoregtk-3.0 webkit2gtk-3.0 webkit2gtk-web-extension-3.0 dioriteglib glib-2.0 gio-2.0",
+		source = ctx.path.ant_glob('src/libnuvolaplayerjs/*.vala') \
+		+ ctx.path.ant_glob('src/libnuvolaplayerjs/*.c') \
+		+ ["vapi/webkit2gtk-web-extension-3.0.vapi"],
+		packages = "javascriptcoregtk-3.0 dioriteglib glib-2.0 gio-2.0 libsoup-2.4",
 		uselib = "JSCORE WEBKIT DIORITEGLIB GLIB GTHREAD GIO",
 		includes = ["src/libnuvolaplayerjs"],
 		vala_defines = vala_defines,
@@ -201,12 +201,16 @@ def build(ctx):
 		vala_target_glib = "2.32",
 	)
 	
+	packages = 'libnotify javascriptcoregtk-3.0 webkit2gtk-3.0 libarchive dioritegtk dioriteglib gtk+-3.0 gdk-3.0 posix json-glib-1.0 glib-2.0 gio-2.0'
+	uselib = 'NOTIFY JSCORE WEBKIT LIBARCHIVE DIORITEGTK DIORITEGLIB GTK+ GDK JSON-GLIB GLIB GTHREAD GIO'
+	
 	ctx(features = "c cshlib",
 		target = LIBNUVOLAPLAYER[3:],
 		name = LIBNUVOLAPLAYER,
-		source = ctx.path.ant_glob('src/libnuvolaplayer/*.vala') + ctx.path.ant_glob('src/libnuvolaplayer/*.c'),
-		packages = 'libnotify javascriptcoregtk-3.0 webkit2gtk-3.0 libarchive dioritegtk dioriteglib gtk+-3.0 gdk-3.0 posix json-glib-1.0 glib-2.0 gio-2.0',
-		uselib = 'NOTIFY JSCORE WEBKIT LIBARCHIVE DIORITEGTK DIORITEGLIB GTK+ GDK JSON-GLIB GLIB GTHREAD GIO',
+		source = ctx.path.ant_glob('src/libnuvolaplayer/*.vala') \
+		+ ctx.path.ant_glob('src/libnuvolaplayer/*.c'),
+		packages = packages,
+		uselib = uselib,
 		use = [LIBNUVOLAPLAYERJS],
 		includes = ["src/libnuvolaplayer"],
 		vala_defines = vala_defines,
@@ -243,8 +247,9 @@ def build(ctx):
 	ctx(features = "c cshlib",
 		target = NUVOLAPLAYEREXTENSION,
 		name = NUVOLAPLAYEREXTENSION,
-		source = ctx.path.ant_glob('src/nuvolaplayerextension/*.vala') + ctx.path.ant_glob('src/nuvolaplayerextension/*.c'),
-		packages = "dioriteglib webkit2gtk-3.0 webkit2gtk-web-extension-3.0 javascriptcoregtk-3.0",
+		source = ctx.path.ant_glob('src/nuvolaplayerextension/*.vala') \
+		+ ctx.path.ant_glob('src/nuvolaplayerextension/*.c'),
+		packages = "dioriteglib webkit2gtk-web-extension-3.0 javascriptcoregtk-3.0",
 		uselib = "DIORITEGLIB DIORITEGTK WEBKIT JSCORE",
 		includes = ["src/nuvolaplayerextension/"],
 		use = [LIBNUVOLAPLAYERJS],
@@ -264,3 +269,14 @@ def post(ctx):
 	if ctx.cmd in ('install', 'uninstall'):
 		if ctx.env.PLATFORM == LINUX and ctx.options.ldconfig:
 			ctx.exec_command('/sbin/ldconfig') 
+
+from waflib.TaskGen import extension
+@extension('.vapi')
+def vapi_file(self, node):
+	try:
+		valatask = self.valatask
+	except AttributeError:
+		valatask = self.valatask = self.create_task('valac')
+		self.init_vala_task()
+
+	valatask.inputs.append(node)
