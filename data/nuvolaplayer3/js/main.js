@@ -164,6 +164,11 @@ Nuvola.makeSignaling = function(obj_proto)
 Nuvola.makeSignaling(Nuvola);
 Nuvola.registerSignals(["home-page", "navigation-request", "uri-changed", "last-page"]);
 
+Nuvola.setHideOnClose = function(hide)
+{
+	return Nuvola._sendMessageSync("Nuvola.setHideOnClose", hide);
+}
+
 Nuvola.Notification =
 {
 	update: function(title, text, iconName, iconURL)
@@ -348,16 +353,19 @@ Nuvola.Player =
 			switch (this.state)
 			{
 			case this.STATE_PLAYING:
+				Nuvola.setHideOnClose(true);
 				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_TOGGLE_PLAY, true);
 				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_PLAY, false);
 				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_PAUSE, true);
 				break;
 			case this.STATE_PAUSED:
+				Nuvola.setHideOnClose(false);
 				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_TOGGLE_PLAY, true);
 				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_PLAY, true);
 				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_PAUSE, false);
 				break;
 			default:
+				Nuvola.setHideOnClose(false);
 				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_TOGGLE_PLAY, false);
 				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_PLAY, false);
 				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_PAUSE, false);

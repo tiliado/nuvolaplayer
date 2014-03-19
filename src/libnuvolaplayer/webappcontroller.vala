@@ -55,6 +55,7 @@ public class WebAppController : Diorite.Application
 	private static const int MINIMAL_REMEMBERED_WINDOW_SIZE = 300;
 	private uint configure_event_cb_id = 0;
 	private MenuBar menu_bar;
+	private bool hide_on_close = false;
 	
 	public WebAppController(Diorite.Storage? storage, WebApp web_app)
 	{
@@ -83,6 +84,7 @@ public class WebAppController : Diorite.Application
 		config.config_changed.connect(on_config_changed);
 		actions = new Diorite.ActionsRegistry(this, null);
 		main_window = new WebAppWindow(this);
+		main_window.can_destroy.connect(on_can_quit);
 		fatal_error.connect(on_fatal_error);
 		show_error.connect(on_show_error);
 		web_engine = new WebEngine(this, web_app, config);
@@ -211,6 +213,10 @@ public class WebAppController : Diorite.Application
 	{
 		switch (name)
 		{
+		case "Nuvola.setHideOnClose":
+			return_if_fail(data != null);
+			data.get("(b)", &hide_on_close);
+			break;
 		case "Nuvola.Actions.addAction":
 			string group = null;
 			string scope = null;
@@ -360,6 +366,12 @@ public class WebAppController : Diorite.Application
 			actions.get_action(Actions.GO_BACK).enabled = web_engine.can_go_back;
 			break;
 		}
+	}
+	
+	private void on_can_quit(ref bool result)
+	{
+		if (hide_on_close)
+			result = false;
 	}
 	
 	private void set_up_menus()

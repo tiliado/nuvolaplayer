@@ -70,6 +70,8 @@ public class WebAppWindow : Gtk.ApplicationWindow
 		}
 		set_default_size(500, 500);
 		
+		delete_event.connect(on_delete_event);
+		
 		this.app = app;
 		app.add_window(this);
 		app.actions.window = this;
@@ -78,12 +80,21 @@ public class WebAppWindow : Gtk.ApplicationWindow
 		add(grid);
 	}
 	
+	public signal void can_destroy(ref bool result);
+	
+	public bool on_delete_event(Gdk.EventAny event)
+	{
+		hide();
+		bool result = true;
+		can_destroy(ref result);
+		return !result;
+	}
+	
 	private bool on_window_state_event(Gdk.EventWindowState event)
 	{
 		maximized = (event.new_window_state & Gdk.WindowState.MAXIMIZED) != 0;
 		return false;
 	}
-
 }
 
 } // namespace Nuvola
