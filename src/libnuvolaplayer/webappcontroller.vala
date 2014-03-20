@@ -125,11 +125,11 @@ public class WebAppController : Diorite.Application
 	{
 		Diorite.Action[] actions_spec = {
 		//          Action(group, scope, name, label?, mnemo_label?, icon?, keybinding?, callback?)
-		new Diorite.Action("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
-		new Diorite.Action("go", "app", Actions.GO_HOME, "Home", "_Home", "go-home", "<alt>Home", web_engine.go_home),
-		new Diorite.Action("go", "app", Actions.GO_BACK, "Back", "_Back", "go-previous", "<alt>Left", web_engine.go_back),
-		new Diorite.Action("go", "app", Actions.GO_FORWARD, "Forward", "_Forward", "go-next", "<alt>Right", web_engine.go_forward),
-		new Diorite.Action("go", "app", Actions.GO_RELOAD, "Reload", "_Reload", "view-refresh", null, web_engine.reload)
+		new Diorite.SimpleAction("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
+		new Diorite.SimpleAction("go", "app", Actions.GO_HOME, "Home", "_Home", "go-home", "<alt>Home", web_engine.go_home),
+		new Diorite.SimpleAction("go", "app", Actions.GO_BACK, "Back", "_Back", "go-previous", "<alt>Left", web_engine.go_back),
+		new Diorite.SimpleAction("go", "app", Actions.GO_FORWARD, "Forward", "_Forward", "go-next", "<alt>Right", web_engine.go_forward),
+		new Diorite.SimpleAction("go", "app", Actions.GO_RELOAD, "Reload", "_Reload", "view-refresh", null, web_engine.reload)
 		};
 		actions.add_actions(actions_spec);
 		
@@ -240,11 +240,11 @@ public class WebAppController : Diorite.Application
 				
 				Diorite.Action action;
 				if (state == null || state.get_type_string() == "mv")
-					action = new Diorite.Action(group, scope, action_name, label, mnemo_label, icon, keybinding, null);
+					action = new Diorite.SimpleAction(group, scope, action_name, label, mnemo_label, icon, keybinding, null);
 				else if(state.is_of_type(VariantType.BOOLEAN))
-					action = new Diorite.Action.toggle(group, scope, action_name, label, mnemo_label, icon, keybinding, null, state);
+					action = new Diorite.ToggleAction(group, scope, action_name, label, mnemo_label, icon, keybinding, null, state);
 				else
-					action = new Diorite.Action.radio(group, scope, action_name, label, mnemo_label, icon, keybinding, null, state);
+					action = new Diorite.RadioAction(group, scope, action_name, label, mnemo_label, icon, keybinding, null, state);
 				action.enabled = false;
 				action.activated.connect(on_custom_action_activated);
 				actions.add_action(action);
