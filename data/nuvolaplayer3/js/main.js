@@ -195,6 +195,19 @@ Nuvola.TrayIcon =
 	},
 }
 
+Nuvola.UnityDockItem =
+{
+	clearActions: function()
+	{
+		Nuvola._sendMessageAsync("Nuvola.TrayIcon.clearActions");
+	},
+	
+	setActions: function(actions)
+	{
+		Nuvola._sendMessageAsync("Nuvola.UnityDockItem.setActions", actions);
+	},
+}
+
 Nuvola.Actions =
 {
 	buttons: {},
@@ -345,8 +358,10 @@ Nuvola.Player =
 			trayIconActions = trayIconActions.concat(this.extraActions);
 		}
 		
+		Nuvola.UnityDockItem.setActions(trayIconActions);
 		trayIconActions.push("quit");
 		Nuvola.TrayIcon.setActions(trayIconActions);
+		
 		
 		if (Nuvola.inArray(changed, "state"))
 		{

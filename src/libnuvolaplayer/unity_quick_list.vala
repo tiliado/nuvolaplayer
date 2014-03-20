@@ -1,0 +1,227 @@
+/*
+ * Copyright 2011-2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met: 
+ * 
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer. 
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution. 
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#if UNITY
+using Unity;
+
+namespace Nuvola.Extensions.UnityQuickList
+{
+
+public Nuvola.ExtensionInfo get_info()
+{
+	return
+	{
+		/// Name of a plugin providing scrobbling to Last.fm
+		_("Unity Quick List"),
+		Nuvola.get_version(),
+		/// Extension descriptiom
+		_("<p>This plugin provides integration with docks compliant with Unity Quick List (Unity Launcher, DockBarX).</p>"),
+		"Jiří Janoušek",
+		typeof(Extension),
+		true
+	};
+}
+
+/**
+ * Manages dock item at Unity Launcher
+ */
+public class Extension: Nuvola.Extension
+{
+	private WebAppController controller;
+	private WebEngine web_engine;
+	private Diorite.ActionsRegistry actions_reg;
+	private LauncherEntry dock_item;
+	private string[] actions = {};
+	private SList<ActionAdaptor> adaptors = null;
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public override void load(WebAppController controller) throws ExtensionError
+	{
+		this.controller = controller;
+		this.web_engine = controller.web_engine;
+		this.actions_reg = controller.actions;
+		this.dock_item = LauncherEntry.get_for_desktop_id(controller.desktop_entry);
+		this.dock_item.quicklist = new Dbusmenu.Menuitem();
+		web_engine.async_message_received.connect(on_async_message_received);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public override void unload()
+	{
+		web_engine.async_message_received.disconnect(on_async_message_received);
+		remove_menu();
+	}
+	
+	public void clear_actions()
+	{
+		actions = {};
+		update_menu();
+	}
+	
+	public void set_actions(string[] actions)
+	{
+		this.actions = actions;
+		update_menu();
+	}
+	
+	private void on_async_message_received(WebEngine engine, string name, Variant? data)
+	{
+		if (name == "Nuvola.UnityDockItem.setActions")
+		{
+			if (data != null && data.is_container())
+			{
+				int i = 0;
+				VariantIter iter = null;
+				data.get("(av)", &iter);
+				string[] actions = new string[iter.n_children()];
+				Variant item = null;
+				while (iter.next("v", &item))
+					actions[i++] = item.get_string();
+				
+				set_actions(actions);
+			}
+		}
+		else if (name == "Nuvola.UnityDockItem.clearActions")
+		{
+			clear_actions();
+		}
+	}
+	
+	private void clear_menu()
+	{
+		if (dock_item == null || this.dock_item.quicklist == null)
+			return;
+		
+		var menu = dock_item.quicklist;
+		adaptors = null;
+		menu.take_children();
+	}
+	
+	private void update_menu()
+	{
+		clear_menu();
+		var menu = dock_item.quicklist;
+		foreach (var action_name in actions)
+		{
+			var item = create_menu_item(action_name);
+			if (item != null)
+				menu.child_append(item);
+		}
+	}
+	
+	private Dbusmenu.Menuitem? create_menu_item(string action_name)
+	{
+		string bare_detailed_name = null;
+		Variant? target = null;
+		string? target_label = null;
+		var name = Diorite.ActionsRegistry.parse_detailed_name(action_name, out bare_detailed_name, out target, out target_label);
+		var action = actions_reg.get_action(name);
+		return_val_if_fail(action != null, null);
+		var label = target_label == null ? action.label : action.label + target_label;
+		var item = new Dbusmenu.Menuitem();
+		item.property_set(Dbusmenu.MENUITEM_PROP_LABEL, label);
+		item.property_set_bool(Dbusmenu.MENUITEM_PROP_ENABLED, action.enabled);
+		if (action is Diorite.ToggleAction)
+		{
+			item.property_set(Dbusmenu.MENUITEM_PROP_TOGGLE_TYPE, Dbusmenu.MENUITEM_TOGGLE_CHECK);
+			item.property_set_int(Dbusmenu.MENUITEM_PROP_TOGGLE_STATE,
+			action.state.get_boolean() ? Dbusmenu.MENUITEM_TOGGLE_STATE_CHECKED : Dbusmenu.MENUITEM_TOGGLE_STATE_UNCHECKED);
+		}
+		else if (action is Diorite.RadioAction)
+		{
+			item.property_set(Dbusmenu.MENUITEM_PROP_TOGGLE_TYPE, Dbusmenu.MENUITEM_TOGGLE_RADIO);
+			item.property_set_int(Dbusmenu.MENUITEM_PROP_TOGGLE_STATE,
+			action.state.equal(target) ? Dbusmenu.MENUITEM_TOGGLE_STATE_CHECKED : Dbusmenu.MENUITEM_TOGGLE_STATE_UNCHECKED);
+		}
+		
+		var adaptor = new ActionAdaptor(action, item, target);
+		adaptors.prepend(adaptor);
+		return item;
+	}
+	
+	private void remove_menu()
+	{
+		if (this.dock_item != null && this.dock_item.quicklist != null)
+		{
+			clear_menu();
+			this.dock_item.quicklist = null;
+		}
+	}
+}
+
+private class ActionAdaptor
+{
+	private Diorite.Action action;
+	private Dbusmenu.Menuitem item;
+	private Variant? parameter;
+	
+	public ActionAdaptor(Diorite.Action action, Dbusmenu.Menuitem item, Variant? parameter)
+	{
+		this.action = action;
+		this.item = item;
+		this.parameter = parameter;
+		item.item_activated.connect(on_activated);
+		action.notify.connect_after(on_action_changed);
+	}
+	
+	~ActionAdaptor()
+	{
+		action.notify.disconnect(on_action_changed);
+		item.item_activated.disconnect(on_activated);
+	}
+	
+	private void on_activated(uint timestamp)
+	{
+		action.activate(parameter);
+	}
+	
+	private void on_action_changed(GLib.Object o, ParamSpec p)
+	{
+		switch (p.name)
+		{
+		case "enabled":
+			item.property_set_bool(Dbusmenu.MENUITEM_PROP_ENABLED, action.enabled);
+			break;
+		case "state":
+			var state = action.state;
+			if (state != null)
+			{
+				if (state.is_of_type(VariantType.BOOLEAN))
+					item.property_set_int(Dbusmenu.MENUITEM_PROP_TOGGLE_STATE,
+					state.get_boolean() ? Dbusmenu.MENUITEM_TOGGLE_STATE_CHECKED : Dbusmenu.MENUITEM_TOGGLE_STATE_UNCHECKED);
+				else
+					item.property_set_int(Dbusmenu.MENUITEM_PROP_TOGGLE_STATE,
+					action.state.equal(parameter) ? Dbusmenu.MENUITEM_TOGGLE_STATE_CHECKED : Dbusmenu.MENUITEM_TOGGLE_STATE_UNCHECKED);
+			}
+			break;
+		}
+	}
+}
+
+} // namespace Nuvola.Extensions.UnityQuickList
+#endif
