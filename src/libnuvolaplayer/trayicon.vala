@@ -50,9 +50,14 @@ public class Extension: Nuvola.Extension
 	private WebAppController controller;
 	private Diorite.ActionsRegistry actions_reg;
 	private WebEngine web_engine;
-	private Gtk.StatusIcon? icon;
+	
 	private string[] actions = {};
 	private Gtk.Menu? menu = null;
+	#if APPINDICATOR
+	private AppIndicator.Indicator? indicator = null;
+	#else
+	private Gtk.StatusIcon? icon;
+	#endif
 	
 	/**
 	 * {@inheritDoc}
@@ -62,27 +67,39 @@ public class Extension: Nuvola.Extension
 		this.controller = controller;
 		this.actions_reg = controller.actions;
 		this.web_engine = controller.web_engine;
+		#if APPINDICATOR
+		critical("AppIndicator support is incomplete");
+		indicator = new AppIndicator.Indicator(controller.path_name, controller.icon, AppIndicator.IndicatorCategory.APPLICATION_STATUS);
+		indicator.set_status(AppIndicator.IndicatorStatus.ACTIVE);
+		create_menu();
+		#else
 		icon = new Gtk.StatusIcon.from_icon_name(controller.icon);
 		icon.title = controller.app_name;
 		set_tooltip(controller.app_name);
+		create_menu();
 		icon.popup_menu.connect(on_popup_menu);
 		icon.activate.connect(() => {controller.activate();});
+		#endif
 		web_engine.async_message_received.connect(on_async_message_received);
 	}
 	
 	public void set_tooltip(string tooltip)
 	{
+		#if !APPINDICATOR
 		icon.tooltip_text = tooltip;
+		#endif
 	}
 	
 	public void clear_actions()
 	{
 		actions = {};
+		create_menu();
 	}
 	
 	public void set_actions(string[] actions)
 	{
 		this.actions = actions;
+		create_menu();
 	}
 	
 	/**
@@ -92,23 +109,37 @@ public class Extension: Nuvola.Extension
 	{
 		web_engine.async_message_received.disconnect(on_async_message_received);
 		clear_actions();
+		#if APPINDICATOR
+		indicator = null;
+		#else
 		icon.visible = false;
 		icon = null;
+		#endif
 		if (menu != null)
 			menu.detach();
 		menu = null;
 	}
 	
-	private void on_popup_menu(uint button, uint time)
+	private void create_menu()
 	{
 		var model = actions_reg.build_menu(actions, false, true);
 		if (menu != null)
 			menu.detach();
 		menu = new Gtk.Menu.from_model(model);
+		#if APPINDICATOR
+		indicator.set_menu(menu);
+		#endif
+	}
+	
+	#if !APPINDICATOR
+	private void on_popup_menu(uint button, uint time)
+	{
+		return_if_fail(menu != null);
 		menu.attach_to_widget(controller.main_window, null);
 		menu.show_all();
 		menu.popup(null, null, icon.position_menu, button, time);
 	}
+	#endif
 	
 	private void on_async_message_received(WebEngine engine, string name, Variant? data)
 	{
