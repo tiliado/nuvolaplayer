@@ -29,7 +29,16 @@ var LAST_URI = "web_app.last_uri";
 
 Nuvola.Actions.addAction("playback", "win", "thumbs-up", "Thumbs up", null, null, null, true);
 Nuvola.Actions.addAction("playback", "win", "thumbs-down", "Thumbs down", null, null, null, true);
-Nuvola.Actions.addAction("playback", "win", "rating", "Rating", null, null, null, 0.0);
+var ratingOptions = [
+	// Variant? parameter, string? label, string? mnemo_label, string? icon, string? keybinding
+	[0, "Rating: 0 stars", null, null, null, null],
+	[1, "Rating: 1 star", null, null, null, null],
+	[2, "Rating: 2 stars", null, null, null, null],
+	[3, "Rating: 3 stars", null, null, null, null],
+	[4, "Rating: 4 stars", null, null, null, null],
+	[5, "Rating: 5 stars", null, null, null, null]
+];
+Nuvola.Actions.addRadioAction("playback", "win", "rating", 0, ratingOptions);
 Nuvola.UnityDockItem.setActions(["play", "pause"]);
 Nuvola.Player.init();
 

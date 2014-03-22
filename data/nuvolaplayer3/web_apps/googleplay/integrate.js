@@ -30,7 +30,7 @@ var player = Nuvola.Player;
 var ACTION_THUMBS_UP = "thumbs-up";
 var ACTION_THUMBS_DOWN = "thumbs-down";
 var ACTION_RATING = "rating";
-var STARS_ACTIONS = ["rating(0.0)|: 0 stars", "rating(1.0)|: 1 star", "rating(2.0)|: 2 stars", "rating(3.0)|: 3 stars", "rating(4.0)|: 4 stars", "rating(5.0)|: 5 stars"]
+var STARS_ACTIONS = ["rating::0", "rating::1", "rating::2", "rating::3", "rating::4", "rating::5"]
 var THUMBS_ACTIONS = ["thumbs-up", "thumbs-down"];
 
 /**

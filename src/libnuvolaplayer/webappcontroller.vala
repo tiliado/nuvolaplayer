@@ -242,13 +242,50 @@ public class WebAppController : Diorite.Application
 				Diorite.Action action;
 				if (state == null || state.get_type_string() == "mv")
 					action = new Diorite.SimpleAction(group, scope, action_name, label, mnemo_label, icon, keybinding, null);
-				else if(state.is_of_type(VariantType.BOOLEAN))
-					action = new Diorite.ToggleAction(group, scope, action_name, label, mnemo_label, icon, keybinding, null, state);
 				else
-					action = new Diorite.RadioAction(group, scope, action_name, label, mnemo_label, icon, keybinding, null, state);
+					action = new Diorite.ToggleAction(group, scope, action_name, label, mnemo_label, icon, keybinding, null, state);
+				
 				action.enabled = false;
 				action.activated.connect(on_custom_action_activated);
 				actions.add_action(action);
+			}
+			break;
+		case "Nuvola.Actions.addRadioAction":
+			string group = null;
+			string scope = null;
+			string action_name = null;
+			string? label = null;
+			string? mnemo_label = null;
+			string? icon = null;
+			string? keybinding = null;
+			Variant? state = null;
+			Variant? parameter = null;
+			VariantIter? options_iter = null;
+			if (data != null)
+			{
+				data.get("(sss@*av)", &group, &scope, &action_name, &state, &options_iter);
+				Diorite.RadioOption[] options = new Diorite.RadioOption[options_iter.n_children()];
+				var i = 0;
+				Variant? array = null;
+				while (options_iter.next("v", &array))
+				{
+					Variant? value = array.get_child_value(0);
+					parameter = value.get_variant();
+					array.get_child(1, "v", &value);
+					label = value.is_of_type(VariantType.STRING) ? value.get_string() : null;
+					array.get_child(2, "v", &value);
+					mnemo_label = value.is_of_type(VariantType.STRING) ? value.get_string() : null;
+					array.get_child(3, "v", &value);
+					icon = value.is_of_type(VariantType.STRING) ? value.get_string() : null;
+					array.get_child(4, "v", &value);
+					keybinding = value.is_of_type(VariantType.STRING) ? value.get_string() : null;
+					options[i++] = new Diorite.RadioOption(parameter, label, mnemo_label, icon, keybinding);
+				}
+				
+				var radio = new Diorite.RadioAction(group, scope, action_name, null, state, options);
+				radio.enabled = false;
+				radio.activated.connect(on_custom_action_activated);
+				actions.add_action(radio);
 			}
 			break;
 		case "Nuvola.Actions.isEnabled":

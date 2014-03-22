@@ -218,6 +218,11 @@ Nuvola.Actions =
 		Nuvola._sendMessageSync("Nuvola.Actions.addAction", group, scope, name, label || "", mnemo_label || "", icon || "", keybinding || "", state);
 	},
 	
+	addRadioAction: function(group, scope, name, state, options)
+	{
+		Nuvola._sendMessageSync("Nuvola.Actions.addRadioAction", group, scope, name, state, options);
+	},
+	
 	debug: function(arg1, arg2)
 	{
 		console.log(arg1 + ", " + arg2);

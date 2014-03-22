@@ -136,13 +136,31 @@ public class Extension: Nuvola.Extension
 	
 	private Dbusmenu.Menuitem? create_menu_item(string action_name)
 	{
-		string bare_detailed_name = null;
-		Variant? target = null;
-		string? target_label = null;
-		var name = Diorite.ActionsRegistry.parse_detailed_name(action_name, out bare_detailed_name, out target, out target_label);
-		var action = actions_reg.get_action(name);
-		return_val_if_fail(action != null, null);
-		var label = target_label == null ? action.label : action.label + target_label;
+		string? detailed_name = null;
+		Diorite.Action? action = null;
+		Diorite.RadioOption? option = null;
+		if (!actions_reg.find_and_parse_action(action_name, out detailed_name, out action, out option))
+		{
+			warning("Action '%s' not found in registry.", action_name);
+			return null;
+		}
+		
+		string? label;
+		string? icon;
+		Variant? target;
+		if (option != null)
+		{
+			label = option.label;
+			icon = option.icon;
+			target = option.parameter;
+		}
+		else
+		{
+			label = action.label;
+			icon = action.icon;
+			target = null;
+		}
+		
 		var item = new Dbusmenu.Menuitem();
 		item.property_set(Dbusmenu.MENUITEM_PROP_LABEL, label);
 		item.property_set_bool(Dbusmenu.MENUITEM_PROP_ENABLED, action.enabled);
