@@ -40,6 +40,7 @@ namespace Actions
 	public const string GO_BACK = "go-back";
 	public const string GO_FORWARD = "go-forward";
 	public const string GO_RELOAD = "go-reload";
+	public const string KEYBINDINGS = "keybindings";
 }
 
 public class WebAppController : Diorite.Application
@@ -122,15 +123,30 @@ public class WebAppController : Diorite.Application
 		load_extensions();
 	}
 	
+	private Diorite.SimpleAction simple_action(string group, string scope, string name, string? label, string? mnemo_label, string? icon, string? keybinding, owned Diorite.ActionCallback? callback)
+	{
+		var kbd = config.get_string("nuvola.keybindings." + name, keybinding);
+		if (kbd == "")
+			kbd = null;
+		return new Diorite.SimpleAction(group, scope, name, label, mnemo_label, icon, kbd, (owned) callback);
+	}
+	
+	private Diorite.ToggleAction toggle_action(string group, string scope, string name, string? label, string? mnemo_label, string? icon, string? keybinding, owned Diorite.ActionCallback? callback, Variant state)
+	{
+		var kbd = config.get_string("nuvola.keybindings." + name, keybinding);
+		return new Diorite.ToggleAction(group, scope, name, label, mnemo_label, icon, kbd, (owned) callback, state);
+	}
+	
 	private void append_actions()
 	{
 		Diorite.Action[] actions_spec = {
 		//          Action(group, scope, name, label?, mnemo_label?, icon?, keybinding?, callback?)
-		new Diorite.SimpleAction("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
-		new Diorite.SimpleAction("go", "app", Actions.GO_HOME, "Home", "_Home", "go-home", "<alt>Home", web_engine.go_home),
-		new Diorite.SimpleAction("go", "app", Actions.GO_BACK, "Back", "_Back", "go-previous", "<alt>Left", web_engine.go_back),
-		new Diorite.SimpleAction("go", "app", Actions.GO_FORWARD, "Forward", "_Forward", "go-next", "<alt>Right", web_engine.go_forward),
-		new Diorite.SimpleAction("go", "app", Actions.GO_RELOAD, "Reload", "_Reload", "view-refresh", null, web_engine.reload)
+		simple_action("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
+		simple_action("main", "app", Actions.KEYBINDINGS, "Keyboard shortcuts", "_Keyboard shortcuts", null, null, do_keybindings),
+		simple_action("go", "app", Actions.GO_HOME, "Home", "_Home", "go-home", "<alt>Home", web_engine.go_home),
+		simple_action("go", "app", Actions.GO_BACK, "Back", "_Back", "go-previous", "<alt>Left", web_engine.go_back),
+		simple_action("go", "app", Actions.GO_FORWARD, "Forward", "_Forward", "go-next", "<alt>Right", web_engine.go_forward),
+		simple_action("go", "app", Actions.GO_RELOAD, "Reload", "_Reload", "view-refresh", null, web_engine.reload)
 		};
 		actions.add_actions(actions_spec);
 		
@@ -139,6 +155,13 @@ public class WebAppController : Diorite.Application
 	private void do_quit()
 	{
 		quit();
+	}
+	
+	private void do_keybindings()
+	{
+		var dialog = new KeybindingsDialog(this, main_window, actions, config);
+		dialog.run();
+		dialog.destroy();
 	}
 	
 	private void load_extensions()
@@ -241,9 +264,9 @@ public class WebAppController : Diorite.Application
 				
 				Diorite.Action action;
 				if (state == null || state.get_type_string() == "mv")
-					action = new Diorite.SimpleAction(group, scope, action_name, label, mnemo_label, icon, keybinding, null);
+					action = simple_action(group, scope, action_name, label, mnemo_label, icon, keybinding, null);
 				else
-					action = new Diorite.ToggleAction(group, scope, action_name, label, mnemo_label, icon, keybinding, null, state);
+					action = toggle_action(group, scope, action_name, label, mnemo_label, icon, keybinding, null, state);
 				
 				action.enabled = false;
 				action.activated.connect(on_custom_action_activated);

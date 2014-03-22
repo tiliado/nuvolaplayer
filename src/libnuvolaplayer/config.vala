@@ -185,7 +185,7 @@ public class Config : GLib.Object, KeyValueStorage
 		return member.get_double();
 	}
 	
-	public string get_string(string key, string default="")
+	public string? get_string(string key, string? default=null)
 	{
 		string? member_name;
 		unowned Json.Object? object = get_parent_object(key, out member_name);
@@ -199,8 +199,14 @@ public class Config : GLib.Object, KeyValueStorage
 		return member.get_string();
 	}
 	
-	public void set_string(string key, string value)
+	public void set_string(string key, string? value)
 	{
+		if (value == null)
+		{
+			set_value(key, null);
+			return;
+		}
+		
 		string? member_name;
 		unowned Json.Object? object = create_parent_object(key, out member_name);
 		return_if_fail(object != null);
