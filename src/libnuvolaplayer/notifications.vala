@@ -62,7 +62,7 @@ public class Extension : Nuvola.Extension
 	{
 		get
 		{
-			return config.get_bool(prefix + ACTIVE_WINDOW, false);
+			return config.get_bool(prefix + ACTIVE_WINDOW);
 		}
 		set
 		{
@@ -106,7 +106,9 @@ public class Extension : Nuvola.Extension
 		actions_supported =  capabilities.find_custom("actions", strcmp) != null;
 		icons_supported =  capabilities.find_custom("action-icons", strcmp) != null;
 		debug(@"Notifications: persistence $persistence_supported, actions $actions_supported, icons $icons_supported");
-		_resident = config.get_bool(prefix + RESIDENT, true);
+		config.defaults.insert(prefix + ACTIVE_WINDOW, new Variant.boolean(false));
+		config.defaults.insert(prefix + RESIDENT, new Variant.boolean(true));
+		_resident = config.get_bool(prefix + RESIDENT);
 		web_engine.async_message_received.connect(on_async_message_received);
 	}
 	

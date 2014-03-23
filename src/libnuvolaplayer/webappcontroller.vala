@@ -81,8 +81,12 @@ public class WebAppController : Diorite.Application
 	private void start()
 	{
 		gtk_settings = Gtk.Settings.get_default();
-		config = new Config(web_app.user_config_dir.get_child("config.json"));
+		var default_config = new HashTable<string, Variant>(str_hash, str_equal);
+		default_config.insert(ConfigKey.WINDOW_X, new Variant.int64(-1));
+		default_config.insert(ConfigKey.WINDOW_Y, new Variant.int64(-1));
+		config = new Config(web_app.user_config_dir.get_child("config.json"), default_config);
 		config.config_changed.connect(on_config_changed);
+		
 		actions = new Diorite.ActionsRegistry(this, null);
 		main_window = new WebAppWindow(this);
 		main_window.can_destroy.connect(on_can_quit);
@@ -105,8 +109,8 @@ public class WebAppController : Diorite.Application
 			return;
 		main_window.grid.add(widget);
 		
-		int x = (int) config.get_int(ConfigKey.WINDOW_X, -1);
-		int y = (int) config.get_int(ConfigKey.WINDOW_Y, -1);
+		int x = (int) config.get_int(ConfigKey.WINDOW_X);
+		int y = (int) config.get_int(ConfigKey.WINDOW_Y);
 		if (x >= 0 && y >= 0)
 			main_window.move(x, y);
 			
@@ -114,7 +118,7 @@ public class WebAppController : Diorite.Application
 		int h = (int) config.get_int(ConfigKey.WINDOW_HEIGHT);
 		main_window.resize(w > MINIMAL_REMEMBERED_WINDOW_SIZE ? w: 1010, h > MINIMAL_REMEMBERED_WINDOW_SIZE ? h : 600);
 		
-		if (config.get_bool(ConfigKey.WINDOW_MAXIMIZED, false))
+		if (config.get_bool(ConfigKey.WINDOW_MAXIMIZED))
 			main_window.maximize();
 		
 		main_window.show_all();
@@ -125,7 +129,7 @@ public class WebAppController : Diorite.Application
 	
 	private Diorite.SimpleAction simple_action(string group, string scope, string name, string? label, string? mnemo_label, string? icon, string? keybinding, owned Diorite.ActionCallback? callback)
 	{
-		var kbd = config.get_string("nuvola.keybindings." + name, keybinding);
+		var kbd = config.get_string("nuvola.keybindings." + name) ?? keybinding;
 		if (kbd == "")
 			kbd = null;
 		return new Diorite.SimpleAction(group, scope, name, label, mnemo_label, icon, kbd, (owned) callback);
@@ -133,7 +137,7 @@ public class WebAppController : Diorite.Application
 	
 	private Diorite.ToggleAction toggle_action(string group, string scope, string name, string? label, string? mnemo_label, string? icon, string? keybinding, owned Diorite.ActionCallback? callback, Variant state)
 	{
-		var kbd = config.get_string("nuvola.keybindings." + name, keybinding);
+		var kbd = config.get_string("nuvola.keybindings." + name) ?? keybinding;
 		return new Diorite.ToggleAction(group, scope, name, label, mnemo_label, icon, kbd, (owned) callback, state);
 	}
 	
@@ -169,8 +173,11 @@ public class WebAppController : Diorite.Application
 		extensions = new ExtensionsManager(this);
 		var available_extensions = extensions.available_extensions;
 		foreach (var key in available_extensions.get_keys())
-			if (config.get_bool(ConfigKey.EXTENSION_ENABLED.printf(key), available_extensions.lookup(key).autoload))
+		{
+			var enabled = config.get_value(ConfigKey.EXTENSION_ENABLED.printf(key)) ?? new Variant.boolean(available_extensions.lookup(key).autoload);
+			if (enabled.get_boolean())
 				extensions.load(key);
+		}
 	}
 	
 	private void on_fatal_error(string title, string message)

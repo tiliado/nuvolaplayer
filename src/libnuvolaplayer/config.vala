@@ -28,11 +28,14 @@ namespace Nuvola
 public class Config : GLib.Object, KeyValueStorage
 {
 	public File file {get; private set;}
+	public HashTable<string, Variant> defaults {get; private set;}
 	private Json.Node? root;
 	
-	public Config(File file)
+	
+	public Config(File file, HashTable<string, Variant>? defaults = null)
 	{
 		this.file = file;
+		this.defaults = defaults != null ? defaults : new HashTable<string, Variant>(str_hash, str_equal);
 		load();
 	}
 	
@@ -109,7 +112,7 @@ public class Config : GLib.Object, KeyValueStorage
 		string? member_name;
 		unowned Json.Object? object = get_parent_object(key, out member_name);
 		if (object == null || !object.has_member(member_name))
-			return null;
+			return defaults.get(key);
 		
 		try
 		{
@@ -118,7 +121,7 @@ public class Config : GLib.Object, KeyValueStorage
 		catch (GLib.Error e)
 		{
 			warning("Failed to deserialize key '%s'. %s", key, e.message);
-			return null;
+			return defaults.get(key);
 		}
 	}
 	
@@ -143,102 +146,56 @@ public class Config : GLib.Object, KeyValueStorage
 		}
 	}
 	
-	public bool get_bool(string key, bool default=false)
+	public bool get_bool(string key)
 	{
-		string? member_name;
-		unowned Json.Object? object = get_parent_object(key, out member_name);
-		if (object == null || !object.has_member(member_name))
-			return default;
-		
-		var member = object.get_member(member_name);
-		if (member.get_node_type() != Json.NodeType.VALUE || member.get_value_type() != typeof(bool))
-			return default;
-		
-		return member.get_boolean();
+		var value = get_value(key);
+		if (value != null && value.is_of_type(VariantType.BOOLEAN))
+			return value.get_boolean();
+		return false;
 	}
 	
-	public int64 get_int(string key, int64 default=0)
+	public int64 get_int(string key)
 	{
-		string? member_name;
-		unowned Json.Object? object = get_parent_object(key, out member_name);
-		if (object == null || !object.has_member(member_name))
-			return default;
-		
-		var member = object.get_member(member_name);
-		if (member.get_node_type() != Json.NodeType.VALUE || member.get_value_type() != typeof(int64))
-			return default;
-		
-		return member.get_int();
+		var value = get_value(key);
+		if (value != null && value.is_of_type(VariantType.INT64))
+			return value.get_int64();
+		return (int64) 0;
 	}
 	
-	public double get_double(string key, double default=0.0)
+	public double get_double(string key)
 	{
-		string? member_name;
-		unowned Json.Object? object = get_parent_object(key, out member_name);
-		if (object == null || !object.has_member(member_name))
-			return default;
-		
-		var member = object.get_member(member_name);
-		if (member.get_node_type() != Json.NodeType.VALUE || member.get_value_type() != typeof(double))
-			return default;
-		
-		return member.get_double();
+		var value = get_value(key);
+		if (value != null && value.is_of_type(VariantType.DOUBLE))
+			return value.get_double();
+		return 0.0;
 	}
 	
-	public string? get_string(string key, string? default=null)
+	public string? get_string(string key)
 	{
-		string? member_name;
-		unowned Json.Object? object = get_parent_object(key, out member_name);
-		if (object == null || !object.has_member(member_name))
-			return default;
-		
-		var member = object.get_member(member_name);
-		if (member.get_node_type() != Json.NodeType.VALUE || member.get_value_type() != typeof(string))
-			return default;
-		
-		return member.get_string();
+		var value = get_value(key);
+		if (value != null && value.is_of_type(VariantType.STRING))
+			return value.get_string();
+		return null;
 	}
 	
 	public void set_string(string key, string? value)
 	{
-		if (value == null)
-		{
-			set_value(key, null);
-			return;
-		}
-		
-		string? member_name;
-		unowned Json.Object? object = create_parent_object(key, out member_name);
-		return_if_fail(object != null);
-		object.set_string_member(member_name, value);
-		config_changed(key);
+		set_value(key, value != null ? new Variant.string(value) : null);
 	}
 	
 	public void set_int(string key, int64 value)
 	{
-		string? member_name;
-		unowned Json.Object? object = create_parent_object(key, out member_name);
-		return_if_fail(object != null);
-		object.set_int_member(member_name, value);
-		config_changed(key);
+		set_value(key, new Variant.int64(value));
 	}
 	
 	public void set_bool(string key, bool value)
 	{
-		string? member_name;
-		unowned Json.Object? object = create_parent_object(key, out member_name);
-		return_if_fail(object != null);
-		object.set_boolean_member(member_name, value);
-		config_changed(key);
+		set_value(key, new Variant.boolean(value));
 	}
 	
 	public void set_double(string key, double value)
 	{
-		string? member_name;
-		unowned Json.Object? object = create_parent_object(key, out member_name);
-		return_if_fail(object != null);
-		object.set_double_member(member_name, value);
-		config_changed(key);
+		set_value(key, new Variant.double(value));
 	}
 	
 	private bool load()
