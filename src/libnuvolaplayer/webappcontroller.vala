@@ -32,6 +32,7 @@ namespace ConfigKey
 	public const string WINDOW_WIDTH = "nuvola.window.width";
 	public const string WINDOW_HEIGHT = "nuvola.window.height";
 	public const string WINDOW_MAXIMIZED = "nuvola.window.maximized";
+	public const string DARK_THEME = "nuvola.dark_theme";
 }
 
 namespace Actions
@@ -41,6 +42,7 @@ namespace Actions
 	public const string GO_FORWARD = "go-forward";
 	public const string GO_RELOAD = "go-reload";
 	public const string KEYBINDINGS = "keybindings";
+	public const string PREFERENCES = "preferences";
 }
 
 public class WebAppController : Diorite.Application
@@ -84,8 +86,10 @@ public class WebAppController : Diorite.Application
 		var default_config = new HashTable<string, Variant>(str_hash, str_equal);
 		default_config.insert(ConfigKey.WINDOW_X, new Variant.int64(-1));
 		default_config.insert(ConfigKey.WINDOW_Y, new Variant.int64(-1));
+		default_config.insert(ConfigKey.DARK_THEME, new Variant.boolean(false));
 		config = new Config(web_app.user_config_dir.get_child("config.json"), default_config);
 		config.config_changed.connect(on_config_changed);
+		Gtk.Settings.get_default().gtk_application_prefer_dark_theme = config.get_bool(ConfigKey.DARK_THEME);
 		
 		actions = new Diorite.ActionsRegistry(this, null);
 		main_window = new WebAppWindow(this);
@@ -147,6 +151,7 @@ public class WebAppController : Diorite.Application
 		//          Action(group, scope, name, label?, mnemo_label?, icon?, keybinding?, callback?)
 		simple_action("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
 		simple_action("main", "app", Actions.KEYBINDINGS, "Keyboard shortcuts", "_Keyboard shortcuts", null, null, do_keybindings),
+		simple_action("main", "app", Actions.PREFERENCES, "Preferences", "_Preferences", null, null, do_preferences),
 		simple_action("go", "app", Actions.GO_HOME, "Home", "_Home", "go-home", "<alt>Home", web_engine.go_home),
 		simple_action("go", "app", Actions.GO_BACK, "Back", "_Back", "go-previous", "<alt>Left", web_engine.go_back),
 		simple_action("go", "app", Actions.GO_FORWARD, "Forward", "_Forward", "go-next", "<alt>Right", web_engine.go_forward),
@@ -166,6 +171,29 @@ public class WebAppController : Diorite.Application
 		var dialog = new KeybindingsDialog(this, main_window, actions, config);
 		dialog.run();
 		dialog.destroy();
+	}
+	
+	private void do_preferences()
+	{
+		var values = new HashTable<string, Variant>(str_hash, str_equal);
+		values.insert(ConfigKey.DARK_THEME, config.get_value(ConfigKey.DARK_THEME));
+		var form = new Diorite.Form.from_spec(Diorite.variant_from_hashtable(values), new Variant.tuple({
+			new Variant.tuple({new Variant.string("bool"), new Variant.string(ConfigKey.DARK_THEME), new Variant.string("Prefer dark theme")})
+		}));
+		var dialog = new PreferencesDialog(this, main_window, form);
+		var response = dialog.run();
+		dialog.destroy();
+		if (response == Gtk.ResponseType.OK)
+		{
+			var new_values = form.get_values();
+			foreach (var key in new_values.get_keys())
+			{
+				var old_value = values.get(key);
+				var new_value = new_values.get(key);
+				if (!new_value.equal(old_value))
+					config.set_value(key, new_value);
+			}
+		}
 	}
 	
 	private void load_extensions()
@@ -420,6 +448,12 @@ public class WebAppController : Diorite.Application
 	
 	private void on_config_changed(string key)
 	{
+		switch (key)
+		{
+		case ConfigKey.DARK_THEME:
+			Gtk.Settings.get_default().gtk_application_prefer_dark_theme = config.get_bool(ConfigKey.DARK_THEME);
+			break;
+		}
 		save_config();
 	}
 	
