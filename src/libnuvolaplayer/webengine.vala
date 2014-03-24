@@ -241,6 +241,7 @@ public class WebEngine : GLib.Object
 		master.add_handler("config_has_key", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_config_has_key);
 		master.add_handler("config_get_value", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_config_get_value);
 		master.add_handler("config_set_value", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_config_set_value);
+		master.add_handler("config_set_default_value", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_config_set_default_value);
 		master.add_handler("show_error", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_show_error);
 		master.add_handler("send_message_sync", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_send_message_sync);
 		master.add_handler("send_message_async", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_send_message_async);
@@ -299,6 +300,18 @@ public class WebEngine : GLib.Object
 		Variant? value = null;
 		request.get("(smv)", &key, &value);
 		config.set_value(key, value);
+		response = null;
+		return true;
+	}
+	
+	private bool handle_config_set_default_value(Diorite.Ipc.MessageServer server, Variant request, out Variant? response)
+	{
+		if (!request.is_of_type(new VariantType("(smv)")))
+			return server.create_error("Invalid request type: " + request.get_type_string(), out response);
+		string? key = null;
+		Variant? value = null;
+		request.get("(smv)", &key, &value);
+		config.set_default_value(key, value);
 		response = null;
 		return true;
 	}

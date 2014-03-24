@@ -84,6 +84,18 @@ public class ConfigProxy: GLib.Object, KeyValueStorage
 			critical("Master client error: %s", e.message);
 		}
 	}
+	
+	public void set_default_value(string key, Variant? value)
+	{
+		try
+		{
+			client.send_message("config_set_default_value", new Variant("(smv)", key, value));
+		}
+		catch (Diorite.Ipc.MessageError e)
+		{
+			critical("Master client error: %s", e.message);
+		}
+	}
 }
 
 } // namespace Nuvola

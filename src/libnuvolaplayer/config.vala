@@ -146,6 +146,14 @@ public class Config : GLib.Object, KeyValueStorage
 		}
 	}
 	
+	public void set_default_value(string key, Variant? value)
+	{
+		if (value == null)
+			defaults.remove(key);
+		else
+			defaults.insert(key, value);
+	}
+	
 	public bool get_bool(string key)
 	{
 		var value = get_value(key);

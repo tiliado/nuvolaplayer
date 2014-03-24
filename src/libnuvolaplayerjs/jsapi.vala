@@ -225,6 +225,7 @@ public class JSApi : GLib.Object
 		{"_hasConfigKey", has_config_key_func, 0},
 		{"_getConfig", get_config_func, 0},
 		{"_setConfig", set_config_func, 0},
+		{"_setDefaultConfig", set_default_config_func, 0},
 		{null, null, 0}
 	};
 	
@@ -433,6 +434,46 @@ public class JSApi : GLib.Object
 		{
 			var value = args[1].is_undefined(ctx) ? null : variant_from_value(ctx, args[1]);
 			js_api.config.set_value(key, value);
+		}
+		catch (JSError e)
+		{
+			exception = create_exception(ctx, "Failed to convert JavaScript value to Variant. %s".printf(e.message));
+		}
+		
+		return undefined;
+	}
+	
+	static unowned JS.Value set_default_config_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)
+	{
+		unowned JS.Value undefined = JS.Value.undefined(ctx);
+		exception = null;
+		if (args.length != 2)
+		{
+			exception = create_exception(ctx, "Two arguments required.");
+			return undefined;
+		}
+		
+		var key = string_or_null(ctx, args[0]);
+		if (key == null)
+		{
+			exception = create_exception(ctx, "The first argument must be a non-null string");
+			return undefined;
+		}
+		
+		var js_api = (self.get_private() as JSApi);
+		if (js_api == null)
+		{
+			exception = create_exception(ctx, "JSApi is null");
+			return undefined;
+		}
+		
+		if (js_api.config == null)
+			return undefined;
+		
+		try
+		{
+			var value = args[1].is_undefined(ctx) ? null : variant_from_value(ctx, args[1]);
+			js_api.config.set_default_value(key, value);
 		}
 		catch (JSError e)
 		{

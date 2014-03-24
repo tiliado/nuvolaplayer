@@ -287,6 +287,7 @@ Nuvola.Player =
 	STATE_UNKNOWN: 0,
 	STATE_PAUSED: 1,
 	STATE_PLAYING: 2,
+	BACKGROUND_PLAYBACK: "player.background_playback",
 	
 	state: 0,
 	song: null,
@@ -307,6 +308,7 @@ Nuvola.Player =
 		Nuvola.Actions.addAction("playback", "win", this.ACTION_STOP, "Stop", null, "media-playback-stop", null);
 		Nuvola.Actions.addAction("playback", "win", this.ACTION_PREV_SONG, "Previous song", null, "media-skip-backward", null);
 		Nuvola.Actions.addAction("playback", "win", this.ACTION_NEXT_SONG, "Next song", null, "media-skip-forward", null);
+		Nuvola.Config.setDefault(this.BACKGROUND_PLAYBACK, true);
 		this.updateMenu();
 	},
 	
@@ -373,7 +375,7 @@ Nuvola.Player =
 			switch (this.state)
 			{
 			case this.STATE_PLAYING:
-				Nuvola.setHideOnClose(true);
+				Nuvola.setHideOnClose(Nuvola.Config.get(this.BACKGROUND_PLAYBACK));
 				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_TOGGLE_PLAY, true);
 				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_PLAY, false);
 				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_PAUSE, true);
@@ -426,14 +428,21 @@ Nuvola.Player.baseActions = [Nuvola.Player.ACTION_TOGGLE_PLAY, Nuvola.Player.ACT
 
 Nuvola.Config = 
 {
+	setDefault: function(key, value)
+	{
+		Nuvola._setDefaultConfig(key, value);
+	},
+	
 	hasKey: function(key)
 	{
 		return Nuvola._hasConfigKey(key);
 	},
+	
 	get: function(key)
 	{
 		return Nuvola._getConfig(key);
 	},
+	
 	set: function(key, value)
 	{
 		Nuvola._setConfig(key, value);

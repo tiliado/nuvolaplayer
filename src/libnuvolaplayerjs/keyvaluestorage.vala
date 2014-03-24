@@ -36,6 +36,8 @@ public interface KeyValueStorage : GLib.Object
 	public abstract Variant? get_value(string key);
 	
 	public abstract void set_value(string key, Variant? value);
+	
+	public abstract void set_default_value(string key, Variant? value);
 }
 
 } // namespace Nuvola
