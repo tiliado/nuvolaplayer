@@ -28,6 +28,7 @@ namespace Nuvola
 public class WebAppWindow : Gtk.ApplicationWindow
 {
 	public Gtk.Grid grid {get; private set;}
+	public Gtk.Overlay overlay {get; private set;}
 	public bool maximized {get; private set; default = false;}
 	
 	private WebAppController app;
@@ -53,7 +54,9 @@ public class WebAppWindow : Gtk.ApplicationWindow
 		app.actions.window = this;
 		grid = new Gtk.Grid();
 		grid.orientation = Gtk.Orientation.VERTICAL;
-		add(grid);
+		overlay = new Gtk.Overlay();
+		overlay.add(grid);
+		add(overlay);
 	}
 	
 	public signal void can_destroy(ref bool result);
