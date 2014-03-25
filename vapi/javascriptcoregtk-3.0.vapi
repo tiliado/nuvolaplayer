@@ -13,6 +13,8 @@ namespace JS{
 		public unowned JS.Object get_global_object();
 		[CCode (cname = "JSObjectMake")]
 		public unowned JS.Object make_object(Class? @class=null, void* @private=null);
+		[CCode (cname = "JSObjectMakeArray")]
+		public unowned JS.Object make_array([CCode (array_length_pos=0.1, array_length_type="size_t")] Value[] args, out JS.Value exception=null);
 		[CCode (cname = "JSObjectMakeFunctionWithCallback")]
 		public unowned JS.Object make_function(JS.String? name, JS.ObjectCallAsFunctionCallback callback);
 		[CCode (cname = "JSGarbageCollect")]

@@ -309,6 +309,15 @@ public unowned JS.Value value_from_variant(JS.Context ctx, Variant? variant) thr
 		return value_from_variant(ctx, maybe_variant);
 	}
 	
+	if (variant.is_container())
+	{
+		var size = variant.n_children();
+		void*[] args = new void*[size];
+		for (var i = 0; i < size; i++)
+			args[i] = (void*) value_from_variant(ctx, variant.get_child_value(i));
+		return ctx.make_array((JS.Value[]) args);
+	}
+	
 	if (variant.is_of_type(VariantType.VARIANT))
 		return value_from_variant(ctx, variant.get_variant());
 	
