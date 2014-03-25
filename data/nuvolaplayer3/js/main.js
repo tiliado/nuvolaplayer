@@ -298,6 +298,7 @@ Nuvola.Player =
 	nextSong: null,
 	prevData: {},
 	extraActions: [],
+	firstUpdate: true,
 	
 	init: function()
 	{
@@ -313,8 +314,19 @@ Nuvola.Player =
 		Nuvola.connect("append-preferences", this, "onAppendPreferences");
 	},
 	
+	beforeFirstUpdate: function()
+	{
+		Nuvola.Config.connect("config-changed", this, "onConfigChanged");
+	},
+	
 	update: function()
 	{
+		if (this.firstUpdate)
+		{
+			this.beforeFirstUpdate();
+			this.firstUpdate = false;
+		}
+		
 		var changed = [];
 		var keys = ["song", "artist", "album", "artwork", "state", "prevSong", "nextSong"];
 		for (var i = 0; i < keys.length; i++)
@@ -376,24 +388,22 @@ Nuvola.Player =
 			switch (this.state)
 			{
 			case this.STATE_PLAYING:
-				Nuvola.setHideOnClose(Nuvola.Config.get(this.BACKGROUND_PLAYBACK));
 				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_TOGGLE_PLAY, true);
 				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_PLAY, false);
 				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_PAUSE, true);
 				break;
 			case this.STATE_PAUSED:
-				Nuvola.setHideOnClose(false);
 				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_TOGGLE_PLAY, true);
 				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_PLAY, true);
 				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_PAUSE, false);
 				break;
 			default:
-				Nuvola.setHideOnClose(false);
 				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_TOGGLE_PLAY, false);
 				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_PLAY, false);
 				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_PAUSE, false);
 				break;
 			}
+			this.setHideOnClose();
 		}
 		
 		if (Nuvola.inArray(changed, "prevSong"))
@@ -424,10 +434,28 @@ Nuvola.Player =
 		Nuvola.MenuBar.setMenu("playback", "_Control", this.baseActions.concat(this.extraActions));
 	},
 	
+	setHideOnClose: function()
+	{
+		if (this.state === this.STATE_PLAYING)
+			Nuvola.setHideOnClose(Nuvola.Config.get(this.BACKGROUND_PLAYBACK));
+		else
+			Nuvola.setHideOnClose(false);
+	},
+	
 	onAppendPreferences: function(object, values, entries)
 	{
 		values[this.BACKGROUND_PLAYBACK] = Nuvola.Config.get(this.BACKGROUND_PLAYBACK);
 		entries.push(["bool", this.BACKGROUND_PLAYBACK, "Keep playing in background when window is closed"]);
+	},
+	
+	onConfigChanged: function(emitter, key)
+	{
+		switch (key)
+		{
+		case this.BACKGROUND_PLAYBACK:
+			this.setHideOnClose();
+			break;
+		}
 	}
 };
 
@@ -455,7 +483,8 @@ Nuvola.Config =
 		Nuvola._setConfig(key, value);
 	}
 };
-
+Nuvola.makeSignaling(Nuvola.Config);
+Nuvola.Config.registerSignals(["config-changed"]);
 
 Nuvola.MenuBar =
 {

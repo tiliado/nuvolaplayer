@@ -466,6 +466,15 @@ public class WebAppController : Diorite.Application
 			break;
 		}
 		save_config();
+		
+		try
+		{
+			web_engine.call_function("Nuvola.Config.emit", new Variant("(ss)", "config-changed", key));
+		}
+		catch (Diorite.Ipc.MessageError e)
+		{
+			warning("Communication failed: %s", e.message);
+		}
 	}
 	
 	private void on_web_engine_notify(GLib.Object o, ParamSpec p)
