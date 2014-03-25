@@ -59,6 +59,7 @@ public class WebAppController : Diorite.Application
 	private uint configure_event_cb_id = 0;
 	private MenuBar menu_bar;
 	private bool hide_on_close = false;
+	private Diorite.Form? init_form = null;
 	
 	public WebAppController(Diorite.Storage? storage, WebApp web_app)
 	{
@@ -99,6 +100,7 @@ public class WebAppController : Diorite.Application
 		web_engine = new WebEngine(this, web_app, config);
 		web_engine.async_message_received.connect(on_async_message_received);
 		web_engine.sync_message_received.connect(on_sync_message_received);
+		web_engine.init_request.connect(on_init_request);
 		web_engine.notify.connect_after(on_web_engine_notify);
 		actions.action_changed.connect(on_action_changed);
 		var widget = web_engine.widget;
@@ -178,6 +180,7 @@ public class WebAppController : Diorite.Application
 		var values = new HashTable<string, Variant>(str_hash, str_equal);
 		values.insert(ConfigKey.DARK_THEME, config.get_value(ConfigKey.DARK_THEME));
 		var form = new Diorite.Form.from_spec(values, new Variant.tuple({
+			new Variant.tuple({new Variant.string("header"), new Variant.string("Basic settings")}),
 			new Variant.tuple({new Variant.string("bool"), new Variant.string(ConfigKey.DARK_THEME), new Variant.string("Prefer dark theme")})
 		}));
 		
@@ -244,6 +247,7 @@ public class WebAppController : Diorite.Application
 	{
 		try
 		{
+			message(config.file.get_path());
 			config.save();
 		}
 		catch (GLib.Error e)
@@ -465,6 +469,7 @@ public class WebAppController : Diorite.Application
 			Gtk.Settings.get_default().gtk_application_prefer_dark_theme = config.get_bool(ConfigKey.DARK_THEME);
 			break;
 		}
+		
 		save_config();
 		
 		try
@@ -494,6 +499,46 @@ public class WebAppController : Diorite.Application
 	{
 		if (hide_on_close)
 			result = false;
+	}
+	
+	private void on_init_request(HashTable<string, Variant> values, Variant entries)
+	{
+		if (init_form != null)
+		{
+			main_window.overlay.remove(init_form);
+			init_form = null;
+		}
+		
+		init_form = new Diorite.Form.from_spec(values, entries);
+		init_form.check_toggles();
+		init_form.expand = false;
+		init_form.valign = init_form.halign = Gtk.Align.CENTER;
+		init_form.show();
+		var button = new Gtk.Button.with_label("OK");
+		button.margin = 10;
+		button.show();
+		button.clicked.connect(on_init_form_button_clicked);
+		init_form.attach_next_to(button, null, Gtk.PositionType.BOTTOM, 2, 1);
+		main_window.overlay.add_overlay(init_form);
+	}
+	
+	private void on_init_form_button_clicked(Gtk.Button button)
+	{
+		button.clicked.disconnect(on_init_form_button_clicked);
+		main_window.overlay.remove(init_form);
+		var new_values = init_form.get_values();
+		init_form = null;
+		
+		foreach (var key in new_values.get_keys())
+		{
+			var new_value = new_values.get(key);
+			if (new_value == null)
+				critical("New values '%s'' not found", key);
+			else
+				config.set_value(key, new_value);
+		}
+		
+		web_engine.load();
 	}
 }
 

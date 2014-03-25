@@ -162,7 +162,7 @@ Nuvola.makeSignaling = function(obj_proto)
 }
 
 Nuvola.makeSignaling(Nuvola);
-Nuvola.registerSignals(["home-page", "navigation-request", "uri-changed", "last-page", "append-preferences"]);
+Nuvola.registerSignals(["home-page", "navigation-request", "uri-changed", "last-page", "append-preferences", "init-request"]);
 
 Nuvola.setHideOnClose = function(hide)
 {

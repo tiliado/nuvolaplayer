@@ -88,6 +88,8 @@ public class WebEngine : GLib.Object
 		debug("Sync message received from JSApi: %s: %s", name, data == null ? "null" : data.print(true));
 	}
 	
+	public signal void init_request(HashTable<string, Variant> values, Variant entries);
+	
 	private bool inject_api()
 	{
 		if (env != null)
@@ -156,6 +158,10 @@ public class WebEngine : GLib.Object
 			return false;
 		
 		start_master();
+		
+		if (check_init_request())
+			return true;
+		
 		return restore_session();
 	}
 	
@@ -234,6 +240,22 @@ public class WebEngine : GLib.Object
 		var args = new Variant("(s@a{sv}@av)", "append-preferences", new Variant.array(new VariantType("{sv}"), {}), new Variant.array(VariantType.VARIANT, {}));
 		env.call_function("emit", ref args);
 		args.get("(s@a{smv}@av)", null, out values, out entries);
+	}
+	
+	private bool check_init_request()
+	{
+		Variant values;
+		Variant entries;
+		var args = new Variant("(s@a{sv}@av)", "init-request", new Variant.array(new VariantType("{sv}"), {}), new Variant.array(VariantType.VARIANT, {}));
+		env.call_function("emit", ref args);
+		args.get("(s@a{smv}@av)", null, out values, out entries);
+		var values_hashtable = Diorite.variant_to_hashtable(values);
+		if (values_hashtable.size() > 0)
+		{
+			init_request(values_hashtable, entries);
+			return true;
+		}
+		return false;
 	}
 	
 	private void start_master()
