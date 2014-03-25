@@ -140,9 +140,25 @@ public class Config : GLib.Object, KeyValueStorage
 		}
 		else
 		{
-			var node = Json.gvariant_serialize(value);
-			object.set_member(member_name, (owned) node);
-			config_changed(key);
+			Variant? old_value = null;
+			if (object.has_member(member_name))
+			{
+				try
+				{
+					old_value = Json.gvariant_deserialize(object.get_member(member_name), null);
+				}
+				catch (GLib.Error e)
+				{
+					assert_not_reached();
+				}
+			}
+			
+			if (old_value != null && !old_value.equal(value))
+			{
+				var node = Json.gvariant_serialize(value);
+				object.set_member(member_name, (owned) node);
+				config_changed(key);
+			}
 		}
 	}
 	
