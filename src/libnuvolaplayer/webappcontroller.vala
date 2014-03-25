@@ -177,9 +177,16 @@ public class WebAppController : Diorite.Application
 	{
 		var values = new HashTable<string, Variant>(str_hash, str_equal);
 		values.insert(ConfigKey.DARK_THEME, config.get_value(ConfigKey.DARK_THEME));
-		var form = new Diorite.Form.from_spec(Diorite.variant_from_hashtable(values), new Variant.tuple({
+		var form = new Diorite.Form.from_spec(values, new Variant.tuple({
 			new Variant.tuple({new Variant.string("bool"), new Variant.string(ConfigKey.DARK_THEME), new Variant.string("Prefer dark theme")})
 		}));
+		
+		Variant? extra_values = null;
+		Variant? extra_entries = null;
+		web_engine.get_preferences(out extra_values, out extra_entries);
+		form.add_values(Diorite.variant_to_hashtable(extra_values));
+		form.add_entries(extra_entries);
+		
 		var dialog = new PreferencesDialog(this, main_window, form);
 		var response = dialog.run();
 		dialog.destroy();
@@ -190,7 +197,11 @@ public class WebAppController : Diorite.Application
 			{
 				var old_value = values.get(key);
 				var new_value = new_values.get(key);
-				if (!new_value.equal(old_value))
+				if (old_value == null)
+					critical("Old values '%s'' not found", key);
+				else if (new_value == null)
+					critical("New values '%s'' not found", key);
+				else
 					config.set_value(key, new_value);
 			}
 		}

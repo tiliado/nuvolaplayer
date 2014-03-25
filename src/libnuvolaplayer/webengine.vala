@@ -141,7 +141,7 @@ public class WebEngine : GLib.Object
 			return true;
 		}
 		
-		if(uri.has_prefix("nuvola://"))
+		if (uri.has_prefix("nuvola://"))
 		{
 			web_view.load_uri(web_app.data_dir.get_child(uri.substring(9)).get_uri());
 			return true;
@@ -227,6 +227,13 @@ public class WebEngine : GLib.Object
 			return;
 		var data = new Variant("(smv)", name, params);
 		slave.send_message("call_function", data);
+	}
+	
+	public void get_preferences(out Variant values, out Variant entries)
+	{
+		var args = new Variant("(s@a{sv}@av)", "append-preferences", new Variant.array(new VariantType("{sv}"), {}), new Variant.array(VariantType.VARIANT, {}));
+		env.call_function("emit", ref args);
+		args.get("(s@a{smv}@av)", null, out values, out entries);
 	}
 	
 	private void start_master()

@@ -162,7 +162,7 @@ Nuvola.makeSignaling = function(obj_proto)
 }
 
 Nuvola.makeSignaling(Nuvola);
-Nuvola.registerSignals(["home-page", "navigation-request", "uri-changed", "last-page"]);
+Nuvola.registerSignals(["home-page", "navigation-request", "uri-changed", "last-page", "append-preferences"]);
 
 Nuvola.setHideOnClose = function(hide)
 {
@@ -310,6 +310,7 @@ Nuvola.Player =
 		Nuvola.Actions.addAction("playback", "win", this.ACTION_NEXT_SONG, "Next song", null, "media-skip-forward", null);
 		Nuvola.Config.setDefault(this.BACKGROUND_PLAYBACK, true);
 		this.updateMenu();
+		Nuvola.connect("append-preferences", this, "onAppendPreferences");
 	},
 	
 	update: function()
@@ -421,6 +422,12 @@ Nuvola.Player =
 	updateMenu: function()
 	{
 		Nuvola.MenuBar.setMenu("playback", "_Control", this.baseActions.concat(this.extraActions));
+	},
+	
+	onAppendPreferences: function(object, values, entries)
+	{
+		values[this.BACKGROUND_PLAYBACK] = Nuvola.Config.get(this.BACKGROUND_PLAYBACK);
+		entries.push(["bool", this.BACKGROUND_PLAYBACK, "Keep playing in background when window is closed"]);
 	}
 };
 
