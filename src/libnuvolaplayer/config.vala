@@ -153,7 +153,7 @@ public class Config : GLib.Object, KeyValueStorage
 				}
 			}
 			
-			if (old_value != null && !old_value.equal(value))
+			if (old_value == null || !old_value.equal(value))
 			{
 				var node = Json.gvariant_serialize(value);
 				object.set_member(member_name, (owned) node);
