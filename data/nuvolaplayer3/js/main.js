@@ -299,6 +299,7 @@ Nuvola.Player =
 	prevData: {},
 	extraActions: [],
 	firstUpdate: true,
+	_artworkLoop: 0,
 	
 	init: function()
 	{
@@ -341,6 +342,17 @@ Nuvola.Player =
 		
 		if (!changed.length)
 			return;
+		
+		if (Nuvola.inArray(changed, "artwork") && this.artwork)
+		{
+			var artworkId = this._artworkLoop++;
+			if (this._artworkLoop > 9)
+				this._artworkLoop = 0;
+			Nuvola.Browser.downloadFileAsync(this.artwork, "player.artwork." + artworkId, function(res)
+			{
+				console.log(Nuvola.format("Artwork downloaded to {1}", res.filePath));
+			});
+		}
 		
 		if (this.song)
 		{
@@ -499,7 +511,31 @@ Nuvola.Browser =
 	ACTION_GO_BACK: "go-back",
 	ACTION_GO_FORWARD: "go-forward",
 	ACTION_GO_HOME: "go-home",
-	ACTION_RELOAD: "reload"
+	ACTION_RELOAD: "reload",
+	_downloadFileAsyncId: 0,
+	_downloadFileAsyncCallbacks: {},
+	
+	downloadFileAsync: function(uri, basename, callback, data)
+	{
+		var id = this._downloadFileAsyncId++;
+		if (this._downloadFileAsyncId >= Number.MAX_VALUE - 1)
+			this._downloadFileAsyncId = 0;
+		this._downloadFileAsyncCallbacks[id] = [callback, data];
+		Nuvola._sendMessageAsync("Nuvola.Browser.downloadFileAsync", uri, basename, id);
+	},
+	
+	_downloadDone: function(id, result, statusCode, statusText, filePath, fileURI)
+	{
+		var cb = this._downloadFileAsyncCallbacks[id];
+		delete this._downloadFileAsyncCallbacks[id];
+		cb[0]({
+			result: result,
+			statusCode: statusCode,
+			statusText: statusText,
+			filePath: filePath,
+			fileURI: fileURI
+		}, cb[1]);
+	}
 }
 
 })(this);  // function(Nuvola)

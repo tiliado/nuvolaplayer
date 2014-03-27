@@ -55,6 +55,7 @@ public class WebAppController : Diorite.Application
 	public weak Gtk.Settings gtk_settings {get; private set;}
 	public Config config {get; private set;}
 	public ExtensionsManager extensions {get; private set;}
+	public Connection connection {get; private set;}
 	private static const int MINIMAL_REMEMBERED_WINDOW_SIZE = 300;
 	private uint configure_event_cb_id = 0;
 	private MenuBar menu_bar;
@@ -97,6 +98,9 @@ public class WebAppController : Diorite.Application
 		main_window.can_destroy.connect(on_can_quit);
 		fatal_error.connect(on_fatal_error);
 		show_error.connect(on_show_error);
+		connection = new Connection(new Soup.SessionAsync(), web_app.user_cache_dir.get_child("conn"));
+		connection.session.add_feature_by_type(typeof(Soup.ProxyResolverDefault));
+		
 		web_engine = new WebEngine(this, web_app, config);
 		web_engine.async_message_received.connect(on_async_message_received);
 		web_engine.sync_message_received.connect(on_sync_message_received);
@@ -431,6 +435,30 @@ public class WebAppController : Diorite.Application
 			var action = actions.get_action(action_name);
 			return_if_fail(action != null);
 			action.activate(null);
+			break;
+		case "Nuvola.Browser.downloadFileAsync":
+			return_if_fail(data != null);
+			string? uri = null;
+			string? basename = null;
+			double cb_id = 0.0;
+			data.get("(ssd)", &uri, &basename, &cb_id);
+			return_if_fail(uri != null);
+			return_if_fail(basename != null);
+			var file = connection.cache_dir.get_child(basename);
+			connection.download_file.begin(uri, file, (obj, res) =>
+			{
+				Soup.Message msg = null;
+				var result = connection.download_file.end(res, out msg);
+				try
+				{
+					web_engine.call_function("Nuvola.Browser._downloadDone", new Variant("(dbusss)", cb_id, result, msg.status_code, msg.reason_phrase, file.get_path(), file.get_uri()));
+				}
+				catch (Diorite.Ipc.MessageError e)
+				{
+					warning("Communication failed: %s", e.message);
+				}
+				
+			});
 			break;
 		}
 	}
