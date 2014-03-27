@@ -294,6 +294,7 @@ Nuvola.Player =
 	artist: null,
 	album: null,
 	artwork: null,
+	artworkFile: null,
 	prevSong: null,
 	nextSong: null,
 	prevData: {},
@@ -343,46 +344,6 @@ Nuvola.Player =
 		if (!changed.length)
 			return;
 		
-		if (Nuvola.inArray(changed, "artwork") && this.artwork)
-		{
-			var artworkId = this._artworkLoop++;
-			if (this._artworkLoop > 9)
-				this._artworkLoop = 0;
-			Nuvola.Browser.downloadFileAsync(this.artwork, "player.artwork." + artworkId, function(res)
-			{
-				console.log(Nuvola.format("Artwork downloaded to {1}", res.filePath));
-			});
-		}
-		
-		if (this.song)
-		{
-			var title = this.song;
-			var message;
-			if (!this.artist && !this.album)
-				message = "by unknown artist";
-			else if(!this.artist)
-				message = Nuvola.format("from {1}", this.album);
-			else if(!this.album)
-				message = Nuvola.format("by {1}", this.artist);
-			else
-				message = Nuvola.format("by {1} from {2}", this.artist, this.album);
-			
-			Nuvola.Notification.update(title, message, "nuvolaplayer", null);
-			Nuvola.Notification.show();
-			
-			if (this.artist)
-				var tooltip = Nuvola.format("{1} by {2}", this.song, this.artist);
-			else
-				var tooltip = this.song;
-			
-			Nuvola.TrayIcon.setTooltip(tooltip);
-		}
-		else
-		{
-			Nuvola.TrayIcon.setTooltip("Nuvola Player");
-		}
-		
-		
 		var trayIconActions = [];
 		if (this.state === this.STATE_PLAYING || this.state === this.STATE_PAUSED)
 		{
@@ -423,6 +384,66 @@ Nuvola.Player =
 		
 		if (Nuvola.inArray(changed, "nextSong"))
 			Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_NEXT_SONG, this.nextSong === true);
+		
+		if (!this.artwork)
+			this.artworkFile = null;
+		
+		if (Nuvola.inArray(changed, "artwork") && this.artwork)
+		{
+			var artworkId = this._artworkLoop++;
+			if (this._artworkLoop > 9)
+				this._artworkLoop = 0;
+			Nuvola.Browser.downloadFileAsync(this.artwork, "player.artwork." + artworkId, this.onArtworkDownloaded.bind(this), changed);
+		}
+		else
+		{
+			this.updateTrackInfo(changed);
+		}
+	},
+	
+	onArtworkDownloaded: function(res, changed)
+	{
+		if (!res.result)
+		{
+			this.artworkFile = null;
+			console.log(Nuvola.format("Artwork download failed: {1} {2}.", res.statusCode, res.statusText));
+		}
+		else
+		{
+			this.artworkFile = res.filePath;
+		}
+		this.updateTrackInfo(changed);
+	},
+	
+	updateTrackInfo: function(changed)
+	{
+		if (this.song)
+		{
+			var title = this.song;
+			var message;
+			if (!this.artist && !this.album)
+				message = "by unknown artist";
+			else if(!this.artist)
+				message = Nuvola.format("from {1}", this.album);
+			else if(!this.album)
+				message = Nuvola.format("by {1}", this.artist);
+			else
+				message = Nuvola.format("by {1} from {2}", this.artist, this.album);
+			
+			Nuvola.Notification.update(title, message, this.artworkFile ? null : "nuvolaplayer", this.artworkFile);
+			Nuvola.Notification.show();
+			
+			if (this.artist)
+				var tooltip = Nuvola.format("{1} by {2}", this.song, this.artist);
+			else
+				var tooltip = this.song;
+			
+			Nuvola.TrayIcon.setTooltip(tooltip);
+		}
+		else
+		{
+			Nuvola.TrayIcon.setTooltip("Nuvola Player");
+		}
 	},
 	
 	addExtraActions: function(actions)
