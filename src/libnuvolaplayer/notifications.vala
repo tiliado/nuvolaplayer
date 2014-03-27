@@ -52,11 +52,12 @@ public class Extension : Nuvola.Extension
 	private Config config;
 	private Gtk.Window main_window;
 	private WebEngine web_engine;
+	private Diorite.ActionsRegistry actions_reg;
+	private string[] actions = {};
 	private Notify.Notification? notification = null;
 	private bool actions_supported = false;
 	private bool persistence_supported = false;
 	private bool icons_supported = false;
-	private uint queued_id = 0;
 	
 	public bool active_window
 	{
@@ -99,6 +100,7 @@ public class Extension : Nuvola.Extension
 		this.config = controller.config;
 		this.main_window = controller.main_window;
 		this.web_engine = controller.web_engine;
+		this.actions_reg = controller.actions;
 		
 		Notify.init(controller.app_name);
 		unowned List<string> capabilities = Notify.get_server_caps();
@@ -130,6 +132,7 @@ public class Extension : Nuvola.Extension
 			notification = null;
 		}
 		Notify.uninit();
+		actions = {};
 	}
 	
 	public void update(string title, string message, string? icon_name, string? icon_path)
@@ -141,7 +144,6 @@ public class Extension : Nuvola.Extension
 		else
 		{
 			notification.clear_hints();
-			notification.clear_actions();
 			notification.update(title, message, icon_name ?? "");
 		}
 		
@@ -158,28 +160,46 @@ public class Extension : Nuvola.Extension
 				warning("Failed to icon %s: %s", icon_path, e.message);
 			}
 		}
+		
+		update_actions();
 	}
 	
-	public void force_show()
+	public void show()
 	{
-		if (queued_id == 0)
-			queued_id = Idle.add(show_notification_cb);
-	}
-	
-	public void show(bool ignore_paused=true)
-	{
-//~ 		if (!(resident && persistence_supported)
-//~ 		&& player.playback_state != STATE_PLAYING
-//~ 		&& ignore_paused || main_window.is_active && !active_window)
-//~ 			return;
+		if (!(resident && persistence_supported) && main_window.is_active && !active_window)
+			return;
 		
 		force_show();
 	}
 	
-	private bool show_notification_cb()
+	private void update_actions()
 	{
-		queued_id = 0;
+		if (notification == null)
+			return;
 		
+		notification.clear_actions();
+		
+		if (persistence_supported && resident)
+			notification.set_hint("resident", true);
+		
+		if (actions_supported)
+		{
+			if (icons_supported)
+				notification.set_hint("action-icons", true);
+			
+			foreach (var name in actions)
+			{
+				var action = actions_reg.get_action(name);
+				if (action != null && action.enabled)
+				{
+					notification.add_action(action.icon, action.label, () => { action.activate(null); });
+				}
+			}
+		}
+	}
+	
+	public void force_show()
+	{
 		try
 		{
 			notification.show();
@@ -188,8 +208,6 @@ public class Extension : Nuvola.Extension
 		{
 			warning("Unable to show notification: %s", e.message);
 		}
-		
-		return false;
 	}
 	
 	private void on_async_message_received(WebEngine engine, string name, Variant? data)
@@ -204,6 +222,22 @@ public class Extension : Nuvola.Extension
 			{
 				data.get("(ssss)", &title, &message, &icon_name, &icon_path);
 				update(title, message, icon_name, icon_path);
+			}
+		}
+		else if (name == "Nuvola.Notification.setActions")
+		{
+			if (data != null && data.is_container())
+			{
+				int i = 0;
+				VariantIter iter = null;
+				data.get("(av)", &iter);
+				string[] actions = new string[iter.n_children()];
+				Variant item = null;
+				while (iter.next("v", &item))
+					actions[i++] = item.get_string();
+				
+				this.actions = (owned) actions;
+				update_actions();
 			}
 		}
 		else if (name == "Nuvola.Notification.show")

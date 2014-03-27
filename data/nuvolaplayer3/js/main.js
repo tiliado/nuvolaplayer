@@ -171,9 +171,14 @@ Nuvola.setHideOnClose = function(hide)
 
 Nuvola.Notification =
 {
-	update: function(title, text, iconName, iconURL)
+	update: function(title, text, iconName, iconPath)
 	{
-		Nuvola._sendMessageAsync("Nuvola.Notification.update", title, text, iconName || "", iconURL || "");
+		Nuvola._sendMessageAsync("Nuvola.Notification.update", title, text, iconName || "", iconPath || "");
+	},
+	
+	setActions: function(actions)
+	{
+		Nuvola._sendMessageAsync("Nuvola.Notification.setActions", actions);
 	},
 	
 	show: function()
@@ -305,6 +310,7 @@ Nuvola.Player =
 	init: function()
 	{
 		Nuvola.TrayIcon.setActions(["quit"]);
+		Nuvola.Notification.setActions([this.ACTION_PLAY, this.ACTION_PAUSE, this.ACTION_PREV_SONG, this.ACTION_NEXT_SONG]);
 		Nuvola.Actions.addAction("playback", "win", this.ACTION_PLAY, "Play", null, "media-playback-start", null);
 		Nuvola.Actions.addAction("playback", "win", this.ACTION_PAUSE, "Pause", null, "media-playback-pause", null);
 		Nuvola.Actions.addAction("playback", "win", this.ACTION_TOGGLE_PLAY, "Toggle play/pause", null, null, null);
@@ -431,7 +437,8 @@ Nuvola.Player =
 				message = Nuvola.format("by {1} from {2}", this.artist, this.album);
 			
 			Nuvola.Notification.update(title, message, this.artworkFile ? null : "nuvolaplayer", this.artworkFile);
-			Nuvola.Notification.show();
+			if (this.state === this.STATE_PLAYING)
+				Nuvola.Notification.show();
 			
 			if (this.artist)
 				var tooltip = Nuvola.format("{1} by {2}", this.song, this.artist);
