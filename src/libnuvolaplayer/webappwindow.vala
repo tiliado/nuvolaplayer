@@ -29,7 +29,38 @@ public class WebAppWindow : Gtk.ApplicationWindow
 {
 	public Gtk.Grid grid {get; private set;}
 	public Gtk.Overlay overlay {get; private set;}
+	public Sidebar sidebar {get; private set;}
+	
+	public int sidebar_position
+	{
+		get
+		{
+			return paned.position;
+		}
+		
+		set
+		{
+			if (value == -1)
+			{
+				if (sidebar.visible)
+				{
+					Gtk.Allocation allocation;
+					int width = 0;
+					paned.get_allocation(out allocation);
+					sidebar.get_preferred_width(out width, null);
+					paned.position = allocation.width - width;
+				}
+			}
+			else if (paned.position != value)
+			{
+				paned.position = value;
+			}
+		}
+	}
+	
 	public bool maximized {get; private set; default = false;}
+	private Gtk.Paned paned;
+	private uint sidebar_position_cb_id = 0;
 	
 	private WebAppController app;
 	
@@ -56,7 +87,14 @@ public class WebAppWindow : Gtk.ApplicationWindow
 		grid.orientation = Gtk.Orientation.VERTICAL;
 		overlay = new Gtk.Overlay();
 		overlay.add(grid);
-		add(overlay);
+		overlay.show_all();
+		sidebar = new Sidebar();
+		paned = new Gtk.Paned(Gtk.Orientation.HORIZONTAL);
+		paned.pack1(overlay, true, false);
+		paned.pack2(sidebar, false, false);
+		paned.notify["position"].connect_after(on_sidebar_position_changed);
+		paned.show();
+		add(paned);
 	}
 	
 	public signal void can_destroy(ref bool result);
@@ -72,6 +110,21 @@ public class WebAppWindow : Gtk.ApplicationWindow
 	private bool on_window_state_event(Gdk.EventWindowState event)
 	{
 		maximized = (event.new_window_state & Gdk.WindowState.MAXIMIZED) != 0;
+		return false;
+	}
+	
+	private void on_sidebar_position_changed(GLib.Object o, ParamSpec p)
+	{
+		if (sidebar_position_cb_id != 0)
+			Source.remove(sidebar_position_cb_id);
+		sidebar_position_cb_id = Timeout.add(250, sidebar_position_cb);
+	}
+	
+	private bool sidebar_position_cb()
+	{
+		debug("Sidebar position: %d", paned.position);
+		sidebar_position_cb_id = 0;
+		sidebar_position = paned.position;
 		return false;
 	}
 }

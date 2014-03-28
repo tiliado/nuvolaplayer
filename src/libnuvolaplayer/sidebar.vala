@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -22,62 +22,64 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola.Extensions.Sample
+namespace Nuvola
 {
 
-public Nuvola.ExtensionInfo get_info()
+public class Sidebar : Gtk.Grid
 {
-	return
-	{
-		/// Name of a sample plugin
-		_("Sample plugin"),
-		"2.7182818284...",
-		/// Sample plugin descriptiom
-		_("<p>This plugin is a sample.</p>"),
-		"Jiří Janoušek",
-		typeof(Extension),
-		true
-	};
-}
-
-
-/**
- * Simple sample plugin
- */
-public class Extension : Nuvola.Extension
-{
-	private weak WebAppController controller;
-	private Gtk.Button? button;
+	private Gtk.Stack stack;
+	private StackMenuButton header;
 	
-	/**
-	 * {@inheritDoc}
-	 */
-	public override void load(WebAppController controller) throws ExtensionError
+	
+	public Sidebar()
 	{
-		debug("[%s] load", id);
-		this.controller = controller;
-		button = new Gtk.Button.with_label("Hello!");
-		button.clicked.connect((b) => {controller.main_window.sidebar.remove_page(b);});
+		stack = new Gtk.Stack();
+		stack.expand = true;
+		stack.margin = 8;
+		stack.show();
+		header = new StackMenuButton(stack);
+		header.stack = stack;
+		header.show();
+		header.hexpand = true;
+		header.halign = Gtk.Align.FILL;
+		header.margin = 8;
+		var button = new Gtk.Button.from_icon_name("window-close", Gtk.IconSize.BUTTON);
+		button.relief = Gtk.ReliefStyle.NONE;
+		button.clicked.connect(on_close_button_clicked);
+		button.margin = 8;
 		button.show();
-		
-		controller.main_window.sidebar.add_page("sample", "Sample", button);
-		controller.main_window.sidebar.add_page("sample2", "Sample2", new Gtk.Label("Sample2"));
+		button.hexpand = false;
+		attach(header, 0, 0, 1, 1);
+		attach(button, 1, 0, 1, 1);
+		attach(stack, 0, 1, 2, 1);
+		vexpand = hexpand = true;
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 */
-	public override void unload()
+	public override void show()
 	{
-		debug("[%s] unload", id);
-		if (button != null)
-		{
-			controller.main_window.sidebar.remove_page(button);
-			button = null;
-		}
-		
+		if (stack.visible_child == null)
+			return;
+		base.show();
+	}
+	
+	public void add_page(string name, string label, Gtk.Widget page)
+	{
+		stack.add_titled(page, name, label);
+		page.show();
+		show();
+	}
+	
+	public void remove_page(Gtk.Widget page)
+	{
+		stack.remove(page);
+		if (stack.visible_child == null)
+			hide();
+	}
+	
+	private void on_close_button_clicked()
+	{
+		hide();
 	}
 }
 
-} // namespace Nuvola.Extensions.Sample
-
+} // namespace Nuvola

@@ -32,6 +32,8 @@ namespace ConfigKey
 	public const string WINDOW_WIDTH = "nuvola.window.width";
 	public const string WINDOW_HEIGHT = "nuvola.window.height";
 	public const string WINDOW_MAXIMIZED = "nuvola.window.maximized";
+	public const string WINDOW_SIDEBAR_POS = "nuvola.window.sidebar_position";
+	public const string WINDOW_SIDEBAR_VISIBLE = "nuvola.window.sidebar_visible";
 	public const string DARK_THEME = "nuvola.dark_theme";
 }
 
@@ -88,6 +90,8 @@ public class WebAppController : Diorite.Application
 		var default_config = new HashTable<string, Variant>(str_hash, str_equal);
 		default_config.insert(ConfigKey.WINDOW_X, new Variant.int64(-1));
 		default_config.insert(ConfigKey.WINDOW_Y, new Variant.int64(-1));
+		default_config.insert(ConfigKey.WINDOW_SIDEBAR_POS, new Variant.int64(-1));
+		default_config.insert(ConfigKey.WINDOW_SIDEBAR_VISIBLE, new Variant.boolean(true));
 		default_config.insert(ConfigKey.DARK_THEME, new Variant.boolean(false));
 		config = new Config(web_app.user_config_dir.get_child("config.json"), default_config);
 		config.config_changed.connect(on_config_changed);
@@ -118,6 +122,7 @@ public class WebAppController : Diorite.Application
 		if (!web_engine.load())
 			return;
 		main_window.grid.add(widget);
+		widget.show();
 		
 		int x = (int) config.get_int(ConfigKey.WINDOW_X);
 		int y = (int) config.get_int(ConfigKey.WINDOW_Y);
@@ -131,10 +136,19 @@ public class WebAppController : Diorite.Application
 		if (config.get_bool(ConfigKey.WINDOW_MAXIMIZED))
 			main_window.maximize();
 		
-		main_window.show_all();
+		
+		main_window.present();
 		main_window.window_state_event.connect(on_window_state_event);
 		main_window.configure_event.connect(on_configure_event);
 		load_extensions();
+		
+		if (config.get_bool(ConfigKey.WINDOW_SIDEBAR_VISIBLE))
+			main_window.sidebar.show();
+		else
+			main_window.sidebar.hide();
+		main_window.sidebar_position = (int) config.get_int(ConfigKey.WINDOW_SIDEBAR_POS);
+		main_window.notify["sidebar-position"].connect_after((o, p) => config.set_int(ConfigKey.WINDOW_SIDEBAR_POS, (int64) main_window.sidebar_position));
+		main_window.sidebar.notify["visible"].connect_after(on_sidebar_visibility_changed);
 	}
 	
 	private Diorite.SimpleAction simple_action(string group, string scope, string name, string? label, string? mnemo_label, string? icon, string? keybinding, owned Diorite.ActionCallback? callback)
@@ -567,6 +581,14 @@ public class WebAppController : Diorite.Application
 		}
 		
 		web_engine.load();
+	}
+	
+	private void on_sidebar_visibility_changed(GLib.Object o, ParamSpec p)
+	{
+		var visible = main_window.sidebar.visible;
+		config.set_bool(ConfigKey.WINDOW_SIDEBAR_VISIBLE, visible);
+		if (visible)
+			main_window.sidebar_position = (int) config.get_int(ConfigKey.WINDOW_SIDEBAR_POS);
 	}
 }
 
