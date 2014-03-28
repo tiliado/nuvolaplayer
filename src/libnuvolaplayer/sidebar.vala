@@ -30,7 +30,6 @@ public class Sidebar : Gtk.Grid
 	private Gtk.Stack stack;
 	private StackMenuButton header;
 	
-	
 	public Sidebar()
 	{
 		stack = new Gtk.Stack();
@@ -57,23 +56,28 @@ public class Sidebar : Gtk.Grid
 	
 	public override void show()
 	{
-		if (stack.visible_child == null)
+		if (is_empty())
 			return;
 		base.show();
 	}
 	
-	public void add_page(string name, string label, Gtk.Widget page)
+	public virtual signal void add_page(string name, string label, Gtk.Widget page)
 	{
 		stack.add_titled(page, name, label);
 		page.show();
 		show();
 	}
 	
-	public void remove_page(Gtk.Widget page)
+	public virtual signal void remove_page(Gtk.Widget page)
 	{
 		stack.remove(page);
-		if (stack.visible_child == null)
+		if (is_empty())
 			hide();
+	}
+	
+	public bool is_empty()
+	{
+		return stack.visible_child == null;
 	}
 	
 	private void on_close_button_clicked()

@@ -54,7 +54,7 @@ public class MenuBar
 		menubar.remove_all();
 		app_menu.remove_all();
 	
-		var tmp_app_menu = actions_reg.build_menu({Actions.KEYBINDINGS, Actions.PREFERENCES, Actions.QUIT}, true, false);
+		var tmp_app_menu = actions_reg.build_menu({Actions.TOGGLE_SIDEBAR, Actions.KEYBINDINGS, Actions.PREFERENCES, Actions.QUIT}, true, false);
 		var size = tmp_app_menu.get_n_items();
 		for (var i = 0; i < size; i++)
 			app_menu.append_item(new MenuItem.from_model(tmp_app_menu, i));

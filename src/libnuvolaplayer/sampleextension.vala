@@ -61,7 +61,6 @@ public class Extension : Nuvola.Extension
 		button.show();
 		
 		controller.main_window.sidebar.add_page("sample", "Sample", button);
-		controller.main_window.sidebar.add_page("sample2", "Sample2", new Gtk.Label("Sample2"));
 	}
 	
 	/**

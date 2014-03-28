@@ -45,6 +45,7 @@ namespace Actions
 	public const string GO_RELOAD = "go-reload";
 	public const string KEYBINDINGS = "keybindings";
 	public const string PREFERENCES = "preferences";
+	public const string TOGGLE_SIDEBAR = "toggle-sidebar";
 }
 
 public class WebAppController : Diorite.Application
@@ -136,7 +137,8 @@ public class WebAppController : Diorite.Application
 		if (config.get_bool(ConfigKey.WINDOW_MAXIMIZED))
 			main_window.maximize();
 		
-		
+		main_window.sidebar.add_page.connect_after(on_sidebar_page_added);
+		main_window.sidebar.remove_page.connect_after(on_sidebar_page_removed);
 		main_window.present();
 		main_window.window_state_event.connect(on_window_state_event);
 		main_window.configure_event.connect(on_configure_event);
@@ -172,13 +174,14 @@ public class WebAppController : Diorite.Application
 		simple_action("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
 		simple_action("main", "app", Actions.KEYBINDINGS, "Keyboard shortcuts", "_Keyboard shortcuts", null, null, do_keybindings),
 		simple_action("main", "app", Actions.PREFERENCES, "Preferences", "_Preferences", null, null, do_preferences),
+		toggle_action("main", "win", Actions.TOGGLE_SIDEBAR, "Show sidebar", "Show _sidebar", null, null, do_toggle_sidebar, config.get_value(ConfigKey.WINDOW_SIDEBAR_VISIBLE)),
 		simple_action("go", "app", Actions.GO_HOME, "Home", "_Home", "go-home", "<alt>Home", web_engine.go_home),
 		simple_action("go", "app", Actions.GO_BACK, "Back", "_Back", "go-previous", "<alt>Left", web_engine.go_back),
 		simple_action("go", "app", Actions.GO_FORWARD, "Forward", "_Forward", "go-next", "<alt>Right", web_engine.go_forward),
 		simple_action("go", "app", Actions.GO_RELOAD, "Reload", "_Reload", "view-refresh", null, web_engine.reload)
 		};
 		actions.add_actions(actions_spec);
-		
+		actions.get_action(Actions.TOGGLE_SIDEBAR).enabled = false;
 	}
 	
 	private void do_quit()
@@ -226,6 +229,15 @@ public class WebAppController : Diorite.Application
 					config.set_value(key, new_value);
 			}
 		}
+	}
+	
+	private void do_toggle_sidebar()
+	{
+		var sidebar = main_window.sidebar;
+		if (sidebar.visible)
+			sidebar.hide();
+		else
+			sidebar.show();
 	}
 	
 	private void load_extensions()
@@ -589,6 +601,18 @@ public class WebAppController : Diorite.Application
 		config.set_bool(ConfigKey.WINDOW_SIDEBAR_VISIBLE, visible);
 		if (visible)
 			main_window.sidebar_position = (int) config.get_int(ConfigKey.WINDOW_SIDEBAR_POS);
+		
+		actions.get_action(Actions.TOGGLE_SIDEBAR).state = new Variant.boolean(visible);
+	}
+	
+	private void on_sidebar_page_added(Sidebar sidebar, string name, string label, Gtk.Widget child)
+	{
+		actions.get_action(Actions.TOGGLE_SIDEBAR).enabled = !sidebar.is_empty();
+	}
+	
+	private void on_sidebar_page_removed(Sidebar sidebar, Gtk.Widget child)
+	{
+		actions.get_action(Actions.TOGGLE_SIDEBAR).enabled = !sidebar.is_empty();
 	}
 }
 
