@@ -32,8 +32,9 @@ namespace ConfigKey
 	public const string WINDOW_WIDTH = "nuvola.window.width";
 	public const string WINDOW_HEIGHT = "nuvola.window.height";
 	public const string WINDOW_MAXIMIZED = "nuvola.window.maximized";
-	public const string WINDOW_SIDEBAR_POS = "nuvola.window.sidebar_position";
-	public const string WINDOW_SIDEBAR_VISIBLE = "nuvola.window.sidebar_visible";
+	public const string WINDOW_SIDEBAR_POS = "nuvola.window.sidebar.position";
+	public const string WINDOW_SIDEBAR_VISIBLE = "nuvola.window.sidebar.visible";
+	public const string WINDOW_SIDEBAR_PAGE = "nuvola.window.sidebar.page";
 	public const string DARK_THEME = "nuvola.dark_theme";
 }
 
@@ -149,8 +150,12 @@ public class WebAppController : Diorite.Application
 		else
 			main_window.sidebar.hide();
 		main_window.sidebar_position = (int) config.get_int(ConfigKey.WINDOW_SIDEBAR_POS);
+		var sidebar_page = config.get_string(ConfigKey.WINDOW_SIDEBAR_PAGE);
+		if (sidebar_page != null)
+			main_window.sidebar.page = sidebar_page;
 		main_window.notify["sidebar-position"].connect_after((o, p) => config.set_int(ConfigKey.WINDOW_SIDEBAR_POS, (int64) main_window.sidebar_position));
 		main_window.sidebar.notify["visible"].connect_after(on_sidebar_visibility_changed);
+		main_window.sidebar.page_changed.connect(on_sidebar_page_changed);
 	}
 	
 	private Diorite.SimpleAction simple_action(string group, string scope, string name, string? label, string? mnemo_label, string? icon, string? keybinding, owned Diorite.ActionCallback? callback)
@@ -604,6 +609,13 @@ public class WebAppController : Diorite.Application
 			main_window.sidebar_position = (int) config.get_int(ConfigKey.WINDOW_SIDEBAR_POS);
 		
 		actions.get_action(Actions.TOGGLE_SIDEBAR).state = new Variant.boolean(visible);
+	}
+	
+	private void on_sidebar_page_changed()
+	{
+		var page = main_window.sidebar.page;
+		if (page != null)
+			config.set_string(ConfigKey.WINDOW_SIDEBAR_PAGE, page);
 	}
 	
 	private void on_sidebar_page_added(Sidebar sidebar, string name, string label, Gtk.Widget child)

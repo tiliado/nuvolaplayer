@@ -27,6 +27,13 @@ namespace Nuvola
 
 public class Sidebar : Gtk.Grid
 {
+	public signal void page_changed();
+	public string? page
+	{
+		get {return stack.visible_child_name;}
+		set {stack.visible_child_name = value;}
+	}
+	
 	private Gtk.Stack stack;
 	private StackMenuButton header;
 	
@@ -36,6 +43,7 @@ public class Sidebar : Gtk.Grid
 		stack.expand = true;
 		stack.margin = 8;
 		stack.show();
+		stack.notify["visible-child-name"].connect_after(on_page_changed);
 		header = new StackMenuButton(stack);
 		header.stack = stack;
 		header.show();
@@ -83,6 +91,11 @@ public class Sidebar : Gtk.Grid
 	private void on_close_button_clicked()
 	{
 		hide();
+	}
+	
+	private void on_page_changed(GLib.Object o, ParamSpec p)
+	{
+		page_changed();
 	}
 }
 
