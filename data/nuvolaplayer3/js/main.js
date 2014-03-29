@@ -396,15 +396,30 @@ Nuvola.Player =
 		
 		if (Nuvola.inArray(changed, "artwork") && this.artwork)
 		{
+			this.artworkFile = null;
 			var artworkId = this._artworkLoop++;
 			if (this._artworkLoop > 9)
 				this._artworkLoop = 0;
 			Nuvola.Browser.downloadFileAsync(this.artwork, "player.artwork." + artworkId, this.onArtworkDownloaded.bind(this), changed);
+			this.sendDevelInfo();
 		}
 		else
 		{
 			this.updateTrackInfo(changed);
 		}
+	},
+	
+	sendDevelInfo: function()
+	{
+		var data = {};
+		var keys = ["song", "artist", "album", "artwork", "artworkFile", "baseActions", "extraActions"];
+		for (var i = 0; i < keys.length; i++)
+		{
+			var key = keys[i];
+			data[key] = this[key];
+		}
+		data.state = ["unknown", "paused", "playing"][this.state];
+		Nuvola._sendMessageAsync("Nuvola.Player.sendDevelInfo", data);
 	},
 	
 	onArtworkDownloaded: function(res, changed)
@@ -423,6 +438,7 @@ Nuvola.Player =
 	
 	updateTrackInfo: function(changed)
 	{
+		this.sendDevelInfo();
 		if (this.song)
 		{
 			var title = this.song;

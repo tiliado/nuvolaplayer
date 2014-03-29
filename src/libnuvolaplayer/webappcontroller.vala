@@ -408,7 +408,8 @@ public class WebAppController : Diorite.Application
 			return_if_fail(action_name != null);
 			var action = actions.get_action(action_name);
 			return_if_fail(action != null);
-			action.enabled = enabled;
+			if (action.enabled != enabled)
+				action.enabled = enabled;
 			break;
 		case "Nuvola.Actions.getState":
 			return_if_fail(data != null);

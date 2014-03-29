@@ -82,7 +82,7 @@ Integration.prototype.update = function()
 	
 	try
 	{
-		var elm = artistDiv.nextSibling.nextSibling.firstChild;
+		var elm = document.querySelector("#playerSongInfo .player-album");
 		player.album = elm.innerText || elm.textContent;
 	}
 	catch (e)
