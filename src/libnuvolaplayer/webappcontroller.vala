@@ -60,6 +60,7 @@ public class WebAppController : Diorite.Application
 	public Config config {get; private set;}
 	public ExtensionsManager extensions {get; private set;}
 	public Connection connection {get; private set;}
+	public GlobalKeybinder keybinder {get; private set;}
 	private static const int MINIMAL_REMEMBERED_WINDOW_SIZE = 300;
 	private uint configure_event_cb_id = 0;
 	private MenuBar menu_bar;
@@ -120,6 +121,7 @@ public class WebAppController : Diorite.Application
 		menu_bar = new MenuBar(actions, app_menu_shown && !menubar_shown);
 		menu_bar.update();
 		menu_bar.set_menus(this);
+		keybinder = new GlobalKeybinder();
 		
 		if (!web_engine.load())
 			return;

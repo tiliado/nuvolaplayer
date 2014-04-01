@@ -150,6 +150,8 @@ def configure(ctx):
 	ctx.check_dep('gio-2.0', 'GIO', '2.32')
 	ctx.check_dep('gtk+-3.0', 'GTK+', '3.4')
 	ctx.check_dep('gdk-3.0', 'GDK', '3.4')
+	ctx.check_dep('gdk-x11-3.0', 'GDKX11', '3.4')
+	ctx.check_dep('x11', 'XLIB', '0.5')
 	ctx.check_dep('gthread-2.0', 'GTHREAD', '2.32')
 	ctx.check_dep('dioriteglib', 'DIORITEGLIB', '0.0.1')
 	ctx.check_dep('dioritegtk', 'DIORITEGTK', '0.0.1')
@@ -214,8 +216,8 @@ def build(ctx):
 		vala_target_glib = "2.32",
 	)
 	
-	packages = 'libnotify javascriptcoregtk-3.0 webkit2gtk-3.0 libarchive dioritegtk dioriteglib gtk+-3.0 gdk-3.0 posix json-glib-1.0 glib-2.0 gio-2.0'
-	uselib = 'NOTIFY JSCORE WEBKIT LIBARCHIVE DIORITEGTK DIORITEGLIB GTK+ GDK JSON-GLIB GLIB GTHREAD GIO'
+	packages = 'libnotify javascriptcoregtk-3.0 webkit2gtk-3.0 libarchive dioritegtk dioriteglib gtk+-3.0 gdk-3.0 gdk-x11-3.0 x11 posix json-glib-1.0 glib-2.0 gio-2.0'
+	uselib = 'NOTIFY JSCORE WEBKIT LIBARCHIVE DIORITEGTK DIORITEGLIB GTK+ GDK GDKX11 XLIB JSON-GLIB GLIB GTHREAD GIO'
 	
 	if ctx.env.with_unity:
 		packages += " unity Dbusmenu-0.4"
