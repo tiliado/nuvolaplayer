@@ -162,7 +162,7 @@ public class WebAppController : Diorite.Application
 		main_window.sidebar.page_changed.connect(on_sidebar_page_changed);
 	}
 	
-	private Diorite.SimpleAction simple_action(string group, string scope, string name, string? label, string? mnemo_label, string? icon, string? keybinding, owned Diorite.ActionCallback? callback)
+	public Diorite.SimpleAction simple_action(string group, string scope, string name, string? label, string? mnemo_label, string? icon, string? keybinding, owned Diorite.ActionCallback? callback)
 	{
 		var kbd = config.get_string("nuvola.keybindings." + name) ?? keybinding;
 		if (kbd == "")
@@ -170,7 +170,7 @@ public class WebAppController : Diorite.Application
 		return new Diorite.SimpleAction(group, scope, name, label, mnemo_label, icon, kbd, (owned) callback);
 	}
 	
-	private Diorite.ToggleAction toggle_action(string group, string scope, string name, string? label, string? mnemo_label, string? icon, string? keybinding, owned Diorite.ActionCallback? callback, Variant state)
+	public Diorite.ToggleAction toggle_action(string group, string scope, string name, string? label, string? mnemo_label, string? icon, string? keybinding, owned Diorite.ActionCallback? callback, Variant state)
 	{
 		var kbd = config.get_string("nuvola.keybindings." + name) ?? keybinding;
 		return new Diorite.ToggleAction(group, scope, name, label, mnemo_label, icon, kbd, (owned) callback, state);

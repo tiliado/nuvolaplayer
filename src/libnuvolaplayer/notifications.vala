@@ -112,6 +112,8 @@ public class Extension : Nuvola.Extension
 		config.defaults.insert(prefix + RESIDENT, new Variant.boolean(true));
 		_resident = config.get_bool(prefix + RESIDENT);
 		web_engine.async_message_received.connect(on_async_message_received);
+		var action = controller.simple_action("view", "app", "show-notification", "Show notification", null, null, null, force_show);
+		actions_reg.add_action(action);
 	}
 	
 	/**
