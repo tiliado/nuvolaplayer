@@ -325,6 +325,7 @@ Nuvola.Player =
 	beforeFirstUpdate: function()
 	{
 		Nuvola.Config.connect("config-changed", this, "onConfigChanged");
+		Nuvola.MediaKeys.connect("key-pressed", this, "onMediaKeyPressed");
 	},
 	
 	update: function()
@@ -512,6 +513,31 @@ Nuvola.Player =
 			this.setHideOnClose();
 			break;
 		}
+	},
+	
+	onMediaKeyPressed: function(emitter, key)
+	{
+		var K = Nuvola.MediaKeys;
+		var A = Nuvola.Actions;
+		switch (key)
+		{
+		case K.PLAY:
+		case K.PAUSE:
+			A.activate(this.ACTION_TOGGLE_PLAY);
+			break;
+		case K.STOP:
+			A.activate(this.ACTION_STOP);
+			break;
+		case K.NEXT:
+			A.activate(this.ACTION_NEXT_SONG);
+			break;
+		case K.PREV:
+			A.activate(this.ACTION_PREV_SONG);
+			break;
+		default:
+			console.log(Nuvola.format("Unknown media key '{1}'.", key));
+			break;
+		}
 	}
 };
 
@@ -549,6 +575,17 @@ Nuvola.MenuBar =
 		Nuvola._sendMessageAsync("Nuvola.MenuBar.setMenu", id, label, actions);
 	},
 }
+
+Nuvola.MediaKeys =
+{
+	PLAY: "Play",
+	PAUSE: "Pause",
+	STOP: "Stop",
+	PREV: "Previous",
+	NEXT: "Next"
+};
+Nuvola.makeSignaling(Nuvola.MediaKeys);
+Nuvola.MediaKeys.registerSignals(["key-pressed"]);
 
 Nuvola.Browser =
 {
