@@ -33,6 +33,7 @@ public class KeybindingsDialog : Gtk.Dialog
 	private Diorite.Application app;
 	private Diorite.ActionsRegistry actions_reg;
 	private Config config;
+	private GlobalKeybindings global_keybindings;
 	private Gtk.TreeView view;
 	private Gtk.ListStore model;
 	
@@ -41,11 +42,12 @@ public class KeybindingsDialog : Gtk.Dialog
 	 * 
 	 * @param app Application object
 	 */
-	public KeybindingsDialog(Diorite.Application app, Gtk.Window? parent, Diorite.ActionsRegistry actions_reg, Config config)
+	public KeybindingsDialog(Diorite.Application app, Gtk.Window? parent, Diorite.ActionsRegistry actions_reg, Config config, GlobalKeybindings global_keybindings)
 	{
 		this.app = app;
 		this.actions_reg = actions_reg;
 		this.config = config;
+		this.global_keybindings = global_keybindings;
 		
 		window_position = Gtk.WindowPosition.CENTER;
 		title = TITLE;
@@ -67,7 +69,7 @@ public class KeybindingsDialog : Gtk.Dialog
 		
 		add_buttons(Gtk.Stock.CLOSE, Gtk.ResponseType.CLOSE);
 		
-		model = new Gtk.ListStore(4, typeof(string), typeof(string), typeof(uint), typeof(Gdk.ModifierType));
+		model = new Gtk.ListStore(6, typeof(string), typeof(string), typeof(uint), typeof(Gdk.ModifierType), typeof(uint), typeof(Gdk.ModifierType));
 		Gtk.TreeIter iter;
 		foreach (var action in actions_reg.list_actions())
 		{
@@ -87,20 +89,42 @@ public class KeybindingsDialog : Gtk.Dialog
 				accel_key = 0;
 				accel_mods = 0;
 			}
+
+			keybinding = global_keybindings.get_keybinding(action.name);
+			uint glob_accel_key;
+			Gdk.ModifierType glob_accel_mods;
+			if (keybinding != null)
+			{
+				Gtk.accelerator_parse(keybinding, out glob_accel_key, out glob_accel_mods);
+			}
+			else
+			{
+				glob_accel_key = 0;
+				glob_accel_mods = 0;
+			}
 			
 			model.append(out iter);
-			model.set(iter, 0, action.name, 1, label, 2, accel_key, 3, accel_mods, -1);
+			model.set(iter, 0, action.name, 1, label, 2, accel_key, 3, accel_mods, 4, glob_accel_key, 5, glob_accel_mods, -1);
 		}
 		
 		view = new Gtk.TreeView.with_model(model);
+		
 		var cell = new Gtk.CellRendererText();
 		view.insert_column_with_attributes(-1, "Action", cell, "text", 1);
+		
 		var accel_cell = new Gtk.CellRendererAccel();
 		accel_cell.editable = true;
 		accel_cell.accel_mode = Gtk.CellRendererAccelMode.GTK;
 		accel_cell.accel_edited.connect(on_accel_edited);
 		accel_cell.accel_cleared.connect(on_accel_cleared);
 		view.insert_column_with_attributes(-1, "Shortcut", accel_cell, "accel-key", 2, "accel-mods", 3);
+		
+		accel_cell = new Gtk.CellRendererAccel();
+		accel_cell.editable = true;
+		accel_cell.accel_mode = Gtk.CellRendererAccelMode.GTK;
+		accel_cell.accel_edited.connect(on_glob_accel_edited);
+		accel_cell.accel_cleared.connect(on_glob_accel_cleared);
+		view.insert_column_with_attributes(-1, "Global Shortcut", accel_cell, "accel-key", 4, "accel-mods", 5);
 		
 		get_content_area().add(view);
 		view.show();
@@ -141,6 +165,33 @@ public class KeybindingsDialog : Gtk.Dialog
 		action.keybinding = null;
 	}
 	
+	private void on_glob_accel_edited(string path_string, uint accel_key, Gdk.ModifierType accel_mods, uint hardware_keycode)
+	{
+		var keybinding = Gtk.accelerator_name(accel_key, accel_mods);
+		var path = new Gtk.TreePath.from_string(path_string);
+		Gtk.TreeIter iter;
+		model.get_iter(out iter, path);
+		string name;
+		model.get(iter, 0, out name, -1);
+		message("nuvola.global_keybindings.%s %s", name, Gtk.accelerator_name(accel_key, accel_mods));
+		
+		
+		if (global_keybindings.set_keybinding(name, keybinding))
+			model.set(iter, 4, accel_key, 5, accel_mods, -1);
+		else
+			model.set(iter, 4, 0, 5, 0, -1);
+	}
+	
+	private void on_glob_accel_cleared(string path_string)
+	{
+		var path = new Gtk.TreePath.from_string(path_string);
+		Gtk.TreeIter iter;
+		model.get_iter(out iter, path);
+		string name;
+		model.get(iter, 0, out name, -1);
+		global_keybindings.set_keybinding(name, null);
+		model.set(iter, 4, 0, 5, 0, -1);
+	}
 }
 
 } // namespace Nuvola
