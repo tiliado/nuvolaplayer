@@ -36,17 +36,29 @@ SUFFIX="3"
 
 UNIQUE_NAME="cz.fenryxo.NuvolaPlayer" + SUFFIX
 
+import subprocess
+try:
+	try:
+		# Read revision info from file revision-info created by ./waf dist
+		num, id = open("revision-info", "r").read().split(" ")
+	except Exception, e:
+		# Read revision info from current branch
+		output = subprocess.Popen(["bzr", "revision-info"], stdout=subprocess.PIPE).communicate()[0]
+		num, id = output.split(" ")
+except Exception, e:
+	raise Exception("Cannot find revision information.")
+
+REVISION = str(int(num))
+REVISION_ID = str(id).strip()
+
+
 VERSIONS, VERSION_SUFFIX = VERSION.split("+")
 if VERSION_SUFFIX == "stable":
 	VERSION = VERSIONS
 elif VERSION_SUFFIX == "rev":
-	import subprocess
-	revision_info = subprocess.Popen(["bzr", "revision-info"], stdout=subprocess.PIPE).communicate()[0]
-	revno, id = revision_info.split(" ")
-	VERSION_SUFFIX += revno
-	VERSION += revno
+	VERSION_SUFFIX += str(REVISION)
+	VERSION += str(REVISION)
 VERSIONS = map(int, VERSIONS.split("."))
-
 
 import sys
 from waflib.Configure import conf
@@ -117,6 +129,9 @@ def configure(ctx):
 	if PLATFORM not in (LINUX,):
 		print("Unsupported platform %s. Please try to talk to devs to consider support of your platform." % sys.platform)
 		sys.exit(1)
+	
+	ctx.msg("Revision", REVISION, "GREEN")
+	ctx.msg("Revision id", REVISION_ID, "GREEN")
 	
 	ctx.define(PLATFORM, 1)
 	ctx.env.VALA_DEFINES = [PLATFORM]
@@ -302,6 +317,16 @@ def post(ctx):
 def dist(ctx):
 	ctx.algo = "tar.gz"
 	ctx.excl = '.bzr .bzrignore build/* **/.waf* **/*~ **/*.swp **/.lock* bzrcommit.txt **/*.pyc'
+	
+	ctx.exec_command("bzr revision-info > revision-info")
+	
+	def archive():
+		ctx._archive()
+		node = ctx.path.find_node("revision-info")
+		if node:
+			node.delete()
+	ctx._archive = ctx.archive
+	ctx.archive = archive
 
 from waflib.TaskGen import extension
 @extension('.vapi')
