@@ -31,14 +31,20 @@ out = 'build'
 # Application name and version
 NAME="Nuvola Player"
 APPNAME = "nuvolaplayer"
-VERSION = "3.0.0~unstable"
+VERSION = "3.0.0+rev"
 SUFFIX="3"
 
 UNIQUE_NAME="cz.fenryxo.NuvolaPlayer" + SUFFIX
 
-VERSIONS, VERSION_SUFFIX = VERSION.split("~")
-if not VERSION_SUFFIX:
-	VERSION_SUFFIX = "stable"
+VERSIONS, VERSION_SUFFIX = VERSION.split("+")
+if VERSION_SUFFIX == "stable":
+	VERSION = VERSIONS
+elif VERSION_SUFFIX == "rev":
+	import subprocess
+	revision_info = subprocess.Popen(["bzr", "revision-info"], stdout=subprocess.PIPE).communicate()[0]
+	revno, id = revision_info.split(" ")
+	VERSION_SUFFIX += revno
+	VERSION += revno
 VERSIONS = map(int, VERSIONS.split("."))
 
 
@@ -292,6 +298,10 @@ def post(ctx):
 	if ctx.cmd in ('install', 'uninstall'):
 		if ctx.env.PLATFORM == LINUX and ctx.options.ldconfig:
 			ctx.exec_command('/sbin/ldconfig') 
+
+def dist(ctx):
+	ctx.algo = "tar.gz"
+	ctx.excl = '.bzr .bzrignore build/* **/.waf* **/*~ **/*.swp **/.lock* bzrcommit.txt **/*.pyc'
 
 from waflib.TaskGen import extension
 @extension('.vapi')
