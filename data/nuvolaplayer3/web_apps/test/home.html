@@ -128,10 +128,8 @@ Player.prototype.setPos = function(pos)
 	this.pos = pos;
 	var rows = document.querySelectorAll("#playlist tr");
 	for (var i = 0; i < rows.length; i++)
-	{
 		rows[i].className = i == pos ? "playing" : "";
-		alert(i + " " + pos);
-	}
+	
 	this.elm.prev.disabled = pos <= 0;
 	this.elm.next.disabled = pos < 0 || pos == Player.songs.length - 1;
 	this.timer = 5;
