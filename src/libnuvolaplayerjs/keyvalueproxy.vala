@@ -25,21 +25,23 @@
 namespace Nuvola
 {
 
-public class ConfigProxy: GLib.Object, KeyValueStorage
+public class KeyValueProxy: GLib.Object, KeyValueStorage
 {
 	private Diorite.Ipc.MessageClient client;
+	private string prefix;
 	
-	public ConfigProxy(Diorite.Ipc.MessageClient client)
+	public KeyValueProxy(Diorite.Ipc.MessageClient client, string prefix)
 	{
 		this.client = client;
+		this.prefix = prefix;
 	}
 	
 	public bool save() throws GLib.Error
 	{
-		var response = client.send_message("config_save", new Variant.byte(0));
+		var response = client.send_message(prefix + "_save", new Variant.byte(0));
 		if (response.is_of_type(VariantType.BOOLEAN))
 			return response.get_boolean();
-		critical("Invalid response to config_save: %s", response.print(false));
+		critical("Invalid response to KeyValueProxy.save: %s", response.print(false));
 		return false;
 	}
 	
@@ -47,10 +49,10 @@ public class ConfigProxy: GLib.Object, KeyValueStorage
 	{
 		try
 		{
-			var response = client.send_message("config_has_key", new Variant.string(key));
+			var response = client.send_message(prefix + "_has_key", new Variant.string(key));
 			if (response.is_of_type(VariantType.BOOLEAN))
 				return response.get_boolean();
-			critical("Invalid response to config_has_key: %s", response.print(false));
+			critical("Invalid response to KeyValueProxy.has_key: %s", response.print(false));
 		}
 		catch (Diorite.Ipc.MessageError e)
 		{
@@ -63,7 +65,7 @@ public class ConfigProxy: GLib.Object, KeyValueStorage
 	{
 		try
 		{
-			var response = client.send_message("config_get_value", new Variant.string(key));
+			var response = client.send_message(prefix + "_get_value", new Variant.string(key));
 			return response;
 		}
 		catch (Diorite.Ipc.MessageError e)
@@ -77,7 +79,7 @@ public class ConfigProxy: GLib.Object, KeyValueStorage
 	{
 		try
 		{
-			client.send_message("config_set_value", new Variant("(smv)", key, value));
+			client.send_message(prefix + "_set_value", new Variant("(smv)", key, value));
 		}
 		catch (Diorite.Ipc.MessageError e)
 		{
@@ -89,7 +91,7 @@ public class ConfigProxy: GLib.Object, KeyValueStorage
 	{
 		try
 		{
-			client.send_message("config_set_default_value", new Variant("(smv)", key, value));
+			client.send_message(prefix + "_set_default_value", new Variant("(smv)", key, value));
 		}
 		catch (Diorite.Ipc.MessageError e)
 		{
