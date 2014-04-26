@@ -103,14 +103,14 @@ public class JSApi : GLib.Object
 	private Diorite.Storage storage;
 	private File data_dir;
 	private File config_dir;
-	private KeyValueStorage? config;
+	private KeyValueStorage[] key_value_storages;
 	
-	public JSApi(Diorite.Storage storage, File data_dir, File config_dir, KeyValueStorage? config)
+	public JSApi(Diorite.Storage storage, File data_dir, File config_dir, KeyValueStorage config)
 	{
 		this.storage = storage;
 		this.data_dir = data_dir;
 		this.config_dir = config_dir;
-		this.config = config;
+		this.key_value_storages = {config};
 	}
 	
 	public signal void send_message_async(string name, Variant? data);
@@ -222,10 +222,10 @@ public class JSApi : GLib.Object
 	{
 		{"_sendMessageAsync", send_message_async_func, 0},
 		{"_sendMessageSync", send_message_sync_func, 0},
-		{"_hasConfigKey", has_config_key_func, 0},
-		{"_getConfig", get_config_func, 0},
-		{"_setConfig", set_config_func, 0},
-		{"_setDefaultConfig", set_default_config_func, 0},
+		{"_keyValueStorageHasKey", key_value_storage_has_key_func, 0},
+		{"_keyValueStorageGetValue", key_value_storage_get_value_func, 0},
+		{"_keyValueStorageSetValue", key_value_storage_set_value_func, 0},
+		{"_keyValueStorageSetDefaultValue", key_value_storage_set_default_value_func, 0},
 		{null, null, 0}
 	};
 	
@@ -331,17 +331,25 @@ public class JSApi : GLib.Object
 		}
 	}
 	
-	static unowned JS.Value has_config_key_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)
+	static unowned JS.Value key_value_storage_has_key_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)
 	{
 		unowned JS.Value _false = JS.Value.boolean(ctx, false);
 		exception = null;
-		if (args.length != 1)
+		if (args.length != 2)
 		{
-			exception = create_exception(ctx, "One argument required.");
+			exception = create_exception(ctx, "Two arguments required.");
 			return _false;
 		}
 		
-		var key = string_or_null(ctx, args[0]);
+		if (!args[0].is_number(ctx))
+		{
+			exception = create_exception(ctx, "Argument 0 must be a number.");
+			return _false;
+		}
+		
+		int index = (int) args[0].to_number(ctx);
+		
+		var key = string_or_null(ctx, args[1]);
 		if (key == null)
 		{
 			exception = create_exception(ctx, "The first argument must be a non-null string");
@@ -355,26 +363,33 @@ public class JSApi : GLib.Object
 			return _false;
 		}
 		
-		if (js_api.config == null)
+		if (js_api.key_value_storages.length <= index)
 			return _false;
 		
-		return JS.Value.boolean(ctx, js_api.config.has_key(key));
+		return JS.Value.boolean(ctx, js_api.key_value_storages[index].has_key(key));
 	}
 	
-	static unowned JS.Value get_config_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)
+	static unowned JS.Value key_value_storage_get_value_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)
 	{
 		unowned JS.Value undefined = JS.Value.undefined(ctx);
 		exception = null;
-		if (args.length != 1)
+		if (args.length != 2)
 		{
-			exception = create_exception(ctx, "One argument required.");
+			exception = create_exception(ctx, "Two arguments required.");
 			return undefined;
 		}
 		
-		var key = string_or_null(ctx, args[0]);
+		if (!args[0].is_number(ctx))
+		{
+			exception = create_exception(ctx, "Argument 0 must be a number.");
+			return undefined;
+		}
+		
+		int index = (int) args[0].to_number(ctx);
+		var key = string_or_null(ctx, args[1]);
 		if (key == null)
 		{
-			exception = create_exception(ctx, "The first argument must be a non-null string");
+			exception = create_exception(ctx, "Argument 1 must be a non-null string");
 			return undefined;
 		}
 		
@@ -385,10 +400,10 @@ public class JSApi : GLib.Object
 			return undefined;
 		}
 		
-		if (js_api.config == null)
+		if (js_api.key_value_storages.length <= index)
 			return undefined;
 		
-		var value = js_api.config.get_value(key);
+		var value = js_api.key_value_storages[index].get_value(key);
 		if (value == null)
 			return undefined;
 		
@@ -403,20 +418,27 @@ public class JSApi : GLib.Object
 		}
 	}
 	
-	static unowned JS.Value set_config_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)
+	static unowned JS.Value key_value_storage_set_value_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)
 	{
 		unowned JS.Value undefined = JS.Value.undefined(ctx);
 		exception = null;
-		if (args.length != 2)
+		if (args.length != 3)
 		{
-			exception = create_exception(ctx, "Two arguments required.");
+			exception = create_exception(ctx, "Three arguments required.");
 			return undefined;
 		}
 		
-		var key = string_or_null(ctx, args[0]);
+		if (!args[0].is_number(ctx))
+		{
+			exception = create_exception(ctx, "Argument 0 must be a number.");
+			return undefined;
+		}
+		
+		int index = (int) args[0].to_number(ctx);
+		var key = string_or_null(ctx, args[1]);
 		if (key == null)
 		{
-			exception = create_exception(ctx, "The first argument must be a non-null string");
+			exception = create_exception(ctx, "Argument 1 must be a non-null string");
 			return undefined;
 		}
 		
@@ -427,13 +449,13 @@ public class JSApi : GLib.Object
 			return undefined;
 		}
 		
-		if (js_api.config == null)
+		if (js_api.key_value_storages.length <= index)
 			return undefined;
 		
 		try
 		{
-			var value = args[1].is_undefined(ctx) ? null : variant_from_value(ctx, args[1]);
-			js_api.config.set_value(key, value);
+			var value = args[2].is_undefined(ctx) ? null : variant_from_value(ctx, args[2]);
+			js_api.key_value_storages[index].set_value(key, value);
 		}
 		catch (JSError e)
 		{
@@ -443,20 +465,27 @@ public class JSApi : GLib.Object
 		return undefined;
 	}
 	
-	static unowned JS.Value set_default_config_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)
+	static unowned JS.Value key_value_storage_set_default_value_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)
 	{
 		unowned JS.Value undefined = JS.Value.undefined(ctx);
 		exception = null;
-		if (args.length != 2)
+		if (args.length != 3)
 		{
-			exception = create_exception(ctx, "Two arguments required.");
+			exception = create_exception(ctx, "Three arguments required.");
 			return undefined;
 		}
 		
-		var key = string_or_null(ctx, args[0]);
+		if (!args[0].is_number(ctx))
+		{
+			exception = create_exception(ctx, "Argument 0 must be a number.");
+			return undefined;
+		}
+		
+		int index = (int) args[0].to_number(ctx);
+		var key = string_or_null(ctx, args[1]);
 		if (key == null)
 		{
-			exception = create_exception(ctx, "The first argument must be a non-null string");
+			exception = create_exception(ctx, "Argument 1 must be a non-null string");
 			return undefined;
 		}
 		
@@ -467,13 +496,13 @@ public class JSApi : GLib.Object
 			return undefined;
 		}
 		
-		if (js_api.config == null)
+		if (js_api.key_value_storages.length <= index)
 			return undefined;
 		
 		try
 		{
-			var value = args[1].is_undefined(ctx) ? null : variant_from_value(ctx, args[1]);
-			js_api.config.set_default_value(key, value);
+			var value = args[2].is_undefined(ctx) ? null : variant_from_value(ctx, args[2]);
+			js_api.key_value_storages[index].set_default_value(key, value);
 		}
 		catch (JSError e)
 		{

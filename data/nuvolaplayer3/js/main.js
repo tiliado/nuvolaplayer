@@ -543,28 +543,33 @@ Nuvola.Player =
 
 Nuvola.Player.baseActions = [Nuvola.Player.ACTION_TOGGLE_PLAY, Nuvola.Player.ACTION_PLAY, Nuvola.Player.ACTION_PAUSE, Nuvola.Player.ACTION_PREV_SONG, Nuvola.Player.ACTION_NEXT_SONG],
 
-Nuvola.Config = 
+
+Nuvola.KeyValueStorage = function(index)
 {
-	setDefault: function(key, value)
-	{
-		Nuvola._setDefaultConfig(key, value);
-	},
-	
-	hasKey: function(key)
-	{
-		return Nuvola._hasConfigKey(key);
-	},
-	
-	get: function(key)
-	{
-		return Nuvola._getConfig(key);
-	},
-	
-	set: function(key, value)
-	{
-		Nuvola._setConfig(key, value);
-	}
-};
+	this.index = index
+}
+
+Nuvola.KeyValueStorage.prototype.setDefault = function(key, value)
+{
+	Nuvola._keyValueStorageSetDefaultValue(this.index, key, value);
+}
+
+Nuvola.KeyValueStorage.prototype.hasKey = function(key)
+{
+	return Nuvola._keyValueStorageHasKey(this.index, key);
+}
+
+Nuvola.KeyValueStorage.prototype.get = function(key)
+{
+	return Nuvola._keyValueStorageGetValue(this.index, key);
+}
+
+Nuvola.KeyValueStorage.prototype.set = function(key, value)
+{
+	Nuvola._keyValueStorageSetKey(this.index, key, value);
+}
+
+Nuvola.Config = new Nuvola.KeyValueStorage(0);
 Nuvola.makeSignaling(Nuvola.Config);
 Nuvola.Config.registerSignals(["config-changed"]);
 
