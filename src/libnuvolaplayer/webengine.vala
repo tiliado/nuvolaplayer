@@ -46,6 +46,7 @@ public class WebEngine : GLib.Object
 	private string[] app_errors;
 	private Variant[] received_messages;
 	private Config config;
+	private VariantHashTable session;
 	
 	public WebEngine(WebAppController app, WebApp web_app, Config config)
 	{
@@ -66,6 +67,8 @@ public class WebEngine : GLib.Object
 		this.web_app = web_app;
 		this.config = config;
 		this.web_view = new WebKit.WebView();
+		session = new VariantHashTable();
+		
 		var ws = web_view.get_settings();
 		ws.enable_developer_extras = true;
 		ws.enable_java = false;
@@ -96,7 +99,7 @@ public class WebEngine : GLib.Object
 			return true;
 		
 		env = new JsRuntime();
-		api = new JSApi(app.storage, web_app.data_dir, web_app.user_config_dir, config);
+		api = new JSApi(app.storage, web_app.data_dir, web_app.user_config_dir, config, session);
 		api.send_message_async.connect(on_send_message_async);
 		api.send_message_sync.connect(on_send_message_sync);
 		try
@@ -271,6 +274,10 @@ public class WebEngine : GLib.Object
 		master.add_handler("config_get_value", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_config_get_value);
 		master.add_handler("config_set_value", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_config_set_value);
 		master.add_handler("config_set_default_value", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_config_set_default_value);
+		master.add_handler("session_has_key", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_session_has_key);
+		master.add_handler("session_get_value", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_session_get_value);
+		master.add_handler("session_set_value", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_session_set_value);
+		master.add_handler("session_set_default_value", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_session_set_default_value);
 		master.add_handler("show_error", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_show_error);
 		master.add_handler("send_message_sync", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_send_message_sync);
 		master.add_handler("send_message_async", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_send_message_async);
@@ -300,6 +307,48 @@ public class WebEngine : GLib.Object
 	private bool handle_get_user_config_dir(Diorite.Ipc.MessageServer server, Variant request, out Variant? response)
 	{
 		response = new Variant.string(web_app.user_config_dir.get_path());
+		return true;
+	}
+	
+	private bool handle_session_has_key(Diorite.Ipc.MessageServer server, Variant request, out Variant? response)
+	{
+		if (!request.is_of_type(VariantType.STRING))
+			return server.create_error("Invalid request type: " + request.get_type_string(), out response);
+		response = new Variant.boolean(session.has_key(request.get_string()));
+		return true;
+	}
+	
+	private bool handle_session_get_value(Diorite.Ipc.MessageServer server, Variant request, out Variant? response)
+	{
+		if (!request.is_of_type(VariantType.STRING))
+			return server.create_error("Invalid request type: " + request.get_type_string(), out response);
+		response = session.get_value(request.get_string());
+		if (response == null)
+			response = new Variant("mv", null);
+		return true;
+	}
+	
+	private bool handle_session_set_value(Diorite.Ipc.MessageServer server, Variant request, out Variant? response)
+	{
+		if (!request.is_of_type(new VariantType("(smv)")))
+			return server.create_error("Invalid request type: " + request.get_type_string(), out response);
+		string? key = null;
+		Variant? value = null;
+		request.get("(smv)", &key, &value);
+		session.set_value(key, value);
+		response = null;
+		return true;
+	}
+	
+	private bool handle_session_set_default_value(Diorite.Ipc.MessageServer server, Variant request, out Variant? response)
+	{
+		if (!request.is_of_type(new VariantType("(smv)")))
+			return server.create_error("Invalid request type: " + request.get_type_string(), out response);
+		string? key = null;
+		Variant? value = null;
+		request.get("(smv)", &key, &value);
+		session.set_default_value(key, value);
+		response = null;
 		return true;
 	}
 	

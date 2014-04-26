@@ -566,12 +566,14 @@ Nuvola.KeyValueStorage.prototype.get = function(key)
 
 Nuvola.KeyValueStorage.prototype.set = function(key, value)
 {
-	Nuvola._keyValueStorageSetKey(this.index, key, value);
+	Nuvola._keyValueStorageSetValue(this.index, key, value);
 }
 
 Nuvola.Config = new Nuvola.KeyValueStorage(0);
 Nuvola.makeSignaling(Nuvola.Config);
 Nuvola.Config.registerSignals(["config-changed"]);
+
+Nuvola.Session = new Nuvola.KeyValueStorage(1);
 
 Nuvola.MenuBar =
 {

@@ -105,12 +105,13 @@ public class JSApi : GLib.Object
 	private File config_dir;
 	private KeyValueStorage[] key_value_storages;
 	
-	public JSApi(Diorite.Storage storage, File data_dir, File config_dir, KeyValueStorage config)
+	public JSApi(Diorite.Storage storage, File data_dir, File config_dir, KeyValueStorage config,
+	KeyValueStorage session)
 	{
 		this.storage = storage;
 		this.data_dir = data_dir;
 		this.config_dir = config_dir;
-		this.key_value_storages = {config};
+		this.key_value_storages = {config, session};
 	}
 	
 	public signal void send_message_async(string name, Variant? data);
