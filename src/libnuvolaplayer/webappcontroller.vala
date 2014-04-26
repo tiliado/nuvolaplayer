@@ -222,7 +222,6 @@ public class WebAppController : Diorite.Application
 		
 		var dialog = new PreferencesDialog(this, main_window, form);
 		var response = dialog.run();
-		dialog.destroy();
 		if (response == Gtk.ResponseType.OK)
 		{
 			var new_values = form.get_values();
@@ -238,6 +237,8 @@ public class WebAppController : Diorite.Application
 					config.set_value(key, new_value);
 			}
 		}
+		// Don't destroy dialog before form data are retrieved
+		dialog.destroy();
 	}
 	
 	private void do_toggle_sidebar()
