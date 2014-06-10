@@ -203,6 +203,9 @@ def configure(ctx):
 	ctx.define("NUVOLA_VERSION_BUGFIX", VERSIONS[2])
 	ctx.define("NUVOLA_VERSION_SUFFIX", VERSION_SUFFIX)
 	ctx.define("GETTEXT_PACKAGE", "nuvolaplayer3")
+	ctx.env.NUVOLA_LIBDIR = "%s/%s" % (ctx.env.LIBDIR, APPNAME + SUFFIX)
+	ctx.define("NUVOLA_LIBDIR", ctx.env.NUVOLA_LIBDIR)
+	
 
 def build(ctx):
 	#~ print ctx.env
@@ -219,7 +222,7 @@ def build(ctx):
 	LIBNUVOLAPLAYER = "lib" + APPNAME + SUFFIX
 	LIBNUVOLAPLAYERJS = "lib" + APPNAME + "js" + SUFFIX
 	NUVOLAPLAYEREXTENSION = APPNAME + SUFFIX + "extension"
-	NUVOLAPLAYEREXTENSION_DIR = "%s/%s" % (ctx.env.LIBDIR, APPNAME + SUFFIX)
+	
 	UIDEMO="uidemo"
 	
 	ctx(features = "c cshlib",
@@ -258,7 +261,7 @@ def build(ctx):
 		use = [LIBNUVOLAPLAYERJS],
 		includes = ["src/libnuvolaplayer"],
 		vala_defines = vala_defines,
-		defines = ['NUVOLA_WEBKIT_EXTENSION_DIR="%s"' % NUVOLAPLAYEREXTENSION_DIR, 'G_LOG_DOMAIN="LibNuvola"'],
+		defines = ['G_LOG_DOMAIN="LibNuvola"'],
 		vapi_dirs = ['vapi'],
 		vala_target_glib = "2.32",
 	)
@@ -301,7 +304,7 @@ def build(ctx):
 		cflags = ['-DG_LOG_DOMAIN="NuvolaExt"'],
 		vapi_dirs = ['vapi'],
 		vala_target_glib = "2.32",
-		install_path = NUVOLAPLAYEREXTENSION_DIR,
+		install_path = ctx.env.NUVOLA_LIBDIR,
 	)
 	
 	data_dir = ctx.path.find_dir('data')

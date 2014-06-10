@@ -33,6 +33,7 @@ private extern const int VERSION_MAJOR;
 private extern const int VERSION_MINOR;
 private extern const int VERSION_BUGFIX;
 private extern const string VERSION_SUFFIX;
+private extern const string LIBDIR;
 
 public string get_unique_name()
 {
@@ -67,6 +68,11 @@ public string get_version_suffix()
 public int[] get_versions()
 {
 	return {VERSION_MAJOR, VERSION_MINOR, VERSION_BUGFIX};
+}
+
+public string get_libdir()
+{
+	return Environment.get_variable("NUVOLA_LIBDIR") ?? LIBDIR;
 }
 
 } // namespace Nuvola

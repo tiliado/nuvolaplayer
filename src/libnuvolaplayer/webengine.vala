@@ -27,8 +27,6 @@ using Nuvola.JSTools;
 namespace Nuvola
 {
 
-private extern const string WEBKIT_EXTENSION_DIR;
-
 public class WebEngine : GLib.Object
 {
 	public Gtk.Widget widget {get {return web_view;}}
@@ -50,7 +48,7 @@ public class WebEngine : GLib.Object
 	
 	public WebEngine(WebAppController app, WebApp web_app, Config config)
 	{
-		var webkit_extension_dir = Environment.get_variable("NUVOLA_WEBKIT_EXTENSION_DIR") ?? WEBKIT_EXTENSION_DIR;
+		var webkit_extension_dir = Nuvola.get_libdir();
 		Environment.set_variable("NUVOLA_IPC_MASTER", app.path_name + MASTER_SUFFIX, true);
 		Environment.set_variable("NUVOLA_IPC_SLAVE", app.path_name + SLAVE_SUFFIX, true);
 		debug("Nuvola WebKit Extension directory: %s", webkit_extension_dir);
