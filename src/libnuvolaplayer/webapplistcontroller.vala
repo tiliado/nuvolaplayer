@@ -61,6 +61,8 @@ public class WebAppListController : Diorite.Application
 	{
 		if (main_window == null)
 			start();
+		else
+			add_window(main_window);
 		
 		main_window.show_all();
 		main_window.present();
@@ -76,6 +78,7 @@ public class WebAppListController : Diorite.Application
 	
 		var view = new WebAppListView(model);
 		main_window = new WebAppListWindow(this, view);
+		main_window.delete_event.connect(on_main_window_delete_event);
 		
 		if (app_menu_shown)
 			set_app_menu(actions.build_menu({Actions.QUIT}));
@@ -152,9 +155,16 @@ public class WebAppListController : Diorite.Application
 		
 	}
 	
+	private bool on_main_window_delete_event(Gdk.EventAny event)
+	{
+		do_quit();
+		return true;
+	}
+	
 	private void do_quit()
 	{
-		quit();
+		main_window.hide();
+		remove_window(main_window);
 	}
 	
 	private void do_install_app()
