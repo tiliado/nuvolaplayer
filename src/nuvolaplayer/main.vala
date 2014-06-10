@@ -39,7 +39,9 @@ struct Args
 	
 	public static const OptionEntry[] options =
 	{
-		{ "app-id", 'a', 0, OptionArg.STRING, ref Args.app_id, "Web app to run.", "ID" },
+		// FIXME: Remove when UI Runner gets own executable
+		{ "run-app-id", 'r', 0, OptionArg.STRING, ref Args.app_id, "Web app to run.", "ID" },
+		
 		{ "apps-dir", 'A', 0, GLib.OptionArg.FILENAME, ref Args.apps_dir, "Search for web app integrations only in directory DIR and disable service management.", "DIR" },
 		{ "verbose", 'v', 0, OptionArg.NONE, ref Args.verbose, "Print informational messages", null },
 		{ "debug", 'D', 0, OptionArg.NONE, ref Args.debug, "Print debugging messages", null },
@@ -56,11 +58,12 @@ public int main(string[] args)
 		var opt_context = new OptionContext("- %s".printf(Nuvola.get_display_name()));
 		opt_context.set_help_enabled(true);
 		opt_context.add_main_entries(Args.options, null);
+		opt_context.set_ignore_unknown_options(true);
 		opt_context.parse(ref args);
 	}
 	catch (OptionError e)
 	{
-		stderr.printf("%s\n", e.message);
+		stderr.printf("option parsing failed: %s\n", e.message);
 		return 1;
 	}
 	
@@ -94,6 +97,7 @@ public int main(string[] args)
 	? new WebAppRegistry.with_data_path(web_apps_storage, Args.apps_dir)
 	: new WebAppRegistry(web_apps_storage, true);
 	
+	// FIXME: Remove when UI Runner gets own executable
 	if (Args.app_id != null)
 	{
 		var web_app = web_app_reg.get_app(Args.app_id);
@@ -117,7 +121,7 @@ public int main(string[] args)
 		exec_cmd += Args.apps_dir;
 	}
 	
-	exec_cmd += "-a";
+	exec_cmd += "-r";
 	var controller = new WebAppListController(storage, web_app_reg, (owned) exec_cmd);
 	return controller.run(args);
 }

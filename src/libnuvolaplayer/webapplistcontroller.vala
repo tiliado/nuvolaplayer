@@ -48,6 +48,7 @@ public class WebAppListController : Diorite.Application
 	{
 		var app_name = Nuvola.get_appname();
 		base(Nuvola.get_unique_name(), Nuvola.get_display_name(), "%s.desktop".printf(app_name), app_name);
+		flags = flags|ApplicationFlags.HANDLES_COMMAND_LINE;
 		icon = Nuvola.get_app_icon();
 		version = Nuvola.get_version();
 		this.storage = storage;
@@ -59,6 +60,8 @@ public class WebAppListController : Diorite.Application
 	{
 		if (main_window == null)
 			start();
+		
+		main_window.show_all();
 		main_window.present();
 	}
 	
@@ -86,7 +89,59 @@ public class WebAppListController : Diorite.Application
 		var pop_down_model = actions.build_menu({Actions.QUIT});
 		pop_down_menu = new Gtk.Menu.from_model(pop_down_model);
 		pop_down_menu.attach_to_widget(main_window, null);
-		main_window.show_all();
+		
+	}
+	
+	public override int command_line(ApplicationCommandLine command_line)
+	{
+		hold();
+		var result = handle_command_line(command_line);
+		release();
+		return result;
+	}
+	
+	
+	private int handle_command_line(ApplicationCommandLine command_line)
+	{
+		string? app_id = null;
+		OptionEntry[] options = new OptionEntry[1];
+		options[0] = { "app-id", 'a', 0, OptionArg.STRING, ref app_id, "Web app to run.", "ID" };
+		
+		// We have to make an extra copy of the array, since .parse assumes
+		// that it can remove strings from the array without freeing them.
+		string[] args = command_line.get_arguments();
+		string*[] _args = new string[args.length];
+		for (int i = 0; i < args.length; i++)
+			_args[i] = args[i];
+		
+		try
+		{
+			var opt_context = new OptionContext("- Nuvola Player");
+			opt_context.set_help_enabled(true);
+			opt_context.add_main_entries(options, null);
+			unowned string[] tmp = _args;
+			opt_context.parse(ref tmp);
+		}
+		catch (OptionError e)
+		{
+			command_line.print("option parsing failed: %s\n", e.message);
+			return 1;
+		}
+		
+		if (main_window == null)
+			start();
+		
+		if (app_id != null)
+		{
+			main_window.hide();
+			start_app(app_id);
+		}
+		else
+		{
+			activate();
+		}
+		
+		return 0;
 	}
 	
 	private void append_actions()
@@ -177,22 +232,29 @@ public class WebAppListController : Diorite.Application
 	{
 		if (main_window.selected_web_app == null)
 			return;
+		
+		main_window.hide();
+		start_app(main_window.selected_web_app);
+	}
+	
+	private void start_app(string app_id)
+	{
 		string[] argv = new string[exec_cmd.length + 2];
 		for (var i = 0; i < exec_cmd.length; i++)
 			argv[i] = exec_cmd[i];
-		argv[exec_cmd.length] = main_window.selected_web_app;
+		argv[exec_cmd.length] = app_id;
 		argv[exec_cmd.length + 1] = null;
 		
 		try
 		{
 			new Diorite.Subprocess(argv, Diorite.SubprocessFlags.INHERIT_FDS);
-			// TODO: Hide main window and wait a few seconds to check a subprocess is running.
-			quit();
 		}
 		catch (GLib.Error e)
 		{
 			warning("Failed to launch subproccess. %s", e.message);
 		}
+	
+		
 	}
 }
 
