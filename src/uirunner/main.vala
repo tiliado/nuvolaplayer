@@ -33,11 +33,13 @@ struct Args
 	static bool debug;
 	static bool verbose;
 	static bool version;
+	static string? app_id = null;
 	static string? apps_dir = null;
 	static string? log_file = null;
 	
 	public static const OptionEntry[] options =
 	{
+		{ "app-id", 'a', 0, OptionArg.STRING, ref Args.app_id, "Web app to run.", "ID" },
 		{ "apps-dir", 'A', 0, GLib.OptionArg.FILENAME, ref Args.apps_dir, "Search for web app integrations only in directory DIR and disable service management.", "DIR" },
 		{ "verbose", 'v', 0, OptionArg.NONE, ref Args.verbose, "Print informational messages", null },
 		{ "debug", 'D', 0, OptionArg.NONE, ref Args.debug, "Print debugging messages", null },
@@ -69,9 +71,13 @@ public int main(string[] args)
 		return 0;
 	}
 	
-	string[] exec_cmd = {args[0]};
-	FileStream? log = null;
+	if (Args.app_id == null)
+	{
+		stderr.printf("No app specified.");
+		return 1;
+	}
 	
+	FileStream? log = null;
 	if (Args.log_file != null)
 	{
 		log = FileStream.open(Args.log_file, "w");
@@ -91,20 +97,15 @@ public int main(string[] args)
 	? new WebAppRegistry.with_data_path(web_apps_storage, Args.apps_dir)
 	: new WebAppRegistry(web_apps_storage, true);
 	
-	exec_cmd[0] = Nuvola.get_ui_runner_path();
-	if (Args.debug)
-		exec_cmd += "-D";
-	else if (Args.verbose)
-		exec_cmd += "-v";
-	if (Args.apps_dir != null && Args.apps_dir != "")
+	var web_app = web_app_reg.get_app(Args.app_id);
+	if (web_app != null)
 	{
-		exec_cmd += "-A";
-		exec_cmd += Args.apps_dir;
+		create_desktop_file(web_app);
+		var controller = new WebAppController(storage, web_app);
+		return controller.run(args);
 	}
-	
-	exec_cmd += "-a";
-	var controller = new WebAppListController(storage, web_app_reg, (owned) exec_cmd);
-	return controller.run(args);
+	warning("Failed to load web app '%s'.", Args.app_id);
+	return 1;
 }
 
 } // namespace Nuvola
