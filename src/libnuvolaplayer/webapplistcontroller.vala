@@ -43,6 +43,7 @@ public class WebAppListController : Diorite.Application
 	public weak Gtk.Settings gtk_settings {get; private set;}
 	private string[] exec_cmd;
 	private Gtk.Menu pop_down_menu;
+	private SList<Diorite.Subprocess> ui_runners = null;
 	
 	public WebAppListController(Diorite.Storage storage, WebAppRegistry web_app_reg, string[] exec_cmd)
 	{
@@ -128,18 +129,10 @@ public class WebAppListController : Diorite.Application
 			return 1;
 		}
 		
-		if (main_window == null)
-			start();
-		
 		if (app_id != null)
-		{
-			main_window.hide();
 			start_app(app_id);
-		}
 		else
-		{
 			activate();
-		}
 		
 		return 0;
 	}
@@ -247,14 +240,25 @@ public class WebAppListController : Diorite.Application
 		
 		try
 		{
-			new Diorite.Subprocess(argv, Diorite.SubprocessFlags.INHERIT_FDS);
+			hold();
+			var runner = new Diorite.Subprocess(argv, Diorite.SubprocessFlags.INHERIT_FDS);
+			runner.exited.connect(on_runner_exited);
+			debug("Launch %s", app_id);
+			ui_runners.prepend(runner);
+			
 		}
 		catch (GLib.Error e)
 		{
 			warning("Failed to launch subproccess. %s", e.message);
 		}
+	}
 	
-		
+	private void on_runner_exited(Diorite.Subprocess runner)
+	{
+		debug("Runner exited");
+		runner.exited.disconnect(on_runner_exited);
+		ui_runners.remove(runner);
+		release();
 	}
 }
 
