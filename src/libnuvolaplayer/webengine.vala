@@ -39,8 +39,8 @@ public class WebEngine : GLib.Object
 	private JSApi api;
 	private Diorite.Ipc.MessageServer master = null;
 	private Diorite.Ipc.MessageClient slave = null;
-	private static const string MASTER_SUFFIX = ".master";
-	private static const string SLAVE_SUFFIX = ".slave";
+	private static const string UI_RUNNER_SUFFIX = ".uirunner";
+	private static const string WEB_WORKER_SUFFIX = ".webworker";
 	private string[] app_errors;
 	private Variant[] received_messages;
 	private Config config;
@@ -49,8 +49,8 @@ public class WebEngine : GLib.Object
 	public WebEngine(WebAppController app, WebApp web_app, Config config)
 	{
 		var webkit_extension_dir = Nuvola.get_libdir();
-		Environment.set_variable("NUVOLA_IPC_MASTER", app.path_name + MASTER_SUFFIX, true);
-		Environment.set_variable("NUVOLA_IPC_SLAVE", app.path_name + SLAVE_SUFFIX, true);
+		Environment.set_variable("NUVOLA_IPC_UI_RUNNER", app.path_name + UI_RUNNER_SUFFIX, true);
+		Environment.set_variable("NUVOLA_IPC_WEB_WORKER", app.path_name + WEB_WORKER_SUFFIX, true);
 		debug("Nuvola WebKit Extension directory: %s", webkit_extension_dir);
 		
 		var wc = WebKit.WebContext.get_default();
@@ -264,7 +264,7 @@ public class WebEngine : GLib.Object
 		if (master != null)
 			return;
 		
-		master = new Diorite.Ipc.MessageServer(app.path_name + MASTER_SUFFIX);
+		master = new Diorite.Ipc.MessageServer(app.path_name + UI_RUNNER_SUFFIX);
 		master.add_handler("get_data_dir", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_get_data_dir);
 		master.add_handler("get_user_config_dir", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_get_user_config_dir);
 		master.add_handler("config_save", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_config_save);
@@ -280,7 +280,7 @@ public class WebEngine : GLib.Object
 		master.add_handler("send_message_sync", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_send_message_sync);
 		master.add_handler("send_message_async", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_send_message_async);
 		new Thread<void*>(app.path_name, listen);
-		slave = new Diorite.Ipc.MessageClient(app.path_name + SLAVE_SUFFIX, 5000);
+		slave = new Diorite.Ipc.MessageClient(app.path_name + WEB_WORKER_SUFFIX, 5000);
 	}
 	
 	private void* listen()

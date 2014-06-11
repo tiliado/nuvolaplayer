@@ -191,8 +191,8 @@ public void on_web_page_created(WebKit.WebExtension extension, WebKit.WebPage we
 public void webkit_web_extension_initialize(WebKit.WebExtension extension)
 {
 	Diorite.Logger.init(stderr, GLib.LogLevelFlags.LEVEL_DEBUG);
-	var master = new Diorite.Ipc.MessageClient(Environment.get_variable("NUVOLA_IPC_MASTER"), 5000);
-	var slave = new Diorite.Ipc.MessageServer(Environment.get_variable("NUVOLA_IPC_SLAVE"));
+	var master = new Diorite.Ipc.MessageClient(Environment.get_variable("NUVOLA_IPC_UI_RUNNER"), 5000);
+	var slave = new Diorite.Ipc.MessageServer(Environment.get_variable("NUVOLA_IPC_WEB_WORKER"));
 	Nuvola.extension = new Nuvola.WebExtension(extension, master, slave); 
 	extension.page_created.connect(Nuvola.on_web_page_created);
 }
