@@ -44,6 +44,8 @@ public class WebAppListController : Diorite.Application
 	private string[] exec_cmd;
 	private Gtk.Menu pop_down_menu;
 	private SList<Diorite.Subprocess> ui_runners = null;
+	private Diorite.Ipc.MessageServer server = null;
+	private const string MASTER_SUFFIX = ".master";
 	
 	public WebAppListController(Diorite.Storage storage, WebAppRegistry web_app_reg, string[] exec_cmd)
 	{
@@ -132,12 +134,32 @@ public class WebAppListController : Diorite.Application
 			return 1;
 		}
 		
+		start_server();
 		if (app_id != null)
 			start_app(app_id);
 		else
 			activate();
 		
 		return 0;
+	}
+	
+	private void start_server()
+	{
+		if (server != null)
+			return;
+		
+		var server_name = path_name + MASTER_SUFFIX;
+		try
+		{
+			server = new Diorite.Ipc.MessageServer(server_name);
+			server.start_service();
+		}
+		catch (Diorite.IOError e)
+		{
+			warning("Master server error: %s", e.message);
+			quit();
+		}
+		
 	}
 	
 	private void append_actions()
