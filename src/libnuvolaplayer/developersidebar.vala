@@ -52,7 +52,7 @@ public class HeaderLabel: Gtk.Label
 
 public class Extension : Nuvola.Extension
 {
-	private weak WebAppController controller;
+	private weak AppRunnerController controller;
 	private WebEngine? web_engine;
 	private Diorite.ActionsRegistry? actions_reg;
 	private Gtk.Grid? grid = null;
@@ -66,7 +66,7 @@ public class Extension : Nuvola.Extension
 	/**
 	 * {@inheritDoc}
 	 */
-	public override void load(WebAppController controller) throws ExtensionError
+	public override void load(AppRunnerController controller) throws ExtensionError
 	{
 		this.controller = controller;
 		web_engine = controller.web_engine;

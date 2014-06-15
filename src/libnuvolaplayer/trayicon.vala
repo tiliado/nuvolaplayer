@@ -47,7 +47,7 @@ public Nuvola.ExtensionInfo get_info()
  */
 public class Extension: Nuvola.Extension
 {
-	private WebAppController controller;
+	private AppRunnerController controller;
 	private Diorite.ActionsRegistry actions_reg;
 	private WebEngine web_engine;
 	
@@ -62,7 +62,7 @@ public class Extension: Nuvola.Extension
 	/**
 	 * {@inheritDoc}
 	 */
-	public override void load(WebAppController controller) throws ExtensionError
+	public override void load(AppRunnerController controller) throws ExtensionError
 	{
 		this.controller = controller;
 		this.actions_reg = controller.actions;

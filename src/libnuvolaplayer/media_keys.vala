@@ -58,7 +58,7 @@ public const string GNOME_NEXT = "Next";
  */
 public class Extension: Nuvola.Extension
 {
-	private WebAppController controller;
+	private AppRunnerController controller;
 	private WebEngine web_engine;
 	private GlobalKeybinder keybinder;
 	private GnomeMedia? media_keys;
@@ -66,7 +66,7 @@ public class Extension: Nuvola.Extension
 	/**
 	 * {@inheritDoc}
 	 */
-	public override void load(WebAppController controller) throws ExtensionError
+	public override void load(AppRunnerController controller) throws ExtensionError
 	{
 		this.controller = controller;
 		this.web_engine = controller.web_engine;

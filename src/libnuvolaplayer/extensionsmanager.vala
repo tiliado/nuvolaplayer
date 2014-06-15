@@ -39,7 +39,7 @@ namespace ConfigKey
  */
 public class ExtensionsManager
 {
-	private WebAppController controller;
+	private AppRunnerController controller;
 	private HashTable<string, Extension> active_extensions;
 	public HashTable<string, ExtensionInfo?> available_extensions {get; private set;}
 	
@@ -50,7 +50,7 @@ public class ExtensionsManager
 	 * @param window		main application window
 	 * @param objects		object container providing all necessary dependencies for extensions
 	 */
-	public ExtensionsManager(WebAppController controller)
+	public ExtensionsManager(AppRunnerController controller)
 	{
 		this.controller = controller;
 		active_extensions = new HashTable<string, Extension>(str_hash, str_equal);

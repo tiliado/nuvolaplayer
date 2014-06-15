@@ -48,7 +48,7 @@ public abstract class Nuvola.Extension : GLib.Object
 	 * @param objects			container providing dependencies
 	 * @throw ExtensionError	when extension fails to load
 	 */
-	public abstract void load(WebAppController controller) throws ExtensionError;
+	public abstract void load(AppRunnerController controller) throws ExtensionError;
 	
 	/**
 	 * Unloads the extension

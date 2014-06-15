@@ -49,7 +49,7 @@ namespace Actions
 	public const string TOGGLE_SIDEBAR = "toggle-sidebar";
 }
 
-public class WebAppController : Diorite.Application
+public class AppRunnerController : Diorite.Application
 {
 	public WebAppWindow? main_window {get; private set; default = null;}
 	public Diorite.Storage? storage {get; private set; default = null;}
@@ -68,7 +68,7 @@ public class WebAppController : Diorite.Application
 	private bool hide_on_close = false;
 	private Diorite.Form? init_form = null;
 	
-	public WebAppController(Diorite.Storage? storage, WebApp web_app)
+	public AppRunnerController(Diorite.Storage? storage, WebApp web_app)
 	{
 		var app_id = web_app.meta.id;
 		base("%sX%s".printf(Nuvola.get_unique_name(), app_id),

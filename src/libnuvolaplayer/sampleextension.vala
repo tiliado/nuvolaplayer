@@ -46,13 +46,13 @@ public Nuvola.ExtensionInfo get_info()
  */
 public class Extension : Nuvola.Extension
 {
-	private weak WebAppController controller;
+	private weak AppRunnerController controller;
 	private Gtk.Button? button;
 	
 	/**
 	 * {@inheritDoc}
 	 */
-	public override void load(WebAppController controller) throws ExtensionError
+	public override void load(AppRunnerController controller) throws ExtensionError
 	{
 		debug("[%s] load", id);
 		this.controller = controller;

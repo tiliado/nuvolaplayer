@@ -101,7 +101,7 @@ public int main(string[] args)
 	if (web_app != null)
 	{
 		create_desktop_file(web_app);
-		var controller = new WebAppController(storage, web_app);
+		var controller = new AppRunnerController(storage, web_app);
 		return controller.run(args);
 	}
 	warning("Failed to load web app '%s'.", Args.app_id);

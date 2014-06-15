@@ -48,7 +48,7 @@ public Nuvola.ExtensionInfo get_info()
  */
 public class Extension : Nuvola.Extension
 {
-	private WebAppController controller;
+	private AppRunnerController controller;
 	private Config config;
 	private Gtk.Window main_window;
 	private WebEngine web_engine;
@@ -94,7 +94,7 @@ public class Extension : Nuvola.Extension
 	/**
 	 * {@inheritDoc}
 	 */
-	public override void load(WebAppController controller) throws ExtensionError
+	public override void load(AppRunnerController controller) throws ExtensionError
 	{
 		this.controller = controller;
 		this.config = controller.config;

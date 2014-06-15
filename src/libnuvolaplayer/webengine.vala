@@ -33,7 +33,7 @@ public class WebEngine : GLib.Object
 	public WebApp web_app {get; private set;}
 	public bool can_go_back {get; private set; default = false;}
 	public bool can_go_forward {get; private set; default = false;}
-	private WebAppController app;
+	private AppRunnerController app;
 	private WebKit.WebView web_view;
 	private JsEnvironment? env = null;
 	private JSApi api;
@@ -46,7 +46,7 @@ public class WebEngine : GLib.Object
 	private Config config;
 	private VariantHashTable session;
 	
-	public WebEngine(WebAppController app, WebApp web_app, Config config)
+	public WebEngine(AppRunnerController app, WebApp web_app, Config config)
 	{
 		var webkit_extension_dir = Nuvola.get_libdir();
 		Environment.set_variable("NUVOLA_IPC_UI_RUNNER", app.path_name + UI_RUNNER_SUFFIX, true);

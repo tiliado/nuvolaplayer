@@ -62,9 +62,9 @@ public class WebAppWindow : Gtk.ApplicationWindow
 	private Gtk.Paned paned;
 	private uint sidebar_position_cb_id = 0;
 	
-	private WebAppController app;
+	private AppRunnerController app;
 	
-	public WebAppWindow(WebAppController app)
+	public WebAppWindow(AppRunnerController app)
 	{
 		window_state_event.connect(on_window_state_event);
 		title = app.app_name;

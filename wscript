@@ -220,7 +220,7 @@ def build(ctx):
 		CFLAGS=""
 	
 	NUVOLAPLAYER = APPNAME + SUFFIX
-	UI_RUNNER = "uirunner"
+	APP_RUNNER = "uirunner"
 	LIBNUVOLAPLAYER = "lib" + APPNAME + SUFFIX
 	LIBNUVOLAPLAYERJS = "lib" + APPNAME + "js" + SUFFIX
 	NUVOLAPLAYEREXTENSION = APPNAME + SUFFIX + "extension"
@@ -282,8 +282,8 @@ def build(ctx):
 	)
 	
 	ctx.program(
-		target = UI_RUNNER,
-		source = ctx.path.ant_glob('src/uirunner/*.vala') + ctx.path.ant_glob('src/uirunner/*.c'),
+		target = APP_RUNNER,
+		source = ctx.path.ant_glob('src/apprunner/*.vala') + ctx.path.ant_glob('src/apprunner/*.c'),
 		packages = "",
 		uselib = "",
 		includes = ["src/lnuvolaplayer"],
