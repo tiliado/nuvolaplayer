@@ -149,6 +149,7 @@ public class MasterController : Diorite.Application
 			return;
 		
 		var server_name = path_name + MASTER_SUFFIX;
+		Environment.set_variable("NUVOLA_IPC_MASTER", server_name, true);
 		try
 		{
 			server = new Diorite.Ipc.MessageServer(server_name);

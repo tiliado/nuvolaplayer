@@ -67,6 +67,7 @@ public class AppRunnerController : Diorite.Application
 	private MenuBar menu_bar;
 	private bool hide_on_close = false;
 	private Diorite.Form? init_form = null;
+	private Diorite.Ipc.MessageClient master;
 	
 	public AppRunnerController(Diorite.Storage? storage, WebApp web_app)
 	{
@@ -90,6 +91,10 @@ public class AppRunnerController : Diorite.Application
 	
 	private void start()
 	{
+		var master_name = Environment.get_variable("NUVOLA_IPC_MASTER");
+		assert(master_name != null);
+		master = new Diorite.Ipc.MessageClient(master_name, 5000);
+		assert(master.wait_for_echo(1000));
 		gtk_settings = Gtk.Settings.get_default();
 		var default_config = new HashTable<string, Variant>(str_hash, str_equal);
 		default_config.insert(ConfigKey.WINDOW_X, new Variant.int64(-1));
