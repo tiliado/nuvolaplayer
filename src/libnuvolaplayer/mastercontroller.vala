@@ -43,7 +43,7 @@ public class MasterController : Diorite.Application
 	public weak Gtk.Settings gtk_settings {get; private set;}
 	private string[] exec_cmd;
 	private Gtk.Menu pop_down_menu;
-	private SList<Diorite.Subprocess> ui_runners = null;
+	private Queue<AppRunner> app_runners = null;
 	private Diorite.Ipc.MessageServer server = null;
 	private const string MASTER_SUFFIX = ".master";
 	
@@ -57,6 +57,7 @@ public class MasterController : Diorite.Application
 		this.storage = storage;
 		this.web_app_reg = web_app_reg;
 		this.exec_cmd = exec_cmd;
+		app_runners = new Queue<AppRunner>();
 	}
 	
 	public override void activate()
@@ -264,32 +265,38 @@ public class MasterController : Diorite.Application
 	
 	private void start_app(string app_id)
 	{
+		hold();
 		string[] argv = new string[exec_cmd.length + 2];
 		for (var i = 0; i < exec_cmd.length; i++)
 			argv[i] = exec_cmd[i];
 		argv[exec_cmd.length] = app_id;
 		argv[exec_cmd.length + 1] = null;
 		
+		AppRunner runner;
 		try
 		{
-			hold();
-			var runner = new Diorite.Subprocess(argv, Diorite.SubprocessFlags.INHERIT_FDS);
-			runner.exited.connect(on_runner_exited);
-			debug("Launch %s", app_id);
-			ui_runners.prepend(runner);
-			
+			runner = new AppRunner(app_id, argv);
 		}
 		catch (GLib.Error e)
 		{
-			warning("Failed to launch subproccess. %s", e.message);
+			warning("Failed to launch app runner for '%s'. %s", app_id, e.message);
+			release();
+			return;
 		}
+		
+		runner.exited.connect(on_runner_exited);
+		debug("Launch app runner for '%s'.", app_id);
+		app_runners.push_tail(runner);
 	}
 	
-	private void on_runner_exited(Diorite.Subprocess runner)
+	private void on_runner_exited(Diorite.Subprocess subprocess)
 	{
-		debug("Runner exited");
+		var runner = subprocess as AppRunner;
+		assert(runner != null);
+		debug("Runner exited: %s", runner.app_id);
 		runner.exited.disconnect(on_runner_exited);
-		ui_runners.remove(runner);
+		if (!app_runners.remove(runner))
+			critical("Runner for '%s' not found in queue.", runner.app_id);
 		release();
 	}
 }
