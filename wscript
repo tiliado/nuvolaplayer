@@ -31,7 +31,7 @@ out = 'build'
 # Application name and version
 NAME="Nuvola Player"
 APPNAME = "nuvolaplayer"
-VERSION = "3.0.0+rev"
+VERSION = "3.0.0+"
 SUFFIX="3"
 
 UNIQUE_NAME="cz.fenryxo.NuvolaPlayer" + SUFFIX
@@ -40,24 +40,24 @@ import subprocess
 try:
 	try:
 		# Read revision info from file revision-info created by ./waf dist
-		num, id = open("revision-info", "r").read().split(" ")
+		id, commiter = open("revision-info", "r").read().split(" ", 1)
 	except Exception, e:
 		# Read revision info from current branch
-		output = subprocess.Popen(["bzr", "revision-info"], stdout=subprocess.PIPE).communicate()[0]
-		num, id = output.split(" ")
+		output = subprocess.Popen(["git", "log", "-n", "1", "--pretty=format:%H %cn <%ce>"], stdout=subprocess.PIPE).communicate()[0]
+		id, commiter = output.split(" ", 1)
 except Exception, e:
 	raise Exception("Cannot find revision information.")
 
-REVISION = str(int(num))
+COMMITTER = str(commiter).strip()
 REVISION_ID = str(id).strip()
 
 
 VERSIONS, VERSION_SUFFIX = VERSION.split("+")
 if VERSION_SUFFIX == "stable":
 	VERSION = VERSIONS
-elif VERSION_SUFFIX == "rev":
-	VERSION_SUFFIX += str(REVISION)
-	VERSION += str(REVISION)
+elif VERSION_SUFFIX == "":
+	VERSION_SUFFIX += REVISION_ID
+	VERSION += REVISION_ID
 VERSIONS = map(int, VERSIONS.split("."))
 
 import sys
@@ -130,8 +130,9 @@ def configure(ctx):
 		print("Unsupported platform %s. Please try to talk to devs to consider support of your platform." % sys.platform)
 		sys.exit(1)
 	
-	ctx.msg("Revision", REVISION, "GREEN")
+	
 	ctx.msg("Revision id", REVISION_ID, "GREEN")
+	ctx.msg("Commiter", COMMITTER, "GREEN")
 	
 	ctx.define(PLATFORM, 1)
 	ctx.env.VALA_DEFINES = [PLATFORM]
