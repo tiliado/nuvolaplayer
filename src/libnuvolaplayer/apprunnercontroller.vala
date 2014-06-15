@@ -51,6 +51,7 @@ namespace Actions
 
 public class AppRunnerController : Diorite.Application
 {
+	private static const string UI_RUNNER_SUFFIX = ".uirunner";
 	public WebAppWindow? main_window {get; private set; default = null;}
 	public Diorite.Storage? storage {get; private set; default = null;}
 	public Diorite.ActionsRegistry? actions {get; private set; default = null;}
@@ -61,13 +62,14 @@ public class AppRunnerController : Diorite.Application
 	public ExtensionsManager extensions {get; private set;}
 	public Connection connection {get; private set;}
 	public GlobalKeybinder keybinder {get; private set;}
+	public Diorite.Ipc.MessageServer server {get; private set; default=null;}
 	private GlobalKeybindings global_keybindings;
 	private static const int MINIMAL_REMEMBERED_WINDOW_SIZE = 300;
 	private uint configure_event_cb_id = 0;
 	private MenuBar menu_bar;
 	private bool hide_on_close = false;
 	private Diorite.Form? init_form = null;
-	private Diorite.Ipc.MessageClient master;
+	private Diorite.Ipc.MessageClient master = null;
 	
 	public AppRunnerController(Diorite.Storage? storage, WebApp web_app)
 	{
@@ -91,10 +93,12 @@ public class AppRunnerController : Diorite.Application
 	
 	private void start()
 	{
+		start_server();
 		var master_name = Environment.get_variable("NUVOLA_IPC_MASTER");
 		assert(master_name != null);
 		master = new Diorite.Ipc.MessageClient(master_name, 5000);
 		assert(master.wait_for_echo(1000));
+		
 		gtk_settings = Gtk.Settings.get_default();
 		var default_config = new HashTable<string, Variant>(str_hash, str_equal);
 		default_config.insert(ConfigKey.WINDOW_X, new Variant.int64(-1));
@@ -196,6 +200,25 @@ public class AppRunnerController : Diorite.Application
 		};
 		actions.add_actions(actions_spec);
 		actions.get_action(Actions.TOGGLE_SIDEBAR).enabled = false;
+	}
+	
+	private void start_server()
+	{
+		if (server != null)
+			return;
+		
+		var server_name = path_name + UI_RUNNER_SUFFIX;
+		Environment.set_variable("NUVOLA_IPC_UI_RUNNER", server_name, true);
+		try
+		{
+			server = new Diorite.Ipc.MessageServer(server_name);
+			server.start_service();
+		}
+		catch (Diorite.IOError e)
+		{
+			warning("Master server error: %s", e.message);
+			quit();
+		}
 	}
 	
 	private void do_quit()

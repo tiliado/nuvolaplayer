@@ -37,9 +37,8 @@ public class WebEngine : GLib.Object
 	private WebKit.WebView web_view;
 	private JsEnvironment? env = null;
 	private JSApi api;
-	private Diorite.Ipc.MessageServer master = null;
+	private Diorite.Ipc.MessageServer server = null;
 	private Diorite.Ipc.MessageClient slave = null;
-	private static const string UI_RUNNER_SUFFIX = ".uirunner";
 	private static const string WEB_WORKER_SUFFIX = ".webworker";
 	private string[] app_errors;
 	private Variant[] received_messages;
@@ -48,8 +47,8 @@ public class WebEngine : GLib.Object
 	
 	public WebEngine(AppRunnerController app, WebApp web_app, Config config)
 	{
+		server = app.server;
 		var webkit_extension_dir = Nuvola.get_libdir();
-		Environment.set_variable("NUVOLA_IPC_UI_RUNNER", app.path_name + UI_RUNNER_SUFFIX, true);
 		Environment.set_variable("NUVOLA_IPC_WEB_WORKER", app.path_name + WEB_WORKER_SUFFIX, true);
 		debug("Nuvola WebKit Extension directory: %s", webkit_extension_dir);
 		
@@ -77,6 +76,7 @@ public class WebEngine : GLib.Object
 		received_messages = {};
 		web_view.notify["uri"].connect(on_uri_changed);
 		web_view.decide_policy.connect(on_decide_policy);
+		set_up_server();
 	}
 	
 	public virtual signal void async_message_received(string name, Variant? data)
@@ -157,8 +157,7 @@ public class WebEngine : GLib.Object
 	{
 		if (!inject_api())
 			return false;
-		
-		start_master();
+		slave = new Diorite.Ipc.MessageClient(app.path_name + WEB_WORKER_SUFFIX, 5000);
 		
 		if (check_init_request())
 			return true;
@@ -259,41 +258,23 @@ public class WebEngine : GLib.Object
 		return false;
 	}
 	
-	private void start_master()
+	private void set_up_server()
 	{
-		if (master != null)
-			return;
-		
-		master = new Diorite.Ipc.MessageServer(app.path_name + UI_RUNNER_SUFFIX);
-		master.add_handler("get_data_dir", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_get_data_dir);
-		master.add_handler("get_user_config_dir", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_get_user_config_dir);
-		master.add_handler("config_save", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_config_save);
-		master.add_handler("config_has_key", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_config_has_key);
-		master.add_handler("config_get_value", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_config_get_value);
-		master.add_handler("config_set_value", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_config_set_value);
-		master.add_handler("config_set_default_value", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_config_set_default_value);
-		master.add_handler("session_has_key", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_session_has_key);
-		master.add_handler("session_get_value", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_session_get_value);
-		master.add_handler("session_set_value", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_session_set_value);
-		master.add_handler("session_set_default_value", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_session_set_default_value);
-		master.add_handler("show_error", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_show_error);
-		master.add_handler("send_message_sync", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_send_message_sync);
-		master.add_handler("send_message_async", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_send_message_async);
-		new Thread<void*>(app.path_name, listen);
-		slave = new Diorite.Ipc.MessageClient(app.path_name + WEB_WORKER_SUFFIX, 5000);
-	}
-	
-	private void* listen()
-	{
-		try
-		{
-			master.listen();
-		}
-		catch (Diorite.IOError e)
-		{
-			warning("Master server error: %s", e.message);
-		}
-		return null;
+		assert(server != null);
+		server.add_handler("get_data_dir", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_get_data_dir);
+		server.add_handler("get_user_config_dir", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_get_user_config_dir);
+		server.add_handler("config_save", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_config_save);
+		server.add_handler("config_has_key", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_config_has_key);
+		server.add_handler("config_get_value", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_config_get_value);
+		server.add_handler("config_set_value", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_config_set_value);
+		server.add_handler("config_set_default_value", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_config_set_default_value);
+		server.add_handler("session_has_key", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_session_has_key);
+		server.add_handler("session_get_value", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_session_get_value);
+		server.add_handler("session_set_value", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_session_set_value);
+		server.add_handler("session_set_default_value", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_session_set_default_value);
+		server.add_handler("show_error", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_show_error);
+		server.add_handler("send_message_sync", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_send_message_sync);
+		server.add_handler("send_message_async", this, (Diorite.Ipc.MessageHandler) WebEngine.handle_send_message_async);
 	}
 	
 	private bool handle_get_data_dir(Diorite.Ipc.MessageServer server, Variant request, out Variant? response)

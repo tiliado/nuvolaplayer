@@ -160,7 +160,6 @@ public class MasterController : Diorite.Application
 			warning("Master server error: %s", e.message);
 			quit();
 		}
-		
 	}
 	
 	private void append_actions()
