@@ -3969,7 +3969,7 @@ namespace GLib {
 		public unowned G peek_tail ();
 		public unowned G peek_nth (uint n);
 		public int index (G data);
-		public void remove (G data);
+		public bool remove (G data);
 		public void remove_all (G data);
 		public void delete_link (List<G> link);
 		public void unlink (List<G> link);
