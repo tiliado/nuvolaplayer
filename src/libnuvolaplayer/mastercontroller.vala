@@ -34,7 +34,7 @@ namespace Actions
 	public const string QUIT = "quit";
 }
 
-public class WebAppListController : Diorite.Application
+public class MasterController : Diorite.Application
 {
 	public WebAppListWindow? main_window {get; private set; default = null;}
 	public Diorite.Storage storage {get; private set; default = null;}
@@ -47,7 +47,7 @@ public class WebAppListController : Diorite.Application
 	private Diorite.Ipc.MessageServer server = null;
 	private const string MASTER_SUFFIX = ".master";
 	
-	public WebAppListController(Diorite.Storage storage, WebAppRegistry web_app_reg, string[] exec_cmd)
+	public MasterController(Diorite.Storage storage, WebAppRegistry web_app_reg, string[] exec_cmd)
 	{
 		var app_name = Nuvola.get_appname();
 		base(Nuvola.get_unique_name(), Nuvola.get_display_name(), "%s.desktop".printf(app_name), app_name);

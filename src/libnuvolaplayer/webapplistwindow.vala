@@ -30,13 +30,13 @@ public class WebAppListWindow : Gtk.ApplicationWindow
 	public Gtk.Grid grid {get; private set;}
 	public WebAppListView view {get; private set;}
 	public string? selected_web_app {get; private set; default = null;}
-	private WebAppListController app;
+	private MasterController app;
 	private Gtk.Grid details;
 	private Gtk.Label app_name;
 	private Gtk.Label app_version;
 	private Gtk.Label app_maintainer;
 	
-	public WebAppListWindow(WebAppListController app, WebAppListView view)
+	public WebAppListWindow(MasterController app, WebAppListView view)
 	{
 		title = "Services - " + app.app_name;
 		try

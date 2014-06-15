@@ -103,7 +103,7 @@ public int main(string[] args)
 	}
 	
 	exec_cmd += "-a";
-	var controller = new WebAppListController(storage, web_app_reg, (owned) exec_cmd);
+	var controller = new MasterController(storage, web_app_reg, (owned) exec_cmd);
 	return controller.run(args);
 }
 
