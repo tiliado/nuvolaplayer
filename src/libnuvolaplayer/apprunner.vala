@@ -54,6 +54,14 @@ public class AppRunner: Diorite.Subprocess
 		return true;
 	}
 	
+	public Variant send_message(string name, Variant params) throws Diorite.Ipc.MessageError
+	{
+		if (client == null)
+			throw new Diorite.Ipc.MessageError.IOERROR("No connected to app runner '%s'.", app_id);
+		
+		return client.send_message(name, params);
+	}
+	
 	private bool check_server_connected_cb()
 	{
 		check_server_connected_id = 0;
