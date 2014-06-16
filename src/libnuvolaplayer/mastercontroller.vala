@@ -44,6 +44,7 @@ public class MasterController : Diorite.Application
 	private string[] exec_cmd;
 	private Gtk.Menu pop_down_menu;
 	private Queue<AppRunner> app_runners = null;
+	private HashTable<string, AppRunner> app_runners_map = null;
 	private Diorite.Ipc.MessageServer server = null;
 	private const string MASTER_SUFFIX = ".master";
 	
@@ -58,6 +59,7 @@ public class MasterController : Diorite.Application
 		this.web_app_reg = web_app_reg;
 		this.exec_cmd = exec_cmd;
 		app_runners = new Queue<AppRunner>();
+		app_runners_map = new HashTable<string, AppRunner>(str_hash, str_equal);
 	}
 	
 	public override void activate()
@@ -154,6 +156,7 @@ public class MasterController : Diorite.Application
 		try
 		{
 			server = new Diorite.Ipc.MessageServer(server_name);
+			server.add_handler("runner_started", this, (Diorite.Ipc.MessageHandler) MasterController.handle_runner_started);
 			server.start_service();
 		}
 		catch (Diorite.IOError e)
@@ -161,6 +164,28 @@ public class MasterController : Diorite.Application
 			warning("Master server error: %s", e.message);
 			quit();
 		}
+	}
+	
+	private bool handle_runner_started(Diorite.Ipc.MessageServer server, Variant request, out Variant? response)
+	{
+		if (!request.is_of_type(new VariantType("(ss)")))
+			return server.create_error("Invalid request type: " + request.get_type_string(), out response);
+		
+		response = null;
+		string? app_id = null;
+		string? server_name = null;
+		request.get("(ss)", ref app_id, ref server_name);
+		return_val_if_fail(app_id != null && server_name != null, false);
+		
+		var runner = app_runners_map[app_id];
+		return_val_if_fail(runner != null, false);
+		
+		if (!runner.connect_server(server_name))
+			return server.create_error("Failed to connect runner '%s': ".printf(app_id), out response);
+		
+		debug("Connected to runner server for '%s'.", app_id);
+		response = new Variant.boolean(true);
+		return true;
 	}
 	
 	private void append_actions()
@@ -287,16 +312,25 @@ public class MasterController : Diorite.Application
 		runner.exited.connect(on_runner_exited);
 		debug("Launch app runner for '%s'.", app_id);
 		app_runners.push_tail(runner);
+		
+		if (app_id in app_runners_map)
+			debug("App runner for '%s' is already running.", app_id);
+		else
+			app_runners_map[app_id] = runner;
 	}
 	
 	private void on_runner_exited(Diorite.Subprocess subprocess)
 	{
 		var runner = subprocess as AppRunner;
 		assert(runner != null);
-		debug("Runner exited: %s", runner.app_id);
+		debug("Runner exited: %s, was connected: %s", runner.app_id, runner.connected.to_string());
 		runner.exited.disconnect(on_runner_exited);
 		if (!app_runners.remove(runner))
 			critical("Runner for '%s' not found in queue.", runner.app_id);
+		
+		if (app_runners_map[runner.app_id] == runner)
+			app_runners_map.remove(runner.app_id);
+		
 		release();
 	}
 }

@@ -93,11 +93,7 @@ public class AppRunnerController : Diorite.Application
 	
 	private void start()
 	{
-		start_server();
-		var master_name = Environment.get_variable("NUVOLA_IPC_MASTER");
-		assert(master_name != null);
-		master = new Diorite.Ipc.MessageClient(master_name, 5000);
-		assert(master.wait_for_echo(1000));
+		set_up_communication();
 		
 		gtk_settings = Gtk.Settings.get_default();
 		var default_config = new HashTable<string, Variant>(str_hash, str_equal);
@@ -202,10 +198,9 @@ public class AppRunnerController : Diorite.Application
 		actions.get_action(Actions.TOGGLE_SIDEBAR).enabled = false;
 	}
 	
-	private void start_server()
+	private void set_up_communication()
 	{
-		if (server != null)
-			return;
+		assert(server == null);
 		
 		var server_name = path_name + UI_RUNNER_SUFFIX;
 		Environment.set_variable("NUVOLA_IPC_UI_RUNNER", server_name, true);
@@ -218,6 +213,20 @@ public class AppRunnerController : Diorite.Application
 		{
 			warning("Master server error: %s", e.message);
 			quit();
+		}
+		
+		var master_name = Environment.get_variable("NUVOLA_IPC_MASTER");
+		assert(master_name != null);
+		master = new Diorite.Ipc.MessageClient(master_name, 5000);
+		assert(master.wait_for_echo(1000));
+		try
+		{
+			var response = master.send_message("runner_started", new Variant("(ss)", web_app.meta.id, server_name));
+			assert(response.equal(new Variant.boolean(true)));
+		}
+		catch (Diorite.Ipc.MessageError e)
+		{
+			error("Communication with master process failed: %s", e.message);
 		}
 	}
 	

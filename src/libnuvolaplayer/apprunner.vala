@@ -28,11 +28,22 @@ namespace Nuvola
 public class AppRunner: Diorite.Subprocess
 {
 	public string app_id {get; private set;}
+	public bool connected { get{ return client != null;} }
+	private Diorite.Ipc.MessageClient? client = null;
 	
 	public AppRunner(string app_id, string[] argv) throws GLib.Error
 	{
 		base(argv, Diorite.SubprocessFlags.INHERIT_FDS);
 		this.app_id = app_id;
+	}
+	
+	public bool connect_server(string server_name)
+	{
+		if (client != null)
+			return false;
+		
+		client = new Diorite.Ipc.MessageClient(server_name, 5000);
+		return true;
 	}
 }
 
