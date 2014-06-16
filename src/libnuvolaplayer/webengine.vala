@@ -41,7 +41,6 @@ public class WebEngine : GLib.Object
 	private Diorite.Ipc.MessageClient slave = null;
 	private static const string WEB_WORKER_SUFFIX = ".webworker";
 	private string[] app_errors;
-	private Variant[] received_messages;
 	private Config config;
 	private VariantHashTable session;
 	
@@ -73,7 +72,6 @@ public class WebEngine : GLib.Object
 		ws.enable_smooth_scrolling = true;
 		ws.enable_write_console_messages_to_stdout = true;
 		app_errors = {};
-		received_messages = {};
 		web_view.notify["uri"].connect(on_uri_changed);
 		web_view.decide_policy.connect(on_decide_policy);
 		set_up_server();
@@ -410,29 +408,12 @@ public class WebEngine : GLib.Object
 	
 	private bool handle_send_message_async(Diorite.Ipc.MessageServer server, Variant request, out Variant? response)
 	{
-		response = null;
-		lock (received_messages)
-		{
-			received_messages += request;
-		}
-		Idle.add(async_message_received_cb);
+		response = new Variant("mv", null);
+		string name = null;
+		Variant? data = null;
+		request.get("(smv)", &name, &data);
+		async_message_received(name, data);
 		return true;
-	}
-	
-	private bool async_message_received_cb()
-	{
-		lock (received_messages)
-		{
-			foreach (var message in received_messages)
-			{
-				string name = null;
-				Variant? data = null;
-				message.get("(smv)", &name, &data);
-				async_message_received(name, data);
-			}
-			received_messages = {};
-		}
-		return false;
 	}
 	
 	private bool handle_send_message_sync(Diorite.Ipc.MessageServer server, Variant request, out Variant? response)
