@@ -157,6 +157,7 @@ public class MasterController : Diorite.Application
 		{
 			server = new Diorite.Ipc.MessageServer(server_name);
 			server.add_handler("runner_started", this, (Diorite.Ipc.MessageHandler) MasterController.handle_runner_started);
+			server.add_handler("runner_activated", this, (Diorite.Ipc.MessageHandler) MasterController.handle_runner_activated);
 			server.start_service();
 		}
 		catch (Diorite.IOError e)
@@ -184,6 +185,26 @@ public class MasterController : Diorite.Application
 			return server.create_error("Failed to connect runner '%s': ".printf(app_id), out response);
 		
 		debug("Connected to runner server for '%s'.", app_id);
+		response = new Variant.boolean(true);
+		return true;
+	}
+	
+	private bool handle_runner_activated(Diorite.Ipc.MessageServer server, Variant request, out Variant? response)
+	{
+		if (!request.is_of_type(new VariantType("s")))
+			return server.create_error("Invalid request type: " + request.get_type_string(), out response);
+		
+		response = null;
+		var app_id = request.get_string();
+		return_val_if_fail(app_id != null, false);
+		
+		var runner = app_runners_map[app_id];
+		return_val_if_fail(runner != null, false);
+		
+		if (!app_runners.remove(runner))
+			critical("Runner for '%s' not found in queue.", runner.app_id);
+		
+		app_runners.push_head(runner);
 		response = new Variant.boolean(true);
 		return true;
 	}

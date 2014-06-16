@@ -152,6 +152,7 @@ public class AppRunnerController : Diorite.Application
 		main_window.present();
 		main_window.window_state_event.connect(on_window_state_event);
 		main_window.configure_event.connect(on_configure_event);
+		main_window.notify["is-active"].connect_after(on_window_is_active_changed);
 		load_extensions();
 		
 		if (config.get_bool(ConfigKey.WINDOW_SIDEBAR_VISIBLE))
@@ -318,6 +319,22 @@ public class AppRunnerController : Diorite.Application
 		bool m = (event.new_window_state & Gdk.WindowState.MAXIMIZED) != 0;
 		config.set_bool(ConfigKey.WINDOW_MAXIMIZED, m);
 		return false;
+	}
+	
+	private void on_window_is_active_changed(Object o, ParamSpec p)
+	{
+		if (!main_window.is_active)
+			return;
+		
+		try
+		{
+			var response = master.send_message("runner_activated", new Variant.string(web_app.meta.id));
+			warn_if_fail(response.equal(new Variant.boolean(true)));
+		}
+		catch (Diorite.Ipc.MessageError e)
+		{
+			critical("Communication with master process failed: %s", e.message);
+		}
 	}
 	
 	private void save_config()
