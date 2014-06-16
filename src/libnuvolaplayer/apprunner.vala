@@ -30,11 +30,13 @@ public class AppRunner: Diorite.Subprocess
 	public string app_id {get; private set;}
 	public bool connected { get{ return client != null;} }
 	private Diorite.Ipc.MessageClient? client = null;
+	private uint check_server_connected_id = 0;
 	
 	public AppRunner(string app_id, string[] argv) throws GLib.Error
 	{
 		base(argv, Diorite.SubprocessFlags.INHERIT_FDS);
 		this.app_id = app_id;
+		check_server_connected_id = Timeout.add_seconds(5, check_server_connected_cb);
 	}
 	
 	public bool connect_server(string server_name)
@@ -42,8 +44,25 @@ public class AppRunner: Diorite.Subprocess
 		if (client != null)
 			return false;
 		
+		if (check_server_connected_id != 0)
+		{
+			Source.remove(check_server_connected_id);
+			check_server_connected_id = 0;
+		}
+		
 		client = new Diorite.Ipc.MessageClient(server_name, 5000);
 		return true;
+	}
+	
+	private bool check_server_connected_cb()
+	{
+		check_server_connected_id = 0;
+		warning("Connection has not been se up in time for app runner '%s'.", app_id);
+		
+		if (running)
+			force_exit();
+		
+		return false;
 	}
 }
 
