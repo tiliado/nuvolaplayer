@@ -43,7 +43,7 @@ public class WebExtension: GLib.Object
 		this.extension = extension;
 		this.master = master;
 		this.slave = slave;
-		slave.add_handler("call_function", this, (Diorite.Ipc.MessageHandler) WebExtension.handle_call_function);
+		slave.add_handler("call_function", handle_call_function);
 		bridges = new HashTable<unowned WebKit.Frame, FrameBridge>(direct_hash, direct_equal);
 		new Thread<void*>("slave", listen);
 		Thread.yield();
@@ -102,7 +102,7 @@ public class WebExtension: GLib.Object
 		}
 	}
 	
-	private bool handle_call_function(Diorite.Ipc.MessageServer server, Variant request, out Variant? response)
+	private void handle_call_function(Diorite.Ipc.MessageServer server, Variant request, out Variant? response) throws Diorite.Ipc.MessageError
 	{
 		lock (function_calls)
 		{
@@ -111,7 +111,6 @@ public class WebExtension: GLib.Object
 		}
 		Idle.add(function_call_cb);
 		response = null;
-		return true;
 	}
 	
 	private bool function_call_cb()

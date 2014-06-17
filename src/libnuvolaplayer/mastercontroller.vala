@@ -156,8 +156,8 @@ public class MasterController : Diorite.Application
 		try
 		{
 			server = new Diorite.Ipc.MessageServer(server_name);
-			server.add_handler("runner_started", this, (Diorite.Ipc.MessageHandler) MasterController.handle_runner_started);
-			server.add_handler("runner_activated", this, (Diorite.Ipc.MessageHandler) MasterController.handle_runner_activated);
+			server.add_handler("runner_started", handle_runner_started);
+			server.add_handler("runner_activated", handle_runner_activated);
 			server.start_service();
 		}
 		catch (Diorite.IOError e)
@@ -167,10 +167,9 @@ public class MasterController : Diorite.Application
 		}
 	}
 	
-	private bool handle_runner_started(Diorite.Ipc.MessageServer server, Variant request, out Variant? response)
+	private void handle_runner_started(Diorite.Ipc.MessageServer server, Variant request, out Variant? response) throws Diorite.Ipc.MessageError
 	{
-		if (!request.is_of_type(new VariantType("(ss)")))
-			return server.create_error("Invalid request type: " + request.get_type_string(), out response);
+		Diorite.Ipc.MessageServer.check_type_str(request, "(ss)");
 		
 		response = null;
 		string? app_id = null;
@@ -182,17 +181,15 @@ public class MasterController : Diorite.Application
 		return_val_if_fail(runner != null, false);
 		
 		if (!runner.connect_server(server_name))
-			return server.create_error("Failed to connect runner '%s': ".printf(app_id), out response);
+			throw new Diorite.Ipc.MessageError.REMOTE_ERROR("Failed to connect runner '%s': ", app_id);
 		
 		debug("Connected to runner server for '%s'.", app_id);
 		response = new Variant.boolean(true);
-		return true;
 	}
 	
-	private bool handle_runner_activated(Diorite.Ipc.MessageServer server, Variant request, out Variant? response)
+	private void handle_runner_activated(Diorite.Ipc.MessageServer server, Variant request, out Variant? response) throws Diorite.Ipc.MessageError
 	{
-		if (!request.is_of_type(new VariantType("s")))
-			return server.create_error("Invalid request type: " + request.get_type_string(), out response);
+		Diorite.Ipc.MessageServer.check_type_str(request, "s");
 		
 		response = null;
 		var app_id = request.get_string();
@@ -206,7 +203,6 @@ public class MasterController : Diorite.Application
 		
 		app_runners.push_head(runner);
 		response = new Variant.boolean(true);
-		return true;
 	}
 	
 	private void append_actions()
