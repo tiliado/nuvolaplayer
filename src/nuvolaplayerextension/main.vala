@@ -30,56 +30,51 @@ public WebExtension extension;
 public class WebExtension: GLib.Object
 {
 	private WebKit.WebExtension extension;
-	private Diorite.Ipc.MessageClient master;
-	private Diorite.Ipc.MessageServer slave;
+	private Diorite.Ipc.MessageClient runner;
+	private Diorite.Ipc.MessageServer server;
 	private HashTable<unowned WebKit.Frame, FrameBridge> bridges;
 	private File data_dir;
 	private File user_config_dir;
 	private JSApi js_api;
 	private Variant[] function_calls = {};
 	
-	public WebExtension(WebKit.WebExtension extension, Diorite.Ipc.MessageClient master, Diorite.Ipc.MessageServer slave)
+	public WebExtension(WebKit.WebExtension extension, Diorite.Ipc.MessageClient runner, Diorite.Ipc.MessageServer server)
 	{
 		this.extension = extension;
-		this.master = master;
-		this.slave = slave;
-		slave.add_handler("call_function", handle_call_function);
+		this.runner = runner;
+		this.server = server;
+		server.add_handler("call_function", handle_call_function);
 		bridges = new HashTable<unowned WebKit.Frame, FrameBridge>(direct_hash, direct_equal);
-		new Thread<void*>("slave", listen);
-		Thread.yield();
+		try
+		{
+			server.start_service();
+		}
+		catch (Diorite.IOError e)
+		{
+			error("Web Worker server error: %s", e.message);
+		}
+		
+		assert(runner.wait_for_echo(1000));
+		
 		Variant response;
 		try
 		{
-			response = master.send_message("get_data_dir", new Variant.byte(0));
+			response = runner.send_message("get_data_dir", new Variant.byte(0));
 			data_dir = File.new_for_path(response.get_string());
-			response = master.send_message("get_user_config_dir", new Variant.byte(0));
+			response = runner.send_message("get_user_config_dir", new Variant.byte(0));
 			user_config_dir = File.new_for_path(response.get_string());
 		}
 		catch (Diorite.Ipc.MessageError e)
 		{
-			critical("Master client error: %s", e.message);
-			return;
+			error("Runner client error: %s", e.message);
 		}
+		
 		var storage = new Diorite.XdgStorage.for_project(Nuvola.get_appname());
-		js_api = new JSApi(storage, data_dir, user_config_dir, new KeyValueProxy(master, "config"),
-		new KeyValueProxy(master, "session"));
+		js_api = new JSApi(storage, data_dir, user_config_dir, new KeyValueProxy(runner, "config"),
+		new KeyValueProxy(runner, "session"));
 		js_api.send_message_async.connect(on_send_message_async);
 		js_api.send_message_sync.connect(on_send_message_sync);
 		WebKit.ScriptWorld.get_default().window_object_cleared.connect(on_window_object_cleared);
-	}
-	
-	private void* listen()
-	{
-		debug("Slave is listening");
-		try
-		{
-			slave.listen();
-		}
-		catch (Diorite.IOError e)
-		{
-			warning("Slave server error: %s", e.message);
-		}
-		return null;
 	}
 	
 	private void on_window_object_cleared(WebKit.ScriptWorld world, WebKit.WebPage page, WebKit.Frame frame)
@@ -104,48 +99,29 @@ public class WebExtension: GLib.Object
 	
 	private void handle_call_function(Diorite.Ipc.MessageServer server, Variant request, out Variant? response) throws Diorite.Ipc.MessageError
 	{
-		lock (function_calls)
+		Diorite.Ipc.MessageServer.check_type_str(request, "(smv)");
+		string name = null;
+		Variant? data = null;
+		request.get("(smv)", &name, &data);
+		var envs = bridges.get_values();
+		foreach (var env in envs)
 		{
-			function_calls += request;
-			
-		}
-		Idle.add(function_call_cb);
-		response = null;
-	}
-	
-	private bool function_call_cb()
-	{
-		lock (function_calls)
-		{
-			foreach (var request in function_calls)
+			try
 			{
-				string name = null;
-				Variant? data = null;
-				request.get("(smv)", &name, &data);
-				debug("!!!!! call method %s %s", name, (data != null ? data.print(true) : "null"));
-				var envs = bridges.get_values();
-				foreach (var env in envs)
-				{
-					try
-					{
-						env.call_function(name, ref data);
-					}
-					catch (JSError e)
-					{
-						show_error("Error during call of %s: %s".printf(name, e.message));
-					}
-				}
+				env.call_function(name, ref data);
 			}
-			function_calls = {};
+			catch (JSError e)
+			{
+				show_error("Error during call of %s: %s".printf(name, e.message));
+			}
 		}
-		return false;
 	}
 	
 	private void show_error(string message)
 	{
 		try
 		{
-			master.send_message("show_error", new Variant.string(message));
+			runner.send_message("show_error", new Variant.string(message));
 		}
 		catch (Diorite.Ipc.MessageError e)
 		{
@@ -157,7 +133,7 @@ public class WebExtension: GLib.Object
 	{
 		try
 		{
-			master.send_message("send_message_async", new Variant("(smv)", name, data));
+			runner.send_message("send_message_async", new Variant("(smv)", name, data));
 		}
 		catch (Diorite.Ipc.MessageError e)
 		{
@@ -169,7 +145,7 @@ public class WebExtension: GLib.Object
 	{
 		try
 		{
-			result = master.send_message("send_message_sync", new Variant("(smv)", name, data));
+			result = runner.send_message("send_message_sync", new Variant("(smv)", name, data));
 		}
 		catch (Diorite.Ipc.MessageError e)
 		{
@@ -190,8 +166,8 @@ public void on_web_page_created(WebKit.WebExtension extension, WebKit.WebPage we
 public void webkit_web_extension_initialize(WebKit.WebExtension extension)
 {
 	Diorite.Logger.init(stderr, GLib.LogLevelFlags.LEVEL_DEBUG);
-	var master = new Diorite.Ipc.MessageClient(Environment.get_variable("NUVOLA_IPC_UI_RUNNER"), 5000);
-	var slave = new Diorite.Ipc.MessageServer(Environment.get_variable("NUVOLA_IPC_WEB_WORKER"));
-	Nuvola.extension = new Nuvola.WebExtension(extension, master, slave); 
+	var runner = new Diorite.Ipc.MessageClient(Environment.get_variable("NUVOLA_IPC_UI_RUNNER"), 5000);
+	var server = new Diorite.Ipc.MessageServer(Environment.get_variable("NUVOLA_IPC_WEB_WORKER"));
+	Nuvola.extension = new Nuvola.WebExtension(extension, runner, server); 
 	extension.page_created.connect(Nuvola.on_web_page_created);
 }
