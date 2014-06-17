@@ -40,7 +40,6 @@ public class WebEngine : GLib.Object
 	private Diorite.Ipc.MessageServer server = null;
 	private Diorite.Ipc.MessageClient slave = null;
 	private static const string WEB_WORKER_SUFFIX = ".webworker";
-	private string[] app_errors;
 	private Config config;
 	private VariantHashTable session;
 	
@@ -71,7 +70,6 @@ public class WebEngine : GLib.Object
 		ws.enable_page_cache = false;
 		ws.enable_smooth_scrolling = true;
 		ws.enable_write_console_messages_to_stdout = true;
-		app_errors = {};
 		web_view.notify["uri"].connect(on_uri_changed);
 		web_view.decide_policy.connect(on_decide_policy);
 		set_up_server();
@@ -377,23 +375,7 @@ public class WebEngine : GLib.Object
 	{
 		Diorite.Ipc.MessageServer.check_type_str(request, "s");
 		response = null;
-		
-		lock (app_errors)
-		{
-			app_errors += request.get_string();
-		}
-		Idle.add(show_app_errors_cb);
-	}
-	
-	private bool show_app_errors_cb()
-	{
-		lock (app_errors)
-		{
-			foreach (var message in app_errors)
-				app.show_error("Integration error", message);
-			app_errors = {};
-		}
-		return false;
+		app.show_error("Integration error", request.get_string());
 	}
 	
 	private void handle_send_message_async(Diorite.Ipc.MessageServer server, Variant request, out Variant? response) throws Diorite.Ipc.MessageError
