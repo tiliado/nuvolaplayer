@@ -167,7 +167,7 @@ public class MasterController : Diorite.Application
 		}
 	}
 	
-	private void handle_runner_started(Diorite.Ipc.MessageServer server, Variant request, out Variant? response) throws Diorite.Ipc.MessageError
+	private void handle_runner_started(Diorite.Ipc.MessageServer server, Variant? request, out Variant? response) throws Diorite.Ipc.MessageError
 	{
 		Diorite.Ipc.MessageServer.check_type_str(request, "(ss)");
 		
@@ -187,7 +187,7 @@ public class MasterController : Diorite.Application
 		response = new Variant.boolean(true);
 	}
 	
-	private void handle_runner_activated(Diorite.Ipc.MessageServer server, Variant request, out Variant? response) throws Diorite.Ipc.MessageError
+	private void handle_runner_activated(Diorite.Ipc.MessageServer server, Variant? request, out Variant? response) throws Diorite.Ipc.MessageError
 	{
 		Diorite.Ipc.MessageServer.check_type_str(request, "s");
 		

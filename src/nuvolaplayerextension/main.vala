@@ -59,9 +59,9 @@ public class WebExtension: GLib.Object
 		Variant response;
 		try
 		{
-			response = runner.send_message("get_data_dir", new Variant.byte(0));
+			response = runner.send_message("get_data_dir");
 			data_dir = File.new_for_path(response.get_string());
-			response = runner.send_message("get_user_config_dir", new Variant.byte(0));
+			response = runner.send_message("get_user_config_dir");
 			user_config_dir = File.new_for_path(response.get_string());
 		}
 		catch (Diorite.Ipc.MessageError e)
@@ -97,7 +97,7 @@ public class WebExtension: GLib.Object
 		}
 	}
 	
-	private void handle_call_function(Diorite.Ipc.MessageServer server, Variant request, out Variant? response) throws Diorite.Ipc.MessageError
+	private void handle_call_function(Diorite.Ipc.MessageServer server, Variant? request, out Variant? response) throws Diorite.Ipc.MessageError
 	{
 		Diorite.Ipc.MessageServer.check_type_str(request, "(smv)");
 		string name = null;
