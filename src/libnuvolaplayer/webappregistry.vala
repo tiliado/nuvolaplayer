@@ -99,7 +99,7 @@ public class WebAppRegistry: GLib.Object
 		var app_storage = storage.get_child(id);
 		
 		var user_dir = app_storage.user_data_dir;
-		if (user_dir != null)
+		if (user_dir.query_exists())
 		{
 			try
 			{
@@ -116,6 +116,9 @@ public class WebAppRegistry: GLib.Object
 		
 		foreach (var dir in app_storage.data_dirs)
 		{
+			if (!dir.query_exists())
+				continue;
+			
 			try
 			{
 				item = load_web_app_from_dir(dir);
