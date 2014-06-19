@@ -109,25 +109,33 @@ public class Extension: Nuvola.Extension
 	{
 		web_engine.async_message_received.disconnect(on_async_message_received);
 		clear_actions();
+		
 		#if APPINDICATOR
 		indicator = null;
 		#else
+		if (menu != null)
+			menu.detach();
 		icon.visible = false;
 		icon = null;
 		#endif
-		if (menu != null)
-			menu.detach();
+		
 		menu = null;
 	}
 	
 	private void create_menu()
 	{
-		var model = actions_reg.build_menu(actions, false, true);
+		#if !APPINDICATOR
 		if (menu != null)
 			menu.detach();
+		#endif
+		
+		var model = actions_reg.build_menu(actions, false, true);
 		menu = new Gtk.Menu.from_model(model);
+		
 		#if APPINDICATOR
 		indicator.set_menu(menu);
+		#else
+		menu.attach_to_widget(controller.main_window, null);
 		#endif
 	}
 	
@@ -135,7 +143,7 @@ public class Extension: Nuvola.Extension
 	private void on_popup_menu(uint button, uint time)
 	{
 		return_if_fail(menu != null);
-		menu.attach_to_widget(controller.main_window, null);
+		
 		menu.show_all();
 		menu.popup(null, null, icon.position_menu, button, time);
 	}
