@@ -69,9 +69,7 @@ public int main(string[] args)
 		return 0;
 	}
 	
-	string[] exec_cmd = {args[0]};
 	FileStream? log = null;
-	
 	if (Args.log_file != null)
 	{
 		log = FileStream.open(Args.log_file, "w");
@@ -91,7 +89,20 @@ public int main(string[] args)
 	? new WebAppRegistry.with_data_path(web_apps_storage, Args.apps_dir)
 	: new WebAppRegistry(web_apps_storage, true);
 	
-	exec_cmd[0] = Nuvola.get_ui_runner_path();
+	
+	string[] exec_cmd = {};
+	
+	#if LINUX
+	var gdb_server = Environment.get_variable("NUVOLA_APP_RUNNER_GDB_SERVER");
+	if (gdb_server != null)
+	{
+		exec_cmd += "/usr/bin/gdbserver";
+		exec_cmd += gdb_server ;
+	}
+	#endif
+	
+	exec_cmd += Nuvola.get_ui_runner_path();
+	
 	if (Args.debug)
 		exec_cmd += "-D";
 	else if (Args.verbose)

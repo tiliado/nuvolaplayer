@@ -13,12 +13,24 @@ run()
 debug()
 {
 	./waf -v && LD_LIBRARY_PATH=build XDG_DATA_DIRS=data:/usr/share:/usr/local/share \
-	NUVOLA_LIBDIR=build gdb --args build/nuvolaplayer3 -D "$@"
+	NUVOLA_LIBDIR=build gdb --follow-fork-mode --args build/nuvolaplayer3 -D "$@"
 }
 
 debug_criticals()
 {
 	./waf -v && LD_LIBRARY_PATH=build XDG_DATA_DIRS=data:/usr/share:/usr/local/share \
 	NUVOLA_LIBDIR=build G_DEBUG=fatal-criticals \
-	gdb --args build/nuvolaplayer3 -D "$@"
+	gdb  --args build/nuvolaplayer3 -D "$@"
+}
+
+debug_app_runner()
+{
+	./waf -v && LD_LIBRARY_PATH=build XDG_DATA_DIRS=data:/usr/share:/usr/local/share \
+	NUVOLA_LIBDIR=build NUVOLA_APP_RUNNER_GDB_SERVER='localhost:9090' build/nuvolaplayer3 -D "$@"
+}
+
+debug_app_runner_join()
+{
+	echo Use "'target remote localhost:9090'"
+	libtool --mode=execute gdb build/uirunner
 }

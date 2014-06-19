@@ -36,7 +36,7 @@ public class AppRunner: Diorite.Subprocess
 	{
 		base(argv, Diorite.SubprocessFlags.INHERIT_FDS);
 		this.app_id = app_id;
-		check_server_connected_id = Timeout.add_seconds(5, check_server_connected_cb);
+		check_server_connected_id = Timeout.add_seconds(30, check_server_connected_cb);
 	}
 	
 	public bool connect_server(string server_name)
