@@ -44,7 +44,6 @@ public void create_desktop_file(WebApp web_app)
 	var data = key_file.to_data(null, null);
 	try
 	{
-		message("%s\n%s", file.get_path(), data);
 		Diorite.System.overwrite_file(file, data);
 	}
 	catch (GLib.Error e)
