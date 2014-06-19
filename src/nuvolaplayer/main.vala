@@ -81,7 +81,8 @@ public int main(string[] args)
 	}
 	
 	Diorite.Logger.init(log != null ? log : stderr, Args.debug ? GLib.LogLevelFlags.LEVEL_DEBUG
-	 : (Args.verbose ? GLib.LogLevelFlags.LEVEL_INFO: GLib.LogLevelFlags.LEVEL_WARNING));
+	 : (Args.verbose ? GLib.LogLevelFlags.LEVEL_INFO: GLib.LogLevelFlags.LEVEL_WARNING),
+	 "Master");
 	
 	var storage = new Diorite.XdgStorage.for_project(Nuvola.get_appname());
 	var web_apps_storage = storage.get_child("web_apps");
