@@ -38,7 +38,7 @@ public class WebEngine : GLib.Object
 	private JsEnvironment? env = null;
 	private JSApi api;
 	private Diorite.Ipc.MessageServer server = null;
-	private Diorite.Ipc.MessageClient slave = null;
+	private Diorite.Ipc.MessageClient web_worker = null;
 	private static const string WEB_WORKER_SUFFIX = ".webworker";
 	private Config config;
 	private VariantHashTable session;
@@ -72,7 +72,7 @@ public class WebEngine : GLib.Object
 		ws.enable_write_console_messages_to_stdout = true;
 		web_view.notify["uri"].connect(on_uri_changed);
 		web_view.decide_policy.connect(on_decide_policy);
-		set_up_server();
+		set_up_ipc();
 	}
 	
 	public virtual signal void async_message_received(string name, Variant? data)
@@ -153,7 +153,9 @@ public class WebEngine : GLib.Object
 	{
 		if (!inject_api())
 			return false;
-		slave = new Diorite.Ipc.MessageClient(app.path_name + WEB_WORKER_SUFFIX, 5000);
+		
+		if (!web_worker.wait_for_echo(2000))
+			error("Cannot connect to web worker process.");
 		
 		if (check_init_request())
 			return true;
@@ -225,10 +227,10 @@ public class WebEngine : GLib.Object
 	
 	public void call_function(string name, Variant? params) throws Diorite.Ipc.MessageError
 	{
-		if (slave == null)
+		if (web_worker == null)
 			return;
 		var data = new Variant("(smv)", name, params);
-		slave.send_message("call_function", data);
+		web_worker.send_message("call_function", data);
 	}
 	
 	public void get_preferences(out Variant values, out Variant entries)
@@ -254,7 +256,7 @@ public class WebEngine : GLib.Object
 		return false;
 	}
 	
-	private void set_up_server()
+	private void set_up_ipc()
 	{
 		assert(server != null);
 		server.add_handler("get_data_dir", handle_get_data_dir);
@@ -271,6 +273,8 @@ public class WebEngine : GLib.Object
 		server.add_handler("show_error", handle_show_error);
 		server.add_handler("send_message_sync", handle_send_message_sync);
 		server.add_handler("send_message_async", handle_send_message_async);
+		
+		web_worker = new Diorite.Ipc.MessageClient(app.path_name + WEB_WORKER_SUFFIX, 5000);
 	}
 	
 	private void handle_get_data_dir(Diorite.Ipc.MessageServer server, Variant? request, out Variant? response) throws Diorite.Ipc.MessageError
