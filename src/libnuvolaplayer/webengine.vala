@@ -39,6 +39,8 @@ public class WebEngine : GLib.Object
 	private JSApi api;
 	private Diorite.Ipc.MessageServer server = null;
 	private Diorite.Ipc.MessageClient web_worker = null;
+	private bool web_worker_ready = false;
+	
 	private static const string WEB_WORKER_SUFFIX = ".webworker";
 	private Config config;
 	private VariantHashTable session;
@@ -157,6 +159,8 @@ public class WebEngine : GLib.Object
 		if (!web_worker.wait_for_echo(2000))
 			error("Cannot connect to web worker process.");
 		
+		web_worker_ready = true;
+		
 		if (check_init_request())
 			return true;
 		
@@ -227,8 +231,9 @@ public class WebEngine : GLib.Object
 	
 	public void call_function(string name, Variant? params) throws Diorite.Ipc.MessageError
 	{
-		if (web_worker == null)
-			return;
+		if (!web_worker_ready)
+			throw new Diorite.Ipc.MessageError.NOT_READY("Web worker process is not ready yet");
+		
 		var data = new Variant("(smv)", name, params);
 		web_worker.send_message("call_function", data);
 	}

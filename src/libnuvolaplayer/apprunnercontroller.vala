@@ -564,7 +564,10 @@ public class AppRunnerController : Diorite.Application
 		}
 		catch (Diorite.Ipc.MessageError e)
 		{
-			warning("Communication failed: %s", e.message);
+			if (e is Diorite.Ipc.MessageError.NOT_READY)
+				debug("Communication failed: %s", e.message);
+			else
+				warning("Communication failed: %s", e.message);
 		}
 	}
 	
