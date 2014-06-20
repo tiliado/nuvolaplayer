@@ -177,8 +177,11 @@ Integration.prototype.update = function()
 	if (this.starRating !== starRating)
 	{
 		this.starRating = starRating;
-		Nuvola.Actions.setEnabled(ACTION_RATING, starRating !== null);
-		Nuvola.Actions.setState(ACTION_RATING, starRating);
+		var enabled = starRating !== null;
+		Nuvola.Actions.setEnabled(ACTION_RATING, enabled);
+		
+		if (enabled)
+			Nuvola.Actions.setState(ACTION_RATING, starRating);
 	}
 	
 	setTimeout(this.update.bind(this), 500);
