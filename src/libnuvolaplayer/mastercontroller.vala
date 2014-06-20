@@ -303,6 +303,7 @@ public class MasterController : Diorite.Application
 		
 		main_window.hide();
 		start_app(main_window.selected_web_app);
+		do_quit();
 	}
 	
 	private void start_app(string app_id)
