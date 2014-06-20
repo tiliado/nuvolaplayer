@@ -187,40 +187,49 @@ Integration.prototype.update = function()
 	setTimeout(this.update.bind(this), 500);
 }
 
+Integration.prototype.getPlayerButtons = function()
+{
+	var elm = document.querySelector("#player .player-middle");
+	return elm ? elm.childNodes : null;
+}
+
 Integration.prototype.onActionActivated = function(object, name, param)
 {
-	var buttons = document.querySelector("#player .player-middle");
+	var buttons = this.getPlayerButtons();
 	if (buttons)
 	{
-		var prevSong = buttons.childNodes[1];
-		var nextSong = buttons.childNodes[3];
+		var prev_song = buttons[1];
+		var next_song = buttons[3];
+		var play_pause = buttons[2];
 	}
 	else
 	{
-		var prevSong = null;
-		var nextSong = null;
+		var prev_song = null;
+		var next_song = null;
+		var play_pause = null;
 	}
 	
 	switch (name)
 	{
 	case player.ACTION_TOGGLE_PLAY:
-		SJBpost("playPause");
+		Nuvola.clickOnElement(play_pause);
 		break;
 	case player.ACTION_PLAY:
 		if (player.state != player.STATE_PLAYING)
-			SJBpost("playPause");
+			Nuvola.clickOnElement(play_pause);
 		break;
-	
 	case player.ACTION_PAUSE:
 	case player.ACTION_STOP:
 		if (player.state == player.STATE_PLAYING)
-			SJBpost("playPause");
+			Nuvola.clickOnElement(play_pause);
 		break;
 	case player.ACTION_PREV_SONG:
-		Nuvola.clickOnElement(prevSong);
+		if (prev_song)
+			Nuvola.clickOnElement(prev_song);
 		break;
 	case player.ACTION_NEXT_SONG:
-		Nuvola.clickOnElement(nextSong);
+		if (next_song)
+			Nuvola.clickOnElement(next_song);
 		break;
 	case ACTION_THUMBS_UP:
 		Nuvola.clickOnElement(this.getThumbs()[1]);
