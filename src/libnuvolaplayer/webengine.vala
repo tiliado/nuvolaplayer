@@ -282,101 +282,96 @@ public class WebEngine : GLib.Object
 		web_worker = new Diorite.Ipc.MessageClient(app.path_name + WEB_WORKER_SUFFIX, 5000);
 	}
 	
-	private void handle_get_data_dir(Diorite.Ipc.MessageServer server, Variant? request, out Variant? response) throws Diorite.Ipc.MessageError
+	private Variant? handle_get_data_dir(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(request, null);
-		response = new Variant.string(web_app.data_dir.get_path());
+		Diorite.Ipc.MessageServer.check_type_str(data, null);
+		return new Variant.string(web_app.data_dir.get_path());
 	}
 	
-	private void handle_get_user_config_dir(Diorite.Ipc.MessageServer server, Variant? request, out Variant? response) throws Diorite.Ipc.MessageError
+	private Variant? handle_get_user_config_dir(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(request, null);
-		response = new Variant.string(web_app.user_config_dir.get_path());
+		Diorite.Ipc.MessageServer.check_type_str(data, null);
+		return new Variant.string(web_app.user_config_dir.get_path());
 	}
 	
-	private void handle_session_has_key(Diorite.Ipc.MessageServer server, Variant? request, out Variant? response) throws Diorite.Ipc.MessageError
+	private Variant? handle_session_has_key(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(request, "s");
-		
-		response = new Variant.boolean(session.has_key(request.get_string()));
+		Diorite.Ipc.MessageServer.check_type_str(data, "s");
+		return new Variant.boolean(session.has_key(data.get_string()));
 	}
 	
-	private void handle_session_get_value(Diorite.Ipc.MessageServer server, Variant? request, out Variant? response) throws Diorite.Ipc.MessageError
+	private Variant? handle_session_get_value(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(request, "s");
-		
-		response = session.get_value(request.get_string());
+		Diorite.Ipc.MessageServer.check_type_str(data, "s");
+		var response = session.get_value(data.get_string());
 		if (response == null)
 			response = new Variant("mv", null);
+		
+		return response;
 	}
 	
-	private void handle_session_set_value(Diorite.Ipc.MessageServer server, Variant? request, out Variant? response) throws Diorite.Ipc.MessageError
+	private Variant? handle_session_set_value(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(request, "(smv)");
-		
+		Diorite.Ipc.MessageServer.check_type_str(data, "(smv)");
 		string? key = null;
 		Variant? value = null;
-		request.get("(smv)", &key, &value);
+		data.get("(smv)", &key, &value);
 		session.set_value(key, value);
-		response = null;
+		return null;
 	}
 	
-	private void handle_session_set_default_value(Diorite.Ipc.MessageServer server, Variant? request, out Variant? response) throws Diorite.Ipc.MessageError
+	private Variant? handle_session_set_default_value(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(request, "(smv)");
-		
+		Diorite.Ipc.MessageServer.check_type_str(data, "(smv)");
 		string? key = null;
 		Variant? value = null;
-		request.get("(smv)", &key, &value);
+		data.get("(smv)", &key, &value);
 		session.set_default_value(key, value);
-		response = null;
+		return null;
 	}
 	
-	private void handle_config_has_key(Diorite.Ipc.MessageServer server, Variant? request, out Variant? response) throws Diorite.Ipc.MessageError
+	private Variant? handle_config_has_key(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(request, "s");
-		
-		response = new Variant.boolean(config.has_key(request.get_string()));
+		Diorite.Ipc.MessageServer.check_type_str(data, "s");
+		return new Variant.boolean(config.has_key(data.get_string()));
 	}
 	
-	private void handle_config_get_value(Diorite.Ipc.MessageServer server, Variant? request, out Variant? response) throws Diorite.Ipc.MessageError
+	private Variant? handle_config_get_value(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(request, "s");
-		
-		response = config.get_value(request.get_string());
+		Diorite.Ipc.MessageServer.check_type_str(data, "s");
+		var response = config.get_value(data.get_string());
 		if (response == null)
 			response = new Variant("mv", null);
+		
+		return response;
 	}
 	
-	private void handle_config_set_value(Diorite.Ipc.MessageServer server, Variant? request, out Variant? response) throws Diorite.Ipc.MessageError
+	private Variant? handle_config_set_value(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(request, "(smv)");
-		
+		Diorite.Ipc.MessageServer.check_type_str(data, "(smv)");
 		string? key = null;
 		Variant? value = null;
-		request.get("(smv)", &key, &value);
+		data.get("(smv)", &key, &value);
 		config.set_value(key, value);
-		response = null;
+		return null;
 	}
 	
-	private void handle_config_set_default_value(Diorite.Ipc.MessageServer server, Variant? request, out Variant? response) throws Diorite.Ipc.MessageError
+	private Variant? handle_config_set_default_value(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(request, "(smv)");
-		
+		Diorite.Ipc.MessageServer.check_type_str(data, "(smv)");
 		string? key = null;
 		Variant? value = null;
-		request.get("(smv)", &key, &value);
+		data.get("(smv)", &key, &value);
 		config.set_default_value(key, value);
-		response = null;
+		return null;
 	}
 	
-	private void handle_config_save(Diorite.Ipc.MessageServer server, Variant? request, out Variant? response) throws Diorite.Ipc.MessageError
+	private Variant? handle_config_save(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(request, null);
-		
+		Diorite.Ipc.MessageServer.check_type_str(data, null);
 		try
 		{
-			response = new Variant.boolean(config.save());
+			return new Variant.boolean(config.save());
 		}
 		catch (GLib.Error e)
 		{
@@ -384,33 +379,32 @@ public class WebEngine : GLib.Object
 		}
 	}
 	
-	private void handle_show_error(Diorite.Ipc.MessageServer server, Variant? request, out Variant? response) throws Diorite.Ipc.MessageError
+	private Variant? handle_show_error(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(request, "s");
-		response = null;
-		app.show_error("Integration error", request.get_string());
+		Diorite.Ipc.MessageServer.check_type_str(data, "s");
+		app.show_error("Integration error", data.get_string());
+		return null;
 	}
 	
-	private void handle_send_message_async(Diorite.Ipc.MessageServer server, Variant? request, out Variant? response) throws Diorite.Ipc.MessageError
+	private Variant? handle_send_message_async(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(request, "(smv)");
-		
-		response = new Variant("mv", null);
+		Diorite.Ipc.MessageServer.check_type_str(data, "(smv)");
 		string name = null;
-		Variant? data = null;
-		request.get("(smv)", &name, &data);
-		async_message_received(name, data);
+		Variant? msg_data = null;
+		data.get("(smv)", &name, &msg_data);
+		async_message_received(name, msg_data);
+		return new Variant("mv", null);
 	}
 	
-	private void handle_send_message_sync(Diorite.Ipc.MessageServer server, Variant? request, out Variant? response) throws Diorite.Ipc.MessageError
+	private Variant? handle_send_message_sync(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(request, "(smv)");
-		
-		response = new Variant("mv", null);
+		Diorite.Ipc.MessageServer.check_type_str(data, "(smv)");
+		var response = new Variant("mv", null);
 		string name = null;
-		Variant? data = null;
-		request.get("(smv)", &name, &data);
-		sync_message_received(name, data, ref response);
+		Variant? msg_data = null;
+		data.get("(smv)", &name, &msg_data);
+		sync_message_received(name, msg_data, ref response);
+		return response;
 	}
 	
 	private void on_send_message_async(string name, Variant? data)

@@ -167,42 +167,38 @@ public class MasterController : Diorite.Application
 		}
 	}
 	
-	private void handle_runner_started(Diorite.Ipc.MessageServer server, Variant? request, out Variant? response) throws Diorite.Ipc.MessageError
+	private Variant? handle_runner_started(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(request, "(ss)");
-		
-		response = null;
+		Diorite.Ipc.MessageServer.check_type_str(data, "(ss)");
 		string? app_id = null;
 		string? server_name = null;
-		request.get("(ss)", ref app_id, ref server_name);
-		return_val_if_fail(app_id != null && server_name != null, false);
+		data.get("(ss)", ref app_id, ref server_name);
+		return_val_if_fail(app_id != null && server_name != null, null);
 		
 		var runner = app_runners_map[app_id];
-		return_val_if_fail(runner != null, false);
+		return_val_if_fail(runner != null, null);
 		
 		if (!runner.connect_server(server_name))
 			throw new Diorite.Ipc.MessageError.REMOTE_ERROR("Failed to connect runner '%s': ", app_id);
 		
 		debug("Connected to runner server for '%s'.", app_id);
-		response = new Variant.boolean(true);
+		return new Variant.boolean(true);
 	}
 	
-	private void handle_runner_activated(Diorite.Ipc.MessageServer server, Variant? request, out Variant? response) throws Diorite.Ipc.MessageError
+	private Variant? handle_runner_activated(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(request, "s");
-		
-		response = null;
-		var app_id = request.get_string();
-		return_val_if_fail(app_id != null, false);
+		Diorite.Ipc.MessageServer.check_type_str(data, "s");
+		var app_id = data.get_string();
+		return_val_if_fail(app_id != null, null);
 		
 		var runner = app_runners_map[app_id];
-		return_val_if_fail(runner != null, false);
+		return_val_if_fail(runner != null, null);
 		
 		if (!app_runners.remove(runner))
 			critical("Runner for '%s' not found in queue.", runner.app_id);
 		
 		app_runners.push_head(runner);
-		response = new Variant.boolean(true);
+		return new Variant.boolean(true);
 	}
 	
 	private void append_actions()

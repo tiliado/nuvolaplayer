@@ -97,24 +97,25 @@ public class WebExtension: GLib.Object
 		}
 	}
 	
-	private void handle_call_function(Diorite.Ipc.MessageServer server, Variant? request, out Variant? response) throws Diorite.Ipc.MessageError
+	private Variant? handle_call_function(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(request, "(smv)");
+		Diorite.Ipc.MessageServer.check_type_str(data, "(smv)");
 		string name = null;
-		Variant? data = null;
-		request.get("(smv)", &name, &data);
+		Variant? params = null;
+		data.get("(smv)", &name, &params);
 		var envs = bridges.get_values();
 		foreach (var env in envs)
 		{
 			try
 			{
-				env.call_function(name, ref data);
+				env.call_function(name, ref params);
 			}
 			catch (JSError e)
 			{
 				show_error("Error during call of %s: %s".printf(name, e.message));
 			}
 		}
+		return params;
 	}
 	
 	private void show_error(string message)
