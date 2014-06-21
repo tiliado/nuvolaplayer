@@ -80,7 +80,10 @@ public class Extension: Nuvola.Extension
 		icon.popup_menu.connect(on_popup_menu);
 		icon.activate.connect(() => {controller.activate();});
 		#endif
-		web_engine.async_message_received.connect(on_async_message_received);
+		var server = controller.server;
+		server.add_handler("Nuvola.TrayIcon.setTooltip", handle_set_tooltip);
+		server.add_handler("Nuvola.TrayIcon.setActions", handle_set_actions);
+		server.add_handler("Nuvola.TrayIcon.clearActions", handle_clear_actions);
 	}
 	
 	public void set_tooltip(string tooltip)
@@ -107,7 +110,10 @@ public class Extension: Nuvola.Extension
 	 */
 	public override void unload()
 	{
-		web_engine.async_message_received.disconnect(on_async_message_received);
+		var server = controller.server;
+		server.remove_handler("Nuvola.TrayIcon.setTooltip");
+		server.remove_handler("Nuvola.TrayIcon.setActions");
+		server.remove_handler("Nuvola.TrayIcon.clearActions");
 		clear_actions();
 		
 		#if APPINDICATOR
@@ -149,36 +155,37 @@ public class Extension: Nuvola.Extension
 	}
 	#endif
 	
-	private void on_async_message_received(WebEngine engine, string name, Variant? data)
+	private Variant? handle_set_tooltip(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
-		if (name == "Nuvola.TrayIcon.setTooltip")
-		{
-			string text = null;
-			if (data != null)
-			{
-				data.get("(s)", &text);
-				set_tooltip(text);
-			}
-		}
-		else if (name == "Nuvola.TrayIcon.setActions")
-		{
-			if (data != null && data.is_container())
-			{
-				int i = 0;
-				VariantIter iter = null;
-				data.get("(av)", &iter);
-				string[] actions = new string[iter.n_children()];
-				Variant item = null;
-				while (iter.next("v", &item))
-					actions[i++] = item.get_string();
-				
-				set_actions((owned) actions);
-			}
-		}
-		else if (name == "Nuvola.TrayIcon.clearActions")
-		{
-			clear_actions();
-		}
+		Diorite.Ipc.MessageServer.check_type_str(data, "(s)");
+		string text;
+		data.get("(s)", out text);
+		set_tooltip(text);
+		return null;
+	}
+	
+	private Variant? handle_set_actions(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	{
+		Diorite.Ipc.MessageServer.check_type_str(data, "(av)");
+		
+		int i = 0;
+		VariantIter iter = null;
+		data.get("(av)", &iter);
+		string[] actions = new string[iter.n_children()];
+		Variant item = null;
+		while (iter.next("v", &item))
+			actions[i++] = item.get_string();
+		
+		set_actions((owned) actions);
+		
+		return null;
+	}
+	
+	private Variant? handle_clear_actions(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	{
+		Diorite.Ipc.MessageServer.check_type_str(data, null);
+		clear_actions();
+		return null;
 	}
 }
 

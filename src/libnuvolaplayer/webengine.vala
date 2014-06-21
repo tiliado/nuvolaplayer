@@ -77,16 +77,6 @@ public class WebEngine : GLib.Object
 		set_up_ipc();
 	}
 	
-	public virtual signal void async_message_received(string name, Variant? data)
-	{
-		debug("Async message received from JSApi: %s: %s", name, data == null ? "null" : data.print(true));
-	}
-	
-	public virtual signal void sync_message_received(string name, Variant? data, ref Variant? result)
-	{
-		debug("Sync message received from JSApi: %s: %s", name, data == null ? "null" : data.print(true));
-	}
-	
 	public signal void init_request(HashTable<string, Variant> values, Variant entries);
 	
 	private bool inject_api()
@@ -276,8 +266,6 @@ public class WebEngine : GLib.Object
 		server.add_handler("session_set_value", handle_session_set_value);
 		server.add_handler("session_set_default_value", handle_session_set_default_value);
 		server.add_handler("show_error", handle_show_error);
-		server.add_handler("send_message_sync", handle_send_message_sync);
-		server.add_handler("send_message_async", handle_send_message_async);
 		
 		web_worker = new Diorite.Ipc.MessageClient(app.path_name + WEB_WORKER_SUFFIX, 5000);
 	}
@@ -386,35 +374,29 @@ public class WebEngine : GLib.Object
 		return null;
 	}
 	
-	private Variant? handle_send_message_async(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
-	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(smv)");
-		string name = null;
-		Variant? msg_data = null;
-		data.get("(smv)", &name, &msg_data);
-		async_message_received(name, msg_data);
-		return new Variant("mv", null);
-	}
-	
-	private Variant? handle_send_message_sync(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
-	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(smv)");
-		var response = new Variant("mv", null);
-		string name = null;
-		Variant? msg_data = null;
-		data.get("(smv)", &name, &msg_data);
-		sync_message_received(name, msg_data, ref response);
-		return response;
-	}
-	
 	private void on_send_message_async(string name, Variant? data)
 	{
-		async_message_received(name, data);
+		try
+		{
+			server.send_local_message(name, data);
+		}
+		catch (Diorite.Ipc.MessageError e)
+		{
+			critical("Failed to send message '%s'. %s", name, e.message);
+		}
 	}
 	
 	private void on_send_message_sync(string name, Variant? data, ref Variant? result)
 	{
-		sync_message_received(name, data, ref result);
+		try
+		{
+			result = server.send_local_message(name, data);
+		}
+		catch (Diorite.Ipc.MessageError e)
+		{
+			critical("Failed to send message '%s'. %s", name, e.message);
+			result = null;
+		}
 	}
 	
 	private bool on_decide_policy(WebKit.PolicyDecision decision, WebKit.PolicyDecisionType decision_type)

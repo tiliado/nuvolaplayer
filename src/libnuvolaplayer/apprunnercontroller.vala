@@ -115,8 +115,6 @@ public class AppRunnerController : Diorite.Application
 		connection.session.add_feature_by_type(typeof(Soup.ProxyResolverDefault));
 		
 		web_engine = new WebEngine(this, web_app, config);
-		web_engine.async_message_received.connect(on_async_message_received);
-		web_engine.sync_message_received.connect(on_sync_message_received);
 		web_engine.init_request.connect(on_init_request);
 		web_engine.notify.connect_after(on_web_engine_notify);
 		actions.action_changed.connect(on_action_changed);
@@ -208,6 +206,16 @@ public class AppRunnerController : Diorite.Application
 		try
 		{
 			server = new Diorite.Ipc.MessageServer(server_name);
+			server.add_handler("Nuvola.setHideOnClose", handle_set_hide_on_close);
+			server.add_handler("Nuvola.Actions.addAction", handle_add_action);
+			server.add_handler("Nuvola.Actions.addRadioAction", handle_add_radio_action);
+			server.add_handler("Nuvola.Actions.isEnabled", handle_is_action_enabled);
+			server.add_handler("Nuvola.Actions.setEnabled", handle_action_set_enabled);
+			server.add_handler("Nuvola.Actions.getState", handle_action_get_state);
+			server.add_handler("Nuvola.Actions.setState", handle_action_set_state);
+			server.add_handler("Nuvola.MenuBar.setMenu", handle_menubar_set_menu);
+			server.add_handler("Nuvola.Actions.activate", handle_action_activate);
+			server.add_handler("Nuvola.Browser.downloadFileAsync", handle_download_file_async);
 			server.start_service();
 		}
 		catch (Diorite.IOError e)
@@ -377,181 +385,224 @@ public class AppRunnerController : Diorite.Application
 		return false;
 	}
 	
-	private void on_sync_message_received(WebEngine engine, string name, Variant? data, ref Variant? result)
+	private Variant? handle_set_hide_on_close(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
-		switch (name)
-		{
-		case "Nuvola.setHideOnClose":
-			return_if_fail(data != null);
-			data.get("(b)", &hide_on_close);
-			break;
-		case "Nuvola.Actions.addAction":
-			string group = null;
-			string scope = null;
-			string action_name = null;
-			string? label = null;
-			string? mnemo_label = null;
-			string? icon = null;
-			string? keybinding = null;
-			Variant? state = null;
-			if (data != null)
-			{
-				data.get("(sssssss@*)", &group, &scope, &action_name, &label, &mnemo_label, &icon, &keybinding, &state);
-				if (label == "")
-					label = null;
-				if (mnemo_label == "")
-					mnemo_label = null;
-				if (icon == "")
-					icon = null;
-				if (keybinding == "")
-					keybinding = null;
-				
-				Diorite.Action action;
-				if (state == null || state.get_type_string() == "mv")
-					action = simple_action(group, scope, action_name, label, mnemo_label, icon, keybinding, null);
-				else
-					action = toggle_action(group, scope, action_name, label, mnemo_label, icon, keybinding, null, state);
-				
-				action.enabled = false;
-				action.activated.connect(on_custom_action_activated);
-				actions.add_action(action);
-			}
-			break;
-		case "Nuvola.Actions.addRadioAction":
-			string group = null;
-			string scope = null;
-			string action_name = null;
-			string? label = null;
-			string? mnemo_label = null;
-			string? icon = null;
-			string? keybinding = null;
-			Variant? state = null;
-			Variant? parameter = null;
-			VariantIter? options_iter = null;
-			if (data != null)
-			{
-				data.get("(sss@*av)", &group, &scope, &action_name, &state, &options_iter);
-				Diorite.RadioOption[] options = new Diorite.RadioOption[options_iter.n_children()];
-				var i = 0;
-				Variant? array = null;
-				while (options_iter.next("v", &array))
-				{
-					Variant? value = array.get_child_value(0);
-					parameter = value.get_variant();
-					array.get_child(1, "v", &value);
-					label = value.is_of_type(VariantType.STRING) ? value.get_string() : null;
-					array.get_child(2, "v", &value);
-					mnemo_label = value.is_of_type(VariantType.STRING) ? value.get_string() : null;
-					array.get_child(3, "v", &value);
-					icon = value.is_of_type(VariantType.STRING) ? value.get_string() : null;
-					array.get_child(4, "v", &value);
-					keybinding = value.is_of_type(VariantType.STRING) ? value.get_string() : null;
-					options[i++] = new Diorite.RadioOption(parameter, label, mnemo_label, icon, keybinding);
-				}
-				
-				var radio = new Diorite.RadioAction(group, scope, action_name, null, state, options);
-				radio.enabled = false;
-				radio.activated.connect(on_custom_action_activated);
-				actions.add_action(radio);
-			}
-			break;
-		case "Nuvola.Actions.isEnabled":
-			return_if_fail(data != null);
-			string? action_name = null;
-			data.get("(s)", &action_name);
-			return_if_fail(action_name != null);
-			var action = actions.get_action(action_name);
-			return_if_fail(action != null);
-			result = new Variant.boolean(action.enabled);
-			break;
-		case "Nuvola.Actions.setEnabled":
-			return_if_fail(data != null);
-			string? action_name = null;
-			bool enabled = false;
-			data.get("(sb)", &action_name, &enabled);
-			return_if_fail(action_name != null);
-			var action = actions.get_action(action_name);
-			return_if_fail(action != null);
-			if (action.enabled != enabled)
-				action.enabled = enabled;
-			break;
-		case "Nuvola.Actions.getState":
-			return_if_fail(data != null);
-			string? action_name = null;
-			data.get("(s)", &action_name);
-			return_if_fail(action_name != null);
-			var action = actions.get_action(action_name);
-			return_if_fail(action != null);
-			result = action.state;
-			break;
-		case "Nuvola.Actions.setState":
-			return_if_fail(data != null);
-			string? action_name = null;
-			Variant? state = null;
-			data.get("(s@*)", &action_name, &state);
-			return_if_fail(action_name != null);
-			var action = actions.get_action(action_name);
-			return_if_fail(action != null);
-			action.state = state;
-			break;
-		}
+		Diorite.Ipc.MessageServer.check_type_str(data, "(b)");
+		data.get("(b)", &hide_on_close);
+		return null;
 	}
 	
-	private void on_async_message_received(WebEngine engine, string name, Variant? data)
+	private Variant? handle_add_action(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
-		switch (name)
+		Diorite.Ipc.MessageServer.check_type_str(data, "(sssssss@*)");
+		
+		string group = null;
+		string scope = null;
+		string action_name = null;
+		string? label = null;
+		string? mnemo_label = null;
+		string? icon = null;
+		string? keybinding = null;
+		Variant? state = null;
+		
+		data.get("(sssssss@*)", &group, &scope, &action_name, &label, &mnemo_label, &icon, &keybinding, &state);
+		
+		if (label == "")
+			label = null;
+		if (mnemo_label == "")
+			mnemo_label = null;
+		if (icon == "")
+			icon = null;
+		if (keybinding == "")
+			keybinding = null;
+		
+		Diorite.Action action;
+		if (state == null || state.get_type_string() == "mv")
+			action = simple_action(group, scope, action_name, label, mnemo_label, icon, keybinding, null);
+		else
+			action = toggle_action(group, scope, action_name, label, mnemo_label, icon, keybinding, null, state);
+		
+		action.enabled = false;
+		action.activated.connect(on_custom_action_activated);
+		actions.add_action(action);
+		
+		return null;
+	}
+	
+	private Variant? handle_add_radio_action(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	{
+		Diorite.Ipc.MessageServer.check_type_str(data, "(sss@*av)");
+		
+		string group = null;
+		string scope = null;
+		string action_name = null;
+		string? label = null;
+		string? mnemo_label = null;
+		string? icon = null;
+		string? keybinding = null;
+		Variant? state = null;
+		Variant? parameter = null;
+		VariantIter? options_iter = null;
+		
+		data.get("(sss@*av)", &group, &scope, &action_name, &state, &options_iter);
+		
+		Diorite.RadioOption[] options = new Diorite.RadioOption[options_iter.n_children()];
+		var i = 0;
+		Variant? array = null;
+		while (options_iter.next("v", &array))
 		{
-		case "Nuvola.MenuBar.setMenu":
-			return_if_fail(data != null && data.is_container());
-			
-			string? id = null;
-			string? label = null;
-			int i = 0;
-			VariantIter iter = null;
-			data.get("(ssav)", &id, &label, &iter);
-			return_if_fail(id != null && label != null && iter != null);
-			string[] actions = new string[iter.n_children()];
-			Variant item = null;
-			while (iter.next("v", &item))
-				actions[i++] = item.get_string();
-			
-			menu_bar[id] = new SubMenu(label, (owned) actions);
-			menu_bar.update();
-			break;
-		case "Nuvola.Actions.activate":
-			return_if_fail(data != null);
-			string? action_name = null;
-			data.get("(s)", &action_name);
-			return_if_fail(action_name != null);
-			var action = actions.get_action(action_name);
-			return_if_fail(action != null);
-			action.activate(null);
-			break;
-		case "Nuvola.Browser.downloadFileAsync":
-			return_if_fail(data != null);
-			string? uri = null;
-			string? basename = null;
-			double cb_id = 0.0;
-			data.get("(ssd)", &uri, &basename, &cb_id);
-			return_if_fail(uri != null);
-			return_if_fail(basename != null);
-			var file = connection.cache_dir.get_child(basename);
-			connection.download_file.begin(uri, file, (obj, res) =>
-			{
-				Soup.Message msg = null;
-				var result = connection.download_file.end(res, out msg);
-				try
-				{
-					web_engine.call_function("Nuvola.Browser._downloadDone", new Variant("(dbusss)", cb_id, result, msg.status_code, msg.reason_phrase, file.get_path(), file.get_uri()));
-				}
-				catch (Diorite.Ipc.MessageError e)
-				{
-					warning("Communication failed: %s", e.message);
-				}
-				
-			});
-			break;
+			Variant? value = array.get_child_value(0);
+			parameter = value.get_variant();
+			array.get_child(1, "v", &value);
+			label = value.is_of_type(VariantType.STRING) ? value.get_string() : null;
+			array.get_child(2, "v", &value);
+			mnemo_label = value.is_of_type(VariantType.STRING) ? value.get_string() : null;
+			array.get_child(3, "v", &value);
+			icon = value.is_of_type(VariantType.STRING) ? value.get_string() : null;
+			array.get_child(4, "v", &value);
+			keybinding = value.is_of_type(VariantType.STRING) ? value.get_string() : null;
+			options[i++] = new Diorite.RadioOption(parameter, label, mnemo_label, icon, keybinding);
 		}
+		
+		var radio = new Diorite.RadioAction(group, scope, action_name, null, state, options);
+		radio.enabled = false;
+		radio.activated.connect(on_custom_action_activated);
+		actions.add_action(radio);
+		
+		return null;
+	}
+	
+	private Variant? handle_is_action_enabled(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	{
+		Diorite.Ipc.MessageServer.check_type_str(data, "(s)");
+		
+		string? action_name = null;
+		data.get("(s)", &action_name);
+		
+		if (action_name == null)
+			throw new Diorite.Ipc.MessageError.INVALID_ARGUMENTS("Action name must not be null");
+		
+		var action = actions.get_action(action_name);
+		return new Variant.boolean(action != null && action.enabled);
+	}
+	
+	private Variant? handle_action_set_enabled(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	{
+		Diorite.Ipc.MessageServer.check_type_str(data, "(sb)");
+		string? action_name = null;
+		bool enabled = false;
+		data.get("(sb)", ref action_name, ref enabled);
+		
+		if (action_name == null)
+			throw new Diorite.Ipc.MessageError.INVALID_ARGUMENTS("Action name must not be null");
+		
+		var action = actions.get_action(action_name);
+		if (action == null)
+			return new Variant.boolean(false);
+		
+		if (action.enabled != enabled)
+			action.enabled = enabled;
+		
+		return new Variant.boolean(true);
+	}
+	
+	private Variant? handle_action_get_state(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	{
+		Diorite.Ipc.MessageServer.check_type_str(data, "(s)");
+		
+		string? action_name = null;
+		data.get("(s)", &action_name);
+		
+		if (action_name == null)
+			throw new Diorite.Ipc.MessageError.INVALID_ARGUMENTS("Action name must not be null");
+		
+		var action = actions.get_action(action_name);
+		if (action == null)
+			new Variant("mv", null);
+		
+		return action.state;
+	}
+	
+	private Variant? handle_action_set_state(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	{
+		Diorite.Ipc.MessageServer.check_type_str(data, "(s@*)");
+		string? action_name = null;
+		Variant? state = null;
+		data.get("(s@*)", &action_name, &state);
+		
+		if (action_name == null)
+			throw new Diorite.Ipc.MessageError.INVALID_ARGUMENTS("Action name must not be null");
+		
+		var action = actions.get_action(action_name);
+		if (action == null)
+			return new Variant.boolean(false);
+		
+		action.state = state;
+		return new Variant.boolean(true);
+	}
+	
+	private Variant? handle_menubar_set_menu(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	{
+		Diorite.Ipc.MessageServer.check_type_str(data, "(ssav)");
+		string? id = null;
+		string? label = null;
+		int i = 0;
+		VariantIter iter = null;
+		data.get("(ssav)", &id, &label, &iter);
+		return_val_if_fail(id != null && label != null && iter != null, null);
+		string[] actions = new string[iter.n_children()];
+		Variant item = null;
+		while (iter.next("v", &item))
+			actions[i++] = item.get_string();
+		
+		menu_bar[id] = new SubMenu(label, (owned) actions);
+		menu_bar.update();
+		return null;
+	}
+	
+	private Variant? handle_action_activate(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	{
+		Diorite.Ipc.MessageServer.check_type_str(data, "(s)");
+		
+		string? action_name = null;
+		data.get("(s)", &action_name);
+		
+		if (action_name == null)
+			throw new Diorite.Ipc.MessageError.INVALID_ARGUMENTS("Action name must not be null");
+		
+		var action = actions.get_action(action_name);
+		if (action == null)
+			return new Variant.boolean(false);
+		
+		action.activate(null);
+		return new Variant.boolean(true);
+	}
+	
+	private Variant? handle_download_file_async(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	{
+		Diorite.Ipc.MessageServer.check_type_str(data, "(ssd)");
+		string? uri = null;
+		string? basename = null;
+		double cb_id = 0.0;
+		data.get("(ssd)", &uri, &basename, &cb_id);
+		return_val_if_fail(uri != null, null);
+		return_val_if_fail(basename != null, null);
+		var file = connection.cache_dir.get_child(basename);
+		connection.download_file.begin(uri, file, (obj, res) =>
+		{
+			Soup.Message msg = null;
+			var result = connection.download_file.end(res, out msg);
+			try
+			{
+				web_engine.call_function("Nuvola.Browser._downloadDone", new Variant("(dbusss)", cb_id, result, msg.status_code, msg.reason_phrase, file.get_path(), file.get_uri()));
+			}
+			catch (Diorite.Ipc.MessageError e)
+			{
+				warning("Communication failed: %s", e.message);
+			}
+		});
+		
+		return null;
 	}
 	
 	private void on_action_changed(Diorite.Action action, ParamSpec p)

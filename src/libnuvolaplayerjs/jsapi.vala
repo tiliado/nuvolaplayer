@@ -320,7 +320,7 @@ public class JSApi : GLib.Object
 		
 		Variant? result = null;
 		js_api.send_message_sync(name, data, ref result);
-		debug("Async result: %s", result == null ? "(null)" : result.print(true));
+		
 		try
 		{
 			return value_from_variant(ctx, result);

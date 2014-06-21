@@ -101,7 +101,7 @@ public class Extension : Nuvola.Extension
 		grid.show_all();
 		
 		controller.main_window.sidebar.add_page("developersidebar", _("Developer"), grid);
-		web_engine.async_message_received.connect(on_async_message_received);
+		controller.server.add_handler("Nuvola.Player.sendDevelInfo", handle_send_devel_info);
 	}
 	
 	/**
@@ -109,7 +109,7 @@ public class Extension : Nuvola.Extension
 	 */
 	public override void unload()
 	{
-		web_engine.async_message_received.disconnect(on_async_message_received);
+		controller.server.remove_handler("Nuvola.Player.sendDevelInfo");
 		if (grid != null)
 		{
 			controller.main_window.sidebar.remove_page(grid);
@@ -139,49 +139,45 @@ public class Extension : Nuvola.Extension
 		return null;
 	}
 	
-	private void on_async_message_received(WebEngine engine, string name, Variant? data)
+	private Variant? handle_send_devel_info(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
-		if (name == "Nuvola.Player.sendDevelInfo")
+		Diorite.Ipc.MessageServer.check_type_str(data, "(@a{smv})");
+		Variant dict;
+		data.get("(@a{smv})", out dict);
+		message("Song %s %s", dict.get_type_string(), dict.print(true));
+		song.label = variant_dict_str(dict, "song") ?? "(null)";
+		artist.label = variant_dict_str(dict, "artist") ?? "(null)";
+		album.label = variant_dict_str(dict, "album") ?? "(null)";
+		state.label = variant_dict_str(dict, "state") ?? "(null)";
+		
+		lock (action_widgets)
 		{
-			if (data != null)
-			{
-				Variant dict;
-				data.get("(@a{smv})", out dict);
-				message("Song %s %s", dict.get_type_string(), dict.print(true));
-				song.label = variant_dict_str(dict, "song") ?? "(null)";
-				artist.label = variant_dict_str(dict, "artist") ?? "(null)";
-				album.label = variant_dict_str(dict, "album") ?? "(null)";
-				state.label = variant_dict_str(dict, "state") ?? "(null)";
-				
-				lock (action_widgets)
-				{
-					if (action_widgets != null)
-						action_widgets.@foreach(unset_button);
-					
-					action_widgets = null;
-					radios.remove_all();
-					
-					var label = new HeaderLabel("Base actions");
-					label.halign = Gtk.Align.START;
-					label.show();
-					action_widgets.prepend(label);
-					grid.add(label);
-					var base_actions = Diorite.variant_to_strv(dict.lookup_value("baseActions", null).get_maybe().get_variant());
-					foreach (var full_name in base_actions)
-						add_action(full_name);
-					
-					label = new HeaderLabel("Extra actions");
-					label.halign = Gtk.Align.START;
-					label.show();
-					action_widgets.prepend(label);
-					grid.add(label);
-					var extra_actions = Diorite.variant_to_strv(dict.lookup_value("extraActions", null).get_maybe().get_variant());
-					foreach (var full_name in extra_actions)
-						add_action(full_name);
-				}
-			}
+			if (action_widgets != null)
+				action_widgets.@foreach(unset_button);
+			
+			action_widgets = null;
+			radios.remove_all();
+			
+			var label = new HeaderLabel("Base actions");
+			label.halign = Gtk.Align.START;
+			label.show();
+			action_widgets.prepend(label);
+			grid.add(label);
+			var base_actions = Diorite.variant_to_strv(dict.lookup_value("baseActions", null).get_maybe().get_variant());
+			foreach (var full_name in base_actions)
+				add_action(full_name);
+			
+			label = new HeaderLabel("Extra actions");
+			label.halign = Gtk.Align.START;
+			label.show();
+			action_widgets.prepend(label);
+			grid.add(label);
+			var extra_actions = Diorite.variant_to_strv(dict.lookup_value("extraActions", null).get_maybe().get_variant());
+			foreach (var full_name in extra_actions)
+				add_action(full_name);
 		}
 		
+		return null;
 	}
 	
 	private void add_action(string full_name)

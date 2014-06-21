@@ -111,9 +111,13 @@ public class Extension : Nuvola.Extension
 		config.defaults.insert(prefix + ACTIVE_WINDOW, new Variant.boolean(false));
 		config.defaults.insert(prefix + RESIDENT, new Variant.boolean(true));
 		_resident = config.get_bool(prefix + RESIDENT);
-		web_engine.async_message_received.connect(on_async_message_received);
 		var action = controller.simple_action("view", "app", "show-notification", "Show notification", null, null, null, force_show);
 		actions_reg.add_action(action);
+		
+		var server = controller.server;
+		server.add_handler("Nuvola.Notification.update", handle_update);
+		server.add_handler("Nuvola.Notification.setActions", handle_set_actions);
+		server.add_handler("Nuvola.Notification.show", handle_show);
 	}
 	
 	/**
@@ -121,7 +125,11 @@ public class Extension : Nuvola.Extension
 	 */
 	public override void unload()
 	{
-		web_engine.async_message_received.disconnect(on_async_message_received);
+		var server = controller.server;
+		server.remove_handler("Nuvola.Notification.update");
+		server.remove_handler("Nuvola.Notification.setActions");
+		server.remove_handler("Nuvola.Notification.show");
+		
 		if (notification != null)
 		{
 			try
@@ -212,40 +220,40 @@ public class Extension : Nuvola.Extension
 		}
 	}
 	
-	private void on_async_message_received(WebEngine engine, string name, Variant? data)
+	private Variant? handle_update(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
-		if (name == "Nuvola.Notification.update")
-		{
-			string title = null;
-			string message = null;
-			string icon_name = null;
-			string icon_path = null;
-			if (data != null)
-			{
-				data.get("(ssss)", &title, &message, &icon_name, &icon_path);
-				update(title, message, icon_name, icon_path);
-			}
-		}
-		else if (name == "Nuvola.Notification.setActions")
-		{
-			if (data != null && data.is_container())
-			{
-				int i = 0;
-				VariantIter iter = null;
-				data.get("(av)", &iter);
-				string[] actions = new string[iter.n_children()];
-				Variant item = null;
-				while (iter.next("v", &item))
-					actions[i++] = item.get_string();
-				
-				this.actions = (owned) actions;
-				update_actions();
-			}
-		}
-		else if (name == "Nuvola.Notification.show")
-		{
-			show();
-		}
+		Diorite.Ipc.MessageServer.check_type_str(data, "(ssss)");
+		string title = null;
+		string message = null;
+		string icon_name = null;
+		string icon_path = null;
+		data.get("(ssss)", &title, &message, &icon_name, &icon_path);
+		update(title, message, icon_name, icon_path);
+		return null;
+	}
+	
+	private Variant? handle_set_actions(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	{
+		Diorite.Ipc.MessageServer.check_type_str(data, "(av)");
+		
+		int i = 0;
+		VariantIter iter = null;
+		data.get("(av)", &iter);
+		string[] actions = new string[iter.n_children()];
+		Variant item = null;
+		while (iter.next("v", &item))
+			actions[i++] = item.get_string();
+		
+		this.actions = (owned) actions;
+		update_actions();
+		return null;
+	}
+	
+	private Variant? handle_show(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	{
+		Diorite.Ipc.MessageServer.check_type_str(data, null);
+		show();
+		return null;
 	}
 }
 

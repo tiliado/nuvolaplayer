@@ -134,7 +134,7 @@ public class WebExtension: GLib.Object
 	{
 		try
 		{
-			runner.send_message("send_message_async", new Variant("(smv)", name, data));
+			runner.send_message(name, data);
 		}
 		catch (Diorite.Ipc.MessageError e)
 		{
@@ -146,7 +146,7 @@ public class WebExtension: GLib.Object
 	{
 		try
 		{
-			result = runner.send_message("send_message_sync", new Variant("(smv)", name, data));
+			result = runner.send_message(name, data);
 		}
 		catch (Diorite.Ipc.MessageError e)
 		{
