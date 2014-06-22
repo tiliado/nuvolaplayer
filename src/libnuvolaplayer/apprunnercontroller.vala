@@ -60,6 +60,7 @@ public class AppRunnerController : Diorite.Application
 	public weak Gtk.Settings gtk_settings {get; private set;}
 	public Config config {get; private set;}
 	public ExtensionsManager extensions {get; private set;}
+	public ComponentsManager components {get; private set;}
 	public Connection connection {get; private set;}
 	public GlobalKeybinder keybinder {get; private set;}
 	public Diorite.Ipc.MessageServer server {get; private set; default=null;}
@@ -306,6 +307,10 @@ public class AppRunnerController : Diorite.Application
 			if (enabled.get_boolean())
 				extensions.load(key);
 		}
+		
+		components = new ComponentsManager(this);
+		components.add_component(new LauncherComponent(this));
+		components.add_implementation(new TrayIcon(this));
 	}
 	
 	private void on_fatal_error(string title, string message)

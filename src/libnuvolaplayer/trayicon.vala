@@ -22,34 +22,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola.Extensions.TrayIcon
+namespace Nuvola
 {
-
-public Nuvola.ExtensionInfo get_info()
-{
-	return
-	{
-		/// Name of a plugin providing scrobbling to Last.fm
-		_("Tray Icon"),
-		Nuvola.get_version(),
-		/// Extension descriptiom
-		_("<p>This plugin shows tray icon with menu. Tray icon may be required for <i>hide on close</i> feature.</p>"),
-		"Jiří Janoušek",
-		typeof(Extension),
-		true
-	};
-}
 
 /**
  * Tray icon is used to control playback when the main window is not visible
  * (it's minimized, hidden or covered by other windows) and to bring the hidden main
  * window to foreground.
  */
-public class Extension: Nuvola.Extension
+public class TrayIcon: GLib.Object, LauncherInterface
 {
 	private AppRunnerController controller;
 	private Diorite.ActionsRegistry actions_reg;
-	private WebEngine web_engine;
 	
 	private string[] actions = {};
 	private Gtk.Menu? menu = null;
@@ -59,14 +43,10 @@ public class Extension: Nuvola.Extension
 	private Gtk.StatusIcon? icon;
 	#endif
 	
-	/**
-	 * {@inheritDoc}
-	 */
-	public override void load(AppRunnerController controller) throws ExtensionError
+	public TrayIcon(AppRunnerController controller)
 	{
 		this.controller = controller;
 		this.actions_reg = controller.actions;
-		this.web_engine = controller.web_engine;
 		#if APPINDICATOR
 		critical("AppIndicator support is incomplete");
 		indicator = new AppIndicator.Indicator(controller.path_name, controller.icon, AppIndicator.IndicatorCategory.APPLICATION_STATUS);
@@ -80,10 +60,6 @@ public class Extension: Nuvola.Extension
 		icon.popup_menu.connect(on_popup_menu);
 		icon.activate.connect(() => {controller.activate();});
 		#endif
-		var server = controller.server;
-		server.add_handler("Nuvola.TrayIcon.setTooltip", handle_set_tooltip);
-		server.add_handler("Nuvola.TrayIcon.setActions", handle_set_actions);
-		server.add_handler("Nuvola.TrayIcon.clearActions", handle_clear_actions);
 	}
 	
 	public void set_tooltip(string tooltip)
@@ -93,10 +69,43 @@ public class Extension: Nuvola.Extension
 		#endif
 	}
 	
-	public void clear_actions()
+	public void remove_actions()
 	{
 		actions = {};
 		create_menu();
+	}
+	
+	public void add_action(string action)
+	{
+		actions += action;
+		create_menu();
+	}
+	
+	public void remove_action(string action)
+	{
+		var index = -1;
+		for (var i = 0; i < actions.length; i++)
+		{
+			if (action == actions[i])
+			{
+				index = i;
+				break;
+			}
+		}
+		
+		if (index >= 0)
+		{
+			var new_actions = new string[actions.length - 1];
+			for (var i = 0; i < actions.length; i++)
+			{
+				if (i < index)
+					new_actions[i] = actions[i];
+				else if (i > index)
+					new_actions[i - 1] = actions[i];
+			}
+			
+			set_actions((owned) new_actions);
+		}
 	}
 	
 	public void set_actions(string[] actions)
@@ -105,16 +114,9 @@ public class Extension: Nuvola.Extension
 		create_menu();
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 */
-	public override void unload()
+	~TrayIcon()
 	{
-		var server = controller.server;
-		server.remove_handler("Nuvola.TrayIcon.setTooltip");
-		server.remove_handler("Nuvola.TrayIcon.setActions");
-		server.remove_handler("Nuvola.TrayIcon.clearActions");
-		clear_actions();
+		remove_actions();
 		
 		#if APPINDICATOR
 		indicator = null;
@@ -154,39 +156,6 @@ public class Extension: Nuvola.Extension
 		menu.popup(null, null, icon.position_menu, button, time);
 	}
 	#endif
-	
-	private Variant? handle_set_tooltip(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
-	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(s)");
-		string text;
-		data.get("(s)", out text);
-		set_tooltip(text);
-		return null;
-	}
-	
-	private Variant? handle_set_actions(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
-	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(av)");
-		
-		int i = 0;
-		VariantIter iter = null;
-		data.get("(av)", &iter);
-		string[] actions = new string[iter.n_children()];
-		Variant item = null;
-		while (iter.next("v", &item))
-			actions[i++] = item.get_string();
-		
-		set_actions((owned) actions);
-		
-		return null;
-	}
-	
-	private Variant? handle_clear_actions(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
-	{
-		Diorite.Ipc.MessageServer.check_type_str(data, null);
-		clear_actions();
-		return null;
-	}
 }
 
-} // namespace Nuvola.Extensions.TrayIcon
+} // namespace Nuvola

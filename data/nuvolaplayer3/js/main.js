@@ -187,16 +187,31 @@ Nuvola.Notification =
 	},
 }
 
-Nuvola.TrayIcon =
+Nuvola.Launcher =
 {
 	setTooltip: function(tooltip)
 	{
-		Nuvola._sendMessageAsync("Nuvola.TrayIcon.setTooltip", tooltip || "");
+		Nuvola._sendMessageAsync("Nuvola.Launcher.setTooltip", tooltip || "");
 	},
 	
 	setActions: function(actions)
 	{
-		Nuvola._sendMessageAsync("Nuvola.TrayIcon.setActions", actions);
+		Nuvola._sendMessageAsync("Nuvola.Launcher.setActions", actions);
+	},
+	
+	removeActions: function(actions)
+	{
+		Nuvola._sendMessageAsync("Nuvola.Launcher.removeActions", actions);
+	},
+	
+	addAction: function(action)
+	{
+		Nuvola._sendMessageAsync("Nuvola.Launcher.addAction", action);
+	},
+	
+	removeAction: function(action)
+	{
+		Nuvola._sendMessageAsync("Nuvola.Launcher.removeAction", action);
 	},
 }
 
@@ -309,7 +324,7 @@ Nuvola.Player =
 	
 	init: function()
 	{
-		Nuvola.TrayIcon.setActions(["quit"]);
+		Nuvola.Launcher.setActions(["quit"]);
 		Nuvola.Notification.setActions([this.ACTION_PLAY, this.ACTION_PAUSE, this.ACTION_PREV_SONG, this.ACTION_NEXT_SONG]);
 		Nuvola.Actions.addAction("playback", "win", this.ACTION_PLAY, "Play", null, "media-playback-start", null);
 		Nuvola.Actions.addAction("playback", "win", this.ACTION_PAUSE, "Pause", null, "media-playback-pause", null);
@@ -360,7 +375,7 @@ Nuvola.Player =
 		
 		Nuvola.UnityDockItem.setActions(trayIconActions);
 		trayIconActions.push("quit");
-		Nuvola.TrayIcon.setActions(trayIconActions);
+		Nuvola.Launcher.setActions(trayIconActions);
 		
 		
 		if (Nuvola.inArray(changed, "state"))
@@ -462,11 +477,11 @@ Nuvola.Player =
 			else
 				var tooltip = this.song;
 			
-			Nuvola.TrayIcon.setTooltip(tooltip);
+			Nuvola.Launcher.setTooltip(tooltip);
 		}
 		else
 		{
-			Nuvola.TrayIcon.setTooltip("Nuvola Player");
+			Nuvola.Launcher.setTooltip("Nuvola Player");
 		}
 	},
 	
