@@ -51,7 +51,7 @@ public int main(string[] args)
 {
 	try
 	{
-		var opt_context = new OptionContext("- %s".printf(Nuvola.get_display_name()));
+		var opt_context = new OptionContext("- %s".printf(Nuvola.get_app_name()));
 		opt_context.set_help_enabled(true);
 		opt_context.add_main_entries(Args.options, null);
 		opt_context.set_ignore_unknown_options(true);
@@ -65,7 +65,7 @@ public int main(string[] args)
 	
 	if (Args.version)
 	{
-		stdout.printf("%s %s\n", Nuvola.get_display_name(), Nuvola.get_version());
+		stdout.printf("%s %s\n", Nuvola.get_app_name(), Nuvola.get_version());
 		return 0;
 	}
 	
@@ -94,7 +94,7 @@ public int main(string[] args)
 	{
 		var app_dir = File.new_for_path(Args.app_dir);
 		var meta = WebAppMeta.load_from_dir(app_dir);
-		var storage = new Diorite.XdgStorage.for_project(Nuvola.get_appname());
+		var storage = new Diorite.XdgStorage.for_project(Nuvola.get_app_id());
 		var web_app = new WebApp(meta, app_dir,
 		  storage.user_config_dir.get_child(WEB_APP_DATA_DIR).get_child(meta.id),
 		  storage.user_data_dir.get_child(WEB_APP_DATA_DIR).get_child(meta.id),

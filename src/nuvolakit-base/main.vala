@@ -37,7 +37,7 @@ private extern const string LIBDIR;
 
 public const string WEB_APP_DATA_DIR = "apps_data";
 
-public string get_unique_name()
+public string get_app_uid()
 {
 	return UNIQUE_NAME;
 }
@@ -47,12 +47,12 @@ public string get_app_icon()
 	return APP_ICON;
 }
 
-public string get_appname()
+public string get_app_id()
 {
 	return APPNAME;
 }
 
-public string get_display_name()
+public string get_app_name()
 {
 	return NAME;
 }

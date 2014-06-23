@@ -69,7 +69,7 @@ public class WebExtension: GLib.Object
 			error("Runner client error: %s", e.message);
 		}
 		
-		var storage = new Diorite.XdgStorage.for_project(Nuvola.get_appname());
+		var storage = new Diorite.XdgStorage.for_project(Nuvola.get_app_id());
 		js_api = new JSApi(storage, data_dir, user_config_dir, new KeyValueProxy(runner, "config"),
 		new KeyValueProxy(runner, "session"));
 		js_api.send_message_async.connect(on_send_message_async);

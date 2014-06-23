@@ -49,7 +49,7 @@ public class WebEngine : GLib.Object
 	{
 		server = app.server;
 		var webkit_extension_dir = Nuvola.get_libdir();
-		Environment.set_variable("NUVOLA_IPC_WEB_WORKER", app.path_name + WEB_WORKER_SUFFIX, true);
+		Environment.set_variable("NUVOLA_IPC_WEB_WORKER", app.app_id + WEB_WORKER_SUFFIX, true);
 		debug("Nuvola WebKit Extension directory: %s", webkit_extension_dir);
 		
 		var wc = WebKit.WebContext.get_default();
@@ -267,7 +267,7 @@ public class WebEngine : GLib.Object
 		server.add_handler("session_set_default_value", handle_session_set_default_value);
 		server.add_handler("show_error", handle_show_error);
 		
-		web_worker = new Diorite.Ipc.MessageClient(app.path_name + WEB_WORKER_SUFFIX, 5000);
+		web_worker = new Diorite.Ipc.MessageClient(app.app_id + WEB_WORKER_SUFFIX, 5000);
 	}
 	
 	private Variant? handle_get_data_dir(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError

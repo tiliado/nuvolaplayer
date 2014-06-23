@@ -97,7 +97,7 @@ public class Extension: Nuvola.Extension
 		
 		try
 		{
-			media_keys.release_media_player_keys(controller.path_name);
+			media_keys.release_media_player_keys(controller.app_id);
 			media_keys.media_player_key_pressed.disconnect(on_media_key_pressed);
 			media_keys = null;
 			
@@ -131,7 +131,7 @@ public class Extension: Nuvola.Extension
 			"org.gnome.SettingsDaemon",
 			"/org/gnome/SettingsDaemon/MediaKeys");
 			/* Vala includes "return false" if DBus method call fails! */
-			media_keys.grab_media_player_keys(controller.path_name, 0);
+			media_keys.grab_media_player_keys(controller.app_id, 0);
 			media_keys.media_player_key_pressed.connect(on_media_key_pressed);
 			return true;
 			
@@ -155,7 +155,7 @@ public class Extension: Nuvola.Extension
 	private void on_media_key_pressed(string app_name, string key)
 	{
 		debug("Media key pressed: %s, %s", app_name, key);
-		if (app_name != controller.path_name)
+		if (app_name != controller.app_id)
 			return;
 		send_key_signal(key);
 	}

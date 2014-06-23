@@ -74,11 +74,11 @@ public class AppRunnerController : Diorite.Application
 	
 	public AppRunnerController(Diorite.Storage? storage, WebApp web_app)
 	{
-		var app_id = web_app.meta.id;
-		base("%sX%s".printf(Nuvola.get_unique_name(), app_id),
-		"%s - %s".printf(web_app.meta.name, Nuvola.get_display_name()),
-		"%s-%s.desktop".printf(Nuvola.get_appname(), app_id),
-		"%s-%s".printf(Nuvola.get_appname(), app_id));
+		var web_app_id = web_app.meta.id;
+		base("%sX%s".printf(Nuvola.get_app_uid(), web_app_id),
+		"%s - %s".printf(web_app.meta.name, Nuvola.get_app_name()),
+		"%s-%s.desktop".printf(Nuvola.get_app_id(), web_app_id),
+		"%s-%s".printf(Nuvola.get_app_id(), web_app_id));
 		icon = Nuvola.get_app_icon();
 		version = Nuvola.get_version();
 		this.storage = storage;
@@ -202,7 +202,7 @@ public class AppRunnerController : Diorite.Application
 	{
 		assert(server == null);
 		
-		var server_name = path_name + UI_RUNNER_SUFFIX;
+		var server_name = app_id + UI_RUNNER_SUFFIX;
 		Environment.set_variable("NUVOLA_IPC_UI_RUNNER", server_name, true);
 		try
 		{

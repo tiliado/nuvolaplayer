@@ -50,9 +50,8 @@ public class MasterController : Diorite.Application
 	
 	public MasterController(Diorite.Storage storage, WebAppRegistry web_app_reg, string[] exec_cmd)
 	{
-		var app_name = Nuvola.get_appname();
-		base(Nuvola.get_unique_name(), Nuvola.get_display_name(), "%s.desktop".printf(app_name), app_name);
-		flags = flags|ApplicationFlags.HANDLES_COMMAND_LINE;
+		var app_id = Nuvola.get_app_id();
+		base(Nuvola.get_app_uid(), Nuvola.get_app_name(), "%s.desktop".printf(app_id), app_id, ApplicationFlags.HANDLES_COMMAND_LINE);
 		icon = Nuvola.get_app_icon();
 		version = Nuvola.get_version();
 		this.storage = storage;
@@ -151,7 +150,7 @@ public class MasterController : Diorite.Application
 		if (server != null)
 			return;
 		
-		var server_name = path_name + MASTER_SUFFIX;
+		var server_name = app_id + MASTER_SUFFIX;
 		Environment.set_variable("NUVOLA_IPC_MASTER", server_name, true);
 		try
 		{
