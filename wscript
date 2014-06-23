@@ -219,9 +219,8 @@ def build(ctx):
 	else:
 		CFLAGS=""
 	
-	NUVOLAPLAYER = APPNAME + SUFFIX
-	APP_RUNNER = "uirunner"
-	NUVOLAKIT = "nuvolakit" + SUFFIX
+	APP_RUNNER = "apprunner"
+	NUVOLAKIT = APPNAME + SUFFIX
 	NUVOLAKIT_RUNNER = NUVOLAKIT + "-runner"
 	NUVOLAKIT_BASE = NUVOLAKIT + "-base"
 	NUVOLAKIT_WORKER = NUVOLAKIT + "-worker"
@@ -244,7 +243,7 @@ def build(ctx):
 		packages = packages,
 		uselib = uselib,
 		vala_defines = vala_defines,
-		defines = ['G_LOG_DOMAIN="NuvolaKit"'],
+		defines = ['G_LOG_DOMAIN="Nuvola"'],
 		vapi_dirs = ['vapi'],
 		vala_target_glib = "2.32",
 	)
@@ -255,16 +254,15 @@ def build(ctx):
 		packages = 'javascriptcoregtk-3.0 webkit2gtk-3.0',
 		uselib =  'JSCORE WEBKIT',
 		use = [NUVOLAKIT_BASE],
-		includes = ["src/libnuvolaplayer"],
 		vala_defines = vala_defines,
-		defines = ['G_LOG_DOMAIN="NuvolaKit"'],
+		defines = ['G_LOG_DOMAIN="Nuvola"'],
 		vapi_dirs = ['vapi'],
 		vala_target_glib = "2.32",
 	)
 	
 	ctx.program(
-		target = NUVOLAPLAYER,
-		source = ctx.path.ant_glob('src/nuvolaplayer/*.vala') + ctx.path.ant_glob('src/nuvolaplayer/*.c'),
+		target = NUVOLAKIT,
+		source = ctx.path.ant_glob('src/master/*.vala'),
 		packages = "",
 		uselib = "",
 		use = [NUVOLAKIT_BASE, NUVOLAKIT_RUNNER],
@@ -276,7 +274,7 @@ def build(ctx):
 	
 	ctx.program(
 		target = APP_RUNNER,
-		source = ctx.path.ant_glob('src/apprunner/*.vala') + ctx.path.ant_glob('src/apprunner/*.c'),
+		source = ctx.path.ant_glob('src/apprunner/*.vala'),
 		packages = "",
 		uselib = "",
 		use = [NUVOLAKIT_BASE, NUVOLAKIT_RUNNER],
@@ -294,7 +292,7 @@ def build(ctx):
 		uselib = "DIORITEGLIB DIORITEGTK WEBKIT JSCORE",
 		use = [NUVOLAKIT_BASE],
 		vala_defines = vala_defines,
-		cflags = ['-DG_LOG_DOMAIN="NuvolaKit"'],
+		cflags = ['-DG_LOG_DOMAIN="Nuvola"'],
 		vapi_dirs = ['vapi'],
 		vala_target_glib = "2.32",
 		install_path = ctx.env.NUVOLA_LIBDIR,

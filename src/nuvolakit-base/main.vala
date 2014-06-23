@@ -77,9 +77,9 @@ public string get_libdir()
 	return Environment.get_variable("NUVOLA_LIBDIR") ?? LIBDIR;
 }
 
-public string get_ui_runner_path()
+public string get_app_runner_path()
 {
-	return get_libdir() + "/uirunner"; 
+	return get_libdir() + "/apprunner"; 
 }
 
 } // namespace Nuvola

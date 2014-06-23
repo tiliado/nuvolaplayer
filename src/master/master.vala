@@ -102,7 +102,7 @@ public int main(string[] args)
 	}
 	#endif
 	
-	exec_cmd += Nuvola.get_ui_runner_path();
+	exec_cmd += Nuvola.get_app_runner_path();
 	
 	if (Args.debug)
 		exec_cmd += "-D";
