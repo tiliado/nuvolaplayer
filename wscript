@@ -221,29 +221,14 @@ def build(ctx):
 	
 	NUVOLAPLAYER = APPNAME + SUFFIX
 	APP_RUNNER = "uirunner"
-	LIBNUVOLAPLAYER = "lib" + APPNAME + SUFFIX
-	LIBNUVOLAPLAYERJS = "lib" + APPNAME + "js" + SUFFIX
-	NUVOLAPLAYEREXTENSION = APPNAME + SUFFIX + "extension"
+	NUVOLAKIT = "nuvolakit" + SUFFIX
+	NUVOLAKIT_RUNNER = NUVOLAKIT + "-runner"
+	NUVOLAKIT_BASE = NUVOLAKIT + "-base"
+	NUVOLAKIT_WORKER = NUVOLAKIT + "-worker"
 	
-	UIDEMO="uidemo"
 	
-	ctx(features = "c cshlib",
-		target = LIBNUVOLAPLAYERJS[3:],
-		name = LIBNUVOLAPLAYERJS,
-		source = ctx.path.ant_glob('src/libnuvolaplayerjs/*.vala') \
-		+ ctx.path.ant_glob('src/libnuvolaplayerjs/*.c') \
-		+ ["vapi/webkit2gtk-web-extension-3.0.vapi"],
-		packages = "javascriptcoregtk-3.0 dioriteglib glib-2.0 gio-2.0 libsoup-2.4",
-		uselib = "JSCORE WEBKIT DIORITEGLIB GLIB GTHREAD GIO",
-		includes = ["src/libnuvolaplayerjs"],
-		vala_defines = vala_defines,
-		defines = ['G_LOG_DOMAIN="LibNuvola"'],
-		vapi_dirs = ['vapi'],
-		vala_target_glib = "2.32",
-	)
-	
-	packages = 'libnotify javascriptcoregtk-3.0 webkit2gtk-3.0 libarchive dioritegtk dioriteglib gtk+-3.0 gdk-3.0 gdk-x11-3.0 x11 posix json-glib-1.0 glib-2.0 gio-2.0'
-	uselib = 'NOTIFY JSCORE WEBKIT LIBARCHIVE DIORITEGTK DIORITEGLIB GTK+ GDK GDKX11 XLIB JSON-GLIB GLIB GTHREAD GIO'
+	packages = 'libnotify javascriptcoregtk-3.0  libarchive dioritegtk dioriteglib gtk+-3.0 gdk-3.0 gdk-x11-3.0 x11 posix json-glib-1.0 glib-2.0 gio-2.0'
+	uselib = 'NOTIFY JSCORE  LIBARCHIVE DIORITEGTK DIORITEGLIB GTK+ GDK GDKX11 XLIB JSON-GLIB GLIB GTHREAD GIO'
 	
 	if ctx.env.with_unity:
 		packages += " unity Dbusmenu-0.4"
@@ -254,16 +239,25 @@ def build(ctx):
 		uselib += " APPINDICATOR"
 	
 	ctx(features = "c cshlib",
-		target = LIBNUVOLAPLAYER[3:],
-		name = LIBNUVOLAPLAYER,
-		source = ctx.path.ant_glob('src/libnuvolaplayer/*.vala') \
-		+ ctx.path.ant_glob('src/libnuvolaplayer/*.c'),
+		target = NUVOLAKIT_BASE,
+		source = ctx.path.ant_glob('src/nuvolakit-base/*.vala'),
 		packages = packages,
 		uselib = uselib,
-		use = [LIBNUVOLAPLAYERJS],
+		vala_defines = vala_defines,
+		defines = ['G_LOG_DOMAIN="NuvolaKit"'],
+		vapi_dirs = ['vapi'],
+		vala_target_glib = "2.32",
+	)
+	
+	ctx(features = "c cshlib",
+		target = NUVOLAKIT_RUNNER,
+		source = ctx.path.ant_glob('src/nuvolakit-runner/*.vala'),
+		packages = 'javascriptcoregtk-3.0 webkit2gtk-3.0',
+		uselib =  'JSCORE WEBKIT',
+		use = [NUVOLAKIT_BASE],
 		includes = ["src/libnuvolaplayer"],
 		vala_defines = vala_defines,
-		defines = ['G_LOG_DOMAIN="LibNuvola"'],
+		defines = ['G_LOG_DOMAIN="NuvolaKit"'],
 		vapi_dirs = ['vapi'],
 		vala_target_glib = "2.32",
 	)
@@ -273,8 +267,7 @@ def build(ctx):
 		source = ctx.path.ant_glob('src/nuvolaplayer/*.vala') + ctx.path.ant_glob('src/nuvolaplayer/*.c'),
 		packages = "",
 		uselib = "",
-		includes = ["src/lnuvolaplayer"],
-		use = [LIBNUVOLAPLAYER, LIBNUVOLAPLAYERJS],
+		use = [NUVOLAKIT_BASE, NUVOLAKIT_RUNNER],
 		vala_defines = vala_defines,
 		defines = ['G_LOG_DOMAIN="Nuvola"'],
 		vapi_dirs = ['vapi'],
@@ -286,8 +279,7 @@ def build(ctx):
 		source = ctx.path.ant_glob('src/apprunner/*.vala') + ctx.path.ant_glob('src/apprunner/*.c'),
 		packages = "",
 		uselib = "",
-		includes = ["src/lnuvolaplayer"],
-		use = [LIBNUVOLAPLAYER, LIBNUVOLAPLAYERJS],
+		use = [NUVOLAKIT_BASE, NUVOLAKIT_RUNNER],
 		vala_defines = vala_defines,
 		defines = ['G_LOG_DOMAIN="Nuvola"'],
 		vapi_dirs = ['vapi'],
@@ -295,29 +287,14 @@ def build(ctx):
 		install_path = ctx.env.NUVOLA_LIBDIR,
 	)
 	
-	ctx.program(
-		target = UIDEMO,
-		source = ctx.path.ant_glob('tests/ui/*.vala'),
-		packages = "dioritegtk dioriteglib gtk+-3.0 gdk-3.0",
-		uselib = "DIORITEGTK DIORITEGLIB GTK+ GDK GLIB GTHREAD",
-		use = [LIBNUVOLAPLAYER],
-		vala_defines = vala_defines,
-		defines = ['G_LOG_DOMAIN="Nuvola"'],
-		vapi_dirs = ['vapi'],
-		vala_target_glib = "2.32",
-	)
-	
 	ctx(features = "c cshlib",
-		target = NUVOLAPLAYEREXTENSION,
-		name = NUVOLAPLAYEREXTENSION,
-		source = ctx.path.ant_glob('src/nuvolaplayerextension/*.vala') \
-		+ ctx.path.ant_glob('src/nuvolaplayerextension/*.c'),
+		target = NUVOLAKIT_WORKER,
+		source = ctx.path.ant_glob('src/nuvolakit-worker/*.vala'),
 		packages = "dioriteglib webkit2gtk-web-extension-3.0 javascriptcoregtk-3.0",
 		uselib = "DIORITEGLIB DIORITEGTK WEBKIT JSCORE",
-		includes = ["src/nuvolaplayerextension/"],
-		use = [LIBNUVOLAPLAYERJS],
+		use = [NUVOLAKIT_BASE],
 		vala_defines = vala_defines,
-		cflags = ['-DG_LOG_DOMAIN="NuvolaExt"'],
+		cflags = ['-DG_LOG_DOMAIN="NuvolaKit"'],
 		vapi_dirs = ['vapi'],
 		vala_target_glib = "2.32",
 		install_path = ctx.env.NUVOLA_LIBDIR,
