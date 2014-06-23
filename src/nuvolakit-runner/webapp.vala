@@ -27,6 +27,11 @@ namespace Nuvola
 
 public class WebAppMeta : GLib.Object
 {
+	/**
+	 * Name of file with metadata.
+	 */
+	private static const string METADATA_FILENAME = "metadata.json";
+	
 	public string id {get; construct;}
 	public string name {get; construct;}
 	public string maintainer_name {get; construct;}
@@ -35,6 +40,50 @@ public class WebAppMeta : GLib.Object
 	public int version_minor {get; construct;}
 	public int api_major {get; construct;}
 	public int api_minor {get; construct;}
+	public File? data_dir {get; private set; default = null;}
+	public bool removable {get; set; default = false;}
+	
+	public static WebAppMeta load_from_dir(File dir) throws WebAppError
+	{
+		if (dir.query_file_type(0) != FileType.DIRECTORY)
+			throw new WebAppError.LOADING_FAILED(@"$(dir.get_path()) is not a directory");
+		
+		var metadata_file = dir.get_child(METADATA_FILENAME);
+		if (metadata_file.query_file_type(0) != FileType.REGULAR)
+			throw new WebAppError.LOADING_FAILED(@"$(metadata_file.get_path()) is not a file");
+		
+		string metadata;
+		try
+		{
+			metadata = Diorite.System.read_file(metadata_file);
+		}
+		catch (GLib.Error e)
+		{
+			throw new WebAppError.LOADING_FAILED("Cannot read '%s'. %s", metadata_file.get_path(), e.message);
+		}
+		
+		WebAppMeta? meta;
+		try
+		{
+			meta = Json.gobject_from_data(typeof(WebAppMeta), metadata) as WebAppMeta;
+		}
+		catch (GLib.Error e)
+		{
+			throw new WebAppError.INVALID_METADATA("Invalid metadata file '%s'. %s", metadata_file.get_path(), e.message);
+		}
+		
+		meta.check();
+		var id = dir.get_basename();
+		if (id != meta.id)
+			throw new WebAppError.INVALID_METADATA("Invalid metadata file '%s'. Id mismatch.", metadata_file.get_path());
+		//			FIXME:
+//~ 		if(!JSApi.is_supported(api_major, api_minor)){
+//~ 			throw new ServiceError.LOADING_FAILED(
+//~ 				"Requested unsupported api: %d.%d'".printf(api_major, api_minor));
+//~ 		}
+		meta.data_dir = dir;
+		return meta;
+	}
 	
 	public void check() throws WebAppError
 	{
@@ -85,7 +134,6 @@ public class WebApp : GLib.Object
 	{
 		Object(meta: meta, user_config_dir: user_config_dir, user_data_dir:user_data_dir, user_cache_dir:user_cache_dir, data_dir: data_dir, removable: removable);
 	}
-
 }
 
 } // namespace Nuvola

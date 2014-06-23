@@ -305,11 +305,17 @@ public class MasterController : Diorite.Application
 	private void start_app(string app_id)
 	{
 		hold();
-		string[] argv = new string[exec_cmd.length + 2];
+		string[] argv = new string[exec_cmd.length + 3];
 		for (var i = 0; i < exec_cmd.length; i++)
 			argv[i] = exec_cmd[i];
-		argv[exec_cmd.length] = app_id;
-		argv[exec_cmd.length + 1] = null;
+		
+		var j = exec_cmd.length;
+		var app_meta = web_app_reg.lookup_app(app_id);
+		assert(app_meta != null);
+		
+		argv[j++] = "-a";
+		argv[j++] = app_meta.data_dir.get_path();
+		argv[j++] = null;
 		
 		AppRunner runner;
 		try

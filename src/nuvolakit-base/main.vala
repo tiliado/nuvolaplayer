@@ -35,6 +35,8 @@ private extern const int VERSION_BUGFIX;
 private extern const string VERSION_SUFFIX;
 private extern const string LIBDIR;
 
+public const string WEB_APP_DATA_DIR = "apps_data";
+
 public string get_unique_name()
 {
 	return UNIQUE_NAME;

@@ -108,13 +108,7 @@ public int main(string[] args)
 		exec_cmd += "-D";
 	else if (Args.verbose)
 		exec_cmd += "-v";
-	if (Args.apps_dir != null && Args.apps_dir != "")
-	{
-		exec_cmd += "-A";
-		exec_cmd += Args.apps_dir;
-	}
 	
-	exec_cmd += "-a";
 	var controller = new MasterController(storage, web_app_reg, (owned) exec_cmd);
 	return controller.run(args);
 }

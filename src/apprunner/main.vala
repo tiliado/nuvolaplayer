@@ -33,14 +33,12 @@ struct Args
 	static bool debug;
 	static bool verbose;
 	static bool version;
-	static string? app_id = null;
-	static string? apps_dir = null;
-	static string? log_file = null;
+	static string? app_dir;
+	static string? log_file;
 	
 	public static const OptionEntry[] options =
 	{
-		{ "app-id", 'a', 0, OptionArg.STRING, ref Args.app_id, "Web app to run.", "ID" },
-		{ "apps-dir", 'A', 0, GLib.OptionArg.FILENAME, ref Args.apps_dir, "Search for web app integrations only in directory DIR and disable service management.", "DIR" },
+		{ "app-dir", 'a', 0, GLib.OptionArg.FILENAME, ref Args.app_dir, "Web app to run.", "DIR" },
 		{ "verbose", 'v', 0, OptionArg.NONE, ref Args.verbose, "Print informational messages", null },
 		{ "debug", 'D', 0, OptionArg.NONE, ref Args.debug, "Print debugging messages", null },
 		{ "version", 'V', 0, OptionArg.NONE, ref Args.version, "Print version and exit", null },
@@ -71,7 +69,7 @@ public int main(string[] args)
 		return 0;
 	}
 	
-	if (Args.app_id == null)
+	if (Args.app_dir == null)
 	{
 		stderr.printf("No app specified.");
 		return 1;
@@ -89,24 +87,29 @@ public int main(string[] args)
 	}
 	
 	Diorite.Logger.init(log != null ? log : stderr, Args.debug ? GLib.LogLevelFlags.LEVEL_DEBUG
-	 : (Args.verbose ? GLib.LogLevelFlags.LEVEL_INFO: GLib.LogLevelFlags.LEVEL_WARNING),
-	 "Runner");
+	  : (Args.verbose ? GLib.LogLevelFlags.LEVEL_INFO: GLib.LogLevelFlags.LEVEL_WARNING),
+	  "Runner");
 	
-	var storage = new Diorite.XdgStorage.for_project(Nuvola.get_appname());
-	var web_apps_storage = storage.get_child("web_apps");
-	var web_app_reg = Args.apps_dir != null && Args.apps_dir != ""
-	? new WebAppRegistry.with_data_path(web_apps_storage, Args.apps_dir)
-	: new WebAppRegistry(web_apps_storage, true);
-	
-	var web_app = web_app_reg.get_app(Args.app_id);
-	if (web_app != null)
+	try
 	{
+		var app_dir = File.new_for_path(Args.app_dir);
+		var meta = WebAppMeta.load_from_dir(app_dir);
+		var storage = new Diorite.XdgStorage.for_project(Nuvola.get_appname());
+		var web_app = new WebApp(meta, app_dir,
+		  storage.user_config_dir.get_child(WEB_APP_DATA_DIR).get_child(meta.id),
+		  storage.user_data_dir.get_child(WEB_APP_DATA_DIR).get_child(meta.id),
+		  storage.user_cache_dir.get_child(WEB_APP_DATA_DIR).get_child(meta.id),
+		  false);
+	
 		create_desktop_file(web_app);
 		var controller = new AppRunnerController(storage, web_app);
 		return controller.run(args);
 	}
-	warning("Failed to load web app '%s'.", Args.app_id);
-	return 1;
+	catch (WebAppError e)
+	{
+		warning("Failed to load web app from '%s'. %s", Args.app_dir, e.message);
+		return 1;
+	}
 }
 
 } // namespace Nuvola

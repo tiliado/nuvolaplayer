@@ -31,10 +31,7 @@ namespace Nuvola
 public class WebAppRegistry: GLib.Object
 {
 	private Diorite.Storage storage;
-	/**
-	 * Name of file with metadata.
-	 */
-	private static const string METADATA_FILENAME = "metadata.json";
+	
 	
 	/**
 	 * Regular expression to check validity of service identifier
@@ -88,14 +85,28 @@ public class WebAppRegistry: GLib.Object
 	 */
 	public WebApp? get_app(string id)
 	{
+		var meta = lookup_app(id);
+		if  (meta == null)
+			return null;
+		
+		return new WebApp(meta, meta.data_dir,
+			storage.user_config_dir.get_parent().get_child("apps_data").get_child(meta.id),
+			storage.user_data_dir.get_parent().get_child("apps_data").get_child(meta.id),
+			storage.user_cache_dir.get_parent().get_child("apps_data").get_child(meta.id),
+			meta.removable
+		);
+	}
+	
+	public WebAppMeta? lookup_app(string id)
+	{
 		if  (!check_id(id))
 		{
 			warning("Service id '%s' is invalid.", id);
 			return null;
 		}
-		WebApp? app = null;
-		WebApp? item;
+		
 		WebAppMeta? meta = null;
+		WebAppMeta? meta2 = null;
 		var app_storage = storage.get_child(id);
 		
 		var user_dir = app_storage.user_data_dir;
@@ -103,10 +114,10 @@ public class WebAppRegistry: GLib.Object
 		{
 			try
 			{
-				app = load_web_app_from_dir(user_dir, allow_management);
-				meta = app.meta;
+				meta = WebAppMeta.load_from_dir(user_dir);
 				debug("Found web app %s at %s, version %u.%u", 
 				meta.name, user_dir.get_path(), meta.version_major, meta.version_minor);
+				meta.removable = allow_management;
 			}
 			catch (WebAppError e)
 			{
@@ -121,14 +132,15 @@ public class WebAppRegistry: GLib.Object
 			
 			try
 			{
-				item = load_web_app_from_dir(dir);
-				meta = item.meta;
+				meta2 = WebAppMeta.load_from_dir(dir);
+				
 				debug("Found app %s at %s, version %u.%u",
-				meta.name, dir.get_path(), meta.version_major, meta.version_minor);
-				if (app == null || meta.version_major > app.meta.version_major
-				|| meta.version_major == app.meta.version_major && meta.version_minor > app.meta.version_minor)
+				meta2.name, dir.get_path(), meta2.version_major, meta2.version_minor);
+				if (meta == null || meta2.version_major > meta.version_major
+				|| meta2.version_major == meta.version_major && meta2.version_minor > meta.version_minor)
 				{
-					app = item;
+					meta = meta2;
+					
 				}
 			}
 			catch (WebAppError e)
@@ -137,63 +149,21 @@ public class WebAppRegistry: GLib.Object
 			}
 		}
 		
-		if (app != null)
-			message("Using web app %s, version %u.%u", app.meta.name, app.meta.version_major, app.meta.version_minor);
-		
+		if (meta != null)
+			message("Using web app %s, version %u.%u", meta.name, meta.version_major, meta.version_minor);
 		else
 			message("Web App %s not found.", id);
 		
-		return app;
-	}
-	
-	public WebAppMeta load_web_app_meta_from_dir(File dir) throws WebAppError
-	{
-		if (dir.query_file_type(0) != FileType.DIRECTORY)
-			throw new WebAppError.LOADING_FAILED(@"$(dir.get_path()) is not a directory");
-				
-		var metadata_file = dir.get_child(METADATA_FILENAME);
-		if (metadata_file.query_file_type(0) != FileType.REGULAR)
-			throw new WebAppError.LOADING_FAILED(@"$(metadata_file.get_path()) is not a file");
-		
-		string metadata;
-		try
-		{
-			metadata = Diorite.System.read_file(metadata_file);
-		}
-		catch (GLib.Error e)
-		{
-			throw new WebAppError.LOADING_FAILED("Cannot read '%s'. %s", metadata_file.get_path(), e.message);
-		}
-		
-		WebAppMeta? meta;
-		try
-		{
-			meta = Json.gobject_from_data(typeof(WebAppMeta), metadata) as WebAppMeta;
-		}
-		catch (GLib.Error e)
-		{
-			throw new WebAppError.INVALID_METADATA("Invalid metadata file '%s'. %s", metadata_file.get_path(), e.message);
-		}
-		
-		meta.check();
-		var id = dir.get_basename();
-		if (id != meta.id)
-			throw new WebAppError.INVALID_METADATA("Invalid metadata file '%s'. Id mismatch.", metadata_file.get_path());
-		//			FIXME:
-//~ 		if(!JSApi.is_supported(api_major, api_minor)){
-//~ 			throw new ServiceError.LOADING_FAILED(
-//~ 				"Requested unsupported api: %d.%d'".printf(api_major, api_minor));
-//~ 		}
 		return meta;
 	}
-		
+	
 	public WebApp load_web_app_from_dir(File dir, bool removable=false) throws WebAppError
 	{
-		var meta = load_web_app_meta_from_dir(dir);
+		var meta = WebAppMeta.load_from_dir(dir);
 		return new WebApp(meta, dir,
-			storage.user_config_dir.get_parent().get_child("apps_data").get_child(meta.id),
-			storage.user_data_dir.get_parent().get_child("apps_data").get_child(meta.id),
-			storage.user_cache_dir.get_parent().get_child("apps_data").get_child(meta.id),
+			storage.user_config_dir.get_parent().get_child(WEB_APP_DATA_DIR).get_child(meta.id),
+			storage.user_data_dir.get_parent().get_child(WEB_APP_DATA_DIR).get_child(meta.id),
+			storage.user_cache_dir.get_parent().get_child(WEB_APP_DATA_DIR).get_child(meta.id),
 			removable
 		);
 	}
