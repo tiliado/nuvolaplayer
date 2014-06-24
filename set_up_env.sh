@@ -43,3 +43,9 @@ debug_app_runner_join()
 	echo Use "'target remote localhost:9090'"
 	libtool --mode=execute gdb build/uirunner
 }
+
+
+watch_and_build()
+{
+	while true; do inotifywait -e delete -e create -e modify -r src; sleep 1; ./waf; done
+}
