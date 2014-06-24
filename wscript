@@ -307,11 +307,6 @@ def build(ctx):
 		GENERIC_NAME=GENERIC_NAME,
 	)
 	
-	data_dir = ctx.path.find_node("data")
-	for name in ["nuvolaplayer3"]:
-		subdir = data_dir.find_node(name)
-		ctx.install_files('${PREFIX}/share/' + name, subdir.ant_glob('**'), cwd=subdir, relative_trick=True)
-	
 	web_apps = ctx.path.find_dir("web_apps")
 	ctx.install_files('${PREFIX}/share/' + APPNAME, web_apps.ant_glob('**'), cwd=web_apps.parent, relative_trick=True)
 	
@@ -320,6 +315,12 @@ def build(ctx):
 	for size in (16, 22, 24, 32, 48, 64):
 		ctx.install_as('${PREFIX}/share/icons/hicolor/%sx%s/apps/%s.png' % (size, size, APPNAME), app_icons.find_node("%s.png" % size))
 	ctx.install_as('${PREFIX}/share/icons/hicolor/scalable/apps/%s.svg' % APPNAME, app_icons.find_node("scalable.svg"))
+	
+	ctx(rule='cat ${SRC} > ${TGT}',
+		source = ctx.path.ant_glob('src/mainjs/*.js'),
+		target = 'share/%s/js/main.js' % APPNAME,
+		install_path = '${PREFIX}/share/%s/js' % APPNAME
+	)
 	
 	ctx.add_post_fun(post)
 
