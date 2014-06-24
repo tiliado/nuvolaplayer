@@ -312,6 +312,10 @@ def build(ctx):
 		subdir = data_dir.find_node(name)
 		ctx.install_files('${PREFIX}/share/' + name, subdir.ant_glob('**'), cwd=subdir, relative_trick=True)
 	
+	web_apps = ctx.path.find_dir("web_apps")
+	ctx.install_files('${PREFIX}/share/' + APPNAME, web_apps.ant_glob('**'), cwd=web_apps.parent, relative_trick=True)
+	
+	
 	app_icons = ctx.path.find_node("data/icons")
 	for size in (16, 22, 24, 32, 48, 64):
 		ctx.install_as('${PREFIX}/share/icons/hicolor/%sx%s/apps/%s.png' % (size, size, APPNAME), app_icons.find_node("%s.png" % size))

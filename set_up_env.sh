@@ -1,3 +1,5 @@
+export NUVOLA_WEB_APPS_DIR="web_apps"
+
 rebuild()
 {
 	./waf distclean configure build "$@"
