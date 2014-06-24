@@ -84,6 +84,9 @@ public int main(string[] args)
 	 : (Args.verbose ? GLib.LogLevelFlags.LEVEL_INFO: GLib.LogLevelFlags.LEVEL_WARNING),
 	 "Master");
 	
+	if (Args.apps_dir == null)
+		Args.apps_dir = Environment.get_variable("NUVOLA_WEB_APPS_DIR");
+	
 	var storage = new Diorite.XdgStorage.for_project(Nuvola.get_app_id());
 	var web_apps_storage = storage.get_child("web_apps");
 	var web_app_reg = Args.apps_dir != null && Args.apps_dir != ""
