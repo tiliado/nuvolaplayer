@@ -29,10 +29,12 @@ top = '.'
 out = 'build'
 
 # Application name and version
-NAME="Nuvola Player"
+NAME="Nuvola Player 3"
 APPNAME = "nuvolaplayer3"
 VERSION = "3.0.0+"
 UNIQUE_NAME="cz.fenryxo.NuvolaPlayer3"
+GENERIC_NAME = "Cloud Player"
+BLURB = "Cloud music integration for your Linux desktop"
 
 import subprocess
 try:
@@ -295,8 +297,18 @@ def build(ctx):
 		install_path = ctx.env.NUVOLA_LIBDIR,
 	)
 	
+	ctx(features = 'subst',
+		source = 'data/templates/launcher.desktop',
+		target = "share/applications/%s.desktop" % APPNAME,
+		install_path = '${PREFIX}/share/applications',
+		BLURB = BLURB,
+		APP_NAME = NAME,
+		APP_ID = APPNAME,
+		GENERIC_NAME=GENERIC_NAME,
+	)
+	
 	data_dir = ctx.path.find_node("data")
-	for name in ["applications", "nuvolaplayer3"]:
+	for name in ["nuvolaplayer3"]:
 		subdir = data_dir.find_node(name)
 		ctx.install_files('${PREFIX}/share/' + name, subdir.ant_glob('**'), cwd=subdir, relative_trick=True)
 	
