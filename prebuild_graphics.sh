@@ -7,12 +7,12 @@ prebuild_app_icon()
 {
 	source="$1"
 	size="$2"
-	directory="$PREFIX/data/icons/hicolor/${size}x${size}/apps"
+	directory="$PREFIX/data/icons"
 	[ -d "$directory" ] || mkdir -p "$directory"
 	set -x
 	rsvg-convert -w $size -h $size \
 	"graphics/nuvola-icon/nuvola-player.${source}.svg" \
-	-o "$directory/nuvolaplayer.png"
+	-o "$directory/${size}.png"
 	{ set +x; } 2>/dev/null
 }
 
@@ -48,7 +48,7 @@ for size in 48 64; do prebuild_app_icon orig $size; done
 
 optimize_svg \
 graphics/nuvola-icon/nuvola-player.orig.svg \
-"$PREFIX/data/icons/hicolor/scalable/apps/nuvolaplayer.svg"
+"$PREFIX/data/icons/scalable.svg"
 
 for source in graphics/service-icons/*.svg; do
 	[[ "$source" != *.*.svg ]] || continue

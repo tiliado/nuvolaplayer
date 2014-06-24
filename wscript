@@ -30,11 +30,9 @@ out = 'build'
 
 # Application name and version
 NAME="Nuvola Player"
-APPNAME = "nuvolaplayer"
+APPNAME = "nuvolaplayer3"
 VERSION = "3.0.0+"
-SUFFIX="3"
-
-UNIQUE_NAME="cz.fenryxo.NuvolaPlayer" + SUFFIX
+UNIQUE_NAME="cz.fenryxo.NuvolaPlayer3"
 
 import subprocess
 try:
@@ -194,7 +192,7 @@ def configure(ctx):
 		ctx.check_dep('appindicator3-0.1', 'APPINDICATOR', '0.4')
 		ctx.vala_def("APPINDICATOR")
 	
-	ctx.define("NUVOLA_APPNAME", APPNAME + SUFFIX)
+	ctx.define("NUVOLA_APPNAME", APPNAME)
 	ctx.define("NUVOLA_NAME", NAME)
 	ctx.define("NUVOLA_UNIQUE_NAME", UNIQUE_NAME)
 	ctx.define("NUVOLA_APP_ICON", APPNAME)
@@ -204,7 +202,7 @@ def configure(ctx):
 	ctx.define("NUVOLA_VERSION_BUGFIX", VERSIONS[2])
 	ctx.define("NUVOLA_VERSION_SUFFIX", VERSION_SUFFIX)
 	ctx.define("GETTEXT_PACKAGE", "nuvolaplayer3")
-	ctx.env.NUVOLA_LIBDIR = "%s/%s" % (ctx.env.LIBDIR, APPNAME + SUFFIX)
+	ctx.env.NUVOLA_LIBDIR = "%s/%s" % (ctx.env.LIBDIR, APPNAME)
 	ctx.define("NUVOLA_LIBDIR", ctx.env.NUVOLA_LIBDIR)
 	
 
@@ -220,10 +218,9 @@ def build(ctx):
 		CFLAGS=""
 	
 	APP_RUNNER = "apprunner"
-	NUVOLAKIT = APPNAME + SUFFIX
-	NUVOLAKIT_RUNNER = NUVOLAKIT + "-runner"
-	NUVOLAKIT_BASE = NUVOLAKIT + "-base"
-	NUVOLAKIT_WORKER = NUVOLAKIT + "-worker"
+	NUVOLAKIT_RUNNER = APPNAME + "-runner"
+	NUVOLAKIT_BASE = APPNAME + "-base"
+	NUVOLAKIT_WORKER = APPNAME + "-worker"
 	
 	
 	packages = 'libnotify javascriptcoregtk-3.0  libarchive dioritegtk dioriteglib gtk+-3.0 gdk-3.0 gdk-x11-3.0 x11 posix json-glib-1.0 glib-2.0 gio-2.0'
@@ -261,7 +258,7 @@ def build(ctx):
 	)
 	
 	ctx.program(
-		target = NUVOLAKIT,
+		target = APPNAME,
 		source = ctx.path.ant_glob('src/master/*.vala'),
 		packages = "",
 		uselib = "",
@@ -298,8 +295,15 @@ def build(ctx):
 		install_path = ctx.env.NUVOLA_LIBDIR,
 	)
 	
-	data_dir = ctx.path.find_dir('data')
-	ctx.install_files('${PREFIX}/share', data_dir.ant_glob('**'), cwd=data_dir, relative_trick=True)
+	data_dir = ctx.path.find_node("data")
+	for name in ["applications", "nuvolaplayer3"]:
+		subdir = data_dir.find_node(name)
+		ctx.install_files('${PREFIX}/share/' + name, subdir.ant_glob('**'), cwd=subdir, relative_trick=True)
+	
+	app_icons = ctx.path.find_node("data/icons")
+	for size in (16, 22, 24, 32, 48, 64):
+		ctx.install_as('${PREFIX}/share/icons/hicolor/%sx%s/apps/%s.png' % (size, size, APPNAME), app_icons.find_node("%s.png" % size))
+	ctx.install_as('${PREFIX}/share/icons/hicolor/scalable/apps/%s.svg' % APPNAME, app_icons.find_node("scalable.svg"))
 	
 	ctx.add_post_fun(post)
 
