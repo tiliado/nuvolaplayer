@@ -44,8 +44,6 @@ def parse_sources(files):
 		
 		with open(path) as f:
 			for line in f:
-				if name == "menubar":
-					print(line)
 				if head:
 					bare_line = line.strip()
 					if bare_line and not bare_line.startswith(("/*", "*")):
@@ -62,8 +60,6 @@ def parse_sources(files):
 							data.append(line)
 				else:
 					data.append(line)
-		if name == "menubar":
-			print(data)
 		sources[name] = Source(name, path, requires, data)
 	
 	return sources
