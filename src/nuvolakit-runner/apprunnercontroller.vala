@@ -129,6 +129,8 @@ public class AppRunnerController : Diorite.Application
 		keybinder = new GlobalKeybinder();
 		global_keybindings = new GlobalKeybindings(keybinder, config, actions);
 		
+		load_extensions();
+		
 		if (!web_engine.load())
 			return;
 		main_window.grid.add(widget);
@@ -152,7 +154,6 @@ public class AppRunnerController : Diorite.Application
 		main_window.window_state_event.connect(on_window_state_event);
 		main_window.configure_event.connect(on_configure_event);
 		main_window.notify["is-active"].connect_after(on_window_is_active_changed);
-		load_extensions();
 		
 		if (config.get_bool(ConfigKey.WINDOW_SIDEBAR_VISIBLE))
 			main_window.sidebar.show();
