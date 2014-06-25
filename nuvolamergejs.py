@@ -34,6 +34,10 @@ class Source:
 		self.merged = False
 		self.visited = 0
 
+class RecursionError(Exception):
+	def __init__(self, path):
+		Exception.__init__(self, "Maximal recursion depth reached at '%s'." % path)
+
 def parse_sources(files):
 	sources = {}
 	for path in files:
@@ -67,7 +71,7 @@ def parse_sources(files):
 def add_source(output, sources, source):
 	source.visited += 1
 	if source.visited > 25:
-		raise Exception("Maximal recursion depth reached at '%s'" %source.path)
+		raise RecursionError(source.path)
 	
 	if not source.merged:
 		for dep in source.requires:
