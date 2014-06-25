@@ -38,6 +38,10 @@ class RecursionError(Exception):
 	def __init__(self, path):
 		Exception.__init__(self, "Maximal recursion depth reached at '%s'." % path)
 
+class ParseError(Exception):
+	def __init__(self, path, lineno, line):
+		Exception.__init__(self, "Parse error %s:%d %s" % (path, lineno, line))
+
 class NotFoundError(Exception):
 	def __init__(self, path, requirement):
 		Exception.__init__(self, "File '%s' requires dependency '%s' that hasn't been found." % (path, requirement))
@@ -51,7 +55,9 @@ def parse_sources(files):
 		head = True
 		
 		with open(path) as f:
+			lineno = 0
 			for line in f:
+				lineno += 1
 				if head:
 					bare_line = line.strip()
 					if bare_line and not bare_line.startswith(("/*", "*")):
@@ -62,7 +68,7 @@ def parse_sources(files):
 									requires.append(parts[1])
 									break
 							else:
-								print("Invalid line: %s" % bare_line)
+								raise ParseError(path, lineno, bare_line)
 						else:
 							head = False
 							data.append(line)
