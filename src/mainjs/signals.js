@@ -22,25 +22,60 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-require("signals");
-
-Nuvola.makeSignaling(Nuvola);
-Nuvola.registerSignals(["home-page", "navigation-request", "uri-changed", "last-page", "append-preferences", "init-request"]);
-
-Nuvola.setHideOnClose = function(hide)
+Nuvola.makeSignaling = function(obj_proto)
 {
-	return Nuvola._sendMessageSync("Nuvola.setHideOnClose", hide);
-}
-
-Nuvola.UnityDockItem =
-{
-	clearActions: function()
+	obj_proto.registerSignals = function(signals)
 	{
-		Nuvola._sendMessageAsync("Nuvola.TrayIcon.clearActions");
-	},
+		if (this.signals === undefined)
+			this.signals = {};
+		
+		var size = signals.length;
+		for (var i = 0; i < size; i++)
+		{
+			this.signals[signals[i]] = [];
+		}
+	}
 	
-	setActions: function(actions)
+	obj_proto.connect = function(name, object, handlerName)
 	{
-		Nuvola._sendMessageAsync("Nuvola.UnityDockItem.setActions", actions);
-	},
+		var handlers = this.signals[name];
+		if (handlers === undefined)
+			throw new Error("Unknown signal '" + name + "'.");
+		handlers.push([object, handlerName]);
+	}
+	
+	obj_proto.disconnect = function(name, object, handlerName)
+	{
+		var handlers = this.signals[name];
+		if (handlers === undefined)
+			throw new Error("Unknown signal '" + name + "'.");
+		var size = handlers.length;
+		for (var i = 0; i < size; i++)
+		{
+			var handler = handlers[i];
+			if (handler[0] === object && handler[1] === handlerName)
+			{
+				handlers.splice(i, 1);
+				break;
+			}
+		}
+	}
+	
+	obj_proto.emit = function(name)
+	{
+		var handlers = this.signals[name];
+		if (handlers === undefined)
+			throw new Error("Unknown signal '" + name + "'.");
+		var size = handlers.length;
+		var args = [this];
+		for (var i = 1; i < arguments.length; i++)
+			args.push(arguments[i]);
+		
+		for (var i = 0; i < size; i++)
+		{
+			var handler = handlers[i];
+			var object = handler[0];
+			object[handler[1]].apply(object, args);
+		}
+	}
 }

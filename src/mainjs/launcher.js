@@ -22,25 +22,30 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-require("signals");
-
-Nuvola.makeSignaling(Nuvola);
-Nuvola.registerSignals(["home-page", "navigation-request", "uri-changed", "last-page", "append-preferences", "init-request"]);
-
-Nuvola.setHideOnClose = function(hide)
+Nuvola.Launcher =
 {
-	return Nuvola._sendMessageSync("Nuvola.setHideOnClose", hide);
-}
-
-Nuvola.UnityDockItem =
-{
-	clearActions: function()
+	setTooltip: function(tooltip)
 	{
-		Nuvola._sendMessageAsync("Nuvola.TrayIcon.clearActions");
+		Nuvola._sendMessageAsync("Nuvola.Launcher.setTooltip", tooltip || "");
 	},
 	
 	setActions: function(actions)
 	{
-		Nuvola._sendMessageAsync("Nuvola.UnityDockItem.setActions", actions);
+		Nuvola._sendMessageAsync("Nuvola.Launcher.setActions", actions);
+	},
+	
+	removeActions: function(actions)
+	{
+		Nuvola._sendMessageAsync("Nuvola.Launcher.removeActions", actions);
+	},
+	
+	addAction: function(action)
+	{
+		Nuvola._sendMessageAsync("Nuvola.Launcher.addAction", action);
+	},
+	
+	removeAction: function(action)
+	{
+		Nuvola._sendMessageAsync("Nuvola.Launcher.removeAction", action);
 	},
 }

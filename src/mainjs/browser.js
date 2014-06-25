@@ -22,25 +22,34 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-require("signals");
-
-Nuvola.makeSignaling(Nuvola);
-Nuvola.registerSignals(["home-page", "navigation-request", "uri-changed", "last-page", "append-preferences", "init-request"]);
-
-Nuvola.setHideOnClose = function(hide)
+Nuvola.Browser =
 {
-	return Nuvola._sendMessageSync("Nuvola.setHideOnClose", hide);
-}
-
-Nuvola.UnityDockItem =
-{
-	clearActions: function()
+	ACTION_GO_BACK: "go-back",
+	ACTION_GO_FORWARD: "go-forward",
+	ACTION_GO_HOME: "go-home",
+	ACTION_RELOAD: "reload",
+	_downloadFileAsyncId: 0,
+	_downloadFileAsyncCallbacks: {},
+	
+	downloadFileAsync: function(uri, basename, callback, data)
 	{
-		Nuvola._sendMessageAsync("Nuvola.TrayIcon.clearActions");
+		var id = this._downloadFileAsyncId++;
+		if (this._downloadFileAsyncId >= Number.MAX_VALUE - 1)
+			this._downloadFileAsyncId = 0;
+		this._downloadFileAsyncCallbacks[id] = [callback, data];
+		Nuvola._sendMessageAsync("Nuvola.Browser.downloadFileAsync", uri, basename, id);
 	},
 	
-	setActions: function(actions)
+	_downloadDone: function(id, result, statusCode, statusText, filePath, fileURI)
 	{
-		Nuvola._sendMessageAsync("Nuvola.UnityDockItem.setActions", actions);
-	},
+		var cb = this._downloadFileAsyncCallbacks[id];
+		delete this._downloadFileAsyncCallbacks[id];
+		cb[0]({
+			result: result,
+			statusCode: statusCode,
+			statusText: statusText,
+			filePath: filePath,
+			fileURI: fileURI
+		}, cb[1]);
+	}
 }

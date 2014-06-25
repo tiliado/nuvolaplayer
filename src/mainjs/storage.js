@@ -24,23 +24,33 @@
 
 require("signals");
 
-Nuvola.makeSignaling(Nuvola);
-Nuvola.registerSignals(["home-page", "navigation-request", "uri-changed", "last-page", "append-preferences", "init-request"]);
-
-Nuvola.setHideOnClose = function(hide)
+Nuvola.KeyValueStorage = function(index)
 {
-	return Nuvola._sendMessageSync("Nuvola.setHideOnClose", hide);
+	this.index = index
 }
 
-Nuvola.UnityDockItem =
+Nuvola.KeyValueStorage.prototype.setDefault = function(key, value)
 {
-	clearActions: function()
-	{
-		Nuvola._sendMessageAsync("Nuvola.TrayIcon.clearActions");
-	},
-	
-	setActions: function(actions)
-	{
-		Nuvola._sendMessageAsync("Nuvola.UnityDockItem.setActions", actions);
-	},
+	Nuvola._keyValueStorageSetDefaultValue(this.index, key, value);
 }
+
+Nuvola.KeyValueStorage.prototype.hasKey = function(key)
+{
+	return Nuvola._keyValueStorageHasKey(this.index, key);
+}
+
+Nuvola.KeyValueStorage.prototype.get = function(key)
+{
+	return Nuvola._keyValueStorageGetValue(this.index, key);
+}
+
+Nuvola.KeyValueStorage.prototype.set = function(key, value)
+{
+	Nuvola._keyValueStorageSetValue(this.index, key, value);
+}
+
+Nuvola.Config = new Nuvola.KeyValueStorage(0);
+Nuvola.makeSignaling(Nuvola.Config);
+Nuvola.Config.registerSignals(["config-changed"]);
+
+Nuvola.Session = new Nuvola.KeyValueStorage(1);

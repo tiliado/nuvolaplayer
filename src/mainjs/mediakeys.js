@@ -22,25 +22,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-require("signals");
-
-Nuvola.makeSignaling(Nuvola);
-Nuvola.registerSignals(["home-page", "navigation-request", "uri-changed", "last-page", "append-preferences", "init-request"]);
-
-Nuvola.setHideOnClose = function(hide)
+Nuvola.MediaKeys =
 {
-	return Nuvola._sendMessageSync("Nuvola.setHideOnClose", hide);
-}
-
-Nuvola.UnityDockItem =
-{
-	clearActions: function()
-	{
-		Nuvola._sendMessageAsync("Nuvola.TrayIcon.clearActions");
-	},
-	
-	setActions: function(actions)
-	{
-		Nuvola._sendMessageAsync("Nuvola.UnityDockItem.setActions", actions);
-	},
-}
+	PLAY: "Play",
+	PAUSE: "Pause",
+	STOP: "Stop",
+	PREV: "Previous",
+	NEXT: "Next"
+};
+Nuvola.makeSignaling(Nuvola.MediaKeys);
+Nuvola.MediaKeys.registerSignals(["key-pressed"]);

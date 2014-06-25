@@ -316,7 +316,7 @@ def build(ctx):
 		ctx.install_as('${PREFIX}/share/icons/hicolor/%sx%s/apps/%s.png' % (size, size, APPNAME), app_icons.find_node("%s.png" % size))
 	ctx.install_as('${PREFIX}/share/icons/hicolor/scalable/apps/%s.svg' % APPNAME, app_icons.find_node("scalable.svg"))
 	
-	ctx(rule='cat ${SRC} > ${TGT}',
+	ctx(features = "mergejs",
 		source = ctx.path.ant_glob('src/mainjs/*.js'),
 		target = 'share/%s/js/main.js' % APPNAME,
 		install_path = '${PREFIX}/share/%s/js' % APPNAME
@@ -353,3 +353,40 @@ def vapi_file(self, node):
 		self.init_vala_task()
 
 	valatask.inputs.append(node)
+
+from waflib import TaskGen, Utils, Errors, Node, Task
+from nuvolamergejs import mergejs as merge_js
+
+@TaskGen.feature('mergejs')
+@TaskGen.before_method('process_source', 'process_rule')
+def _mergejs_taskgen(self):
+	source = Utils.to_list(getattr(self, 'source', []))
+	if isinstance(source, Node.Node):
+		source = [source]
+	
+	target = (getattr(self, 'target', []))
+	if isinstance(target, str):
+		target =  self.path.find_or_declare(target)
+	elif not isinstance(target, Node.Node):
+		raise Errors.WafError('invalid target for %r' % self)
+	
+	for i in xrange(len(source)):
+		item = source[i]
+		if isinstance(item, str):
+			source[i] =  self.path.find_resource(item)
+		elif not isinstance(item, Node.Node):
+			raise Errors.WafError('invalid source for %r' % self)
+	
+	task = self.create_task('mergejs', source, target)
+	
+	install_path = getattr(self, 'install_path', None)
+	if install_path:
+		self.bld.install_files(install_path, target, chmod=getattr(self, 'chmod', Utils.O644))
+	
+	self.source = []
+
+class mergejs(Task.Task):
+	def run(self):
+		output = merge_js([i.abspath() for i in self.inputs])
+		self.outputs[0].write(output)
+		return 0 
