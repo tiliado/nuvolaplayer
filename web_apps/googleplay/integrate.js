@@ -26,6 +26,8 @@
 (function(Nuvola)
 {
 
+var State = Nuvola.PlaybackState;
+var PlayerAction = Nuvola.PlayerAction;
 var player = Nuvola.Player;
 var ACTION_THUMBS_UP = "thumbs-up";
 var ACTION_THUMBS_DOWN = "thumbs-down";
@@ -95,13 +97,13 @@ Integration.prototype.update = function()
 		var buttons = document.querySelector("#player .player-middle");
 		var pp = buttons.childNodes[2];
 		if (pp.disabled === true)
-			player.state = player.STATE_UNKNOWN;
+			player.state = State.UNKNOWN;
 		else if (pp.className == "flat-button playing")
-			player.state = player.STATE_PLAYING;
+			player.state = State.PLAYING;
 		else
-			player.state = player.STATE_PAUSED;
+			player.state = State.PAUSED;
 		
-		if (player.state !== player.STATE_UNKNOWN)
+		if (player.state !== State.UNKNOWN)
 		{
 			player.prevSong = buttons.childNodes[1].disabled === false;
 			player.nextSong = buttons.childNodes[3].disabled === false;
@@ -211,23 +213,23 @@ Integration.prototype.onActionActivated = function(object, name, param)
 	
 	switch (name)
 	{
-	case player.ACTION_TOGGLE_PLAY:
+	case PlayerAction.TOGGLE_PLAY:
 		Nuvola.clickOnElement(play_pause);
 		break;
-	case player.ACTION_PLAY:
-		if (player.state != player.STATE_PLAYING)
+	case PlayerAction.PLAY:
+		if (player.state != State.PLAYING)
 			Nuvola.clickOnElement(play_pause);
 		break;
-	case player.ACTION_PAUSE:
-	case player.ACTION_STOP:
-		if (player.state == player.STATE_PLAYING)
+	case PlayerAction.PAUSE:
+	case PlayerAction.STOP:
+		if (player.state == State.PLAYING)
 			Nuvola.clickOnElement(play_pause);
 		break;
-	case player.ACTION_PREV_SONG:
+	case PlayerAction.PREV_SONG:
 		if (prev_song)
 			Nuvola.clickOnElement(prev_song);
 		break;
-	case player.ACTION_NEXT_SONG:
+	case PlayerAction.NEXT_SONG:
 		if (next_song)
 			Nuvola.clickOnElement(next_song);
 		break;

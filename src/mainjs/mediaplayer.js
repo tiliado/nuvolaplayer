@@ -29,19 +29,25 @@ require("mediakeys");
 require("storage");
 require("browser");
 
+
+var PlayerAction = {
+	PLAY: "play",
+	TOGGLE_PLAY: "toggle-play",
+	PAUSE: "pause",
+	STOP: "stop",
+	PREV_SONG: "prev-song",
+	NEXT_SONG: "next-song",
+}
+
+var PlaybackState = {
+	UNKNOWN: 0,
+	PAUSED: 1,
+	PLAYING: 2,
+}
+
 Nuvola.Player = 
 {
-	ACTION_PLAY: "play",
-	ACTION_TOGGLE_PLAY: "toggle-play",
-	ACTION_PAUSE: "pause",
-	ACTION_STOP: "stop",
-	ACTION_PREV_SONG: "prev-song",
-	ACTION_NEXT_SONG: "next-song",
-	STATE_UNKNOWN: 0,
-	STATE_PAUSED: 1,
-	STATE_PLAYING: 2,
 	BACKGROUND_PLAYBACK: "player.background_playback",
-	
 	state: 0,
 	song: null,
 	artist: null,
@@ -58,13 +64,13 @@ Nuvola.Player =
 	init: function()
 	{
 		Nuvola.Launcher.setActions(["quit"]);
-		Nuvola.Notification.setActions([this.ACTION_PLAY, this.ACTION_PAUSE, this.ACTION_PREV_SONG, this.ACTION_NEXT_SONG]);
-		Nuvola.Actions.addAction("playback", "win", this.ACTION_PLAY, "Play", null, "media-playback-start", null);
-		Nuvola.Actions.addAction("playback", "win", this.ACTION_PAUSE, "Pause", null, "media-playback-pause", null);
-		Nuvola.Actions.addAction("playback", "win", this.ACTION_TOGGLE_PLAY, "Toggle play/pause", null, null, null);
-		Nuvola.Actions.addAction("playback", "win", this.ACTION_STOP, "Stop", null, "media-playback-stop", null);
-		Nuvola.Actions.addAction("playback", "win", this.ACTION_PREV_SONG, "Previous song", null, "media-skip-backward", null);
-		Nuvola.Actions.addAction("playback", "win", this.ACTION_NEXT_SONG, "Next song", null, "media-skip-forward", null);
+		Nuvola.Notification.setActions([PlayerAction.PLAY, PlayerAction.PAUSE, PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG]);
+		Nuvola.Actions.addAction("playback", "win", PlayerAction.PLAY, "Play", null, "media-playback-start", null);
+		Nuvola.Actions.addAction("playback", "win", PlayerAction.PAUSE, "Pause", null, "media-playback-pause", null);
+		Nuvola.Actions.addAction("playback", "win", PlayerAction.TOGGLE_PLAY, "Toggle play/pause", null, null, null);
+		Nuvola.Actions.addAction("playback", "win", PlayerAction.STOP, "Stop", null, "media-playback-stop", null);
+		Nuvola.Actions.addAction("playback", "win", PlayerAction.PREV_SONG, "Previous song", null, "media-skip-backward", null);
+		Nuvola.Actions.addAction("playback", "win", PlayerAction.NEXT_SONG, "Next song", null, "media-skip-forward", null);
 		Nuvola.Config.setDefault(this.BACKGROUND_PLAYBACK, true);
 		this.updateMenu();
 		Nuvola.Core.connect("append-preferences", this, "onAppendPreferences");
@@ -100,9 +106,9 @@ Nuvola.Player =
 			return;
 		
 		var trayIconActions = [];
-		if (this.state === this.STATE_PLAYING || this.state === this.STATE_PAUSED)
+		if (this.state === PlaybackState.PLAYING || this.state === PlaybackState.PAUSED)
 		{
-			trayIconActions = [this.state === this.STATE_PAUSED ? this.ACTION_PLAY : this.ACTION_PAUSE, this.ACTION_PREV_SONG, this.ACTION_NEXT_SONG];
+			trayIconActions = [this.state === this.STATE_PAUSED ? PlayerAction.PLAY : PlayerAction.PAUSE, PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG];
 			trayIconActions = trayIconActions.concat(this.extraActions);
 		}
 		
@@ -114,30 +120,30 @@ Nuvola.Player =
 		{
 			switch (this.state)
 			{
-			case this.STATE_PLAYING:
-				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_TOGGLE_PLAY, true);
-				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_PLAY, false);
-				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_PAUSE, true);
+			case PlaybackState.PLAYING:
+				Nuvola.Actions.setEnabled(PlayerAction.TOGGLE_PLAY, true);
+				Nuvola.Actions.setEnabled(PlayerAction.PLAY, false);
+				Nuvola.Actions.setEnabled(PlayerAction.PAUSE, true);
 				break;
-			case this.STATE_PAUSED:
-				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_TOGGLE_PLAY, true);
-				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_PLAY, true);
-				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_PAUSE, false);
+			case PlaybackState.PAUSED:
+				Nuvola.Actions.setEnabled(PlayerAction.TOGGLE_PLAY, true);
+				Nuvola.Actions.setEnabled(PlayerAction.PLAY, true);
+				Nuvola.Actions.setEnabled(PlayerAction.PAUSE, false);
 				break;
 			default:
-				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_TOGGLE_PLAY, false);
-				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_PLAY, false);
-				Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_PAUSE, false);
+				Nuvola.Actions.setEnabled(PlayerAction.TOGGLE_PLAY, false);
+				Nuvola.Actions.setEnabled(PlayerAction.PLAY, false);
+				Nuvola.Actions.setEnabled(PlayerAction.PAUSE, false);
 				break;
 			}
 			this.setHideOnClose();
 		}
 		
 		if (Nuvola.inArray(changed, "prevSong"))
-			Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_PREV_SONG, this.prevSong === true);
+			Nuvola.Actions.setEnabled(PlayerAction.PREV_SONG, this.prevSong === true);
 		
 		if (Nuvola.inArray(changed, "nextSong"))
-			Nuvola.Actions.setEnabled(Nuvola.Player.ACTION_NEXT_SONG, this.nextSong === true);
+			Nuvola.Actions.setEnabled(PlayerAction.NEXT_SONG, this.nextSong === true);
 		
 		if (!this.artwork)
 			this.artworkFile = null;
@@ -166,6 +172,7 @@ Nuvola.Player =
 			var key = keys[i];
 			data[key] = this[key];
 		}
+		
 		data.state = ["unknown", "paused", "playing"][this.state];
 		Nuvola._sendMessageAsync("Nuvola.Player.sendDevelInfo", data);
 	},
@@ -201,7 +208,7 @@ Nuvola.Player =
 				message = Nuvola.format("by {1} from {2}", this.artist, this.album);
 			
 			Nuvola.Notification.update(title, message, this.artworkFile ? null : "nuvolaplayer", this.artworkFile);
-			if (this.state === this.STATE_PLAYING)
+			if (this.state === PlaybackState.PLAYING)
 				Nuvola.Notification.show();
 			
 			if (this.artist)
@@ -240,7 +247,7 @@ Nuvola.Player =
 	
 	setHideOnClose: function()
 	{
-		if (this.state === this.STATE_PLAYING)
+		if (this.state === PlaybackState.PLAYING)
 			Nuvola.Core.setHideOnClose(Nuvola.Config.get(this.BACKGROUND_PLAYBACK));
 		else
 			Nuvola.Core.setHideOnClose(false);
@@ -270,16 +277,16 @@ Nuvola.Player =
 		{
 		case K.PLAY:
 		case K.PAUSE:
-			A.activate(this.ACTION_TOGGLE_PLAY);
+			A.activate(PlayerAction.TOGGLE_PLAY);
 			break;
 		case K.STOP:
-			A.activate(this.ACTION_STOP);
+			A.activate(PlayerAction.STOP);
 			break;
 		case K.NEXT:
-			A.activate(this.ACTION_NEXT_SONG);
+			A.activate(PlayerAction.NEXT_SONG);
 			break;
 		case K.PREV:
-			A.activate(this.ACTION_PREV_SONG);
+			A.activate(PlayerAction.PREV_SONG);
 			break;
 		default:
 			console.log(Nuvola.format("Unknown media key '{1}'.", key));
@@ -288,4 +295,6 @@ Nuvola.Player =
 	}
 };
 
-Nuvola.Player.baseActions = [Nuvola.Player.ACTION_TOGGLE_PLAY, Nuvola.Player.ACTION_PLAY, Nuvola.Player.ACTION_PAUSE, Nuvola.Player.ACTION_PREV_SONG, Nuvola.Player.ACTION_NEXT_SONG],
+Nuvola.Player.baseActions = [PlayerAction.TOGGLE_PLAY, PlayerAction.PLAY, PlayerAction.PAUSE, PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG],
+Nuvola.PlayerAction = PlayerAction;
+Nuvola.PlaybackState = PlaybackState;
