@@ -44,10 +44,10 @@ Nuvola.Player.init();
 var Initialization = function()
 {
 	this.allowedURI = new RegExp(Nuvola.meta.allowed_uri);
-	Nuvola.connect("home-page", this, "onHomePage");
-	Nuvola.connect("last-page", this, "onLastPage");
-	Nuvola.connect("navigation-request", this, "onNavigationRequest");
-	Nuvola.connect("uri-changed", this, "onURIChanged");
+	Nuvola.Core.connect("home-page", this, "onHomePage");
+	Nuvola.Core.connect("last-page", this, "onLastPage");
+	Nuvola.Core.connect("navigation-request", this, "onNavigationRequest");
+	Nuvola.Core.connect("uri-changed", this, "onURIChanged");
 }
 
 Initialization.prototype.onHomePage = function(object, result)

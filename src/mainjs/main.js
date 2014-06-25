@@ -24,10 +24,14 @@
 
 require("signals");
 
-Nuvola.makeSignaling(Nuvola);
-Nuvola.registerSignals(["home-page", "navigation-request", "uri-changed", "last-page", "append-preferences", "init-request"]);
-
-Nuvola.setHideOnClose = function(hide)
+Nuvola.Core =
 {
-	return Nuvola._sendMessageSync("Nuvola.setHideOnClose", hide);
+	setHideOnClose: function(hide)
+	{
+		return Nuvola._sendMessageSync("Nuvola.setHideOnClose", hide);
+	},
 }
+
+Nuvola.makeSignaling(Nuvola.Core);
+Nuvola.Core.registerSignals(["home-page", "navigation-request", "uri-changed", "last-page", "append-preferences", "init-request"]);
+

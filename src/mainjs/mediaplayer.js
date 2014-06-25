@@ -67,7 +67,7 @@ Nuvola.Player =
 		Nuvola.Actions.addAction("playback", "win", this.ACTION_NEXT_SONG, "Next song", null, "media-skip-forward", null);
 		Nuvola.Config.setDefault(this.BACKGROUND_PLAYBACK, true);
 		this.updateMenu();
-		Nuvola.connect("append-preferences", this, "onAppendPreferences");
+		Nuvola.Core.connect("append-preferences", this, "onAppendPreferences");
 	},
 	
 	beforeFirstUpdate: function()
@@ -241,9 +241,9 @@ Nuvola.Player =
 	setHideOnClose: function()
 	{
 		if (this.state === this.STATE_PLAYING)
-			Nuvola.setHideOnClose(Nuvola.Config.get(this.BACKGROUND_PLAYBACK));
+			Nuvola.Core.setHideOnClose(Nuvola.Config.get(this.BACKGROUND_PLAYBACK));
 		else
-			Nuvola.setHideOnClose(false);
+			Nuvola.Core.setHideOnClose(false);
 	},
 	
 	onAppendPreferences: function(object, values, entries)
