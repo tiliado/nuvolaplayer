@@ -106,7 +106,6 @@ Nuvola.Player =
 			trayIconActions = trayIconActions.concat(this.extraActions);
 		}
 		
-		Nuvola.UnityDockItem.setActions(trayIconActions);
 		trayIconActions.push("quit");
 		Nuvola.Launcher.setActions(trayIconActions);
 		

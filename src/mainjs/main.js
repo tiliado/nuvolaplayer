@@ -31,16 +31,3 @@ Nuvola.setHideOnClose = function(hide)
 {
 	return Nuvola._sendMessageSync("Nuvola.setHideOnClose", hide);
 }
-
-Nuvola.UnityDockItem =
-{
-	clearActions: function()
-	{
-		Nuvola._sendMessageAsync("Nuvola.TrayIcon.clearActions");
-	},
-	
-	setActions: function(actions)
-	{
-		Nuvola._sendMessageAsync("Nuvola.UnityDockItem.setActions", actions);
-	},
-}

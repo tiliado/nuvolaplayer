@@ -39,7 +39,6 @@ var ratingOptions = [
 	[5, "Rating: 5 stars", null, null, null, null]
 ];
 Nuvola.Actions.addRadioAction("playback", "win", "rating", 0, ratingOptions);
-Nuvola.UnityDockItem.setActions(["play", "pause"]);
 Nuvola.Player.init();
 
 var Initialization = function()
