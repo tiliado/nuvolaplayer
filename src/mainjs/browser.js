@@ -22,12 +22,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+var BrowserAction = {
+	GO_BACK: "go-back",
+	GO_FORWARD: "go-forward",
+	GO_HOME: "go-home",
+	RELOAD: "reload",
+}
+
 Nuvola.Browser =
 {
-	ACTION_GO_BACK: "go-back",
-	ACTION_GO_FORWARD: "go-forward",
-	ACTION_GO_HOME: "go-home",
-	ACTION_RELOAD: "reload",
+	
 	_downloadFileAsyncId: 0,
 	_downloadFileAsyncCallbacks: {},
 	
@@ -53,3 +57,5 @@ Nuvola.Browser =
 		}, cb[1]);
 	}
 }
+
+Nuvola.BrowserAction = BrowserAction;

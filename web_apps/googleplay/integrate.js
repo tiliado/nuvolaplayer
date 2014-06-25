@@ -291,8 +291,8 @@ Integration.prototype.addNavigationButtons = function()
 	navigateForward.style.borderLeftRightRadius = "2px";
 	queryBar.insertBefore(navigateForward, queryBarFirstChild);
 	
-	Nuvola.Actions.attachButton(Nuvola.Browser.ACTION_GO_BACK, navigateBack);
-	Nuvola.Actions.attachButton(Nuvola.Browser.ACTION_GO_FORWARD, navigateForward);
+	Nuvola.Actions.attachButton(Nuvola.BrowserAction.GO_BACK, navigateBack);
+	Nuvola.Actions.attachButton(Nuvola.BrowserAction.GO_FORWARD, navigateForward);
 }
 
 Integration.prototype.getThumbs = function()
