@@ -38,6 +38,10 @@ class RecursionError(Exception):
 	def __init__(self, path):
 		Exception.__init__(self, "Maximal recursion depth reached at '%s'." % path)
 
+class NotFoundError(Exception):
+	def __init__(self, path, requirement):
+		Exception.__init__(self, "File '%s' requires dependency '%s' that hasn't been found." % (path, requirement))
+
 def parse_sources(files):
 	sources = {}
 	for path in files:
@@ -74,8 +78,13 @@ def add_source(output, sources, source):
 		raise RecursionError(source.path)
 	
 	if not source.merged:
-		for dep in source.requires:
-			add_source(output, sources, sources[dep])
+		for dep_name in source.requires:
+			dep_source = sources.get(dep_name)
+			
+			if not dep_source:
+				raise NotFoundError(source.path, dep_name)
+			
+			add_source(output, sources, dep_source)
 	
 	if not source.merged:
 		output.append("// Included file '%s'\n\n" % source.path)
