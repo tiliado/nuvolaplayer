@@ -374,7 +374,7 @@ public Variant variant_from_value(JS.Context ctx, JS.Value val) throws JSError
 		return builder.end();
 	}
 	
-	throw new JSError.WRONG_TYPE("Unsupported type.");
+	return new Variant.string("<UNDEFINED>");
 }
 
 } // namespace Nuvola.JSTools
