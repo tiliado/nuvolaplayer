@@ -22,13 +22,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Nuvola.MediaKeys =
-{
+var MediaKey = {
 	PLAY: "Play",
 	PAUSE: "Pause",
 	STOP: "Stop",
 	PREV: "Previous",
 	NEXT: "Next"
 };
+
+Nuvola.MediaKeys = {};
 Nuvola.makeSignaling(Nuvola.MediaKeys);
 Nuvola.MediaKeys.registerSignals(["key-pressed"]);
+
+Nuvola.MediaKey = MediaKey;

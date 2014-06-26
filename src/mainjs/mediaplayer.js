@@ -271,21 +271,20 @@ Nuvola.Player =
 	
 	onMediaKeyPressed: function(emitter, key)
 	{
-		var K = Nuvola.MediaKeys;
 		var A = Nuvola.Actions;
 		switch (key)
 		{
-		case K.PLAY:
-		case K.PAUSE:
+		case MediaKey.PLAY:
+		case MediaKey.PAUSE:
 			A.activate(PlayerAction.TOGGLE_PLAY);
 			break;
-		case K.STOP:
+		case MediaKey.STOP:
 			A.activate(PlayerAction.STOP);
 			break;
-		case K.NEXT:
+		case MediaKey.NEXT:
 			A.activate(PlayerAction.NEXT_SONG);
 			break;
-		case K.PREV:
+		case MediaKey.PREV:
 			A.activate(PlayerAction.PREV_SONG);
 			break;
 		default:
