@@ -24,70 +24,76 @@
 
 require("signals");
 
-Nuvola.Actions =
+var Actions = function()
 {
-	buttons: {},
-	
-	addAction: function(group, scope, name, label, mnemo_label, icon, keybinding, state)
-	{
-		var state = state !== undefined ? state: null;
-		Nuvola._sendMessageSync("Nuvola.Actions.addAction", group, scope, name, label || "", mnemo_label || "", icon || "", keybinding || "", state);
-	},
-	
-	addRadioAction: function(group, scope, name, state, options)
-	{
-		Nuvola._sendMessageSync("Nuvola.Actions.addRadioAction", group, scope, name, state, options);
-	},
-	
-	debug: function(arg1, arg2)
-	{
-		console.log(arg1 + ", " + arg2);
-	},
-	
-	isEnabled: function(name)
-	{
-		return Nuvola._sendMessageSync("Nuvola.Actions.isEnabled", name);
-	},
-	
-	setEnabled: function(name, enabled)
-	{
-		return Nuvola._sendMessageSync("Nuvola.Actions.setEnabled", name, enabled);
-	},
-	
-	getState: function(name)
-	{
-		return Nuvola._sendMessageSync("Nuvola.Actions.getState", name);
-	},
-	
-	setState: function(name, state)
-	{
-		return Nuvola._sendMessageSync("Nuvola.Actions.setState", name, state);
-	},
-	
-	activate: function(name)
-	{
-		Nuvola._sendMessageAsync("Nuvola.Actions.activate", name);
-	},
-	
-	attachButton: function(name, button)
-	{
-		this.buttons[name] = button;
-		button.disabled = !Nuvola.Actions.isEnabled(name);
-		button.setAttribute("data-action-name", name);
-		button.addEventListener('click', function()
-		{
-			Nuvola.Actions.activate(this.getAttribute("data-action-name"));
-		});
-	},
-	
-	onEnabledChanged: function(object, name, enabled)
-	{
-		if (this.buttons[name])
-			this.buttons[name].disabled = !enabled;
-	}
+	this.registerSignals(["action-activated", "enabled-changed"]);
+	this.connect("action-activated", this, "debug");
+	this.connect("enabled-changed", this, "onEnabledChanged");
+	this.buttons = {};
 }
 
-Nuvola.makeSignaling(Nuvola.Actions);
-Nuvola.Actions.registerSignals(["action-activated", "enabled-changed"]);
-Nuvola.Actions.connect("action-activated", Nuvola.Actions, "debug");
-Nuvola.Actions.connect("enabled-changed", Nuvola.Actions, "onEnabledChanged");
+Nuvola.makeSignaling(Actions.prototype);
+
+Actions.prototype.addAction = function(group, scope, name, label, mnemo_label, icon, keybinding, state)
+{
+	var state = state !== undefined ? state: null;
+	Nuvola._sendMessageSync("Nuvola.Actions.addAction", group, scope, name, label || "", mnemo_label || "", icon || "", keybinding || "", state);
+}
+
+Actions.prototype.addRadioAction = function(group, scope, name, state, options)
+{
+	Nuvola._sendMessageSync("Nuvola.Actions.addRadioAction", group, scope, name, state, options);
+}
+
+Actions.prototype.debug = function(arg1, arg2)
+{
+	console.log(arg1 + ", " + arg2);
+}
+
+Actions.prototype.isEnabled = function(name)
+{
+	return Nuvola._sendMessageSync("Nuvola.Actions.isEnabled", name);
+}
+
+Actions.prototype.setEnabled = function(name, enabled)
+{
+	return Nuvola._sendMessageSync("Nuvola.Actions.setEnabled", name, enabled);
+}
+
+Actions.prototype.getState = function(name)
+{
+	return Nuvola._sendMessageSync("Nuvola.Actions.getState", name);
+}
+
+Actions.prototype.setState = function(name, state)
+{
+	return Nuvola._sendMessageSync("Nuvola.Actions.setState", name, state);
+}
+
+Actions.prototype.activate = function(name)
+{
+	Nuvola._sendMessageAsync("Nuvola.Actions.activate", name);
+}
+
+Actions.prototype.attachButton = function(name, button)
+{
+	this.buttons[name] = button;
+	button.disabled = !this.isEnabled(name);
+	button.setAttribute("data-action-name", name);
+	
+	var self = this;
+	button.addEventListener('click', function()
+	{
+		self.activate(this.getAttribute("data-action-name"));
+	});
+}
+
+Actions.prototype.onEnabledChanged = function(object, name, enabled)
+{
+	if (this.buttons[name])
+		this.buttons[name].disabled = !enabled;
+}
+
+// export public items
+Nuvola.ActionsClass = Actions;
+Nuvola.Actions = new Actions();

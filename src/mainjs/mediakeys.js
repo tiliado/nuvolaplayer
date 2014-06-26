@@ -30,8 +30,14 @@ var MediaKey = {
 	NEXT: "Next"
 };
 
-Nuvola.MediaKeys = {};
-Nuvola.makeSignaling(Nuvola.MediaKeys);
-Nuvola.MediaKeys.registerSignals(["key-pressed"]);
+var MediaKeys = function()
+{
+	this.registerSignals(["key-pressed"]);
+}
 
+Nuvola.makeSignaling(MediaKeys.prototype);
+
+// export public items
 Nuvola.MediaKey = MediaKey;
+Nuvola.MediaKeysClass = MediaKeys;
+Nuvola.MediaKeys = new MediaKeys();

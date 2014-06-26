@@ -22,10 +22,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Nuvola.MenuBar =
+var MenuBar = function(){}
+
+MenuBar.prototype.setMenu = function(id, label, actions)
 {
-	setMenu: function(id, label, actions)
-	{
-		Nuvola._sendMessageAsync("Nuvola.MenuBar.setMenu", id, label, actions);
-	},
+	Nuvola._sendMessageAsync("Nuvola.MenuBar.setMenu", id, label, actions);
 }
+
+// export public items
+Nuvola.MenuBarClass = MenuBar;
+Nuvola.MenuBar = new MenuBar();

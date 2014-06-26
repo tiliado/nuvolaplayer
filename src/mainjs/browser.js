@@ -29,33 +29,35 @@ var BrowserAction = {
 	RELOAD: "reload",
 }
 
-Nuvola.Browser =
+var Browser = function()
 {
-	
-	_downloadFileAsyncId: 0,
-	_downloadFileAsyncCallbacks: {},
-	
-	downloadFileAsync: function(uri, basename, callback, data)
-	{
-		var id = this._downloadFileAsyncId++;
-		if (this._downloadFileAsyncId >= Number.MAX_VALUE - 1)
-			this._downloadFileAsyncId = 0;
-		this._downloadFileAsyncCallbacks[id] = [callback, data];
-		Nuvola._sendMessageAsync("Nuvola.Browser.downloadFileAsync", uri, basename, id);
-	},
-	
-	_downloadDone: function(id, result, statusCode, statusText, filePath, fileURI)
-	{
-		var cb = this._downloadFileAsyncCallbacks[id];
-		delete this._downloadFileAsyncCallbacks[id];
-		cb[0]({
-			result: result,
-			statusCode: statusCode,
-			statusText: statusText,
-			filePath: filePath,
-			fileURI: fileURI
-		}, cb[1]);
-	}
+	this._downloadFileAsyncId = 0;
+	this._downloadFileAsyncCallbacks = {}
 }
 
+Browser.prototype.downloadFileAsync = function(uri, basename, callback, data)
+{
+	var id = this._downloadFileAsyncId++;
+	if (this._downloadFileAsyncId >= Number.MAX_VALUE - 1)
+		this._downloadFileAsyncId = 0;
+	this._downloadFileAsyncCallbacks[id] = [callback, data];
+	Nuvola._sendMessageAsync("Nuvola.Browser.downloadFileAsync", uri, basename, id);
+},
+
+Browser.prototype._downloadDone = function(id, result, statusCode, statusText, filePath, fileURI)
+{
+	var cb = this._downloadFileAsyncCallbacks[id];
+	delete this._downloadFileAsyncCallbacks[id];
+	cb[0]({
+		result: result,
+		statusCode: statusCode,
+		statusText: statusText,
+		filePath: filePath,
+		fileURI: fileURI
+	}, cb[1]);
+}
+
+// export public items
 Nuvola.BrowserAction = BrowserAction;
+Nuvola.BrowserClass = Browser;
+Nuvola.Browser = new Browser();

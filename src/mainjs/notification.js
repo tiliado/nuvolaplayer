@@ -22,21 +22,25 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Nuvola.Notification =
+var Notification = function()
 {
-	update: function(title, text, iconName, iconPath)
-	{
-		Nuvola._sendMessageAsync("Nuvola.Notification.update", title, text, iconName || "", iconPath || "");
-	},
-	
-	setActions: function(actions)
-	{
-		Nuvola._sendMessageAsync("Nuvola.Notification.setActions", actions);
-	},
-	
-	show: function()
-	{
-		Nuvola._sendMessageAsync("Nuvola.Notification.show");
-	},
 }
 
+Notification.prototype.update = function(title, text, iconName, iconPath)
+{
+	Nuvola._sendMessageAsync("Nuvola.Notification.update", title, text, iconName || "", iconPath || "");
+}
+
+Notification.prototype.setActions = function(actions)
+{
+	Nuvola._sendMessageAsync("Nuvola.Notification.setActions", actions);
+}
+
+Notification.prototype.show = function()
+{
+	Nuvola._sendMessageAsync("Nuvola.Notification.show");
+}
+
+// export public items
+Nuvola.NotificationClass = Notification;
+Nuvola.Notification = new Notification();

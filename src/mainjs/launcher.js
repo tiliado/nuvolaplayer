@@ -22,30 +22,35 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Nuvola.Launcher =
+var Launcher = function()
 {
-	setTooltip: function(tooltip)
-	{
-		Nuvola._sendMessageAsync("Nuvola.Launcher.setTooltip", tooltip || "");
-	},
-	
-	setActions: function(actions)
-	{
-		Nuvola._sendMessageAsync("Nuvola.Launcher.setActions", actions);
-	},
-	
-	removeActions: function(actions)
-	{
-		Nuvola._sendMessageAsync("Nuvola.Launcher.removeActions", actions);
-	},
-	
-	addAction: function(action)
-	{
-		Nuvola._sendMessageAsync("Nuvola.Launcher.addAction", action);
-	},
-	
-	removeAction: function(action)
-	{
-		Nuvola._sendMessageAsync("Nuvola.Launcher.removeAction", action);
-	},
 }
+
+Launcher.prototype.setTooltip = function(tooltip)
+{
+	Nuvola._sendMessageAsync("Nuvola.Launcher.setTooltip", tooltip || "");
+}
+
+Launcher.prototype.setActions = function(actions)
+{
+	Nuvola._sendMessageAsync("Nuvola.Launcher.setActions", actions);
+}
+
+Launcher.prototype.removeActions = function(actions)
+{
+	Nuvola._sendMessageAsync("Nuvola.Launcher.removeActions", actions);
+}
+
+Launcher.prototype.addAction = function(action)
+{
+	Nuvola._sendMessageAsync("Nuvola.Launcher.addAction", action);
+}
+
+Launcher.prototype.removeAction = function(action)
+{
+	Nuvola._sendMessageAsync("Nuvola.Launcher.removeAction", action);
+}
+
+// export public items
+Nuvola.LauncherClass = Launcher;
+Nuvola.Launcher = new Launcher();

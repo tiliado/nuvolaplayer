@@ -24,33 +24,38 @@
 
 require("signals");
 
-Nuvola.KeyValueStorage = function(index)
+var KeyValueStorage = function(index)
 {
-	this.index = index
+	this.index = index;
 }
 
-Nuvola.KeyValueStorage.prototype.setDefault = function(key, value)
+KeyValueStorage.prototype.setDefault = function(key, value)
 {
 	Nuvola._keyValueStorageSetDefaultValue(this.index, key, value);
 }
 
-Nuvola.KeyValueStorage.prototype.hasKey = function(key)
+KeyValueStorage.prototype.hasKey = function(key)
 {
 	return Nuvola._keyValueStorageHasKey(this.index, key);
 }
 
-Nuvola.KeyValueStorage.prototype.get = function(key)
+KeyValueStorage.prototype.get = function(key)
 {
 	return Nuvola._keyValueStorageGetValue(this.index, key);
 }
 
-Nuvola.KeyValueStorage.prototype.set = function(key, value)
+KeyValueStorage.prototype.set = function(key, value)
 {
 	Nuvola._keyValueStorageSetValue(this.index, key, value);
 }
 
-Nuvola.Config = new Nuvola.KeyValueStorage(0);
-Nuvola.makeSignaling(Nuvola.Config);
-Nuvola.Config.registerSignals(["config-changed"]);
+var Config = new KeyValueStorage(0);
+Nuvola.makeSignaling(Config);
+Config.registerSignals(["config-changed"]);
 
-Nuvola.Session = new Nuvola.KeyValueStorage(1);
+var Session = new KeyValueStorage(1);
+
+// export public items
+Nuvola.KeyValueStorageClass = KeyValueStorage;
+Nuvola.Config = Config;
+Nuvola.Session = Session;
