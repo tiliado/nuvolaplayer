@@ -98,8 +98,12 @@ def add_source(output, sources, source):
 		output.append("\n")
 		source.merged = True
 
-def merge_sources(sources):
+def merge_sources(sources, main):
 	output = ["(function(Nuvola)\n{\n\n"]
+	
+	main = sources.get(main)
+	if main:
+		add_source(output, sources, main)
 	
 	for source in sources.values():
 		add_source(output, sources, source)
@@ -107,9 +111,9 @@ def merge_sources(sources):
 	output.append("\n\n})(this);  // function(Nuvola)\n")
 	return "".join(output)
 
-def mergejs(sources):
+def mergejs(sources, main="main"):
 	sources = parse_sources(sources)
-	output = merge_sources(sources)
+	output = merge_sources(sources, main)
 	return output
 
 if __name__ == "__main__":
