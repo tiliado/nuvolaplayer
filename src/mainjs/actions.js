@@ -22,7 +22,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-require("class");
+require("prototype");
 require("signals");
 
 var Actions = $prototype(null);
