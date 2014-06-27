@@ -38,9 +38,9 @@ var Initialization = function()
 	Nuvola.Config.setDefault(HOST, "");
 	Nuvola.Config.setDefault(PORT, "");
 	Nuvola.Config.setDefault(COUNTRY_VARIANT, "com");
-	Nuvola.connect("home-page", this, "onHomePage");
-	Nuvola.connect("append-preferences", this, "onAppendPreferences");
-	Nuvola.connect("init-request", this, "onInitRequest");
+	Nuvola.Core.connect("home-page", this, "onHomePage");
+	Nuvola.Core.connect("append-preferences", this, "onAppendPreferences");
+	Nuvola.Core.connect("init-request", this, "onInitRequest");
 }
 
 Initialization.prototype.onHomePage = function(object, result)
