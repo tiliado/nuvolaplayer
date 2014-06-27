@@ -24,33 +24,33 @@
 
 require("class");
 
-var Launcher = $Class(Object);
+var Launcher = $prototype(null);
 
-Launcher.prototype.setTooltip = function(tooltip)
+Launcher.setTooltip = function(tooltip)
 {
 	Nuvola._sendMessageAsync("Nuvola.Launcher.setTooltip", tooltip || "");
 }
 
-Launcher.prototype.setActions = function(actions)
+Launcher.setActions = function(actions)
 {
 	Nuvola._sendMessageAsync("Nuvola.Launcher.setActions", actions);
 }
 
-Launcher.prototype.removeActions = function(actions)
+Launcher.removeActions = function(actions)
 {
 	Nuvola._sendMessageAsync("Nuvola.Launcher.removeActions", actions);
 }
 
-Launcher.prototype.addAction = function(action)
+Launcher.addAction = function(action)
 {
 	Nuvola._sendMessageAsync("Nuvola.Launcher.addAction", action);
 }
 
-Launcher.prototype.removeAction = function(action)
+Launcher.removeAction = function(action)
 {
 	Nuvola._sendMessageAsync("Nuvola.Launcher.removeAction", action);
 }
 
 // export public items
-Nuvola.LauncherClass = Launcher;
-Nuvola.Launcher = new Launcher();
+Nuvola.LauncherPrototype = Launcher;
+Nuvola.Launcher = $object(Launcher);

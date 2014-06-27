@@ -25,18 +25,20 @@
 require("class");
 require("signals");
 
-var Core = $Class(Object, function()
+var Core = $prototype(null);
+
+Core.$init = function()
 {
 	this.registerSignals(["home-page", "navigation-request", "uri-changed", "last-page", "append-preferences", "init-request"]);
-});
+}
 
-Nuvola.makeSignaling(Core.prototype);
+Nuvola.makeSignaling(Core);
 
-Core.prototype.setHideOnClose = function(hide)
+Core.setHideOnClose = function(hide)
 {
 	return Nuvola._sendMessageSync("Nuvola.setHideOnClose", hide);
 }
 
 // export public items
-Nuvola.CoreClass = Core;
-Nuvola.Core = new Core();
+Nuvola.CorePrototype = Core;
+Nuvola.Core = $object(Core);

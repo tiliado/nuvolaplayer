@@ -24,13 +24,13 @@
 
 require("class");
 
-var MenuBar = $Class(Object);
+var MenuBar = $prototype(null);
 
-MenuBar.prototype.setMenu = function(id, label, actions)
+MenuBar.setMenu = function(id, label, actions)
 {
 	Nuvola._sendMessageAsync("Nuvola.MenuBar.setMenu", id, label, actions);
 }
 
 // export public items
-Nuvola.MenuBarClass = MenuBar;
-Nuvola.MenuBar = new MenuBar();
+Nuvola.MenuBarPrototype = MenuBar;
+Nuvola.MenuBar = $object(MenuBar);

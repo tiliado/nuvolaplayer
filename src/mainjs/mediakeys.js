@@ -32,14 +32,16 @@ var MediaKey = {
 	NEXT: "Next"
 };
 
-var MediaKeys = $Class(Object, function()
+var MediaKeys = $prototype(null);
+
+MediaKeys.$init = function()
 {
 	this.registerSignals(["key-pressed"]);
-});
+}
 
-Nuvola.makeSignaling(MediaKeys.prototype);
+Nuvola.makeSignaling(MediaKeys);
 
 // export public items
 Nuvola.MediaKey = MediaKey;
-Nuvola.MediaKeysClass = MediaKeys;
-Nuvola.MediaKeys = new MediaKeys();
+Nuvola.MediaKeysPrototype = MediaKeys;
+Nuvola.MediaKeys = $object(MediaKeys);

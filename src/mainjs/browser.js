@@ -31,13 +31,15 @@ var BrowserAction = {
 	RELOAD: "reload",
 }
 
-var Browser = $Class(Object, function()
+var Browser = $prototype(null);
+
+Browser.$init = function()
 {
 	this._downloadFileAsyncId = 0;
 	this._downloadFileAsyncCallbacks = {}
-});
+}
 
-Browser.prototype.downloadFileAsync = function(uri, basename, callback, data)
+Browser.downloadFileAsync = function(uri, basename, callback, data)
 {
 	var id = this._downloadFileAsyncId++;
 	if (this._downloadFileAsyncId >= Number.MAX_VALUE - 1)
@@ -46,7 +48,7 @@ Browser.prototype.downloadFileAsync = function(uri, basename, callback, data)
 	Nuvola._sendMessageAsync("Nuvola.Browser.downloadFileAsync", uri, basename, id);
 },
 
-Browser.prototype._downloadDone = function(id, result, statusCode, statusText, filePath, fileURI)
+Browser._downloadDone = function(id, result, statusCode, statusText, filePath, fileURI)
 {
 	var cb = this._downloadFileAsyncCallbacks[id];
 	delete this._downloadFileAsyncCallbacks[id];
@@ -61,5 +63,5 @@ Browser.prototype._downloadDone = function(id, result, statusCode, statusText, f
 
 // export public items
 Nuvola.BrowserAction = BrowserAction;
-Nuvola.BrowserClass = Browser;
-Nuvola.Browser = new Browser();
+Nuvola.BrowserPrototype = Browser;
+Nuvola.Browser = $object(Browser);

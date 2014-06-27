@@ -25,38 +25,45 @@
 require("class");
 require("signals");
 
-var KeyValueStorage = $Class(Object, function(index)
+var KeyValueStorage = $prototype(null);
+
+KeyValueStorage.$init = function(index)
 {
 	this.index = index;
-});
+}
 
-KeyValueStorage.prototype.setDefault = function(key, value)
+KeyValueStorage.setDefault = function(key, value)
 {
 	Nuvola._keyValueStorageSetDefaultValue(this.index, key, value);
 }
 
-KeyValueStorage.prototype.hasKey = function(key)
+KeyValueStorage.hasKey = function(key)
 {
 	return Nuvola._keyValueStorageHasKey(this.index, key);
 }
 
-KeyValueStorage.prototype.get = function(key)
+KeyValueStorage.get = function(key)
 {
 	return Nuvola._keyValueStorageGetValue(this.index, key);
 }
 
-KeyValueStorage.prototype.set = function(key, value)
+KeyValueStorage.set = function(key, value)
 {
 	Nuvola._keyValueStorageSetValue(this.index, key, value);
 }
 
-var Config = new KeyValueStorage(0);
-Nuvola.makeSignaling(Config);
-Config.registerSignals(["config-changed"]);
+var ConfigStorage = $prototype(KeyValueStorage);
 
-var Session = new KeyValueStorage(1);
+ConfigStorage.$init = function()
+{
+	KeyValueStorage.$init.call(this, 0);
+	this.registerSignals(["config-changed"]);
+}
+
+Nuvola.makeSignaling(ConfigStorage);
 
 // export public items
-Nuvola.KeyValueStorageClass = KeyValueStorage;
-Nuvola.Config = Config;
-Nuvola.Session = Session;
+Nuvola.KeyValueStoragePrototype = KeyValueStorage;
+Nuvola.Session = $object(KeyValueStorage, 1);
+Nuvola.Config = $object(ConfigStorage);
+

@@ -25,58 +25,60 @@
 require("class");
 require("signals");
 
-var Actions = $Class(Object, function()
+var Actions = $prototype(null);
+
+Actions.$init = function()
 {
 	this.registerSignals(["action-activated", "enabled-changed"]);
 	this.connect("action-activated", this, "debug");
 	this.connect("enabled-changed", this, "onEnabledChanged");
 	this.buttons = {};
-});
+}
 
-Nuvola.makeSignaling(Actions.prototype);
+Nuvola.makeSignaling(Actions);
 
-Actions.prototype.addAction = function(group, scope, name, label, mnemo_label, icon, keybinding, state)
+Actions.addAction = function(group, scope, name, label, mnemo_label, icon, keybinding, state)
 {
 	var state = state !== undefined ? state: null;
 	Nuvola._sendMessageSync("Nuvola.Actions.addAction", group, scope, name, label || "", mnemo_label || "", icon || "", keybinding || "", state);
 }
 
-Actions.prototype.addRadioAction = function(group, scope, name, state, options)
+Actions.addRadioAction = function(group, scope, name, state, options)
 {
 	Nuvola._sendMessageSync("Nuvola.Actions.addRadioAction", group, scope, name, state, options);
 }
 
-Actions.prototype.debug = function(arg1, arg2)
+Actions.debug = function(arg1, arg2)
 {
-	console.log(arg1 + ", " + arg2);
+	console.log("JS API: Action activated: " + arg2);
 }
 
-Actions.prototype.isEnabled = function(name)
+Actions.isEnabled = function(name)
 {
 	return Nuvola._sendMessageSync("Nuvola.Actions.isEnabled", name);
 }
 
-Actions.prototype.setEnabled = function(name, enabled)
+Actions.setEnabled = function(name, enabled)
 {
 	return Nuvola._sendMessageSync("Nuvola.Actions.setEnabled", name, enabled);
 }
 
-Actions.prototype.getState = function(name)
+Actions.getState = function(name)
 {
 	return Nuvola._sendMessageSync("Nuvola.Actions.getState", name);
 }
 
-Actions.prototype.setState = function(name, state)
+Actions.setState = function(name, state)
 {
 	return Nuvola._sendMessageSync("Nuvola.Actions.setState", name, state);
 }
 
-Actions.prototype.activate = function(name)
+Actions.activate = function(name)
 {
 	Nuvola._sendMessageAsync("Nuvola.Actions.activate", name);
 }
 
-Actions.prototype.attachButton = function(name, button)
+Actions.attachButton = function(name, button)
 {
 	this.buttons[name] = button;
 	button.disabled = !this.isEnabled(name);
@@ -89,12 +91,12 @@ Actions.prototype.attachButton = function(name, button)
 	});
 }
 
-Actions.prototype.onEnabledChanged = function(object, name, enabled)
+Actions.onEnabledChanged = function(object, name, enabled)
 {
 	if (this.buttons[name])
 		this.buttons[name].disabled = !enabled;
 }
 
 // export public items
-Nuvola.ActionsClass = Actions;
-Nuvola.Actions = new Actions();
+Nuvola.ActionsPrototype = Actions;
+Nuvola.Actions = $object(Actions);

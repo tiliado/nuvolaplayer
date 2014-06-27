@@ -24,23 +24,23 @@
 
 require("class");
 
-var Notification = $Class(Object);
+var Notification = $prototype(null);
 
-Notification.prototype.update = function(title, text, iconName, iconPath)
+Notification.update = function(title, text, iconName, iconPath)
 {
 	Nuvola._sendMessageAsync("Nuvola.Notification.update", title, text, iconName || "", iconPath || "");
 }
 
-Notification.prototype.setActions = function(actions)
+Notification.setActions = function(actions)
 {
 	Nuvola._sendMessageAsync("Nuvola.Notification.setActions", actions);
 }
 
-Notification.prototype.show = function()
+Notification.show = function()
 {
 	Nuvola._sendMessageAsync("Nuvola.Notification.show");
 }
 
 // export public items
-Nuvola.NotificationClass = Notification;
-Nuvola.Notification = new Notification();
+Nuvola.NotificationPrototype = Notification;
+Nuvola.Notification = $object(Notification);

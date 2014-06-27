@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -22,53 +22,60 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// based on Nuvola.makeClass from Nuvola Player 2
-
-var $Class = function(parents, initFunc)
+/**
+ * Creates new object from prototype and mixins.
+ * 
+ * Creates new object that will have `proto` as its prototype and will be extended with properties
+ * from all specified `mixins`.
+ * 
+ * This is similar to creating a subclass in class-based inheritance.
+ * 
+ * @param proto        object prototype or null to use `Object`
+ * @param mixins...    mixins objects
+ * @return new prototype object
+ */
+var $prototype = function(proto, mixins)
 {
-	var constructor = initFunc || function(){};
-	var parent = null;
+	if (proto === undefined)
+		throw new Error("Proto argument must be specified. Can be null.");
 	
-	if (parents)
+	var object = Object.create(proto);
+	
+	var len = arguments.length;
+	for (var i = 1; i < len; i++)
 	{
-		if (parents instanceof Array)
-		{
-			parent = parents.length >= 1 ? parents.shift() : null;
-		}
-		else
-		{
-			parent = parents;
-			klass = null;
-		}
+		var mixin = arguments[i];
+		for (var name in mixin)
+			object[name] = mixin[name];
 	}
 	
-	// Create derived class
-	if (parent)
-	{
-		var tmp = function(){};
-		tmp.prototype = parent.prototype;
-		constructor.prototype = new tmp();
-	}
-	
-	// Mixin other classes
-	if (parents)
-	{
-		var size = parents.length;
-		for (var i = 0; i < size; i++)
-		{
-			var mixin = parents[i];
-			for (var key in mixin)
-			{
-				var fn = mixin[key];
-				if (!fn.name)
-					fn.name = key;
-				
-				constructor.prototype[key] = fn;
-			}
-		}
-	}
-	
-	return constructor;
+	return object;
 }
 
-Nuvola.$Class = $Class;
+/**
+ * Creates new initialized object from prototype.
+ * 
+ * Creates new object that will have `proto` as its prototype and will be initialized by calling
+ * `$init` method with provided arguments `args`.
+ * 
+ * This is similar to creating an instance object from a class in class-based inheritance.
+ * 
+ * @param proto           object prototype or null to use `Object`
+ * @param init_args...    arguments to pass to the `$init` method
+ * @return new initialized object
+ */
+var $object = function(proto, init_args)
+{
+	if (proto === undefined)
+		throw new Error("Proto argument must be specified. Can be null.");
+	
+	var object = Object.create(proto);
+	
+	if (object.$init)
+		object.$init.apply(object, [].slice.call(arguments, 1));
+	
+	return object;
+}
+
+Nuvola.$object = $object;
+Nuvola.$prototype = $prototype;

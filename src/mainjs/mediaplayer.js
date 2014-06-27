@@ -46,7 +46,9 @@ var PlaybackState = {
 	PLAYING: 2,
 }
 
-var Player = $Class(Object, function()
+var Player = $prototype(null);
+
+Player.$init = function()
 {
 	this.state = PlaybackState.UNKNOWN;
 	this.song = null;
@@ -61,11 +63,11 @@ var Player = $Class(Object, function()
 	this.firstUpdate = true;
 	this._artworkLoop = 0;
 	this.baseActions = [PlayerAction.TOGGLE_PLAY, PlayerAction.PLAY, PlayerAction.PAUSE, PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG];
-});
+}
 
 Player.BACKGROUND_PLAYBACK = "player.background_playback";
 
-Player.prototype.init = function()
+Player.init = function()
 {
 	Nuvola.Launcher.setActions(["quit"]);
 	Nuvola.Notification.setActions([PlayerAction.PLAY, PlayerAction.PAUSE, PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG]);
@@ -80,13 +82,13 @@ Player.prototype.init = function()
 	Nuvola.Core.connect("append-preferences", this, "onAppendPreferences");
 }
 
-Player.prototype.beforeFirstUpdate = function()
+Player.beforeFirstUpdate = function()
 {
 	Nuvola.Config.connect("config-changed", this, "onConfigChanged");
 	Nuvola.MediaKeys.connect("key-pressed", this, "onMediaKeyPressed");
 }
 
-Player.prototype.update = function()
+Player.update = function()
 {
 	if (this.firstUpdate)
 	{
@@ -167,7 +169,7 @@ Player.prototype.update = function()
 	}
 }
 
-Player.prototype.sendDevelInfo = function()
+Player.sendDevelInfo = function()
 {
 	var data = {};
 	var keys = ["song", "artist", "album", "artwork", "artworkFile", "baseActions", "extraActions"];
@@ -181,7 +183,7 @@ Player.prototype.sendDevelInfo = function()
 	Nuvola._sendMessageAsync("Nuvola.Player.sendDevelInfo", data);
 }
 
-Player.prototype.onArtworkDownloaded = function(res, changed)
+Player.onArtworkDownloaded = function(res, changed)
 {
 	if (!res.result)
 	{
@@ -195,7 +197,7 @@ Player.prototype.onArtworkDownloaded = function(res, changed)
 	this.updateTrackInfo(changed);
 }
 
-Player.prototype.updateTrackInfo = function(changed)
+Player.updateTrackInfo = function(changed)
 {
 	this.sendDevelInfo();
 	if (this.song)
@@ -228,7 +230,7 @@ Player.prototype.updateTrackInfo = function(changed)
 	}
 }
 
-Player.prototype.addExtraActions = function(actions)
+Player.addExtraActions = function(actions)
 {
 	var update = false;
 	for (var i = 0; i < actions.length; i++)
@@ -244,12 +246,12 @@ Player.prototype.addExtraActions = function(actions)
 		this.updateMenu();
 }
 
-Player.prototype.updateMenu = function()
+Player.updateMenu = function()
 {
 	Nuvola.MenuBar.setMenu("playback", "_Control", this.baseActions.concat(this.extraActions));
 }
 
-Player.prototype.setHideOnClose = function()
+Player.setHideOnClose = function()
 {
 	if (this.state === PlaybackState.PLAYING)
 		Nuvola.Core.setHideOnClose(Nuvola.Config.get(Player.BACKGROUND_PLAYBACK));
@@ -257,13 +259,13 @@ Player.prototype.setHideOnClose = function()
 		Nuvola.Core.setHideOnClose(false);
 }
 
-Player.prototype.onAppendPreferences = function(object, values, entries)
+Player.onAppendPreferences = function(object, values, entries)
 {
 	values[Player.BACKGROUND_PLAYBACK] = Nuvola.Config.get(Player.BACKGROUND_PLAYBACK);
 	entries.push(["bool", Player.BACKGROUND_PLAYBACK, "Keep playing in background when window is closed"]);
 }
 
-Player.prototype.onConfigChanged = function(emitter, key)
+Player.onConfigChanged = function(emitter, key)
 {
 	switch (key)
 	{
@@ -273,7 +275,7 @@ Player.prototype.onConfigChanged = function(emitter, key)
 	}
 }
 
-Player.prototype.onMediaKeyPressed = function(emitter, key)
+Player.onMediaKeyPressed = function(emitter, key)
 {
 	var A = Nuvola.Actions;
 	switch (key)
@@ -300,5 +302,5 @@ Player.prototype.onMediaKeyPressed = function(emitter, key)
 // export public items
 Nuvola.PlayerAction = PlayerAction;
 Nuvola.PlaybackState = PlaybackState;
-Nuvola.PlayerClass = Player;
-Nuvola.Player = new Player();
+Nuvola.PlayerPrototype = Player;
+Nuvola.Player = $object(Player);
