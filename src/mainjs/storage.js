@@ -52,15 +52,13 @@ KeyValueStorage.set = function(key, value)
 	Nuvola._keyValueStorageSetValue(this.index, key, value);
 }
 
-var ConfigStorage = $prototype(KeyValueStorage);
+var ConfigStorage = $prototype(KeyValueStorage, SignalsMixin);
 
 ConfigStorage.$init = function()
 {
 	KeyValueStorage.$init.call(this, 0);
 	this.registerSignals(["config-changed"]);
 }
-
-Nuvola.makeSignaling(ConfigStorage);
 
 // export public items
 Nuvola.KeyValueStoragePrototype = KeyValueStorage;

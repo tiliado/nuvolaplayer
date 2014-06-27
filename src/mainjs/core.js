@@ -25,14 +25,12 @@
 require("prototype");
 require("signals");
 
-var Core = $prototype(null);
+var Core = $prototype(null, SignalsMixin);
 
 Core.$init = function()
 {
 	this.registerSignals(["home-page", "navigation-request", "uri-changed", "last-page", "append-preferences", "init-request"]);
 }
-
-Nuvola.makeSignaling(Core);
 
 Core.setHideOnClose = function(hide)
 {

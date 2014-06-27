@@ -22,9 +22,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Nuvola.makeSignaling = function(obj_proto)
-{
-	obj_proto.registerSignals = function(signals)
+var SignalsMixin = {
+	"registerSignals": function(signals)
 	{
 		if (this.signals === undefined)
 			this.signals = {};
@@ -34,17 +33,17 @@ Nuvola.makeSignaling = function(obj_proto)
 		{
 			this.signals[signals[i]] = [];
 		}
-	}
+	},
 	
-	obj_proto.connect = function(name, object, handlerName)
+	"connect": function(name, object, handlerName)
 	{
 		var handlers = this.signals[name];
 		if (handlers === undefined)
 			throw new Error("Unknown signal '" + name + "'.");
 		handlers.push([object, handlerName]);
-	}
+	},
 	
-	obj_proto.disconnect = function(name, object, handlerName)
+	"disconnect": function(name, object, handlerName)
 	{
 		var handlers = this.signals[name];
 		if (handlers === undefined)
@@ -59,9 +58,9 @@ Nuvola.makeSignaling = function(obj_proto)
 				break;
 			}
 		}
-	}
+	},
 	
-	obj_proto.emit = function(name)
+	"emit": function(name)
 	{
 		var handlers = this.signals[name];
 		if (handlers === undefined)
@@ -77,5 +76,7 @@ Nuvola.makeSignaling = function(obj_proto)
 			var object = handler[0];
 			object[handler[1]].apply(object, args);
 		}
-	}
+	},
 }
+
+Nuvola.SignalsMixin = SignalsMixin;

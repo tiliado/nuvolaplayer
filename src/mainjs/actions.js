@@ -25,7 +25,7 @@
 require("prototype");
 require("signals");
 
-var Actions = $prototype(null);
+var Actions = $prototype(null, SignalsMixin);
 
 Actions.$init = function()
 {
@@ -34,8 +34,6 @@ Actions.$init = function()
 	this.connect("enabled-changed", this, "onEnabledChanged");
 	this.buttons = {};
 }
-
-Nuvola.makeSignaling(Actions);
 
 Actions.addAction = function(group, scope, name, label, mnemo_label, icon, keybinding, state)
 {
