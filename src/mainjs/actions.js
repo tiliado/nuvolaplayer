@@ -22,15 +22,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+require("class");
 require("signals");
 
-var Actions = function()
+var Actions = $Class(Object, function()
 {
 	this.registerSignals(["action-activated", "enabled-changed"]);
 	this.connect("action-activated", this, "debug");
 	this.connect("enabled-changed", this, "onEnabledChanged");
 	this.buttons = {};
-}
+});
 
 Nuvola.makeSignaling(Actions.prototype);
 

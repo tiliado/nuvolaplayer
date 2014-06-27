@@ -22,6 +22,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+require("class");
+
 var MediaKey = {
 	PLAY: "Play",
 	PAUSE: "Pause",
@@ -30,10 +32,10 @@ var MediaKey = {
 	NEXT: "Next"
 };
 
-var MediaKeys = function()
+var MediaKeys = $Class(Object, function()
 {
 	this.registerSignals(["key-pressed"]);
-}
+});
 
 Nuvola.makeSignaling(MediaKeys.prototype);
 

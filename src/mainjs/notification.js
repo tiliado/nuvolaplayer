@@ -22,9 +22,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-var Notification = function()
-{
-}
+require("class");
+
+var Notification = $Class(Object);
 
 Notification.prototype.update = function(title, text, iconName, iconPath)
 {

@@ -22,9 +22,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-var Launcher = function()
-{
-}
+require("class");
+
+var Launcher = $Class(Object);
 
 Launcher.prototype.setTooltip = function(tooltip)
 {

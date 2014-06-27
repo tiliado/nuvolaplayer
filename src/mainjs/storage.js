@@ -22,12 +22,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+require("class");
 require("signals");
 
-var KeyValueStorage = function(index)
+var KeyValueStorage = $Class(Object, function(index)
 {
 	this.index = index;
-}
+});
 
 KeyValueStorage.prototype.setDefault = function(key, value)
 {

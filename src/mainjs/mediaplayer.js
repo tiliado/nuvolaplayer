@@ -22,6 +22,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+require("class");
 require("notification");
 require("launcher");
 require("actions");
@@ -45,7 +46,7 @@ var PlaybackState = {
 	PLAYING: 2,
 }
 
-var Player = function()
+var Player = $Class(Object, function()
 {
 	this.state = PlaybackState.UNKNOWN;
 	this.song = null;
@@ -60,7 +61,7 @@ var Player = function()
 	this.firstUpdate = true;
 	this._artworkLoop = 0;
 	this.baseActions = [PlayerAction.TOGGLE_PLAY, PlayerAction.PLAY, PlayerAction.PAUSE, PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG];
-}
+});
 
 Player.BACKGROUND_PLAYBACK = "player.background_playback";
 

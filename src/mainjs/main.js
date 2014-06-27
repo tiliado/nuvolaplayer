@@ -22,12 +22,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+require("class");
 require("signals");
 
-var Core = function()
+var Core = $Class(Object, function()
 {
 	this.registerSignals(["home-page", "navigation-request", "uri-changed", "last-page", "append-preferences", "init-request"]);
-}
+});
 
 Nuvola.makeSignaling(Core.prototype);
 

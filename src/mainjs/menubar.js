@@ -22,7 +22,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-var MenuBar = function(){}
+require("class");
+
+var MenuBar = $Class(Object);
 
 MenuBar.prototype.setMenu = function(id, label, actions)
 {
