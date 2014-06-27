@@ -99,7 +99,7 @@ def add_source(output, sources, source):
 		source.merged = True
 
 def merge_sources(sources, main):
-	output = ["(function(Nuvola)\n{\n\n"]
+	output = ["'use strict';\n\n(function(Nuvola)\n{\n\n"]
 	
 	main = sources.get(main)
 	if main:
