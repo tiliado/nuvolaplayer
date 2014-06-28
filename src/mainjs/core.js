@@ -43,6 +43,14 @@ Core.$init = function()
 	 * @param Array formSpec       specification of entries to show in the initialization form
 	 */
 	this.addSignal("init-app-runner");
+	
+	/** 
+	 * @signal init-web-worker     initialize web worker process hook
+	 * 
+	 * This signal is emitted just before a web page is loaded in the main frame of the web view.
+	 */
+	this.addSignal("init-web-worker");
+	
 	this.registerSignals(["home-page", "navigation-request", "uri-changed", "last-page", "append-preferences"]);
 }
 

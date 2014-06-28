@@ -39,6 +39,7 @@ WebAppPrototype.$init = function()
 	Nuvola.Core.connect("navigation-request", this, "onNavigationRequest");
 	Nuvola.Core.connect("uri-changed", this, "onURIChanged");
 	Nuvola.Core.connect("init-app-runner", this, "onInitAppRunner");
+	Nuvola.Core.connect("init-web-worker", this, "onInitWebWorker");
 }
 
 WebAppPrototype.start = function()
@@ -67,6 +68,30 @@ WebAppPrototype.onURIChanged = function(object, uri)
 }
 
 WebAppPrototype.onInitAppRunner = function(emitter, values, entries)
+{
+}
+
+/**
+ * @method WebAppPrototype.onInitWebWorker
+ * 
+ * Handler for Core::init-web-worker signal. Override this method to integrate the web page.
+ * 
+ * ```
+ * WebApp.onInitWebWorker = function(emitter)
+ * {
+ *     Nuvola.WebAppPrototype.onInitWebWorker.call(this);
+ *     // one of these:
+ *     document.addEventListener("DOMContentLoaded", this.onPageReady.bind(this));
+ *     window.addEventListener("load", this.onPageReady.bind(this));
+ * }
+ * 
+ * WebApp.onPageReady = function(event)
+ * {
+ *     ...
+ * }
+ * ```
+ */
+WebAppPrototype.onInitWebWorker = function(emitter)
 {
 }
 

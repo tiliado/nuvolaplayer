@@ -113,6 +113,8 @@ public class WebExtension: GLib.Object
 		{
 			js_api.inject(bridge);
 			js_api.integrate(bridge);
+			var args = new Variant("(s)", "init-web-worker");
+			bridge.call_function("Nuvola.Core.emit", ref args);
 		}
 		catch (JSError e)
 		{
