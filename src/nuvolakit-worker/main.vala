@@ -46,6 +46,7 @@ public class WebExtension: GLib.Object
 		this.server = server;
 		
 		WebKit.ScriptWorld.get_default().window_object_cleared.connect(on_window_object_cleared);
+		extension.page_created.connect(on_web_page_created);
 		
 		server.add_handler("call_function", handle_call_function);
 		bridges = new HashTable<unowned WebKit.Frame, FrameBridge>(direct_hash, direct_equal);
@@ -177,11 +178,11 @@ public class WebExtension: GLib.Object
 		}
 	}
 	
-}
+	private void on_web_page_created(WebKit.WebExtension extension, WebKit.WebPage web_page)
+	{
+		debug("Page %u created for %s", (uint) web_page.get_id(), web_page.get_uri());
+	}
 
-public void on_web_page_created(WebKit.WebExtension extension, WebKit.WebPage web_page)
-{
-	warning("Page %u created for %s", (uint) web_page.get_id(), web_page.get_uri());
 }
 
 } // namespace Nuvola
@@ -192,5 +193,4 @@ public void webkit_web_extension_initialize(WebKit.WebExtension extension)
 	var runner = new Diorite.Ipc.MessageClient(Environment.get_variable("NUVOLA_IPC_UI_RUNNER"), 5000);
 	var server = new Diorite.Ipc.MessageServer(Environment.get_variable("NUVOLA_IPC_WEB_WORKER"));
 	Nuvola.extension = new Nuvola.WebExtension(extension, runner, server); 
-	extension.page_created.connect(Nuvola.on_web_page_created);
 }
