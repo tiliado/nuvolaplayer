@@ -29,6 +29,7 @@ require("actions");
 require("mediakeys");
 require("storage");
 require("browser");
+require("core");
 
 
 var PlayerAction = {
@@ -63,11 +64,12 @@ Player.$init = function()
 	this.firstUpdate = true;
 	this._artworkLoop = 0;
 	this.baseActions = [PlayerAction.TOGGLE_PLAY, PlayerAction.PLAY, PlayerAction.PAUSE, PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG];
+	Nuvola.Core.connect("init-app-runner", this, "onInitAppRunner");
 }
 
 Player.BACKGROUND_PLAYBACK = "player.background_playback";
 
-Player.init = function()
+Player.onInitAppRunner = function(emitter, values, entries)
 {
 	Nuvola.Launcher.setActions(["quit"]);
 	Nuvola.Notification.setActions([PlayerAction.PLAY, PlayerAction.PAUSE, PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG]);

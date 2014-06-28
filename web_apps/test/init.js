@@ -25,8 +25,6 @@
 (function(Nuvola)
 {
 
-Nuvola.Player.init();
-
 var ADDRESS = "app.address";
 var HOST = "app.host";
 var PORT = "app.port";

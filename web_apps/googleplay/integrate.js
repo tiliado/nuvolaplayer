@@ -324,7 +324,6 @@ Integration.prototype.toggleThumbRating = function(enabled)
 	}
 }
 
-Nuvola.Player.init();
 
 
 /* Store reference */ 
