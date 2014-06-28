@@ -72,7 +72,6 @@ public errordomain JSError
 public class JSApi : GLib.Object
 {
 	private static const string MAIN_JS = "main.js";
-	private static const string INIT_JS = "init.js";
 	private static const string META_JSON = "metadata.json";
 	private static const string META_PROPERTY = "meta";
 	private static const string JS_DIR = "js";
@@ -185,18 +184,7 @@ public class JSApi : GLib.Object
 	
 	public void initialize(JsEnvironment env) throws JSError
 	{
-		var init_js = data_dir.get_child(INIT_JS);
-		if (!init_js.query_exists())
-			throw new JSError.INITIALIZATION_FAILED("Failed to find a web app component init.js. This probably means the web app integration has not been installed correctly or that component has been accidentally deleted.");
-		
-		try
-		{
-			env.execute_script_from_file(init_js);
-		}
-		catch (JSError e)
-		{
-			throw new JSError.INITIALIZATION_FAILED("Failed to initialize a web app component init.js located at '%s'. Initialization exited with error:\n\n%s", init_js.get_path(), e.message);
-		}
+		integrate(env);
 	}
 	
 	public void integrate(JsEnvironment env) throws JSError
