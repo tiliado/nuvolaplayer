@@ -40,7 +40,7 @@ var Initialization = function()
 	Nuvola.Config.setDefault(COUNTRY_VARIANT, "com");
 	Nuvola.Core.connect("home-page", this, "onHomePage");
 	Nuvola.Core.connect("append-preferences", this, "onAppendPreferences");
-	Nuvola.Core.connect("init-request", this, "onInitRequest");
+	Nuvola.Core.connect("init-app-runner", this, "onInitAppRunner");
 }
 
 Initialization.prototype.onHomePage = function(object, result)
@@ -53,7 +53,7 @@ Initialization.prototype.onAppendPreferences = function(emitter, values, entries
 	this.appendPreferences(values, entries);
 }
 
-Initialization.prototype.onInitRequest = function(emitter, values, entries)
+Initialization.prototype.onInitAppRunner = function(emitter, values, entries)
 {
 	if (!Nuvola.Config.hasKey(ADDRESS))
 		this.appendPreferences(values, entries);

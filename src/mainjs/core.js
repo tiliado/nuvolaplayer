@@ -25,11 +25,25 @@
 require("prototype");
 require("signals");
 
+/**
+ * Class to manage Nuvola Player Core
+ */
 var Core = $prototype(null, SignalsMixin);
 
 Core.$init = function()
 {
-	this.registerSignals(["home-page", "navigation-request", "uri-changed", "last-page", "append-preferences", "init-request"]);
+	/** 
+	 * @signal init-app-runner     initialize app runner process hook
+	 * 
+	 * This signal is emitted at start-up when initialization of the app runner process is needed.
+	 * You can use it to append entries to initialization form (e. g. preferred national variant
+	 * or address of custom service instance) and to perform own initialization routine.
+	 * 
+	 * @param Object initValues    initialization values to fill the initialization form with
+	 * @param Array formSpec       specification of entries to show in the initialization form
+	 */
+	this.addSignal("init-app-runner");
+	this.registerSignals(["home-page", "navigation-request", "uri-changed", "last-page", "append-preferences"]);
 }
 
 Core.setHideOnClose = function(hide)

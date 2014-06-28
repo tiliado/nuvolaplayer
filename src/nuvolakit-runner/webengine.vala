@@ -239,7 +239,7 @@ public class WebEngine : GLib.Object
 	{
 		Variant values;
 		Variant entries;
-		var args = new Variant("(s@a{sv}@av)", "init-request", new Variant.array(new VariantType("{sv}"), {}), new Variant.array(VariantType.VARIANT, {}));
+		var args = new Variant("(s@a{sv}@av)", "init-app-runner", new Variant.array(new VariantType("{sv}"), {}), new Variant.array(VariantType.VARIANT, {}));
 		env.call_function("Nuvola.Core.emit", ref args);
 		args.get("(s@a{smv}@av)", null, out values, out entries);
 		var values_hashtable = Diorite.variant_to_hashtable(values);
