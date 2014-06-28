@@ -138,6 +138,12 @@ public class WebEngine : GLib.Object
 			return true;
 		}
 		
+		if (uri.has_prefix(web_app.data_dir.get_uri()))
+		{
+			web_view.load_uri(uri);
+			return true;
+		}
+		
 		return false;
 	}
 	
