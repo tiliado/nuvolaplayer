@@ -37,12 +37,16 @@ public class WebExtension: GLib.Object
 	private File user_config_dir;
 	private JSApi js_api;
 	private Variant[] function_calls = {};
+	private bool initialized = false;
 	
 	public WebExtension(WebKit.WebExtension extension, Diorite.Ipc.MessageClient runner, Diorite.Ipc.MessageServer server)
 	{
 		this.extension = extension;
 		this.runner = runner;
 		this.server = server;
+		
+		WebKit.ScriptWorld.get_default().window_object_cleared.connect(on_window_object_cleared);
+		
 		server.add_handler("call_function", handle_call_function);
 		bridges = new HashTable<unowned WebKit.Frame, FrameBridge>(direct_hash, direct_equal);
 		try
@@ -74,7 +78,7 @@ public class WebExtension: GLib.Object
 		new KeyValueProxy(runner, "session"));
 		js_api.send_message_async.connect(on_send_message_async);
 		js_api.send_message_sync.connect(on_send_message_sync);
-		WebKit.ScriptWorld.get_default().window_object_cleared.connect(on_window_object_cleared);
+		initialized = true;
 	}
 	
 	private void on_window_object_cleared(WebKit.ScriptWorld world, WebKit.WebPage page, WebKit.Frame frame)
@@ -82,6 +86,24 @@ public class WebExtension: GLib.Object
 		if (!frame.is_main_frame())
 			return; // TODO: Add api not to ignore non-main frames
 		
+		if (initialized)
+		{
+			init_frame(world, page, frame);
+			return;
+		}
+		
+		Idle.add(() =>
+		{
+			if (!initialized)
+				return true;
+			
+			init_frame(world, page, frame);
+			return false;
+		});
+	}
+	
+	private void init_frame(WebKit.ScriptWorld world, WebKit.WebPage page, WebKit.Frame frame)
+	{
 		unowned JS.GlobalContext context = frame.get_javascript_context_for_script_world(world);
 		debug("Window object cleared: %s, %p, %p, %p", frame.get_uri(), frame, page, context);
 		var bridge = new FrameBridge(frame, context);
