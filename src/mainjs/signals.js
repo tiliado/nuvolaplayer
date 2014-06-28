@@ -23,6 +23,13 @@
  */
 
 var SignalsMixin = {
+	"addSignal": function(name)
+	{
+		if (this.signals == null)
+			this.signals = {};
+		
+		this.signals[name] = [];
+	},
 	"registerSignals": function(signals)
 	{
 		if (this.signals === undefined)
