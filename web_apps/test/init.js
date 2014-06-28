@@ -30,34 +30,29 @@ var HOST = "app.host";
 var PORT = "app.port";
 var COUNTRY_VARIANT = "app.country_variant";
 
-var Initialization = function()
+var WebApp = Nuvola.$WebApp();
+
+WebApp.onInitAppRunner = function(emitter, values, entries)
 {
+	Nuvola.WebAppPrototype.onInitAppRunner.call(this, emitter, values, entries);
+	
 	Nuvola.Config.setDefault(ADDRESS, "default");
 	Nuvola.Config.setDefault(HOST, "");
 	Nuvola.Config.setDefault(PORT, "");
 	Nuvola.Config.setDefault(COUNTRY_VARIANT, "com");
-	Nuvola.Core.connect("home-page", this, "onHomePage");
+	
 	Nuvola.Core.connect("append-preferences", this, "onAppendPreferences");
-	Nuvola.Core.connect("init-app-runner", this, "onInitAppRunner");
-}
-
-Initialization.prototype.onHomePage = function(object, result)
-{
-	result.url = Nuvola.meta.home_url;
-}
-
-Initialization.prototype.onAppendPreferences = function(emitter, values, entries)
-{
-	this.appendPreferences(values, entries);
-}
-
-Initialization.prototype.onInitAppRunner = function(emitter, values, entries)
-{
+	
 	if (!Nuvola.Config.hasKey(ADDRESS))
 		this.appendPreferences(values, entries);
 }
 
-Initialization.prototype.appendPreferences = function(values, entries)
+WebApp.onAppendPreferences = function(emitter, values, entries)
+{
+	this.appendPreferences(values, entries);
+}
+
+WebApp.appendPreferences = function(values, entries)
 {
 	values[ADDRESS] = Nuvola.Config.get(ADDRESS);
 	values[HOST] = Nuvola.Config.get(HOST);
@@ -78,6 +73,6 @@ Initialization.prototype.appendPreferences = function(values, entries)
 	entries.push(["option", COUNTRY_VARIANT + ":com", "United States"]);
 }
 
-Nuvola.initialization = new Initialization();
+WebApp.start();
 
 })(this);  // function(Nuvola)

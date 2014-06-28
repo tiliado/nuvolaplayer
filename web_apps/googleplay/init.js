@@ -25,51 +25,26 @@
 (function(Nuvola)
 {
 
-var LAST_URI = "web_app.last_uri";
+var WebApp = Nuvola.$WebApp();
 
-Nuvola.Actions.addAction("playback", "win", "thumbs-up", "Thumbs up", null, null, null, true);
-Nuvola.Actions.addAction("playback", "win", "thumbs-down", "Thumbs down", null, null, null, true);
-var ratingOptions = [
-	// Variant? parameter, string? label, string? mnemo_label, string? icon, string? keybinding
-	[0, "Rating: 0 stars", null, null, null, null],
-	[1, "Rating: 1 star", null, null, null, null],
-	[2, "Rating: 2 stars", null, null, null, null],
-	[3, "Rating: 3 stars", null, null, null, null],
-	[4, "Rating: 4 stars", null, null, null, null],
-	[5, "Rating: 5 stars", null, null, null, null]
-];
-Nuvola.Actions.addRadioAction("playback", "win", "rating", 0, ratingOptions);
-
-var Initialization = function()
+WebApp.onInitAppRunner = function(emitter, values, entries)
 {
-	this.allowedURI = new RegExp(Nuvola.meta.allowed_uri);
-	Nuvola.Core.connect("home-page", this, "onHomePage");
-	Nuvola.Core.connect("last-page", this, "onLastPage");
-	Nuvola.Core.connect("navigation-request", this, "onNavigationRequest");
-	Nuvola.Core.connect("uri-changed", this, "onURIChanged");
+	Nuvola.WebAppPrototype.onInitAppRunner.call(this, emitter, values, entries);
+	
+	Nuvola.Actions.addAction("playback", "win", "thumbs-up", "Thumbs up", null, null, null, true);
+	Nuvola.Actions.addAction("playback", "win", "thumbs-down", "Thumbs down", null, null, null, true);
+	var ratingOptions = [
+		// Variant? parameter, string? label, string? mnemo_label, string? icon, string? keybinding
+		[0, "Rating: 0 stars", null, null, null, null],
+		[1, "Rating: 1 star", null, null, null, null],
+		[2, "Rating: 2 stars", null, null, null, null],
+		[3, "Rating: 3 stars", null, null, null, null],
+		[4, "Rating: 4 stars", null, null, null, null],
+		[5, "Rating: 5 stars", null, null, null, null]
+	];
+	Nuvola.Actions.addRadioAction("playback", "win", "rating", 0, ratingOptions);
 }
 
-Initialization.prototype.onHomePage = function(object, result)
-{
-	result.url = Nuvola.meta.home_url;
-}
-
-Initialization.prototype.onLastPage = function(object, result)
-{
-	result.url = Nuvola.Config.get(LAST_URI);
-}
-
-
-Initialization.prototype.onNavigationRequest = function(object, request)
-{
-	request.approved = this.allowedURI.test(request.url);
-}
-
-Initialization.prototype.onURIChanged = function(object, uri)
-{
-	Nuvola.Config.set(LAST_URI, uri);
-}
-
-Nuvola.initialization = new Initialization();
+WebApp.start();
 
 })(this);  // function(Nuvola)
