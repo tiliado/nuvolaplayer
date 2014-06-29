@@ -28,7 +28,7 @@
 
 var State = Nuvola.PlaybackState;
 var PlayerAction = Nuvola.PlayerAction;
-var player = Nuvola.Player;
+var player = Nuvola.$object(Nuvola.PlayerPrototype);
 var ACTION_THUMBS_UP = "thumbs-up";
 var ACTION_THUMBS_DOWN = "thumbs-down";
 var ACTION_RATING = "rating";

@@ -47,9 +47,9 @@ var PlaybackState = {
 	PLAYING: 2,
 }
 
-var Player = $prototype(null);
+var PlayerPrototype = $prototype(null);
 
-Player.$init = function()
+PlayerPrototype.$init = function()
 {
 	this.state = PlaybackState.UNKNOWN;
 	this.song = null;
@@ -67,9 +67,9 @@ Player.$init = function()
 	Nuvola.Core.connect("init-app-runner", this, "onInitAppRunner");
 }
 
-Player.BACKGROUND_PLAYBACK = "player.background_playback";
+PlayerPrototype.BACKGROUND_PLAYBACK = "player.background_playback";
 
-Player.onInitAppRunner = function(emitter, values, entries)
+PlayerPrototype.onInitAppRunner = function(emitter, values, entries)
 {
 	Nuvola.Launcher.setActions(["quit"]);
 	Nuvola.Notification.setActions([PlayerAction.PLAY, PlayerAction.PAUSE, PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG]);
@@ -79,18 +79,18 @@ Player.onInitAppRunner = function(emitter, values, entries)
 	Nuvola.Actions.addAction("playback", "win", PlayerAction.STOP, "Stop", null, "media-playback-stop", null);
 	Nuvola.Actions.addAction("playback", "win", PlayerAction.PREV_SONG, "Previous song", null, "media-skip-backward", null);
 	Nuvola.Actions.addAction("playback", "win", PlayerAction.NEXT_SONG, "Next song", null, "media-skip-forward", null);
-	Nuvola.Config.setDefault(Player.BACKGROUND_PLAYBACK, true);
+	Nuvola.Config.setDefault(this.BACKGROUND_PLAYBACK, true);
 	this.updateMenu();
 	Nuvola.Core.connect("append-preferences", this, "onAppendPreferences");
 }
 
-Player.beforeFirstUpdate = function()
+PlayerPrototype.beforeFirstUpdate = function()
 {
 	Nuvola.Config.connect("config-changed", this, "onConfigChanged");
 	Nuvola.MediaKeys.connect("key-pressed", this, "onMediaKeyPressed");
 }
 
-Player.update = function()
+PlayerPrototype.update = function()
 {
 	if (this.firstUpdate)
 	{
@@ -171,7 +171,7 @@ Player.update = function()
 	}
 }
 
-Player.sendDevelInfo = function()
+PlayerPrototype.sendDevelInfo = function()
 {
 	var data = {};
 	var keys = ["song", "artist", "album", "artwork", "artworkFile", "baseActions", "extraActions"];
@@ -185,7 +185,7 @@ Player.sendDevelInfo = function()
 	Nuvola._sendMessageAsync("Nuvola.Player.sendDevelInfo", data);
 }
 
-Player.onArtworkDownloaded = function(res, changed)
+PlayerPrototype.onArtworkDownloaded = function(res, changed)
 {
 	if (!res.result)
 	{
@@ -199,7 +199,7 @@ Player.onArtworkDownloaded = function(res, changed)
 	this.updateTrackInfo(changed);
 }
 
-Player.updateTrackInfo = function(changed)
+PlayerPrototype.updateTrackInfo = function(changed)
 {
 	this.sendDevelInfo();
 	if (this.song)
@@ -232,7 +232,7 @@ Player.updateTrackInfo = function(changed)
 	}
 }
 
-Player.addExtraActions = function(actions)
+PlayerPrototype.addExtraActions = function(actions)
 {
 	var update = false;
 	for (var i = 0; i < actions.length; i++)
@@ -248,36 +248,36 @@ Player.addExtraActions = function(actions)
 		this.updateMenu();
 }
 
-Player.updateMenu = function()
+PlayerPrototype.updateMenu = function()
 {
 	Nuvola.MenuBar.setMenu("playback", "_Control", this.baseActions.concat(this.extraActions));
 }
 
-Player.setHideOnClose = function()
+PlayerPrototype.setHideOnClose = function()
 {
 	if (this.state === PlaybackState.PLAYING)
-		Nuvola.Core.setHideOnClose(Nuvola.Config.get(Player.BACKGROUND_PLAYBACK));
+		Nuvola.Core.setHideOnClose(Nuvola.Config.get(this.BACKGROUND_PLAYBACK));
 	else
 		Nuvola.Core.setHideOnClose(false);
 }
 
-Player.onAppendPreferences = function(object, values, entries)
+PlayerPrototype.onAppendPreferences = function(object, values, entries)
 {
-	values[Player.BACKGROUND_PLAYBACK] = Nuvola.Config.get(Player.BACKGROUND_PLAYBACK);
-	entries.push(["bool", Player.BACKGROUND_PLAYBACK, "Keep playing in background when window is closed"]);
+	values[this.BACKGROUND_PLAYBACK] = Nuvola.Config.get(this.BACKGROUND_PLAYBACK);
+	entries.push(["bool", this.BACKGROUND_PLAYBACK, "Keep playing in background when window is closed"]);
 }
 
-Player.onConfigChanged = function(emitter, key)
+PlayerPrototype.onConfigChanged = function(emitter, key)
 {
 	switch (key)
 	{
-	case Player.BACKGROUND_PLAYBACK:
+	case this.BACKGROUND_PLAYBACK:
 		this.setHideOnClose();
 		break;
 	}
 }
 
-Player.onMediaKeyPressed = function(emitter, key)
+PlayerPrototype.onMediaKeyPressed = function(emitter, key)
 {
 	var A = Nuvola.Actions;
 	switch (key)
@@ -304,5 +304,4 @@ Player.onMediaKeyPressed = function(emitter, key)
 // export public items
 Nuvola.PlayerAction = PlayerAction;
 Nuvola.PlaybackState = PlaybackState;
-Nuvola.PlayerPrototype = Player;
-Nuvola.Player = $object(Player);
+Nuvola.PlayerPrototype = PlayerPrototype;

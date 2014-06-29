@@ -24,6 +24,7 @@
 
 (function(Nuvola)
 {
+var player = Nuvola.$object(Nuvola.PlayerPrototype);
 
 var ADDRESS = "app.address";
 var HOST = "app.host";
