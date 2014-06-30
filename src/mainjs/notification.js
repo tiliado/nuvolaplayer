@@ -71,6 +71,14 @@ NotificationPrototype.setActions = function(actions)
 }
 
 /**
+ * Remove all actions available as buttons in notification.
+ */
+NotificationPrototype.removeActions = function()
+{
+	Nuvola._sendMessageAsync("Nuvola.Notification.removeActions", this.name);
+}
+
+/**
  * Shows notification.
  * 
  * @param force    ensure notification is shown if true, otherwise show it when suitable

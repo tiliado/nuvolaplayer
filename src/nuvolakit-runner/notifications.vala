@@ -74,6 +74,11 @@ public class Notification
 		this.actions = actions;
 	}
 	
+	public void remove_actions()
+	{
+		this.actions = {};
+	}
+	
 	public void show_once(bool add_actions)
 	{
 		if (!shown_before)
@@ -170,6 +175,7 @@ public class Extension : Nuvola.Extension
 		var server = controller.server;
 		server.add_handler("Nuvola.Notification.update", handle_update);
 		server.add_handler("Nuvola.Notification.setActions", handle_set_actions);
+		server.add_handler("Nuvola.Notification.removeActions", handle_remove_actions);
 		server.add_handler("Nuvola.Notification.show", handle_show);
 	}
 	
@@ -181,6 +187,7 @@ public class Extension : Nuvola.Extension
 		var server = controller.server;
 		server.remove_handler("Nuvola.Notification.update");
 		server.remove_handler("Nuvola.Notification.setActions");
+		server.remove_handler("Nuvola.Notification.removeActions");
 		server.remove_handler("Nuvola.Notification.show");
 		
 		Notify.uninit();
@@ -216,6 +223,11 @@ public class Extension : Nuvola.Extension
 		}
 		
 		get_or_create(name).set_actions(actions_found);
+	}
+	
+	public void remove_actions(string name)
+	{
+		get_or_create(name).remove_actions();
 	}
 	
 	public void show(string name, bool force)
@@ -263,6 +275,15 @@ public class Extension : Nuvola.Extension
 			actions[i++] = item.get_string();
 		
 		set_actions(name, (owned) actions);
+		return null;
+	}
+	
+	private Variant? handle_remove_actions(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	{
+		Diorite.Ipc.MessageServer.check_type_str(data, "(s)");
+		string name = null;
+		data.get("(s)", &name);
+		remove_actions(name);
 		return null;
 	}
 	
