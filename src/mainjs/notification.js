@@ -24,23 +24,76 @@
 
 require("prototype");
 
-var Notification = $prototype(null);
+/**
+ * Desktop notification.
+ */
+var NotificationPrototype = $prototype(null);
 
-Notification.update = function(title, text, iconName, iconPath)
+/**
+ * Creates new named notification.
+ * 
+ * @param String  name        notification name (identifier)
+ * @param Boolean resident    mark the notification as resident by default
+ */
+NotificationPrototype.$init = function(name, resident)
 {
-	Nuvola._sendMessageAsync("Nuvola.Notification.update", title, text, iconName || "", iconPath || "");
+	this.name = name;
+	this.resident = !!resident;
 }
 
-Notification.setActions = function(actions)
+/**
+ * Update properties of a notification
+ * 
+ * @param String title        short title
+ * @param String text         text of the notification
+ * @param String? iconName    name of icon for notification
+ * @param String? iconPath    path to an icon for notification
+ * @param Boolean resident    mark the notification as resident, use null/undefined to reuse last value
+ */
+NotificationPrototype.update = function(title, text, iconName, iconPath, resident)
 {
-	Nuvola._sendMessageAsync("Nuvola.Notification.setActions", actions);
+	if (resident == null)
+		resident = this.resident;
+	else
+		this.resident = !!resident;
+	
+	Nuvola._sendMessageAsync("Nuvola.Notification.update", this.name, title, text, iconName || "", iconPath || "", !!resident);
 }
 
-Notification.show = function()
+/**
+ * Set actions available as buttons in notification.
+ * 
+ * @param String[] actions    array of action names
+ */
+NotificationPrototype.setActions = function(actions)
 {
-	Nuvola._sendMessageAsync("Nuvola.Notification.show");
+	Nuvola._sendMessageAsync("Nuvola.Notification.setActions", this.name, actions);
+}
+
+/**
+ * Shows notification.
+ * 
+ * @param force    ensure notification is shown if true, otherwise show it when suitable
+ */
+NotificationPrototype.show = function(force)
+{
+	Nuvola._sendMessageAsync("Nuvola.Notification.show", this.name, !!force);
+}
+
+/**
+ * Manages desktop notifications.
+ */
+var NotificationsPrototype = $prototype(null);
+
+/**
+ * Convenience method to creates new named notification.
+ */
+NotificationsPrototype.getNamedNotification = function(name)
+{
+	return $object(NotificationPrototype, name);
 }
 
 // export public items
-Nuvola.NotificationPrototype = Notification;
-Nuvola.Notification = $object(Notification);
+Nuvola.NotificationPrototype = NotificationPrototype;
+Nuvola.NotificationsPrototype = NotificationsPrototype;
+Nuvola.Notifications = $object(NotificationsPrototype);

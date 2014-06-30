@@ -64,6 +64,7 @@ PlayerPrototype.$init = function()
 	this.firstUpdate = true;
 	this._artworkLoop = 0;
 	this.baseActions = [PlayerAction.TOGGLE_PLAY, PlayerAction.PLAY, PlayerAction.PAUSE, PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG];
+	this.notification = Nuvola.Notifications.getNamedNotification("mediaplayer", true);
 	Nuvola.Core.connect("init-app-runner", this, "onInitAppRunner");
 }
 
@@ -72,13 +73,13 @@ PlayerPrototype.BACKGROUND_PLAYBACK = "player.background_playback";
 PlayerPrototype.onInitAppRunner = function(emitter, values, entries)
 {
 	Nuvola.Launcher.setActions(["quit"]);
-	Nuvola.Notification.setActions([PlayerAction.PLAY, PlayerAction.PAUSE, PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG]);
 	Nuvola.Actions.addAction("playback", "win", PlayerAction.PLAY, "Play", null, "media-playback-start", null);
 	Nuvola.Actions.addAction("playback", "win", PlayerAction.PAUSE, "Pause", null, "media-playback-pause", null);
 	Nuvola.Actions.addAction("playback", "win", PlayerAction.TOGGLE_PLAY, "Toggle play/pause", null, null, null);
 	Nuvola.Actions.addAction("playback", "win", PlayerAction.STOP, "Stop", null, "media-playback-stop", null);
 	Nuvola.Actions.addAction("playback", "win", PlayerAction.PREV_SONG, "Previous song", null, "media-skip-backward", null);
 	Nuvola.Actions.addAction("playback", "win", PlayerAction.NEXT_SONG, "Next song", null, "media-skip-forward", null);
+	this.notification.setActions([PlayerAction.PLAY, PlayerAction.PAUSE, PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG]);
 	Nuvola.Config.setDefault(this.BACKGROUND_PLAYBACK, true);
 	this.updateMenu();
 	Nuvola.Core.connect("append-preferences", this, "onAppendPreferences");
@@ -215,9 +216,9 @@ PlayerPrototype.updateTrackInfo = function(changed)
 		else
 			message = Nuvola.format("by {1} from {2}", this.artist, this.album);
 		
-		Nuvola.Notification.update(title, message, this.artworkFile ? null : "nuvolaplayer", this.artworkFile);
+		this.notification.update(title, message, this.artworkFile ? null : "nuvolaplayer", this.artworkFile);
 		if (this.state === PlaybackState.PLAYING)
-			Nuvola.Notification.show();
+			this.notification.show();
 		
 		if (this.artist)
 			var tooltip = Nuvola.format("{1} by {2}", this.song, this.artist);
