@@ -76,70 +76,81 @@ WebApp.onPageReady = function(event)
 
 WebApp.update = function()
 {
+	var track = {};
 	try
 	{
-		player.artwork = document.getElementById('playingAlbumArt').src;
+		track.artLocation = document.getElementById('playingAlbumArt').src;
 	}
 	catch(e)
 	{
-		player.artwork = null;
+		track.artLocation =  null;
 	}
 	
 	try
 	{
 		var elm = document.getElementById('playerSongTitle').firstChild;
-		player.song = elm.innerText || elm.textContent;
+		track.title = elm.innerText || elm.textContent;
 	}
 	catch(e)
 	{
-		player.song = null;
+		track.title = null;
 	}
 	
 	try
 	{
 		var elm = document.getElementById('player-artist').firstChild;
-		player.artist = elm.innerText || elm.textContent;
+		track.artist = elm.innerText || elm.textContent;
 	}
 	catch (e)
 	{
-		player.artist = null;
+		track.artist = null;
 	}
 	
 	try
 	{
 		var elm = document.querySelector("#playerSongInfo .player-album");
-		player.album = elm.innerText || elm.textContent;
+		track.album = elm.innerText || elm.textContent;
 	}
 	catch (e)
 	{
-		player.album = null;
+		track.album = null;
 	}
 	
+	player.setTrack(track);
+	
+	var state = State.UNKNOWN;
+	var prevSong, nextSong, canPlay, canPause;
 	try
 	{
 		var buttons = document.querySelector("#player .player-middle");
 		var pp = buttons.childNodes[2];
 		if (pp.disabled === true)
-			player.state = State.UNKNOWN;
+			state = State.UNKNOWN;
 		else if (pp.className == "flat-button playing")
-			player.state = State.PLAYING;
+			state = State.PLAYING;
 		else
-			player.state = State.PAUSED;
+			state = State.PAUSED;
 		
-		if (player.state !== State.UNKNOWN)
+		if (state !== State.UNKNOWN)
 		{
-			player.prevSong = buttons.childNodes[1].disabled === false;
-			player.nextSong = buttons.childNodes[3].disabled === false;
+			prevSong = buttons.childNodes[1].disabled === false;
+			nextSong = buttons.childNodes[3].disabled === false;
 		}
 		else
 		{
-			player.prevSong = player.nextSong = false;
+			prevSong = nextSong = false;
 		}
 	}
 	catch (e)
 	{
-		player.prevSong = player.nextSong = false;
+		prevSong = nextSong = false;
 	}
+	
+	player.setPlaybackState(state);
+	player.setCanPause(state === State.PLAYING);
+	player.setCanPlay(state === State.PAUSED);
+	player.setCanGoPrev(prevSong);
+	player.setCanGoNext(nextSong);
 	
 	// null = disabled; true/false toggled on/off
 	var thumbsUp, thumbsDown;
@@ -181,8 +192,6 @@ WebApp.update = function()
 	{
 		starRating = null;
 	}
-	
-	player.update();
 	
 	if (this.thumbsUp !== thumbsUp)
 	{

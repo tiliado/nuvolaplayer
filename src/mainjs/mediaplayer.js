@@ -52,14 +52,11 @@ var PlayerPrototype = $prototype(null);
 PlayerPrototype.$init = function()
 {
 	this.state = PlaybackState.UNKNOWN;
-	this.song = null;
-	this.artist = null;
-	this.album = null;
-	this.artwork = null;
 	this.artworkFile = null;
-	this.prevSong = null;
-	this.nextSong = null;
-	this.prevData = {};
+	this.canGoPrev = null;
+	this.canGoNext = null;
+	this.canPlay = null;
+	this.canPause = null;
 	this.extraActions = [];
 	this._artworkLoop = 0;
 	this.baseActions = [PlayerAction.TOGGLE_PLAY, PlayerAction.PLAY, PlayerAction.PAUSE, PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG];
@@ -89,75 +86,33 @@ PlayerPrototype.onInitWebWorker = function(emitter)
 {
 	Nuvola.Config.connect("config-changed", this, "onConfigChanged");
 	Nuvola.MediaKeys.connect("key-pressed", this, "onMediaKeyPressed");
+	this.track = {
+		"title": undefined,
+		"artist": undefined,
+		"album": undefined,
+		"artLocation": undefined
+	};
+	this._setActions();
 }
 
-PlayerPrototype.update = function()
+PlayerPrototype.setTrack = function(track)
 {
-	var changed = [];
-	var keys = ["song", "artist", "album", "artwork", "state", "prevSong", "nextSong"];
-	for (var i = 0; i < keys.length; i++)
-	{
-		var key = keys[i];
-		if (this.prevData[key] !== this[key])
-		{
-			this.prevData[key] = this[key];
-			changed.push(key);
-		}
-	}
+	var changed = Nuvola.objectDiff(this.track, track);
+	this.track = track;
 	
 	if (!changed.length)
 		return;
-	
-	var trayIconActions = [];
-	if (this.state === PlaybackState.PLAYING || this.state === PlaybackState.PAUSED)
-	{
-		trayIconActions = [this.state === this.STATE_PAUSED ? PlayerAction.PLAY : PlayerAction.PAUSE, PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG];
-		trayIconActions = trayIconActions.concat(this.extraActions);
-	}
-	
-	trayIconActions.push("quit");
-	Nuvola.Launcher.setActions(trayIconActions);
-	
-	
-	if (Nuvola.inArray(changed, "state"))
-	{
-		switch (this.state)
-		{
-		case PlaybackState.PLAYING:
-			Nuvola.Actions.setEnabled(PlayerAction.TOGGLE_PLAY, true);
-			Nuvola.Actions.setEnabled(PlayerAction.PLAY, false);
-			Nuvola.Actions.setEnabled(PlayerAction.PAUSE, true);
-			break;
-		case PlaybackState.PAUSED:
-			Nuvola.Actions.setEnabled(PlayerAction.TOGGLE_PLAY, true);
-			Nuvola.Actions.setEnabled(PlayerAction.PLAY, true);
-			Nuvola.Actions.setEnabled(PlayerAction.PAUSE, false);
-			break;
-		default:
-			Nuvola.Actions.setEnabled(PlayerAction.TOGGLE_PLAY, false);
-			Nuvola.Actions.setEnabled(PlayerAction.PLAY, false);
-			Nuvola.Actions.setEnabled(PlayerAction.PAUSE, false);
-			break;
-		}
-		this.setHideOnClose();
-	}
-	
-	if (Nuvola.inArray(changed, "prevSong"))
-		Nuvola.Actions.setEnabled(PlayerAction.PREV_SONG, this.prevSong === true);
-	
-	if (Nuvola.inArray(changed, "nextSong"))
-		Nuvola.Actions.setEnabled(PlayerAction.NEXT_SONG, this.nextSong === true);
-	
-	if (!this.artwork)
+		
+	if (!track.artLocation)
 		this.artworkFile = null;
 	
-	if (Nuvola.inArray(changed, "artwork") && this.artwork)
+	if (Nuvola.inArray(changed, "artLocation") && track.artLocation)
 	{
 		this.artworkFile = null;
 		var artworkId = this._artworkLoop++;
 		if (this._artworkLoop > 9)
 			this._artworkLoop = 0;
-		Nuvola.Browser.downloadFileAsync(this.artwork, "player.artwork." + artworkId, this.onArtworkDownloaded.bind(this), changed);
+		Nuvola.Browser.downloadFileAsync(track.artLocation, "player.artwork." + artworkId, this.onArtworkDownloaded.bind(this), changed);
 		this.sendDevelInfo();
 	}
 	else
@@ -166,14 +121,78 @@ PlayerPrototype.update = function()
 	}
 }
 
+PlayerPrototype.setPlaybackState = function(state)
+{
+	if (this.state !== state)
+	{
+		this.state = state;
+		this.setHideOnClose();
+		this._setActions();
+		this.updateTrackInfo(["state"]);
+	}
+}
+
+PlayerPrototype.setCanGoNext = function(canGoNext)
+{
+	if (this.canGoNext !== canGoNext)
+	{
+		this.canGoNext = canGoNext;
+		Nuvola.Actions.setEnabled(PlayerAction.NEXT_SONG, !!canGoNext);
+		this.sendDevelInfo();
+	}
+}
+
+PlayerPrototype.setCanGoPrev = function(canGoPrev)
+{
+	if (this.canGoPrev !== canGoPrev)
+	{
+		this.canGoPrev = canGoPrev;
+		Nuvola.Actions.setEnabled(PlayerAction.PREV_SONG, !!canGoPrev);
+		this.sendDevelInfo();
+	}
+}
+
+PlayerPrototype.setCanPlay = function(canPlay)
+{
+	if (this.canPlay !== canPlay)
+	{
+		this.canPlay = canPlay;
+		Nuvola.Actions.setEnabled(PlayerAction.PLAY, !!canPlay);
+		Nuvola.Actions.setEnabled(PlayerAction.TOGGLE_PLAY, !!(this.canPlay || this.canPause));
+		this.sendDevelInfo();
+	}
+}
+
+PlayerPrototype.setCanPause = function(canPause)
+{
+	if (this.canPause !== canPause)
+	{
+		this.canPause = canPause;
+		Nuvola.Actions.setEnabled(PlayerAction.PAUSE, !!canPause);
+		Nuvola.Actions.setEnabled(PlayerAction.TOGGLE_PLAY, !!(this.canPlay || this.canPause));
+		this.sendDevelInfo();
+	}
+}
+
+PlayerPrototype._setActions = function()
+{
+	var actions = [this.state === PlaybackState.PLAYING ? PlayerAction.PAUSE : PlayerAction.PLAY, PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG];
+	actions = actions.concat(this.extraActions);
+	actions.push("quit");
+	Nuvola.Launcher.setActions(actions);
+}
+
 PlayerPrototype.sendDevelInfo = function()
 {
 	var data = {};
-	var keys = ["song", "artist", "album", "artwork", "artworkFile", "baseActions", "extraActions"];
+	var keys = ["title", "artist", "album", "artLocation", "artworkFile", "baseActions", "extraActions"];
 	for (var i = 0; i < keys.length; i++)
 	{
 		var key = keys[i];
-		data[key] = this[key];
+		if (this.track.hasOwnProperty(key))
+			data[key] = this.track[key];
+		else
+			data[key] = this[key];
 	}
 	
 	data.state = ["unknown", "paused", "playing"][this.state];
@@ -197,28 +216,26 @@ PlayerPrototype.onArtworkDownloaded = function(res, changed)
 PlayerPrototype.updateTrackInfo = function(changed)
 {
 	this.sendDevelInfo();
-	if (this.song)
+	var track = this.track;
+	
+	if (track.title)
 	{
-		var title = this.song;
+		var title = track.title;
 		var message;
-		if (!this.artist && !this.album)
+		if (!track.artist && !track.album)
 			message = "by unknown artist";
-		else if(!this.artist)
-			message = Nuvola.format("from {1}", this.album);
-		else if(!this.album)
-			message = Nuvola.format("by {1}", this.artist);
+		else if(!track.artist)
+			message = Nuvola.format("from {1}", track.album);
+		else if(!track.album)
+			message = Nuvola.format("by {1}", track.artist);
 		else
-			message = Nuvola.format("by {1} from {2}", this.artist, this.album);
+			message = Nuvola.format("by {1} from {2}", track.artist, track.album);
 		
 		this.notification.update(title, message, this.artworkFile ? null : "nuvolaplayer", this.artworkFile);
 		if (this.state === PlaybackState.PLAYING)
 			this.notification.show();
 		
-		if (this.artist)
-			var tooltip = Nuvola.format("{1} by {2}", this.song, this.artist);
-		else
-			var tooltip = this.song;
-		
+		var tooltip = track.artist ? Nuvola.format("{1} by {2}", track.title, track.artist) : track.title;
 		Nuvola.Launcher.setTooltip(tooltip);
 	}
 	else

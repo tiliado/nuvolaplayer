@@ -145,7 +145,7 @@ public class Extension : Nuvola.Extension
 		Variant dict;
 		data.get("(@a{smv})", out dict);
 		message("Song %s %s", dict.get_type_string(), dict.print(true));
-		song.label = variant_dict_str(dict, "song") ?? "(null)";
+		song.label = variant_dict_str(dict, "title") ?? "(null)";
 		artist.label = variant_dict_str(dict, "artist") ?? "(null)";
 		album.label = variant_dict_str(dict, "album") ?? "(null)";
 		state.label = variant_dict_str(dict, "state") ?? "(null)";
