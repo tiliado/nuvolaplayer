@@ -66,6 +66,7 @@ WebApp.onInitWebWorker = function(emitter)
 	this.starRating = undefined;
 	this.starRatingEnabled = undefined;
 	this.thumbRatingEnabled = undefined;
+	this.state = State.UNKNOWN;
 	document.addEventListener("DOMContentLoaded", this.onPageReady.bind(this));
 }
 
@@ -119,20 +120,20 @@ WebApp.update = function()
 	
 	player.setTrack(track);
 	
-	var state = State.UNKNOWN;
+	this.state = State.UNKNOWN;
 	var prevSong, nextSong, canPlay, canPause;
 	try
 	{
 		var buttons = document.querySelector("#player .player-middle");
 		var pp = buttons.childNodes[2];
 		if (pp.disabled === true)
-			state = State.UNKNOWN;
+			this.state = State.UNKNOWN;
 		else if (pp.className == "flat-button playing")
-			state = State.PLAYING;
+			this.state = State.PLAYING;
 		else
-			state = State.PAUSED;
+			this.state = State.PAUSED;
 		
-		if (state !== State.UNKNOWN)
+		if (this.state !== State.UNKNOWN)
 		{
 			prevSong = buttons.childNodes[1].disabled === false;
 			nextSong = buttons.childNodes[3].disabled === false;
@@ -147,9 +148,9 @@ WebApp.update = function()
 		prevSong = nextSong = false;
 	}
 	
-	player.setPlaybackState(state);
-	player.setCanPause(state === State.PLAYING);
-	player.setCanPlay(state === State.PAUSED);
+	player.setPlaybackState(this.state);
+	player.setCanPause(this.state === State.PLAYING);
+	player.setCanPlay(this.state === State.PAUSED);
 	player.setCanGoPrev(prevSong);
 	player.setCanGoNext(nextSong);
 	
@@ -249,12 +250,12 @@ WebApp.onActionActivated = function(object, name, param)
 		Nuvola.clickOnElement(play_pause);
 		break;
 	case PlayerAction.PLAY:
-		if (player.state != State.PLAYING)
+		if (this.state != State.PLAYING)
 			Nuvola.clickOnElement(play_pause);
 		break;
 	case PlayerAction.PAUSE:
 	case PlayerAction.STOP:
-		if (player.state == State.PLAYING)
+		if (this.state == State.PLAYING)
 			Nuvola.clickOnElement(play_pause);
 		break;
 	case PlayerAction.PREV_SONG:
