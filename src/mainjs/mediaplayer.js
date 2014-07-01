@@ -61,11 +61,11 @@ PlayerPrototype.$init = function()
 	this.nextSong = null;
 	this.prevData = {};
 	this.extraActions = [];
-	this.firstUpdate = true;
 	this._artworkLoop = 0;
 	this.baseActions = [PlayerAction.TOGGLE_PLAY, PlayerAction.PLAY, PlayerAction.PAUSE, PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG];
 	this.notification = Nuvola.Notifications.getNamedNotification("mediaplayer", true);
 	Nuvola.Core.connect("init-app-runner", this, "onInitAppRunner");
+	Nuvola.Core.connect("init-web-worker", this, "onInitWebWorker");
 }
 
 PlayerPrototype.BACKGROUND_PLAYBACK = "player.background_playback";
@@ -85,7 +85,7 @@ PlayerPrototype.onInitAppRunner = function(emitter, values, entries)
 	Nuvola.Core.connect("append-preferences", this, "onAppendPreferences");
 }
 
-PlayerPrototype.beforeFirstUpdate = function()
+PlayerPrototype.onInitWebWorker = function(emitter)
 {
 	Nuvola.Config.connect("config-changed", this, "onConfigChanged");
 	Nuvola.MediaKeys.connect("key-pressed", this, "onMediaKeyPressed");
@@ -93,12 +93,6 @@ PlayerPrototype.beforeFirstUpdate = function()
 
 PlayerPrototype.update = function()
 {
-	if (this.firstUpdate)
-	{
-		this.beforeFirstUpdate();
-		this.firstUpdate = false;
-	}
-	
 	var changed = [];
 	var keys = ["song", "artist", "album", "artwork", "state", "prevSong", "nextSong"];
 	for (var i = 0; i < keys.length; i++)
