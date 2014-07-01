@@ -99,3 +99,23 @@ Nuvola.makeElement = function(name, attributes, text)
 	
 	return elm;
 }
+
+/**
+ * Compares own properties of two objects
+ * 
+ * @param Object object1    the first object to compare
+ * @param Object object2    the second object to compare
+ * @return Array of names of different properties
+ */
+Nuvola.objectDiff = function(object1, object2)
+{
+	var changes = [];
+	for (var property in object1)
+	{
+		if (object1.hasOwnProperty(property)
+		&& (!object2.hasOwnProperty(property) || object1[property] !== object2[property]))
+			changes.push(property);
+	}
+	
+	return changes;
+}
