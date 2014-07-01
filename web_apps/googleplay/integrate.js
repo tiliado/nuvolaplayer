@@ -343,7 +343,7 @@ WebApp.toggleStarRating = function(enabled)
 {
 	if (enabled && this.starRatingEnabled !== true)
 	{
-		Nuvola.Player.addExtraActions(STARS_ACTIONS);
+		player.addExtraActions(STARS_ACTIONS);
 		this.starRatingEnabled = true;
 	}
 }
@@ -352,7 +352,7 @@ WebApp.toggleThumbRating = function(enabled)
 {
 	if (enabled && this.thumbRatingEnabled !== true)
 	{
-		Nuvola.Player.addExtraActions(THUMBS_ACTIONS);
+		player.addExtraActions(THUMBS_ACTIONS);
 		this.thumbRatingEnabled = true;
 	}
 }
