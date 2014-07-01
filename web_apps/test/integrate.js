@@ -24,7 +24,7 @@
 
 (function(Nuvola)
 {
-var player = Nuvola.$object(Nuvola.PlayerPrototype);
+var player = Nuvola.$object(Nuvola.MediaPlayer);
 
 var ADDRESS = "app.address";
 var HOST = "app.host";

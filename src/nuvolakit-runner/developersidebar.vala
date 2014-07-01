@@ -101,7 +101,7 @@ public class Extension : Nuvola.Extension
 		grid.show_all();
 		
 		controller.main_window.sidebar.add_page("developersidebar", _("Developer"), grid);
-		controller.server.add_handler("Nuvola.Player.sendDevelInfo", handle_send_devel_info);
+		controller.server.add_handler("Nuvola.MediaPlayer.sendDevelInfo", handle_send_devel_info);
 	}
 	
 	/**
@@ -109,7 +109,7 @@ public class Extension : Nuvola.Extension
 	 */
 	public override void unload()
 	{
-		controller.server.remove_handler("Nuvola.Player.sendDevelInfo");
+		controller.server.remove_handler("Nuvola.MediaPlayer.sendDevelInfo");
 		if (grid != null)
 		{
 			controller.main_window.sidebar.remove_page(grid);
