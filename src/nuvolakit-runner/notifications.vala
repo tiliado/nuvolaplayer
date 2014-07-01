@@ -177,6 +177,7 @@ public class Extension : Nuvola.Extension
 		server.add_handler("Nuvola.Notification.setActions", handle_set_actions);
 		server.add_handler("Nuvola.Notification.removeActions", handle_remove_actions);
 		server.add_handler("Nuvola.Notification.show", handle_show);
+		server.add_handler("Nuvola.Notifications.showNotification", handle_show_notification);
 	}
 	
 	/**
@@ -189,6 +190,7 @@ public class Extension : Nuvola.Extension
 		server.remove_handler("Nuvola.Notification.setActions");
 		server.remove_handler("Nuvola.Notification.removeActions");
 		server.remove_handler("Nuvola.Notification.show");
+		server.remove_handler("Nuvola.Notifications.showNotification");
 		
 		Notify.uninit();
 	}
@@ -239,6 +241,16 @@ public class Extension : Nuvola.Extension
 			notification.show(add_actions);
 		else if (notification.resident)
 				notification.show_once(add_actions);
+	}
+	
+	public void show_anonymous(string summary, string body, string? icon_name, string? icon_path, bool force)
+	{
+		if (force || !main_window.is_active)
+		{
+			var notification = new Notification();
+			notification.update(summary, body, icon_name, icon_path, false);
+			notification.show(false);
+		}
 	}
 	
 	private void show_notifications()
@@ -294,6 +306,19 @@ public class Extension : Nuvola.Extension
 		bool force = false;
 		data.get("(sb)", &name, &force);
 		show(name, force);
+		return null;
+	}
+	
+	private Variant? handle_show_notification(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	{
+		Diorite.Ipc.MessageServer.check_type_str(data, "(ssssb)");
+		string summary = null;
+		string body = null;
+		string icon_name = null;
+		string icon_path = null;
+		bool force = false;
+		data.get("(ssssb)", &summary, &body, &icon_name, &icon_path, &force);
+		show_anonymous(summary, body, icon_name, icon_path, force);
 		return null;
 	}
 }

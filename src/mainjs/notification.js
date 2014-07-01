@@ -101,6 +101,20 @@ NotificationsPrototype.getNamedNotification = function(name)
 	return $object(NotificationPrototype, name);
 }
 
+/**
+ * Instantly show anonymous notification.
+ * 
+ * @param String title        short title
+ * @param String text         text of the notification
+ * @param String? iconName    name of icon for notification
+ * @param String? iconPath    path to an icon for notification
+ * @param Boolean force       ensure notification is shown if true, otherwise show it when suitable
+ */
+NotificationsPrototype.showNotification = function(title, text, iconName, iconPath, force)
+{
+	Nuvola._sendMessageAsync("Nuvola.Notifications.showNotification", title, text, iconName || "", iconPath || "", !!force);
+}
+
 // export public items
 Nuvola.NotificationPrototype = NotificationPrototype;
 Nuvola.NotificationsPrototype = NotificationsPrototype;
