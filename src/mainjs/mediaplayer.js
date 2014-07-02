@@ -103,36 +103,6 @@ MediaPlayer.$init = function()
 	Nuvola.Core.connect("init-web-worker", this, "_onInitWebWorker");
 }
 
-MediaPlayer._BACKGROUND_PLAYBACK = "player.background_playback";
-
-MediaPlayer._onInitAppRunner = function(emitter, values, entries)
-{
-	Nuvola.Launcher.setActions(["quit"]);
-	Nuvola.Actions.addAction("playback", "win", PlayerAction.PLAY, "Play", null, "media-playback-start", null);
-	Nuvola.Actions.addAction("playback", "win", PlayerAction.PAUSE, "Pause", null, "media-playback-pause", null);
-	Nuvola.Actions.addAction("playback", "win", PlayerAction.TOGGLE_PLAY, "Toggle play/pause", null, null, null);
-	Nuvola.Actions.addAction("playback", "win", PlayerAction.STOP, "Stop", null, "media-playback-stop", null);
-	Nuvola.Actions.addAction("playback", "win", PlayerAction.PREV_SONG, "Previous song", null, "media-skip-backward", null);
-	Nuvola.Actions.addAction("playback", "win", PlayerAction.NEXT_SONG, "Next song", null, "media-skip-forward", null);
-	this._notification.setActions([PlayerAction.PLAY, PlayerAction.PAUSE, PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG]);
-	Nuvola.Config.setDefault(this._BACKGROUND_PLAYBACK, true);
-	this._updateMenu();
-	Nuvola.Core.connect("append-preferences", this, "_onAppendPreferences");
-}
-
-MediaPlayer._onInitWebWorker = function(emitter)
-{
-	Nuvola.Config.connect("config-changed", this, "_onConfigChanged");
-	Nuvola.MediaKeys.connect("key-pressed", this, "_onMediaKeyPressed");
-	this._track = {
-		"title": undefined,
-		"artist": undefined,
-		"album": undefined,
-		"artLocation": undefined
-	};
-	this._setActions();
-}
-
 /**
  * Set info about currently playing track.
  * 
@@ -258,6 +228,62 @@ MediaPlayer.setCanPause = function(canPause)
 	}
 }
 
+/**
+ * Add actions for media player capabilities
+ * 
+ * For example: star rating, thumbs up/down, like/love/unlike.
+ * 
+ * Actions that have been already added are ignored.
+ * 
+ * @param Array of String actions    names of actions
+ */
+MediaPlayer.addExtraActions = function(actions)
+{
+	var update = false;
+	for (var i = 0; i < actions.length; i++)
+	{
+		var action = actions[i];
+		if (!Nuvola.inArray(this._extraActions, action))
+		{
+			this._extraActions.push(action);
+			update = true;
+		}
+	}
+	
+	if (update)
+		this._updateMenu();
+}
+
+MediaPlayer._BACKGROUND_PLAYBACK = "player.background_playback";
+
+MediaPlayer._onInitAppRunner = function(emitter, values, entries)
+{
+	Nuvola.Launcher.setActions(["quit"]);
+	Nuvola.Actions.addAction("playback", "win", PlayerAction.PLAY, "Play", null, "media-playback-start", null);
+	Nuvola.Actions.addAction("playback", "win", PlayerAction.PAUSE, "Pause", null, "media-playback-pause", null);
+	Nuvola.Actions.addAction("playback", "win", PlayerAction.TOGGLE_PLAY, "Toggle play/pause", null, null, null);
+	Nuvola.Actions.addAction("playback", "win", PlayerAction.STOP, "Stop", null, "media-playback-stop", null);
+	Nuvola.Actions.addAction("playback", "win", PlayerAction.PREV_SONG, "Previous song", null, "media-skip-backward", null);
+	Nuvola.Actions.addAction("playback", "win", PlayerAction.NEXT_SONG, "Next song", null, "media-skip-forward", null);
+	this._notification.setActions([PlayerAction.PLAY, PlayerAction.PAUSE, PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG]);
+	Nuvola.Config.setDefault(this._BACKGROUND_PLAYBACK, true);
+	this._updateMenu();
+	Nuvola.Core.connect("append-preferences", this, "_onAppendPreferences");
+}
+
+MediaPlayer._onInitWebWorker = function(emitter)
+{
+	Nuvola.Config.connect("config-changed", this, "_onConfigChanged");
+	Nuvola.MediaKeys.connect("key-pressed", this, "_onMediaKeyPressed");
+	this._track = {
+		"title": undefined,
+		"artist": undefined,
+		"album": undefined,
+		"artLocation": undefined
+	};
+	this._setActions();
+}
+
 MediaPlayer._setActions = function()
 {
 	var actions = [this._state === PlaybackState.PLAYING ? PlayerAction.PAUSE : PlayerAction.PLAY, PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG];
@@ -323,32 +349,6 @@ MediaPlayer._updateTrackInfo = function(changed)
 	{
 		Nuvola.Launcher.setTooltip("Nuvola Player");
 	}
-}
-
-/**
- * Add actions for media player capabilities
- * 
- * For example: star rating, thumbs up/down, like/love/unlike.
- * 
- * Actions that have been already added are ignored.
- * 
- * @param Array of String actions    names of actions
- */
-MediaPlayer.addExtraActions = function(actions)
-{
-	var update = false;
-	for (var i = 0; i < actions.length; i++)
-	{
-		var action = actions[i];
-		if (!Nuvola.inArray(this._extraActions, action))
-		{
-			this._extraActions.push(action);
-			update = true;
-		}
-	}
-	
-	if (update)
-		this._updateMenu();
 }
 
 MediaPlayer._updateMenu = function()
