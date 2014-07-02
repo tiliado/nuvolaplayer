@@ -32,5 +32,5 @@ MenuBar.setMenu = function(id, label, actions)
 }
 
 // export public items
-Nuvola.MenuBarPrototype = MenuBar;
-Nuvola.MenuBar = $object(MenuBar);
+Nuvola.MenuBar = MenuBar;
+Nuvola.menuBar = $object(MenuBar);

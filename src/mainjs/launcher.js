@@ -52,5 +52,5 @@ Launcher.removeAction = function(action)
 }
 
 // export public items
-Nuvola.LauncherPrototype = Launcher;
-Nuvola.Launcher = $object(Launcher);
+Nuvola.Launcher = Launcher;
+Nuvola.launcher = $object(Launcher);

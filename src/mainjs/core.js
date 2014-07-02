@@ -60,5 +60,5 @@ Core.setHideOnClose = function(hide)
 }
 
 // export public items
-Nuvola.CorePrototype = Core;
-Nuvola.Core = $object(Core);
+Nuvola.Core = Core;
+Nuvola.core = $object(Core);

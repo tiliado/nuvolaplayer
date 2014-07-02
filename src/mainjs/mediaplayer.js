@@ -98,9 +98,9 @@ MediaPlayer.$init = function()
 	this._extraActions = [];
 	this._artworkLoop = 0;
 	this._baseActions = [PlayerAction.TOGGLE_PLAY, PlayerAction.PLAY, PlayerAction.PAUSE, PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG];
-	this._notification = Nuvola.Notifications.getNamedNotification("mediaplayer", true);
-	Nuvola.Core.connect("init-app-runner", this, "_onInitAppRunner");
-	Nuvola.Core.connect("init-web-worker", this, "_onInitWebWorker");
+	this._notification = Nuvola.notifications.getNamedNotification("mediaplayer", true);
+	Nuvola.core.connect("init-app-runner", this, "_onInitAppRunner");
+	Nuvola.core.connect("init-web-worker", this, "_onInitWebWorker");
 }
 
 /**
@@ -131,7 +131,7 @@ MediaPlayer.setTrack = function(track)
 		var artworkId = this._artworkLoop++;
 		if (this._artworkLoop > 9)
 			this._artworkLoop = 0;
-		Nuvola.Browser.downloadFileAsync(track.artLocation, "player.artwork." + artworkId, this._onArtworkDownloaded.bind(this), changed);
+		Nuvola.browser.downloadFileAsync(track.artLocation, "player.artwork." + artworkId, this._onArtworkDownloaded.bind(this), changed);
 		this._sendDevelInfo();
 	}
 	else
@@ -170,7 +170,7 @@ MediaPlayer.setCanGoNext = function(canGoNext)
 	if (this._canGoNext !== canGoNext)
 	{
 		this._canGoNext = canGoNext;
-		Nuvola.Actions.setEnabled(PlayerAction.NEXT_SONG, !!canGoNext);
+		Nuvola.actions.setEnabled(PlayerAction.NEXT_SONG, !!canGoNext);
 		this._sendDevelInfo();
 	}
 }
@@ -187,7 +187,7 @@ MediaPlayer.setCanGoPrev = function(canGoPrev)
 	if (this._canGoPrev !== canGoPrev)
 	{
 		this._canGoPrev = canGoPrev;
-		Nuvola.Actions.setEnabled(PlayerAction.PREV_SONG, !!canGoPrev);
+		Nuvola.actions.setEnabled(PlayerAction.PREV_SONG, !!canGoPrev);
 		this._sendDevelInfo();
 	}
 }
@@ -204,8 +204,8 @@ MediaPlayer.setCanPlay = function(canPlay)
 	if (this._canPlay !== canPlay)
 	{
 		this._canPlay = canPlay;
-		Nuvola.Actions.setEnabled(PlayerAction.PLAY, !!canPlay);
-		Nuvola.Actions.setEnabled(PlayerAction.TOGGLE_PLAY, !!(this._canPlay || this._canPause));
+		Nuvola.actions.setEnabled(PlayerAction.PLAY, !!canPlay);
+		Nuvola.actions.setEnabled(PlayerAction.TOGGLE_PLAY, !!(this._canPlay || this._canPause));
 		this._sendDevelInfo();
 	}
 }
@@ -222,8 +222,8 @@ MediaPlayer.setCanPause = function(canPause)
 	if (this._canPause !== canPause)
 	{
 		this._canPause = canPause;
-		Nuvola.Actions.setEnabled(PlayerAction.PAUSE, !!canPause);
-		Nuvola.Actions.setEnabled(PlayerAction.TOGGLE_PLAY, !!(this._canPlay || this._canPause));
+		Nuvola.actions.setEnabled(PlayerAction.PAUSE, !!canPause);
+		Nuvola.actions.setEnabled(PlayerAction.TOGGLE_PLAY, !!(this._canPlay || this._canPause));
 		this._sendDevelInfo();
 	}
 }
@@ -258,23 +258,23 @@ MediaPlayer._BACKGROUND_PLAYBACK = "player.background_playback";
 
 MediaPlayer._onInitAppRunner = function(emitter, values, entries)
 {
-	Nuvola.Launcher.setActions(["quit"]);
-	Nuvola.Actions.addAction("playback", "win", PlayerAction.PLAY, "Play", null, "media-playback-start", null);
-	Nuvola.Actions.addAction("playback", "win", PlayerAction.PAUSE, "Pause", null, "media-playback-pause", null);
-	Nuvola.Actions.addAction("playback", "win", PlayerAction.TOGGLE_PLAY, "Toggle play/pause", null, null, null);
-	Nuvola.Actions.addAction("playback", "win", PlayerAction.STOP, "Stop", null, "media-playback-stop", null);
-	Nuvola.Actions.addAction("playback", "win", PlayerAction.PREV_SONG, "Previous song", null, "media-skip-backward", null);
-	Nuvola.Actions.addAction("playback", "win", PlayerAction.NEXT_SONG, "Next song", null, "media-skip-forward", null);
+	Nuvola.launcher.setActions(["quit"]);
+	Nuvola.actions.addAction("playback", "win", PlayerAction.PLAY, "Play", null, "media-playback-start", null);
+	Nuvola.actions.addAction("playback", "win", PlayerAction.PAUSE, "Pause", null, "media-playback-pause", null);
+	Nuvola.actions.addAction("playback", "win", PlayerAction.TOGGLE_PLAY, "Toggle play/pause", null, null, null);
+	Nuvola.actions.addAction("playback", "win", PlayerAction.STOP, "Stop", null, "media-playback-stop", null);
+	Nuvola.actions.addAction("playback", "win", PlayerAction.PREV_SONG, "Previous song", null, "media-skip-backward", null);
+	Nuvola.actions.addAction("playback", "win", PlayerAction.NEXT_SONG, "Next song", null, "media-skip-forward", null);
 	this._notification.setActions([PlayerAction.PLAY, PlayerAction.PAUSE, PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG]);
-	Nuvola.Config.setDefault(this._BACKGROUND_PLAYBACK, true);
+	Nuvola.config.setDefault(this._BACKGROUND_PLAYBACK, true);
 	this._updateMenu();
-	Nuvola.Core.connect("append-preferences", this, "_onAppendPreferences");
+	Nuvola.core.connect("append-preferences", this, "_onAppendPreferences");
 }
 
 MediaPlayer._onInitWebWorker = function(emitter)
 {
-	Nuvola.Config.connect("config-changed", this, "_onConfigChanged");
-	Nuvola.MediaKeys.connect("key-pressed", this, "_onMediaKeyPressed");
+	Nuvola.config.connect("config-changed", this, "_onConfigChanged");
+	Nuvola.mediaKeys.connect("key-pressed", this, "_onMediaKeyPressed");
 	this._track = {
 		"title": undefined,
 		"artist": undefined,
@@ -289,7 +289,7 @@ MediaPlayer._setActions = function()
 	var actions = [this._state === PlaybackState.PLAYING ? PlayerAction.PAUSE : PlayerAction.PLAY, PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG];
 	actions = actions.concat(this._extraActions);
 	actions.push("quit");
-	Nuvola.Launcher.setActions(actions);
+	Nuvola.launcher.setActions(actions);
 }
 
 MediaPlayer._sendDevelInfo = function()
@@ -343,30 +343,30 @@ MediaPlayer._updateTrackInfo = function(changed)
 			this._notification.show();
 		
 		var tooltip = track.artist ? Nuvola.format("{1} by {2}", track.title, track.artist) : track.title;
-		Nuvola.Launcher.setTooltip(tooltip);
+		Nuvola.launcher.setTooltip(tooltip);
 	}
 	else
 	{
-		Nuvola.Launcher.setTooltip("Nuvola Player");
+		Nuvola.launcher.setTooltip("Nuvola Player");
 	}
 }
 
 MediaPlayer._updateMenu = function()
 {
-	Nuvola.MenuBar.setMenu("playback", "_Control", this._baseActions.concat(this._extraActions));
+	Nuvola.menuBar.setMenu("playback", "_Control", this._baseActions.concat(this._extraActions));
 }
 
 MediaPlayer._setHideOnClose = function()
 {
 	if (this._state === PlaybackState.PLAYING)
-		Nuvola.Core.setHideOnClose(Nuvola.Config.get(this._BACKGROUND_PLAYBACK));
+		Nuvola.core.setHideOnClose(Nuvola.config.get(this._BACKGROUND_PLAYBACK));
 	else
-		Nuvola.Core.setHideOnClose(false);
+		Nuvola.core.setHideOnClose(false);
 }
 
 MediaPlayer._onAppendPreferences = function(object, values, entries)
 {
-	values[this._BACKGROUND_PLAYBACK] = Nuvola.Config.get(this._BACKGROUND_PLAYBACK);
+	values[this._BACKGROUND_PLAYBACK] = Nuvola.config.get(this._BACKGROUND_PLAYBACK);
 	entries.push(["bool", this._BACKGROUND_PLAYBACK, "Keep playing in background when window is closed"]);
 }
 
@@ -382,7 +382,7 @@ MediaPlayer._onConfigChanged = function(emitter, key)
 
 MediaPlayer._onMediaKeyPressed = function(emitter, key)
 {
-	var A = Nuvola.Actions;
+	var A = Nuvola.actions;
 	switch (key)
 	{
 	case MediaKey.PLAY:

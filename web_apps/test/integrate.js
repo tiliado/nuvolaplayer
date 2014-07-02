@@ -35,27 +35,27 @@ var WebApp = Nuvola.$WebApp();
 
 WebApp.onInitAppRunner = function(emitter, values, entries)
 {
-	Nuvola.WebAppPrototype.onInitAppRunner.call(this, emitter, values, entries);
+	Nuvola.WebApp.onInitAppRunner.call(this, emitter, values, entries);
 	
-	Nuvola.Config.setDefault(ADDRESS, "default");
-	Nuvola.Config.setDefault(HOST, "");
-	Nuvola.Config.setDefault(PORT, "");
-	Nuvola.Config.setDefault(COUNTRY_VARIANT, "com");
+	Nuvola.config.setDefault(ADDRESS, "default");
+	Nuvola.config.setDefault(HOST, "");
+	Nuvola.config.setDefault(PORT, "");
+	Nuvola.config.setDefault(COUNTRY_VARIANT, "com");
 	
-	Nuvola.Core.connect("append-preferences", this, "onAppendPreferences");
+	Nuvola.core.connect("append-preferences", this, "onAppendPreferences");
 	
-	if (!Nuvola.Config.hasKey(ADDRESS))
+	if (!Nuvola.config.hasKey(ADDRESS))
 		this.appendPreferences(values, entries);
 }
 
 WebApp.onInitWebWorker = function(emitter)
 {
-	Nuvola.WebAppPrototype.onInitWebWorker.call(this);
+	Nuvola.WebApp.onInitWebWorker.call(this);
 	
 	console.log(Nuvola.Session.hasKey("foo"));
-	Nuvola.Session.set("foo", "boo");
-	console.log(Nuvola.Session.hasKey("foo"));
-	console.log(Nuvola.Session.get("foo"));
+	Nuvola.session.set("foo", "boo");
+	console.log(Nuvola.session.hasKey("foo"));
+	console.log(Nuvola.session.get("foo"));
 }
 
 WebApp.onAppendPreferences = function(emitter, values, entries)
@@ -65,9 +65,9 @@ WebApp.onAppendPreferences = function(emitter, values, entries)
 
 WebApp.appendPreferences = function(values, entries)
 {
-	values[ADDRESS] = Nuvola.Config.get(ADDRESS);
-	values[HOST] = Nuvola.Config.get(HOST);
-	values[PORT] = Nuvola.Config.get(PORT);
+	values[ADDRESS] = Nuvola.config.get(ADDRESS);
+	values[HOST] = Nuvola.config.get(HOST);
+	values[PORT] = Nuvola.config.get(PORT);
 	entries.push(["header", "Logitech Media Server"]);
 	entries.push(["label", "Address of your Logitech Media Server"]);
 	entries.push(["option", ADDRESS + ":default", "use default address ('localhost:9000')", null, [HOST, PORT]]);
@@ -75,7 +75,7 @@ WebApp.appendPreferences = function(values, entries)
 	entries.push(["string", HOST, "Host"]);
 	entries.push(["string", PORT, "Port"]);
 	
-	values[COUNTRY_VARIANT] = Nuvola.Config.get(COUNTRY_VARIANT);
+	values[COUNTRY_VARIANT] = Nuvola.config.get(COUNTRY_VARIANT);
 	entries.push(["header", "Amazon Cloud Player"]);
 	entries.push(["label", "Preferred national variant"]);
 	entries.push(["option", COUNTRY_VARIANT + ":de", "Germany"]);

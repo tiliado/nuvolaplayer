@@ -41,5 +41,5 @@ MediaKeys.$init = function()
 
 // export public items
 Nuvola.MediaKey = MediaKey;
-Nuvola.MediaKeysPrototype = MediaKeys;
-Nuvola.MediaKeys = $object(MediaKeys);
+Nuvola.MediaKeys = MediaKeys;
+Nuvola.mediaKeys = $object(MediaKeys);

@@ -63,5 +63,5 @@ Browser._downloadDone = function(id, result, statusCode, statusText, filePath, f
 
 // export public items
 Nuvola.BrowserAction = BrowserAction;
-Nuvola.BrowserPrototype = Browser;
-Nuvola.Browser = $object(Browser);
+Nuvola.Browser = Browser;
+Nuvola.browser = $object(Browser);

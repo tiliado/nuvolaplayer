@@ -96,5 +96,5 @@ Actions.onEnabledChanged = function(object, name, enabled)
 }
 
 // export public items
-Nuvola.ActionsPrototype = Actions;
-Nuvola.Actions = $object(Actions);
+Nuvola.Actions = Actions;
+Nuvola.actions = $object(Actions);

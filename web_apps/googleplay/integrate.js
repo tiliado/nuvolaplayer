@@ -40,10 +40,10 @@ var WebApp = Nuvola.$WebApp();
 
 WebApp.onInitAppRunner = function(emitter, values, entries)
 {
-	Nuvola.WebAppPrototype.onInitAppRunner.call(this, emitter, values, entries);
+	Nuvola.WebApp.onInitAppRunner.call(this, emitter, values, entries);
 	
-	Nuvola.Actions.addAction("playback", "win", "thumbs-up", "Thumbs up", null, null, null, true);
-	Nuvola.Actions.addAction("playback", "win", "thumbs-down", "Thumbs down", null, null, null, true);
+	Nuvola.actions.addAction("playback", "win", "thumbs-up", "Thumbs up", null, null, null, true);
+	Nuvola.actions.addAction("playback", "win", "thumbs-down", "Thumbs down", null, null, null, true);
 	var ratingOptions = [
 		// Variant? parameter, string? label, string? mnemo_label, string? icon, string? keybinding
 		[0, "Rating: 0 stars", null, null, null, null],
@@ -53,14 +53,14 @@ WebApp.onInitAppRunner = function(emitter, values, entries)
 		[4, "Rating: 4 stars", null, null, null, null],
 		[5, "Rating: 5 stars", null, null, null, null]
 	];
-	Nuvola.Actions.addRadioAction("playback", "win", "rating", 0, ratingOptions);
+	Nuvola.actions.addRadioAction("playback", "win", "rating", 0, ratingOptions);
 }
 
 WebApp.onInitWebWorker = function(emitter)
 {
-	Nuvola.WebAppPrototype.onInitWebWorker.call(this);
+	Nuvola.WebApp.onInitWebWorker.call(this);
 	
-	Nuvola.Actions.connect("action-activated", this, "onActionActivated");
+	Nuvola.actions.connect("action-activated", this, "onActionActivated");
 	this.thumbsUp = undefined;
 	this.thumbsDown = undefined;
 	this.starRating = undefined;
@@ -198,25 +198,25 @@ WebApp.update = function()
 	if (this.thumbsUp !== thumbsUp)
 	{
 		this.thumbsUp = thumbsUp;
-		Nuvola.Actions.setEnabled(ACTION_THUMBS_UP, thumbsUp !== null);
-		Nuvola.Actions.setState(ACTION_THUMBS_UP, thumbsUp === true);
+		Nuvola.actions.setEnabled(ACTION_THUMBS_UP, thumbsUp !== null);
+		Nuvola.actions.setState(ACTION_THUMBS_UP, thumbsUp === true);
 	}
 	
 	if (this.thumbsDown !== thumbsDown)
 	{
 		this.thumbsDown = thumbsDown;
-		Nuvola.Actions.setEnabled(ACTION_THUMBS_DOWN, thumbsDown !== null);
-		Nuvola.Actions.setState(ACTION_THUMBS_DOWN, thumbsDown === true);
+		Nuvola.actions.setEnabled(ACTION_THUMBS_DOWN, thumbsDown !== null);
+		Nuvola.actions.setState(ACTION_THUMBS_DOWN, thumbsDown === true);
 	}
 	
 	if (this.starRating !== starRating)
 	{
 		this.starRating = starRating;
 		var enabled = starRating !== null;
-		Nuvola.Actions.setEnabled(ACTION_RATING, enabled);
+		Nuvola.actions.setEnabled(ACTION_RATING, enabled);
 		
 		if (enabled)
-			Nuvola.Actions.setState(ACTION_RATING, starRating);
+			Nuvola.actions.setState(ACTION_RATING, starRating);
 	}
 	
 	setTimeout(this.update.bind(this), 500);
@@ -324,8 +324,8 @@ WebApp.addNavigationButtons = function()
 	navigateForward.style.borderLeftRightRadius = "2px";
 	queryBar.insertBefore(navigateForward, queryBarFirstChild);
 	
-	Nuvola.Actions.attachButton(Nuvola.BrowserAction.GO_BACK, navigateBack);
-	Nuvola.Actions.attachButton(Nuvola.BrowserAction.GO_FORWARD, navigateForward);
+	Nuvola.actions.attachButton(Nuvola.BrowserAction.GO_BACK, navigateBack);
+	Nuvola.actions.attachButton(Nuvola.BrowserAction.GO_FORWARD, navigateForward);
 }
 
 WebApp.getThumbs = function()

@@ -207,7 +207,7 @@ public class Extension: Nuvola.Extension
 	{
 		try
 		{
-			web_engine.call_function("Nuvola.MediaKeys.emit", new Variant("(ss)", "key-pressed", key));
+			web_engine.call_function("Nuvola.mediaKeys.emit", new Variant("(ss)", "key-pressed", key));
 		}
 		catch (Diorite.Ipc.MessageError e)
 		{

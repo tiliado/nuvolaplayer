@@ -107,7 +107,7 @@ public class WebEngine : GLib.Object
 		var builder = new VariantBuilder(new VariantType("a{smv}"));
 		builder.add("{smv}", key, default_value == null ? null : new Variant.string(default_value));
 		var args = new Variant("(s@a{smv})", name, builder.end());
-		env.call_function("Nuvola.Core.emit", ref args);
+		env.call_function("Nuvola.core.emit", ref args);
 		VariantIter iter = args.iterator();
 		assert(iter.next("s", null));
 		assert(iter.next("a{smv}", &iter));
@@ -237,7 +237,7 @@ public class WebEngine : GLib.Object
 	public void get_preferences(out Variant values, out Variant entries)
 	{
 		var args = new Variant("(s@a{sv}@av)", "append-preferences", new Variant.array(new VariantType("{sv}"), {}), new Variant.array(VariantType.VARIANT, {}));
-		env.call_function("Nuvola.Core.emit", ref args);
+		env.call_function("Nuvola.core.emit", ref args);
 		args.get("(s@a{smv}@av)", null, out values, out entries);
 	}
 	
@@ -246,7 +246,7 @@ public class WebEngine : GLib.Object
 		Variant values;
 		Variant entries;
 		var args = new Variant("(s@a{sv}@av)", "init-app-runner", new Variant.array(new VariantType("{sv}"), {}), new Variant.array(VariantType.VARIANT, {}));
-		env.call_function("Nuvola.Core.emit", ref args);
+		env.call_function("Nuvola.core.emit", ref args);
 		args.get("(s@a{smv}@av)", null, out values, out entries);
 		var values_hashtable = Diorite.variant_to_hashtable(values);
 		if (values_hashtable.size() > 0)
@@ -452,7 +452,7 @@ public class WebEngine : GLib.Object
 		var args = new Variant("(s@a{smv})", "navigation-request", builder.end());
 		try
 		{
-			env.call_function("Nuvola.Core.emit", ref args);
+			env.call_function("Nuvola.core.emit", ref args);
 		}
 		catch (JSError e)
 		{
@@ -479,7 +479,7 @@ public class WebEngine : GLib.Object
 		var args = new Variant("(sms)", "uri-changed", web_view.uri);
 		try
 		{
-			env.call_function("Nuvola.Core.emit", ref args);
+			env.call_function("Nuvola.core.emit", ref args);
 		}
 		catch (JSError e)
 		{

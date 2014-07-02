@@ -600,7 +600,7 @@ public class AppRunnerController : Diorite.Application
 			var result = connection.download_file.end(res, out msg);
 			try
 			{
-				web_engine.call_function("Nuvola.Browser._downloadDone", new Variant("(dbusss)", cb_id, result, msg.status_code, msg.reason_phrase, file.get_path(), file.get_uri()));
+				web_engine.call_function("Nuvola.browser._downloadDone", new Variant("(dbusss)", cb_id, result, msg.status_code, msg.reason_phrase, file.get_path(), file.get_uri()));
 			}
 			catch (Diorite.Ipc.MessageError e)
 			{
@@ -617,7 +617,7 @@ public class AppRunnerController : Diorite.Application
 			return;
 		try
 		{
-			web_engine.call_function("Nuvola.Actions.emit", new Variant("(ssb)", "enabled-changed", action.name, action.enabled));
+			web_engine.call_function("Nuvola.actions.emit", new Variant("(ssb)", "enabled-changed", action.name, action.enabled));
 		}
 		catch (Diorite.Ipc.MessageError e)
 		{
@@ -632,7 +632,7 @@ public class AppRunnerController : Diorite.Application
 	{
 		try
 		{
-			web_engine.call_function("Nuvola.Actions.emit", new Variant("(ssmv)", "action-activated", action.name, parameter));
+			web_engine.call_function("Nuvola.actions.emit", new Variant("(ssmv)", "action-activated", action.name, parameter));
 		}
 		catch (Diorite.Ipc.MessageError e)
 		{
@@ -653,7 +653,7 @@ public class AppRunnerController : Diorite.Application
 		
 		try
 		{
-			web_engine.call_function("Nuvola.Config.emit", new Variant("(ss)", "config-changed", key));
+			web_engine.call_function("Nuvola.config.emit", new Variant("(ss)", "config-changed", key));
 		}
 		catch (Diorite.Ipc.MessageError e)
 		{

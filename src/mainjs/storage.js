@@ -60,8 +60,17 @@ ConfigStorage.$init = function()
 	this.registerSignals(["config-changed"]);
 }
 
+var SessionStorage = $prototype(KeyValueStorage);
+
+SessionStorage.$init = function()
+{
+	KeyValueStorage.$init.call(this, 1);
+}
+
 // export public items
-Nuvola.KeyValueStoragePrototype = KeyValueStorage;
-Nuvola.Session = $object(KeyValueStorage, 1);
-Nuvola.Config = $object(ConfigStorage);
+Nuvola.KeyValueStorage = KeyValueStorage;
+Nuvola.ConfigStorage = ConfigStorage;
+Nuvola.SessionStorage = SessionStorage;
+Nuvola.session = $object(SessionStorage);
+Nuvola.config = $object(ConfigStorage);
 

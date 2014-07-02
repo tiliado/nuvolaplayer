@@ -27,7 +27,7 @@ require("prototype");
 /**
  * Desktop notification.
  */
-var NotificationPrototype = $prototype(null);
+var Notification = $prototype(null);
 
 /**
  * Creates new named notification.
@@ -35,7 +35,7 @@ var NotificationPrototype = $prototype(null);
  * @param String  name        notification name (identifier)
  * @param Boolean resident    mark the notification as resident by default
  */
-NotificationPrototype.$init = function(name, resident)
+Notification.$init = function(name, resident)
 {
 	this.name = name;
 	this.resident = !!resident;
@@ -50,7 +50,7 @@ NotificationPrototype.$init = function(name, resident)
  * @param String? iconPath    path to an icon for notification
  * @param Boolean resident    mark the notification as resident, use null/undefined to reuse last value
  */
-NotificationPrototype.update = function(title, text, iconName, iconPath, resident)
+Notification.update = function(title, text, iconName, iconPath, resident)
 {
 	if (resident == null)
 		resident = this.resident;
@@ -65,7 +65,7 @@ NotificationPrototype.update = function(title, text, iconName, iconPath, residen
  * 
  * @param String[] actions    array of action names
  */
-NotificationPrototype.setActions = function(actions)
+Notification.setActions = function(actions)
 {
 	Nuvola._sendMessageAsync("Nuvola.Notification.setActions", this.name, actions);
 }
@@ -73,7 +73,7 @@ NotificationPrototype.setActions = function(actions)
 /**
  * Remove all actions available as buttons in notification.
  */
-NotificationPrototype.removeActions = function()
+Notification.removeActions = function()
 {
 	Nuvola._sendMessageAsync("Nuvola.Notification.removeActions", this.name);
 }
@@ -83,7 +83,7 @@ NotificationPrototype.removeActions = function()
  * 
  * @param force    ensure notification is shown if true, otherwise show it when suitable
  */
-NotificationPrototype.show = function(force)
+Notification.show = function(force)
 {
 	Nuvola._sendMessageAsync("Nuvola.Notification.show", this.name, !!force);
 }
@@ -91,14 +91,14 @@ NotificationPrototype.show = function(force)
 /**
  * Manages desktop notifications.
  */
-var NotificationsPrototype = $prototype(null);
+var Notifications = $prototype(null);
 
 /**
  * Convenience method to creates new named notification.
  */
-NotificationsPrototype.getNamedNotification = function(name)
+Notifications.getNamedNotification = function(name)
 {
-	return $object(NotificationPrototype, name);
+	return $object(Notification, name);
 }
 
 /**
@@ -110,12 +110,12 @@ NotificationsPrototype.getNamedNotification = function(name)
  * @param String? iconPath    path to an icon for notification
  * @param Boolean force       ensure notification is shown if true, otherwise show it when suitable
  */
-NotificationsPrototype.showNotification = function(title, text, iconName, iconPath, force)
+Notifications.showNotification = function(title, text, iconName, iconPath, force)
 {
 	Nuvola._sendMessageAsync("Nuvola.Notifications.showNotification", title, text, iconName || "", iconPath || "", !!force);
 }
 
 // export public items
-Nuvola.NotificationPrototype = NotificationPrototype;
-Nuvola.NotificationsPrototype = NotificationsPrototype;
-Nuvola.Notifications = $object(NotificationsPrototype);
+Nuvola.Notification = Notification;
+Nuvola.Notifications = Notifications;
+Nuvola.notifications = $object(Notifications);

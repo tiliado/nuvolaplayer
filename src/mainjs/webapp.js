@@ -26,48 +26,48 @@ require("prototype");
 require("signals");
 require("core");
 
-var WebAppPrototype = $prototype(null, SignalsMixin);
-WebAppPrototype.LAST_URI = "web_app.last_uri";
+var WebApp = $prototype(null, SignalsMixin);
+WebApp.LAST_URI = "web_app.last_uri";
 
-WebAppPrototype.$init = function()
+WebApp.$init = function()
 {
 	this.meta = Nuvola.meta;
 	var allowedURI = this.meta.allowed_uri;
 	this.allowedURI = allowedURI ? new RegExp(allowedURI) : null;
-	Nuvola.Core.connect("home-page", this, "onHomePage");
-	Nuvola.Core.connect("last-page", this, "onLastPage");
-	Nuvola.Core.connect("navigation-request", this, "onNavigationRequest");
-	Nuvola.Core.connect("uri-changed", this, "onURIChanged");
-	Nuvola.Core.connect("init-app-runner", this, "onInitAppRunner");
-	Nuvola.Core.connect("init-web-worker", this, "onInitWebWorker");
+	Nuvola.core.connect("home-page", this, "onHomePage");
+	Nuvola.core.connect("last-page", this, "onLastPage");
+	Nuvola.core.connect("navigation-request", this, "onNavigationRequest");
+	Nuvola.core.connect("uri-changed", this, "onURIChanged");
+	Nuvola.core.connect("init-app-runner", this, "onInitAppRunner");
+	Nuvola.core.connect("init-web-worker", this, "onInitWebWorker");
 }
 
-WebAppPrototype.start = function()
+WebApp.start = function()
 {
-	Nuvola.WebAppObject = $object(this);
+	Nuvola.webApp = $object(this);
 }
 
-WebAppPrototype.onHomePage = function(object, result)
+WebApp.onHomePage = function(object, result)
 {
 	result.url = this.meta.home_url;
 }
 
-WebAppPrototype.onLastPage = function(object, result)
+WebApp.onLastPage = function(object, result)
 {
-	result.url = Nuvola.Config.get(this.LAST_URI) || null;
+	result.url = Nuvola.config.get(this.LAST_URI) || null;
 }
 
-WebAppPrototype.onNavigationRequest = function(object, request)
+WebApp.onNavigationRequest = function(object, request)
 {
 	request.approved = this.allowedURI ? true : this.allowedURI.test(request.url);
 }
 
-WebAppPrototype.onURIChanged = function(object, uri)
+WebApp.onURIChanged = function(object, uri)
 {
-	Nuvola.Config.set(this.LAST_URI, uri);
+	Nuvola.config.set(this.LAST_URI, uri);
 }
 
-WebAppPrototype.onInitAppRunner = function(emitter, values, entries)
+WebApp.onInitAppRunner = function(emitter, values, entries)
 {
 }
 
@@ -79,7 +79,7 @@ WebAppPrototype.onInitAppRunner = function(emitter, values, entries)
  * ```
  * WebApp.onInitWebWorker = function(emitter)
  * {
- *     Nuvola.WebAppPrototype.onInitWebWorker.call(this);
+ *     Nuvola.WebApp.onInitWebWorker.call(this);
  *     // one of these:
  *     document.addEventListener("DOMContentLoaded", this.onPageReady.bind(this));
  *     window.addEventListener("load", this.onPageReady.bind(this));
@@ -91,17 +91,17 @@ WebAppPrototype.onInitAppRunner = function(emitter, values, entries)
  * }
  * ```
  */
-WebAppPrototype.onInitWebWorker = function(emitter)
+WebApp.onInitWebWorker = function(emitter)
 {
 }
 
 // export public fields
-Nuvola.WebAppPrototype = WebAppPrototype;
+Nuvola.WebApp = WebApp;
 Nuvola.$WebApp = function()
 {
 	if (this !== Nuvola)
 		throw new Error("Nuvola.$WebApp has been called incorrectly. Use `var WebApp = Nuvola.$WebApp();` idiom.");
 	
-	return $prototype(WebAppPrototype);
+	return $prototype(WebApp);
 }
 
