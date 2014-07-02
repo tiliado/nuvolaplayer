@@ -31,24 +31,62 @@ require("storage");
 require("browser");
 require("core");
 
-
+/**
+ * Base media player actions
+ */
 var PlayerAction = {
+	/**
+	 * Start playback
+	 */
 	PLAY: "play",
+	/**
+	 * Toggle playback (play/pause)
+	 */
 	TOGGLE_PLAY: "toggle-play",
+	/**
+	 * Pause playback
+	 */
 	PAUSE: "pause",
+	/**
+	 * Stop playback
+	 */
 	STOP: "stop",
+	/**
+	 * Skip to next track
+	 */
 	PREV_SONG: "prev-song",
+	/**
+	 * Skip to previous track
+	 */
 	NEXT_SONG: "next-song",
 }
 
+/**
+ * Media player playback states
+ */
 var PlaybackState = {
+	/**
+	 * Track is not playing nor paused.
+	 */
 	UNKNOWN: 0,
+	/**
+	 * Playback is paused.
+	 */
 	PAUSED: 1,
+	/**
+	 * Track is playing.
+	 */
 	PLAYING: 2,
 }
 
+/**
+ * Media player controller.
+ */
 var MediaPlayer = $prototype(null);
 
+/**
+ * Initializes media player
+ */
 MediaPlayer.$init = function()
 {
 	this._state = PlaybackState.UNKNOWN;
@@ -95,14 +133,25 @@ MediaPlayer._onInitWebWorker = function(emitter)
 	this._setActions();
 }
 
+/**
+ * Set info about currently playing track.
+ * 
+ * If track info is same as in the previous call, this method does nothing.
+ * 
+ * @param String|null track.title          track title
+ * @param String|null track.artist         track artist
+ * @param String|null track.album          track album
+ * @param String|null track.artLocation    URL of album/track artwork
+ */
 MediaPlayer.setTrack = function(track)
 {
 	var changed = Nuvola.objectDiff(this._track, track);
-	this._track = track;
 	
 	if (!changed.length)
 		return;
-		
+	
+	this._track = track;
+	
 	if (!track.artLocation)
 		this._artworkFile = null;
 	
@@ -121,6 +170,13 @@ MediaPlayer.setTrack = function(track)
 	}
 }
 
+/**
+ * Set current playback state
+ * 
+ * If the current state is same as the previous one, this method does nothing.
+ * 
+ * @param Nuvola.PlaybackState state    current playback state
+ */
 MediaPlayer.setPlaybackState = function(state)
 {
 	if (this._state !== state)
@@ -132,6 +188,13 @@ MediaPlayer.setPlaybackState = function(state)
 	}
 }
 
+/**
+ * Set whether it is possible to go to the next track
+ * 
+ * If the argument is same as in the previous call, this method does nothing.
+ * 
+ * @param Boolean canGoNext    true if the "go to next track" button is active
+ */
 MediaPlayer.setCanGoNext = function(canGoNext)
 {
 	if (this._canGoNext !== canGoNext)
@@ -142,6 +205,13 @@ MediaPlayer.setCanGoNext = function(canGoNext)
 	}
 }
 
+/**
+ * Set whether it is possible to go to the previous track
+ * 
+ * If the argument is same as in the previous call, this method does nothing.
+ * 
+ * @param Boolean canGoPrev    true if the "go to previous track" button is active
+ */
 MediaPlayer.setCanGoPrev = function(canGoPrev)
 {
 	if (this._canGoPrev !== canGoPrev)
@@ -152,6 +222,13 @@ MediaPlayer.setCanGoPrev = function(canGoPrev)
 	}
 }
 
+/**
+ * Set whether it is possible to start playback
+ * 
+ * If the argument is same as in the previous call, this method does nothing.
+ * 
+ * @param Boolean canPlay    true if the "play" button is active
+ */
 MediaPlayer.setCanPlay = function(canPlay)
 {
 	if (this._canPlay !== canPlay)
@@ -163,6 +240,13 @@ MediaPlayer.setCanPlay = function(canPlay)
 	}
 }
 
+/**
+ * Set whether it is possible to pause playback
+ * 
+ * If the argument is same as in the previous call, this method does nothing.
+ * 
+ * @param Boolean canPause    true if the "pause" button is active
+ */
 MediaPlayer.setCanPause = function(canPause)
 {
 	if (this._canPause !== canPause)
@@ -241,6 +325,15 @@ MediaPlayer._updateTrackInfo = function(changed)
 	}
 }
 
+/**
+ * Add actions for media player capabilities
+ * 
+ * For example: star rating, thumbs up/down, like/love/unlike.
+ * 
+ * Actions that have been already added are ignored.
+ * 
+ * @param Array of String actions    names of actions
+ */
 MediaPlayer.addExtraActions = function(actions)
 {
 	var update = false;
@@ -253,6 +346,7 @@ MediaPlayer.addExtraActions = function(actions)
 			update = true;
 		}
 	}
+	
 	if (update)
 		this._updateMenu();
 }
