@@ -24,28 +24,61 @@
 
 require("prototype");
 
+/**
+ * Manages launcher component (Unity dock item, tray icon, ...)
+ */
 var Launcher = $prototype(null);
 
+/**
+ * Set launcher tooltip.
+ * 
+ * This functionality is currently implemented only by the tray icon.
+ * 
+ * @param String tooltip    short tooltip text
+ */
 Launcher.setTooltip = function(tooltip)
 {
 	Nuvola._sendMessageAsync("Nuvola.Launcher.setTooltip", tooltip || "");
 }
 
+/**
+ * Set launcher menu actions.
+ * 
+ * This functionality has two implementations:
+ * 
+ *  -  menu of a tray icon
+ *  -  menu of a Unity dock item
+ * 
+ * @param Array of String    action names
+ */
 Launcher.setActions = function(actions)
 {
 	Nuvola._sendMessageAsync("Nuvola.Launcher.setActions", actions);
 }
 
+/**
+ * Removes all launcher menu actions.
+ */ 
 Launcher.removeActions = function()
 {
 	Nuvola._sendMessageAsync("Nuvola.Launcher.removeActions");
 }
 
+/**
+ * Add action to launcher's menu.
+ * 
+ * @param String action    action name
+ */
 Launcher.addAction = function(action)
 {
 	Nuvola._sendMessageAsync("Nuvola.Launcher.addAction", action);
 }
 
+/**
+ * Remove action from launcher's menu.
+ * 
+ * @param String action    action name
+ */
 Launcher.removeAction = function(action)
 {
 	Nuvola._sendMessageAsync("Nuvola.Launcher.removeAction", action);
