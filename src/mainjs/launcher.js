@@ -36,9 +36,9 @@ Launcher.setActions = function(actions)
 	Nuvola._sendMessageAsync("Nuvola.Launcher.setActions", actions);
 }
 
-Launcher.removeActions = function(actions)
+Launcher.removeActions = function()
 {
-	Nuvola._sendMessageAsync("Nuvola.Launcher.removeActions", actions);
+	Nuvola._sendMessageAsync("Nuvola.Launcher.removeActions");
 }
 
 Launcher.addAction = function(action)
