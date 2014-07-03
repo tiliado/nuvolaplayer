@@ -34,12 +34,12 @@ WebApp.$init = function()
 	this.meta = Nuvola.meta;
 	var allowedURI = this.meta.allowed_uri;
 	this.allowedURI = allowedURI ? new RegExp(allowedURI) : null;
-	Nuvola.core.connect("HomePageRequest", this, "onHomePage");
-	Nuvola.core.connect("LastPageRequest", this, "onLastPage");
-	Nuvola.core.connect("NavigationRequest", this, "onNavigationRequest");
-	Nuvola.core.connect("UriChanged", this, "onURIChanged");
-	Nuvola.core.connect("InitAppRunner", this, "onInitAppRunner");
-	Nuvola.core.connect("InitWebWorker", this, "onInitWebWorker");
+	Nuvola.core.connect("HomePageRequest", this);
+	Nuvola.core.connect("LastPageRequest", this);
+	Nuvola.core.connect("NavigationRequest", this);
+	Nuvola.core.connect("UriChanged", this);
+	Nuvola.core.connect("InitAppRunner", this);
+	Nuvola.core.connect("InitWebWorker", this);
 }
 
 WebApp.start = function()
@@ -47,27 +47,27 @@ WebApp.start = function()
 	Nuvola.webApp = $object(this);
 }
 
-WebApp.onHomePage = function(object, result)
+WebApp._onHomePageRequest = function(object, result)
 {
 	result.url = this.meta.home_url;
 }
 
-WebApp.onLastPage = function(object, result)
+WebApp._onLastPageRequest = function(object, result)
 {
 	result.url = Nuvola.config.get(this.LAST_URI) || null;
 }
 
-WebApp.onNavigationRequest = function(object, request)
+WebApp._onNavigationRequest = function(object, request)
 {
 	request.approved = this.allowedURI ? true : this.allowedURI.test(request.url);
 }
 
-WebApp.onURIChanged = function(object, uri)
+WebApp._onUriChanged = function(object, uri)
 {
 	Nuvola.config.set(this.LAST_URI, uri);
 }
 
-WebApp.onInitAppRunner = function(emitter, values, entries)
+WebApp._onInitAppRunner = function(emitter, values, entries)
 {
 }
 
@@ -77,21 +77,21 @@ WebApp.onInitAppRunner = function(emitter, values, entries)
  * Handler for Core::InitWebWorker signal. Override this method to integrate the web page.
  * 
  * ```
- * WebApp.onInitWebWorker = function(emitter)
+ * WebApp._onInitWebWorker = function(emitter)
  * {
- *     Nuvola.WebApp.onInitWebWorker.call(this);
+ *     Nuvola.WebApp._onInitWebWorker.call(this);
  *     // one of these:
- *     document.addEventListener("DOMContentLoaded", this.onPageReady.bind(this));
- *     window.addEventListener("load", this.onPageReady.bind(this));
+ *     document.addEventListener("DOMContentLoaded", this._onPageReady.bind(this));
+ *     window.addEventListener("load", this._onPageReady.bind(this));
  * }
  * 
- * WebApp.onPageReady = function(event)
+ * WebApp._onPageReady = function(event)
  * {
  *     ...
  * }
  * ```
  */
-WebApp.onInitWebWorker = function(emitter)
+WebApp._onInitWebWorker = function(emitter)
 {
 }
 

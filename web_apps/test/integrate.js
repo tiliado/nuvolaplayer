@@ -33,24 +33,24 @@ var COUNTRY_VARIANT = "app.country_variant";
 
 var WebApp = Nuvola.$WebApp();
 
-WebApp.onInitAppRunner = function(emitter, values, entries)
+WebApp._onInitAppRunner = function(emitter, values, entries)
 {
-	Nuvola.WebApp.onInitAppRunner.call(this, emitter, values, entries);
+	Nuvola.WebApp._onInitAppRunner.call(this, emitter, values, entries);
 	
 	Nuvola.config.setDefault(ADDRESS, "default");
 	Nuvola.config.setDefault(HOST, "");
 	Nuvola.config.setDefault(PORT, "");
 	Nuvola.config.setDefault(COUNTRY_VARIANT, "com");
 	
-	Nuvola.core.connect("AppendPreferences", this, "onAppendPreferences");
+	Nuvola.core.connect("AppendPreferences", this);
 	
 	if (!Nuvola.config.hasKey(ADDRESS))
 		this.appendPreferences(values, entries);
 }
 
-WebApp.onInitWebWorker = function(emitter)
+WebApp._onInitWebWorker = function(emitter)
 {
-	Nuvola.WebApp.onInitWebWorker.call(this);
+	Nuvola.WebApp._onInitWebWorker.call(this);
 	
 	console.log(Nuvola.session.hasKey("foo"));
 	Nuvola.session.set("foo", "boo");
@@ -58,7 +58,7 @@ WebApp.onInitWebWorker = function(emitter)
 	console.log(Nuvola.session.get("foo"));
 }
 
-WebApp.onAppendPreferences = function(emitter, values, entries)
+WebApp._onAppendPreferences = function(emitter, values, entries)
 {
 	this.appendPreferences(values, entries);
 }

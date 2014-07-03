@@ -30,8 +30,8 @@ var Actions = $prototype(null, SignalsMixin);
 Actions.$init = function()
 {
 	this.registerSignals(["ActionActivated", "ActionEnabledChanged"]);
-	this.connect("ActionActivated", this, "debug");
-	this.connect("ActionEnabledChanged", this, "onEnabledChanged");
+	this.connect("ActionActivated", this);
+	this.connect("ActionEnabledChanged", this);
 	this.buttons = {};
 }
 
@@ -46,9 +46,9 @@ Actions.addRadioAction = function(group, scope, name, state, options)
 	Nuvola._sendMessageSync("Nuvola.Actions.addRadioAction", group, scope, name, state, options);
 }
 
-Actions.debug = function(arg1, arg2)
+Actions._onActionActivated = function(arg1, action)
 {
-	console.log("JS API: Action activated: " + arg2);
+	console.log("JS API: Action activated: " + action);
 }
 
 Actions.isEnabled = function(name)
@@ -89,7 +89,7 @@ Actions.attachButton = function(name, button)
 	});
 }
 
-Actions.onEnabledChanged = function(object, name, enabled)
+Actions._onActionEnabledChanged = function(object, name, enabled)
 {
 	if (this.buttons[name])
 		this.buttons[name].disabled = !enabled;

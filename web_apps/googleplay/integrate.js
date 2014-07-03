@@ -38,9 +38,9 @@ var THUMBS_ACTIONS = ["thumbs-up", "thumbs-down"];
 
 var WebApp = Nuvola.$WebApp();
 
-WebApp.onInitAppRunner = function(emitter, values, entries)
+WebApp._onInitAppRunner = function(emitter, values, entries)
 {
-	Nuvola.WebApp.onInitAppRunner.call(this, emitter, values, entries);
+	Nuvola.WebApp._onInitAppRunner.call(this, emitter, values, entries);
 	
 	Nuvola.actions.addAction("playback", "win", "thumbs-up", "Thumbs up", null, null, null, true);
 	Nuvola.actions.addAction("playback", "win", "thumbs-down", "Thumbs down", null, null, null, true);
@@ -56,9 +56,9 @@ WebApp.onInitAppRunner = function(emitter, values, entries)
 	Nuvola.actions.addRadioAction("playback", "win", "rating", 0, ratingOptions);
 }
 
-WebApp.onInitWebWorker = function(emitter)
+WebApp._onInitWebWorker = function(emitter)
 {
-	Nuvola.WebApp.onInitWebWorker.call(this);
+	Nuvola.WebApp._onInitWebWorker.call(this, emitter);
 	
 	Nuvola.actions.connect("ActionActivated", this);
 	this.thumbsUp = undefined;
@@ -67,10 +67,10 @@ WebApp.onInitWebWorker = function(emitter)
 	this.starRatingEnabled = undefined;
 	this.thumbRatingEnabled = undefined;
 	this.state = State.UNKNOWN;
-	document.addEventListener("DOMContentLoaded", this.onPageReady.bind(this));
+	document.addEventListener("DOMContentLoaded", this._onPageReady.bind(this));
 }
 
-WebApp.onPageReady = function(event)
+WebApp._onPageReady = function(event)
 {
 	this.addNavigationButtons();
 	this.update();
