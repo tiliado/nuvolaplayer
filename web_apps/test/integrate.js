@@ -52,7 +52,7 @@ WebApp.onInitWebWorker = function(emitter)
 {
 	Nuvola.WebApp.onInitWebWorker.call(this);
 	
-	console.log(Nuvola.Session.hasKey("foo"));
+	console.log(Nuvola.session.hasKey("foo"));
 	Nuvola.session.set("foo", "boo");
 	console.log(Nuvola.session.hasKey("foo"));
 	console.log(Nuvola.session.get("foo"));
