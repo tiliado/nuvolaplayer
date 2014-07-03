@@ -22,7 +22,28 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * @mixin Provides signaling functionality.
+ */ 
 var SignalsMixin = {
+
+	/**
+	 * Adds new signal listeners can connect to
+	 * 
+	 * @param String name    signal name, should be dash-separated lowercase words
+	 * 
+	 * ```
+	 * BookStore.$init = function()
+	 * {
+	 *     **
+	 *      * Emitted when a book is added.
+	 *      * 
+	 *      * @param Book book    book that has been added
+	 *      *\/
+	 *     this.addSignal("book-added");
+	 * }
+	 * ```
+	 */
 	"addSignal": function(name)
 	{
 		if (this.signals == null)
@@ -30,6 +51,7 @@ var SignalsMixin = {
 		
 		this.signals[name] = [];
 	},
+	
 	"registerSignals": function(signals)
 	{
 		if (this.signals === undefined)
@@ -42,6 +64,29 @@ var SignalsMixin = {
 		}
 	},
 	
+	/**
+	 * Connect handler to a signal
+	 * 
+	 * The first argument passed to the handler is the emitter object, i.e. object that has emitted the signal,
+	 * other arguments should be specified at each signal's description.
+	 * 
+	 * @param String name           signal name
+	 * @param Object object         object that contains handler method
+	 * @param String handlerName    name of handler method of an object
+	 * @throws Error if signal doesn't exist
+	 * 
+	 * ```
+	 * Logger._onBookAdded = function(emitter, book)
+	 * {
+	 *     console.log("New book: " + book.title + ".");
+	 * }
+	 * 
+	 * Logger.$init = function()
+	 * {
+	 *     bookStore.connect("book-added", this, "_onBookAdded");
+	 * }
+	 * ```
+	 */
 	"connect": function(name, object, handlerName)
 	{
 		var handlers = this.signals[name];
@@ -50,6 +95,14 @@ var SignalsMixin = {
 		handlers.push([object, handlerName]);
 	},
 	
+	/**
+	 * Disconnect handler from a signal
+	 * 
+	 * @param String name           signal name
+	 * @param Object object         object that contains handler method
+	 * @param String handlerName    name of handler method of an object
+	 * @throws Error if signal doesn't exist
+	 */
 	"disconnect": function(name, object, handlerName)
 	{
 		var handlers = this.signals[name];
@@ -67,7 +120,22 @@ var SignalsMixin = {
 		}
 	},
 	
-	"emit": function(name)
+	/**
+	 * Emit a signal
+	 * 
+	 * @param String name               signal name
+	 * @param Variant varArgsList...    arguments to pass to signal handlers
+	 * @throws Error if signal doesn't exist
+	 * 
+	 * ```
+	 * BookStore.addBook = function(book)
+	 * {
+	 *     this.books.push(book);
+	 *     this.emit("book-added", book)
+	 * }
+	 * ```
+	 */
+	"emit": function(name, varArgsList)
 	{
 		var handlers = this.signals[name];
 		if (handlers === undefined)
@@ -84,6 +152,6 @@ var SignalsMixin = {
 			object[handler[1]].apply(object, args);
 		}
 	},
-}
+};
 
 Nuvola.SignalsMixin = SignalsMixin;
