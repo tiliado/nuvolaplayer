@@ -36,7 +36,7 @@ var MediaKeys = $prototype(null, SignalsMixin);
 
 MediaKeys.$init = function()
 {
-	this.registerSignals(["key-pressed"]);
+	this.registerSignals(["MediaKeyPressed"]);
 }
 
 // export public items

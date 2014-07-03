@@ -33,7 +33,7 @@ var Core = $prototype(null, SignalsMixin);
 Core.$init = function()
 {
 	/** 
-	 * @signal init-app-runner     initialize app runner process hook
+	 * @signal InitAppRunner     initialize app runner process hook
 	 * 
 	 * This signal is emitted at start-up when initialization of the app runner process is needed.
 	 * You can use it to append entries to initialization form (e. g. preferred national variant
@@ -42,16 +42,16 @@ Core.$init = function()
 	 * @param Object initValues    initialization values to fill the initialization form with
 	 * @param Array formSpec       specification of entries to show in the initialization form
 	 */
-	this.addSignal("init-app-runner");
+	this.addSignal("InitAppRunner");
 	
 	/** 
-	 * @signal init-web-worker     initialize web worker process hook
+	 * @signal InitWebWorker     initialize web worker process hook
 	 * 
 	 * This signal is emitted just before a web page is loaded in the main frame of the web view.
 	 */
-	this.addSignal("init-web-worker");
+	this.addSignal("InitWebWorker");
 	
-	this.registerSignals(["home-page", "navigation-request", "uri-changed", "last-page", "append-preferences"]);
+	this.registerSignals(["HomePageRequest", "NavigationRequest", "UriChanged", "LastPageRequest", "AppendPreferences"]);
 }
 
 Core.setHideOnClose = function(hide)

@@ -34,12 +34,12 @@ WebApp.$init = function()
 	this.meta = Nuvola.meta;
 	var allowedURI = this.meta.allowed_uri;
 	this.allowedURI = allowedURI ? new RegExp(allowedURI) : null;
-	Nuvola.core.connect("home-page", this, "onHomePage");
-	Nuvola.core.connect("last-page", this, "onLastPage");
-	Nuvola.core.connect("navigation-request", this, "onNavigationRequest");
-	Nuvola.core.connect("uri-changed", this, "onURIChanged");
-	Nuvola.core.connect("init-app-runner", this, "onInitAppRunner");
-	Nuvola.core.connect("init-web-worker", this, "onInitWebWorker");
+	Nuvola.core.connect("HomePageRequest", this, "onHomePage");
+	Nuvola.core.connect("LastPageRequest", this, "onLastPage");
+	Nuvola.core.connect("NavigationRequest", this, "onNavigationRequest");
+	Nuvola.core.connect("UriChanged", this, "onURIChanged");
+	Nuvola.core.connect("InitAppRunner", this, "onInitAppRunner");
+	Nuvola.core.connect("InitWebWorker", this, "onInitWebWorker");
 }
 
 WebApp.start = function()
@@ -74,7 +74,7 @@ WebApp.onInitAppRunner = function(emitter, values, entries)
 /**
  * @method WebAppPrototype.onInitWebWorker
  * 
- * Handler for Core::init-web-worker signal. Override this method to integrate the web page.
+ * Handler for Core::InitWebWorker signal. Override this method to integrate the web page.
  * 
  * ```
  * WebApp.onInitWebWorker = function(emitter)

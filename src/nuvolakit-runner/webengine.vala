@@ -168,7 +168,7 @@ public class WebEngine : GLib.Object
 		var result = false;
 		try
 		{
-			var url = data_request("last-page", "url");
+			var url = data_request("LastPageRequest", "url");
 			if (url == null)
 				return try_go_home();
 			
@@ -195,7 +195,7 @@ public class WebEngine : GLib.Object
 	{
 		try
 		{
-			var url = data_request("home-page", "url");
+			var url = data_request("HomePageRequest", "url");
 			if (url == null)
 				app.show_error("Invalid home page URL", "The web app integration script has an empty home page URL.");
 			else if (!load_uri(url))
@@ -236,7 +236,7 @@ public class WebEngine : GLib.Object
 	
 	public void get_preferences(out Variant values, out Variant entries)
 	{
-		var args = new Variant("(s@a{sv}@av)", "append-preferences", new Variant.array(new VariantType("{sv}"), {}), new Variant.array(VariantType.VARIANT, {}));
+		var args = new Variant("(s@a{sv}@av)", "AppendPreferences", new Variant.array(new VariantType("{sv}"), {}), new Variant.array(VariantType.VARIANT, {}));
 		env.call_function("Nuvola.core.emit", ref args);
 		args.get("(s@a{smv}@av)", null, out values, out entries);
 	}
@@ -245,7 +245,7 @@ public class WebEngine : GLib.Object
 	{
 		Variant values;
 		Variant entries;
-		var args = new Variant("(s@a{sv}@av)", "init-app-runner", new Variant.array(new VariantType("{sv}"), {}), new Variant.array(VariantType.VARIANT, {}));
+		var args = new Variant("(s@a{sv}@av)", "InitAppRunner", new Variant.array(new VariantType("{sv}"), {}), new Variant.array(VariantType.VARIANT, {}));
 		env.call_function("Nuvola.core.emit", ref args);
 		args.get("(s@a{smv}@av)", null, out values, out entries);
 		var values_hashtable = Diorite.variant_to_hashtable(values);
@@ -449,7 +449,7 @@ public class WebEngine : GLib.Object
 		var builder = new VariantBuilder(new VariantType("a{smv}"));
 		builder.add("{smv}", "url", new Variant.string(url));
 		builder.add("{smv}", "approved", new Variant.boolean(true));
-		var args = new Variant("(s@a{smv})", "navigation-request", builder.end());
+		var args = new Variant("(s@a{smv})", "NavigationRequest", builder.end());
 		try
 		{
 			env.call_function("Nuvola.core.emit", ref args);
@@ -476,7 +476,7 @@ public class WebEngine : GLib.Object
 	{
 		can_go_back = web_view.can_go_back();
 		can_go_forward = web_view.can_go_forward();
-		var args = new Variant("(sms)", "uri-changed", web_view.uri);
+		var args = new Variant("(sms)", "UriChanged", web_view.uri);
 		try
 		{
 			env.call_function("Nuvola.core.emit", ref args);

@@ -42,7 +42,7 @@ WebApp.onInitAppRunner = function(emitter, values, entries)
 	Nuvola.config.setDefault(PORT, "");
 	Nuvola.config.setDefault(COUNTRY_VARIANT, "com");
 	
-	Nuvola.core.connect("append-preferences", this, "onAppendPreferences");
+	Nuvola.core.connect("AppendPreferences", this, "onAppendPreferences");
 	
 	if (!Nuvola.config.hasKey(ADDRESS))
 		this.appendPreferences(values, entries);

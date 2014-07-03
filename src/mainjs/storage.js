@@ -57,7 +57,7 @@ var ConfigStorage = $prototype(KeyValueStorage, SignalsMixin);
 ConfigStorage.$init = function()
 {
 	KeyValueStorage.$init.call(this, 0);
-	this.registerSignals(["config-changed"]);
+	this.registerSignals(["ConfigChanged"]);
 }
 
 var SessionStorage = $prototype(KeyValueStorage);

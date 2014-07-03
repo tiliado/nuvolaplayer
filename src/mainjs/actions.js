@@ -29,9 +29,9 @@ var Actions = $prototype(null, SignalsMixin);
 
 Actions.$init = function()
 {
-	this.registerSignals(["action-activated", "enabled-changed"]);
-	this.connect("action-activated", this, "debug");
-	this.connect("enabled-changed", this, "onEnabledChanged");
+	this.registerSignals(["ActionActivated", "ActionEnabledChanged"]);
+	this.connect("ActionActivated", this, "debug");
+	this.connect("ActionEnabledChanged", this, "onEnabledChanged");
 	this.buttons = {};
 }
 

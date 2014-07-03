@@ -617,7 +617,7 @@ public class AppRunnerController : Diorite.Application
 			return;
 		try
 		{
-			web_engine.call_function("Nuvola.actions.emit", new Variant("(ssb)", "enabled-changed", action.name, action.enabled));
+			web_engine.call_function("Nuvola.actions.emit", new Variant("(ssb)", "ActionEnabledChanged", action.name, action.enabled));
 		}
 		catch (Diorite.Ipc.MessageError e)
 		{
@@ -632,7 +632,7 @@ public class AppRunnerController : Diorite.Application
 	{
 		try
 		{
-			web_engine.call_function("Nuvola.actions.emit", new Variant("(ssmv)", "action-activated", action.name, parameter));
+			web_engine.call_function("Nuvola.actions.emit", new Variant("(ssmv)", "ActionActivated", action.name, parameter));
 		}
 		catch (Diorite.Ipc.MessageError e)
 		{
@@ -653,7 +653,7 @@ public class AppRunnerController : Diorite.Application
 		
 		try
 		{
-			web_engine.call_function("Nuvola.config.emit", new Variant("(ss)", "config-changed", key));
+			web_engine.call_function("Nuvola.config.emit", new Variant("(ss)", "ConfigChanged", key));
 		}
 		catch (Diorite.Ipc.MessageError e)
 		{

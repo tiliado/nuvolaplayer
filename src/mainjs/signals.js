@@ -30,7 +30,7 @@ var SignalsMixin = {};
 /**
  * Adds new signal listeners can connect to
  * 
- * @param String name    signal name, should be dash-separated lowercase words
+ * @param String name    signal name, should be in CamelCase
  * 
  * ```
  * BookStore.$init = function()

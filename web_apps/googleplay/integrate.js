@@ -60,7 +60,7 @@ WebApp.onInitWebWorker = function(emitter)
 {
 	Nuvola.WebApp.onInitWebWorker.call(this);
 	
-	Nuvola.actions.connect("action-activated", this, "onActionActivated");
+	Nuvola.actions.connect("ActionActivated", this, "onActionActivated");
 	this.thumbsUp = undefined;
 	this.thumbsDown = undefined;
 	this.starRating = undefined;

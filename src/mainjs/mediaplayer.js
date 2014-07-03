@@ -99,8 +99,8 @@ MediaPlayer.$init = function()
 	this._artworkLoop = 0;
 	this._baseActions = [PlayerAction.TOGGLE_PLAY, PlayerAction.PLAY, PlayerAction.PAUSE, PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG];
 	this._notification = Nuvola.notifications.getNamedNotification("mediaplayer", true);
-	Nuvola.core.connect("init-app-runner", this, "_onInitAppRunner");
-	Nuvola.core.connect("init-web-worker", this, "_onInitWebWorker");
+	Nuvola.core.connect("InitAppRunner", this, "_onInitAppRunner");
+	Nuvola.core.connect("InitWebWorker", this, "_onInitWebWorker");
 }
 
 /**
@@ -268,13 +268,13 @@ MediaPlayer._onInitAppRunner = function(emitter, values, entries)
 	this._notification.setActions([PlayerAction.PLAY, PlayerAction.PAUSE, PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG]);
 	Nuvola.config.setDefault(this._BACKGROUND_PLAYBACK, true);
 	this._updateMenu();
-	Nuvola.core.connect("append-preferences", this, "_onAppendPreferences");
+	Nuvola.core.connect("AppendPreferences", this, "_onAppendPreferences");
 }
 
 MediaPlayer._onInitWebWorker = function(emitter)
 {
-	Nuvola.config.connect("config-changed", this, "_onConfigChanged");
-	Nuvola.mediaKeys.connect("key-pressed", this, "_onMediaKeyPressed");
+	Nuvola.config.connect("ConfigChanged", this, "_onConfigChanged");
+	Nuvola.mediaKeys.connect("MediaKeyPressed", this, "_onMediaKeyPressed");
 	this._track = {
 		"title": undefined,
 		"artist": undefined,
