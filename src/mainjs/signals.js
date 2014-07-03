@@ -70,9 +70,9 @@ SignalsMixin.registerSignals = function(signals)
  * The first argument passed to the handler is the emitter object, i.e. object that has emitted the signal,
  * other arguments should be specified at each signal's description.
  * 
- * @param String name           signal name
- * @param Object object         object that contains handler method
- * @param String handlerName    name of handler method of an object
+ * @param String name                    signal name
+ * @param Object object                  object that contains handler method
+ * @param optional String handlerName    name of handler method of an object, default name is ``_onSignalName``
  * @throws Error if signal doesn't exist
  * 
  * ```
@@ -89,6 +89,7 @@ SignalsMixin.registerSignals = function(signals)
  */
 SignalsMixin.connect = function(name, object, handlerName)
 {
+	handlerName = handlerName || ("_on" + name);
 	var handlers = this.signals[name];
 	if (handlers === undefined)
 		throw new Error("Unknown signal '" + name + "'.");
@@ -98,13 +99,14 @@ SignalsMixin.connect = function(name, object, handlerName)
 /**
  * Disconnect handler from a signal
  * 
- * @param String name           signal name
- * @param Object object         object that contains handler method
- * @param String handlerName    name of handler method of an object
+ * @param String name                    signal name
+ * @param Object object                  object that contains handler method
+ * @param optional String handlerName    name of handler method of an object, default name is ``_onSignalName``
  * @throws Error if signal doesn't exist
  */
 SignalsMixin.disconnect = function(name, object, handlerName)
 {
+	handlerName = handlerName || ("_on" + name);
 	var handlers = this.signals[name];
 	if (handlers === undefined)
 		throw new Error("Unknown signal '" + name + "'.");

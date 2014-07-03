@@ -60,7 +60,7 @@ WebApp.onInitWebWorker = function(emitter)
 {
 	Nuvola.WebApp.onInitWebWorker.call(this);
 	
-	Nuvola.actions.connect("ActionActivated", this, "onActionActivated");
+	Nuvola.actions.connect("ActionActivated", this);
 	this.thumbsUp = undefined;
 	this.thumbsDown = undefined;
 	this.starRating = undefined;
@@ -228,7 +228,7 @@ WebApp.getPlayerButtons = function()
 	return elm ? elm.childNodes : null;
 }
 
-WebApp.onActionActivated = function(object, name, param)
+WebApp._onActionActivated = function(object, name, param)
 {
 	var buttons = this.getPlayerButtons();
 	if (buttons)
