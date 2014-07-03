@@ -25,133 +25,132 @@
 /**
  * @mixin Provides signaling functionality.
  */ 
-var SignalsMixin = {
+var SignalsMixin = {};
 
-	/**
-	 * Adds new signal listeners can connect to
-	 * 
-	 * @param String name    signal name, should be dash-separated lowercase words
-	 * 
-	 * ```
-	 * BookStore.$init = function()
-	 * {
-	 *     **
-	 *      * Emitted when a book is added.
-	 *      * 
-	 *      * @param Book book    book that has been added
-	 *      *\/
-	 *     this.addSignal("book-added");
-	 * }
-	 * ```
-	 */
-	"addSignal": function(name)
-	{
-		if (this.signals == null)
-			this.signals = {};
-		
-		this.signals[name] = [];
-	},
+/**
+ * Adds new signal listeners can connect to
+ * 
+ * @param String name    signal name, should be dash-separated lowercase words
+ * 
+ * ```
+ * BookStore.$init = function()
+ * {
+ *     **
+ *      * Emitted when a book is added.
+ *      * 
+ *      * @param Book book    book that has been added
+ *      *\/
+ *     this.addSignal("book-added");
+ * }
+ * ```
+ */
+SignalsMixin.addSignal = function(name)
+{
+	if (this.signals == null)
+		this.signals = {};
 	
-	"registerSignals": function(signals)
+	this.signals[name] = [];
+}
+
+SignalsMixin.registerSignals = function(signals)
+{
+	if (this.signals === undefined)
+		this.signals = {};
+	
+	var size = signals.length;
+	for (var i = 0; i < size; i++)
 	{
-		if (this.signals === undefined)
-			this.signals = {};
-		
-		var size = signals.length;
-		for (var i = 0; i < size; i++)
+		this.signals[signals[i]] = [];
+	}
+}
+
+/**
+ * Connect handler to a signal
+ * 
+ * The first argument passed to the handler is the emitter object, i.e. object that has emitted the signal,
+ * other arguments should be specified at each signal's description.
+ * 
+ * @param String name           signal name
+ * @param Object object         object that contains handler method
+ * @param String handlerName    name of handler method of an object
+ * @throws Error if signal doesn't exist
+ * 
+ * ```
+ * Logger._onBookAdded = function(emitter, book)
+ * {
+ *     console.log("New book: " + book.title + ".");
+ * }
+ * 
+ * Logger.$init = function()
+ * {
+ *     bookStore.connect("book-added", this, "_onBookAdded");
+ * }
+ * ```
+ */
+SignalsMixin.connect = function(name, object, handlerName)
+{
+	var handlers = this.signals[name];
+	if (handlers === undefined)
+		throw new Error("Unknown signal '" + name + "'.");
+	handlers.push([object, handlerName]);
+}
+
+/**
+ * Disconnect handler from a signal
+ * 
+ * @param String name           signal name
+ * @param Object object         object that contains handler method
+ * @param String handlerName    name of handler method of an object
+ * @throws Error if signal doesn't exist
+ */
+SignalsMixin.disconnect = function(name, object, handlerName)
+{
+	var handlers = this.signals[name];
+	if (handlers === undefined)
+		throw new Error("Unknown signal '" + name + "'.");
+	var size = handlers.length;
+	for (var i = 0; i < size; i++)
+	{
+		var handler = handlers[i];
+		if (handler[0] === object && handler[1] === handlerName)
 		{
-			this.signals[signals[i]] = [];
+			handlers.splice(i, 1);
+			break;
 		}
-	},
+	}
+},
+
+/**
+ * Emit a signal
+ * 
+ * @param String name               signal name
+ * @param Variant varArgsList...    arguments to pass to signal handlers
+ * @throws Error if signal doesn't exist
+ * 
+ * ```
+ * BookStore.addBook = function(book)
+ * {
+ *     this.books.push(book);
+ *     this.emit("book-added", book)
+ * }
+ * ```
+ */
+SignalsMixin.emit = function(name, varArgsList)
+{
+	var handlers = this.signals[name];
+	if (handlers === undefined)
+		throw new Error("Unknown signal '" + name + "'.");
+	var size = handlers.length;
+	var args = [this];
+	for (var i = 1; i < arguments.length; i++)
+		args.push(arguments[i]);
 	
-	/**
-	 * Connect handler to a signal
-	 * 
-	 * The first argument passed to the handler is the emitter object, i.e. object that has emitted the signal,
-	 * other arguments should be specified at each signal's description.
-	 * 
-	 * @param String name           signal name
-	 * @param Object object         object that contains handler method
-	 * @param String handlerName    name of handler method of an object
-	 * @throws Error if signal doesn't exist
-	 * 
-	 * ```
-	 * Logger._onBookAdded = function(emitter, book)
-	 * {
-	 *     console.log("New book: " + book.title + ".");
-	 * }
-	 * 
-	 * Logger.$init = function()
-	 * {
-	 *     bookStore.connect("book-added", this, "_onBookAdded");
-	 * }
-	 * ```
-	 */
-	"connect": function(name, object, handlerName)
+	for (var i = 0; i < size; i++)
 	{
-		var handlers = this.signals[name];
-		if (handlers === undefined)
-			throw new Error("Unknown signal '" + name + "'.");
-		handlers.push([object, handlerName]);
-	},
-	
-	/**
-	 * Disconnect handler from a signal
-	 * 
-	 * @param String name           signal name
-	 * @param Object object         object that contains handler method
-	 * @param String handlerName    name of handler method of an object
-	 * @throws Error if signal doesn't exist
-	 */
-	"disconnect": function(name, object, handlerName)
-	{
-		var handlers = this.signals[name];
-		if (handlers === undefined)
-			throw new Error("Unknown signal '" + name + "'.");
-		var size = handlers.length;
-		for (var i = 0; i < size; i++)
-		{
-			var handler = handlers[i];
-			if (handler[0] === object && handler[1] === handlerName)
-			{
-				handlers.splice(i, 1);
-				break;
-			}
-		}
-	},
-	
-	/**
-	 * Emit a signal
-	 * 
-	 * @param String name               signal name
-	 * @param Variant varArgsList...    arguments to pass to signal handlers
-	 * @throws Error if signal doesn't exist
-	 * 
-	 * ```
-	 * BookStore.addBook = function(book)
-	 * {
-	 *     this.books.push(book);
-	 *     this.emit("book-added", book)
-	 * }
-	 * ```
-	 */
-	"emit": function(name, varArgsList)
-	{
-		var handlers = this.signals[name];
-		if (handlers === undefined)
-			throw new Error("Unknown signal '" + name + "'.");
-		var size = handlers.length;
-		var args = [this];
-		for (var i = 1; i < arguments.length; i++)
-			args.push(arguments[i]);
-		
-		for (var i = 0; i < size; i++)
-		{
-			var handler = handlers[i];
-			var object = handler[0];
-			object[handler[1]].apply(object, args);
-		}
-	},
-};
+		var handler = handlers[i];
+		var object = handler[0];
+		object[handler[1]].apply(object, args);
+	}
+}
 
 Nuvola.SignalsMixin = SignalsMixin;
