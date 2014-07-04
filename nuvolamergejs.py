@@ -57,10 +57,10 @@ def parse_sources(files):
 		with open(path) as f:
 			lineno = 0
 			for line in f:
+				bare_line = line.strip()
 				lineno += 1
-				if head:
-					bare_line = line.strip()
-					if bare_line and not bare_line.startswith(("/*", "*")):
+				if bare_line and not bare_line.startswith(("/*", "*", "//")):
+					if head:
 						if bare_line.startswith("require("):
 							for q in ('"', "'"):
 								parts = bare_line.split(q)
@@ -72,8 +72,8 @@ def parse_sources(files):
 						else:
 							head = False
 							data.append(line)
-				else:
-					data.append(line)
+					else:
+						data.append(line)
 		sources[name] = Source(name, path, requires, data)
 	
 	return sources
@@ -93,13 +93,12 @@ def add_source(output, sources, source):
 			add_source(output, sources, dep_source)
 	
 	if not source.merged:
-		output.append("// Included file '%s'\n\n" % source.path)
+		output.append("// Included file '%s'\n" % source.path)
 		output.extend(source.data)
-		output.append("\n")
 		source.merged = True
 
 def merge_sources(sources, main):
-	output = ["'use strict';\n\n(function(Nuvola)\n{\n\n"]
+	output = ["'use strict';\n(function(Nuvola)\n{\n"]
 	
 	main = sources.get(main)
 	if main:
@@ -108,7 +107,7 @@ def merge_sources(sources, main):
 	for source in sources.values():
 		add_source(output, sources, source)
 	
-	output.append("\n\n})(this);  // function(Nuvola)\n")
+	output.append("})(this);  // function(Nuvola)\n")
 	return "".join(output)
 
 def mergejs(sources, main="main"):
