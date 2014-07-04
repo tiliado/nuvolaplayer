@@ -45,11 +45,11 @@ Nuvola.inArray = function(array, item)
 }
 
 /**
-* Triggers mouse event on element
-* 
-* @param elm Element object
-* @param name Event name
-*/
+ * Triggers mouse event on element
+ * 
+ * @param elm Element object
+ * @param name Event name
+ */
 Nuvola.triggerMouseEvent = function(elm, name)
 {
 	var event = document.createEvent('MouseEvents');
@@ -58,10 +58,10 @@ Nuvola.triggerMouseEvent = function(elm, name)
 }
 
 /**
-* Simulates click on element
-* 
-* @param elm Element object
-*/
+ * Simulates click on element
+ * 
+ * @param elm Element object
+ */
 Nuvola.clickOnElement = function(elm)
 {
 	Nuvola.triggerMouseEvent(elm, 'mouseover');
