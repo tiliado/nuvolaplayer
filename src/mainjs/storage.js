@@ -71,6 +71,14 @@ SessionStorage.$init = function()
 Nuvola.KeyValueStorage = KeyValueStorage;
 Nuvola.ConfigStorage = ConfigStorage;
 Nuvola.SessionStorage = SessionStorage;
+
+/**
+ * Instance object of @link{SessionStorage} prototype connected to Nuvola backend.
+ */
 Nuvola.session = $object(SessionStorage);
+
+/**
+ * Instance object of @link{ConfigStorage} prototype connected to Nuvola backend.
+ */
 Nuvola.config = $object(ConfigStorage);
 

@@ -257,4 +257,8 @@ Actions._onActionEnabledChanged = function(object, name, enabled)
 
 // export public items
 Nuvola.Actions = Actions;
+
+/**
+ * Instance object of @link{Actions} prototype connected to Nuvola backend.
+ */
 Nuvola.actions = $object(Actions);

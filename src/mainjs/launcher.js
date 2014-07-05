@@ -86,4 +86,8 @@ Launcher.removeAction = function(action)
 
 // export public items
 Nuvola.Launcher = Launcher;
+
+/**
+ * Instance object of @link{Launcher} prototype connected to Nuvola backend.
+ */
 Nuvola.launcher = $object(Launcher);

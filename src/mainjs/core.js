@@ -61,4 +61,8 @@ Core.setHideOnClose = function(hide)
 
 // export public items
 Nuvola.Core = Core;
+
+/**
+ * Instance object of @link{Core} prototype connected to Nuvola backend.
+ */
 Nuvola.core = $object(Core);
