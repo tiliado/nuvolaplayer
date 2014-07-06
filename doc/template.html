@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>Documentation</title>
+		<style type="text/css">
+			.sidebar {
+				position: fixed;
+				left: 0px;
+				top: 0px;
+				height: 100%;
+				width: 300px;
+				background-color: #aaa;
+				-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+				-moz-box-sizing: border-box;    /* Firefox, other Gecko */
+				box-sizing: border-box;         /* Opera/IE 8+ */
+				padding: 18px;
+				overflow: auto;
+				font-size: 90%;
+			}
+			
+			.body ul {
+				margin-top: 10px;
+				
+			}
+			
+			.sidebar ul {
+				margin: 5px 0px 5px 10px;
+				padding: 0px;
+			}
+			
+			.sidebar ul ul{
+				margin: 5px 0px 5px 20px;
+			}
+			
+			.sidebar ul li, .body ul li{
+				padding: 2px 0px;
+			}
+			
+			.body {
+				margin-left: 300px;
+				padding: 18px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="sidebar">$index</div>
+		<div class="body">
+			<h1>Documentation</h1>
+			$body
+		</div>
+	</body>
+</html>
