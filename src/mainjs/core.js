@@ -30,6 +30,9 @@ require("signals");
  */
 var Core = $prototype(null, SignalsMixin);
 
+/*
+ * Initializes new Core instance object
+ */
 Core.$init = function()
 {
 	/** 
