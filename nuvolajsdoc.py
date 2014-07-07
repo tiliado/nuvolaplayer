@@ -447,7 +447,10 @@ class HtmlPrinter(object):
 	
 	def process_doc_text(self, header, desc, buf):
 		buf.append('<p><b>{0}</b></p>\n'.format(escape(header)))
-		buf.append(self.replace_links(self.mkd('\n'.join(desc))))
+		text = '\n'.join(desc)
+		text = text.replace("\n```\n", '\n```js\n')
+		text = text.replace("\\/", '/')
+		buf.append(self.replace_links(self.mkd(text)))
 	
 	def process_doc_params(self, params, buf):
 		buf.append('<p><b>Parameters</b></p>\n<ul>\n')
