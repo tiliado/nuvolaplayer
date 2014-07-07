@@ -200,7 +200,7 @@ Actions.getState = function(name)
  * 
  * ```
  * // toggle thumbs-up off
- * Nuvola.actions.setState("thumbs-up", fasle);
+ * Nuvola.actions.setState("thumbs-up", false);
  * 
  * // Set 5 stars
  * Nuvola.actions.setState("rating", 5);
@@ -229,6 +229,7 @@ Actions.activate = function(name)
  * 
  * @param String name          action name
  * @param HTMLButton button    HTML button element
+ * 
  * ```
  * var navigateBack = Nuvola.makeElement("button", null, "<");
  * var elm = document.getElementById("bar");

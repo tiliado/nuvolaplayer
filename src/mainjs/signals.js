@@ -35,7 +35,7 @@ var SignalsMixin = {};
  * ```
  * BookStore.$init = function()
  * {
- *     **
+ *     /**
  *      * Emitted when a book is added.
  *      * 
  *      * @param Book book    book that has been added
