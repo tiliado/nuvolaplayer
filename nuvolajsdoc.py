@@ -28,6 +28,8 @@ import re
 from string import Template
 from xml.sax.saxutils import escape
 from collections import defaultdict
+from markdown import Markdown
+from markdown.extensions import Extension
 
 MODE_CODE = 0
 MODE_DOC = 1
@@ -263,13 +265,14 @@ class Alias(object):
 
 
 class HtmlPrinter(object):
-	def __init__(self, tree, ns):
+	def __init__(self, tree, ns, markdown):
 		self.tree = tree
 		self.ns = ns
 		self.index = []
 		self.body = []
 		ns_len = len(ns) + 1
 		self.strip_ns = lambda s: s[ns_len:]
+		self.markdown = markdown
 	
 	def process(self):
 		tree = self.tree
@@ -443,9 +446,8 @@ class HtmlPrinter(object):
 		return []
 	
 	def process_doc_text(self, header, desc, buf):
-		buf.append('<p><b>{0}</b></p>\n<pre>'.format(escape(header)))
-		buf.append( self.replace_links('\n'.join(desc)))
-		buf.append('</pre>\n')
+		buf.append('<p><b>{0}</b></p>\n'.format(escape(header)))
+		buf.append(self.replace_links(self.mkd('\n'.join(desc))))
 	
 	def process_doc_params(self, params, buf):
 		buf.append('<p><b>Parameters</b></p>\n<ul>\n')
@@ -478,6 +480,9 @@ class HtmlPrinter(object):
 			return '<a href="#{0}">{1}</a>'.format(escape(canonical), escape(symbol)) if canonical else escape(symbol)
 		
 		return LINK_RE.sub(sub, text)
+	
+	def mkd(self, s):
+		return self.markdown.convert(s)
 
 DOC_DESC = "@desc"
 DOC_TEXT = "@text"
@@ -601,7 +606,13 @@ def generate_doc(ns, out_file, sources_dir):
 	for source in gather_sources(sources_dir):
 		make_tree(tree, parse_source(source))
 	
-	printer = HtmlPrinter(tree, ns)
+	
+	markdown = Markdown(
+		extensions = ['sane_lists', 'fenced_code', 'codehilite', 'def_list', 'attr_list', 'abbr', 'admonition'],
+		safe_mode='escape',
+		lazy_ol=False)
+	
+	printer = HtmlPrinter(tree, ns, markdown)
 	index, body = printer.process()
 	
 	with open("doc/template.html", "rt") as f:
