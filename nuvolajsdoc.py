@@ -316,9 +316,8 @@ class HtmlPrinter(object):
 		
 		index.append('<li><a href="#{0}">{1}</a></li>\n'.format(html_symbol, html_bare_symbol))
 		body.append('<li><small>function</small> <b id="{0}">{0}</b>({1})<br />\n'.format(html_symbol, html_params))
-		body.append("<pre>")
-		body.append(self.replace_links("\n".join(node.doc)))
-		body.append("</pre></li>\n\n")
+		body.extend(self.process_doc(node))
+		body.append("</li>\n\n")
 	
 	def process_method(self, symbol, node, index, body):
 		html_symbol = escape(symbol)
@@ -327,18 +326,16 @@ class HtmlPrinter(object):
 		
 		index.append('<li><a href="#{0}">{1}</a></li>\n'.format(html_symbol, html_name))
 		body.append('<li><small>method</small> <b id="{0}">{1}</b>({2})<br />\n'.format(html_symbol, html_name, html_params))
-		body.append("<pre>");
-		body.append(self.replace_links("\n".join(node.doc)))
-		body.append("</pre></li>\n\n")
+		body.extend(self.process_doc(node))
+		body.append("</li>\n\n")
 		
 	def process_signal(self, symbol, node, index, body):
 		html_symbol = escape(symbol)
 		html_name = escape(node.name)
 		index.append('<li><a href="#{0}">{1}</a></li>\n'.format(html_symbol, html_name))
 		body.append('<li><small>signal</small> <b id="{0}">{1}</b><br />\n'.format(html_symbol, html_name))
-		body.append("<pre>");
-		body.append(self.replace_links("\n".join(node.doc)))
-		body.append("</pre></li>\n\n")
+		body.extend(self.process_doc(node))
+		body.append("</li>\n\n")
 		
 	def process_prototype(self, symbol, node, index, body):
 		html_symbol = escape(symbol)
@@ -354,9 +351,8 @@ class HtmlPrinter(object):
 				inherits.append(escape(i))
 		
 		body.append('<li> <small>prototype</small> <b id="{0}">{0}</b> inherits {1}\n<br />'.format(html_symbol, ", ".join(inherits)))
-		body.append("<pre>");
-		body.append(self.replace_links("\n".join(node.doc)))
-		body.append("</pre><ul>\n\n")
+		body.extend(self.process_doc(node))
+		body.append("<ul>\n\n")
 		
 		for item in node.methods:
 			self.process_method(self.tree.get_symbol_name(item), item, index, body)
@@ -373,12 +369,11 @@ class HtmlPrinter(object):
 		html_name = escape(node.name)
 		index.append('<li><a href="#{0}">{1}</a></li>\n'.format(html_symbol, html_bare_symbol))
 		body.append('<li><small>enumeration</small> <b id="{0}">{0}</b><br />\n'.format(html_symbol))
-		body.append("<pre>");
-		body.append(self.replace_links("\n".join(node.doc)))
-		body.append("</pre><ul>\n\n")
+		body.extend(self.process_doc(node))
+		body.append("<ul>\n\n")
 		
 		for item in node.items:
-			body.append('<li><b id="{0}">{1}</b> - {2}</li>\n'.format(escape(self.tree.get_symbol_name(item)), escape(item.name), self.replace_links(escape(" ".join(item.doc)))))
+			body.append('<li><b id="{0}">{1}</b> - {2}</li>\n'.format(escape(self.tree.get_symbol_name(item)), escape(item.name), self.replace_links(escape(" ".join(self.join_buffers(item.doc[DOC_DESC]))))))
 		
 		body.append('</ul></li>\n')
 	
@@ -388,9 +383,8 @@ class HtmlPrinter(object):
 		html_name = escape(node.name)
 		index.append('<li><a href="#{0}">{1}</a>\n<ul>'.format(html_symbol, html_bare_symbol))
 		body.append('<li><small>mixin</small> <b id="{0}">{0}</b>\n<br />'.format(html_symbol))
-		body.append("<pre>");
-		body.append(self.replace_links("\n".join(node.doc)))
-		body.append("</pre><ul>\n\n")
+		body.extend(self.process_doc(node))
+		body.append("<ul>\n\n")
 		
 		for method in node.methods:
 			self.process_method(self.tree.get_symbol_name(method), method, index, body)
@@ -404,9 +398,78 @@ class HtmlPrinter(object):
 		html_name = escape(node.name)
 		index.append('<li><a href="#{0}">{1}</a></li>\n'.format(html_symbol, html_bare_symbol))
 		body.append('<li><small>field</small> <b id="{0}">{0}</b><br />\n'.format(html_symbol))
-		body.append("<pre>");
-		body.append(self.replace_links("\n".join(node.doc)))
-		body.append("</pre></li>\n\n")
+		body.extend(self.process_doc(node))
+		body.append("</li>\n\n")
+	
+	def process_doc(self, node):
+		doc = node.doc
+		buf = []
+		desc = doc.pop(DOC_DESC, None)
+		text = doc.pop(DOC_TEXT, None)
+		params = doc.pop(DOC_PARAM, None)
+		returns = doc.pop(DOC_RETURN, None)
+		throws = doc.pop(DOC_THROW, None)
+		
+		if desc:
+			self.process_doc_text("Description", self.join_buffers(desc), buf)
+		
+		if params:
+			self.process_doc_params(params, buf)
+		
+		if returns:
+			self.process_doc_returns(returns, buf)
+		
+		if throws:
+			self.process_doc_throws(throws, buf)
+		
+		if text:
+			self.process_doc_text("Additional documentation", self.join_buffers(text), buf)
+		
+		for key in doc:
+			print("Error: extra doc key '{0}' for {1}.".format(key, str(node)))
+		
+		return buf
+	
+	def join_buffers(self, buffers):
+		if len( buffers) > 1:
+			result = []
+			for i in  buffers:
+				result.extend(i)
+			return result
+		
+		if buffers:
+			return buffers[0]
+		
+		return []
+	
+	def process_doc_text(self, header, desc, buf):
+		buf.append('<p><b>{0}</b></p>\n<pre>'.format(escape(header)))
+		buf.append( self.replace_links('\n'.join(desc)))
+		buf.append('</pre>\n')
+	
+	def process_doc_params(self, params, buf):
+		buf.append('<p><b>Parameters</b></p>\n<ul>\n')
+		
+		for p in params:
+			buf.extend(('<li>', self.replace_links(' '.join(p)), '</li>\n'))
+		
+		buf.append('</ul>\n')
+		
+	def process_doc_throws(self, throws, buf):
+		buf.append('<p><b>Throws</b></p>\n<ul>\n')
+		
+		for p in throws:
+			buf.extend(('<li>', self.replace_links(' '.join(p)), '</li>\n'))
+		
+		buf.append('</ul>\n')
+		
+	def process_doc_returns(self, params, buf):
+		buf.append('<p><b>Returns</b></p>\n<ul>\n')
+		
+		for p in params:
+			buf.extend(('<p>', self.replace_links(' '.join(p)), '</p>\n'))
+		
+		buf.append('</ul>\n')
 	
 	def replace_links(self, text):
 		def sub(m):
@@ -416,6 +479,41 @@ class HtmlPrinter(object):
 		
 		return LINK_RE.sub(sub, text)
 
+DOC_DESC = "@desc"
+DOC_TEXT = "@text"
+DOC_PARAM = "@param"
+DOC_RETURN = "@return"
+DOC_THROW = "@throws"
+DOC_IGNORE = ("@signal", "@mixin", "@enum")
+
+def parse_doc_comment(doc):
+	mode = DOC_DESC
+	result = defaultdict(list)
+	buf = []
+	result[DOC_DESC].append(buf)
+	
+	for line in doc:
+		for tag in (DOC_PARAM, DOC_RETURN, DOC_THROW):
+			if line.startswith(tag):
+				mode = tag
+				buf = [line[len(tag):].strip()]
+				result[tag].append(buf)
+				break
+			
+		else:
+			
+			if mode not in (DOC_DESC, DOC_TEXT) and not line.startswith(" "):
+				mode = DOC_TEXT
+				buf = []
+				result[DOC_TEXT].append(buf)
+			
+			for tag in DOC_IGNORE:
+				if line.startswith(tag):
+					line = line[len(tag)+1:]
+			
+			buf.append(line)
+	
+	return result
 
 def parse_symbol(symbol, doc_head):
 	m = METHOD_RE.match(symbol)
@@ -484,7 +582,8 @@ def parse_source(source):
 			else:
 				mode = MODE_CODE
 				klass, parts = parse_symbol(bare, doc[0])
-				yield klass(source, lineno, bare, parts, doc)
+				
+				yield klass(source, lineno, bare, parts, parse_doc_comment(doc))
 
 def make_tree(tree, nodes):
 	for node in nodes:
