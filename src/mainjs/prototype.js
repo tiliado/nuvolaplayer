@@ -30,8 +30,8 @@
  * 
  * This is similar to creating a subclass in class-based inheritance.
  * 
- * @param proto        object prototype or null to use `Object`
- * @param mixins...    mixins objects
+ * @param Object|null proto    object prototype or null to use `Object`
+ * @param Object mixins...     mixins objects
  * @return new prototype object
  */
 var $prototype = function(proto, mixins)
@@ -60,8 +60,8 @@ var $prototype = function(proto, mixins)
  * 
  * This is similar to creating an instance object from a class in class-based inheritance.
  * 
- * @param proto           object prototype or null to use `Object`
- * @param init_args...    arguments to pass to the `$init` method
+ * @param Object proto            object @link{$prototype|prototype} or null to use `Object`
+ * @param variant init_args...    arguments to pass to the `$init` method
  * @return new initialized object
  */
 var $object = function(proto, init_args)

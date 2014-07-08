@@ -49,7 +49,7 @@ Launcher.setTooltip = function(tooltip)
  *  -  menu of a tray icon
  *  -  menu of a Unity dock item
  * 
- * @param Array of String    action names
+ * @param "Array of String" actions    action names
  */
 Launcher.setActions = function(actions)
 {

@@ -195,8 +195,8 @@ Actions.getState = function(name)
 /**
  * Set current state of toggle or radio actions.
  * 
- * @param String name    action name
- * @param variant state  current state: ``true/false`` for toggle actions, one of stateId entries of radio actions
+ * @param String name      action name
+ * @param variant state    current state: ``true/false`` for toggle actions, one of stateId entries of radio actions
  * 
  * ```
  * // toggle thumbs-up off

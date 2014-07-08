@@ -47,8 +47,8 @@ Nuvola.inArray = function(array, item)
 /**
  * Triggers mouse event on element
  * 
- * @param elm Element object
- * @param name Event name
+ * @param HTMLElement elm    Element object
+ * @param String name        Event name
  */
 Nuvola.triggerMouseEvent = function(elm, name)
 {
@@ -60,7 +60,7 @@ Nuvola.triggerMouseEvent = function(elm, name)
 /**
  * Simulates click on element
  * 
- * @param elm Element object
+ * @param HTMLElement elm    Element object
  */
 Nuvola.clickOnElement = function(elm)
 {
@@ -72,8 +72,9 @@ Nuvola.clickOnElement = function(elm)
 
 /**
  * Creates HTML text node
- * @param text	text of the node
- * @return		new text node
+ * 
+ * @param String text    text of the node
+ * @return    new text node
  */
 Nuvola.makeText = function(text)
 {
@@ -82,10 +83,11 @@ Nuvola.makeText = function(text)
 
 /**
  * Creates HTML element
- * @param name			element name
- * @param attributes	element attributes (optional)
- * @param text			text of the element (optional)
- * @return				new HTML element
+ * 
+ * @param String name          element name
+ * @param Object attributes    element attributes (optional)
+ * @param String text          text of the element (optional)
+ * @return new HTML element
  */
 Nuvola.makeElement = function(name, attributes, text)
 {

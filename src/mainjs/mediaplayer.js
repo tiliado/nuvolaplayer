@@ -145,7 +145,7 @@ MediaPlayer.setTrack = function(track)
  * 
  * If the current state is same as the previous one, this method does nothing.
  * 
- * @param Nuvola.PlaybackState state    current playback state
+ * @param PlaybackState state    current playback state
  */
 MediaPlayer.setPlaybackState = function(state)
 {
@@ -235,7 +235,7 @@ MediaPlayer.setCanPause = function(canPause)
  * 
  * Actions that have been already added are ignored.
  * 
- * @param Array of String actions    names of actions
+ * @param "Array of String" actions    names of actions
  */
 MediaPlayer.addExtraActions = function(actions)
 {
