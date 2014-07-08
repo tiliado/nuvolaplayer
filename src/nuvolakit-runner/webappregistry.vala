@@ -189,9 +189,6 @@ public class WebAppRegistry: GLib.Object
 				while ((file_info = enumerator.next_file()) != null)
 				{
 					string name = file_info.get_name();
-					if (!check_id(name))
-						continue;
-					
 					var app_dir = user_dir.get_child(name);
 					if (app_dir.query_file_type(0) != FileType.DIRECTORY)
 						continue;
@@ -223,8 +220,6 @@ public class WebAppRegistry: GLib.Object
 				while ((file_info = enumerator.next_file()) != null)
 				{
 					string name = file_info.get_name();
-					if (!check_id(name))
-						continue;
 					
 					var app_dir = dir.get_child(name);
 					if (app_dir.query_file_type(0) != FileType.DIRECTORY)

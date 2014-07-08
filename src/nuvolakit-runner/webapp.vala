@@ -73,10 +73,8 @@ public class WebAppMeta : GLib.Object
 		}
 		
 		meta.check();
-		var id = dir.get_basename();
-		if (id != meta.id)
-			throw new WebAppError.INVALID_METADATA("Invalid metadata file '%s'. Id mismatch.", metadata_file.get_path());
-		//			FIXME:
+
+//			FIXME:
 //~ 		if(!JSApi.is_supported(api_major, api_minor)){
 //~ 			throw new ServiceError.LOADING_FAILED(
 //~ 				"Requested unsupported api: %d.%d'".printf(api_major, api_minor));
