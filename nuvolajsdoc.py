@@ -43,7 +43,8 @@ SIGNAL_RE = re.compile(r"^this\.addSignal\s*\((.*)\);$")
 PROPERTY_RE = re.compile(r'^["\']?(\w+)["\']?\s*:\s*(.+)$')
 FIELD_RE = re.compile(r"^\s*(\$?\w+(?:\.\$?\w+)*)\s+=\s+(.*)\s*;$")
 ALIAS_RE = re.compile(r"^(\$?\w+(?:\.\$?\w+)*)\s+=\s+(\$?\w+(?:\.\$?\w+)*)\s*;$")
-LINK_RE = re.compile(r'@link\{(.+?)\}')
+LINK_RE = re.compile(r'@link\{(.+?)(?:\|(.+?))?\}')
+PARAM_RE = re.compile(r'^(optional\s+)?(?:[\'"](.+?)[\'"]\s*|([^\'"].*?)\s+)(.+?)\s+(.*)$')
 
 def gather_sources(sources_dir):
 	for root, dirs, files in os.walk(sources_dir):
@@ -455,8 +456,10 @@ class HtmlPrinter(object):
 	def process_doc_params(self, params, buf):
 		buf.append('<p><b>Parameters</b></p>\n<ul>\n')
 		
-		for p in params:
-			buf.extend(('<li>', self.replace_links(' '.join(p)), '</li>\n'))
+		for type, name, desc in params:
+			type = " ".join(self.link_symbol(s) for s in type.split(" "))
+			desc = self.mkd(desc)[3:-4]
+			buf.append('<li>{0} <b>{1}</b> - {2}</li>\n'.format(type, escape(name), self.replace_links(desc)))
 		
 		buf.append('</ul>\n')
 		
@@ -523,7 +526,35 @@ def parse_doc_comment(doc):
 			
 			buf.append(line)
 	
+	try:
+		params = result[DOC_PARAM]
+		valid_params = []
+		for param in params:
+			res = parse_param(param)
+			if res is None:
+				print("Error: Invalid @param '%s'." % param)
+			else:
+				valid_params.append(res)
+		
+		result[DOC_PARAM] = valid_params
+	except KeyError:
+		pass
+	
 	return result
+
+def parse_param(param):
+	param = " ".join(s.strip() for s in param)
+	m = PARAM_RE.match(param)
+	if m:
+		optional, type1, type2, name, desc = m.groups()
+		type = type1 or type2
+		
+		if optional:
+			type = optional.strip() + " " + type
+		
+		return type, name, desc
+	
+	return None
 
 def parse_symbol(symbol, doc_head):
 	m = METHOD_RE.match(symbol)
