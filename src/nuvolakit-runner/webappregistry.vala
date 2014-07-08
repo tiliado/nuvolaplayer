@@ -105,49 +105,9 @@ public class WebAppRegistry: GLib.Object
 			return null;
 		}
 		
-		WebAppMeta? meta = null;
-		WebAppMeta? meta2 = null;
-		var app_storage = storage.get_child(id);
-		
-		var user_dir = app_storage.user_data_dir;
-		if (user_dir.query_exists())
-		{
-			try
-			{
-				meta = WebAppMeta.load_from_dir(user_dir);
-				debug("Found web app %s at %s, version %u.%u", 
-				meta.name, user_dir.get_path(), meta.version_major, meta.version_minor);
-				meta.removable = allow_management;
-			}
-			catch (WebAppError e)
-			{
-				warning("Unable to load web app from %s: %s", user_dir.get_path(), e.message);
-			}
-		}
-		
-		foreach (var dir in app_storage.data_dirs)
-		{
-			if (!dir.query_exists())
-				continue;
-			
-			try
-			{
-				meta2 = WebAppMeta.load_from_dir(dir);
-				
-				debug("Found app %s at %s, version %u.%u",
-				meta2.name, dir.get_path(), meta2.version_major, meta2.version_minor);
-				if (meta == null || meta2.version_major > meta.version_major
-				|| meta2.version_major == meta.version_major && meta2.version_minor > meta.version_minor)
-				{
-					meta = meta2;
-					
-				}
-			}
-			catch (WebAppError e)
-			{
-				warning("Unable to load web app from %s: %s", dir.get_path(), e.message);
-			}
-		}
+		var apps = list_web_apps(id);
+		var app = apps[id];
+		var meta = app == null ? null : app.meta;
 		
 		if (meta != null)
 			message("Using web app %s, version %u.%u", meta.name, meta.version_major, meta.version_minor);
@@ -173,13 +133,14 @@ public class WebAppRegistry: GLib.Object
 	 * 
 	 * @return hash table of service id - metadata pairs
 	 */
-	public HashTable<string, WebApp> list_web_apps()
+	public HashTable<string, WebApp> list_web_apps(string? filter_id=null)
 	{
 		HashTable<string,  WebApp> result = new HashTable<string, WebApp>(str_hash, str_equal);
 		FileInfo file_info;
 		WebApp? app;
 		WebApp? tmp_app;
 		var user_dir = storage.user_data_dir;
+		string id;
 		
 		if (user_dir.query_exists())
 		{
@@ -188,17 +149,20 @@ public class WebAppRegistry: GLib.Object
 				var enumerator = user_dir.enumerate_children(FileAttribute.STANDARD_NAME, 0);
 				while ((file_info = enumerator.next_file()) != null)
 				{
-					string name = file_info.get_name();
-					var app_dir = user_dir.get_child(name);
+					string dirname = file_info.get_name();
+					var app_dir = user_dir.get_child(dirname);
 					if (app_dir.query_file_type(0) != FileType.DIRECTORY)
 						continue;
 					
 					try
 					{
 						app = load_web_app_from_dir(app_dir, allow_management);
+						id = app.meta.id;
 						debug("Found web app %s at %s, version %u.%u",
 						app.meta.name, app_dir.get_path(), app.meta.version_major, app.meta.version_minor);
-						result.insert(name, app);
+						
+						if (filter_id == null || filter_id == id)
+							result.insert(id, app);
 					}
 					catch (WebAppError e)
 					{
@@ -219,9 +183,8 @@ public class WebAppRegistry: GLib.Object
 				var enumerator = dir.enumerate_children(FileAttribute.STANDARD_NAME, 0);
 				while ((file_info = enumerator.next_file()) != null)
 				{
-					string name = file_info.get_name();
-					
-					var app_dir = dir.get_child(name);
+					string dirname = file_info.get_name();
+					var app_dir = dir.get_child(dirname);
 					if (app_dir.query_file_type(0) != FileType.DIRECTORY)
 						continue;
 					
@@ -238,15 +201,20 @@ public class WebAppRegistry: GLib.Object
 					debug("Found web app %s at %s, version %u.%u",
 					app.meta.name, app_dir.get_path(), app.meta.version_major, app.meta.version_minor);
 					
-					tmp_app = result.lookup(name);
+					id = app.meta.id;
 					
-					// Insert new value, if web app has not been added yet,
-					// or override previous web app integration, if
-					// the new one has greater version.
-					if(tmp_app == null
-					|| app.meta.version_major > tmp_app.meta.version_major
-					|| app.meta.version_major == tmp_app.meta.version_major && app.meta.version_minor > tmp_app.meta.version_minor)
-						result.insert(name, app);
+					if (filter_id == null || filter_id == id)
+					{
+						tmp_app = result.lookup(id);
+						
+						// Insert new value, if web app has not been added yet,
+						// or override previous web app integration, if
+						// the new one has greater version.
+						if(tmp_app == null
+						|| app.meta.version_major > tmp_app.meta.version_major
+						|| app.meta.version_major == tmp_app.meta.version_major && app.meta.version_minor > tmp_app.meta.version_minor)
+							result.insert(id, app);
+					}
 				}
 			}
 			catch (Error e)
