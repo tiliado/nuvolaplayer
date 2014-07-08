@@ -466,11 +466,11 @@ class HtmlPrinter(object):
 		
 		buf.append('</ul>\n')
 		
-	def process_doc_throws(self, throws, buf):
+	def process_doc_throws(self, items, buf):
 		buf.append('<p><b>Throws</b></p>\n<ul>\n')
 		
-		for p in throws:
-			buf.extend(('<li>', self.replace_links(' '.join(p)), '</li>\n'))
+		for item in items:
+			buf.extend(('<li>', self.replace_links(self.mkd(' '.join(s.strip() for s in item))), '</li>\n'))
 		
 		buf.append('</ul>\n')
 		
