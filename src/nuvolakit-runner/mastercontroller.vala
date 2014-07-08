@@ -317,6 +317,7 @@ public class MasterController : Diorite.Application
 		argv[j++] = null;
 		
 		AppRunner runner;
+		debug("Launch app runner for '%s': %s", app_id, string.joinv(" ", argv));
 		try
 		{
 			runner = new AppRunner(app_id, argv);
@@ -329,7 +330,6 @@ public class MasterController : Diorite.Application
 		}
 		
 		runner.exited.connect(on_runner_exited);
-		debug("Launch app runner for '%s'.", app_id);
 		app_runners.push_tail(runner);
 		
 		if (app_id in app_runners_map)
