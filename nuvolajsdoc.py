@@ -336,8 +336,11 @@ class HtmlPrinter(object):
 	def process_signal(self, symbol, node, index, body):
 		html_symbol = escape(symbol)
 		html_name = escape(node.name)
+		params = [(node.parent, "emitter", "object that emitted the signal")] + node.doc.get(DOC_PARAM, [])
+		node.doc[DOC_PARAM] = params
+		html_params = ", ".join(escape(p[1]) for p in params)
 		index.append('<li><a href="#{0}">{1}</a></li>\n'.format(html_symbol, html_name))
-		body.append('<li><small>signal</small> <b id="{0}">{1}</b><br />\n'.format(html_symbol, html_name))
+		body.append('<li><small>signal</small> <b id="{0}">{1}</b>({2})<br />\n'.format(html_symbol, html_name, html_params))
 		body.extend(self.process_doc(node))
 		body.append("</li>\n\n")
 		
