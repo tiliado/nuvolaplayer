@@ -476,13 +476,15 @@ class HtmlPrinter(object):
 		
 		buf.append('</ul>\n')
 	
+	
+	def link_symbol(self, symbol, text=None):
+		canonical = self.tree.get_canonical(symbol)
+		if not text:
+			text = symbol
+		return '<a href="#{0}">{1}</a>'.format(escape(canonical), escape(text)) if canonical else escape(text)
+	
 	def replace_links(self, text):
-		def sub(m):
-			symbol = m.group(1)
-			canonical = self.tree.get_canonical(symbol)
-			return '<a href="#{0}">{1}</a>'.format(escape(canonical), escape(symbol)) if canonical else escape(symbol)
-		
-		return LINK_RE.sub(sub, text)
+		return LINK_RE.sub(lambda m: self.link_symbol(m.group(1), m.group(2)), text)
 	
 	def mkd(self, s):
 		return self.markdown.convert(s)
