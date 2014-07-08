@@ -56,7 +56,17 @@ public class WebAppListView : Gtk.IconView
 		}
 		catch (Error e)
 		{
-			warning("Unable to load fallback icon '%s'. %s", fallback_icon, e.message);
+			var fallback2 = fallback_icon[0:fallback_icon.length - 1];
+			warning("Unable to load fallback icon '%s'. %s. Trying '%s' instead.", fallback_icon, e.message, fallback2);
+			
+			try
+			{
+				return Gtk.IconTheme.get_default().load_icon(fallback2, ICON_SIZE, 0);
+			}
+			catch (Error e)
+			{
+				warning("Unable to load fallback icon '%s'. %s", fallback2, e.message);
+			}
 		}
 		return null;
 	}
