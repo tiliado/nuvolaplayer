@@ -338,7 +338,14 @@ class HtmlPrinter(object):
 		html_name = escape(node.name)
 		params = [(node.parent, "emitter", "object that emitted the signal")] + node.doc.get(DOC_PARAM, [])
 		node.doc[DOC_PARAM] = params
-		html_params = ", ".join(escape(p[1]) for p in params)
+		
+		unique_params = []
+		for p in params:
+			p = p[1].split(".")[0].strip()
+			if not p in unique_params:
+				unique_params.append(p)
+		
+		html_params = ", ".join(escape(p) for p in unique_params)
 		index.append('<li><a href="#{0}">{1}</a></li>\n'.format(html_symbol, html_name))
 		body.append('<li><small>signal</small> <b id="{0}">{1}</b>({2})<br />\n'.format(html_symbol, html_name, html_params))
 		body.extend(self.process_doc(node))
