@@ -142,6 +142,17 @@ class Symbols(object):
 		self.symbols[canonical] = node
 		self.canonical[canonical] = canonical
 		self.canonical[alias] = canonical
+		
+		append_symbols = []
+		for symbol, node in self.symbols.iteritems():
+			if node.parent == alias:
+				canonical = self.get_symbol_name(node)
+				self.canonical[symbol] = canonical
+				self.canonical[canonical] = canonical
+				append_symbols.append((canonical, node))
+		
+		for canonical, node in append_symbols:
+			self.symbols[canonical] = node
 
 
 class FunctionSymbol(Node):
