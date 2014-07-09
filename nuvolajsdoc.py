@@ -616,7 +616,7 @@ def parse_source(source):
 						
 			elif mode == MODE_DOC:
 				if line[level:level+2] != " *":
-					print("Error: Wrong level: %s: %r" % (lineno, line))
+					print("Error: Wrong level: %s:%s: %r" % (source, lineno, line))
 				
 				
 				if bare == "*/":
