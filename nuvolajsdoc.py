@@ -450,7 +450,6 @@ class HtmlPrinter(object):
 		return []
 	
 	def process_doc_text(self, header, desc, buf):
-		buf.append('<p><b>{0}</b></p>\n'.format(escape(header)))
 		text = '\n'.join(desc)
 		text = text.replace("\n```\n", '\n```js\n')
 		text = text.replace("\\/", '/')
