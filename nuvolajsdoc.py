@@ -368,14 +368,25 @@ class HtmlPrinter(object):
 		index.append('<li><a href="#{0}">{1}</a>\n<ul>'.format(html_symbol, html_bare_symbol))
 		
 		inherits = []
-		for i in node.inherits:
-			canonical = self.tree.get_canonical(i)
-			if canonical:
-				inherits.append('<a href="#{0}">{1}</a>'.format(escape(canonical), escape(i)))
-			else:
-				inherits.append(escape(i))
+		if node.inherits:
+			for i in node.inherits:
+				canonical = self.tree.get_canonical(i)
+				if canonical:
+					inherits.append('<a href="#{0}">{1}</a>'.format(escape(canonical), escape(i)))
+				else:
+					inherits.append(escape(i))
+			
+			extends = inherits[0]
+			inherits = inherits[1:]
+		else:
+			extends = None
 		
-		body.append('<li> <small>prototype</small> <b id="{0}">{0}</b> inherits {1}\n<br />'.format(html_symbol, ", ".join(inherits)))
+		body.append('<li> <small>prototype</small> <b id="{0}">{0}</b>'.format(html_symbol))
+		if extends:
+			body.append(' extends {0}'.format(extends))
+		if inherits:
+			body.append(', contains {0}'.format(", ".join(inherits)))
+		body.append("<br />\n")
 		body.extend(self.process_doc(node))
 		body.append("<ul>\n\n")
 		
