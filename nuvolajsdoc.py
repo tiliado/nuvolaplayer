@@ -643,8 +643,10 @@ def parse_source(source):
 			else:
 				mode = MODE_CODE
 				klass, parts = parse_symbol(bare, doc[0])
-				
-				yield klass(source, lineno, bare, parts, parse_doc_comment(doc))
+				if klass is None:
+					print("Error: Unknown symbol type at {0}:{1} '{2}'".format(source, lineno, bare))
+				else:
+					yield klass(source, lineno, bare, parts, parse_doc_comment(doc))
 
 def make_tree(tree, nodes):
 	for node in nodes:
