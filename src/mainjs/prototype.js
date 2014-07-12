@@ -26,9 +26,8 @@
  * Creates new object from prototype and mixins.
  * 
  * Creates new object that will have `proto` as its prototype and will be extended with properties
- * from all specified `mixins`.
- * 
- * This is similar to creating a subclass in class-based inheritance.
+ * from all specified `mixins`. This is similar to creating a subclass in class-based inheritance.
+ * See @link{$object} for instance object creation.
  * 
  * @param Object|null proto    object prototype or null to use `Object`
  * @param Object mixins...     mixins objects
@@ -56,9 +55,8 @@ var $prototype = function(proto, mixins)
  * Creates new initialized object from prototype.
  * 
  * Creates new object that will have `proto` as its prototype and will be initialized by calling
- * `$init` method with provided arguments `args`.
- * 
- * This is similar to creating an instance object from a class in class-based inheritance.
+ * `$init` method with provided arguments `args`. This is similar to creating an instance object
+ * from a class in class-based inheritance.
  * 
  * @param Object proto            object @link{$prototype|prototype} or null to use `Object`
  * @param variant init_args...    arguments to pass to the `$init` method
