@@ -26,9 +26,19 @@ require("prototype");
 require("signals");
 require("core");
 
+/**
+ * Prototype object for web app integration.
+ */
 var WebApp = $prototype(null, SignalsMixin);
+
+/**
+ * @link{ConfigStorage|Configuration} key used to store an address of the last visited page.
+ */
 WebApp.LAST_URI = "web_app.last_uri";
 
+/**
+ * Initializes new web app object.
+ */
 WebApp.$init = function()
 {
 	this.meta = Nuvola.meta;
@@ -42,44 +52,68 @@ WebApp.$init = function()
 	Nuvola.core.connect("InitWebWorker", this);
 }
 
+/**
+ * Convenience function to create new WebApp object linked to Nuvola API.
+ * 
+ * ```
+ * var WebApp = Nuvola.$WebApp();
+ * 
+ * ...
+ * 
+ * WebApp.start();
+ * ```
+ */
 WebApp.start = function()
 {
 	Nuvola.webApp = $object(this);
 }
 
-WebApp._onHomePageRequest = function(object, result)
+/**
+ * Signal handler for @link{Core::HomePageRequest}
+ */
+WebApp._onHomePageRequest = function(emitter, result)
 {
 	result.url = this.meta.home_url;
 }
 
-WebApp._onLastPageRequest = function(object, result)
+/**
+ * Signal handler for @link{Core::LastPageRequest}
+ */
+WebApp._onLastPageRequest = function(emitter, request)
 {
-	result.url = Nuvola.config.get(this.LAST_URI) || null;
+	request.url = Nuvola.config.get(this.LAST_URI) || null;
 }
 
+/**
+ * Signal handler for @link{Core::NavigationRequest}
+ */
 WebApp._onNavigationRequest = function(object, request)
 {
 	request.approved = this.allowedURI ? true : this.allowedURI.test(request.url);
 }
 
+/**
+ * Signal handler for @link{Core::UriChanged}
+ */
 WebApp._onUriChanged = function(object, uri)
 {
 	Nuvola.config.set(this.LAST_URI, uri);
 }
 
+/**
+ * Signal handler for @link{Core::InitAppRunner}
+ */
 WebApp._onInitAppRunner = function(emitter, values, entries)
 {
 }
 
 /**
- * @method WebAppPrototype.onInitWebWorker
- * 
- * Handler for Core::InitWebWorker signal. Override this method to integrate the web page.
+ * Signal handler for @link{Core::InitWebWorker}. Override this method to integrate the web page.
  * 
  * ```
  * WebApp._onInitWebWorker = function(emitter)
  * {
- *     Nuvola.WebApp._onInitWebWorker.call(this);
+ *     Nuvola.WebApp._onInitWebWorker.call(this, emitter);
  *     // one of these:
  *     document.addEventListener("DOMContentLoaded", this._onPageReady.bind(this));
  *     window.addEventListener("load", this._onPageReady.bind(this));
@@ -97,6 +131,16 @@ WebApp._onInitWebWorker = function(emitter)
 
 // export public fields
 Nuvola.WebApp = WebApp;
+
+/**
+ * Convenience function to create new prototype object extending @link{WebApp} prototype.
+ * 
+ * @return new prototype object extending @link{WebApp}
+ * 
+ * ```
+ * var WebApp = Nuvola.$WebApp();
+ * ```
+ */
 Nuvola.$WebApp = function()
 {
 	if (this !== Nuvola)
