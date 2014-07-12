@@ -24,8 +24,18 @@
 
 require("prototype");
 
+/**
+ * Prototype object for Menubar management
+ */
 var MenuBar = $prototype(null);
 
+/**
+ * Adds new menu to the menubar or replaces existing menu with the same id
+ * 
+ * @param String id       menu identifier
+ * @param String label    label shown in user interface
+ * @param "Array of String" actions    @link{Actions|actions} shown in the menu
+ */
 MenuBar.setMenu = function(id, label, actions)
 {
 	Nuvola._sendMessageAsync("Nuvola.MenuBar.setMenu", id, label, actions);
@@ -33,4 +43,8 @@ MenuBar.setMenu = function(id, label, actions)
 
 // export public items
 Nuvola.MenuBar = MenuBar;
+
+/**
+ * Instance object of @link{MenuBar} prototype connected to Nuvola backend.
+ */
 Nuvola.menuBar = $object(MenuBar);
