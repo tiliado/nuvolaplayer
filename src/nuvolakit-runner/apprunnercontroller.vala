@@ -196,7 +196,6 @@ public class AppRunnerController : Diorite.Application
 		simple_action("go", "app", Actions.GO_RELOAD, "Reload", "_Reload", "view-refresh", null, web_engine.reload)
 		};
 		actions.add_actions(actions_spec);
-		actions.get_action(Actions.TOGGLE_SIDEBAR).enabled = false;
 	}
 	
 	private void set_up_communication()
