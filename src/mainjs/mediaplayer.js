@@ -32,7 +32,7 @@ require("browser");
 require("core");
 
 /**
- * @enum Base media player actions
+ * @enum Base media player @link{Actions|actions}
  */
 var PlayerAction = {
 	/**

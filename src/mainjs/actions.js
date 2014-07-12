@@ -30,6 +30,10 @@ require("signals");
  * 
  * Actions can be shown in various user interface components such as menu, tray icon menu, Unity HUD, Unity Laucher
  * Quicklist, or invoked by keyboard shortcut, remote control, etc.
+ * 
+ * Some actions are provided by the Nuvola Player backend (e. g. @link{BrowserAction|browser actions}),
+ * some are created by JavaScript API objects (e. g. @link{PlayerAction|media player actions}) and
+ * web app integration scripts can create custom actions with @link{Actions.addAction} or @link{Actions.addRadioAction}.
  */
 var Actions = $prototype(null, SignalsMixin);
 
