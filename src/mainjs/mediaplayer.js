@@ -308,7 +308,7 @@ MediaPlayer._sendDevelInfo = function()
 
 MediaPlayer._onArtworkDownloaded = function(res, changed)
 {
-	if (!res.result)
+	if (!res.success)
 	{
 		this._artworkFile = null;
 		console.log(Nuvola.format("Artwork download failed: {1} {2}.", res.statusCode, res.statusText));

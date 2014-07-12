@@ -48,12 +48,12 @@ Browser.downloadFileAsync = function(uri, basename, callback, data)
 	Nuvola._sendMessageAsync("Nuvola.Browser.downloadFileAsync", uri, basename, id);
 },
 
-Browser._downloadDone = function(id, result, statusCode, statusText, filePath, fileURI)
+Browser._downloadDone = function(id, success, statusCode, statusText, filePath, fileURI)
 {
 	var cb = this._downloadFileAsyncCallbacks[id];
 	delete this._downloadFileAsyncCallbacks[id];
 	cb[0]({
-		result: result,
+		success: success,
 		statusCode: statusCode,
 		statusText: statusText,
 		filePath: filePath,
