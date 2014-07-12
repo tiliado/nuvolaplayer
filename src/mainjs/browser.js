@@ -24,21 +24,60 @@
 
 require("prototype");
 
+/**
+ * @enum Names on browser's @link{Actions|actions}
+ */
 var BrowserAction = {
+	/**
+	 * Go back to the previous page
+	 */
 	GO_BACK: "go-back",
+	/**
+	 * Go forward
+	 */
 	GO_FORWARD: "go-forward",
+	/**
+	 * Go to the web app's home page.
+	 */
 	GO_HOME: "go-home",
+	/**
+	 * Reload page
+	 */
 	RELOAD: "reload",
 }
 
+/**
+ * Prototype object for web browser management
+ */
 var Browser = $prototype(null);
 
+/**
+ * Initializes new Browser object
+ */
 Browser.$init = function()
 {
 	this._downloadFileAsyncId = 0;
 	this._downloadFileAsyncCallbacks = {}
 }
 
+/**
+ * Request download of a file
+ * 
+ * @param String uri         file to download
+ * @param String basename    a filename of the result
+ * @param Function callback    function to call after file is downloaded
+ * @param Variant data         extra data passed to the callback
+ * 
+ * **callback** will be called with two arguments:
+ * 
+ *   * ``result`` object with properties
+ *        - ``success`` - ``true`` if the download has been successful, ``false`` otherwise
+ *        - ``statusCode`` - a HTTP status code
+ *        - ``statusText`` - description of the HTTP status code
+ *        - ``filePath``   - filesystem path to the downloaded file
+ *        - ``fileURI``    - URI of the downloaded file (``file:///...``)
+ *   * ``data`` - data argument passed to downloadFileAsync
+ */
 Browser.downloadFileAsync = function(uri, basename, callback, data)
 {
 	var id = this._downloadFileAsyncId++;
@@ -64,4 +103,8 @@ Browser._downloadDone = function(id, success, statusCode, statusText, filePath, 
 // export public items
 Nuvola.BrowserAction = BrowserAction;
 Nuvola.Browser = Browser;
+
+/**
+ * Instance object of @link{Browser} prototype connected to Nuvola backend.
+ */
 Nuvola.browser = $object(Browser);
