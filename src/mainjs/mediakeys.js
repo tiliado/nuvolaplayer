@@ -24,22 +24,55 @@
 
 require("prototype");
 
+/**
+ * @enum Identifiers of media keys
+ */
 var MediaKey = {
+	/**
+	 * Play key
+	 */
 	PLAY: "Play",
+	/**
+	 * Pause key
+	 */
 	PAUSE: "Pause",
+	/**
+	 * Stop key
+	 */
 	STOP: "Stop",
+	/**
+	 * Go to the previous track key
+	 */
 	PREV: "Previous",
+	/**
+	 * Go to the next track key
+	 */
 	NEXT: "Next"
 };
 
+/**
+ * Prototype object integrating media keys handling
+ */
 var MediaKeys = $prototype(null, SignalsMixin);
 
+/**
+ * Initializes new MediaKeys object.
+ */
 MediaKeys.$init = function()
 {
-	this.registerSignals(["MediaKeyPressed"]);
+	/**
+	 * Emitted when a media key is pressed.
+	 * 
+	 * @param MediaKey key    the pressed key
+	 */
+	this.addSignal("MediaKeyPressed");
 }
 
 // export public items
 Nuvola.MediaKey = MediaKey;
 Nuvola.MediaKeys = MediaKeys;
+
+/**
+ * Instance object of @link{MediaKeys} prototype connected to Nuvola backend.
+ */
 Nuvola.mediaKeys = $object(MediaKeys);
