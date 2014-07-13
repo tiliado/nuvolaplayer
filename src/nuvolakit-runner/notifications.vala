@@ -25,26 +25,8 @@
 
 // https://people.gnome.org/~mccann/docs/notification-spec/notification-spec-latest.html
 
-namespace Nuvola.Extensions.Notifications
+namespace Nuvola
 {
-
-const string ACTIVE_WINDOW = "active_window";
-const string RESIDENT = "resident";
-
-public Nuvola.ExtensionInfo get_info()
-{
-	return
-	{
-		/// Name of a plugin providing integration with multimedia keys in GNOME
-		_("Notifications"),
-		Nuvola.get_version(),
-		/// Description of a plugin providing integration with multimedia keys in GNOME
-		_("<p>This plugin provides desktop notifications (<i>libnotify</i>).</p>"),
-		"Jiří Janoušek",
-		typeof(Extension),
-		true
-	};
-}
 
 public class Notification
 {
@@ -134,7 +116,7 @@ public class Notification
 /**
  * Manages notifications
  */
-public class Extension : Nuvola.Extension
+public class Notifications : GLib.Object, NotificationsInterface
 {
 	private AppRunnerController controller;
 	private Config config;
@@ -146,21 +128,14 @@ public class Extension : Nuvola.Extension
 	private bool persistence_supported = false;
 	private bool icons_supported = false;
 	
-	construct
-	{
-		has_preferences = true;
-		notifications = new HashTable<string, Notification>(str_hash, str_equal);
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public override void load(AppRunnerController controller) throws ExtensionError
+	public Notifications(AppRunnerController controller) throws ExtensionError
 	{
 		this.controller = controller;
 		this.config = controller.config;
 		this.main_window = controller.main_window;
 		this.actions_reg = controller.actions;
+		
+		notifications = new HashTable<string, Notification>(str_hash, str_equal);
 		
 		Notify.init(controller.app_name);
 		unowned List<string> capabilities = Notify.get_server_caps();
@@ -171,27 +146,11 @@ public class Extension : Nuvola.Extension
 		
 		var action = controller.simple_action("view", "app", "show-notification", "Show notification", null, null, null, show_notifications);
 		actions_reg.add_action(action);
-		
-		var server = controller.server;
-		server.add_handler("Nuvola.Notification.update", handle_update);
-		server.add_handler("Nuvola.Notification.setActions", handle_set_actions);
-		server.add_handler("Nuvola.Notification.removeActions", handle_remove_actions);
-		server.add_handler("Nuvola.Notification.show", handle_show);
-		server.add_handler("Nuvola.Notifications.showNotification", handle_show_notification);
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 */
-	public override void unload()
+	~Notifications()
 	{
-		var server = controller.server;
-		server.remove_handler("Nuvola.Notification.update");
-		server.remove_handler("Nuvola.Notification.setActions");
-		server.remove_handler("Nuvola.Notification.removeActions");
-		server.remove_handler("Nuvola.Notification.show");
-		server.remove_handler("Nuvola.Notifications.showNotification");
-		
+
 		Notify.uninit();
 	}
 	
@@ -257,69 +216,6 @@ public class Extension : Nuvola.Extension
 	{
 		foreach (var notification in notifications.get_values())
 			notification.show(true);
-	}
-	
-	private Variant? handle_update(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
-	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(sssssb)");
-		string name = null;
-		string title = null;
-		string message = null;
-		string icon_name = null;
-		string icon_path = null;
-		bool resident = false;
-		data.get("(sssssb)", &name, &title, &message, &icon_name, &icon_path);
-		update(name, title, message, icon_name, icon_path, resident);
-		return null;
-	}
-	
-	private Variant? handle_set_actions(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
-	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(sav)");
-		
-		string name = null;
-		int i = 0;
-		VariantIter iter = null;
-		data.get("(sav)", &name, &iter);
-		string[] actions = new string[iter.n_children()];
-		Variant item = null;
-		while (iter.next("v", &item))
-			actions[i++] = item.get_string();
-		
-		set_actions(name, (owned) actions);
-		return null;
-	}
-	
-	private Variant? handle_remove_actions(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
-	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(s)");
-		string name = null;
-		data.get("(s)", &name);
-		remove_actions(name);
-		return null;
-	}
-	
-	private Variant? handle_show(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
-	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(sb)");
-		string name = null;
-		bool force = false;
-		data.get("(sb)", &name, &force);
-		show(name, force);
-		return null;
-	}
-	
-	private Variant? handle_show_notification(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
-	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(ssssb)");
-		string summary = null;
-		string body = null;
-		string icon_name = null;
-		string icon_path = null;
-		bool force = false;
-		data.get("(ssssb)", &summary, &body, &icon_name, &icon_path, &force);
-		show_anonymous(summary, body, icon_name, icon_path, force);
-		return null;
 	}
 }
 
