@@ -22,51 +22,33 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola.Extensions.MediaKeys
+namespace Nuvola
 {
-
-public Nuvola.ExtensionInfo get_info()
-{
-	return
-	{
-		/// Name of a plugin providing integration with multimedia keys in GNOME
-		_("Media keys"),
-		Nuvola.get_version(),
-		/// Description of a plugin providing integration with multimedia keys in GNOME
-		_("<p>This extension allows one to control playback with multimedia keys.</p>"),
-		"Jiří Janoušek",
-		typeof(Extension),
-		true
-	};
-}
-
-public const string X11_PLAY = "XF86AudioPlay";
-//~ public const string X11_PLAY = "XF86Calculator";
-public const string X11_PAUSE = "XF86AudioPause";
-public const string X11_STOP = "XF86AudioStop";
-public const string X11_PREV = "XF86AudioPrev";
-public const string X11_NEXT = "XF86AudioNext";
-//~ public const string X11_NEXT = "XF86Tools";
-public const string GNOME_PLAY = "Play";
-public const string GNOME_PAUSE = "Pause";
-public const string GNOME_STOP = "Stop";
-public const string GNOME_PREV = "Previous";
-public const string GNOME_NEXT = "Next";
 
 /**
- * Manages multimedia keys and pause key
+ * Manages multimedia keys
  */
-public class Extension: Nuvola.Extension
+public class MediaKeys: GLib.Object, MediaKeysInterface
 {
+	public static const string X11_PLAY = "XF86AudioPlay";
+//~ 	public const string X11_PLAY = "XF86Calculator";
+	public static const string X11_PAUSE = "XF86AudioPause";
+	public static const string X11_STOP = "XF86AudioStop";
+	public static const string X11_PREV = "XF86AudioPrev";
+	public static const string X11_NEXT = "XF86AudioNext";
+//~ 	public static const string X11_NEXT = "XF86Tools";
+	public static const string GNOME_PLAY = "Play";
+	public static const string GNOME_PAUSE = "Pause";
+	public static const string GNOME_STOP = "Stop";
+	public static const string GNOME_PREV = "Previous";
+	public static const string GNOME_NEXT = "Next";
+
 	private AppRunnerController controller;
 	private WebEngine web_engine;
 	private GlobalKeybinder keybinder;
 	private GnomeMedia? media_keys;
 	
-	/**
-	 * {@inheritDoc}
-	 */
-	public override void load(AppRunnerController controller) throws ExtensionError
+	public MediaKeys(AppRunnerController controller)
 	{
 		this.controller = controller;
 		this.web_engine = controller.web_engine;
@@ -74,10 +56,7 @@ public class Extension: Nuvola.Extension
 		handle_multimedia_keys();
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 */
-	public override void unload()
+	~MediaKeys()
 	{
 		release_multimedia_keys();
 		keybinder = null;
@@ -225,4 +204,4 @@ public interface GnomeMedia: Object
 	public signal void media_player_key_pressed(string app, string key);
 }
 
-} // namespace Nuvola.Extensions.MediaKeys
+} // namespace Nuvola

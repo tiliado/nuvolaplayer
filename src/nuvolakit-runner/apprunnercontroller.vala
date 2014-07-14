@@ -313,6 +313,8 @@ public class AppRunnerController : Diorite.Application
 		components.add_implementation(new TrayIcon(this));
 		components.add_component(new NotificationsComponent(this));
 		components.add_implementation(new Notifications(this));
+		components.add_component(new MediaKeysComponent(this));
+		components.add_implementation(new MediaKeys(this));
 	}
 	
 	private void on_fatal_error(string title, string message)
