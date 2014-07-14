@@ -669,7 +669,7 @@ def make_tree(tree, nodes):
 		else:
 			tree.add_symbol(node)
 
-def generate_doc(ns, out_file, sources_dir):
+def generate_doc(ns, out_file, sources_dir, template):
 	tree = Symbols(ns)
 	
 	for source in gather_sources(sources_dir):
@@ -684,11 +684,11 @@ def generate_doc(ns, out_file, sources_dir):
 	printer = HtmlPrinter(tree, ns, markdown)
 	index, body = printer.process()
 	
-	with open("doc/template.html", "rt") as f:
+	with open(template, "rt") as f:
 		template = Template(f.read())
 	
 	with open(out_file, "wt") as f:
 		f.write(template.safe_substitute(index=index, body=body))
 
 if __name__ == "__main__":
-	generate_doc("Nuvola", "doc.html", "src/mainjs")
+	generate_doc("Nuvola", "doc.html", "src/mainjs", "doc/templates/jsdoc.html")
