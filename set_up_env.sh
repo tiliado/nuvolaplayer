@@ -1,4 +1,6 @@
 export NUVOLA_WEB_APPS_DIR="web_apps"
+export DIORITE_LOG_IPC_SERVER="yes"
+export DIORITE_LOG_MESSAGE_SERVER="yes"
 
 rebuild()
 {
