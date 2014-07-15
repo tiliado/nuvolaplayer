@@ -107,7 +107,7 @@ public class Nuvola.LauncherComponent: GLib.Object, Component
 			actions[i++] = item.get_string();
 		
 		foreach (var object in objects)
-			object.set_actions((owned) actions);
+			object.set_actions(actions);
 		
 		return null;
 	}
