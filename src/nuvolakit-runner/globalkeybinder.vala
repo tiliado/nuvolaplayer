@@ -89,7 +89,11 @@ public class GlobalKeybinder: GLib.Object
 	
 	private bool grab_ungrab(bool grab, string accelerator, out int keycode, out Gdk.ModifierType modifiers)
 	{
-		return_val_if_fail(grab != is_bound(accelerator), false);
+		var bound = is_bound(accelerator);
+		
+		if (grab != bound)
+			return true;
+		
 		uint keysym;
 		Gtk.accelerator_parse(accelerator, out keysym, out modifiers);
 		return_val_if_fail(keysym != 0, false);
@@ -102,6 +106,7 @@ public class GlobalKeybinder: GLib.Object
 		keycode = display.keysym_to_keycode(keysym);            
 		return_val_if_fail(keycode != 0, false);
 		Gdk.error_trap_push();
+		
 		foreach (uint lock_modifier in lock_modifiers)
 		{
 			if (grab)
