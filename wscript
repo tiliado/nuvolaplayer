@@ -46,7 +46,7 @@ try:
 		output = subprocess.Popen(["git", "log", "-n", "1", "--pretty=format:%H %cn <%ce>"], stdout=subprocess.PIPE).communicate()[0]
 		id, commiter = output.split(" ", 1)
 except Exception, e:
-	raise Exception("Cannot find revision information.")
+	id, commiter = "fuzzy_id", "fuzzy_comitter"
 
 COMMITTER = str(commiter).strip()
 REVISION_ID = str(id).strip()
