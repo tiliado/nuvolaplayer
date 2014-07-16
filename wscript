@@ -120,7 +120,7 @@ def options(ctx):
 	ctx.add_option('--noopt', action='store_true', default=False, dest='noopt', help="Turn off compiler optimizations")
 	ctx.add_option('--debug', action='store_true', default=True, dest='debug', help="Turn on debugging symbols")
 	ctx.add_option('--no-debug', action='store_false', dest='debug', help="Turn off debugging symbols")
-	ctx.add_option('--no-ldconfig', action='store_false', default=True, dest='ldconfig', help="Don't run ldconfig after installation")
+	ctx.add_option('--no-system-hooks', action='store_false', default=True, dest='system_hooks', help="Don't run system hooks after installation (ldconfig, icon cache update, ...")
 	ctx.add_option('--platform', default=_PLATFORM, help="Target platform")
 
 # Configure build process
@@ -326,8 +326,18 @@ def build(ctx):
 
 def post(ctx):
 	if ctx.cmd in ('install', 'uninstall'):
-		if ctx.env.PLATFORM == LINUX and ctx.options.ldconfig:
-			ctx.exec_command('/sbin/ldconfig') 
+		if ctx.env.PLATFORM == LINUX and ctx.options.system_hooks:
+			icon_dir = "%s/icons/hicolor" % ctx.env.DATADIR
+			sys_hooks = (
+				['/sbin/ldconfig'],
+				['gtk-update-icon-cache', icon_dir],
+				['gtk-update-icon-cache-3.0', icon_dir]
+			)
+			
+			sys.stderr.write('Running system hooks (use --no-system-hooks to disable)\n')
+			for cmd in sys_hooks:
+				sys.stderr.write("System hook: %s\n" % " ".join(cmd))
+				ctx.exec_command(cmd)
 
 def dist(ctx):
 	ctx.algo = "tar.gz"
