@@ -43,7 +43,7 @@ debug_app_runner_criticals()
 debug_app_runner_join()
 {
 	echo Use "'target remote localhost:9090'"
-	libtool --mode=execute gdb build/uirunner
+	libtool --mode=execute gdb build/apprunner
 }
 
 
