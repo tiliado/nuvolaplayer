@@ -23,61 +23,72 @@
  */
 
 #if UNITY
-using Unity;
-
-namespace Nuvola.Extensions.UnityQuickList
+namespace Nuvola
 {
-
-public Nuvola.ExtensionInfo get_info()
-{
-	return
-	{
-		/// Name of a plugin providing scrobbling to Last.fm
-		_("Unity Quick List"),
-		Nuvola.get_version(),
-		/// Extension descriptiom
-		_("<p>This plugin provides integration with docks compliant with Unity Quick List (Unity Launcher, DockBarX).</p>"),
-		"Jiří Janoušek",
-		typeof(Extension),
-		true
-	};
-}
 
 /**
  * Manages dock item at Unity Launcher
  */
-public class Extension: Nuvola.Extension
+public class UnityLauncher: GLib.Object, LauncherInterface
 {
 	private AppRunnerController controller;
-	private WebEngine web_engine;
 	private Diorite.ActionsRegistry actions_reg;
-	private LauncherEntry dock_item;
+	private Unity.LauncherEntry dock_item;
 	private string[] actions = {};
 	private SList<ActionAdaptor> adaptors = null;
 	
-	/**
-	 * {@inheritDoc}
-	 */
-	public override void load(AppRunnerController controller) throws ExtensionError
+	public UnityLauncher(AppRunnerController controller)
 	{
 		this.controller = controller;
-		this.web_engine = controller.web_engine;
 		this.actions_reg = controller.actions;
-		this.dock_item = LauncherEntry.get_for_desktop_id(controller.desktop_entry);
+		this.dock_item = Unity.LauncherEntry.get_for_desktop_id(controller.desktop_name);
 		this.dock_item.quicklist = new Dbusmenu.Menuitem();
-		web_engine.async_message_received.connect(on_async_message_received);
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 */
-	public override void unload()
+	~UnityLauncher()
 	{
-		web_engine.async_message_received.disconnect(on_async_message_received);
 		remove_menu();
 	}
 	
-	public void clear_actions()
+	public void set_tooltip(string tooltip)
+	{
+	}
+	
+	public void add_action(string action)
+	{
+		actions += action;
+		update_menu();
+	}
+	
+	public void remove_action(string action)
+	{
+		return;
+		var index = -1;
+		for (var i = 0; i < actions.length; i++)
+		{
+			if (action == actions[i])
+			{
+				index = i;
+				break;
+			}
+		}
+		
+		if (index >= 0)
+		{
+			var new_actions = new string[actions.length - 1];
+			for (var i = 0; i < actions.length; i++)
+			{
+				if (i < index)
+					new_actions[i] = actions[i];
+				else if (i > index)
+					new_actions[i - 1] = actions[i];
+			}
+			
+			set_actions((owned) new_actions);
+		}
+	}
+	
+	public void remove_actions()
 	{
 		actions = {};
 		update_menu();
@@ -87,29 +98,6 @@ public class Extension: Nuvola.Extension
 	{
 		this.actions = actions;
 		update_menu();
-	}
-	
-	private void on_async_message_received(WebEngine engine, string name, Variant? data)
-	{
-		if (name == "Nuvola.UnityDockItem.setActions")
-		{
-			if (data != null && data.is_container())
-			{
-				int i = 0;
-				VariantIter iter = null;
-				data.get("(av)", &iter);
-				string[] actions = new string[iter.n_children()];
-				Variant item = null;
-				while (iter.next("v", &item))
-					actions[i++] = item.get_string();
-				
-				set_actions(actions);
-			}
-		}
-		else if (name == "Nuvola.UnityDockItem.clearActions")
-		{
-			clear_actions();
-		}
 	}
 	
 	private void clear_menu()
@@ -184,10 +172,10 @@ public class Extension: Nuvola.Extension
 	
 	private void remove_menu()
 	{
-		if (this.dock_item != null && this.dock_item.quicklist != null)
+		if (dock_item != null && dock_item.quicklist != null)
 		{
 			clear_menu();
-			this.dock_item.quicklist = null;
+			dock_item.quicklist = null;
 		}
 	}
 }
@@ -241,5 +229,5 @@ private class ActionAdaptor
 	}
 }
 
-} // namespace Nuvola.Extensions.UnityQuickList
+} // namespace Nuvola
 #endif
