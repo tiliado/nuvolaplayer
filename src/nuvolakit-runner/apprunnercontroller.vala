@@ -214,7 +214,7 @@ public class AppRunnerController : Diorite.Application
 			server.add_handler("Nuvola.Actions.setEnabled", handle_action_set_enabled);
 			server.add_handler("Nuvola.Actions.getState", handle_action_get_state);
 			server.add_handler("Nuvola.Actions.setState", handle_action_set_state);
-			server.add_handler("Nuvola.MenuBar.setMenu", handle_menubar_set_menu);
+			
 			server.add_handler("Nuvola.Actions.activate", handle_action_activate);
 			server.add_handler("Nuvola.Browser.downloadFileAsync", handle_download_file_async);
 			server.start_service();
@@ -322,6 +322,8 @@ public class AppRunnerController : Diorite.Application
 		components.add_component(new MediaKeysComponent(this));
 		components.add_implementation(new MediaKeys(this));
 		
+		components.add_component(new MenuBarComponent(this));
+		components.add_implementation(menu_bar);
 	}
 	
 	private void on_fatal_error(string title, string message)
@@ -555,25 +557,6 @@ public class AppRunnerController : Diorite.Application
 		
 		action.state = state;
 		return new Variant.boolean(true);
-	}
-	
-	private Variant? handle_menubar_set_menu(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
-	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(ssav)");
-		string? id = null;
-		string? label = null;
-		int i = 0;
-		VariantIter iter = null;
-		data.get("(ssav)", &id, &label, &iter);
-		return_val_if_fail(id != null && label != null && iter != null, null);
-		string[] actions = new string[iter.n_children()];
-		Variant item = null;
-		while (iter.next("v", &item))
-			actions[i++] = item.get_string();
-		
-		menu_bar[id] = new SubMenu(label, (owned) actions);
-		menu_bar.update();
-		return null;
 	}
 	
 	private Variant? handle_action_activate(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError

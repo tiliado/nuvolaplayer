@@ -25,7 +25,7 @@
 namespace Nuvola
 {
 
-public class MenuBar
+public class MenuBar: GLib.Object, MenuBarInterface
 {
 	private Diorite.ActionsRegistry actions_reg;
 	private bool export_app_menu;
@@ -70,9 +70,15 @@ public class MenuBar
 			submenu.append_to_menu(actions_reg, menubar);
 	}
 	
-	public void set(string id, SubMenu submenu)
+	public void set_submenu(string id, SubMenu submenu)
 	{
-		menus.replace(id, submenu);
+		menus[id] = submenu;
+	}
+	
+	public void set_menu(string id, string label, string[] actions)
+	{
+		set_submenu(id, new SubMenu(label, actions));
+		update();
 	}
 }
 
