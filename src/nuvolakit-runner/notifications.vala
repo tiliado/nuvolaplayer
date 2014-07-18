@@ -144,7 +144,7 @@ public class Notifications : GLib.Object, NotificationsInterface
 		icons_supported =  capabilities.find_custom("action-icons", strcmp) != null;
 		debug(@"Notifications: persistence $persistence_supported, actions $actions_supported, icons $icons_supported");
 		
-		var action = controller.simple_action("view", "app", "show-notification", "Show notification", null, null, null, show_notifications);
+		var action = controller.actions_helper.simple_action("view", "app", "show-notification", "Show notification", null, null, null, show_notifications);
 		actions_reg.add_action(action);
 	}
 	

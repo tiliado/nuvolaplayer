@@ -64,6 +64,7 @@ public class AppRunnerController : Diorite.Application
 	public Connection connection {get; private set;}
 	public GlobalKeybinder keybinder {get; private set;}
 	public Diorite.Ipc.MessageServer server {get; private set; default=null;}
+	public ActionsHelper actions_helper {get; private set; default = null;}
 	private GlobalKeybindings global_keybindings;
 	private static const int MINIMAL_REMEMBERED_WINDOW_SIZE = 300;
 	private uint configure_event_cb_id = 0;
@@ -108,6 +109,7 @@ public class AppRunnerController : Diorite.Application
 		Gtk.Settings.get_default().gtk_application_prefer_dark_theme = config.get_bool(ConfigKey.DARK_THEME);
 		
 		actions = new Diorite.ActionsRegistry(this, null);
+		actions_helper = new ActionsHelper(actions, config);
 		main_window = new WebAppWindow(this);
 		main_window.can_destroy.connect(on_can_quit);
 		fatal_error.connect(on_fatal_error);
@@ -168,32 +170,21 @@ public class AppRunnerController : Diorite.Application
 		main_window.sidebar.page_changed.connect(on_sidebar_page_changed);
 	}
 	
-	public Diorite.SimpleAction simple_action(string group, string scope, string name, string? label, string? mnemo_label, string? icon, string? keybinding, owned Diorite.ActionCallback? callback)
-	{
-		var kbd = config.get_string("nuvola.keybindings." + name) ?? keybinding;
-		if (kbd == "")
-			kbd = null;
-		return new Diorite.SimpleAction(group, scope, name, label, mnemo_label, icon, kbd, (owned) callback);
-	}
 	
-	public Diorite.ToggleAction toggle_action(string group, string scope, string name, string? label, string? mnemo_label, string? icon, string? keybinding, owned Diorite.ActionCallback? callback, Variant state)
-	{
-		var kbd = config.get_string("nuvola.keybindings." + name) ?? keybinding;
-		return new Diorite.ToggleAction(group, scope, name, label, mnemo_label, icon, kbd, (owned) callback, state);
-	}
 	
 	private void append_actions()
 	{
+		unowned ActionsHelper ah = actions_helper;
 		Diorite.Action[] actions_spec = {
 		//          Action(group, scope, name, label?, mnemo_label?, icon?, keybinding?, callback?)
-		simple_action("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
-		simple_action("main", "app", Actions.KEYBINDINGS, "Keyboard shortcuts", "_Keyboard shortcuts", null, null, do_keybindings),
-		simple_action("main", "app", Actions.PREFERENCES, "Preferences", "_Preferences", null, null, do_preferences),
-		toggle_action("main", "win", Actions.TOGGLE_SIDEBAR, "Show sidebar", "Show _sidebar", null, null, do_toggle_sidebar, config.get_value(ConfigKey.WINDOW_SIDEBAR_VISIBLE)),
-		simple_action("go", "app", Actions.GO_HOME, "Home", "_Home", "go-home", "<alt>Home", web_engine.go_home),
-		simple_action("go", "app", Actions.GO_BACK, "Back", "_Back", "go-previous", "<alt>Left", web_engine.go_back),
-		simple_action("go", "app", Actions.GO_FORWARD, "Forward", "_Forward", "go-next", "<alt>Right", web_engine.go_forward),
-		simple_action("go", "app", Actions.GO_RELOAD, "Reload", "_Reload", "view-refresh", null, web_engine.reload)
+		ah.simple_action("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
+		ah.simple_action("main", "app", Actions.KEYBINDINGS, "Keyboard shortcuts", "_Keyboard shortcuts", null, null, do_keybindings),
+		ah.simple_action("main", "app", Actions.PREFERENCES, "Preferences", "_Preferences", null, null, do_preferences),
+		ah.toggle_action("main", "win", Actions.TOGGLE_SIDEBAR, "Show sidebar", "Show _sidebar", null, null, do_toggle_sidebar, config.get_value(ConfigKey.WINDOW_SIDEBAR_VISIBLE)),
+		ah.simple_action("go", "app", Actions.GO_HOME, "Home", "_Home", "go-home", "<alt>Home", web_engine.go_home),
+		ah.simple_action("go", "app", Actions.GO_BACK, "Back", "_Back", "go-previous", "<alt>Left", web_engine.go_back),
+		ah.simple_action("go", "app", Actions.GO_FORWARD, "Forward", "_Forward", "go-next", "<alt>Right", web_engine.go_forward),
+		ah.simple_action("go", "app", Actions.GO_RELOAD, "Reload", "_Reload", "view-refresh", null, web_engine.reload)
 		};
 		actions.add_actions(actions_spec);
 	}
@@ -208,14 +199,6 @@ public class AppRunnerController : Diorite.Application
 		{
 			server = new Diorite.Ipc.MessageServer(server_name);
 			server.add_handler("Nuvola.setHideOnClose", handle_set_hide_on_close);
-			server.add_handler("Nuvola.Actions.addAction", handle_add_action);
-			server.add_handler("Nuvola.Actions.addRadioAction", handle_add_radio_action);
-			server.add_handler("Nuvola.Actions.isEnabled", handle_is_action_enabled);
-			server.add_handler("Nuvola.Actions.setEnabled", handle_action_set_enabled);
-			server.add_handler("Nuvola.Actions.getState", handle_action_get_state);
-			server.add_handler("Nuvola.Actions.setState", handle_action_set_state);
-			
-			server.add_handler("Nuvola.Actions.activate", handle_action_activate);
 			server.add_handler("Nuvola.Browser.downloadFileAsync", handle_download_file_async);
 			server.start_service();
 		}
@@ -309,6 +292,9 @@ public class AppRunnerController : Diorite.Application
 		}
 		
 		components = new ComponentsManager(this);
+		
+		components.add_component(new ActionsComponent(this));
+		components.add_implementation(actions_helper);
 		
 		components.add_component(new LauncherComponent(this));
 		components.add_implementation(new TrayIcon(this));
@@ -410,173 +396,6 @@ public class AppRunnerController : Diorite.Application
 		return null;
 	}
 	
-	private Variant? handle_add_action(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
-	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(sssssss@*)");
-		
-		string group = null;
-		string scope = null;
-		string action_name = null;
-		string? label = null;
-		string? mnemo_label = null;
-		string? icon = null;
-		string? keybinding = null;
-		Variant? state = null;
-		
-		data.get("(sssssss@*)", &group, &scope, &action_name, &label, &mnemo_label, &icon, &keybinding, &state);
-		
-		if (label == "")
-			label = null;
-		if (mnemo_label == "")
-			mnemo_label = null;
-		if (icon == "")
-			icon = null;
-		if (keybinding == "")
-			keybinding = null;
-		
-		Diorite.Action action;
-		if (state == null || state.get_type_string() == "mv")
-			action = simple_action(group, scope, action_name, label, mnemo_label, icon, keybinding, null);
-		else
-			action = toggle_action(group, scope, action_name, label, mnemo_label, icon, keybinding, null, state);
-		
-		action.enabled = false;
-		action.activated.connect(on_custom_action_activated);
-		actions.add_action(action);
-		
-		return null;
-	}
-	
-	private Variant? handle_add_radio_action(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
-	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(sss@*av)");
-		
-		string group = null;
-		string scope = null;
-		string action_name = null;
-		string? label = null;
-		string? mnemo_label = null;
-		string? icon = null;
-		string? keybinding = null;
-		Variant? state = null;
-		Variant? parameter = null;
-		VariantIter? options_iter = null;
-		
-		data.get("(sss@*av)", &group, &scope, &action_name, &state, &options_iter);
-		
-		Diorite.RadioOption[] options = new Diorite.RadioOption[options_iter.n_children()];
-		var i = 0;
-		Variant? array = null;
-		while (options_iter.next("v", &array))
-		{
-			Variant? value = array.get_child_value(0);
-			parameter = value.get_variant();
-			array.get_child(1, "v", &value);
-			label = value.is_of_type(VariantType.STRING) ? value.get_string() : null;
-			array.get_child(2, "v", &value);
-			mnemo_label = value.is_of_type(VariantType.STRING) ? value.get_string() : null;
-			array.get_child(3, "v", &value);
-			icon = value.is_of_type(VariantType.STRING) ? value.get_string() : null;
-			array.get_child(4, "v", &value);
-			keybinding = value.is_of_type(VariantType.STRING) ? value.get_string() : null;
-			options[i++] = new Diorite.RadioOption(parameter, label, mnemo_label, icon, keybinding);
-		}
-		
-		var radio = new Diorite.RadioAction(group, scope, action_name, null, state, options);
-		radio.enabled = false;
-		radio.activated.connect(on_custom_action_activated);
-		actions.add_action(radio);
-		
-		return null;
-	}
-	
-	private Variant? handle_is_action_enabled(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
-	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(s)");
-		
-		string? action_name = null;
-		data.get("(s)", &action_name);
-		
-		if (action_name == null)
-			throw new Diorite.Ipc.MessageError.INVALID_ARGUMENTS("Action name must not be null");
-		
-		var action = actions.get_action(action_name);
-		return new Variant.boolean(action != null && action.enabled);
-	}
-	
-	private Variant? handle_action_set_enabled(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
-	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(sb)");
-		string? action_name = null;
-		bool enabled = false;
-		data.get("(sb)", ref action_name, ref enabled);
-		
-		if (action_name == null)
-			throw new Diorite.Ipc.MessageError.INVALID_ARGUMENTS("Action name must not be null");
-		
-		var action = actions.get_action(action_name);
-		if (action == null)
-			return new Variant.boolean(false);
-		
-		if (action.enabled != enabled)
-			action.enabled = enabled;
-		
-		return new Variant.boolean(true);
-	}
-	
-	private Variant? handle_action_get_state(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
-	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(s)");
-		
-		string? action_name = null;
-		data.get("(s)", &action_name);
-		
-		if (action_name == null)
-			throw new Diorite.Ipc.MessageError.INVALID_ARGUMENTS("Action name must not be null");
-		
-		var action = actions.get_action(action_name);
-		if (action == null)
-			new Variant("mv", null);
-		
-		return action.state;
-	}
-	
-	private Variant? handle_action_set_state(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
-	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(s@*)");
-		string? action_name = null;
-		Variant? state = null;
-		data.get("(s@*)", &action_name, &state);
-		
-		if (action_name == null)
-			throw new Diorite.Ipc.MessageError.INVALID_ARGUMENTS("Action name must not be null");
-		
-		var action = actions.get_action(action_name);
-		if (action == null)
-			return new Variant.boolean(false);
-		
-		action.state = state;
-		return new Variant.boolean(true);
-	}
-	
-	private Variant? handle_action_activate(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
-	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(s)");
-		
-		string? action_name = null;
-		data.get("(s)", &action_name);
-		
-		if (action_name == null)
-			throw new Diorite.Ipc.MessageError.INVALID_ARGUMENTS("Action name must not be null");
-		
-		var action = actions.get_action(action_name);
-		if (action == null)
-			return new Variant.boolean(false);
-		
-		action.activate(null);
-		return new Variant.boolean(true);
-	}
-	
 	private Variant? handle_download_file_async(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
 		Diorite.Ipc.MessageServer.check_type_str(data, "(ssd)");
@@ -618,18 +437,6 @@ public class AppRunnerController : Diorite.Application
 				debug("Communication failed: %s", e.message);
 			else
 				warning("Communication failed: %s", e.message);
-		}
-	}
-	
-	private void on_custom_action_activated(Diorite.Action action, Variant? parameter)
-	{
-		try
-		{
-			web_engine.call_function("Nuvola.actions.emit", new Variant("(ssmv)", "ActionActivated", action.name, parameter));
-		}
-		catch (Diorite.Ipc.MessageError e)
-		{
-			warning("Communication failed: %s", e.message);
 		}
 	}
 	
