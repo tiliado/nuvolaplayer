@@ -128,7 +128,7 @@ public class Notifications : GLib.Object, NotificationsInterface
 	private bool persistence_supported = false;
 	private bool icons_supported = false;
 	
-	public Notifications(AppRunnerController controller) throws ExtensionError
+	public Notifications(AppRunnerController controller)
 	{
 		this.controller = controller;
 		this.config = controller.config;
