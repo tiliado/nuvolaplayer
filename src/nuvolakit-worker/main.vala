@@ -36,7 +36,6 @@ public class WebExtension: GLib.Object
 	private File data_dir;
 	private File user_config_dir;
 	private JSApi js_api;
-	private Variant[] function_calls = {};
 	private bool initialized = false;
 	
 	public WebExtension(WebKit.WebExtension extension, Diorite.Ipc.MessageClient runner, Diorite.Ipc.MessageServer server)
