@@ -237,7 +237,14 @@ public class WebEngine : GLib.Object
 	public void get_preferences(out Variant values, out Variant entries)
 	{
 		var args = new Variant("(s@a{sv}@av)", "AppendPreferences", new Variant.array(new VariantType("{sv}"), {}), new Variant.array(VariantType.VARIANT, {}));
-		env.call_function("Nuvola.core.emit", ref args);
+		try
+		{
+			env.call_function("Nuvola.core.emit", ref args);
+		}
+		catch (JSError e)
+		{
+			app.show_error("Integration error", "%s failed to load preferences with error:\n\n%s".printf(app.app_name, e.message));
+		}
 		args.get("(s@a{smv}@av)", null, out values, out entries);
 	}
 	
@@ -246,7 +253,16 @@ public class WebEngine : GLib.Object
 		Variant values;
 		Variant entries;
 		var args = new Variant("(s@a{sv}@av)", "InitAppRunner", new Variant.array(new VariantType("{sv}"), {}), new Variant.array(VariantType.VARIANT, {}));
-		env.call_function("Nuvola.core.emit", ref args);
+		try
+		{
+			env.call_function("Nuvola.core.emit", ref args);
+		}
+		catch (JSError e)
+		{
+			app.fatal_error("Initialization error", "%s failed to initialize app runner. Initialization exited with error:\n\n%s".printf(app.app_name, e.message));
+			return false;
+		}
+		
 		args.get("(s@a{smv}@av)", null, out values, out entries);
 		var values_hashtable = Diorite.variant_to_hashtable(values);
 		if (values_hashtable.size() > 0)
