@@ -44,9 +44,9 @@ public class GlobalKeybinder: GLib.Object
 	
 	public GlobalKeybinder()
 	{
-		var root_window = Gdk.get_default_root_window();
-		if (root_window != null)
-			root_window.add_filter(event_filter);
+		var root_window = Gdk.get_default_root_window() as Gdk.X11.Window;
+		return_if_fail(root_window != null);
+		root_window.add_filter(event_filter);
 	}
 	
 	public bool is_bound(string accelerator)
@@ -90,6 +90,8 @@ public class GlobalKeybinder: GLib.Object
 	private bool grab_ungrab(bool grab, string accelerator, out int keycode, out Gdk.ModifierType modifiers)
 	{
 		var bound = is_bound(accelerator);
+		keycode = 0;
+		modifiers = 0;
 		
 		if (grab == bound)
 			return true;
@@ -98,11 +100,13 @@ public class GlobalKeybinder: GLib.Object
 		Gtk.accelerator_parse(accelerator, out keysym, out modifiers);
 		return_val_if_fail(keysym != 0, false);
 		
-		var root_window = Gdk.get_default_root_window();
+		var root_window = Gdk.get_default_root_window() as Gdk.X11.Window;
 		return_val_if_fail(root_window != null, false);
-		var gdk_display = root_window.get_display();
-		unowned X.Display display = Gdk.X11Display.get_xdisplay(gdk_display);
-		X.ID xid = Gdk.X11Window.get_xid(root_window);
+		var gdk_display = root_window.get_display() as Gdk.X11.Display;
+		return_val_if_fail(gdk_display != null, false);
+		
+		unowned X.Display display = gdk_display.get_xdisplay();
+		X.ID xid = root_window.get_xid();
 		keycode = display.keysym_to_keycode(keysym);            
 		return_val_if_fail(keycode != 0, false);
 		Gdk.error_trap_push();
