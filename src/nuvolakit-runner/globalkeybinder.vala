@@ -91,7 +91,7 @@ public class GlobalKeybinder: GLib.Object
 	{
 		var bound = is_bound(accelerator);
 		
-		if (grab != bound)
+		if (grab == bound)
 			return true;
 		
 		uint keysym;
