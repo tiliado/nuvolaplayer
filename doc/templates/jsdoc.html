@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta charset="utf-8" />
-		<title>Documentation</title>
+		<title>NuvolaKit 3.0 JavaScript API Reference</title>
 		<style type="text/css">
 			.sidebar {
 				position: fixed;
@@ -88,10 +88,53 @@
 		</style>
 	</head>
 	<body>
-		<div class="sidebar">$index</div>
-		<div class="body">
-			<h1>Documentation</h1>
-			$body
-		</div>
-	</body>
+
+<div class="sidebar">
+<h3>NuvolaKit 3.0</h3>
+<p><a href="#intro">Introduction</a></p>
+
+$index
+
+</div>
+<div class="body">
+
+<h1>NuvolaKit 3.0 JavaScript API Reference</h1>
+
+<h2 id="intro">Introduction</h2>
+<p>This is a reference of public JavaScript API of NuvolaKit, the core part of Nuvola Player 3. Undocumented parts of
+the API are considered unstable, internal or experimental, so you should not use them.</p>
+
+<h3>Base API</h3>
+<p><strong>Most of the integration scripts</strong> will probably use only a small part of the API:</p>
+<ul>
+	<li><strong><a href="#Nuvola.$WebApp">Nuvola.$WebApp</a></strong> to create a new web app controller</li>
+	<li><strong><a href="#Nuvola.MediaPlayer">Nuvola.MediaPlayer</a></strong> to provide playback details</li>
+</ul>
+
+<h3>Advanced API</h3>
+<p>If you want to do <strong>more magic</strong>, you will need new spells:</p>
+
+<ul>
+	<li>use <strong><a href="#Nuvola.config">Nuvola.config</a></strong> to store persistent configuration</li>
+	<li>use <strong><a href="#Nuvola.session">Nuvola.session</a></strong> to store temporary configuration or session information</li>
+	<li>override default signal handlers in <strong><a href="#Nuvola.WebApp">Nuvola.WebApp</a></strong></li>
+	<li>connect to <strong><a href="#Nuvola.core">Nuvola.core</a></strong> signals for URI manipulation and custom preferences</li>
+	<li>use <strong><a href="#Nuvola.actions">Nuvola.actions</a></strong> to define custom actions (thumbs up, like, star rating, etc.)</li>
+	
+</ul>
+
+<h3>Low-level API</h3>
+<p>Objects like <strong><a href="#Nuvola.menuBar">Nuvola.menuBar</a></strong>,
+<strong><a href="#Nuvola.launcher">Nuvola.launcher</a></strong>,
+<strong><a href="#Nuvola.browser">Nuvola.browser</a></strong>,
+<strong><a href="#Nuvola.mediaKeys">Nuvola.mediaKeys</a></strong>
+are low-level components you probably don't want to use directly since
+<strong><a href="#Nuvola.MediaPlayer">Nuvola.MediaPlayer</a></strong>
+takes care about it.
+</p>
+
+$body
+
+</div>
+</body>
 </html>
