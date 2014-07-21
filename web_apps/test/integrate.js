@@ -56,6 +56,38 @@ WebApp._onInitWebWorker = function(emitter)
 	Nuvola.session.set("foo", "boo");
 	console.log(Nuvola.session.hasKey("foo"));
 	console.log(Nuvola.session.get("foo"));
+	
+	var Building = Nuvola.$prototype(null);
+
+	Building.$init = function(address)
+	{
+		this.address = address;
+	}
+	
+	Building.printAddress = function()
+	{
+	    console.log(this.address);
+	}
+	
+	var Shop = Nuvola.$prototype(Building);
+	
+	Shop.$init = function(address, goods)
+	{
+		Building.$init.call(this, address)
+		this.goods = goods;
+	}
+	
+	Shop.printGoods = function()
+	{
+		console.log(this.goods);
+	}
+	
+	var house = Nuvola.$object(Building, "King Street 1024, London");
+	house.printAddress();
+	
+	var candyShop = Nuvola.$object(Shop, "King Street 1024, London", "candies");
+	candyShop.printAddress();
+	candyShop.printGoods();
 }
 
 WebApp._onAppendPreferences = function(emitter, values, entries)

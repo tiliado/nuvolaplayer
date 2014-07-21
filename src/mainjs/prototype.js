@@ -27,11 +27,38 @@
  * 
  * Creates new object that will have `proto` as its prototype and will be extended with properties
  * from all specified `mixins`. This is similar to creating a subclass in class-based inheritance.
- * See @link{$object} for instance object creation.
+ * See @link{$object} for instance object creation. Prototype object names are in `UpperCamelCase`.
  * 
  * @param Object|null proto    object prototype or null to use `Object`
  * @param Object mixins...     mixins objects
  * @return new prototype object
+ * 
+ * ```
+ * var Building = Nuvola.$prototype(null);
+ * 
+ * Building.$init = function(address)
+ * {
+ *     this.address = address;
+ * }
+ * 
+ * Building.printAddress = function()
+ * {
+ *     console.log(this.address);
+ * }
+ * 
+ * var Shop = Nuvola.$prototype(Building);
+ * 
+ * Shop.$init = function(address, goods)
+ * {
+ *     Building.$init.call(this, address)
+ *     this.goods = goods;
+ * }
+ * 
+ * Shop.printGoods = function()
+ * {
+ *     console.log(this.goods);
+ * }
+ * ```
  */
 var $prototype = function(proto, mixins)
 {
@@ -56,11 +83,20 @@ var $prototype = function(proto, mixins)
  * 
  * Creates new object that will have `proto` as its prototype and will be initialized by calling
  * `$init` method with provided arguments `args`. This is similar to creating an instance object
- * from a class in class-based inheritance.
+ * from a class in class-based inheritance. Instance object names are in `lowerCamelCase`.
  * 
  * @param Object proto            object @link{$prototype|prototype} or null to use `Object`
  * @param variant init_args...    arguments to pass to the `$init` method
  * @return new initialized object
+ * 
+ * ```
+ * var house = Nuvola.$object(Building, "King Street 1024, London");
+ * house.printAddress();
+ * 
+ * var candyShop = Nuvola.$object(Shop, "King Street 1024, London", "candies");
+ * candyShop.printAddress();
+ * candyShop.printGoods();
+ * ```
  */
 var $object = function(proto, init_args)
 {
