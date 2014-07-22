@@ -7,12 +7,12 @@ SITENAME = u'Nuvola Player Documentation'
 SITEURL = ''
 
 PATH = '.'
-PATH_METADATA = r'(?P<type>\w+)/(?P<dirname>.*?)/(?P<basename>.*?).md'
+PATH_METADATA = r'(?P<type>\w+)/(?P<dirname>.*?/|)?(?P<basename>.*?).md'
 
 PAGE_PATHS = ['pages']
 DISPLAY_PAGES_ON_MENU = False
-PAGE_URL = '{dirname}/{basename}.html'
-PAGE_SAVE_AS = '{dirname}/{basename}.html'
+PAGE_URL = '{dirname}{basename}.html'
+PAGE_SAVE_AS = '{dirname}{basename}.html'
 
 ARTICLE_PATHS = ['articles']
 
