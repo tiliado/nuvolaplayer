@@ -40,7 +40,7 @@ var SignalsMixin = {};
  *      * 
  *      * @param Book book    book that has been added
  *      *\/
- *     this.addSignal("book-added");
+ *     this.addSignal("BookAdded");
  * }
  * ```
  */
@@ -83,7 +83,8 @@ SignalsMixin.registerSignals = function(signals)
  * 
  * Logger.$init = function()
  * {
- *     bookStore.connect("book-added", this, "_onBookAdded");
+ *     bookStore.connect("BookAdded", this);
+ *     // equivalent: bookStore.connect("BookAdded", this, "_onBookAdded");
  * }
  * ```
  */
