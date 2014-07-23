@@ -441,7 +441,7 @@ public class WebAppRegistry: GLib.Object
 		{
 			try
 			{
-				id_regex = new Regex("^\\w+$");
+				id_regex = new Regex("^\\w+(-\\w+)*$");
 			}
 			catch (RegexError e)
 			{
