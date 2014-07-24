@@ -39,5 +39,16 @@ TAGS_SAVE_AS = ''
 RELATIVE_URLS = True
 STATIC_PATHS = ['images']
 
-MD_EXTENSIONS = ['extra', 'sane_lists', 'fenced_code', 'codehilite', 'def_list', 'attr_list', 'abbr', 'admonition']
-# safe_mode='escape', lazy_ol=False
+from markdown.extensions import Extension
+class MarkdownConfigExtension(Extension):
+    def extendMarkdown(self, md, md_globals):
+        md.safeMode = 'escape'
+        md.enable_attributes = False
+        md.lazy_ol = False
+
+MD_EXTENSIONS = [
+    MarkdownConfigExtension(),
+    'extra', 'sane_lists', 'fenced_code', 'codehilite',
+    'def_list', 'attr_list', 'abbr', 'admonition'
+    ]
+
