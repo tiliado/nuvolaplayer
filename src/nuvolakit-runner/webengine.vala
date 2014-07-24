@@ -197,9 +197,16 @@ public class WebEngine : GLib.Object
 		{
 			var url = data_request("HomePageRequest", "url");
 			if (url == null)
-				app.show_error("Invalid home page URL", "The web app integration script has an empty home page URL.");
-			else if (!load_uri(url))
-				app.show_error("Invalid home page URL", "The web app integration script has not provided a valid home page URL '%s'.".printf(url));
+			{
+				app.fatal_error("Invalid home page URL", "The web app integration script has provided an empty home page URL.");
+				return false;
+			}
+			
+			if (!load_uri(url))
+			{
+				app.fatal_error("Invalid home page URL", "The web app integration script has not provided a valid home page URL '%s'.".printf(url));
+				return false;
+			}
 		}
 		catch (JSError e)
 		{
