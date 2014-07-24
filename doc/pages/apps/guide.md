@@ -110,6 +110,8 @@ This file contains several mandatory fields:
 
 :   required version of JavaScript API, currently 3.0.
 
+And some optional fields:
+
 `home_url`
 
 :   Home page of your service. The test integration service uses `nuvola://home.html` that refers to
@@ -118,8 +120,16 @@ This file contains several mandatory fields:
     
     If your service has multiple home pages (e.g. Amazon Cloud Player has some national variants)
     or the address has to be specified by user (e.g. address of users Logitech Media Server or
-    Owncloud instance), you have to use custom homepage resolution hooks (TODO).
+    Owncloud instance), you have to use custom homepage resolution hooks (TODO) and omit this field
+    in metadata.json.
 
 Run `nuvolaplayer3 -D -A ~/projects/nuvola-player` again and you will see a list with one service :-)
 
 ![A list with single service integration]({filename}/images/guide/app_list_one_service.png)
+
+If you launch your service, either from the list of services or with command
+`nuvolaplayer3 -D -A ~/projects/nuvola-player -a test-integration`, you will see an error
+dialog saying "Invalid home page URL - The web app integration script has provided an empty home
+page URL." and the app will quit. That because Nuvola Player makes no assumption about where the
+homepage URL is stored and expect service integration script provides this information explicitly
+during a app runner initialization phase.
