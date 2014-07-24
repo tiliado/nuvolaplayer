@@ -133,3 +133,18 @@ dialog saying "Invalid home page URL - The web app integration script has provid
 page URL." and the app will quit. That because Nuvola Player makes no assumption about where the
 homepage URL is stored and expect service integration script provides this information explicitly
 during a app runner initialization phase.
+
+App Runner and Web Worker
+=========================
+
+Nuvola Player uses two processes for each service (web app):
+
+  * **App Runner process** that manages user interface, desktop integration components and
+    a life-cycle of the WebKitGtk WebView.
+ 
+  * **Web Worker process** is created by WebKitGtk WebView and it's the place where the web
+    interface of a web app lives, i.e. where the website is loaded.
+
+**On start-up**, Nuvola Player executes ``integrate.js`` script in the App Runner process to perform
+initialization of the web app and then executes it again in the WebWorker process everytime a web
+page is loaded in it to integrate the wep page.
