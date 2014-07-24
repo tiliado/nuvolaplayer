@@ -148,3 +148,78 @@ Nuvola Player uses two processes for each service (web app):
 **On start-up**, Nuvola Player executes ``integrate.js`` script in the App Runner process to perform
 initialization of the web app and then executes it again in the WebWorker process everytime a web
 page is loaded in it to integrate the wep page.
+
+App Runner Process
+==================
+
+Let's create base `integrate.js` script with following content:
+
+    #!js
+    /*
+     * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
+     *
+     * Redistribution and use in source and binary forms, with or without
+     * modification, are permitted provided that the following conditions are met: 
+     * 
+     * 1. Redistributions of source code must retain the above copyright notice, this
+     *    list of conditions and the following disclaimer. 
+     * 2. Redistributions in binary form must reproduce the above copyright notice,
+     *    this list of conditions and the following disclaimer in the documentation
+     *    and/or other materials provided with the distribution. 
+     * 
+     * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+     * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+     * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+     * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+     * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+     * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+     * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+     * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+     * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+     * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+     */
+    
+    "use strict";
+    
+    (function(Nuvola)
+    {
+    
+    var WebApp = Nuvola.$WebApp();
+    
+    WebApp.start();
+    
+    })(this);  // function(Nuvola)
+
+``Nuvola.$WebApp()`` creates new WebApp prototype object derived from the `Nuvola.WebApp`
+prototype. The `Nuvola.WebApp` contains handy default handlers for initialization routines,
+so you don't have to process them, but it's good to know they exist and you can override them
+if your web app requires more magic ;-)
+
+Initialization routines
+-----------------------
+
+On start-up, Nuvola Player performs following actions:
+
+ 1. App Runner emits the Nuvola.Core::InitAppRunner signal that is processed by
+    Nuvola.WebApp._onInitAppRunner handler by default. This default handler does nothing, feel free
+    to override it.
+    
+      * TODO: Advanced - Web apps with user-specified home page URL
+      * TODO: Advanced - Web app with a separated variants with different home page URL
+ 
+ 2. App Runner emits the Nuvola.Core::LastPageRequest signal that is processed by
+    Nuvola.WebApp._onLastPageRequest handler by default. This handler returns URL
+    of the last visited page or null. If the URL is valid, it is loaded in the Web Worker process
+    and initialization is finished.
+    
+      * TODO: Advanced - Specify which URL should not be used as a last visited page
+
+ 3. If the last visited page is null, App Runner emits the Nuvola.Core::HomePageRequest signal
+    that is processed by Nuvola.WebApp._onHomePageRequest handler by default. This handler returns
+    URL specified in the "home_url" field of `metadata.json`. If the URL is valid, it is loaded in
+    the Web Worker process and initialization is finished, otherwise Nuvola Player will quit with
+    an error "Invalid home page URL - The web app integration script has provided an empty home
+    page URL."
+    
+      * TODO: Advanced - Web app with user-specified home page URL
+      * TODO: Advanced - Web app with a separated variants with different home page URL
