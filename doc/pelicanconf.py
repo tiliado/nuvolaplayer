@@ -37,7 +37,7 @@ CATEGORIES_SAVE_AS = ''
 TAGS_SAVE_AS = ''
 
 RELATIVE_URLS = True
-
+STATIC_PATHS = ['images']
 
 MD_EXTENSIONS = ['extra', 'sane_lists', 'fenced_code', 'codehilite', 'def_list', 'attr_list', 'abbr', 'admonition']
 # safe_mode='escape', lazy_ol=False

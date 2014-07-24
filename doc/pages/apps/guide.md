@@ -48,9 +48,12 @@ Run Nuvola Player 3 from terminal with following command:
     nuvolaplayer3 -D -A ~/projects/nuvola-player
 
 You will see an empty list of services. That's fine, because we told Nuvola Player to load service
-integrations only from directory `~/projects/nuvola-player`. You will also see an error message
-in terminal that tells you Nuvola Player failed to load your service integration because of invalid
-metadata file.
+integrations only from directory `~/projects/nuvola-player`.
+
+![Empty list of service integrations]({filename}/images/guide/empty_app_list.png)
+
+You will also see an error message in terminal that tells you Nuvola Player failed to load your
+service integration because of invalid metadata file.
 
     :::text
     [Master:WARNING  Nuvola] webappregistry.vala:169: Unable to load app from
@@ -116,4 +119,7 @@ This file contains several mandatory fields:
     If your service has multiple home pages (e.g. Amazon Cloud Player has some national variants)
     or the address has to be specified by user (e.g. address of users Logitech Media Server or
     Owncloud instance), you have to use custom homepage resolution hooks (TODO).
-    
+
+Run `nuvolaplayer3 -D -A ~/projects/nuvola-player` again and you will see a list with one service :-)
+
+![A list with single service integration]({filename}/images/guide/app_list_one_service.png)
