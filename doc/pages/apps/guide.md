@@ -223,3 +223,19 @@ On start-up, Nuvola Player performs following actions:
     
       * TODO: Advanced - Web app with user-specified home page URL
       * TODO: Advanced - Web app with a separated variants with different home page URL
+
+Run-time events
+---------------
+
+During run-time, Nuvola Player performs following actions:
+
+  * App Runner emits the Nuvola.Core::HomePageRequest signal to get home page URL everytime
+    user activates "Go Home" action (either by keyboard shortcut, menu item, etc.)
+
+  * App Runner emits Nuvola.Core::NavigationRequest just before navigation to a new page. That
+    signal is processed by Nuvola.WebApp._onNavigationRequest handler by default and can be used
+    for TODO URL filtering.
+    
+  * App Runner emits Nuvola.Core::UriChanged signal everytime a new page is loaded. That signal
+    is processed by Nuvola.WebApp._onUriChanged handler by default which saves the URI to be later
+    returned by Nuvola.Core::LastPageRequest signal handler.
