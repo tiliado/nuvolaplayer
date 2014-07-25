@@ -239,3 +239,72 @@ During run-time, Nuvola Player performs following actions:
   * App Runner emits Nuvola.Core::UriChanged signal everytime a new page is loaded. That signal
     is processed by Nuvola.WebApp._onUriChanged handler by default which saves the URI to be later
     returned by Nuvola.Core::LastPageRequest signal handler.
+
+Web Worker Process
+==================
+
+The web page of a streaming service is loaded in the Web Worker process, so major part of your
+integration script will be running here.
+
+Initialization
+--------------
+
+Web Worker emits Nuvola.Core::InitWebWorker signal everytime a new page is about to be loaded.
+The default handler Nuvola.WebApp._onInitWebWorker does nothing, so let's override it:
+
+```js
+var WebApp = Nuvola.$WebApp();
+
+WebApp._onInitWebWorker = function(emitter)
+{
+    // Chain up to the prototype's method
+    Nuvola.WebApp._onInitWebWorker.call(this, emitter);
+    
+    document.addEventListener("DOMContentLoaded", function()
+    {
+        alert("document's DOMContentLoaded event");
+    });
+    
+    window.addEventListener("load", function()
+    {
+        alert("window's load event");
+    });
+    
+    alert("Nuvola.Core's InitWebWorker signal");
+}
+
+WebApp.start();
+```
+
+The example mentions three phases of page loading:
+
+  * `Nuvola.Core::InitWebWorker` signal is emitted in clear JavaScript environment with a brand new
+    global ``window`` object. You should not touch it, only perform necessary initialization
+    (usually not needed) and set your listener for either `document`'s `DOMContentLoaded` event
+    (preferred) or `window`'s `load` event.
+
+  * `document`'s `DOMContentLoaded` event is emitted when Document Object Model is ready, but not all
+    resources (images, stylesheets, etc.) might be loaded. It is considered safe to manipulate with
+    the page.
+
+  * `window`'s `load` event is emitted when the page is completely loaded. It is usually not
+    necessary to wait for this event.
+
+**To sum up**, you might want to use this idiom for Web Worker process initialization:
+
+```js
+var WebApp = Nuvola.$WebApp();
+
+WebApp._onInitWebWorker = function(emitter)
+{
+    Nuvola.WebApp._onInitWebWorker.call(this, emitter);
+    document.addEventListener("DOMContentLoaded", this._onPageReady.bind(this));
+}
+
+WebApp._onPageReady = function(event)
+{
+    alert("Page ready for magic :-)");
+}
+
+WebApp.start();
+```
