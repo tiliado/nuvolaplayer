@@ -337,3 +337,76 @@ The first visible effect is a new menu with playback control actions:
 
 ![Without and with media player component]({filename}/images/guide/without_and_with_media_player_component.png)
 
+Playback state and track details
+--------------------------------
+
+The first task of your service integration is to extract playback state and track details from the
+web page and provide them to media player component. There are two ways how to extract playback
+state and track details:
+
+ 1. Use [Document Object Model][DOM] to get information from the HTML code of the web page.
+ 2. Use JavaScript API provided by the web page if there is any.
+
+[DOM]: https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model
+
+The first way is more general and will be described here.
+
+```js
+WebApp._onPageReady = function(event)
+{
+    this.update();
+}
+
+WebApp.update = function()
+{
+    console.log("update");
+    var track = {
+        title: null,
+        artist: null,
+        album: null,
+        artLocation: null
+    }
+    
+    player.setTrack(track);
+    player.setPlaybackState(PlaybackState.UNKNOWN);
+    
+    // Schedule the next update
+    setTimeout(this.update.bind(this), 500);
+}
+```
+
+### Playback state
+
+The test service shows playback state at the top of the page. Let's right-click there and select
+*Inspect element* to show WebKit Web Inspector.
+
+![Inspect element]({filename}/images/guide/inspect_element.png)
+![Inspect playback state]({filename}/images/guide/inspect_playback_state.png)
+
+The code to extract playback state might be
+
+```js
+try
+{
+    switch(document.getElementById("status").innerText)
+    {
+        case "Playing":
+            var state = PlaybackState.PLAYING;
+            break;
+        case "Paused":
+            var state = PlaybackState.PAUSED;
+            break;
+        default:
+            var state = PlaybackState.UNKNOWN;
+            break;
+    }
+}
+catch(e)
+{
+    // Always expect errors, e.g. document.getElementById("status") might be null
+    var state = PlaybackState.UNKNOWN;
+}
+
+player.setPlaybackState(state);
+```
+![Playback state]({filename}/images/guide/playback_state.png)
