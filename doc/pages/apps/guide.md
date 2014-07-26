@@ -308,3 +308,32 @@ WebApp._onPageReady = function(event)
 
 WebApp.start();
 ```
+
+MediaPlayer Component
+---------------------
+
+Unlike Nuvola Player 2, the core of Nuvola Player 3 called NuvolaKit is more generic and don't
+load media player-specific code by default, so it's up to you to do that. ( This design decision
+allows us to reuse NuvolaKit with for other web apps like Unity Web Apps in the future.)
+
+```js
+...
+
+(function(Nuvola)
+{
+// Create media player component
+var player = Nuvola.$object(Nuvola.MediaPlayer);
+
+// Handy aliases
+var PlaybackState = Nuvola.PlaybackState;
+var PlayerAction = Nuvola.PlayerAction;
+
+var WebApp = Nuvola.$WebApp();
+
+...
+```
+
+The first visible effect is a new menu with playback control actions:
+
+![Without and with media player component]({filename}/images/guide/without_and_with_media_player_component.png)
+
