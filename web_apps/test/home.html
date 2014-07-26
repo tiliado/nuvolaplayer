@@ -6,6 +6,7 @@
 		td, th {border: 1px solid black; padding: 5px;}
 		tbody tr {cursor: pointer;}
 		.playing td {font-weight: bold; background-color: yellow;}
+		#nowplaying {display:none;}
 		</style>
 	</head>
 	<body>
@@ -14,6 +15,9 @@
 		<p>
 		<strong id="status"></strong>
 		<span id="timer"></span>
+		<span id="nowplaying"><i id="track"></i> by <i id="artist"></i> from <i id="album"></i></span>
+		</p>
+		<p>
 		<button id="pp" onclick="player.togglePlay();">Play</button>
 		<button id="prev" onclick="player.prev();">Prev</button>
 		<button id="next" onclick="player.next();">Next</button>
@@ -85,6 +89,10 @@ var Player = function()
 		next: document.getElementById("next"),
 		status: document.getElementById("status"),
 		timer: document.getElementById("timer"),
+		nowplaying: document.getElementById("nowplaying"),
+		track: document.getElementById("track"),
+		artist: document.getElementById("artist"),
+		album: document.getElementById("album"),
 	}
 	
 	this.elm.prev.disabled = true;
@@ -163,7 +171,24 @@ Player.prototype.setPos = function(pos)
 	this.elm.prev.disabled = pos <= 0;
 	this.elm.next.disabled = pos < 0 || pos == Player.songs.length - 1;
 	this.timer = 5;
-	this.elm.timer.innerText = this.timer;
+	
+	if (pos >= 0)
+	{
+		var track = Player.songs[pos];
+		this.elm.timer.innerText = this.timer;
+		this.elm.track.innerText = track.name;
+		this.elm.artist.innerText = track.artist;
+		this.elm.album.innerText = track.album;
+		this.elm.nowplaying.style.display = "inline";
+	}
+	else
+	{
+		this.elm.timer.innerText = "";
+		this.elm.track.innerText = "";
+		this.elm.artist.innerText = "";
+		this.elm.album.innerText = "";
+		this.elm.nowplaying.style.display = "none";
+	}
 }
 
 Player.prototype.play = function()
