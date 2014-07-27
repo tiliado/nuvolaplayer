@@ -386,27 +386,35 @@ The test service shows playback state at the top of the page. Let's right-click 
 The code to extract playback state might be
 
 ```js
-try
+WebApp.update = function()
 {
-    switch(document.getElementById("status").innerText)
+    ...
+    
+    try
     {
-        case "Playing":
-            var state = PlaybackState.PLAYING;
-            break;
-        case "Paused":
-            var state = PlaybackState.PAUSED;
-            break;
-        default:
-            var state = PlaybackState.UNKNOWN;
-            break;
+        switch(document.getElementById("status").innerText)
+        {
+            case "Playing":
+                var state = PlaybackState.PLAYING;
+                break;
+            case "Paused":
+                var state = PlaybackState.PAUSED;
+                break;
+            default:
+                var state = PlaybackState.UNKNOWN;
+                break;
+        }
     }
+    catch(e)
+    {
+        // Always expect errors, e.g. document.getElementById("status") might be null
+        var state = PlaybackState.UNKNOWN;
+    }
+    
+    player.setPlaybackState(state);
+    
+    ...
 }
-catch(e)
-{
-    // Always expect errors, e.g. document.getElementById("status") might be null
-    var state = PlaybackState.UNKNOWN;
-}
-
-player.setPlaybackState(state);
 ```
 ![Playback state]({filename}/images/guide/playback_state.png)
+
