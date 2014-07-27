@@ -418,3 +418,37 @@ WebApp.update = function()
 ```
 ![Playback state]({filename}/images/guide/playback_state.png)
 
+### Track details
+
+Similarly, we can obtain track details:
+
+```js
+WebApp.update = function()
+{
+    ...
+    
+    var track = {
+        artLocation: null // always null
+    }
+    
+    var idMap = {title: "track", artist: "artist", album: "album"}
+    for (var key in idMap)
+    {
+        try
+        {
+            track[key] = document.getElementById(idMap[key]).innerText || null;
+        }
+        catch(e)
+        {
+            // Always expect errors, e.g. document.getElementById() might return null
+            track[key] = null;
+        }
+    }
+    
+    player.setTrack(track);
+    
+    ...
+}
+```
+
+![Track details]({filename}/images/guide/track_details.png)
