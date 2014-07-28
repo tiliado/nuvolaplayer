@@ -452,3 +452,98 @@ WebApp.update = function()
 ```
 
 ![Track details]({filename}/images/guide/track_details.png)
+
+Player Actions
+==============
+
+The second responsibility of a service integration is to manage media player actions:
+
+ 1. Set which actions are enabled.
+ 2. Invoke the actions when they are activated.
+
+The first part is done via calls player.setCanPause(), player.setCanPlay(),
+player.setCanGoPrev() and player.setCanGoNext(nextSong):
+
+```js
+WebApp.update = function()
+{
+    ...
+    
+    var enabled;
+    try
+    {
+        enabled = !document.getElementById("prev").disabled;
+    }
+    catch(e)
+    {
+        enabled = false;
+    }
+    player.setCanGoPrev(enabled);
+    
+    try
+    {
+        enabled  = !document.getElementById("next").disabled;
+    }
+    catch(e)
+    {
+        enabled = false;
+    }
+    player.setCanGoNext(enabled);
+    
+    var playPause = document.getElementById("pp");
+    try
+    {
+        enabled  = playPause.innerText == "Play";
+    }
+    catch(e)
+    {
+        enabled = false;
+    }
+    player.setCanPlay(enabled);
+    
+    try
+    {
+        enabled  = playPause.innerText == "Pause";
+    }
+    catch(e)
+    {
+        enabled = false;
+    }
+    player.setCanPause(enabled);
+    
+    ...
+}
+```
+![Playback actions]({filename}/images/guide/playback_actions.png)
+
+To handle playback actions, it is neccessary to connect to Actions::ActionActivated signal:
+
+```js
+var WebApp = Nuvola.$WebApp();
+
+WebApp._onInitWebWorker = function(emitter)
+{
+    Nuvola.WebApp._onInitWebWorker.call(this, emitter);
+    Nuvola.actions.connect("ActionActivated", this);
+    document.addEventListener("DOMContentLoaded", this._onPageReady.bind(this));
+}
+
+WebApp._onActionActivated = function(object, name, param)
+{
+    switch (name)
+    {
+    case PlayerAction.TOGGLE_PLAY:
+    case PlayerAction.PLAY:
+    case PlayerAction.PAUSE:
+    case PlayerAction.STOP:
+        Nuvola.clickOnElement(document.getElementById("pp"));
+        break;
+    case PlayerAction.PREV_SONG:
+        Nuvola.clickOnElement(document.getElementById("prev"));
+        break;
+    case PlayerAction.NEXT_SONG:
+        Nuvola.clickOnElement(document.getElementById("next"));
+        break;
+    }
+}
+```
