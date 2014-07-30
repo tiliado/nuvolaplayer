@@ -60,3 +60,9 @@ build_pelican_doc()
 {
     (cd doc; pelican -r)
 }
+
+build_js_doc()
+{
+    ./nuvolajsdoc.py
+    while true; do inotifywait -e delete -e create -e modify -r src/mainjs; ./nuvolajsdoc.py; done
+}
