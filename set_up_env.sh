@@ -55,3 +55,8 @@ watch_and_build()
 {
 	while true; do inotifywait -e delete -e create -e modify -r src; sleep 1; ./waf; done
 }
+
+build_pelican_doc()
+{
+    (cd doc; pelican -r)
+}
