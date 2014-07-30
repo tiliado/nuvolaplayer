@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 AUTHOR = u'Tiliado'
-SITENAME = u'Nuvola Player Documentation'
+SITENAME = u'Nuvola Player Development'
 SITEURL = ''
 
 PATH = '.'
