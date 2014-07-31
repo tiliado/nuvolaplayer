@@ -40,13 +40,17 @@
     </nav>
     
     <div class="container">
-      {% block content %}
-      {% endblock %}
-      
-      <hr />
-      <div class="footer">
-        Proudly powered by <a href="http://getpelican.com/">Pelican</a>,
-        which takes great advantage of <a href="http://python.org">Python</a>.
+      <div class="row">
+        <div class="col-sm-12 col-lg-offset-1 col-lg-10">
+          {% block content %}
+          {% endblock %}
+          
+          <hr />
+          <div class="footer">
+            Proudly powered by <a href="http://getpelican.com/">Pelican</a>,
+            which takes great advantage of <a href="http://python.org">Python</a>.
+          </div>
+        </div>
       </div>
     </div>
     <script src="{{ SITEURL }}/theme/jquery.min.js"></script>
