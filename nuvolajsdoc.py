@@ -691,4 +691,4 @@ def generate_doc(ns, out_file, sources_dir, template):
 		f.write(template.safe_substitute(index=index, body=body))
 
 if __name__ == "__main__":
-	generate_doc("Nuvola", "doc.html", "src/mainjs", "doc/templates/jsdoc.html")
+	generate_doc("Nuvola", "build/doc/apps/api_reference.html", "src/mainjs", "doc/theme/templates/jsdoc.html")

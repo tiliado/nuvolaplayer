@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>NuvolaKit 3.0 JavaScript API Reference</title>
+    <link rel="stylesheet" href="../theme/bootstrap.min.css" />
+    <link rel="stylesheet" href="../theme/pygments.css" />
+    <style type="text/css">
+    #sidebar {
+        position: fixed;
+        height: 85%;
+        background-color: #eee;
+        overflow: auto;
+        font-size: 90%;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-default navbar-static-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-1">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">Nuvola Player Development</a>
+        </div><!-- .navbar-header -->
+
+        <div class="collapse navbar-collapse" id="navbar-collapse-1">
+          <ul class="nav navbar-nav">
+            <li><a href="../index.html">Home</a></li>
+            <li><a href="../core.html">Core</a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">Service Integrations <span class="caret"></span></a>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="../apps/tutorial.html">Service Integration Tutorial</a></li>
+                <li><a href="../apps/guide.html">Service Integration Guide</a></li>
+                <li><a href="../apps/porting.html">Porting to Nuvola Player 3</a></li>
+                <li><a href="../apps/api_reference.html">NuvolaKit 3.0 JavaScript API Reference</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div><!-- .navbar-collapse -->
+      </div>
+    </nav>
+    
+    <div class="container">
+<div class="row">
+<div class="col-sm-3" id="sidebar">
+<h3>NuvolaKit 3.0</h3>
+<p><a href="#intro">Introduction</a></p>
+
+$index
+
+</div>
+<div class="body col-sm-offset-4 col-sm-8">
+
+<div class="page-header">
+   <h1>NuvolaKit 3.0 JavaScript API Reference</h1>
+</div>
+
+<h2 id="intro">Introduction</h2>
+<p>This is a reference of public JavaScript API of NuvolaKit, the core part of Nuvola Player 3. Undocumented parts of
+the API are considered unstable, internal or experimental, so you should not use them.</p>
+
+<h3>Prototypal inheritance</h3>
+<p>Unlike C++ or Java, JavaScript doesn't have class-based inheritance, but
+<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Inheritance_and_the_prototype_chain">prototype-based inheritance</a>.
+New objects are created from other object that are <em>prototypes</em> and inheritance creates prototype chain.
+While some JavaScript frameworks try to simulate the class-based inheritance, NuvolaKit enforces usage of
+<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/create">Object.create() method</a>
+to create new objects from prototypes and provides two convenience wrappers:
+<strong><a href="#Nuvola.$prototype">Nuvola.$prototype</a></strong> to create new <em>prototype objects</em> and
+<strong><a href="#Nuvola.$object">Nuvola.$object</a></strong> to create new <em>instance objects</em>.
+</p>
+
+<h3>Base API</h3>
+<p><strong>Most of the integration scripts</strong> will probably use only a small part of the API:</p>
+<ul>
+  <li><strong><a href="#Nuvola.$WebApp">Nuvola.$WebApp</a></strong> to create a new web app controller</li>
+  <li><strong><a href="#Nuvola.MediaPlayer">Nuvola.MediaPlayer</a></strong> to provide playback details</li>
+</ul>
+
+<h3>Advanced API</h3>
+<p>If you want to do <strong>more magic</strong>, you will need new spells:</p>
+
+<ul>
+  <li>use <strong><a href="#Nuvola.config">Nuvola.config</a></strong> to store persistent configuration</li>
+  <li>use <strong><a href="#Nuvola.session">Nuvola.session</a></strong> to store temporary configuration or session information</li>
+  <li>override default signal handlers in <strong><a href="#Nuvola.WebApp">Nuvola.WebApp</a></strong></li>
+  <li>connect to <strong><a href="#Nuvola.core">Nuvola.core</a></strong> signals for URI manipulation and custom preferences</li>
+  <li>use <strong><a href="#Nuvola.actions">Nuvola.actions</a></strong> to define custom actions (thumbs up, like, star rating, etc.)</li>
+  
+</ul>
+
+<h3>Low-level API</h3>
+<p>Objects like <strong><a href="#Nuvola.menuBar">Nuvola.menuBar</a></strong>,
+<strong><a href="#Nuvola.launcher">Nuvola.launcher</a></strong>,
+<strong><a href="#Nuvola.browser">Nuvola.browser</a></strong>,
+<strong><a href="#Nuvola.mediaKeys">Nuvola.mediaKeys</a></strong>
+are low-level components you probably don't want to use directly since
+<strong><a href="#Nuvola.MediaPlayer">Nuvola.MediaPlayer</a></strong>
+takes care about it.
+</p>
+
+$body
+
+</div>
+</div>
+      
+      <hr />
+      <div class="footer">
+      </div>
+    </div>
+    <script src="../theme/jquery.min.js"></script>
+    <script src="../theme/bootstrap.min.js"></script>
+  </body>
+</html>
+
