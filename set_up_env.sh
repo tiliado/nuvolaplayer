@@ -58,7 +58,7 @@ watch_and_build()
 
 build_pelican_doc()
 {
-    (cd doc; pelican -r)
+    (cd doc; pelican -r -t theme)
 }
 
 build_js_doc()
