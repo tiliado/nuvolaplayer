@@ -7,8 +7,21 @@
     <link rel="stylesheet" href="../theme/pygments.css" />
     <style type="text/css">
     #sidebar {
-        font-size: 90%;
-      }
+      font-size: 90%;
+    }
+    
+    .backtotop {
+      position: fixed;
+      display: block;
+      bottom: 0em;
+      z-index: 100;
+      background-color: #eee;
+      padding: 0.5em;
+    }
+    
+    .footer {
+      padding-bottom: 0.5em;
+    }
     </style>
   </head>
   <body>
@@ -50,6 +63,7 @@
 
 $index
 
+<span class="backtotop"><a href="#sidebar">↑ Back to top ↑</a></span>
 </div>
 <div class="body col-md-9 col-lg-8">
 
@@ -107,7 +121,7 @@ $body
 </div>
       
       <hr />
-      <div class="footer">
+      <div class="footer col-sm-12">
       </div>
     </div>
     <script src="../theme/jquery.min.js"></script>

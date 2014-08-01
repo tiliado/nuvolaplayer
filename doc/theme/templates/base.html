@@ -7,6 +7,17 @@
     {% endblock head %}
     <link rel="stylesheet" href="{{ SITEURL }}/theme/bootstrap.min.css" />
     <link rel="stylesheet" href="{{ SITEURL }}/theme/pygments.css" />
+    <style type="text/css">
+    .backtotop {
+      position: fixed;
+      bottom: 0.5em;
+      z-index: 100;
+    }
+    
+    .footer {
+      padding-bottom: 0.5em;
+    }
+    </style>
   </head>
   <body>
     <nav class="navbar navbar-default navbar-static-top" role="navigation">
@@ -46,11 +57,9 @@
         {% endblock %}
         
         <div class="footer col-sm-12 text-center">
-          <p>
             <hr />
             Proudly powered by <a href="http://getpelican.com/">Pelican</a>,
             which takes great advantage of <a href="http://python.org">Python</a>.
-          </p>
         </div>
       </div>
     </div>
