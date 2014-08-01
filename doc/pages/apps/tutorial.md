@@ -1,6 +1,8 @@
 Title: Service Integrations Tutorial
 Date: 2014-07-29 10:45 +0200
 
+[TOC]
+
 **NOTE: This tutorial applies to Nuvola Player 3 that is currently in development.**
 
 This tutorial briefly describes creation of a new service integration for Nuvola Player 3 from
