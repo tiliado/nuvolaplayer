@@ -23,8 +23,11 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+from __future__ import unicode_literals
+
 import os
 import re
+from codecs import open
 from string import Template
 from xml.sax.saxutils import escape
 from collections import defaultdict
@@ -627,7 +630,7 @@ def parse_source(source):
 	mode = MODE_CODE
 	level = 0
 	doc = None
-	with open(source, "rt") as f:
+	with open(source, "rt", "utf-8") as f:
 		lineno = 0
 		for line in f:
 			bare = line.strip()
@@ -684,10 +687,10 @@ def generate_doc(ns, out_file, sources_dir, template):
 	printer = HtmlPrinter(tree, ns, markdown)
 	index, body = printer.process()
 	
-	with open(template, "rt") as f:
+	with open(template, "rt", "utf-8") as f:
 		template = Template(f.read())
 	
-	with open(out_file, "wt") as f:
+	with open(out_file, "wt", "utf-8") as f:
 		f.write(template.safe_substitute(index=index, body=body))
 
 if __name__ == "__main__":
