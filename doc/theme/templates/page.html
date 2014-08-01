@@ -1,10 +1,23 @@
 {% extends "base.html" %}
 {% block title %}{{ page.title }}{%endblock%}
 {% block content %}
-  <div class="page-header">
-    <h1>{{ page.title }}</h1>
+  <div class="col-sm-12">
+      <div class="page-header text-center">
+        <h1 id="top">{{ page.title }}</h1>
+      </div>
   </div>
   
-  {{ page.content }}
-
+  {% if page.toc %}
+    <div class="col-md-2 col-lg-3">
+      <p><strong>Contents</strong></p>
+      {{ page.toc }}
+    </div>
+    <div class="col-sm-12 col-md-10 col-lg-9">
+      {{ page.content }}
+    </div> 
+  {% else %}
+    <div class="col-sm-12 col-lg-offset-1 col-lg-10">
+      {{ page.content }}
+    </div> 
+  {% endif %}
 {% endblock %}
