@@ -72,7 +72,9 @@ class LowerHeaderLevelProcessor(Treeprocessor):
 
 MD_EXTENSIONS = [
     MarkdownConfigExtension(), LowerHeaderLevelExtension(),
-    'extra', 'sane_lists', 'fenced_code', 'codehilite',
+    'extra', 'toc', 'sane_lists', 'fenced_code', 'codehilite',
     'def_list', 'attr_list', 'abbr', 'admonition'
     ]
 
+PLUGIN_PATHS = ["plugins"]
+PLUGINS = ("extract_toc", )
