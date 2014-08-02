@@ -59,6 +59,7 @@ Let's create ``metadata.json`` file with following content:
         "version_minor": 0,
         "api_major": 3,
         "api_minor": 0,
+        "categories": "AudioVideo;Audio;",
         "home_url": "nuvola://home.html"
     }
 
@@ -95,6 +96,12 @@ This file contains several mandatory fields:
 `api_major` and `api_minor`
 
 :   required version of JavaScript API, currently 3.0.
+
+``categories``
+
+:   [Application categories](http://standards.freedesktop.org/menu-spec/latest/apa.html) suitable
+    for the web app, it is used to place a desktop launcher to proper category in applications menu.
+    Nuvola Player services should be in ``"AudioVideo;Audio;"``.
 
 `home_url`
 
