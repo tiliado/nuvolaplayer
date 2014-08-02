@@ -36,6 +36,7 @@ public class WebAppMeta : GLib.Object
 	public string name {get; construct;}
 	public string maintainer_name {get; construct;}
 	public string maintainer_link {get; construct;}
+	public string categories {get; construct set;}
 	public int version_major {get; construct;}
 	public int version_minor {get; construct;}
 	public int api_major {get; construct;}
@@ -103,6 +104,12 @@ public class WebAppMeta : GLib.Object
 		&&  !maintainer_link.has_prefix("https://")
 		&&  !maintainer_link.has_prefix("mailto:"))
 			throw new WebAppError.INVALID_METADATA("Empty or invalid 'maintainer_link' entry: '%s'", maintainer_link);
+		
+		if (categories == null || categories == "")
+		{
+			categories = "Network;";
+			warning("Empty 'categories' entry for web app '%s'. Using '%s' as a fallback.", id, categories);
+		}
 	}
 }
 
