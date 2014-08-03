@@ -43,6 +43,21 @@ Prepare development environment
         touch metadata.json integrate.js
         gedit metadata.json integrate.js >/dev/null 2>&1 &
 
+ 6. Initialize Git repository
+    
+    You can skip this step if you don't know Git version control system. However, if you would like
+    to have your service integration maintained as a part of the Nuvola Player project and available
+    in Nuvola Player repository, you will increase maintenance burden of the project, because
+    somebody (me) will have to create Git repository from tar.gz archive of your service integration
+    anyway.
+    
+    Let's initialize a new Git repository for your service integration.
+    
+        :::sh
+        cd ~/projects/nuvola-player/test-integration
+        git init .
+        git add metadata.json integrate.js
+        git commit -m "Initial commit"
 
 Create metadata file
 ====================
