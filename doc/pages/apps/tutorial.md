@@ -179,13 +179,21 @@ var WebApp = Nuvola.$WebApp();
 WebApp._onInitWebWorker = function(emitter)
 {
     Nuvola.WebApp._onInitWebWorker.call(this, emitter);
-    document.addEventListener("DOMContentLoaded", this._onPageReady.bind(this));
+    
+    var state = document.readyState;
+    if (state === "interactive" || state === "complete")
+        this._onPageReady();
+    else
+        document.addEventListener("DOMContentLoaded", this._onPageReady.bind(this));
 }
 
 // Page is ready for magic
-WebApp._onPageReady = function(event)
+WebApp._onPageReady = function()
 {
+    // Connect handler for signal ActionActivated
     Nuvola.actions.connect("ActionActivated", this);
+    
+    // Start update routine
     this.update();
 }
 
@@ -231,7 +239,7 @@ Line 25
 
 :   Use strict JavaScipt mode in your scripts.
 
-Lines 27-28 and 78
+Lines 27-28 and 86
 
 :   Use anonymous function to create closure with Nuvola object.
 
@@ -246,27 +254,27 @@ Line 38
     handy default handlers for initialization routines and signals from Nuvola core. 
     You can override them if your web app requires more magic ;-)
 
-Lines 41-45
+Lines 41-50
 
 :   Handler for `Nuvola.Core::InitWebWorker` signal that emitted in clear JavaScript environment
     with a brand new global ``window`` object. You should not touch it, only perform necessary
     initialization (usually not needed) and set your listener for either `document`'s
     `DOMContentLoaded` event (preferred) or `window`'s `load` event.
 
-Lines 48-52
+Lines 53-60
 
 :   When document object model of a web page is ready, we register a signal handler for playback
     actions and call update() method.
 
-Lines 55-69
+Lines 63-77
 
 :   The update() method periodically extracts playback state and track details.
 
-Lines 72-74
+Lines 81-82
 
 :   Actions handler is used to respond to player actions.
 
-Line 76
+Line 84
 
 :   Convenience method to create and register new instance of your web app integration.
 
@@ -446,15 +454,6 @@ To handle playback actions, it is neccessary to connect to Actions::ActionActiva
 This signal is emitted for every UI action, not only for player actions.
 
 ```js
-var WebApp = Nuvola.$WebApp();
-
-WebApp._onInitWebWorker = function(emitter)
-{
-    Nuvola.WebApp._onInitWebWorker.call(this, emitter);
-    
-    document.addEventListener("DOMContentLoaded", this._onPageReady.bind(this));
-}
-
 WebApp._onActionActivated = function(object, name, param)
 {
     switch (name)
