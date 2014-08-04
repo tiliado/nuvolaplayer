@@ -129,6 +129,12 @@ This file contains several mandatory fields:
       * TODO: Advanced - Web apps with user-specified home page URL
       * TODO: Advanced - Web app with a separated variants with different home page URL
 
+!!! info "If you use Git, commit changes"
+        :::sh
+        cd ~/projects/nuvola-player/test-integration
+        git add metadata.json
+        git commit -m "Add initial metadata for service"
+
 Create integration script
 =========================
 
@@ -278,6 +284,12 @@ Line 84
 
 :   Convenience method to create and register new instance of your web app integration.
 
+!!! info "If you use Git, commit changes"
+        :::sh
+        cd ~/projects/nuvola-player/test-integration
+        git add integrate.js
+        git commit -m "Add skeleton of integration script"
+
 Launch Nuvola Player
 ====================
 
@@ -387,6 +399,12 @@ WebApp.update = function()
 
 ![Track details]({filename}/images/guide/track_details.png)
 
+!!! info "If you use Git, commit changes"
+        :::sh
+        cd ~/projects/nuvola-player/test-integration
+        git add integrate.js
+        git commit -m "Extract metadata and playback state"
+
 Player Actions
 ==============
 
@@ -474,5 +492,11 @@ WebApp._onActionActivated = function(object, name, param)
 }
 ```
 You should click action buttons in the developer's sidebar to be sure they are working as expected.
+
+!!! info "If you use Git, commit changes"
+        :::sh
+        cd ~/projects/nuvola-player/test-integration
+        git add integrate.js
+        git commit -m "Add player actions handling"
 
 TODO: Advanced - custom actions.
