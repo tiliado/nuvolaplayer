@@ -77,4 +77,4 @@ MD_EXTENSIONS = [
     ]
 
 PLUGIN_PATHS = ["plugins"]
-PLUGINS = ("extract_toc", )
+PLUGINS = ("extract_toc", "bootstrap_admonition")
