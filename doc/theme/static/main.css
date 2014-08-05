@@ -18,3 +18,13 @@ dl dt {
 dl dd {
   margin-left: 40px;
 }
+
+.sidebar ul {
+  margin-left: 0px;
+  padding-left: 12px;
+}
+
+.sidebar ul ul{
+  margin-left: 12px;
+  padding-left: 12px;
+}
