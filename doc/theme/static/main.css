@@ -1,0 +1,14 @@
+.backtotop {
+  position: fixed;
+  display: block;
+  bottom: 0em;
+  z-index: 100;
+  background-color: #eee;
+  padding: 0.5em;
+}
+    
+.footer {
+  padding-bottom: 0.5em;
+}
+
+
