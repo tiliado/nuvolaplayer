@@ -326,7 +326,22 @@ state and track details:
 
 [DOM]: https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model
 
-The first way is more general and will be described here.
+The first way is more general and will be described here. The folowing methods are useful:
+
+  * [document.getElementById](https://developer.mozilla.org/en-US/docs/Web/API/document.getElementById) -
+    look-up an element by ``id`` attribute
+  * [document.getElementsByName](https://developer.mozilla.org/en-US/docs/Web/API/Document.getElementsByName) -
+    look-up elements by ``name`` attribute
+  * [document.getElementsByClassName](https://developer.mozilla.org/en-US/docs/Web/API/document.getElementsByClassName) -
+    look-up elements by ``class`` attribute
+  * [document.getElementsByTagName](https://developer.mozilla.org/en-US/docs/Web/API/document.getElementsByTagName) -
+    look-up elements by tag name (e.g. ``a``, ``div``, etc.)
+  * [document.querySelector](https://developer.mozilla.org/en-US/docs/Web/API/document.querySelector) -
+    look-up the first element that matches provided [CSS selector][B1]
+  * [document.querySelectorAll](https://developer.mozilla.org/en-US/docs/Web/API/document.querySelectorAll) -
+    look-up all elements that match provided [CSS selector][B1]
+
+[B1]: https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Getting_Started/Selectors
 
 Playback state
 --------------
