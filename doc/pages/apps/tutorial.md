@@ -1,13 +1,10 @@
 Title: Service Integrations Tutorial
-Date: 2014-07-29 10:45 +0200
 
 [TOC]
 
-**NOTE: This tutorial applies to Nuvola Player 3 that is currently in development.**
-
-This tutorial briefly describes creation of a new service integration for Nuvola Player 3 from
-scratch. The goal is to write an integration script for *Test service* shipped with Nuvola Player,
-
+This tutorial briefly describes creation of **a new service integration for Nuvola Player 3 from
+scratch**. The goal is to write an integration script for *Test service* shipped with Nuvola Player
+and to prepare you to create your own service integration. I'm looking forward to a code review ;-)
 There is also more detailed [Service Integrations Guide]({filename}guide.md) that provides
 insight to the NuvolaKit core. 
 
@@ -15,13 +12,13 @@ Prepare development environment
 ===============================
 
  1. Install Nuvola Player 3
- 2. Create project directory `~/projects/nuvola-player` (or any other name, but don't forget to
-    adjust paths in this guide).
+ 2. Create a project directory `~/projects/nuvola-player` (or any other name, but don't forget to
+    adjust paths in this tutorial).
     
         :::sh
         mkdir -p ~/projects/nuvola-player
      
- 3. Create a copy of the test service
+ 3. Create a copy of the test service shipped with Nuvola Player 3.
     
         :::sh
         cd ~/projects/nuvola-player
@@ -29,29 +26,28 @@ Prepare development environment
         # or
         cp -r /usr/local/share/nuvolaplayer3/web_apps/test ./test-integration
     
- 4. Rename old integration files
+ 4. Rename old integration files (or remove it).
     
         :::sh
         cd ~/projects/nuvola-player/test-integration
         mv metadata.json metadata.old.json
         mv integrate.js integrate.old.js
     
- 5. Create new integration files
+ 5. Create new integration files and open them in your preferred plan-text editor (Gedit,
+    for example).
     
         :::sh
         cd ~/projects/nuvola-player/test-integration
         touch metadata.json integrate.js
         gedit metadata.json integrate.js >/dev/null 2>&1 &
 
- 6. Initialize Git repository
+ 6. Initialize a new [Git][git] repository for your service integration.
     
-    You can skip this step if you don't know Git version control system. However, if you would like
-    to have your service integration maintained as a part of the Nuvola Player project and available
-    in Nuvola Player repository, you will increase maintenance burden of the project, because
-    somebody (me) will have to create Git repository from tar.gz archive of your service integration
-    anyway.
-    
-    Let's initialize a new Git repository for your service integration.
+    You can skip this step if you don't know [Git version control system][git]. However, if you
+    would like to have your service integration maintained as a part of the Nuvola Player project
+    and available in the Nuvola Player repository, you will increase maintenance burden of the
+    project, because somebody ([*me*][me]) will have to create Git repository from tar.gz archive of your
+    service integration anyway.
     
         :::sh
         cd ~/projects/nuvola-player/test-integration
@@ -62,7 +58,9 @@ Prepare development environment
 Create metadata file
 ====================
 
-Let's create ``metadata.json`` file with following content:
+**Metadata file contains basic information about your service integrations.** It uses
+[JSON format](http://en.wikipedia.org/wiki/JSON) and it's called ``metadata.json``.
+Let's look at the example:
 
     :::json
     {
@@ -83,7 +81,9 @@ This file contains several mandatory fields:
 `id`
 
 :   Identifier of the service. It can contain only letters `a-z`, digits `0-9` and dash `-` to
-    separate words, e.g. `google-play` for Google Play Music, `eight-tracks` for 8tracks.com.
+    separate words, e.g. `google-play` for Google Play Music, `8tracks` for 8tracks.com.
+    (Nuvola Player 2 required the id must be same as the directory name of the service
+    integration, but Nuvola Player 3 doesn't have this limitation.)
 
 `name`
 
@@ -96,26 +96,26 @@ This file contains several mandatory fields:
 
 `version_minor`
 
-:   a minor version of service integration, an integer >= 0. This field should
+:   A minor version of service integration, an integer >= 0. This field should
     be increased when a new release is made.
     
 `maintainer_name`
 
-:   Name of the maintainer of the service integration.
+:   A name of the maintainer of the service integration.
 
 `maintainer_link`
 
-:   link to page with contact to maintainer (including `http://` or `https://`) or email address
-    prefixed by `mailto:`.
+:   A link to a page with contact to maintainer (including `http://` or `https://`) or an email
+    address prefixed by `mailto:`.
 
 `api_major` and `api_minor`
 
-:   required version of JavaScript API, currently 3.0.
+:   A required version of JavaScript API, currently ``3.0``.
 
 ``categories``
 
 :   [Application categories](http://standards.freedesktop.org/menu-spec/latest/apa.html) suitable
-    for the web app, it is used to place a desktop launcher to proper category in applications menu.
+    for the web app. It is used to place a desktop launcher to proper category in applications menu.
     Nuvola Player services should be in ``"AudioVideo;Audio;"``.
 
 `home_url`
@@ -138,7 +138,12 @@ This file contains several mandatory fields:
 Create integration script
 =========================
 
-Let's create base `integrate.js` script with following content:
+**The integration script is the fundamental part of the service integration.** It's written in
+JavaScript and called ``integrate.js``. This script is called once at start-up of the web app to
+perform initialization of the main process (covered in [the guide]({filename}guide.md)) and again
+in the web page rendering process every-time a web page is loaded in the web view. Let's look at the
+next sample integration script that doesn't actually do much, but will be used as a base for further
+modifications.
 
 ```
 #!js
@@ -230,12 +235,6 @@ WebApp.start();
 })(this);  // function(Nuvola)
 ```
 
-This script is called once at start-up of the web app to perform initialization of the main process
-(covered in [the guide]({filename}guide.md)) and again in the web page rendering process everytime
-a web page is loaded in the web view.
-
-Let's go through the code.
-
 Lines 2-22
 
 :   Copyright and license information. While you can choose any license for your work, it's
@@ -243,11 +242,12 @@ Lines 2-22
 
 Line 25
 
-:   Use strict JavaScipt mode in your scripts.
+:   Use [strict JavaScript mode][A1] in your scripts.
 
 Lines 27-28 and 86
 
-:   Use anonymous function to create closure with Nuvola object.
+:   Use [self-executing anonymous function][A2] to create closure with Nuvola object.
+    (Integration script are executed with ``Nuvola`` object bound to ``this``).
 
 Line 31
 
@@ -290,6 +290,9 @@ Line 84
         git add integrate.js
         git commit -m "Add skeleton of integration script"
 
+[A1]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions_and_function_scope/Strict_mode
+[A2]: http://markdalgleish.com/2011/03/self-executing-anonymous-functions/
+
 Launch Nuvola Player
 ====================
 
@@ -307,15 +310,15 @@ the web page anywhere and select "Inspect element" to show WebKit Web Inspector.
 ![Inspect element]({filename}/images/guide/inspect_element.png)
 ![Inspect playback state]({filename}/images/guide/inspect_playback_state.png)
 
-You can also launch your service integration with id `test-integration` directly with command
+You can also launch your service integration with id `test-integration` directly.
 
     nuvolaplayer3 -D -A ~/projects/nuvola-player -a test-integration
 
 Playback state and track details
 ================================
 
-The first task of your service integration is to extract playback state and track details from the
-web page and provide them to media player component. There are two ways how to extract playback
+The first task of your service integration is to **extract playback state and track details from the
+web page** and provide them to the media player component. There are two ways how to extract playback
 state and track details:
 
  1. Use [Document Object Model][DOM] to get information from the HTML code of the web page.
@@ -328,9 +331,14 @@ The first way is more general and will be described here.
 Playback state
 --------------
 
-The code to extract playback state might be
+Looking at the code of a web page shown in the picture bellow, the code to extract playback state
+might be.
 
 ```js
+var PlaybackState = Nuvola.PlaybackState;
+
+...
+
 WebApp.update = function()
 {
     ...
@@ -408,7 +416,7 @@ WebApp.update = function()
 Player Actions
 ==============
 
-The second responsibility of a service integration is to manage media player actions:
+The second responsibility of a service integration is to **manage media player actions**:
 
  1. Set which actions are enabled.
  2. Invoke the actions when they are activated.
@@ -472,6 +480,21 @@ To handle playback actions, it is neccessary to connect to Actions::ActionActiva
 This signal is emitted for every UI action, not only for player actions.
 
 ```js
+var PlayerAction = Nuvola.PlayerAction;
+
+...
+
+WebApp._onPageReady = function()
+{
+    // Connect handler for signal ActionActivated
+    Nuvola.actions.connect("ActionActivated", this);
+    
+    // Start update routine
+    this.update();
+}
+
+...
+
 WebApp._onActionActivated = function(object, name, param)
 {
     switch (name)
@@ -491,7 +514,9 @@ WebApp._onActionActivated = function(object, name, param)
     }
 }
 ```
-You should click action buttons in the developer's sidebar to be sure they are working as expected.
+
+!!! danger "Always test playback actions"
+    You should click action buttons in the developer's sidebar to be sure they are working as expected.
 
 !!! info "If you use Git, commit changes"
         :::sh
@@ -500,3 +525,6 @@ You should click action buttons in the developer's sidebar to be sure they are w
         git commit -m "Add player actions handling"
 
 TODO: Advanced - custom actions.
+
+[git]: http://git-scm.com/
+[me]: http://fenryxo.cz
