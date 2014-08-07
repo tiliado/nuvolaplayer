@@ -304,9 +304,12 @@ service, because we told Nuvola Player to load service integrations only from di
 
 ![A list with single service integration]({filename}/images/guide/app_list_one_service.png)
 
-Launch your service integration and a new window will be opened with the test service. Right-click
-the web page anywhere and select "Inspect element" to show WebKit Web Inspector.
+Launch your service integration and a new window will be opened with the test service. First of all,
+show **developer's sidebar** (menu Application → Show sidebar → select "Developer" in the right 
+sidebar), then enable **WebKit Web Inspector** (right-click the web page anywhere and select
+"Inspect element").
 
+![Show sidebar]({filename}/images/guide/show_sidebar.png)
 ![Inspect element]({filename}/images/guide/inspect_element.png)
 ![Inspect playback state]({filename}/images/guide/inspect_playback_state.png)
 
