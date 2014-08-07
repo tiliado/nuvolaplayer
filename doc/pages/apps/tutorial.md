@@ -311,7 +311,7 @@ sidebar), then enable **WebKit Web Inspector** (right-click the web page anywher
 
 ![Show sidebar]({filename}/images/guide/show_sidebar.png)
 ![Inspect element]({filename}/images/guide/inspect_element.png)
-![Inspect playback state]({filename}/images/guide/inspect_playback_state.png)
+![WebKit Web Inspector]({filename}/images/guide/webkit_web_inspector.png)
 
 You can also launch your service integration with id `test-integration` directly.
 
