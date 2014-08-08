@@ -38,7 +38,7 @@ var MenuBar = $prototype(null);
  */
 MenuBar.setMenu = function(id, label, actions)
 {
-	Nuvola._sendMessageAsync("Nuvola.MenuBar.setMenu", id, label, actions);
+    Nuvola._sendMessageAsync("Nuvola.MenuBar.setMenu", id, label, actions);
 }
 
 // export public items

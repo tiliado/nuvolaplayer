@@ -41,15 +41,15 @@ WebApp.LAST_URI = "web_app.last_uri";
  */
 WebApp.$init = function()
 {
-	this.meta = Nuvola.meta;
-	var allowedURI = this.meta.allowed_uri;
-	this.allowedURI = allowedURI ? new RegExp(allowedURI) : null;
-	Nuvola.core.connect("HomePageRequest", this);
-	Nuvola.core.connect("LastPageRequest", this);
-	Nuvola.core.connect("NavigationRequest", this);
-	Nuvola.core.connect("UriChanged", this);
-	Nuvola.core.connect("InitAppRunner", this);
-	Nuvola.core.connect("InitWebWorker", this);
+    this.meta = Nuvola.meta;
+    var allowedURI = this.meta.allowed_uri;
+    this.allowedURI = allowedURI ? new RegExp(allowedURI) : null;
+    Nuvola.core.connect("HomePageRequest", this);
+    Nuvola.core.connect("LastPageRequest", this);
+    Nuvola.core.connect("NavigationRequest", this);
+    Nuvola.core.connect("UriChanged", this);
+    Nuvola.core.connect("InitAppRunner", this);
+    Nuvola.core.connect("InitWebWorker", this);
 }
 
 /**
@@ -65,7 +65,7 @@ WebApp.$init = function()
  */
 WebApp.start = function()
 {
-	Nuvola.webApp = $object(this);
+    Nuvola.webApp = $object(this);
 }
 
 /**
@@ -73,7 +73,7 @@ WebApp.start = function()
  */
 WebApp._onHomePageRequest = function(emitter, result)
 {
-	result.url = this.meta.home_url;
+    result.url = this.meta.home_url;
 }
 
 /**
@@ -81,7 +81,7 @@ WebApp._onHomePageRequest = function(emitter, result)
  */
 WebApp._onLastPageRequest = function(emitter, request)
 {
-	request.url = Nuvola.config.get(this.LAST_URI) || null;
+    request.url = Nuvola.config.get(this.LAST_URI) || null;
 }
 
 /**
@@ -89,7 +89,7 @@ WebApp._onLastPageRequest = function(emitter, request)
  */
 WebApp._onNavigationRequest = function(object, request)
 {
-	request.approved = this.allowedURI ? true : this.allowedURI.test(request.url);
+    request.approved = this.allowedURI ? true : this.allowedURI.test(request.url);
 }
 
 /**
@@ -97,7 +97,7 @@ WebApp._onNavigationRequest = function(object, request)
  */
 WebApp._onUriChanged = function(object, uri)
 {
-	Nuvola.config.set(this.LAST_URI, uri);
+    Nuvola.config.set(this.LAST_URI, uri);
 }
 
 /**
@@ -143,9 +143,9 @@ Nuvola.WebApp = WebApp;
  */
 Nuvola.$WebApp = function()
 {
-	if (this !== Nuvola)
-		throw new Error("Nuvola.$WebApp has been called incorrectly. Use `var WebApp = Nuvola.$WebApp();` idiom.");
-	
-	return $prototype(WebApp);
+    if (this !== Nuvola)
+        throw new Error("Nuvola.$WebApp has been called incorrectly. Use `var WebApp = Nuvola.$WebApp();` idiom.");
+    
+    return $prototype(WebApp);
 }
 

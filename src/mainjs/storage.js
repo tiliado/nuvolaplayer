@@ -37,7 +37,7 @@ var KeyValueStorage = $prototype(null);
  */
 KeyValueStorage.$init = function(index)
 {
-	this.index = index;
+    this.index = index;
 }
 
 /**
@@ -61,7 +61,7 @@ KeyValueStorage.$init = function(index)
  */
 KeyValueStorage.setDefault = function(key, value)
 {
-	Nuvola._keyValueStorageSetDefaultValue(this.index, key, value);
+    Nuvola._keyValueStorageSetDefaultValue(this.index, key, value);
 }
 
 /**
@@ -74,7 +74,7 @@ KeyValueStorage.setDefault = function(key, value)
  */
 KeyValueStorage.hasKey = function(key)
 {
-	return Nuvola._keyValueStorageHasKey(this.index, key);
+    return Nuvola._keyValueStorageHasKey(this.index, key);
 }
 
 /**
@@ -89,7 +89,7 @@ KeyValueStorage.hasKey = function(key)
  */
 KeyValueStorage.get = function(key)
 {
-	return Nuvola._keyValueStorageGetValue(this.index, key);
+    return Nuvola._keyValueStorageGetValue(this.index, key);
 }
 
 /**
@@ -100,7 +100,7 @@ KeyValueStorage.get = function(key)
  */
 KeyValueStorage.set = function(key, value)
 {
-	Nuvola._keyValueStorageSetValue(this.index, key, value);
+    Nuvola._keyValueStorageSetValue(this.index, key, value);
 }
 
 /**
@@ -115,14 +115,14 @@ var ConfigStorage = $prototype(KeyValueStorage, SignalsMixin);
  */
 ConfigStorage.$init = function()
 {
-	KeyValueStorage.$init.call(this, 0);
-	
-	/**
-	 * Emitted when a configuration key is changed
-	 * 
-	 * @param String key    key name
-	 */
-	this.addSignal("ConfigChanged");
+    KeyValueStorage.$init.call(this, 0);
+    
+    /**
+     * Emitted when a configuration key is changed
+     * 
+     * @param String key    key name
+     */
+    this.addSignal("ConfigChanged");
 }
 
 /**
@@ -137,7 +137,7 @@ var SessionStorage = $prototype(KeyValueStorage);
  */
 SessionStorage.$init = function()
 {
-	KeyValueStorage.$init.call(this, 1);
+    KeyValueStorage.$init.call(this, 1);
 }
 
 // export public items

@@ -37,8 +37,8 @@ var Notification = $prototype(null);
  */
 Notification.$init = function(name, resident)
 {
-	this.name = name;
-	this.resident = !!resident;
+    this.name = name;
+    this.resident = !!resident;
 }
 
 /**
@@ -52,12 +52,12 @@ Notification.$init = function(name, resident)
  */
 Notification.update = function(title, text, iconName, iconPath, resident)
 {
-	if (resident == null)
-		resident = this.resident;
-	else
-		this.resident = !!resident;
-	
-	Nuvola._sendMessageAsync("Nuvola.Notification.update", this.name, title, text, iconName || "", iconPath || "", !!resident);
+    if (resident == null)
+        resident = this.resident;
+    else
+        this.resident = !!resident;
+    
+    Nuvola._sendMessageAsync("Nuvola.Notification.update", this.name, title, text, iconName || "", iconPath || "", !!resident);
 }
 
 /**
@@ -67,7 +67,7 @@ Notification.update = function(title, text, iconName, iconPath, resident)
  */
 Notification.setActions = function(actions)
 {
-	Nuvola._sendMessageAsync("Nuvola.Notification.setActions", this.name, actions);
+    Nuvola._sendMessageAsync("Nuvola.Notification.setActions", this.name, actions);
 }
 
 /**
@@ -75,7 +75,7 @@ Notification.setActions = function(actions)
  */
 Notification.removeActions = function()
 {
-	Nuvola._sendMessageAsync("Nuvola.Notification.removeActions", this.name);
+    Nuvola._sendMessageAsync("Nuvola.Notification.removeActions", this.name);
 }
 
 /**
@@ -85,7 +85,7 @@ Notification.removeActions = function()
  */
 Notification.show = function(force)
 {
-	Nuvola._sendMessageAsync("Nuvola.Notification.show", this.name, !!force);
+    Nuvola._sendMessageAsync("Nuvola.Notification.show", this.name, !!force);
 }
 
 /**
@@ -98,7 +98,7 @@ var Notifications = $prototype(null);
  */
 Notifications.getNamedNotification = function(name)
 {
-	return $object(Notification, name);
+    return $object(Notification, name);
 }
 
 /**
@@ -112,7 +112,7 @@ Notifications.getNamedNotification = function(name)
  */
 Notifications.showNotification = function(title, text, iconName, iconPath, force)
 {
-	Nuvola._sendMessageAsync("Nuvola.Notifications.showNotification", title, text, iconName || "", iconPath || "", !!force);
+    Nuvola._sendMessageAsync("Nuvola.Notifications.showNotification", title, text, iconName || "", iconPath || "", !!force);
 }
 
 // export public items

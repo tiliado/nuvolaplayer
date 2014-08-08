@@ -35,117 +35,117 @@ var Core = $prototype(null, SignalsMixin);
  */
 Core.$init = function()
 {
-	/** 
-	 * Emitted at start-up when initialization of the app runner process is needed.
-	 * You can use it to append entries to initialization form (e. g. preferred national variant
-	 * or address of custom service instance) and to perform own initialization routine.
-	 * 
-	 * See @link{Core::AppendPreferences} for example of a form specification.
-	 * 
-	 * @param Object values                       mapping between form field names and their values
-	 * @param "Array of FormFieldArray" fields    specification of form fields 
-	 */
-	this.addSignal("InitAppRunner");
-	
-	/** 
-	 * @signal InitWebWorker     initialize web worker process hook
-	 * 
-	 * This signal is emitted just before a web page is loaded in the main frame of the web view.
-	 */
-	this.addSignal("InitWebWorker");
-	
-	/**
-	 * Emitted on request for home page URL.
-	 * 
-	 * @param String request.url    property to assign home page url to
-	 * 
-	 * ```
-	 * var _onHomePageRequest = function(emitter, request)
-	 * {
-	 *     request.url = "http://tiliado.eu";
-	 * }
-	 * ```
-	 */
-	this.addSignal("HomePageRequest");
-	
-	/**
-	 * Emitted on request for navigation to a new web page.
-	 * 
-	 * @param String request.url    URL of the new page
-	 * @param Boolean request.approved    whether the navigation is approved, set to ``false`` when
-	 *     the ``request.url`` should be opened in user's default web browser 
-	 * 
-	 * ```
-	 * var _onNavigationRequest = function(object, request)
-	 * {
-	 *     request.approved = isAddressAllowed(request.url);
-	 * }
-	 * ```
-	 */
-	this.addSignal("NavigationRequest");
-	
-	/**
-	 * Emitted on request for the last visited URL.
-	 * 
-	 * @param String|null result.url    property to assign the last visited URL to
-	 * 
-	 * ```
-	 * var _onLastPageRequest = function(emitter, result)
-	 * {
-	 *     request.url = Nuvola.config.get("last_uri") || null;
-	 * }
-	 * ```
-	 */
-	this.addSignal("LastPageRequest");
-	
-	/**
-	 * Emitted after @link{Core::NavigationRequest|approved navigation} to a new page URL.
-	 * 
-	 * @param string uri    URI of the new page
-	 * 
-	 * ```
-	 * var _onUriChanged = function(emitter, uri)
-	 * {
-	 *     Nuvola.config.set("last_uri", uri);
-	 * }
-	 * ```
-	 */
-	this.addSignal("UriChanged");
-	
-	/**
-	 * Emitted when preferences dialog is being built.
-	 * 
-	 * @param Object values                       mapping between form field names and their values
-	 * @param "Array of FormFieldArray" entries   specification of form fields
-	 * 
-	 * ```
-	 * var _onAppendPreferences = function(emitter, values, entries)
-	 * {
-	 *     var ADDRESS = "app.address";
-	 *     var HOST = "app.host";
-	 *     var PORT = "app.port";
-	 *     var COUNTRY_VARIANT = "app.country_variant";
-	 *     
-	 *     values[ADDRESS] = Nuvola.config.get(ADDRESS);
-	 *     values[HOST] = Nuvola.config.get(HOST);
-	 *     values[PORT] = Nuvola.config.get(PORT);
-	 *     entries.push(["header", "Logitech Media Server"]);
-	 *     entries.push(["label", "Address of your Logitech Media Server"]);
-	 *     entries.push(["option", ADDRESS + ":default", "use default address ('localhost:9000')",
-	 *         null, [HOST, PORT]]);
-	 *     entries.push(["option", ADDRESS + ":custom", "use custom address", [HOST, PORT], null]);
-	 *     entries.push(["string", HOST, "Host"]);
-	 *     entries.push(["string", PORT, "Port"]);
-	 *     
-	 *     values[COUNTRY_VARIANT] = Nuvola.config.get(COUNTRY_VARIANT);
-	 *     entries.push(["header", "Amazon Cloud Player"]);
-	 *     entries.push(["label", "Preferred national variant"]);
-	 *     entries.push(["option", COUNTRY_VARIANT + ":co.uk", "United Kingdom"]);
-	 *     entries.push(["option", COUNTRY_VARIANT + ":com", "United States"]);
-	 * }
-	 * ```
-	 */
-	this.addSignal("AppendPreferences");
+    /** 
+     * Emitted at start-up when initialization of the app runner process is needed.
+     * You can use it to append entries to initialization form (e. g. preferred national variant
+     * or address of custom service instance) and to perform own initialization routine.
+     * 
+     * See @link{Core::AppendPreferences} for example of a form specification.
+     * 
+     * @param Object values                       mapping between form field names and their values
+     * @param "Array of FormFieldArray" fields    specification of form fields 
+     */
+    this.addSignal("InitAppRunner");
+    
+    /** 
+     * @signal InitWebWorker     initialize web worker process hook
+     * 
+     * This signal is emitted just before a web page is loaded in the main frame of the web view.
+     */
+    this.addSignal("InitWebWorker");
+    
+    /**
+     * Emitted on request for home page URL.
+     * 
+     * @param String request.url    property to assign home page url to
+     * 
+     * ```
+     * var _onHomePageRequest = function(emitter, request)
+     * {
+     *     request.url = "http://tiliado.eu";
+     * }
+     * ```
+     */
+    this.addSignal("HomePageRequest");
+    
+    /**
+     * Emitted on request for navigation to a new web page.
+     * 
+     * @param String request.url    URL of the new page
+     * @param Boolean request.approved    whether the navigation is approved, set to ``false`` when
+     *     the ``request.url`` should be opened in user's default web browser 
+     * 
+     * ```
+     * var _onNavigationRequest = function(object, request)
+     * {
+     *     request.approved = isAddressAllowed(request.url);
+     * }
+     * ```
+     */
+    this.addSignal("NavigationRequest");
+    
+    /**
+     * Emitted on request for the last visited URL.
+     * 
+     * @param String|null result.url    property to assign the last visited URL to
+     * 
+     * ```
+     * var _onLastPageRequest = function(emitter, result)
+     * {
+     *     request.url = Nuvola.config.get("last_uri") || null;
+     * }
+     * ```
+     */
+    this.addSignal("LastPageRequest");
+    
+    /**
+     * Emitted after @link{Core::NavigationRequest|approved navigation} to a new page URL.
+     * 
+     * @param string uri    URI of the new page
+     * 
+     * ```
+     * var _onUriChanged = function(emitter, uri)
+     * {
+     *     Nuvola.config.set("last_uri", uri);
+     * }
+     * ```
+     */
+    this.addSignal("UriChanged");
+    
+    /**
+     * Emitted when preferences dialog is being built.
+     * 
+     * @param Object values                       mapping between form field names and their values
+     * @param "Array of FormFieldArray" entries   specification of form fields
+     * 
+     * ```
+     * var _onAppendPreferences = function(emitter, values, entries)
+     * {
+     *     var ADDRESS = "app.address";
+     *     var HOST = "app.host";
+     *     var PORT = "app.port";
+     *     var COUNTRY_VARIANT = "app.country_variant";
+     *     
+     *     values[ADDRESS] = Nuvola.config.get(ADDRESS);
+     *     values[HOST] = Nuvola.config.get(HOST);
+     *     values[PORT] = Nuvola.config.get(PORT);
+     *     entries.push(["header", "Logitech Media Server"]);
+     *     entries.push(["label", "Address of your Logitech Media Server"]);
+     *     entries.push(["option", ADDRESS + ":default", "use default address ('localhost:9000')",
+     *         null, [HOST, PORT]]);
+     *     entries.push(["option", ADDRESS + ":custom", "use custom address", [HOST, PORT], null]);
+     *     entries.push(["string", HOST, "Host"]);
+     *     entries.push(["string", PORT, "Port"]);
+     *     
+     *     values[COUNTRY_VARIANT] = Nuvola.config.get(COUNTRY_VARIANT);
+     *     entries.push(["header", "Amazon Cloud Player"]);
+     *     entries.push(["label", "Preferred national variant"]);
+     *     entries.push(["option", COUNTRY_VARIANT + ":co.uk", "United Kingdom"]);
+     *     entries.push(["option", COUNTRY_VARIANT + ":com", "United States"]);
+     * }
+     * ```
+     */
+    this.addSignal("AppendPreferences");
 }
 
 /**
@@ -156,7 +156,7 @@ Core.$init = function()
  */
 Core.setHideOnClose = function(hide)
 {
-	return Nuvola._sendMessageSync("Nuvola.setHideOnClose", hide);
+    return Nuvola._sendMessageSync("Nuvola.setHideOnClose", hide);
 }
 
 // export public items

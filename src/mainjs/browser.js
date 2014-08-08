@@ -28,22 +28,22 @@ require("prototype");
  * @enum Names on browser's @link{Actions|actions}
  */
 var BrowserAction = {
-	/**
-	 * Go back to the previous page
-	 */
-	GO_BACK: "go-back",
-	/**
-	 * Go forward
-	 */
-	GO_FORWARD: "go-forward",
-	/**
-	 * Go to the web app's home page.
-	 */
-	GO_HOME: "go-home",
-	/**
-	 * Reload page
-	 */
-	RELOAD: "reload",
+    /**
+     * Go back to the previous page
+     */
+    GO_BACK: "go-back",
+    /**
+     * Go forward
+     */
+    GO_FORWARD: "go-forward",
+    /**
+     * Go to the web app's home page.
+     */
+    GO_HOME: "go-home",
+    /**
+     * Reload page
+     */
+    RELOAD: "reload",
 }
 
 /**
@@ -56,8 +56,8 @@ var Browser = $prototype(null);
  */
 Browser.$init = function()
 {
-	this._downloadFileAsyncId = 0;
-	this._downloadFileAsyncCallbacks = {}
+    this._downloadFileAsyncId = 0;
+    this._downloadFileAsyncCallbacks = {}
 }
 
 /**
@@ -80,24 +80,24 @@ Browser.$init = function()
  */
 Browser.downloadFileAsync = function(uri, basename, callback, data)
 {
-	var id = this._downloadFileAsyncId++;
-	if (this._downloadFileAsyncId >= Number.MAX_VALUE - 1)
-		this._downloadFileAsyncId = 0;
-	this._downloadFileAsyncCallbacks[id] = [callback, data];
-	Nuvola._sendMessageAsync("Nuvola.Browser.downloadFileAsync", uri, basename, id);
+    var id = this._downloadFileAsyncId++;
+    if (this._downloadFileAsyncId >= Number.MAX_VALUE - 1)
+        this._downloadFileAsyncId = 0;
+    this._downloadFileAsyncCallbacks[id] = [callback, data];
+    Nuvola._sendMessageAsync("Nuvola.Browser.downloadFileAsync", uri, basename, id);
 },
 
 Browser._downloadDone = function(id, success, statusCode, statusText, filePath, fileURI)
 {
-	var cb = this._downloadFileAsyncCallbacks[id];
-	delete this._downloadFileAsyncCallbacks[id];
-	cb[0]({
-		success: success,
-		statusCode: statusCode,
-		statusText: statusText,
-		filePath: filePath,
-		fileURI: fileURI
-	}, cb[1]);
+    var cb = this._downloadFileAsyncCallbacks[id];
+    delete this._downloadFileAsyncCallbacks[id];
+    cb[0]({
+        success: success,
+        statusCode: statusCode,
+        statusText: statusText,
+        filePath: filePath,
+        fileURI: fileURI
+    }, cb[1]);
 }
 
 // export public items

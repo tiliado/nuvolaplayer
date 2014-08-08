@@ -62,20 +62,20 @@
  */
 var $prototype = function(proto, mixins)
 {
-	if (proto === undefined)
-		throw new Error("Proto argument must be specified. Can be null.");
-	
-	var object = Object.create(proto);
-	
-	var len = arguments.length;
-	for (var i = 1; i < len; i++)
-	{
-		var mixin = arguments[i];
-		for (var name in mixin)
-			object[name] = mixin[name];
-	}
-	
-	return object;
+    if (proto === undefined)
+        throw new Error("Proto argument must be specified. Can be null.");
+    
+    var object = Object.create(proto);
+    
+    var len = arguments.length;
+    for (var i = 1; i < len; i++)
+    {
+        var mixin = arguments[i];
+        for (var name in mixin)
+            object[name] = mixin[name];
+    }
+    
+    return object;
 }
 
 /**
@@ -100,15 +100,15 @@ var $prototype = function(proto, mixins)
  */
 var $object = function(proto, init_args)
 {
-	if (proto === undefined)
-		throw new Error("Proto argument must be specified. Can be null.");
-	
-	var object = Object.create(proto);
-	
-	if (object.$init)
-		object.$init.apply(object, [].slice.call(arguments, 1));
-	
-	return object;
+    if (proto === undefined)
+        throw new Error("Proto argument must be specified. Can be null.");
+    
+    var object = Object.create(proto);
+    
+    if (object.$init)
+        object.$init.apply(object, [].slice.call(arguments, 1));
+    
+    return object;
 }
 
 Nuvola.$object = $object;

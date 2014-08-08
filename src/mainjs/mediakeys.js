@@ -28,26 +28,26 @@ require("prototype");
  * @enum Identifiers of media keys
  */
 var MediaKey = {
-	/**
-	 * Play key
-	 */
-	PLAY: "Play",
-	/**
-	 * Pause key
-	 */
-	PAUSE: "Pause",
-	/**
-	 * Stop key
-	 */
-	STOP: "Stop",
-	/**
-	 * Go to the previous track key
-	 */
-	PREV: "Previous",
-	/**
-	 * Go to the next track key
-	 */
-	NEXT: "Next"
+    /**
+     * Play key
+     */
+    PLAY: "Play",
+    /**
+     * Pause key
+     */
+    PAUSE: "Pause",
+    /**
+     * Stop key
+     */
+    STOP: "Stop",
+    /**
+     * Go to the previous track key
+     */
+    PREV: "Previous",
+    /**
+     * Go to the next track key
+     */
+    NEXT: "Next"
 };
 
 /**
@@ -60,12 +60,12 @@ var MediaKeys = $prototype(null, SignalsMixin);
  */
 MediaKeys.$init = function()
 {
-	/**
-	 * Emitted when a media key is pressed.
-	 * 
-	 * @param MediaKey key    the pressed key
-	 */
-	this.addSignal("MediaKeyPressed");
+    /**
+     * Emitted when a media key is pressed.
+     * 
+     * @param MediaKey key    the pressed key
+     */
+    this.addSignal("MediaKeyPressed");
 }
 
 // export public items

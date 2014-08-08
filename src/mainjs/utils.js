@@ -25,23 +25,23 @@
 Nuvola.formatRegExp = new RegExp("{-?[0-9]+}", "g");
 Nuvola.format = function ()
 {
-	var args = arguments;
-	return args[0].replace(this.formatRegExp, function (item)
-	{
-		var index = parseInt(item.substring(1, item.length - 1));
-		if (index > 0)
-			return typeof args[index] !== 'undefined' ? args[index] : "";
-		else if (index === -1)
-			return "{";
-		else if (index === -2)
-			return "}";
-		return "";
-	});
+    var args = arguments;
+    return args[0].replace(this.formatRegExp, function (item)
+    {
+        var index = parseInt(item.substring(1, item.length - 1));
+        if (index > 0)
+            return typeof args[index] !== 'undefined' ? args[index] : "";
+        else if (index === -1)
+            return "{";
+        else if (index === -2)
+            return "}";
+        return "";
+    });
 };
 
 Nuvola.inArray = function(array, item)
 {
-	return array.indexOf(item) > -1;
+    return array.indexOf(item) > -1;
 }
 
 /**
@@ -52,9 +52,9 @@ Nuvola.inArray = function(array, item)
  */
 Nuvola.triggerMouseEvent = function(elm, name)
 {
-	var event = document.createEvent('MouseEvents');
-	event.initMouseEvent(name, true, true, document.defaultView, 1, 0, 0, 0, 0, false, false, false, false, 0, elm);
-	elm.dispatchEvent(event);
+    var event = document.createEvent('MouseEvents');
+    event.initMouseEvent(name, true, true, document.defaultView, 1, 0, 0, 0, 0, false, false, false, false, 0, elm);
+    elm.dispatchEvent(event);
 }
 
 /**
@@ -64,10 +64,10 @@ Nuvola.triggerMouseEvent = function(elm, name)
  */
 Nuvola.clickOnElement = function(elm)
 {
-	Nuvola.triggerMouseEvent(elm, 'mouseover');
-	Nuvola.triggerMouseEvent(elm, 'mousedown');
-	Nuvola.triggerMouseEvent(elm, 'mouseup');
-	Nuvola.triggerMouseEvent(elm, 'click');
+    Nuvola.triggerMouseEvent(elm, 'mouseover');
+    Nuvola.triggerMouseEvent(elm, 'mousedown');
+    Nuvola.triggerMouseEvent(elm, 'mouseup');
+    Nuvola.triggerMouseEvent(elm, 'click');
 }
 
 /**
@@ -78,7 +78,7 @@ Nuvola.clickOnElement = function(elm)
  */
 Nuvola.makeText = function(text)
 {
-	return document.createTextNode(text);
+    return document.createTextNode(text);
 }
 
 /**
@@ -91,15 +91,15 @@ Nuvola.makeText = function(text)
  */
 Nuvola.makeElement = function(name, attributes, text)
 {
-	var elm = document.createElement(name);
-	attributes = attributes || {};
-	for (var key in attributes)
-		elm.setAttribute(key, attributes[key]);
-	
-	if (text !== undefined && text !== null)
-		elm.appendChild(Nuvola.makeText(text));
-	
-	return elm;
+    var elm = document.createElement(name);
+    attributes = attributes || {};
+    for (var key in attributes)
+        elm.setAttribute(key, attributes[key]);
+    
+    if (text !== undefined && text !== null)
+        elm.appendChild(Nuvola.makeText(text));
+    
+    return elm;
 }
 
 /**
@@ -111,13 +111,13 @@ Nuvola.makeElement = function(name, attributes, text)
  */
 Nuvola.objectDiff = function(object1, object2)
 {
-	var changes = [];
-	for (var property in object1)
-	{
-		if (object1.hasOwnProperty(property)
-		&& (!object2.hasOwnProperty(property) || object1[property] !== object2[property]))
-			changes.push(property);
-	}
-	
-	return changes;
+    var changes = [];
+    for (var property in object1)
+    {
+        if (object1.hasOwnProperty(property)
+        && (!object2.hasOwnProperty(property) || object1[property] !== object2[property]))
+            changes.push(property);
+    }
+    
+    return changes;
 }

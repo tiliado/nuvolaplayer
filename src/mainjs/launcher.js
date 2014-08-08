@@ -38,7 +38,7 @@ var Launcher = $prototype(null);
  */
 Launcher.setTooltip = function(tooltip)
 {
-	Nuvola._sendMessageAsync("Nuvola.Launcher.setTooltip", tooltip || "");
+    Nuvola._sendMessageAsync("Nuvola.Launcher.setTooltip", tooltip || "");
 }
 
 /**
@@ -53,7 +53,7 @@ Launcher.setTooltip = function(tooltip)
  */
 Launcher.setActions = function(actions)
 {
-	Nuvola._sendMessageAsync("Nuvola.Launcher.setActions", actions);
+    Nuvola._sendMessageAsync("Nuvola.Launcher.setActions", actions);
 }
 
 /**
@@ -61,7 +61,7 @@ Launcher.setActions = function(actions)
  */ 
 Launcher.removeActions = function()
 {
-	Nuvola._sendMessageAsync("Nuvola.Launcher.removeActions");
+    Nuvola._sendMessageAsync("Nuvola.Launcher.removeActions");
 }
 
 /**
@@ -71,7 +71,7 @@ Launcher.removeActions = function()
  */
 Launcher.addAction = function(action)
 {
-	Nuvola._sendMessageAsync("Nuvola.Launcher.addAction", action);
+    Nuvola._sendMessageAsync("Nuvola.Launcher.addAction", action);
 }
 
 /**
@@ -81,7 +81,7 @@ Launcher.addAction = function(action)
  */
 Launcher.removeAction = function(action)
 {
-	Nuvola._sendMessageAsync("Nuvola.Launcher.removeAction", action);
+    Nuvola._sendMessageAsync("Nuvola.Launcher.removeAction", action);
 }
 
 // export public items

@@ -46,22 +46,22 @@ var SignalsMixin = {};
  */
 SignalsMixin.addSignal = function(name)
 {
-	if (this.signals == null)
-		this.signals = {};
-	
-	this.signals[name] = [];
+    if (this.signals == null)
+        this.signals = {};
+    
+    this.signals[name] = [];
 }
 
 SignalsMixin.registerSignals = function(signals)
 {
-	if (this.signals === undefined)
-		this.signals = {};
-	
-	var size = signals.length;
-	for (var i = 0; i < size; i++)
-	{
-		this.signals[signals[i]] = [];
-	}
+    if (this.signals === undefined)
+        this.signals = {};
+    
+    var size = signals.length;
+    for (var i = 0; i < size; i++)
+    {
+        this.signals[signals[i]] = [];
+    }
 }
 
 /**
@@ -90,11 +90,11 @@ SignalsMixin.registerSignals = function(signals)
  */
 SignalsMixin.connect = function(name, object, handlerName)
 {
-	handlerName = handlerName || ("_on" + name);
-	var handlers = this.signals[name];
-	if (handlers === undefined)
-		throw new Error("Unknown signal '" + name + "'.");
-	handlers.push([object, handlerName]);
+    handlerName = handlerName || ("_on" + name);
+    var handlers = this.signals[name];
+    if (handlers === undefined)
+        throw new Error("Unknown signal '" + name + "'.");
+    handlers.push([object, handlerName]);
 }
 
 /**
@@ -107,20 +107,20 @@ SignalsMixin.connect = function(name, object, handlerName)
  */
 SignalsMixin.disconnect = function(name, object, handlerName)
 {
-	handlerName = handlerName || ("_on" + name);
-	var handlers = this.signals[name];
-	if (handlers === undefined)
-		throw new Error("Unknown signal '" + name + "'.");
-	var size = handlers.length;
-	for (var i = 0; i < size; i++)
-	{
-		var handler = handlers[i];
-		if (handler[0] === object && handler[1] === handlerName)
-		{
-			handlers.splice(i, 1);
-			break;
-		}
-	}
+    handlerName = handlerName || ("_on" + name);
+    var handlers = this.signals[name];
+    if (handlers === undefined)
+        throw new Error("Unknown signal '" + name + "'.");
+    var size = handlers.length;
+    for (var i = 0; i < size; i++)
+    {
+        var handler = handlers[i];
+        if (handler[0] === object && handler[1] === handlerName)
+        {
+            handlers.splice(i, 1);
+            break;
+        }
+    }
 },
 
 /**
@@ -140,20 +140,20 @@ SignalsMixin.disconnect = function(name, object, handlerName)
  */
 SignalsMixin.emit = function(name, varArgsList)
 {
-	var handlers = this.signals[name];
-	if (handlers === undefined)
-		throw new Error("Unknown signal '" + name + "'.");
-	var size = handlers.length;
-	var args = [this];
-	for (var i = 1; i < arguments.length; i++)
-		args.push(arguments[i]);
-	
-	for (var i = 0; i < size; i++)
-	{
-		var handler = handlers[i];
-		var object = handler[0];
-		object[handler[1]].apply(object, args);
-	}
+    var handlers = this.signals[name];
+    if (handlers === undefined)
+        throw new Error("Unknown signal '" + name + "'.");
+    var size = handlers.length;
+    var args = [this];
+    for (var i = 1; i < arguments.length; i++)
+        args.push(arguments[i]);
+    
+    for (var i = 0; i < size; i++)
+    {
+        var handler = handlers[i];
+        var object = handler[0];
+        object[handler[1]].apply(object, args);
+    }
 }
 
 Nuvola.SignalsMixin = SignalsMixin;
