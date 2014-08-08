@@ -541,6 +541,14 @@ WebApp._onActionActivated = function(object, name, param)
 
 TODO: Advanced - custom actions.
 
+What to do next
+===============
+
+Supposing you have followed this tutorial, you have enough knowledge to create your own service
+integration. If you would like to have your service integration maintained as a part of Nuvola
+Player project and distributed in Nuvola Player repository, you have to follow
+[Service Integration Guidelines]({filename}guidelines.md)
+
 [git]: http://git-scm.com/
 [me]: http://fenryxo.cz
 [JS_STRICT]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions_and_function_scope/Strict_mode
