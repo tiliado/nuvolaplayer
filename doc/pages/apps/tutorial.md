@@ -242,11 +242,11 @@ Lines 2-22
 
 Line 25
 
-:   Use [strict JavaScript mode][A1] in your scripts.
+:   Use [strict JavaScript mode][JS_STRICT] in your scripts.
 
 Lines 27-28 and 86
 
-:   Use [self-executing anonymous function][A2] to create closure with Nuvola object.
+:   Use [self-executing anonymous function][JS_SEAF] to create closure with Nuvola object.
     (Integration script are executed with ``Nuvola`` object bound to ``this``).
 
 Line 31
@@ -289,9 +289,6 @@ Line 84
         cd ~/projects/nuvola-player/test-integration
         git add integrate.js
         git commit -m "Add skeleton of integration script"
-
-[A1]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions_and_function_scope/Strict_mode
-[A2]: http://markdalgleish.com/2011/03/self-executing-anonymous-functions/
 
 Launch Nuvola Player
 ====================
@@ -546,3 +543,5 @@ TODO: Advanced - custom actions.
 
 [git]: http://git-scm.com/
 [me]: http://fenryxo.cz
+[JS_STRICT]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions_and_function_scope/Strict_mode
+[JS_SEAF]: http://markdalgleish.com/2011/03/self-executing-anonymous-functions/
