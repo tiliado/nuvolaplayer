@@ -49,6 +49,8 @@ Prepare development environment
     project, because somebody ([*me*][me]) will have to create Git repository from tar.gz archive of your
     service integration anyway.
     
+    See [Git tutorial](https://try.github.io/levels/1/challenges/1).
+    
         :::sh
         cd ~/projects/nuvola-player/test-integration
         git init .
@@ -548,6 +550,10 @@ Supposing you have followed this tutorial, you have enough knowledge to create y
 integration. If you would like to have your service integration maintained as a part of Nuvola
 Player project and distributed in Nuvola Player repository, you have to follow
 [Service Integration Guidelines]({filename}guidelines.md)
+
+If you have **finished your service integration**, the next step is to
+[distribute]({filename}distribute.md) it.
+
 
 [git]: http://git-scm.com/
 [me]: http://fenryxo.cz
