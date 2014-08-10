@@ -27,11 +27,13 @@ namespace Nuvola
 
 public class VariantHashTable : GLib.Object, KeyValueStorage
 {
-	public HashTable<string, Variant> values {get; private set;}
+	public HashTable<string, Variant?> values {get; private set;}
+	private HashTable<string, bool> keys {get; set;}
 
-	public VariantHashTable(HashTable<string, Variant>? values = null)
+	public VariantHashTable(HashTable<string, Variant?>? values = null)
 	{
 		this.values = values != null ? values : new HashTable<string, Variant>(str_hash, str_equal);
+		keys = new HashTable<string, bool>(str_hash, str_equal);
 	}
 	
 	public bool save() throws GLib.Error
@@ -41,7 +43,7 @@ public class VariantHashTable : GLib.Object, KeyValueStorage
 	
 	public bool has_key(string key)
 	{
-		return key in values;
+		return key in keys;
 	}
 	
 	public Variant? get_value(string key)
@@ -52,9 +54,15 @@ public class VariantHashTable : GLib.Object, KeyValueStorage
 	public void set_value(string key, Variant? value)
 	{
 		if (value != null)
+		{
 			values[key] = value;
+			keys[key] = true;
+		}
 		else
+		{
 			values.remove(key);
+			keys.remove(key);
+		}
 	}
 	
 	public void set_default_value(string key, Variant? value)
