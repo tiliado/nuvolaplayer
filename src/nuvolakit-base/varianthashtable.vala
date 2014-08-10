@@ -41,18 +41,18 @@ public class VariantHashTable : GLib.Object, KeyValueStorage
 	
 	public bool has_key(string key)
 	{
-		return values.contains(key);
+		return key in values;
 	}
 	
 	public Variant? get_value(string key)
 	{
-		return values.get(key);
+		return values[key];
 	}
 	
 	public void set_value(string key, Variant? value)
 	{
 		if (value != null)
-			values.replace(key, value);
+			values[key] = value;
 		else
 			values.remove(key);
 	}
