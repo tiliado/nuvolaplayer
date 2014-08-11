@@ -300,6 +300,12 @@ public unowned JS.Value value_from_variant(JS.Context ctx, Variant? variant) thr
 	if (variant.is_of_type(VariantType.UINT32))
 		return JS.Value.number(ctx, (double) variant.get_uint32());
 	
+	if (variant.is_of_type(VariantType.INT64))
+		return JS.Value.number(ctx, (double) variant.get_int64());
+	
+	if (variant.is_of_type(VariantType.UINT64))
+		return JS.Value.number(ctx, (double) variant.get_uint64());
+	
 	if (type.is_subtype_of(VariantType.MAYBE))
 	{
 		Variant? maybe_variant = null;
