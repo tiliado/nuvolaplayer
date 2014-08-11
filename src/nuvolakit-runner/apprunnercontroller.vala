@@ -257,12 +257,9 @@ public class AppRunnerController : Diorite.Application
 			var new_values = form.get_values();
 			foreach (var key in new_values.get_keys())
 			{
-				var old_value = values.get(key);
 				var new_value = new_values.get(key);
-				if (old_value == null)
-					critical("Old values '%s'' not found", key);
-				else if (new_value == null)
-					critical("New values '%s'' not found", key);
+				if (new_value == null)
+					critical("New value '%s' not found", key);
 				else
 					config.set_value(key, new_value);
 			}
