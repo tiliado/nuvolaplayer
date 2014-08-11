@@ -11,6 +11,7 @@ Service Integration Development
   * [Porting to Nuvola Player 3]({filename}apps/porting.md): This guide describes porting of service
     integrations from Nuvola Player 2 to Nuvola Player 3.
   * [Configuration and session storage]({filename}apps/configuration-and-session-storage.md)
+  * [Initialization and Preferences Forms]({filename}apps/initialization-and-preferences-forms.md)
   * [NuvolaKit 3.0 JavaScript API reference](apps/api_reference.html) - JavaScript API reference of
     the core of Nuvola Player 3.
   

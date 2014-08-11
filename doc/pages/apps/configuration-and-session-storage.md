@@ -197,5 +197,13 @@ If you open JavaScript console in WebKit Web Inspector, you see following output
     The behavior of Nuvola.session.get() is undefined in that case, i.e. it can do and return
     anything, throw error or launch a nuclear weapon.
 
+Forms for user input
+====================
+
+If you require input from user, take look at
+[Initialization and preferences forms]({filename}initialization-and-preferences-forms.md).
+
+![App initialization form]({filename}/images/guide/form_fields_example.png)
+
 
 [TOC]
