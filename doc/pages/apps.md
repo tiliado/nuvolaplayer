@@ -14,6 +14,7 @@ Service Integration Development
   * [Distribute Service Integration]({filename}apps/distribute.md)
   * [Configuration and session storage]({filename}apps/configuration-and-session-storage.md)
   * [Initialization and Preferences Forms]({filename}apps/initialization-and-preferences-forms.md)
+  * [Web apps with a variable home page URL]({filename}apps/variable-home-page-url.md)
   * [NuvolaKit 3.0 JavaScript API reference](apps/api_reference.html) - JavaScript API reference of
     the core of Nuvola Player 3.
   
