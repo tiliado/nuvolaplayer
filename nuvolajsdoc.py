@@ -34,6 +34,8 @@ from collections import defaultdict
 from markdown import Markdown
 from markdown.extensions import Extension
 
+from jinja2 import Environment, FileSystemLoader
+
 MODE_CODE = 0
 MODE_DOC = 1
 MODE_SYMBOL = 2
@@ -672,6 +674,12 @@ def make_tree(tree, nodes):
 		else:
 			tree.add_symbol(node)
 
+def process_template(template, data):
+	loader = FileSystemLoader(os.path.dirname(template), encoding='utf-8')
+	env = Environment(loader=loader)
+	template = env.get_template(os.path.basename(template))
+	return template.render(**data)
+	
 def generate_doc(ns, out_file, sources_dir, template):
 	tree = Symbols(ns)
 	
@@ -687,11 +695,13 @@ def generate_doc(ns, out_file, sources_dir, template):
 	printer = HtmlPrinter(tree, ns, markdown)
 	index, body = printer.process()
 	
-	with open(template, "rt", "utf-8") as f:
-		template = Template(f.read())
+	data = {
+		"index": index,
+		"body": body
+	}
 	
 	with open(out_file, "wt", "utf-8") as f:
-		f.write(template.safe_substitute(index=index, body=body))
+		f.write(process_template(template, data))
 
 if __name__ == "__main__":
 	generate_doc("Nuvola", "build/doc/apps/api_reference.html", "src/mainjs", "doc/theme/templates/jsdoc.html")
