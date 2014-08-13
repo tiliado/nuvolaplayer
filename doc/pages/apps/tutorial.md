@@ -126,10 +126,8 @@ This file contains several mandatory fields:
     file  `home.html` in the service's directory. You will use real homepage later in your own
     service integration (e.g. `https://play.google.com/music/` for Google Play Music).
     
-    This field is optional if you use custom function to handle home page request:
-    
-      * TODO: Advanced - Web apps with user-specified home page URL
-      * TODO: Advanced - Web app with a separated variants with different home page URL
+    This field is not required if you use custom function to handle home page request.
+    See [Web apps with a variable home page URL]({filename}variable-home-page-url.md).
 
 !!! info "If you use Git, commit changes"
         :::sh
