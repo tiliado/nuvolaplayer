@@ -39,6 +39,10 @@ TAGS_SAVE_AS = ''
 RELATIVE_URLS = True
 STATIC_PATHS = ['images']
 
+INTERLINKS = {
+    "apiref": "./api_reference.html#"
+}
+
 import re
 from markdown.extensions import Extension
 from markdown.treeprocessors import Treeprocessor
@@ -77,4 +81,5 @@ MD_EXTENSIONS = [
     ]
 
 PLUGIN_PATHS = ["plugins"]
-PLUGINS = ("extract_toc", "bootstrap_admonition")
+PLUGINS = ("extract_toc", "bootstrap_admonition", "interlinks")
+
