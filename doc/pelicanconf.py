@@ -1,9 +1,14 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*- #
 from __future__ import unicode_literals
 
-AUTHOR = u'Tiliado'
-SITENAME = u'Nuvola Player Development'
+# Import common configuration
+import os
+import sys
+sys.path.insert(0, os.path.dirname(__file__))
+from common_conf import *
+sys.path.pop(0)
+
+AUTHOR = 'Tiliado'
 SITEURL = ''
 
 PATH = '.'
@@ -21,7 +26,7 @@ CACHE_PATH = OUTPUT_PATH + '.cache'
 
 TIMEZONE = 'UTC'
 DEFAULT_DATE_FORMAT = '%Y-%m-%d %H:%M %z'
-DEFAULT_LANG = u'en'
+DEFAULT_LANG = 'en'
 
 FEED_ALL_ATOM = None
 CATEGORY_FEED_ATOM = None
@@ -40,7 +45,8 @@ RELATIVE_URLS = True
 STATIC_PATHS = ['images']
 
 INTERLINKS = {
-    "apiref": "./api_reference.html#"
+    "apiref": "./api_reference.html#",
+    "tiliado": TILIADOWEB,
 }
 
 import re
