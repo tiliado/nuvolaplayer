@@ -27,6 +27,8 @@ from __future__ import unicode_literals
 
 import os
 import re
+import sys
+from importlib import import_module
 from codecs import open
 from string import Template
 from xml.sax.saxutils import escape
@@ -679,8 +681,21 @@ def process_template(template, data):
     env = Environment(loader=loader)
     template = env.get_template(os.path.basename(template))
     return template.render(**data)
+
+def load_config(config_file):
+    sys.path.insert(0, os.path.dirname(config_file))
+    config = import_module(os.path.basename(config_file).rsplit(".", 1)[0])
+    sys.path.pop(0)
+    return config
     
-def generate_doc(ns, out_file, sources_dir, template):
+def generate_doc(ns, out_file, sources_dir, config_file, template=None):
+    config = load_config(config_file)
+    if template is None:
+        try:
+            template = config.TEMPLATE
+        except AttributeError:
+            raise ValueError("Template not specified")
+    
     tree = Symbols(ns)
     
     for source in gather_sources(sources_dir):
@@ -695,13 +710,12 @@ def generate_doc(ns, out_file, sources_dir, template):
     printer = HtmlPrinter(tree, ns, markdown)
     index, body = printer.process()
     
-    data = {
-        "index": index,
-        "body": body
-    }
+    data = {key: getattr(config, key) for key in dir(config) if not key.startswith("_")}
+    data["index"] = index
+    data["body"] = body
     
     with open(out_file, "wt", "utf-8") as f:
         f.write(process_template(template, data))
 
 if __name__ == "__main__":
-    generate_doc("Nuvola", "build/doc/apps/api_reference.html", "src/mainjs", "doc/theme/templates/jsdoc.html")
+    generate_doc("Nuvola", "build/doc/apps/api_reference.html", "src/mainjs", "doc/jsdoc_conf.py")
