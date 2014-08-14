@@ -1,64 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>NuvolaKit 3.0 JavaScript API Reference</title>
-    <link rel="stylesheet" href="../theme/bootstrap.min.css" />
-    <link rel="stylesheet" href="../theme/pygments.css" />
-    <link rel="stylesheet" href="../theme/jsdoc.css" />
-    <link rel="stylesheet" href="../theme/main.css" />
-  </head>
-  <body>
-    <nav class="navbar navbar-default navbar-static-top" role="navigation">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-1">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="../index.html">Nuvola Player Development</a>
-        </div><!-- .navbar-header -->
+{% extends "base.html" %}
 
-        <div class="collapse navbar-collapse" id="navbar-collapse-1">
-          <ul class="nav navbar-nav">
-            <li><a href="../index.html">Home</a></li>
-            <li><a href="../core.html">Core</a></li>
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown">Service Integrations <span class="caret"></span></a>
-              <ul class="dropdown-menu" role="menu">
-                <li><a href="../apps/tutorial.html">Service Integration Tutorial</a></li>
-                <li><a href="../apps/guide.html">Service Integration Guide</a></li>
-                <li><a href="../apps/guidelines.html">Service Integration Guidelines</a></li>
-                <li><a href="../apps/distribute.html">Distribute Service Integration</a></li>
-                <li><a href="../apps/configuration-and-session-storage.html">Configuration and session storage</a></li>
-                <li><a href="../apps/initialization-and-preferences-forms.html">Initialization and Preferences Forms</a></li>
-                <li><a href="../apps/variable-home-page-url.html">Web apps with a variable home page URL</a></li>
-                <li><a href="../apps/porting.html">Porting to Nuvola Player 3</a></li>
-                <li><a href="../apps/api_reference.html">NuvolaKit 3.0 JavaScript API Reference</a></li>
-              </ul>
-            </li>
-          </ul>
-        </div><!-- .navbar-collapse -->
-      </div>
-    </nav>
-    
-    <div class="container">
-<div class="row">
-<div class="col-md-3 col-lg-4" id="sidebar">
-<h3>NuvolaKit 3.0</h3>
-<p><a href="#intro">Introduction</a></p>
+{% block title %}{{ TITLE }}{% endblock %}
 
-{{ index }}
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="../theme/jsdoc.css" />
+{% endblock styles %}
 
-<span class="backtotop"><a href="#sidebar">↑ Back to top ↑</a></span>
+{% block content %}
+<div class="col-sm-12">
+    <div class="page-header text-center">
+      <h1 id="top">{{ TITLE }}</h1>
+    </div>
 </div>
-<div class="body col-md-9 col-lg-8">
-
-<div class="page-header">
-   <h1>NuvolaKit 3.0 JavaScript API Reference</h1>
+<div class="col-md-3 col-lg-4 sidebar">
+  <h3>NuvolaKit 3.0</h3>
+  <p><a href="#intro">Introduction</a></p>
+  {{ index }}
+  <span class="backtotop"><a href="#top">↑ Back to top ↑</a></span>
 </div>
+<div class="col-sm-12 col-md-9 col-lg-8">
 
 <h2 id="intro">Introduction</h2>
 <p>This is a reference of public JavaScript API of NuvolaKit, the core part of Nuvola Player 3. Undocumented parts of
@@ -106,15 +67,5 @@ takes care about it.
 
 {{ body }}
 
-</div>
-</div>
-      
-      <hr />
-      <div class="footer col-sm-12">
-      </div>
-    </div>
-    <script src="../theme/jquery.min.js"></script>
-    <script src="../theme/bootstrap.min.js"></script>
-  </body>
-</html>
-
+</div> 
+{% endblock %}

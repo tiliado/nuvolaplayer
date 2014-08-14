@@ -5,9 +5,11 @@
     {% block head %}
         <title>{% block title %}{{ SITENAME }}{% endblock title %}</title>
     {% endblock head %}
+    {% block styles %}
     <link rel="stylesheet" href="{{ SITEURL }}/theme/bootstrap.min.css" />
     <link rel="stylesheet" href="{{ SITEURL }}/theme/pygments.css" />
     <link rel="stylesheet" href="{{ SITEURL }}/theme/main.css" />
+    {% endblock styles %}
   </head>
   <body>
     <nav class="navbar navbar-default navbar-static-top" role="navigation">
