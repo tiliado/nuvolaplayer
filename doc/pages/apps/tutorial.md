@@ -246,17 +246,17 @@ Line 25
 
 Lines 27-28 and 86
 
-:   Use [self-executing anonymous function][JS_SEAF] to create closure with Nuvola object.
+:   Use [self-executing anonymous function][JS_SEAF] to create closure with [Nuvola object](apiref>).
     (Integration script are executed with ``Nuvola`` object bound to ``this``).
 
 Line 31
 
-:   Create MediaPlayer component that adds playback actions and is later used to provide playback
+:   Create [MediaPlayer](apiref>Nuvola.MediaPlayer) component that adds playback actions and is later used to provide playback
     details.
 
 Line 38
 
-:   Create new WebApp prototype object derived from the `Nuvola.WebApp` prototype that contains
+:   Create new WebApp prototype object derived from the [Nuvola.WebApp](apiref>Nuvola.WebApp) prototype that contains
     handy default handlers for initialization routines and signals from Nuvola core. 
     You can override them if your web app requires more magic ;-)
 
@@ -347,7 +347,9 @@ Playback state
 --------------
 
 Looking at the code of a web page shown in the picture bellow, the code to extract playback state
-might be.
+might be. Playback states are defined in an enumeration
+[Nuvola.PlaybackState](apiref>Nuvola.PlaybackState) and set by method
+[player.setPlaybackState()](apiref>Nuvola.MediaPlayer.setPlaybackState).
 
 ```js
 var PlaybackState = Nuvola.PlaybackState;
@@ -389,7 +391,7 @@ WebApp.update = function()
 Track details
 -------------
 
-Similarly, we can obtain track details:
+Similarly, we can obtain track details and pass them to method [player.setTrack()](apiref>Nuvola.MediaPlayer.setTrack)
 
 ```js
 WebApp.update = function()
@@ -436,8 +438,10 @@ The second responsibility of a service integration is to **manage media player a
  1. Set which actions are enabled.
  2. Invoke the actions when they are activated.
 
-The first part is done via calls player.setCanPause(), player.setCanPlay(),
-player.setCanGoPrev() and player.setCanGoNext():
+The first part is done via calls [player.setCanPause()](apiref>Nuvola.MediaPlayer.setCanPause),
+[player.setCanPlay()](apiref>Nuvola.MediaPlayer.setCanPlay),
+[player.setCanGoPrev()](apiref>Nuvola.MediaPlayer.setCanGoPrev) and
+[player.setCanGoNext()](apiref>Nuvola.MediaPlayer.setCanGoNext):
 
 ```js
 WebApp.update = function()
@@ -489,10 +493,13 @@ WebApp.update = function()
     ...
 }
 ```
+
 ![Playback actions]({filename}/images/guide/playback_actions.png)
 
-To handle playback actions, it is neccessary to connect to Actions::ActionActivated signal.
-This signal is emitted for every UI action, not only for player actions.
+To handle playback actions defined in an enumeration [PlayerAction](apiref>Nuvola.PlayerAction),
+it is necessary to connect to [Actions::ActionActivated signal](apiref>Nuvola.Actions%3A%3AActionActivated).
+You can use a convenient function [Nuvola.clickOnElement()](apiref>Nuvola.clickOnElement) to
+simulate clicking.
 
 ```js
 var PlayerAction = Nuvola.PlayerAction;
