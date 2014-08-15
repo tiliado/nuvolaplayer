@@ -539,7 +539,9 @@ WebApp._onActionActivated = function(object, name, param)
         git add integrate.js
         git commit -m "Add player actions handling"
 
-TODO: Advanced - custom actions.
+!!! info "Custom actions"
+    Service integrations can also create custom actions like thumbs up/down or star rating. However,
+    documentation for custom actions hasn't been made yet.
 
 What to do next
 ===============
