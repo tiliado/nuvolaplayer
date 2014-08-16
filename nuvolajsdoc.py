@@ -50,7 +50,7 @@ SIGNAL_RE = re.compile(r"^this\.addSignal\s*\((.*)\);$")
 PROPERTY_RE = re.compile(r'^["\']?(\w+)["\']?\s*:\s*(.+)$')
 FIELD_RE = re.compile(r"^\s*(\$?\w+(?:\.\$?\w+)*)\s+=\s+(.*)\s*;$")
 ALIAS_RE = re.compile(r"^(\$?\w+(?:\.\$?\w+)*)\s+=\s+(\$?\w+(?:\.\$?\w+)*)\s*;$")
-LINK_RE = re.compile(r'@link\{(.+?)(?:\|(.+?))?\}')
+LINK_RE = re.compile(r'@link\{(?:(\w+?)&gt;)?(.+?)(?:\|(.+?))?\}')
 PARAM_RE = re.compile(r'^(optional\s+)?(?:[\'"](.+?)[\'"]\s*|([^\'"].*?)\s+)(.+?)\s+(.*)$')
 
 def gather_sources(sources_dir):
@@ -284,7 +284,7 @@ class Alias(object):
 
 
 class HtmlPrinter(object):
-    def __init__(self, tree, ns, markdown):
+    def __init__(self, tree, ns, markdown, interlinks=None):
         self.tree = tree
         self.ns = ns
         self.index = []
@@ -292,6 +292,7 @@ class HtmlPrinter(object):
         ns_len = len(ns) + 1
         self.strip_ns = lambda s: s[ns_len:]
         self.markdown = markdown
+        self.interlinks = interlinks if interlinks is not None else {}
     
     def process(self):
         tree = self.tree
@@ -524,8 +525,17 @@ class HtmlPrinter(object):
             text = symbol
         return '<a href="#{0}">{1}</a>'.format(escape(canonical), escape(text)) if canonical else escape(text)
     
+    def interlink(self, interlink, target, text=None):
+        prefix = self.interlinks[interlink]
+        return '<a href="{0}">{1}</a>'.format(escape(prefix + target), escape(text or target))
+        
+    def replace_link(self, interlink, target, text=None):
+        if interlink:
+            return self.interlink(interlink, target, text)
+        return self.link_symbol(target, text)
+        
     def replace_links(self, text):
-        return LINK_RE.sub(lambda m: self.link_symbol(m.group(1), m.group(2)), text)
+        return LINK_RE.sub(lambda m: self.replace_link(m.group(1), m.group(2), m.group(3)), text)
     
     def mkd(self, s):
         return self.markdown.convert(s)
@@ -706,8 +716,9 @@ def generate_doc(ns, out_file, sources_dir, config_file, template=None):
         extensions = ['sane_lists', 'fenced_code', 'codehilite', 'def_list', 'attr_list', 'abbr', 'admonition'],
         safe_mode='escape',
         lazy_ol=False)
-    
-    printer = HtmlPrinter(tree, ns, markdown)
+
+    interlinks = getattr(config, "INTERLINKS", defaultdict(unicode))
+    printer = HtmlPrinter(tree, ns, markdown, interlinks=interlinks)
     index, body = printer.process()
     
     data = {key: getattr(config, key) for key in dir(config) if not key.startswith("_")}
