@@ -124,7 +124,7 @@ Home Page Request Handler
 -------------------------
 
 Since we don't use the ``home_url`` field of ``metadata.json``, we have to override the default
-handler for ``Nuvola.Core::HomePageRequest`` signal.
+handler for [Nuvola.Core::HomePageRequest](apiref>Nuvola.Core%3A%3AHomePageRequest) signal.
 
 ```js
 ...
@@ -254,7 +254,7 @@ Home Page Request Handler
 -------------------------
 
 Since we don't use the ``home_url`` field of ``metadata.json``, we have to override the default
-handler for ``Nuvola.Core::HomePageRequest`` signal.
+handler for [Nuvola.Core::HomePageRequest](apiref>Nuvola.Core%3A%3AHomePageRequest) signal.
 
 ```js
 ...
