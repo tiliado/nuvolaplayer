@@ -14,7 +14,8 @@ loaded. You should use it only for configuration your service information cannot
 For example, Logitech Media Server integration needs to know an address of server instance,
 because it has no idea what web page to load without this information.
 
-The initialization from is show when ``entries`` parameter of Nuvola.Core::InitAppRunner signal
+The initialization from is show when ``entries`` parameter of 
+[Nuvola.Core::InitAppRunner](apiref>Nuvola.Core%3A%3AInitAppRunner) signal
 handler is not left empty. The example bellow asks user to provide name to show a greeting.
 API used in ``WebApp.appendPreferences`` will be [described later](#form-specification).
 
@@ -65,7 +66,8 @@ API used in ``WebApp.appendPreferences`` will be [described later](#form-specifi
 ![After initialization form]({filename}/images/guide/after_initialization_form.png)
 
 !!! info
-    New values are immediately available in ``Nuvola.config`` after user clicks OK button.
+    New values are immediately available in [Nuvola.config](apiref>Nuvola.config) after user clicks
+    OK button.
     
 Preferences form
 ================
@@ -74,7 +76,8 @@ Preferences form can be used to change configuration specified in the initializa
 add extra configuration option not necessary needed in initialization phase.
 
 Preferences form is shown when user select Preferences from menu. NuvolaKit allows you to add
-preferences specific to your service integration in Nuvola.Core::AppendPreferences signal handler.
+preferences specific to your service integration in 
+[Nuvola.Core::AppendPreferences](apiref>Nuvola.Core%3A%3AAppendPreferences) signal handler.
 API used in ``WebApp.appendPreferences`` will be [described later](#form-specification).
 
     :::js
@@ -114,7 +117,8 @@ API used in ``WebApp.appendPreferences`` will be [described later](#form-specifi
 ![Preferences form]({filename}/images/guide/preferences_form.png)
 
 !!! info
-    New values are immediately available in ``Nuvola.config`` after user clicks OK button.
+    New values are immediately available in [Nuvola.config](apiref>Nuvola.config) after user clicks
+    OK button.
 
 !!! info
     While this example adds same entries to both initialization and preferences forms, it's not
@@ -123,11 +127,12 @@ API used in ``WebApp.appendPreferences`` will be [described later](#form-specifi
 Form Specification
 ==================
 
-Both Nuvola.Core::InitAppRunner and Nuvola.Core::AppendPreferences signals contain ``values`` and
-``entries`` parameters to describe forms. ``values`` is an object that contains key-value pairs
-describing current configuration. These values will appear in the form. ``entries`` is an array that
-contains specifications of form entries. Each form entry is an array, the first item of a form
-entry describes a type of the entry.
+Both [Nuvola.Core::InitAppRunner](apiref>Nuvola.Core%3A%3AInitAppRunner) and
+[Nuvola.Core::AppendPreferences](apiref>Nuvola.Core%3A%3AAppendPreferences) signals contain
+``values`` and ``entries`` parameters to describe forms. ``values`` is an object that contains
+key-value pairs describing current configuration. These values will appear in the form. ``entries``
+is an array that contains specifications of form entries. Each form entry is an array, the first
+item of a form entry describes a type of the entry.
 
 Form Entries
 ------------
