@@ -6,8 +6,9 @@ session information.
 Persistent Configuration
 ========================
 
-Application can use Nuvola.ConfigStorage API to store the persistent configuration. An initialized
-Nuvola.ConfigStorage object is available as Nuvola.config. Here follows usual work-flow.
+Application can use [Nuvola.ConfigStorage API](apiref>Nuvola.ConfigStorage) to store the persistent
+configuration. An initialized Nuvola.ConfigStorage object is available as
+[Nuvola.config](apiref>Nuvola.config). Here follows usual work-flow.
 
 Define configuration key names
 ------------------------------
@@ -30,8 +31,9 @@ Define "constants" with names of configuration key.
 Set default values
 ------------------
 
-Set default values in WebApp._onInitAppRunner signal handler. This code is run only once at
-start-up.
+[Set default values](apiref>Nuvola.KeyValueStorage.setDefault) in
+[WebApp._onInitAppRunner](apiref>Nuvola.WebApp._onInitAppRunner) signal handler. This code is run
+only once at start-up.
 
     :::js
     ...
@@ -52,7 +54,9 @@ start-up.
 Get/set values
 --------------
 
-Get/set values anywhere in your integration script with Nuvola.config.get or Nuvola.config.set.
+Get/set values anywhere in your integration script with
+[Nuvola.config.get](apiref>Nuvola.KeyValueStorage.get) or
+[Nuvola.config.set](apiref>Nuvola.KeyValueStorage.set).
     
     :::js
     ...
@@ -94,9 +98,10 @@ If you open JavaScript console in WebKit Web Inspector, you see following output
     Current value app.port = '8000' (integrate.js, line 77)
 
 !!! danger "Always use Nuvola.config.setDefault()"
-    It's a programmer's error to manipulate with configuration keys without default values.
-    The behavior of Nuvola.config.get() is undefined in that case, i.e. it can do and return
-    anything, throw error or launch a nuclear weapon.
+    It's a programmer's error to manipulate with configuration keys without
+    [default values](apiref>Nuvola.KeyValueStorage.setDefault).  The behavior of
+    [Nuvola.config.get()](apiref>Nuvola.KeyValueStorage.get) is undefined in that case,
+    i.e. it can do and return anything, throw error or launch a nuclear weapon.
 
 !!! info "Implementation detail"
     The configuration is stored in a JSON file
@@ -105,8 +110,9 @@ If you open JavaScript console in WebKit Web Inspector, you see following output
 Temporary session information
 =============================
 
-Application can use Nuvola.SessionStorage API to store the temporary session information. An initialized
-Nuvola.SessionStorage object is available as Nuvola.session. Here follows usual work-flow.
+Application can use Nuvola.SessionStorage API to store the temporary session information. An
+initialized [Nuvola.SessionStorage](apiref>Nuvola.SessionStorage) object is available as
+[Nuvola.session](apiref>Nuvola.session). Here follows usual work-flow.
 
 Define configuration key names
 ------------------------------
@@ -129,8 +135,9 @@ Define constants with names of session keys.
 Set default values
 ------------------
 
-Set default values in WebApp._onInitAppRunner signal handler. This code is run only once at
-start-up.
+[Set default values](apiref>Nuvola.KeyValueStorage.setDefault) in
+[WebApp._onInitAppRunner](apiref>Nuvola.WebApp._onInitAppRunner) signal handler. This code is run
+only once at start-up.
 
     :::js
     ...
@@ -151,7 +158,9 @@ start-up.
 Get/set values
 --------------
 
-Get/set values anywhere in your integration script with Nuvola.session.get or Nuvola.session.set.
+Get/set values anywhere in your integration script with
+[Nuvola.session.get](apiref>Nuvola.KeyValueStorage.get) or
+[Nuvola.session.set](apiref>Nuvola.KeyValueStorage.set).
     
     :::js
     ...
@@ -193,9 +202,10 @@ If you open JavaScript console in WebKit Web Inspector, you see following output
     Current value app.port = '8000' (integrate.js, line 77)
 
 !!! danger "Always use Nuvola.session.setDefault()"
-    It's a programmer's error to manipulate with configuration keys without default values.
-    The behavior of Nuvola.session.get() is undefined in that case, i.e. it can do and return
-    anything, throw error or launch a nuclear weapon.
+    It's a programmer's error to manipulate with configuration keys without
+    [default values](apiref>Nuvola.KeyValueStorage.setDefault). The behavior of
+    [Nuvola.session.get()](apiref>Nuvola.KeyValueStorage.get) is undefined in that case,
+    i.e. it can do and return anything, throw error or launch a nuclear weapon.
 
 Forms for user input
 ====================
