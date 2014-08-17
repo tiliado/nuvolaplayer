@@ -40,10 +40,10 @@ Core.$init = function()
      * You can use it to append entries to initialization form (e. g. preferred national variant
      * or address of custom service instance) and to perform own initialization routine.
      * 
-     * See @link{Core::AppendPreferences} for example of a form specification.
-     * 
      * @param Object values                       mapping between form field names and their values
-     * @param "Array of FormFieldArray" fields    specification of form fields 
+     * @param "Array of FormFieldArray" fields    specification of form fields, see
+     *     @link{doc>apps/initialization-and-preferences-forms.html|Initialization and Preferences Forms}
+     *     for details 
      */
     this.addSignal("InitAppRunner");
     
@@ -56,6 +56,8 @@ Core.$init = function()
     
     /**
      * Emitted on request for home page URL.
+     * 
+     * See @link{doc>apps/variable-home-page-url.html|Web apps with a variable home page URL}.
      * 
      * @param String request.url    property to assign home page url to
      * 
@@ -116,34 +118,9 @@ Core.$init = function()
      * Emitted when preferences dialog is being built.
      * 
      * @param Object values                       mapping between form field names and their values
-     * @param "Array of FormFieldArray" entries   specification of form fields
-     * 
-     * ```
-     * var _onAppendPreferences = function(emitter, values, entries)
-     * {
-     *     var ADDRESS = "app.address";
-     *     var HOST = "app.host";
-     *     var PORT = "app.port";
-     *     var COUNTRY_VARIANT = "app.country_variant";
-     *     
-     *     values[ADDRESS] = Nuvola.config.get(ADDRESS);
-     *     values[HOST] = Nuvola.config.get(HOST);
-     *     values[PORT] = Nuvola.config.get(PORT);
-     *     entries.push(["header", "Logitech Media Server"]);
-     *     entries.push(["label", "Address of your Logitech Media Server"]);
-     *     entries.push(["option", ADDRESS + ":default", "use default address ('localhost:9000')",
-     *         null, [HOST, PORT]]);
-     *     entries.push(["option", ADDRESS + ":custom", "use custom address", [HOST, PORT], null]);
-     *     entries.push(["string", HOST, "Host"]);
-     *     entries.push(["string", PORT, "Port"]);
-     *     
-     *     values[COUNTRY_VARIANT] = Nuvola.config.get(COUNTRY_VARIANT);
-     *     entries.push(["header", "Amazon Cloud Player"]);
-     *     entries.push(["label", "Preferred national variant"]);
-     *     entries.push(["option", COUNTRY_VARIANT + ":co.uk", "United Kingdom"]);
-     *     entries.push(["option", COUNTRY_VARIANT + ":com", "United States"]);
-     * }
-     * ```
+     * @param "Array of FormFieldArray" entries   specification of form fields, see
+     *     @link{doc>apps/initialization-and-preferences-forms.html|Initialization and Preferences Forms}
+     *     for details
      */
     this.addSignal("AppendPreferences");
 }
