@@ -114,9 +114,12 @@ WebApp._onInitAppRunner = function(emitter, values, entries)
  * WebApp._onInitWebWorker = function(emitter)
  * {
  *     Nuvola.WebApp._onInitWebWorker.call(this, emitter);
- *     // one of these:
- *     document.addEventListener("DOMContentLoaded", this._onPageReady.bind(this));
- *     window.addEventListener("load", this._onPageReady.bind(this));
+ *     
+ *     var state = document.readyState;
+ *     if (state === "interactive" || state === "complete")
+ *         this._onPageReady();
+ *     else
+ *         document.addEventListener("DOMContentLoaded", this._onPageReady.bind(this));
  * }
  * 
  * WebApp._onPageReady = function(event)
