@@ -134,9 +134,6 @@ key-value pairs describing current configuration. These values will appear in th
 is an array that contains specifications of form entries. Each form entry is an array, the first
 item of a form entry describes a type of the entry.
 
-Form Entries
-------------
-
 Header: ``["header", text]``
 
 :   Centered bold text ``text``.
@@ -163,7 +160,7 @@ Option entry: ``["option", key, value, label, enableEntries, disableEntries]``
    enabled or disabled when this particular option is selected.
    
 Sample Form
------------
+===========
 
 ![Example of form fields]({filename}/images/guide/form_fields_example.png)
 
@@ -249,5 +246,11 @@ Sample Form
     }
     
     ...
+
+Use cases
+=========
+
+See article [Web apps with a variable home page URL]({filename}variable-home-page-url.md) for
+use cases of Initialization and Preferences Forms to allow user specify a custom home page url.
 
 [TOC]
