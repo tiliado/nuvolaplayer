@@ -1,24 +1,24 @@
 Title: Service Integrations Guide
-Date: 2014-07-22 19:41 +0200
 
 [TOC]
 
-**NOTE: This guide applies to Nuvola Player 3 that is currently in development.**
-
-This guide describes creation of a new service integration for Nuvola Player 3 from scratch. The
-goal is to write an integration script for *Test service* shipped with Nuvola Player
+This guide describes creation of **a new service integration for Nuvola Player 3 from
+scratch**. The goal is to write an integration script for *Test service* shipped with Nuvola Player
+and to prepare you to create your own service integration. Unlike the
+[Service Integrations Tutorial]({filename}guide.md), this guide provides also insight to the Nuvola
+Player Core and explain some design decisions.
 
 Prepare development environment
 ===============================
 
  1. Install Nuvola Player 3
- 2. Create project directory `~/projects/nuvola-player` (or any other name, but don't forget to
-    adjust paths in this guide).
+ 2. Create a project directory `~/projects/nuvola-player` (or any other name, but don't forget to
+    adjust paths in this tutorial).
     
         :::sh
         mkdir -p ~/projects/nuvola-player
      
- 3. Create a copy of the test service
+ 3. Create a copy of the test service shipped with Nuvola Player 3.
     
         :::sh
         cd ~/projects/nuvola-player
@@ -26,29 +26,30 @@ Prepare development environment
         # or
         cp -r /usr/local/share/nuvolaplayer3/web_apps/test ./test-integration
     
- 4. Rename old integration files
+ 4. Rename old integration files (or remove it).
     
         :::sh
         cd ~/projects/nuvola-player/test-integration
         mv metadata.json metadata.old.json
         mv integrate.js integrate.old.js
     
- 5. Create new integration files
+ 5. Create new integration files and open them in your preferred plan-text editor (Gedit,
+    for example).
     
         :::sh
         cd ~/projects/nuvola-player/test-integration
         touch metadata.json integrate.js
         gedit metadata.json integrate.js >/dev/null 2>&1 &
 
- 6. Initialize Git repository
+ 6. Initialize a new [Git][git] repository for your service integration.
     
-    You can skip this step if you don't know Git version control system. However, if you would like
-    to have your service integration maintained as a part of the Nuvola Player project and available
-    in Nuvola Player repository, you will increase maintenance burden of the project, because
-    somebody (me) will have to create Git repository from tar.gz archive of your service integration
-    anyway.
+    You can skip this step if you don't know [Git version control system][git]. However, if you
+    would like to have your service integration maintained as a part of the Nuvola Player project
+    and available in the Nuvola Player repository, you will increase maintenance burden of the
+    project, because somebody ([*me*][me]) will have to create Git repository from tar.gz archive of your
+    service integration anyway.
     
-    Let's initialize a new Git repository for your service integration.
+    See [Git tutorial](https://try.github.io/levels/1/challenges/1).
     
         :::sh
         cd ~/projects/nuvola-player/test-integration
@@ -59,17 +60,14 @@ Prepare development environment
 Create metadata file
 ====================
 
-Run Nuvola Player 3 from terminal with following command:
+Let's try to launch Nuvola Player 3 with our empty service integration. Argument ``-D`` enables
+debugging output to console and arguments ``-A ~/projects/nuvola-player`` tells Nuvola Player to
+load service integrations only from directory ``~/projects/nuvola-player``.
     
     nuvolaplayer3 -D -A ~/projects/nuvola-player
 
-You will see an empty list of services. That's fine, because we told Nuvola Player to load service
-integrations only from directory `~/projects/nuvola-player`.
-
-![Empty list of service integrations]({filename}/images/guide/empty_app_list.png)
-
-You will also see an error message in terminal that tells you Nuvola Player failed to load your
-service integration because of invalid metadata file.
+You will see an empty list of services and an error message in terminal that tells you Nuvola Player
+failed to load your service integration because of invalid metadata file. So let's create it!
 
     :::text
     [Master:WARNING  Nuvola] webappregistry.vala:169: Unable to load app from
@@ -77,7 +75,11 @@ service integration because of invalid metadata file.
     '/home/fenryxo/projects/nuvola-player/test-integration/metadata.json'.
     Expecting a JSON object, but the root node is of type '(null)'
 
-Let's create ``metadata.json`` file with following content:
+![Empty list of service integrations]({filename}/images/guide/empty_app_list.png)
+
+**Metadata file contains basic information about your service integrations.** It uses
+[JSON format](http://en.wikipedia.org/wiki/JSON) and it's called ``metadata.json``.
+Let's look at the example:
 
     :::json
     {
@@ -93,12 +95,14 @@ Let's create ``metadata.json`` file with following content:
         "home_url": "nuvola://home.html"
     }
 
-This file contains several mandatory fields:
+This file contains several **mandatory fields**:
 
 `id`
 
 :   Identifier of the service. It can contain only letters `a-z`, digits `0-9` and dash `-` to
-    separate words, e.g. `google-play` for Google Play Music, `eight-tracks` for 8tracks.com.
+    separate words, e.g. `google-play` for Google Play Music, `8tracks` for 8tracks.com.
+    (Nuvola Player 2 required the id must be same as the directory name of the service
+    integration, but Nuvola Player 3 doesn't have this limitation.)
 
 `name`
 
@@ -111,29 +115,27 @@ This file contains several mandatory fields:
 
 `version_minor`
 
-:   a minor version of service integration, an integer >= 0. This field should
+:   A minor version of service integration, an integer >= 0. This field should
     be increased when a new release is made.
     
 `maintainer_name`
 
-:   Name of the maintainer of the service integration.
+:   A name of the maintainer of the service integration.
 
 `maintainer_link`
 
-:   link to page with contact to maintainer (including `http://` or `https://`) or email address
-    prefixed by `mailto:`.
+:   A link to a page with contact to maintainer (including `http://` or `https://`) or an email
+    address prefixed by `mailto:`.
 
 `api_major` and `api_minor`
 
-:   required version of JavaScript API, currently 3.0.
+:   A required version of JavaScript API, currently ``3.0``.
 
 ``categories``
 
 :   [Application categories](http://standards.freedesktop.org/menu-spec/latest/apa.html) suitable
-    for the web app, it is used to place a desktop launcher to proper category in applications menu.
+    for the web app. It is used to place a desktop launcher to proper category in applications menu.
     Nuvola Player services should be in ``"AudioVideo;Audio;"``.
-
-And some optional fields:
 
 `home_url`
 
@@ -141,21 +143,19 @@ And some optional fields:
     file  `home.html` in the service's directory. You will use real homepage later in your own
     service integration (e.g. `https://play.google.com/music/` for Google Play Music).
     
-    If your service has multiple home pages (e.g. Amazon Cloud Player has some national variants)
-    or the address has to be specified by user (e.g. address of users Logitech Media Server or
-    Owncloud instance), you have to use custom homepage resolution hooks (TODO) and omit this field
-    in metadata.json.
+    This field is not required if you use custom function to handle home page request.
+    See [Web apps with a variable home page URL]({filename}variable-home-page-url.md).
+
+!!! info "If you use Git, commit changes"
+        :::sh
+        cd ~/projects/nuvola-player/test-integration
+        git add metadata.json
+        git commit -m "Add initial metadata for service"
+
 
 Run `nuvolaplayer3 -D -A ~/projects/nuvola-player` again and you will see a list with one service :-)
 
 ![A list with single service integration]({filename}/images/guide/app_list_one_service.png)
-
-If you launch your service, either from the list of services or with command
-`nuvolaplayer3 -D -A ~/projects/nuvola-player -a test-integration`, you will see an error
-dialog saying "Invalid home page URL - The web app integration script has provided an empty home
-page URL." and the app will quit. That because Nuvola Player makes no assumption about where the
-homepage URL is stored and expect service integration script provides this information explicitly
-during a app runner initialization phase.
 
 App Runner and Web Worker
 =========================
@@ -163,181 +163,141 @@ App Runner and Web Worker
 Nuvola Player uses two processes for each service (web app):
 
   * **App Runner process** that manages user interface, desktop integration components and
-    a life-cycle of the WebKitGtk WebView.
+    a life-cycle of the WebKitGtk WebView. On start-up, Nuvola Player executes once the integration
+    script in the App Runner process to perform initialization of the web app. and then executes
  
   * **Web Worker process** is created by WebKitGtk WebView and it's the place where the web
-    interface of a web app lives, i.e. where the website is loaded.
-
-**On start-up**, Nuvola Player executes ``integrate.js`` script in the App Runner process to perform
-initialization of the web app and then executes it again in the WebWorker process everytime a web
-page is loaded in it to integrate the wep page.
+    interface of a web app lives, i.e. where the website is loaded. Nuvola Player executes the
+    integration script in the Web Worker process everytime a web page is loaded in it to integrate
+    the wep page.
 
 App Runner Process
 ==================
 
+If you launch your service, either from the list of services or with command
+`nuvolaplayer3 -D -A ~/projects/nuvola-player -a test-integration`, you will see an error
+dialog saying "Invalid home page URL - The web app integration script has provided an empty home
+page URL." and the app will quit. That's because Nuvola Player makes no assumption about where the
+homepage URL is stored and expect service integration script provides this information explicitly
+during a app runner initialization phase. Since we have an empty integration script that does
+nothing, nobody has told Nuvola Player "Hey, look at home_url field of metadata.json!".
+
 Let's create base `integrate.js` script with following content:
 
-    #!js
-    /*
-     * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
-     *
-     * Redistribution and use in source and binary forms, with or without
-     * modification, are permitted provided that the following conditions are met: 
-     * 
-     * 1. Redistributions of source code must retain the above copyright notice, this
-     *    list of conditions and the following disclaimer. 
-     * 2. Redistributions in binary form must reproduce the above copyright notice,
-     *    this list of conditions and the following disclaimer in the documentation
-     *    and/or other materials provided with the distribution. 
-     * 
-     * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-     * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-     * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-     * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-     * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-     * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-     * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-     * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-     * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-     * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-     */
-    
-    "use strict";
-    
-    (function(Nuvola)
-    {
-    
-    var WebApp = Nuvola.$WebApp();
-    
-    WebApp.start();
-    
-    })(this);  // function(Nuvola)
+```
+#!js
+/*
+ * Copyright 2014 Your name <your e-mail>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met: 
+ * 
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer. 
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution. 
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
-``Nuvola.$WebApp()`` creates new WebApp prototype object derived from the `Nuvola.WebApp`
-prototype. The `Nuvola.WebApp` contains handy default handlers for initialization routines,
-so you don't have to process them, but it's good to know they exist and you can override them
-if your web app requires more magic ;-)
+"use strict";
+
+(function(Nuvola)
+{
+
+// Create new WebApp prototype
+var WebApp = Nuvola.$WebApp();
+    
+WebApp.start();
+    
+})(this);  // function(Nuvola)
+```
+
+Lines 2-22
+
+:   Copyright and license information. While you can choose any license for your work, it's
+    recommended to use the license of Nuvola Player as shown in the example.
+
+Line 25
+
+:   Use [strict JavaScript mode][JS_STRICT] in your scripts.
+
+Lines 27-28 and 35
+
+:   Use [self-executing anonymous function][JS_SEAF] to create closure with [Nuvola object](apiref>).
+    (Integration script are executed with ``Nuvola`` object bound to ``this``).
+
+Line 31
+
+:   Create new WebApp prototype object derived from the [Nuvola.WebApp](apiref>Nuvola.WebApp)
+    prototype that contains handy default handlers for **initialization routines**, so you don't
+    have to process them, but it's good to know they exist and you can override them if your web app
+    requires more magic ;-)
+
 
 Initialization routines
 -----------------------
 
 On start-up, Nuvola Player performs following actions:
 
- 1. App Runner emits the Nuvola.Core::InitAppRunner signal that is processed by
-    Nuvola.WebApp._onInitAppRunner handler by default. This default handler does nothing, feel free
-    to override it.
+ 1. App Runner emits the [Nuvola.Core::InitAppRunner signal](apiref>Nuvola.Core%3A%3AInitAppRunner)
+    that is processed by [Nuvola.WebApp._onInitAppRunner handler](apiref>Nuvola.WebApp._onInitAppRunner)
+    by default. This default handler does nothing, feel free to override it. See an article
+    [Initialization and Preferences Forms]({filename}apps/initialization-and-preferences-forms.md)
+    for exmaples of use case.
     
-      * TODO: Advanced - Web apps with user-specified home page URL
-      * TODO: Advanced - Web app with a separated variants with different home page URL
- 
- 2. App Runner emits the Nuvola.Core::LastPageRequest signal that is processed by
-    Nuvola.WebApp._onLastPageRequest handler by default. This handler returns URL
-    of the last visited page or null. If the URL is valid, it is loaded in the Web Worker process
-    and initialization is finished.
-    
-      * TODO: Advanced - Specify which URL should not be used as a last visited page
+ 2. App Runner emits the [Nuvola.Core::LastPageRequest signal](apiref>Nuvola.Core%3A%3ALastPageRequest)
+    that is processed by [Nuvola.WebApp._onLastPageRequest handler](apiref>Nuvola.WebApp._onLastPageRequest)
+    by default. This handler returns URL of the last visited page or null. If the URL is valid, it
+    is loaded in the Web Worker process and initialization is finished.
+    **TODO** Advanced - Specify which URL should not be used as a last visited page
 
- 3. If the last visited page is null, App Runner emits the Nuvola.Core::HomePageRequest signal
-    that is processed by Nuvola.WebApp._onHomePageRequest handler by default. This handler returns
-    URL specified in the "home_url" field of `metadata.json`. If the URL is valid, it is loaded in
-    the Web Worker process and initialization is finished, otherwise Nuvola Player will quit with
-    an error "Invalid home page URL - The web app integration script has provided an empty home
-    page URL."
-    
-      * TODO: Advanced - Web app with user-specified home page URL
-      * TODO: Advanced - Web app with a separated variants with different home page URL
+ 3. If the last visited page is null, App Runner emits the
+    [Nuvola.Core::HomePageRequest signal](apiref>Nuvola.Core%3A%3AHomePageRequest) that is processed
+    by [Nuvola.WebApp._onHomePageRequest handler](apiref>Nuvola.WebApp._onHomePageRequest) by default.
+    This handler returns URL specified in the "home_url" field of `metadata.json`. If the URL is
+    valid, it is loaded in the Web Worker process and initialization is finished, otherwise Nuvola
+    Player will quit with an error "Invalid home page URL - The web app integration script has
+    provided an empty home page URL." See article
+    [Web apps with a variable home page URL]({filename}variable-home-page-url.md) for
+    a typical example when it's necessary to override this signal handler.
 
 Run-time events
 ---------------
 
 During run-time, Nuvola Player performs following actions:
 
-  * App Runner emits the Nuvola.Core::HomePageRequest signal to get home page URL everytime
-    user activates "Go Home" action (either by keyboard shortcut, menu item, etc.)
+  * App Runner emits the
+    [Nuvola.Core::HomePageRequest signal](apiref>Nuvola.Core%3A%3AHomePageRequest) to get home page
+    URL when user activates the "Go Home" action (either by keyboard shortcut, menu item, etc.)
 
-  * App Runner emits Nuvola.Core::NavigationRequest just before navigation to a new page. That
-    signal is processed by Nuvola.WebApp._onNavigationRequest handler by default and can be used
-    for TODO URL filtering.
+  * App Runner emits [Nuvola.Core::NavigationRequest](apiref>Nuvola.Core%3A%3ANavigationRequest)
+    just before navigation to a new page. That signal is processed by
+    [Nuvola.WebApp._onNavigationRequest handler](apiref>Nuvola.WebApp._onNavigationRequest) by
+    default. **TODO** URL filtering.
     
-  * App Runner emits Nuvola.Core::UriChanged signal everytime a new page is loaded. That signal
-    is processed by Nuvola.WebApp._onUriChanged handler by default which saves the URI to be later
-    returned by Nuvola.Core::LastPageRequest signal handler.
-
-Web Worker Process
-==================
-
-The web page of a streaming service is loaded in the Web Worker process, so major part of your
-integration script will be running here.
-
-Initialization
---------------
-
-Web Worker emits Nuvola.Core::InitWebWorker signal everytime a new page is about to be loaded.
-The default handler Nuvola.WebApp._onInitWebWorker does nothing, so let's override it:
-
-```js
-var WebApp = Nuvola.$WebApp();
-
-WebApp._onInitWebWorker = function(emitter)
-{
-    // Chain up to the prototype's method
-    Nuvola.WebApp._onInitWebWorker.call(this, emitter);
-    
-    document.addEventListener("DOMContentLoaded", function()
-    {
-        alert("document's DOMContentLoaded event");
-    });
-    
-    window.addEventListener("load", function()
-    {
-        alert("window's load event");
-    });
-    
-    alert("Nuvola.Core's InitWebWorker signal");
-}
-
-WebApp.start();
-```
-
-The example mentions three phases of page loading:
-
-  * `Nuvola.Core::InitWebWorker` signal is emitted in clear JavaScript environment with a brand new
-    global ``window`` object. You should not touch it, only perform necessary initialization
-    (usually not needed) and set your listener for either `document`'s `DOMContentLoaded` event
-    (preferred) or `window`'s `load` event.
-
-  * `document`'s `DOMContentLoaded` event is emitted when Document Object Model is ready, but not all
-    resources (images, stylesheets, etc.) might be loaded. It is considered safe to manipulate with
-    the page.
-
-  * `window`'s `load` event is emitted when the page is completely loaded. It is usually not
-    necessary to wait for this event.
-
-**To sum up**, you might want to use this idiom for Web Worker process initialization:
-
-```js
-var WebApp = Nuvola.$WebApp();
-
-WebApp._onInitWebWorker = function(emitter)
-{
-    Nuvola.WebApp._onInitWebWorker.call(this, emitter);
-    document.addEventListener("DOMContentLoaded", this._onPageReady.bind(this));
-}
-
-WebApp._onPageReady = function(event)
-{
-    alert("Page ready for magic :-)");
-}
-
-WebApp.start();
-```
+  * App Runner emits [Nuvola.Core::UriChanged signal](apiref>Nuvola.Core%3A%3ANavigationRequest)
+    when a new page is loaded. That signal is processed by
+    [Nuvola.WebApp._onUriChanged handler](apiref>Nuvola.WebApp._onUriChanged) by default which saves
+    the URI to be later returned by
+    [Nuvola.WebApp._onLastPageRequest signal handler](apiref>Nuvola.WebApp._onLastPageRequest).
 
 MediaPlayer Component
 ---------------------
 
-Unlike Nuvola Player 2, the core of Nuvola Player 3 called NuvolaKit is more generic and don't
-load media player-specific code by default, so it's up to you to do that. ( This design decision
-allows us to reuse NuvolaKit with for other web apps like Unity Web Apps in the future.)
+Unlike Nuvola Player 2, the core of Nuvola Player 3 called NuvolaKit is more generic and doesn't
+load media player-specific code by default, so it's up to you to do that. (This design decision
+allows us to reuse NuvolaKit for other web apps like Unity Web Apps in the future.)
 
 ```js
 ...
@@ -346,10 +306,6 @@ allows us to reuse NuvolaKit with for other web apps like Unity Web Apps in the 
 {
 // Create media player component
 var player = Nuvola.$object(Nuvola.MediaPlayer);
-
-// Handy aliases
-var PlaybackState = Nuvola.PlaybackState;
-var PlayerAction = Nuvola.PlayerAction;
 
 var WebApp = Nuvola.$WebApp();
 
@@ -360,11 +316,61 @@ The first visible effect is a new menu with playback control actions:
 
 ![Without and with media player component]({filename}/images/guide/without_and_with_media_player_component.png)
 
+Web Worker Process
+==================
+
+The web page of a streaming service is loaded in the Web Worker process, so major part of your
+integration script will be running here.
+
+Initialization
+--------------
+
+[](apiref>Nuvola.%3A%3A)
+
+Web Worker emits [Nuvola.Core::InitWebWorker signal](apiref>Nuvola.Core%3A%3AInitWebWorker) when a
+new page is about to be loaded. The default handler
+[Nuvola.WebApp._onInitWebWorker](apiref>Nuvola.WebApp._onInitWebWorker) does nothing, so let's
+override it:
+
+```js
+...
+
+var WebApp = Nuvola.$WebApp();
+
+// Initialization routines
+WebApp._onInitWebWorker = function(emitter)
+{
+    Nuvola.WebApp._onInitWebWorker.call(this, emitter);
+    
+    var state = document.readyState;
+    if (state === "interactive" || state === "complete")
+        this._onPageReady();
+    else
+        document.addEventListener("DOMContentLoaded", this._onPageReady.bind(this));
+}
+
+// Page is ready for magic
+WebApp._onPageReady = function()
+{
+    alert("Page ready for magic :-)");
+}
+
+WebApp.start();
+
+...
+```
+
+This signal handlers makes sure **Document Object Model of the web page is ready** and invokes
+``WebApp._onPageReady`` method. Note that `document`'s `DOMContentLoaded` event is emitted when
+Document Object Model is ready, but not all resources (images, stylesheets, etc.) might be loaded.
+You can also attach the ``WebApp._onPageReady`` handler to `window`'s `load` event that is emitted
+when the page is completely loaded, but it is usually not necessary to wait for this event.
+
 Playback state and track details
 --------------------------------
 
-The first task of your service integration is to extract playback state and track details from the
-web page and provide them to media player component. There are two ways how to extract playback
+The first task of your service integration is to **extract playback state and track details from the
+web page** and provide them to the media player component. There are two ways how to extract playback
 state and track details:
 
  1. Use [Document Object Model][DOM] to get information from the HTML code of the web page.
@@ -372,43 +378,66 @@ state and track details:
 
 [DOM]: https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model
 
-The first way is more general and will be described here.
+The first way is more general and will be described here. The folowing methods are useful:
+
+  * [document.getElementById](https://developer.mozilla.org/en-US/docs/Web/API/document.getElementById) -
+    look-up an element by ``id`` attribute
+  * [document.getElementsByName](https://developer.mozilla.org/en-US/docs/Web/API/Document.getElementsByName) -
+    look-up elements by ``name`` attribute
+  * [document.getElementsByClassName](https://developer.mozilla.org/en-US/docs/Web/API/document.getElementsByClassName) -
+    look-up elements by ``class`` attribute
+  * [document.getElementsByTagName](https://developer.mozilla.org/en-US/docs/Web/API/document.getElementsByTagName) -
+    look-up elements by tag name (e.g. ``a``, ``div``, etc.)
+  * [document.querySelector](https://developer.mozilla.org/en-US/docs/Web/API/document.querySelector) -
+    look-up the first element that matches provided [CSS selector][B1]
+  * [document.querySelectorAll](https://developer.mozilla.org/en-US/docs/Web/API/document.querySelectorAll) -
+    look-up all elements that match provided [CSS selector][B1]
+
+[B1]: https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Getting_Started/Selectors
+
+A common idiom is to create **an update method to extract metadata from the web page**:
 
 ```js
-WebApp._onPageReady = function(event)
+...
+
+// Create media player component
+var player = Nuvola.$object(Nuvola.MediaPlayer);
+
+// Handy aliases
+var PlaybackState = Nuvola.PlaybackState;
+var PlayerAction = Nuvola.PlayerAction;
+
+// Create new WebApp prototype
+var WebApp = Nuvola.$WebApp();
+
+...
+
+WebApp._onPageReady = function()
 {
+    // Start update routine
     this.update();
 }
 
+// Extract data from the web page
 WebApp.update = function()
 {
-    console.log("update");
-    var track = {
-        title: null,
-        artist: null,
-        album: null,
-        artLocation: null
-    }
-    
-    player.setTrack(track);
-    player.setPlaybackState(PlaybackState.UNKNOWN);
-    
-    // Schedule the next update
-    setTimeout(this.update.bind(this), 500);
 }
+
+...
 ```
 
 ### Playback state
 
-The test service shows playback state at the top of the page. Let's right-click there and select
-*Inspect element* to show WebKit Web Inspector.
-
-![Inspect element]({filename}/images/guide/inspect_element.png)
-![Inspect playback state]({filename}/images/guide/inspect_playback_state.png)
-
-The code to extract playback state might be
+Looking at the code of a web page shown in the picture bellow, the code to extract playback state
+might be. Playback states are defined in an enumeration
+[Nuvola.PlaybackState](apiref>Nuvola.PlaybackState) and set by method
+[player.setPlaybackState()](apiref>Nuvola.MediaPlayer.setPlaybackState).
 
 ```js
+var PlaybackState = Nuvola.PlaybackState;
+
+...
+
 WebApp.update = function()
 {
     ...
@@ -443,7 +472,7 @@ WebApp.update = function()
 
 ### Track details
 
-Similarly, we can obtain track details:
+Similarly, we can obtain track details and pass them to method [player.setTrack()](apiref>Nuvola.MediaPlayer.setTrack)
 
 ```js
 WebApp.update = function()
@@ -476,16 +505,24 @@ WebApp.update = function()
 
 ![Track details]({filename}/images/guide/track_details.png)
 
-Player Actions
-==============
+!!! info "If you use Git, commit changes"
+        :::sh
+        cd ~/projects/nuvola-player/test-integration
+        git add integrate.js
+        git commit -m "Extract metadata and playback state"
 
-The second responsibility of a service integration is to manage media player actions:
+Player Actions
+--------------
+
+The second responsibility of a service integration is to **manage media player actions**:
 
  1. Set which actions are enabled.
  2. Invoke the actions when they are activated.
 
-The first part is done via calls player.setCanPause(), player.setCanPlay(),
-player.setCanGoPrev() and player.setCanGoNext(nextSong):
+The first part is done via calls [player.setCanPause()](apiref>Nuvola.MediaPlayer.setCanPause),
+[player.setCanPlay()](apiref>Nuvola.MediaPlayer.setCanPlay),
+[player.setCanGoPrev()](apiref>Nuvola.MediaPlayer.setCanGoPrev) and
+[player.setCanGoNext()](apiref>Nuvola.MediaPlayer.setCanGoNext):
 
 ```js
 WebApp.update = function()
@@ -537,19 +574,29 @@ WebApp.update = function()
     ...
 }
 ```
+
 ![Playback actions]({filename}/images/guide/playback_actions.png)
 
-To handle playback actions, it is neccessary to connect to Actions::ActionActivated signal:
+To handle playback actions defined in an enumeration [PlayerAction](apiref>Nuvola.PlayerAction),
+it is necessary to connect to [Actions::ActionActivated signal](apiref>Nuvola.Actions%3A%3AActionActivated).
+You can use a convenient function [Nuvola.clickOnElement()](apiref>Nuvola.clickOnElement) to
+simulate clicking.
 
 ```js
-var WebApp = Nuvola.$WebApp();
+var PlayerAction = Nuvola.PlayerAction;
 
-WebApp._onInitWebWorker = function(emitter)
+...
+
+WebApp._onPageReady = function()
 {
-    Nuvola.WebApp._onInitWebWorker.call(this, emitter);
+    // Connect handler for signal ActionActivated
     Nuvola.actions.connect("ActionActivated", this);
-    document.addEventListener("DOMContentLoaded", this._onPageReady.bind(this));
+    
+    // Start update routine
+    this.update();
 }
+
+...
 
 WebApp._onActionActivated = function(object, name, param)
 {
@@ -570,3 +617,38 @@ WebApp._onActionActivated = function(object, name, param)
     }
 }
 ```
+
+!!! danger "Always test playback actions"
+    You should click action buttons in the developer's sidebar to be sure they are working as expected.
+
+!!! info "If you use Git, commit changes"
+        :::sh
+        cd ~/projects/nuvola-player/test-integration
+        git add integrate.js
+        git commit -m "Add player actions handling"
+
+!!! info "Custom actions"
+    Service integrations can also create custom actions like thumbs up/down or star rating. However,
+    documentation for custom actions hasn't been made yet.
+
+Questions?
+==========
+
+Don't hesitate to ask your questions at
+[Nuvola Player Development forum](https://groups.google.com/d/forum/nuvola-player-devel).
+
+What to do next
+===============
+
+Supposing you have followed this tutorial, you have enough knowledge to create your own service
+integration. If you would like to have your service integration **maintained as a part of Nuvola
+Player project** and distributed in Nuvola Player repository, you have to follow
+[Service Integration Guidelines]({filename}guidelines.md)
+
+If you have **finished your service integration**, the next step is to
+[distribute]({filename}distribute.md) it.
+
+[git]: http://git-scm.com/
+[me]: http://fenryxo.cz
+[JS_STRICT]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions_and_function_scope/Strict_mode
+[JS_SEAF]: http://markdalgleish.com/2011/03/self-executing-anonymous-functions/
