@@ -23,7 +23,22 @@
  */
 
 Nuvola.formatRegExp = new RegExp("{-?[0-9]+}", "g");
-Nuvola.format = function ()
+/**
+ * Replaces placeholders in a template string with provided data.
+ * 
+ * Placeholders are in form of ``{n}`` where ``n`` is index of data argument starting at 1.
+ * Special placeholders are ``{-1}`` for ``{`` and ``{-2}`` for ``}``.
+ * 
+ * @param String template    template string
+ * @param Variant data...    other arguments will be used as data for replacement
+ * @return String
+ * 
+ * ```js
+ * alert(Nuvola.format("My name is {2}. {1} {2}!", "James", "Bond"));
+ * // "My name is Bond. James Bond!"
+ * ```
+ */
+Nuvola.format = function()
 {
     var args = arguments;
     return args[0].replace(this.formatRegExp, function (item)
