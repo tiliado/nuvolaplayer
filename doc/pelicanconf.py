@@ -44,10 +44,7 @@ TAGS_SAVE_AS = ''
 RELATIVE_URLS = True
 STATIC_PATHS = ['images']
 
-INTERLINKS = {
-    "apiref": "./api_reference.html#",
-    "tiliado": TILIADOWEB,
-}
+INTERLINKS["apiref"] = "./api_reference.html#"
 
 import re
 from markdown.extensions import Extension

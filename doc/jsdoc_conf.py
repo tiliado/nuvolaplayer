@@ -6,7 +6,4 @@ SITEURL = ".."
 TEMPLATE = "doc/theme/templates/jsdoc.html"
 TITLE = "NuvolaKit 3.0 JavaScript API Reference"
 
-INTERLINKS = {
-    "doc": "../",
-    "tiliado": TILIADOWEB,
-}
+INTERLINKS["doc"] = "../"
