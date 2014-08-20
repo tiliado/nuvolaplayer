@@ -6,4 +6,5 @@ TILIADOWEB = "https://tiliado.eu/"
 
 INTERLINKS = {
     "tiliado": TILIADOWEB,
+    "gh": "https://github.com/"
 }
