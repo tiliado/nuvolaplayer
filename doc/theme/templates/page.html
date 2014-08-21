@@ -15,10 +15,14 @@
     </div>
     <div class="col-sm-12 col-md-10 col-lg-9">
       {{ page.content }}
+      
+      {% include "footer.inc.html" %}
     </div> 
   {% else %}
     <div class="col-sm-12 col-lg-offset-1 col-lg-10">
       {{ page.content }}
+      
+      {% include "footer.inc.html" %}
     </div> 
   {% endif %}
 {% endblock %}
