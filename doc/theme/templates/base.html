@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html lang="{{ DEFAULT_LANG }}">
   <head>
-    <meta charset="utf-8" />
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     {% block head %}
         <title>{% block title %}{{ SITENAME }}{% endblock title %}</title>
     {% endblock head %}
@@ -10,48 +12,17 @@
     <link rel="stylesheet" href="{{ SITEURL }}/theme/pygments.css" />
     <link rel="stylesheet" href="{{ SITEURL }}/theme/main.css" />
     {% endblock styles %}
+    {% block scripts %}
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <script src="{{ SITEURL }}/theme/jquery.min.js"></script>
+    <script src="{{ SITEURL }}/theme/bootstrap.min.js"></script>
+    {% endblock scripts %}
   </head>
   <body>
-    <nav class="navbar navbar-default navbar-static-top" role="navigation">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-1">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="{{ SITEURL }}/index.html">{{ SITENAME }}</a>
-        </div><!-- .navbar-header -->
-
-        <div class="collapse navbar-collapse" id="navbar-collapse-1">
-          <ul class="nav navbar-nav">
-            <li><a href="{{ SITEURL }}/index.html">Home</a></li>
-            <li><a href="{{ SITEURL }}/core.html">Core</a></li>
-            <li class="dropdown">
-              <a href="{{ SITEURL }}/apps.html" class="dropdown-toggle" data-toggle="dropdown">Service Integrations <span class="caret"></span></a>
-              <ul class="dropdown-menu" role="menu">
-                <li><a href="{{ SITEURL }}/apps.html">Introduction</a></li>
-                <li><a href="{{ SITEURL }}/apps/porting.html">Porting to Nuvola Player 3</a></li>
-                <li><a href="{{ SITEURL }}/apps/api_reference.html">NuvolaKit 3.0 JavaScript API Reference</a></li>
-                <li class="divider"></li>
-                <li class="dropdown-header">Basic</li>
-                <li><a href="{{ SITEURL }}/apps/tutorial.html">Service Integration Tutorial</a></li>
-                <li><a href="{{ SITEURL }}/apps/guidelines.html">Service Integration Guidelines</a></li>
-                <li><a href="{{ SITEURL }}/apps/distribute.html">Distribute Service Integration</a></li>
-                <li class="divider"></li>
-                <li class="dropdown-header">Advanced</li>
-                <li><a href="{{ SITEURL }}/apps/guide.html">Full Service Integration Guide</a></li>
-                <li><a href="{{ SITEURL }}/apps/configuration-and-session-storage.html">Configuration and session storage</a></li>
-                <li><a href="{{ SITEURL }}/apps/initialization-and-preferences-forms.html">Initialization and Preferences Forms</a></li>
-                <li><a href="{{ SITEURL }}/apps/variable-home-page-url.html">Web apps with a variable home page URL</a></li>
-                
-              </ul>
-            </li>
-          </ul>
-        </div><!-- .navbar-collapse -->
-      </div>
-    </nav>
+    {% include "navbar.inc.html" %}
     
     <div class="container">
       <div class="row">
@@ -59,15 +30,9 @@
         {% block content %}
         {% endblock %}
         
-        <div class="footer col-sm-12 text-center">
-            <hr />
-            Proudly powered by <a href="http://getpelican.com/">Pelican</a>,
-            which takes great advantage of <a href="http://python.org">Python</a>.
-        </div>
+        {% include "footer.inc.html" %}
       </div>
     </div>
-    <script src="{{ SITEURL }}/theme/jquery.min.js"></script>
-    <script src="{{ SITEURL }}/theme/bootstrap.min.js"></script>
   </body>
 </html>
 
