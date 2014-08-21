@@ -729,4 +729,10 @@ def generate_doc(ns, out_file, sources_dir, config_file, template=None):
         f.write(process_template(template, data))
 
 if __name__ == "__main__":
-    generate_doc("Nuvola", "build/doc/apps/api_reference.html", "src/mainjs", "doc/jsdoc_conf.py")
+    import sys
+    import argparse
+    parser = argparse.ArgumentParser(description='Generates JavaScript documentation.')
+    parser.add_argument('-t','--template',  help='template to use')
+    result = parser.parse_args(sys.argv[1:])
+    generate_doc("Nuvola", "build/doc/apps/api_reference.html", "src/mainjs", "doc/jsdoc_conf.py",
+        result.template)
