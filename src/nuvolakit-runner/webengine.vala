@@ -428,39 +428,54 @@ public class WebEngine : GLib.Object
 		}
 	}
 	
+	private bool decide_navigation_policy(bool new_window, WebKit.NavigationPolicyDecision decision)
+	{
+		var uri = decision.request.uri;
+		if (!uri.has_prefix("http://") && !uri.has_prefix("https://"))
+			return false;
+		
+		var result = navigation_request(uri);
+		var type = decision.navigation_type;
+		if (new_window)
+			warning("Navigation, new window: uri = %s, result = %s, frame = %s, type = %s",
+				uri, result.to_string(), decision.frame_name, type.to_string());
+		else
+			debug("Navigation, current window: uri = %s, result = %s, frame = %s, type = %s",
+				uri, result.to_string(), decision.frame_name, type.to_string());
+		
+		// We care only about user clicks
+		if (type != WebKit.NavigationType.LINK_CLICKED)
+			return false;
+		
+		if (result)
+		{
+			decision.use();
+			return true;
+		}
+		else
+		{
+			try
+			{
+				Gtk.show_uri(null, uri, Gdk.CURRENT_TIME);
+				decision.ignore();
+				return true;
+			}
+			catch (GLib.Error e)
+			{
+				critical("Failed to open '%s' in a default web browser. %s", uri, e.message);
+				return false;
+			}
+		}
+	}
+	
 	private bool on_decide_policy(WebKit.PolicyDecision decision, WebKit.PolicyDecisionType decision_type)
 	{
 		switch (decision_type)
 		{
 		case WebKit.PolicyDecisionType.NAVIGATION_ACTION:
-			WebKit.NavigationPolicyDecision navigation_decision = (WebKit.NavigationPolicyDecision) decision;
-			if (navigation_decision.mouse_button == 0)
-				return false;
-			var uri = navigation_decision.request.uri;
-			if (!uri.has_prefix("http://") && !uri.has_prefix("https://"))
-				return false;
-			var result = navigation_request(uri);
-			debug("Mouse Navigation: %s %s", uri, result.to_string());
-			if (result)
-			{
-				decision.use();
-				return true;
-			}
-			else
-			{
-				try
-				{
-					Gtk.show_uri(null, uri, Gdk.CURRENT_TIME);
-					decision.ignore();
-					return true;
-				}
-				catch (GLib.Error e)
-				{
-					critical("Failed to open '%s' in a default web browser. %s", uri, e.message);
-					return false;
-				}
-			}
+			return decide_navigation_policy(false, (WebKit.NavigationPolicyDecision) decision);
 		case WebKit.PolicyDecisionType.NEW_WINDOW_ACTION:
+			return decide_navigation_policy(true, (WebKit.NavigationPolicyDecision) decision);
 		case WebKit.PolicyDecisionType.RESPONSE:
 		default:
 			return false;
