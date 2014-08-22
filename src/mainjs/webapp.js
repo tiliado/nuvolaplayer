@@ -89,7 +89,7 @@ WebApp._onLastPageRequest = function(emitter, request)
  */
 WebApp._onNavigationRequest = function(object, request)
 {
-    request.approved = this.allowedURI ? true : this.allowedURI.test(request.url);
+    request.approved = this.allowedURI ? this.allowedURI.test(request.url) : true;
 }
 
 /**
