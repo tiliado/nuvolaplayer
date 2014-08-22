@@ -640,13 +640,20 @@ Don't hesitate to ask your questions at
 What to do next
 ===============
 
-Supposing you have followed this tutorial, you have enough knowledge to create your own service
-integration. If you would like to have your service integration **maintained as a part of Nuvola
-Player project** and distributed in Nuvola Player repository, you have to follow
-[Service Integration Guidelines]({filename}guidelines.md)
+Supposing you have followed this guide, you have enough knowledge to create your own service
+integration. You are encouraged to take a look at articles in advanced section to spice up your work:
 
-If you have **finished your service integration**, the next step is to
-[distribute]({filename}distribute.md) it.
+  * [Configuration and session storage]({filename}configuration-and-session-storage.md):
+    Nuvola Player 3 allows service integrations to store both a persistent configuration and a temporary session information.
+  * [Initialization and Preferences Forms]({filename}initialization-and-preferences-forms.md):
+    These forms are useful when you need to get user input.
+  * [Web apps with a variable home page URL]({filename}variable-home-page-url.md):
+    This article covers Web apps that don't have a single (constant) home page URL, so their home page has to be specified by user.
+
+If you would like to have your service integration **maintained as a part of Nuvola
+Player project** and distributed in Nuvola Player repository, you have to follow
+[Service Integration Guidelines]({filename}guidelines.md). Once you have **finished your
+service integration**, the next step is to [distribute]({filename}distribute.md) it.
 
 [git]: http://git-scm.com/
 [me]: http://fenryxo.cz
