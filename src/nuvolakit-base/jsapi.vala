@@ -215,6 +215,7 @@ public class JSApi : GLib.Object
 		{"_keyValueStorageGetValue", key_value_storage_get_value_func, 0},
 		{"_keyValueStorageSetValue", key_value_storage_set_value_func, 0},
 		{"_keyValueStorageSetDefaultValue", key_value_storage_set_default_value_func, 0},
+		{"_log", log_func, 0},
 		{null, null, 0}
 	};
 	
@@ -499,6 +500,19 @@ public class JSApi : GLib.Object
 		}
 		
 		return undefined;
+	}
+	
+	static unowned JS.Value log_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)
+	{
+		exception = null;
+		for (var i = 0; i < args.length; i++)
+		{
+			if (args[i].is_undefined(ctx))
+				debug("\n# Nuvola.log: undefined");
+			else
+				debug("\n# Nuvola.log: %s", variant_from_value(ctx, args[i]).print(false));
+		}
+		return JS.Value.undefined(ctx);
 	}
 }
 
