@@ -33,8 +33,6 @@ var global = Function('return this')() || (0, eval)('this');
  */
 Nuvola.global = global;
 
-// Make sure some useful functionality does exist even in bare global object
-
 /**
  * Log message to terminal
  * 
@@ -59,17 +57,45 @@ Nuvola.warn = function(message)
     Nuvola._warn(message + "");
 }
 
+// Make sure some useful functionality does exist even in bare global object
+
+var argsToString = function(args)
+{
+    var strings = [];
+    for (var i = 0; i < args.length; i++)
+        strings.push("" + args[i])
+    return strings.join(" ");
+}
+
 if (!global.console)
     global.console = {};
 
 if (!console.log)
-    console.log = Nuvola.log;
+{
+    console.log = function()
+    {
+        Nuvola.warn("console.log() is not available, using Nuvola.log as a fallback. The following message might be incomplete.");
+        Nuvola.log(argsToString(arguments));
+    }
+}
 
 if (!console.debug)
-    console.debug = Nuvola.log;
+{
+    console.debug = function()
+    {
+        Nuvola.warn("console.debug() is not available, using Nuvola.log as a fallback. The following message might be incomplete.");
+        Nuvola.log(argsToString(arguments));
+    }
+}
 
 if (!global.alert)
-    global.alert = Nuvola.log;
+{
+    global.alert = function()
+    {
+        Nuvola.warn("alert() is not available, using Nuvola.log as a fallback. The following message might be incomplete.");
+        Nuvola.log(argsToString(arguments));
+    }
+}
 
 try
 {
