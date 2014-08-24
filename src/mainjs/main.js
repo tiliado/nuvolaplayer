@@ -58,3 +58,12 @@ if (!console.debug)
 
 if (!global.alert)
     global.alert = Nuvola.log;
+
+try
+{
+    window; // ReferenceError with bare Global Object
+}
+catch (e)
+{
+    global.window = null;
+}
