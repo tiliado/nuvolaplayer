@@ -22,22 +22,26 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// http://stackoverflow.com/a/6930376/991303
-var global = Function('return this')() || (0, eval)('this');
+/**
+ * Log message to terminal
+ * 
+ * Note: This function doesn't print to JavaScript console of WebKit Web Inspector, but to real console/terminal.
+ * 
+ * @param Variant message    message to log, will be converted to string
+ */
+Nuvola.log = function(message)
+{
+    Nuvola._log(message + "");
+}
 
 /**
- * Global JavaScript Object
+ * Log warning to terminal
  * 
- * Note that only the web worker process has global ``window`` object provided by a web browser engine.
- * The app runner process has bare global object.
+ * Note: This function doesn't print to JavaScript console of WebKit Web Inspector, but to real console/terminal.
+ * 
+ * @param Variant message    message to log, will be converted to string
  */
-Nuvola.global = global;
-
-try
+Nuvola.warn = function(message)
 {
-    window; // ReferenceError with bare Global Object
-}
-catch (e)
-{
-    global.window = null;
+    Nuvola._warn(message + "");
 }

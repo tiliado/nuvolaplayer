@@ -22,22 +22,44 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// http://stackoverflow.com/a/6930376/991303
-var global = Function('return this')() || (0, eval)('this');
+require("logging");
 
-/**
- * Global JavaScript Object
- * 
- * Note that only the web worker process has global ``window`` object provided by a web browser engine.
- * The app runner process has bare global object.
- */
-Nuvola.global = global;
+// Make sure some useful functionality does exist even in bare global object
 
-try
+var argsToString = function(args)
 {
-    window; // ReferenceError with bare Global Object
+    var strings = [];
+    for (var i = 0; i < args.length; i++)
+        strings.push("" + args[i])
+    return strings.join(" ");
 }
-catch (e)
+
+if (!global.console)
+    global.console = {};
+
+if (!console.log)
 {
-    global.window = null;
+    console.log = function()
+    {
+        Nuvola.warn("console.log() is not available, using Nuvola.log as a fallback. The following message might be incomplete.");
+        Nuvola.log(argsToString(arguments));
+    }
+}
+
+if (!console.debug)
+{
+    console.debug = function()
+    {
+        Nuvola.warn("console.debug() is not available, using Nuvola.log as a fallback. The following message might be incomplete.");
+        Nuvola.log(argsToString(arguments));
+    }
+}
+
+if (!global.alert)
+{
+    global.alert = function()
+    {
+        Nuvola.warn("alert() is not available, using Nuvola.log as a fallback. The following message might be incomplete.");
+        Nuvola.log(argsToString(arguments));
+    }
 }
