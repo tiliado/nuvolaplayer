@@ -272,6 +272,19 @@ public unowned JS.Value value_from_variant(JS.Context ctx, Variant? variant) thr
 		return JS.Value.null(ctx);
 	
 	var type = variant.get_type();
+	
+	if (variant.is_of_type(VariantType.VARIANT))
+		return value_from_variant(ctx, variant.get_variant());
+	
+	if (type.is_subtype_of(VariantType.MAYBE))
+	{
+		Variant? maybe_variant = null;
+		variant.get("m*", &maybe_variant);
+		if (maybe_variant == null)
+			return JS.Value.null(ctx);
+		return value_from_variant(ctx, maybe_variant);
+	}
+	
 	var object_type = new VariantType("a{s*}");
 	if (type.is_subtype_of(object_type))
 	{
@@ -306,15 +319,6 @@ public unowned JS.Value value_from_variant(JS.Context ctx, Variant? variant) thr
 	if (variant.is_of_type(VariantType.UINT64))
 		return JS.Value.number(ctx, (double) variant.get_uint64());
 	
-	if (type.is_subtype_of(VariantType.MAYBE))
-	{
-		Variant? maybe_variant = null;
-		variant.get("m*", &maybe_variant);
-		if (maybe_variant == null)
-			return JS.Value.null(ctx);
-		return value_from_variant(ctx, maybe_variant);
-	}
-	
 	if (variant.is_container())
 	{
 		var size = variant.n_children();
@@ -323,9 +327,6 @@ public unowned JS.Value value_from_variant(JS.Context ctx, Variant? variant) thr
 			args[i] = (void*) value_from_variant(ctx, variant.get_child_value(i));
 		return ctx.make_array((JS.Value[]) args);
 	}
-	
-	if (variant.is_of_type(VariantType.VARIANT))
-		return value_from_variant(ctx, variant.get_variant());
 	
 	throw new JSError.WRONG_TYPE("Unsupported type '%s'. Content: %s", variant.get_type_string(), variant.print(true));
 }
