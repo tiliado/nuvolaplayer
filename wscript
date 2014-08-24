@@ -168,6 +168,7 @@ def configure(ctx):
 	ctx.env.append_unique("LINKFLAGS", ["-Wl,--no-undefined", "-Wl,--as-needed"])
 	
 	# Check dependencies
+	ctx.env.DIORITE_SERIES = DIORITE_SERIES = "0.1"
 	ctx.check_dep('glib-2.0', 'GLIB', '2.32')
 	ctx.check_dep('gio-2.0', 'GIO', '2.32')
 	ctx.check_dep('gtk+-3.0', 'GTK+', '3.4')
@@ -175,8 +176,8 @@ def configure(ctx):
 	ctx.check_dep('gdk-x11-3.0', 'GDKX11', '3.4')
 	ctx.check_dep('x11', 'XLIB', '0.5')
 	ctx.check_dep('gthread-2.0', 'GTHREAD', '2.32')
-	ctx.check_dep('dioriteglib', 'DIORITEGLIB', '0.0.1')
-	ctx.check_dep('dioritegtk', 'DIORITEGTK', '0.0.1')
+	ctx.check_dep('dioriteglib-' + DIORITE_SERIES, 'DIORITEGLIB', DIORITE_SERIES)
+	ctx.check_dep('dioritegtk-' + DIORITE_SERIES, 'DIORITEGTK', DIORITE_SERIES)
 	ctx.check_dep('json-glib-1.0', 'JSON-GLIB', '0.7')
 	ctx.check_dep('libarchive', 'LIBARCHIVE', '3.1')
 	ctx.check_dep('webkit2gtk-3.0', 'WEBKIT', '2.2')
@@ -224,8 +225,8 @@ def build(ctx):
 	NUVOLAKIT_BASE = APPNAME + "-base"
 	NUVOLAKIT_WORKER = APPNAME + "-worker"
 	
-	
-	packages = 'libnotify javascriptcoregtk-3.0  libarchive dioritegtk dioriteglib gtk+-3.0 gdk-3.0 gdk-x11-3.0 x11 posix json-glib-1.0 glib-2.0 gio-2.0'
+	packages = 'dioritegtk-{0} dioriteglib-{0} '.format(ctx.env.DIORITE_SERIES)
+	packages += 'libnotify javascriptcoregtk-3.0  libarchive gtk+-3.0 gdk-3.0 gdk-x11-3.0 x11 posix json-glib-1.0 glib-2.0 gio-2.0'
 	uselib = 'NOTIFY JSCORE  LIBARCHIVE DIORITEGTK DIORITEGLIB GTK+ GDK GDKX11 XLIB JSON-GLIB GLIB GTHREAD GIO'
 	
 	if ctx.env.with_unity:
@@ -287,7 +288,7 @@ def build(ctx):
 	ctx(features = "c cshlib",
 		target = NUVOLAKIT_WORKER,
 		source = ctx.path.ant_glob('src/nuvolakit-worker/*.vala'),
-		packages = "dioriteglib webkit2gtk-web-extension-3.0 javascriptcoregtk-3.0",
+		packages = "dioriteglib-{0} webkit2gtk-web-extension-3.0 javascriptcoregtk-3.0".format(ctx.env.DIORITE_SERIES),
 		uselib = "DIORITEGLIB DIORITEGTK WEBKIT JSCORE",
 		use = [NUVOLAKIT_BASE],
 		vala_defines = vala_defines,
