@@ -47,6 +47,18 @@ Nuvola.log = function(message)
     Nuvola._log(message + "");
 }
 
+/**
+ * Log warning to terminal
+ * 
+ * Note: This function doesn't print to JavaScript console of WebKit Web Inspector, but to real console/terminal.
+ * 
+ * @param Variant message    message to log, will be converted to string
+ */
+Nuvola.warn = function(message)
+{
+    Nuvola._warn(message + "");
+}
+
 if (!global.console)
     global.console = {};
 
