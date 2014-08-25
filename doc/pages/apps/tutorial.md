@@ -262,10 +262,10 @@ Line 38
 
 Lines 41-50
 
-:   Handler for `Nuvola.Core::InitWebWorker` signal that emitted in clear JavaScript environment
-    with a brand new global ``window`` object. You should not touch it, only perform necessary
-    initialization (usually not needed) and set your listener for either `document`'s
-    `DOMContentLoaded` event (preferred) or `window`'s `load` event.
+:   Handler for [Nuvola.Core::InitWebWorker signal](apiref>Core%3A%3AInitWebWorker) signal that
+    emitted in clear JavaScript environment with a brand new global ``window`` object. You should
+    not touch it, only perform necessary initialization (usually not needed) and set your listener
+    for either `document`'s `DOMContentLoaded` event (preferred) or `window`'s `load` event.
 
 Lines 53-60
 
@@ -313,6 +313,30 @@ sidebar), then enable **WebKit Web Inspector** (right-click the web page anywher
 You can also launch your service integration with id `test-integration` directly.
 
     nuvolaplayer3 -D -A ~/projects/nuvola-player -a test-integration
+
+Debugging and logging messages
+==============================
+
+You might want to print some debugging messages to console during development. There are two types
+of them in Nuvola Player:
+
+  * **JavaScript console** is shown in the WebKit Web Inspector.
+  * **Terminal console** is the black window with white text. Debugging messages are only printed
+    if you have launched Nuvola Player with ``-D`` or ``--debug`` flag.
+
+The are two ways how to print debugging messages:
+
+  * [Nuvola.log()](apiref>Nuvola.log) always prints only to terminal console.
+  * [console.log()](https://developer.mozilla.org/en-US/docs/Web/API/console.log) prints to JavaScript
+    console only if [Window object](https://developer.mozilla.org/en/docs/Web/API/Window) is
+    the the global object of the current JavaScript environment. Otherwise, Nuvola.log is used as a
+    fallback and a warning is issued.
+
+You might be wondering **why the Window object isn't always available as the global JavaScript
+object**. That's because Nuvola Player executes a lot of JavaScript code in a pure JavaScript
+environment outside the web view. However, the [Core::InitWebWorker signal](apiref>Core%3A%3AInitWebWorker)
+and your ``WebApp._onInitWebWorker`` and ``WebApp._onActionActivated`` signal handlers are
+invoked in the web view with the global window object, so feel free to use ``console.log()``.
 
 Playback state and track details
 ================================

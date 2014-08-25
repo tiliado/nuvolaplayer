@@ -51,6 +51,12 @@ only once at start-up.
     
     ...
 
+!!! danger "Global window object not available"
+    The [Nuvola.Core::InitAppRunner](apiref>Nuvola.Core%3A%3AInitAppRunner) signal is executed in a
+    pure JavaScript environment without [Window object](https://developer.mozilla.org/en/docs/Web/API/Window).
+    Use [Nuvola.log()](apiref>Nuvola.log) to print logging and debugging messages to terminal
+    instead of [console.log()](https://developer.mozilla.org/en-US/docs/Web/API/console.log).
+    
 Get/set values
 --------------
 
@@ -155,6 +161,12 @@ only once at start-up.
     
     ...
 
+!!! danger "Global window object not available"
+    The [Nuvola.Core::InitAppRunner](apiref>Nuvola.Core%3A%3AInitAppRunner) signal is executed in a
+    pure JavaScript environment without [Window object](https://developer.mozilla.org/en/docs/Web/API/Window).
+    Use [Nuvola.log()](apiref>Nuvola.log) to print logging and debugging messages to terminal
+    instead of [console.log()](https://developer.mozilla.org/en-US/docs/Web/API/console.log).
+    
 Get/set values
 --------------
 

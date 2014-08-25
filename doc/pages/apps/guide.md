@@ -171,6 +171,24 @@ Nuvola Player uses two processes for each service (web app):
     integration script in the Web Worker process everytime a web page is loaded in it to integrate
     the wep page.
 
+Debugging and logging messages
+==============================
+
+You might want to print some debugging messages to console during development. There are two types
+of them in Nuvola Player:
+
+  * **JavaScript console** is shown in the WebKit Web Inspector.
+  * **Terminal console** is the black window with white text. Debugging messages are only printed
+    if you have launched Nuvola Player with ``-D`` or ``--debug`` flag.
+
+The are two ways how to print debugging messages:
+
+  * [Nuvola.log()](apiref>Nuvola.log) always prints only to terminal console and it's available
+    in both App Runner and Web Worker processes.
+  * [console.log()](https://developer.mozilla.org/en-US/docs/Web/API/console.log) prints to JavaScript
+    console only in the Web Worker process. Nuvola.log is used as a
+    fallback and a warning is issued in the  App Runner process.
+
 App Runner Process
 ==================
 
@@ -244,6 +262,11 @@ Line 31
     have to process them, but it's good to know they exist and you can override them if your web app
     requires more magic ;-)
 
+!!! danger "Global window object not available"
+    This code is executed in a pure JavaScript environment without
+    [Window object](https://developer.mozilla.org/en/docs/Web/API/Window).
+    Use [Nuvola.log()](apiref>Nuvola.log) to print logging and debugging messages to terminal
+    instead of [console.log()](https://developer.mozilla.org/en-US/docs/Web/API/console.log).
 
 Initialization routines
 -----------------------

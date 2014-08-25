@@ -19,7 +19,6 @@ The initialization from is show when ``entries`` parameter of
 handler is not left empty. The example bellow asks user to provide name to show a greeting.
 API used in ``WebApp.appendPreferences`` will be [described later](#form-specification).
 
-
     :::js
     ...
     
@@ -64,6 +63,12 @@ API used in ``WebApp.appendPreferences`` will be [described later](#form-specifi
 
 ![Initialization form]({filename}/images/guide/initialization_form.png)
 ![After initialization form]({filename}/images/guide/after_initialization_form.png)
+
+!!! danger "Global window object not available"
+    The [Nuvola.Core::InitAppRunner](apiref>Nuvola.Core%3A%3AInitAppRunner) signal is executed in a
+    pure JavaScript environment without [Window object](https://developer.mozilla.org/en/docs/Web/API/Window).
+    Use [Nuvola.log()](apiref>Nuvola.log) to print logging and debugging messages to terminal
+    instead of [console.log()](https://developer.mozilla.org/en-US/docs/Web/API/console.log).
 
 !!! info
     New values are immediately available in [Nuvola.config](apiref>Nuvola.config) after user clicks
@@ -116,6 +121,12 @@ API used in ``WebApp.appendPreferences`` will be [described later](#form-specifi
 
 ![Preferences form]({filename}/images/guide/preferences_form.png)
 
+!!! danger "Global window object not available"
+    The [Nuvola.Core::AppendPreferences](apiref>Nuvola.Core%3A%3AAppendPreferences) signal is executed in a
+    pure JavaScript environment without [Window object](https://developer.mozilla.org/en/docs/Web/API/Window).
+    Use [Nuvola.log()](apiref>Nuvola.log) to print logging and debugging messages to terminal
+    instead of [console.log()](https://developer.mozilla.org/en-US/docs/Web/API/console.log).
+    
 !!! info
     New values are immediately available in [Nuvola.config](apiref>Nuvola.config) after user clicks
     OK button.

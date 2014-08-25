@@ -18,6 +18,13 @@ flexibility, we need more magic:
   * Override the default home page request handler that looks for ``home_url`` field of
     ``metadata.json``.
 
+!!! danger "Global window object not available"
+    Both [Nuvola.Core::InitAppRunner](apiref>Nuvola.Core%3A%3AInitAppRunner) and
+    [Nuvola.Core::AppendPreferences](apiref>Nuvola.Core%3A%3AAppendPreferences) signals mentioned in
+    this article are executed in a pure JavaScript environment without
+    [Window object](https://developer.mozilla.org/en/docs/Web/API/Window).
+    Use [Nuvola.log()](apiref>Nuvola.log) to print logging and debugging messages to terminal
+    instead of [console.log()](https://developer.mozilla.org/en-US/docs/Web/API/console.log).
 
 Multiple Website Variants
 =========================
