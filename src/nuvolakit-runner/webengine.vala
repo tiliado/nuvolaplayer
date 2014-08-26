@@ -434,14 +434,11 @@ public class WebEngine : GLib.Object
 		if (!uri.has_prefix("http://") && !uri.has_prefix("https://"))
 			return false;
 		
-		var result = navigation_request(uri);
+		var new_window_override = new_window;
+		var result = navigation_request(uri, ref new_window_override);
 		var type = decision.navigation_type;
-		if (new_window)
-			warning("Navigation, new window: uri = %s, result = %s, frame = %s, type = %s",
-				uri, result.to_string(), decision.frame_name, type.to_string());
-		else
-			debug("Navigation, current window: uri = %s, result = %s, frame = %s, type = %s",
-				uri, result.to_string(), decision.frame_name, type.to_string());
+		debug("Navigation, %s window: uri = %s, result = %s, frame = %s, type = %s",
+			new_window_override ? "new" : "current", uri, result.to_string(), decision.frame_name, type.to_string());
 		
 		// We care only about user clicks
 		if (type != WebKit.NavigationType.LINK_CLICKED)
@@ -450,6 +447,8 @@ public class WebEngine : GLib.Object
 		if (result)
 		{
 			decision.use();
+			if (new_window_override)
+				warning("Opening links in a new window hasn't been implemented yet.");
 			return true;
 		}
 		else
@@ -482,11 +481,12 @@ public class WebEngine : GLib.Object
 		}
 	}
 	
-	private bool navigation_request(string url)
+	private bool navigation_request(string url, ref bool new_window)
 	{
 		var builder = new VariantBuilder(new VariantType("a{smv}"));
 		builder.add("{smv}", "url", new Variant.string(url));
 		builder.add("{smv}", "approved", new Variant.boolean(true));
+		builder.add("{smv}", "newWindow", new Variant.boolean(new_window));
 		var args = new Variant("(s@a{smv})", "NavigationRequest", builder.end());
 		try
 		{
@@ -504,9 +504,12 @@ public class WebEngine : GLib.Object
 		Variant value = null;
 		bool approved = false;
 		while (iter.next("{smv}", &key, &value))
+		{
 			if (key == "approved")
 				approved = value != null ? value.get_boolean() : false;
-		
+			else if (key == "newWindow" && value != null)
+				new_window = value.get_boolean();
+		}
 		return approved;
 	}
 	

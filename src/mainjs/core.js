@@ -73,8 +73,9 @@ Core.$init = function()
     /**
      * Emitted on request for navigation to a new web page.
      * 
-     * @param String request.url    URL of the new page
-     * @param Boolean request.approved    whether the navigation is approved, set to ``false`` when
+     * @param String request.url           URL of the new page
+     * @param Boolean request.newWindow    whether to open request in a new window, you can overwrite this field
+     * @param Boolean request.approved     whether the navigation is approved, set to ``false`` when
      *     the ``request.url`` should be opened in user's default web browser 
      * 
      * ```
