@@ -96,10 +96,4 @@ While service integrations in Nuvola Player 2 are maintained in the same reposit
 service integrations for Nuvola Player 3 are more independent and are maintained in separate repositories.
 See article [Distribute Service Integration]({filename}distribute.md) for details.
 
-Questions?
-==========
-
-Don't hesitate to ask your questions at
-[Nuvola Player Development forum](https://groups.google.com/d/forum/nuvola-player-devel).
-
 [TOC]

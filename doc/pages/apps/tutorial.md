@@ -574,12 +574,6 @@ WebApp._onActionActivated = function(object, name, param)
     Service integrations can also create custom actions like thumbs up/down or star rating. However,
     documentation for custom actions hasn't been made yet.
 
-Questions?
-==========
-
-Don't hesitate to ask your questions at
-[Nuvola Player Development forum](https://groups.google.com/d/forum/nuvola-player-devel).
-
 What to do next
 ===============
 
