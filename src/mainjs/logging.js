@@ -22,16 +22,21 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+require("utils");
+
 /**
  * Log message to terminal
  * 
  * Note: This function doesn't print to JavaScript console of WebKit Web Inspector, but to real console/terminal.
  * 
- * @param Variant message    message to log, will be converted to string
+ * @param String template    template string, see @link{Nuvola.format} for details
+ * @param Variant data...    other arguments will be used as data for replacement
  */
-Nuvola.log = function(message)
+Nuvola.log = function(template)
 {
-    Nuvola._log(message + "");
+    var args = Array.prototype.slice.call(arguments);
+    var message = Nuvola.format.apply(Nuvola, args);
+    Nuvola._log(message);
 }
 
 /**
@@ -39,9 +44,12 @@ Nuvola.log = function(message)
  * 
  * Note: This function doesn't print to JavaScript console of WebKit Web Inspector, but to real console/terminal.
  * 
- * @param Variant message    message to log, will be converted to string
+ * @param String template    template string, see @link{Nuvola.format} for details
+ * @param Variant data...    other arguments will be used as data for replacement
  */
-Nuvola.warn = function(message)
+Nuvola.warn = function(template)
 {
-    Nuvola._warn(message + "");
+    var args = Array.prototype.slice.call(arguments);
+    var message = Nuvola.format.apply(Nuvola, args);
+    Nuvola._warn(message);
 }

@@ -42,7 +42,7 @@ if (!console.log)
     console.log = function()
     {
         Nuvola.warn("console.log() is not available, using Nuvola.log as a fallback. The following message might be incomplete.");
-        Nuvola.log(argsToString(arguments));
+        Nuvola.log("{1}", argsToString(arguments));
     }
 }
 
@@ -51,7 +51,7 @@ if (!console.debug)
     console.debug = function()
     {
         Nuvola.warn("console.debug() is not available, using Nuvola.log as a fallback. The following message might be incomplete.");
-        Nuvola.log(argsToString(arguments));
+        Nuvola.log("{1}", argsToString(arguments));
     }
 }
 
@@ -60,6 +60,6 @@ if (!global.alert)
     global.alert = function()
     {
         Nuvola.warn("alert() is not available, using Nuvola.log as a fallback. The following message might be incomplete.");
-        Nuvola.log(argsToString(arguments));
+        Nuvola.log("{1}", argsToString(arguments));
     }
 }
