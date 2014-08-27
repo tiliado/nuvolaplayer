@@ -660,6 +660,8 @@ What to do next
 Supposing you have followed this guide, you have enough knowledge to create your own service
 integration. You are encouraged to take a look at articles in advanced section to spice up your work:
 
+  * [URL Filtering (URL Sandbox)]({filename}url-filtering.md):
+    Decide which urls are opened in a default web browser instead of Nuvola Player.
   * [Configuration and session storage]({filename}configuration-and-session-storage.md):
     Nuvola Player 3 allows service integrations to store both a persistent configuration and a temporary session information.
   * [Initialization and Preferences Forms]({filename}initialization-and-preferences-forms.md):

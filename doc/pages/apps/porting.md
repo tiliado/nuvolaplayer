@@ -25,7 +25,8 @@ Mapping of old ``metadata.conf`` fields to the new ``metadata.json`` fields:
       * ``version`` - increase major version number by one
       * ``version_minor`` - set minor version number to 0
       * ``home_page`` - name changed to ``home_url``
-      * ``sandbox_pattern`` - name changed to ``allowed_uri``, optional field
+      * ``sandbox_pattern`` - name changed to ``allowed_uri``, optional field. See the article
+        [URL Filtering (URL Sandbox)]({filename}url-filtering.md).
       * ``maintainer_name`` - unchanged
       * ``maintainer_link`` - if you want to have your service integration shipped with Nuvola
         Player, you must use link to your Github profile. (See

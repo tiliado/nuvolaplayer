@@ -45,7 +45,10 @@ Advanced
 --------
 
   * [Full Service Integration Guide]({filename}apps/guide.md): This guide describes creation of a new service
-    integration for Nuvola Player 3 from scratch in a much detail.
+    integration for Nuvola Player 3 from scratch in a much detail, provides **insight to the Nuvola
+    Player Core** and explain some design decisions.
+  * [URL Filtering (URL Sandbox)]({filename}apps/url-filtering.md):
+    Decide which urls are opened in a default web browser instead of Nuvola Player.
   * [Configuration and session storage]({filename}apps/configuration-and-session-storage.md):
     Nuvola Player 3 allows service integrations to store both a persistent configuration and a temporary session information.
   * [Initialization and Preferences Forms]({filename}apps/initialization-and-preferences-forms.md):
