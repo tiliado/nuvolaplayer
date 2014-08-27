@@ -53,13 +53,40 @@ public class TrayIcon: GLib.Object, LauncherInterface
 		indicator.set_status(AppIndicator.IndicatorStatus.ACTIVE);
 		create_menu();
 		#else
-		icon = new Gtk.StatusIcon.from_icon_name(controller.icon);
+		var icon_name = controller.icon;
+		icon = new Gtk.StatusIcon.from_icon_name(icon_name);
 		icon.title = controller.app_name;
 		set_tooltip(controller.app_name);
 		create_menu();
 		icon.popup_menu.connect(on_popup_menu);
 		icon.activate.connect(() => {controller.activate();});
+		
+		var icon_pixbuf = load_icon({icon_name, icon_name[0:icon_name.length - 1]}, icon.size);
+		if (icon_pixbuf == null)
+		{
+			warning("Cannot load icon for StatusIcon");
+		}
+		else
+		{
+			icon.set_from_pixbuf(icon_pixbuf);
+		}
 		#endif
+	}
+	
+	public static Gdk.Pixbuf? load_icon(string[] names, int size)
+	{
+		foreach (var name in names)
+		{
+			try
+			{
+				return Gtk.IconTheme.get_default().load_icon(name, size, 0);
+			}
+			catch (Error e)
+			{
+			}
+		}
+		
+		return null;
 	}
 	
 	public void set_tooltip(string tooltip)
