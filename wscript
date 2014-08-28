@@ -56,8 +56,10 @@ VERSIONS, VERSION_SUFFIX = VERSION.split("+")
 if VERSION_SUFFIX == "stable":
 	VERSION = VERSIONS
 elif VERSION_SUFFIX == "":
-	VERSION_SUFFIX += REVISION_ID
-	VERSION += REVISION_ID
+	from datetime import datetime
+	suffix = "{}.{}".format(datetime.utcnow().strftime("%Y%m%d%H%M"), short_id)
+	VERSION_SUFFIX += suffix
+	VERSION += suffix
 VERSIONS = map(int, VERSIONS.split("."))
 
 import sys
