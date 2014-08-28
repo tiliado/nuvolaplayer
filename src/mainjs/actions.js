@@ -83,6 +83,7 @@ Actions.$init = function()
     this.connect("ActionActivated", this);
     this.connect("ActionEnabledChanged", this);
     this.buttons = {};
+    this.enabledFlagsCache = {};
 }
 
 /**
@@ -169,12 +170,45 @@ Actions.isEnabled = function(name)
 /**
  * Sets whether action is enabled
  * 
+ * **Note:** consider use of method @link{Actions.updateEnabledFlag} that is more effective, because it performs
+ * caching of enabled flags and updates them only if necessary.
+ * 
  * @param String name        action name
  * @param Boolean enabled    true is action is enabled, false otherwise
  */
 Actions.setEnabled = function(name, enabled)
 {
     return Nuvola._sendMessageSync("Nuvola.Actions.setEnabled", name, enabled);
+}
+
+/**
+ * Update action enabled flag
+ * 
+ * This method uses cache of action enabled flags to update them only if necessary.
+ * 
+ * @param String name        action name
+ * @param Boolean enabled    true is action is enabled, false otherwise
+ */
+Actions.updateEnabledFlag = function(name, enabled)
+{
+    if (enabled !== this.enabledFlagsCache[name])
+    {
+        this.enabledFlagsCache[name] = enabled;
+        this.setEnabled(name, enabled);
+    }
+}
+
+/**
+ * Bulk update of action enabled flags
+ * 
+ * This method uses cache of action enabled flags to update them only if necessary.
+ * 
+ * @param Object enabledFlags    mapping of ``action name``: ``enabled flag``
+ */
+Actions.updateEnabledFlags = function(enabledFlags)
+{
+    for (var name in enabledFlags)
+        this.updateEnabledFlag(name, enabledFlags[name]);
 }
 
 /**
