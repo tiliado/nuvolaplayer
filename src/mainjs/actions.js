@@ -84,6 +84,7 @@ Actions.$init = function()
     this.connect("ActionEnabledChanged", this);
     this.buttons = {};
     this.enabledFlagsCache = {};
+    this.statesCache = {};
 }
 
 /**
@@ -233,6 +234,9 @@ Actions.getState = function(name)
 /**
  * Set current state of toggle or radio actions.
  * 
+ * **Note:** consider use of method @link{Actions.updateState} that is more effective, because it performs caching of
+ * states and updates them only if necessary.
+ * 
  * @param String name      action name
  * @param variant state    current state: ``true/false`` for toggle actions, one of stateId entries of radio actions
  * 
@@ -250,6 +254,36 @@ Actions.setState = function(name, state)
 }
 
 /**
+ * Update of action state
+ * 
+ * This method uses cache of action states to update them only if necessary.
+ * 
+ * @param String name      action name
+ * @param variant state    current state: ``true/false`` for toggle actions, one of stateId entries of radio actions
+ */
+Actions.updateState = function(name, state)
+{    
+    if (state !== this.statesCache[name])
+    {
+        this.statesCache[name] = state;
+        this.setState(name, state);
+    }
+}
+
+/**
+ * Bulk update of action states
+ * 
+ * This method uses cache of action states to update them only if necessary.
+ * 
+ * @param Object states    mapping of ``action name``: ``state``
+ */
+Actions.updateStates = function(states)
+{    
+    for (var name in states)
+        this.updateState(name, states[name]);
+}
+
+/**
  * Activate (invoke) action
  * 
  * @param String name    action name
@@ -258,7 +292,6 @@ Actions.activate = function(name)
 {
     Nuvola._sendMessageAsync("Nuvola.Actions.activate", name);
 }
-
 
 /**
  * Attach HTML button to an action
