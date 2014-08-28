@@ -254,6 +254,7 @@ def build(ctx):
 		packages = 'javascriptcoregtk-3.0 webkit2gtk-3.0',
 		uselib =  'JSCORE WEBKIT',
 		use = [NUVOLAKIT_BASE],
+		lib = ['m'],
 		vala_defines = vala_defines,
 		defines = ['G_LOG_DOMAIN="Nuvola"'],
 		vapi_dirs = ['vapi'],

@@ -53,14 +53,25 @@ public class TrayIcon: GLib.Object, LauncherInterface
 		indicator.set_status(AppIndicator.IndicatorStatus.ACTIVE);
 		create_menu();
 		#else
-		var icon_name = controller.icon;
-		icon = new Gtk.StatusIcon.from_icon_name(icon_name);
+		icon = new Gtk.StatusIcon.from_icon_name(controller.icon);
 		icon.title = controller.app_name;
 		set_tooltip(controller.app_name);
 		create_menu();
 		icon.popup_menu.connect(on_popup_menu);
 		icon.activate.connect(() => {controller.activate();});
-		
+		unset_number();
+		#endif
+	}
+	
+	public void unset_number()
+	{
+		set_number(-1);
+	}
+	
+	public void set_number(int number)
+	{
+		#if !APPINDICATOR
+		var icon_name = controller.icon;
 		var icon_pixbuf = load_icon({icon_name, icon_name[0:icon_name.length - 1]}, icon.size);
 		if (icon_pixbuf == null)
 		{
@@ -68,9 +79,61 @@ public class TrayIcon: GLib.Object, LauncherInterface
 		}
 		else
 		{
+			render_number(number, ref icon_pixbuf);
 			icon.set_from_pixbuf(icon_pixbuf);
 		}
 		#endif
+	}
+	
+	private static void render_number(int number, ref Gdk.Pixbuf pixbuf)
+	{
+		if (number <= 0)
+			return;
+		
+		var padding = 1.0;
+		assert(pixbuf.width == pixbuf.height);
+		var size = pixbuf.width;
+		string text;
+		int offset;
+		double font_size;
+		if (number < 100)
+		{
+			text = number.to_string();
+			font_size = 0.5 * size;
+		}
+		else
+		{
+			text = "∞";
+			font_size = 0.8 * size;
+		}
+		var format = pixbuf.has_alpha ? Cairo.Format.ARGB32 : Cairo.Format.RGB24;
+		var surface = new Cairo.ImageSurface(format, size, size);
+		var cairo = new Cairo.Context(surface);
+		Gdk.cairo_set_source_pixbuf(cairo, pixbuf, 0.0, 0.0);
+		cairo.paint();
+		
+		cairo.move_to(0, 0);
+		cairo.select_font_face("Sans", Cairo.FontSlant.NORMAL, Cairo.FontWeight.NORMAL);
+		cairo.set_font_size(font_size);
+		Cairo.TextExtents extents;
+		cairo.text_extents(text, out extents);
+		var text_x = Math.round(extents.x_bearing);
+		var text_y = Math.round(extents.y_bearing);
+		var text_width = Math.round(extents.width);
+		var text_height = Math.round(extents.height);
+		
+		cairo.set_source_rgba (1, 1, 1, 0.6);
+		var width = text_width + 2 * padding;
+		var height = text_height + 2 * padding;
+		cairo.rectangle(Math.floor(0.5 * (size - width)), Math.floor(0.5 * (size - height)), width, height);
+		cairo.fill();
+		
+		cairo.set_source_rgba(1, 0, 0, 1.0);
+		var x = Math.floor(0.5 * (size - text_width) - text_x);
+		var y = Math.floor(0.5 * (size - text_height) - text_y);
+		cairo.move_to(x, y);
+		cairo.show_text(text);
+		pixbuf = Gdk.pixbuf_get_from_surface (surface, 0, 0, size, size);
 	}
 	
 	public static Gdk.Pixbuf? load_icon(string[] names, int size)
