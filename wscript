@@ -40,16 +40,16 @@ import subprocess
 try:
 	try:
 		# Read revision info from file revision-info created by ./waf dist
-		id, commiter = open("revision-info", "r").read().split(" ", 1)
+		short_id, long_id, commiter = open("revision-info", "r").read().split(" ", 2)
 	except Exception, e:
 		# Read revision info from current branch
-		output = subprocess.Popen(["git", "log", "-n", "1", "--pretty=format:%H %cn <%ce>"], stdout=subprocess.PIPE).communicate()[0]
-		id, commiter = output.split(" ", 1)
+		output = subprocess.Popen(["git", "log", "-n", "1", "--pretty=format:%h %H %cn <%ce>"], stdout=subprocess.PIPE).communicate()[0]
+		short_id, long_id, commiter = output.split(" ", 2)
 except Exception, e:
-	id, commiter = "fuzzy_id", "fuzzy_comitter"
+	short_id, long_id, commiter = "fuzzy_id", "fuzzy_id", "fuzzy_comitter"
 
 COMMITTER = str(commiter).strip()
-REVISION_ID = str(id).strip()
+REVISION_ID = str(long_id).strip()
 
 
 VERSIONS, VERSION_SUFFIX = VERSION.split("+")
@@ -343,9 +343,8 @@ def post(ctx):
 
 def dist(ctx):
 	ctx.algo = "tar.gz"
-	ctx.excl = '.bzr .bzrignore build/* **/.waf* **/*~ **/*.swp **/.lock* bzrcommit.txt **/*.pyc'
-	
-	ctx.exec_command("bzr revision-info > revision-info")
+	ctx.excl = '.git .gitignore build/* **/.waf* **/*~ **/*.swp **/.lock* bzrcommit.txt **/*.pyc'
+	ctx.exec_command("git log -n 1 --pretty='format:%h %H %cn <%ce>' > revision-info")
 	
 	def archive():
 		ctx._archive()
