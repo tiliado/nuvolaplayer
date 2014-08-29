@@ -651,8 +651,8 @@ WebApp._onActionActivated = function(object, name, param)
         git commit -m "Add player actions handling"
 
 !!! info "Custom actions"
-    Service integrations can also create custom actions like thumbs up/down or star rating. However,
-    documentation for custom actions hasn't been made yet.
+    Service integrations can also create [custom Actions]({filename}custom-actions.md) like thumbs
+    up/down or star rating.
 
 What to do next
 ===============
@@ -668,6 +668,9 @@ integration. You are encouraged to take a look at articles in advanced section t
     These forms are useful when you need to get user input.
   * [Web apps with a variable home page URL]({filename}variable-home-page-url.md):
     This article covers Web apps that don't have a single (constant) home page URL, so their home page has to be specified by user.
+  * [Custom Actions]({filename}custom-actions.md):
+    This article covers API that allows you to add custom actions like thumbs up/down rating.
+
 
 If you would like to have your service integration **maintained as a part of Nuvola
 Player project** and distributed in Nuvola Player repository, you have to follow

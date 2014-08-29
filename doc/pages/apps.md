@@ -55,6 +55,8 @@ Advanced
     These forms are useful when you need to get user input.
   * [Web apps with a variable home page URL]({filename}apps/variable-home-page-url.md):
     This article covers Web apps that don't have a single (constant) home page URL, so their home page has to be specified by user.
+  * [Custom Actions]({filename}apps/custom-actions.md):
+    This article covers API that allows you to add custom actions like thumbs up/down rating.
   
 [git]: http://git-scm.com/
 [github]: https://github.com/
