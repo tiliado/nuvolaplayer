@@ -276,7 +276,7 @@ On start-up, Nuvola Player performs following actions:
  1. App Runner emits the [Nuvola.Core::InitAppRunner signal](apiref>Nuvola.Core%3A%3AInitAppRunner)
     that is processed by [Nuvola.WebApp._onInitAppRunner handler](apiref>Nuvola.WebApp._onInitAppRunner)
     by default. This default handler does nothing, feel free to override it. See an article
-    [Initialization and Preferences Forms]({filename}apps/initialization-and-preferences-forms.md)
+    [Initialization and Preferences Forms]({filename}initialization-and-preferences-forms.md)
     for exmaples of use case.
     
  2. App Runner emits the [Nuvola.Core::LastPageRequest signal](apiref>Nuvola.Core%3A%3ALastPageRequest)
