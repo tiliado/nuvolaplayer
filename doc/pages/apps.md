@@ -27,6 +27,7 @@ Helpful
  
  * [Porting from Nuvola Player 2 to Nuvola Player 3]({filename}apps/porting.md)
  * [NuvolaKit 3.0 JavaScript API reference](apps/api_reference.html)
+ * [Advantages of Nuvola Player 3]({filename}nuvola_player_3_advantages.md)
   
 Basic
 -----
