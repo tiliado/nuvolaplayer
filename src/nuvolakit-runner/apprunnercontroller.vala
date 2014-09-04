@@ -239,16 +239,36 @@ public class AppRunnerController : Diorite.Application
 	{
 		var values = new HashTable<string, Variant>(str_hash, str_equal);
 		values.insert(ConfigKey.DARK_THEME, config.get_value(ConfigKey.DARK_THEME));
-		var form = new Diorite.Form.from_spec(values, new Variant.tuple({
-			new Variant.tuple({new Variant.string("header"), new Variant.string("Basic settings")}),
-			new Variant.tuple({new Variant.string("bool"), new Variant.string(ConfigKey.DARK_THEME), new Variant.string("Prefer dark theme")})
-		}));
+		Diorite.Form form;
+		try
+		{
+			form = Diorite.Form.create_from_spec(values, new Variant.tuple({
+				new Variant.tuple({new Variant.string("header"), new Variant.string("Basic settings")}),
+				new Variant.tuple({new Variant.string("bool"), new Variant.string(ConfigKey.DARK_THEME), new Variant.string("Prefer dark theme")})
+			}));
+		}
+		catch (Diorite.FormError e)
+		{
+			show_error("Preferences form error",
+				"Preferences form hasn't been shown because of malformed form specification: %s"
+				.printf(e.message));
+			return;
+		}
 		
-		Variant? extra_values = null;
-		Variant? extra_entries = null;
-		web_engine.get_preferences(out extra_values, out extra_entries);
-		form.add_values(Diorite.variant_to_hashtable(extra_values));
-		form.add_entries(extra_entries);
+		try
+		{
+			Variant? extra_values = null;
+			Variant? extra_entries = null;
+			web_engine.get_preferences(out extra_values, out extra_entries);
+			form.add_values(Diorite.variant_to_hashtable(extra_values));
+			form.add_entries(extra_entries);
+		}
+		catch (Diorite.FormError e)
+		{
+			show_error("Preferences form error",
+				"Some entries of the Preferences form haven't been shown because of malformed form specification: %s"
+				.printf(e.message));
+		}
 		
 		var dialog = new PreferencesDialog(this, main_window, form);
 		var response = dialog.run();
@@ -485,17 +505,26 @@ public class AppRunnerController : Diorite.Application
 			init_form = null;
 		}
 		
-		init_form = new Diorite.Form.from_spec(values, entries);
-		init_form.check_toggles();
-		init_form.expand = false;
-		init_form.valign = init_form.halign = Gtk.Align.CENTER;
-		init_form.show();
-		var button = new Gtk.Button.with_label("OK");
-		button.margin = 10;
-		button.show();
-		button.clicked.connect(on_init_form_button_clicked);
-		init_form.attach_next_to(button, null, Gtk.PositionType.BOTTOM, 2, 1);
-		main_window.overlay.add_overlay(init_form);
+		try
+		{
+			init_form = Diorite.Form.create_from_spec(values, entries);
+			init_form.check_toggles();
+			init_form.expand = false;
+			init_form.valign = init_form.halign = Gtk.Align.CENTER;
+			init_form.show();
+			var button = new Gtk.Button.with_label("OK");
+			button.margin = 10;
+			button.show();
+			button.clicked.connect(on_init_form_button_clicked);
+			init_form.attach_next_to(button, null, Gtk.PositionType.BOTTOM, 2, 1);
+			main_window.overlay.add_overlay(init_form);
+		}
+		catch (Diorite.FormError e)
+		{
+			show_error("Initialization form error",
+				"Initialization form hasn't been shown because of malformed form specification: %s"
+				.printf(e.message));
+		}
 	}
 	
 	private void on_init_form_button_clicked(Gtk.Button button)
