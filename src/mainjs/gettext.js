@@ -46,6 +46,8 @@ var Translate = {};
  * 
  * ```
  * var _ = Nuvola.Translate.gettext;
+ * /// You can use tree slashes to add comment for translators.
+ * /// It has to be on a line preceding the translated string though.
  * console.log(_("Hello world!")); // Right
  * 
  * var greeting = "Hello world!";
@@ -85,6 +87,8 @@ Translate.gettext = function(text)
  * 
  * ```
  * var C_ = Nuvola.Translate.pgettext;
+ * /// You can use tree slashes to add comment for translators.
+ * /// It has to be on a line preceding the translated string though.
  * console.log(C_("Navigation", "Back"));
  * console.log(C_("Body part", "Back"));
  * ```
@@ -126,6 +130,15 @@ Translate.pgettext = function(context, text)
  *     "There are {1} eggs in the fridge.",
  *     eggs);
  * console.log(Nuvola.format(text, eggs));
+ * 
+ * var text = ngettext(
+ *     /// You can use tree slashes to add comment for translators.
+ *     /// It has to be on a line preceding the singular string though.
+ *     /// {1} will be replaced by number of eggs in both forms,
+ *     /// but can be omitted as shown in singular form.
+ *     "There is one egg in the fridge.",
+ *     "There are {1} eggs in the fridge.",
+ *     eggs);
  * ```
  */
 Translate.ngettext = function(text1, text2, n)
