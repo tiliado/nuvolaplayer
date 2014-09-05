@@ -26,6 +26,14 @@ require("logging");
 
 /**
  * @namespace Translation functions.
+ * 
+ * These functions are only placeholders for now, but you can use them to mark translatable strings
+ * and then check whether they are properly recognized by a tool ``xgettext`` from the ``gettext``
+ * package.
+ * 
+ * ```sh
+ * xgettext --from-code=utf-8 -kC_:1c,2 -c/ -o- integrate.js
+ * ```
  */
 var Translate = {};
 
