@@ -212,6 +212,19 @@ class MixinSymbol(Node):
         else:
             print("Error: type '%s' not supported for mixins. %s" % (child.type, child))
 
+class NamespaceSymbol(Node):
+    def __init__(self, source, lineno, line, parts, doc):
+        parent, name = rdotsplit(parts[0])
+        Node.__init__(self, source, lineno, parent, name, doc)
+        self.methods = []
+    
+    def append(self, child):
+        if isinstance(child, FunctionSymbol):
+            self.methods.append(child)
+            self.methods.sort(key=lambda i: i.name)
+        else:
+            print("Error: type '%s' not supported for namespaces. %s" % (child.type, child))
+
 
 class PrototypeSymbol(Node):
     def __init__(self, source, lineno, line, parts, doc):
@@ -308,8 +321,8 @@ class HtmlPrinter(object):
         index.append("<h3>Namespace {0}</h3>".format(escape(self.ns)))
         body.append("<h2>Namespace {0}</h2>".format(escape(self.ns)))
         
-        types = ("field", "function", "prototype", "mixin", "enum")
-        types_names = ("Fields", "Functions", "Prototypes", "Mixins", "Enums")
+        types = ("field", "function", "prototype", "namespace", "mixin", "enum")
+        types_names = ("Fields", "Functions", "Prototypes", "Namespaces", "Mixins", "Enums")
         for i in xrange(len(types)):
             type_name = escape(types_names[i])
             index.append('<h4>{0}</h4>\n<ul>\n'.format(type_name))
@@ -419,6 +432,21 @@ class HtmlPrinter(object):
         for item in node.items:
             body.append('<li><b id="{0}">{1}</b> - {2}</li>\n'.format(escape(self.tree.get_symbol_name(item)), escape(item.name), self.replace_links(escape(" ".join(self.join_buffers(item.doc[DOC_DESC]))))))
         
+        body.append('</ul></li>\n')
+    
+    def process_namespace(self, symbol, node, index, body):
+        html_symbol = escape(symbol)
+        html_bare_symbol = escape(self.strip_ns(symbol))
+        html_name = escape(node.name)
+        index.append('<li><a href="#{0}">{1}</a>\n<ul>'.format(html_symbol, html_bare_symbol))
+        body.append('<li><small>namespace</small> <b id="{0}">{0}</b>\n<br />'.format(html_symbol))
+        body.extend(self.process_doc(node))
+        body.append("<ul>\n\n")
+        
+        for method in node.methods:
+            self.process_method(self.tree.get_symbol_name(method), method, index, body)
+        
+        index.append('</ul></li>\n')
         body.append('</ul></li>\n')
     
     def process_mixin(self, symbol, node, index, body):
@@ -545,7 +573,7 @@ DOC_TEXT = "@text"
 DOC_PARAM = "@param"
 DOC_RETURN = "@return"
 DOC_THROW = "@throws"
-DOC_IGNORE = ("@signal", "@mixin", "@enum")
+DOC_IGNORE = ("@signal", "@mixin", "@enum", "@namespace")
 
 def parse_doc_comment(doc):
     mode = DOC_DESC
@@ -616,6 +644,9 @@ def parse_symbol(symbol, doc_head):
         
         if "@mixin" in doc_head:
             return MixinSymbol, m.groups()
+            
+        if "@namespace" in doc_head:
+            return NamespaceSymbol, m.groups()
     
     m = PROTOTYPE_RE.match(symbol)
     if m:
