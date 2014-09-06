@@ -105,8 +105,8 @@ Translate.pgettext = function(context, text)
 {
     if (!context)
     {
-        Nuvola.warn("Context information passed to Translate.C_ is invalid: {1}, '{2}'", context, text);
-        return Translate["T_"](text);
+        Nuvola.warn("Context information passed to Translate.pgettext is invalid: {1}, '{2}'", context, text);
+        return Translate.gettext(text);
     }
     
     // TODO: string g_dpgettext2 (string domain, string context, string msgid)
