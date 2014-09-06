@@ -90,6 +90,8 @@ WebApp._onInitWebWorker = function(emitter)
 	var candyShop = Nuvola.$object(Shop, "King Street 1024, London", "candies");
 	candyShop.printAddress();
 	candyShop.printGoods();
+	
+	this.testTranslation();
 }
 
 WebApp._onAppendPreferences = function(emitter, values, entries)
@@ -116,6 +118,63 @@ WebApp.appendPreferences = function(values, entries)
 	entries.push(["option", COUNTRY_VARIANT, "fr", "France"]);
 	entries.push(["option", COUNTRY_VARIANT, "co.uk", "United Kingdom"]);
 	entries.push(["option", COUNTRY_VARIANT, "com", "United States"]);
+}
+
+WebApp.testTranslation = function()
+{
+    var _ = Nuvola.Translate.gettext;
+    
+    /// You can use tree slashes to add comment for translators.
+    /// It has to be on a line preceding the translated string though.
+    console.log(_("Hello world!"));
+    var name = "Jiří";
+    /// {1} will be replaced by name
+    console.log(Nuvola.format(_("Hello {1}!"), name));
+    
+    var ngettext = Nuvola.Translate.ngettext;
+    var eggs = 5;
+    var text = ngettext(
+        /// You can use tree slashes to add comment for translators.
+        /// It has to be on a line preceding the singular string though.
+        /// {1} will be replaced by number of eggs in both forms,
+        /// but can be omitted as shown in singular form.
+        "There is one egg in the fridge.",
+        "There are {1} eggs in the fridge.",
+        eggs);
+    console.log(Nuvola.format(text, eggs));
+    var eggs = 1;
+    var text = ngettext(
+        "There is one egg in the fridge.",
+        "There are {1} eggs in the fridge.",
+        eggs);
+    console.log(Nuvola.format(text, eggs));
+    
+    var C_ = Nuvola.Translate.pgettext;
+    
+    /// You can use tree slashes to add comment for translators.
+    /// It has to be on a line preceding the translated string though.
+    console.log(C_("Navigation", "Back"));
+    console.log(C_("Body part", "Back"));
+    
+    console.log(Nuvola.Translate.gettext("Bye World!"));
+    var name = "Jiří";
+    console.log(Nuvola.format(Nuvola.Translate.gettext("Bye {1}!"), name));
+    
+    var eggs = 5;
+    var text = Nuvola.Translate.ngettext(
+        "There is one child in the fridge.",
+        "There are {1} children in the fridge.",
+        eggs);
+    console.log(Nuvola.format(text, eggs));
+    var eggs = 1;
+    var text = Nuvola.Translate.ngettext(
+        "There is one child in the fridge!",
+        "There are {1} children in the fridge!",
+        eggs);
+    console.log(Nuvola.format(text, eggs));
+    
+    console.log(Nuvola.Translate.pgettext("Navigation", "Forward"));
+    console.log(Nuvola.Translate.pgettext("Body part", "Forward"));
 }
 
 WebApp.start();
