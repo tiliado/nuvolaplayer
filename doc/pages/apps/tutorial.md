@@ -593,6 +593,9 @@ integration. You are encouraged to take a look at articles in advanced section t
     This article covers Web apps that don't have a single (constant) home page URL, so their home page has to be specified by user.
   * [Custom Actions]({filename}custom-actions.md):
     This article covers API that allows you to add custom actions like thumbs up/down rating.
+  * [Translations]({filename}translations.md): How to mark translatable strings for 
+    [Gettext-based](http://www.gnu.org/software/gettext/manual/gettext.html)
+    translations framework for service integration scripts.
 
 If you would like to have your service integration **maintained as a part of Nuvola
 Player project** and distributed in Nuvola Player repository, you have to follow

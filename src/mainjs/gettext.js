@@ -31,9 +31,7 @@ require("logging");
  * and then check whether they are properly recognized by a tool ``xgettext`` from the ``gettext``
  * package.
  * 
- * ```sh
- * xgettext --from-code=utf-8 -kC_:1c,2 -c/ -o- integrate.js
- * ```
+ * See also @link{doc>apps/translations.html|translations documentation}.
  */
 var Translate = {};
 

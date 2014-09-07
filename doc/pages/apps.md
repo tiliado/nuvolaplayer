@@ -58,6 +58,9 @@ Advanced
     This article covers Web apps that don't have a single (constant) home page URL, so their home page has to be specified by user.
   * [Custom Actions]({filename}apps/custom-actions.md):
     This article covers API that allows you to add custom actions like thumbs up/down rating.
+  * [Translations]({filename}apps/translations.md): How to mark translatable strings for 
+    [Gettext-based](http://www.gnu.org/software/gettext/manual/gettext.html)
+    translations framework for service integration scripts.
   
 [git]: http://git-scm.com/
 [github]: https://github.com/
