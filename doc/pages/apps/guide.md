@@ -621,7 +621,7 @@ WebApp._onPageReady = function()
 
 ...
 
-WebApp._onActionActivated = function(object, name, param)
+WebApp._onActionActivated = function(emitter, name, param)
 {
     switch (name)
     {
