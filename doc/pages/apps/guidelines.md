@@ -23,6 +23,8 @@ Rules
 
 6. You have to use Nuvola Player JavaScript API >= 3.0.
 
+7. You have to [mark translatable strings]({filename}translations.md) in ``integrate.js``.
+
 License
 ======= 
 
