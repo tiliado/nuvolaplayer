@@ -22,7 +22,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-Nuvola.formatRegExp = new RegExp("{-?[0-9]+}", "g");
+
 /**
  * Replaces placeholders in a template string with provided data.
  * 
@@ -36,12 +36,16 @@ Nuvola.formatRegExp = new RegExp("{-?[0-9]+}", "g");
  * ```js
  * alert(Nuvola.format("My name is {2}. {1} {2}!", "James", "Bond"));
  * // "My name is Bond. James Bond!"
+ * 
+ * // You can create an alias
+ * var $fmt = Nuvola.format;
+ * alert($fmt("My name is {2}. {1} {2}!", "James", "Bond"));
  * ```
  */
 Nuvola.format = function()
 {
     var args = arguments;
-    return args[0].replace(this.formatRegExp, function (item)
+    return args[0].replace(Nuvola.format._regex, function (item)
     {
         var index = parseInt(item.substring(1, item.length - 1));
         if (index > 0)
@@ -53,6 +57,8 @@ Nuvola.format = function()
         return "";
     });
 };
+
+Nuvola.format._regex = new RegExp("{-?[0-9]+}", "g");
 
 Nuvola.inArray = function(array, item)
 {
