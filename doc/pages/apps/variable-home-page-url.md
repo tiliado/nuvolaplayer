@@ -40,7 +40,9 @@ Configuration
 
 We use only one [configuration]({filename}configuration-and-session-storage.md) key,
 ``COUNTRY_VARIANT``, to hold which national variant is preferred. Other defined variables
-(constants by convention) will be used later.
+(constants by convention) will be used later. Note that 
+[translation function]({filename}translations.md) alias ``C_`` is used mark short translatable
+strings with context information.
 
 ```js
 ...
@@ -49,14 +51,17 @@ We use only one [configuration]({filename}configuration-and-session-storage.md) 
 {
 
 ...
-
+// Translations
+var _ = Nuvola.Translate.gettext;
+var C_ = Nuvola.Translate.pgettext;
+...
 var COUNTRY_VARIANT = "app.country_variant";
 var HOME_PAGE = "http://www.amazon.{1}/gp/dmusic/mp3/player";
 var COUNTRY_VARIANTS = [
-    ["de", "Germany"],
-    ["fr", "France"],
-    ["co.uk", "United Kingdom"],
-    ["com", "United States"]
+    ["de", C_("Amazon variant", "Germany")],
+    ["fr", C_("Amazon variant", "France")],
+    ["co.uk", C_("Amazon variant", "United Kingdom")],
+    ["com", C_("Amazon variant", "United States")]
 ];
 ...
 
@@ -75,9 +80,14 @@ Initialization Form
 
 The [initialization form]({filename}initialization-and-preferences-forms.md) contains one radio
 entry for each value of ``COUNTRY_VARIANT`` key. The empty string as a default value ensures the
-first radio entry is selected by default.
+first radio entry is selected by default. Note that 
+[translation function]({filename}translations.md) alias ``_`` is used mark translatable strings.
 
 ```js
+...
+// Translations
+var _ = Nuvola.Translate.gettext;
+var C_ = Nuvola.Translate.pgettext;
 ...
 
 WebApp._onInitAppRunner = function(emitter, values, entries)
@@ -91,9 +101,8 @@ WebApp._onInitAppRunner = function(emitter, values, entries)
 WebApp.appendPreferences = function(values, entries)
 {
     values[COUNTRY_VARIANT] = Nuvola.config.get(COUNTRY_VARIANT);
-    entries.push(["header", "Amazon Cloud Player"]);
-    entries.push(["label", "Preferred national variant"]);
-    
+    entries.push(["header", _("Amazon Cloud Player")]);
+    entries.push(["label", _("Preferred national variant")]);
     for (var i = 0; i < COUNTRY_VARIANTS.length; i++)
         entries.push(["option", COUNTRY_VARIANT, COUNTRY_VARIANTS[i][0], COUNTRY_VARIANTS[i][1]]);
 }
@@ -200,9 +209,13 @@ Initialization Form
 The [initialization form]({filename}initialization-and-preferences-forms.md) contains two radio
 entries (one for each value of ``ADDRESS`` key) and two text entries for ``HOST`` and ``PORT`` keys.
 Note that the text entries are disabled (insensitive) when ``ADDRESS`` entry is set to
-``ADDRESS_DEFAULT``. Try it out ;-)
+``ADDRESS_DEFAULT``. Try it out ;-) Note that 
+[translation function]({filename}translations.md) alias ``_`` is used mark translatable strings.
 
 ```js
+...
+// Translations
+var _ = Nuvola.Translate.gettext;
 ...
 
 WebApp._onInitAppRunner = function(emitter, values, entries)
@@ -218,12 +231,12 @@ WebApp.appendPreferences = function(values, entries)
     values[ADDRESS] = Nuvola.config.get(ADDRESS);
     values[HOST] = Nuvola.config.get(HOST);
     values[PORT] = Nuvola.config.get(PORT);
-    entries.push(["header", "Logitech Media Server"]);
-    entries.push(["label", "Address of your Logitech Media Server"]);
+    entries.push(["header", _("Logitech Media Server")]);
+    entries.push(["label", _("Address of your Logitech Media Server")]);
     entries.push(["option", ADDRESS, ADDRESS_DEFAULT,
-        "use default address ('localhost:9000')", null, [HOST, PORT]]);
+        _("use default address ('localhost:9000')"), null, [HOST, PORT]]);
     entries.push(["option", ADDRESS, ADDRESS_CUSTOM,
-        "use custom address", [HOST, PORT], null]);
+        _("use custom address"), [HOST, PORT], null]);
     entries.push(["string", HOST, "Host"]);
     entries.push(["string", PORT, "Port"]);
 }

@@ -23,9 +23,14 @@ from letters, digits and dash. Then we create the actions in
     [Nuvola.Actions.addRadioAction](apiref>Nuvola.Actions.addRadioAction). Options are specified
     by an array ``ratingOptions`` and the initial state is set to ``0`` (0 starts).
 
+Note that [translation function]({filename}translations.md) alias ``C_`` is used mark short
+translatable strings with context information ("Action").
+
 ```js
 ...
-
+// Translations
+var C_ = Nuvola.Translate.pgettext;
+...
 var ACTION_ALERT = "x-alert";
 var ACTION_THUMBS_UP = "thumbs-up";
 var ACTION_THUMBS_DOWN = "thumbs-down";
@@ -39,11 +44,11 @@ WebApp._onInitAppRunner = function(emitter, values, entries)
 {
     Nuvola.WebApp._onInitAppRunner.call(this, emitter, values, entries);
     
-    Nuvola.actions.addAction("playback", "win", ACTION_ALERT, "Alert!",
+    Nuvola.actions.addAction("playback", "win", ACTION_ALERT, C_("Action", "Alert!"),
         null, null, null, null);
-    Nuvola.actions.addAction("playback", "win", ACTION_THUMBS_UP, "Thumbs up",
+    Nuvola.actions.addAction("playback", "win", ACTION_THUMBS_UP, C_("Action", "Thumbs up"),
         null, null, null, true);
-    Nuvola.actions.addAction("playback", "win", ACTION_THUMBS_DOWN, "Thumbs down",
+    Nuvola.actions.addAction("playback", "win", ACTION_THUMBS_DOWN, C_("Action", "Thumbs down"),
         null, null, null, true);
     var ratingOptions = [
         // stateId, label, mnemo_label, icon, keybinding

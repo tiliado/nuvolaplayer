@@ -173,6 +173,8 @@ Option entry: ``["option", key, value, label, enableEntries, disableEntries]``
 Sample Form
 ===========
 
+This sample form also makes use of [translation functions]({filename}translations.md).
+
 ![Example of form fields]({filename}/images/guide/form_fields_example.png)
 
     :::js
@@ -181,6 +183,11 @@ Sample Form
     (function(Nuvola)
     {
     
+    ...
+    // Translations
+    var _ = Nuvola.Translate.gettext;
+    var C_ = Nuvola.Translate.pgettext;
+    ...
     /* Form keys and values */
     var USER_NAME = "app.user_name";
     var MARRIED = "app.married";
@@ -194,6 +201,12 @@ Sample Form
     var HOST = "app.host";
     var PORT = "app.port";
     var COUNTRY_VARIANT = "app.country_variant";
+    var COUNTRY_VARIANTS = [
+        ["de", C_("Amazon variant", "Germany")],
+        ["fr", C_("Amazon variant", "France")],
+        ["co.uk", C_("Amazon variant", "United Kingdom")],
+        ["com", C_("Amazon variant", "United States")]
+    ];
     
     ...
     
@@ -229,31 +242,29 @@ Sample Form
         values[MARRIED] = Nuvola.config.get(MARRIED);
         values[SPOUSE] = Nuvola.config.get(SPOUSE);
         values[WANNA_MARRY] = Nuvola.config.get(WANNA_MARRY);
-        entries.push(["header", "My Beautiful Media Server"]);
-        entries.push(["string", USER_NAME, "Your name"]);
-        entries.push(["bool", MARRIED, "I'm married", [SPOUSE], [WANNA_MARRY]]);
-        entries.push(["string", SPOUSE, "Your spouse"]);
-        entries.push(["bool", WANNA_MARRY, "I want to get married"]);
+        entries.push(["header", _("My Beautiful Media Server")]);
+        entries.push(["string", USER_NAME, C_("Service preferences", "Your name")]);
+        entries.push(["bool", MARRIED, C_("Service preferences", "I'm married"), [SPOUSE], [WANNA_MARRY]]);
+        entries.push(["string", SPOUSE, C_("Service preferences", "Your spouse")]);
+        entries.push(["bool", WANNA_MARRY, C_("Service preferences", "I want to get married")]);
         
         values[ADDRESS] = Nuvola.config.get(ADDRESS);
         values[HOST] = Nuvola.config.get(HOST);
         values[PORT] = Nuvola.config.get(PORT);
-        entries.push(["header", "Logitech Media Server"]);
-        entries.push(["label", "Address of your Logitech Media Server"]);
+        entries.push(["header", _("Logitech Media Server")]);
+        entries.push(["label", _("Address of your Logitech Media Server")]);
         entries.push(["option", ADDRESS, ADDRESS_DEFAULT,
-            "use default address ('localhost:9000')", null, [HOST, PORT]]);
+            _("use default address ('localhost:9000')"), null, [HOST, PORT]]);
         entries.push(["option", ADDRESS, ADDRESS_CUSTOM,
-            "use custom address", [HOST, PORT], null]);
+            _("use custom address"), [HOST, PORT], null]);
         entries.push(["string", HOST, "Host"]);
         entries.push(["string", PORT, "Port"]);
         
         values[COUNTRY_VARIANT] = Nuvola.config.get(COUNTRY_VARIANT);
-        entries.push(["header", "Amazon Cloud Player"]);
-        entries.push(["label", "Preferred national variant"]);
-        entries.push(["option", COUNTRY_VARIANT, "de", "Germany"]);
-        entries.push(["option", COUNTRY_VARIANT, "fr", "France"]);
-        entries.push(["option", COUNTRY_VARIANT, "co.uk", "United Kingdom"]);
-        entries.push(["option", COUNTRY_VARIANT, "com", "United States"]);
+        entries.push(["header", _("Amazon Cloud Player")]);
+        entries.push(["label", _("Preferred national variant")]);
+        for (var i = 0; i < COUNTRY_VARIANTS.length; i++)
+            entries.push(["option", COUNTRY_VARIANT, COUNTRY_VARIANTS[i][0], COUNTRY_VARIANTS[i][1]]);
     }
     
     ...
