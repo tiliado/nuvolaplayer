@@ -82,7 +82,7 @@ add extra configuration option not necessary needed in initialization phase.
 
 Preferences form is shown when user select Preferences from menu. NuvolaKit allows you to add
 preferences specific to your service integration in 
-[Nuvola.Core::AppendPreferences](apiref>Nuvola.Core%3A%3AAppendPreferences) signal handler.
+[Nuvola.Core::PreferencesForm](apiref>Nuvola.Core%3A%3APreferencesForm) signal handler.
 API used in ``WebApp.appendPreferences`` will be [described later](#form-specification).
 
     :::js
@@ -101,11 +101,11 @@ API used in ``WebApp.appendPreferences`` will be [described later](#form-specifi
         
         ...
         
-        // Call this._onAppendPreferences on AppendPreferences signal
-        Nuvola.core.connect("AppendPreferences", this);
+        // Call this._onPreferencesForm on PreferencesForm signal
+        Nuvola.core.connect("PreferencesForm", this);
     }
     
-    WebApp._onAppendPreferences = function(emitter, values, entries)
+    WebApp._onPreferencesForm = function(emitter, values, entries)
     {
         this.appendPreferences(values, entries);
     }
@@ -122,7 +122,7 @@ API used in ``WebApp.appendPreferences`` will be [described later](#form-specifi
 ![Preferences form]({filename}/images/guide/preferences_form.png)
 
 !!! danger "Global window object not available"
-    The [Nuvola.Core::AppendPreferences](apiref>Nuvola.Core%3A%3AAppendPreferences) signal is executed in a
+    The [Nuvola.Core::PreferencesForm](apiref>Nuvola.Core%3A%3APreferencesForm) signal is executed in a
     pure JavaScript environment without [Window object](https://developer.mozilla.org/en/docs/Web/API/Window).
     Use [Nuvola.log()](apiref>Nuvola.log) to print logging and debugging messages to terminal
     instead of [console.log()](https://developer.mozilla.org/en-US/docs/Web/API/console.log).
@@ -139,7 +139,7 @@ Form Specification
 ==================
 
 Both [Nuvola.Core::InitAppRunner](apiref>Nuvola.Core%3A%3AInitAppRunner) and
-[Nuvola.Core::AppendPreferences](apiref>Nuvola.Core%3A%3AAppendPreferences) signals contain
+[Nuvola.Core::PreferencesForm](apiref>Nuvola.Core%3A%3APreferencesForm) signals contain
 ``values`` and ``entries`` parameters to describe forms. ``values`` is an object that contains
 key-value pairs describing current configuration. These values will appear in the form. ``entries``
 is an array that contains specifications of form entries. Each form entry is an array, the first
@@ -227,11 +227,11 @@ This sample form also makes use of [translation functions]({filename}translation
         Nuvola.config.setDefault(COUNTRY_VARIANT, "fr");
         
         this.appendPreferences(values, entries);
-        Nuvola.core.connect("AppendPreferences", this);
+        Nuvola.core.connect("PreferencesForm", this);
     }
     
     
-    WebApp._onAppendPreferences = function(emitter, values, entries)
+    WebApp._onPreferencesForm = function(emitter, values, entries)
     {
         this.appendPreferences(values, entries);
     }

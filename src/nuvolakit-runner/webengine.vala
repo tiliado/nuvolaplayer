@@ -243,7 +243,7 @@ public class WebEngine : GLib.Object
 	
 	public void get_preferences(out Variant values, out Variant entries)
 	{
-		var args = new Variant("(s@a{sv}@av)", "AppendPreferences", new Variant.array(new VariantType("{sv}"), {}), new Variant.array(VariantType.VARIANT, {}));
+		var args = new Variant("(s@a{sv}@av)", "PreferencesForm", new Variant.array(new VariantType("{sv}"), {}), new Variant.array(VariantType.VARIANT, {}));
 		try
 		{
 			env.call_function("Nuvola.core.emit", ref args);

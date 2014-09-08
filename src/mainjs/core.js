@@ -123,7 +123,7 @@ Core.$init = function()
      *     @link{doc>apps/initialization-and-preferences-forms.html|Initialization and Preferences Forms}
      *     for details
      */
-    this.addSignal("AppendPreferences");
+    this.addSignal("PreferencesForm");
 }
 
 /**

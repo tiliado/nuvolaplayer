@@ -64,7 +64,7 @@ WebApp._onInitAppRunner = function(emitter, values, entries)
     Nuvola.config.setDefault(PORT, "");
     Nuvola.config.setDefault(COUNTRY_VARIANT, "com");
     
-    Nuvola.core.connect("AppendPreferences", this);
+    Nuvola.core.connect("PreferencesForm", this);
     
     if (!Nuvola.config.hasKey(ADDRESS))
         this.appendPreferences(values, entries);
@@ -207,7 +207,7 @@ WebApp._onActionActivated = function(emitter, name, param)
     }
 }
 
-WebApp._onAppendPreferences = function(emitter, values, entries)
+WebApp._onPreferencesForm = function(emitter, values, entries)
 {
     this.appendPreferences(values, entries);
 }

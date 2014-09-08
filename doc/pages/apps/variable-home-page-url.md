@@ -20,7 +20,7 @@ flexibility, we need more magic:
 
 !!! danger "Global window object not available"
     Both [Nuvola.Core::InitAppRunner](apiref>Nuvola.Core%3A%3AInitAppRunner) and
-    [Nuvola.Core::AppendPreferences](apiref>Nuvola.Core%3A%3AAppendPreferences) signals mentioned in
+    [Nuvola.Core::PreferencesForm](apiref>Nuvola.Core%3A%3APreferencesForm) signals mentioned in
     this article are executed in a pure JavaScript environment without
     [Window object](https://developer.mozilla.org/en/docs/Web/API/Window).
     Use [Nuvola.log()](apiref>Nuvola.log) to print logging and debugging messages to terminal
@@ -125,10 +125,10 @@ WebApp._onInitAppRunner = function(emitter, values, entries)
     if (!Nuvola.config.hasKey(COUNTRY_VARIANT))
         this.appendPreferences(values, entries);
     
-    Nuvola.core.connect("AppendPreferences", this);
+    Nuvola.core.connect("PreferencesForm", this);
 }
 
-WebApp._onAppendPreferences = function(emitter, values, entries)
+WebApp._onPreferencesForm = function(emitter, values, entries)
 {
     this.appendPreferences(values, entries);
 }
@@ -259,10 +259,10 @@ WebApp._onInitAppRunner = function(emitter, values, entries)
     if (!Nuvola.config.hasKey(ADDRESS))
         this.appendPreferences(values, entries);
     
-    Nuvola.core.connect("AppendPreferences", this);
+    Nuvola.core.connect("PreferencesForm", this);
 }
 
-WebApp._onAppendPreferences = function(emitter, values, entries)
+WebApp._onPreferencesForm = function(emitter, values, entries)
 {
     this.appendPreferences(values, entries);
 }

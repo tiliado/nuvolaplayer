@@ -268,7 +268,7 @@ MediaPlayer._onInitAppRunner = function(emitter, values, entries)
     this._notification.setActions([PlayerAction.PLAY, PlayerAction.PAUSE, PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG]);
     Nuvola.config.setDefault(this._BACKGROUND_PLAYBACK, true);
     this._updateMenu();
-    Nuvola.core.connect("AppendPreferences", this);
+    Nuvola.core.connect("PreferencesForm", this);
 }
 
 MediaPlayer._onInitWebWorker = function(emitter)
@@ -364,7 +364,7 @@ MediaPlayer._setHideOnClose = function()
         Nuvola.core.setHideOnClose(false);
 }
 
-MediaPlayer._onAppendPreferences = function(object, values, entries)
+MediaPlayer._onPreferencesForm = function(object, values, entries)
 {
     values[this._BACKGROUND_PLAYBACK] = Nuvola.config.get(this._BACKGROUND_PLAYBACK);
     entries.push(["bool", this._BACKGROUND_PLAYBACK, "Keep playing in background when window is closed"]);
