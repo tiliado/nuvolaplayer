@@ -37,15 +37,19 @@ Core.$init = function()
 {
     /** 
      * Emitted at start-up when initialization of the app runner process is needed.
-     * You can use it to append entries to initialization form (e. g. preferred national variant
-     * or address of custom service instance) and to perform own initialization routine.
+     * You can use it to perform own initialization routine.
+     */
+    this.addSignal("InitAppRunner");
+    
+    /** 
+     * Emitted at start-up when initialization form is being built.
      * 
      * @param Object values                       mapping between form field names and their values
      * @param "Array of FormFieldArray" fields    specification of form fields, see
      *     @link{doc>apps/initialization-and-preferences-forms.html|Initialization and Preferences Forms}
      *     for details 
      */
-    this.addSignal("InitAppRunner");
+    this.addSignal("InitializationForm");
     
     /** 
      * @signal InitWebWorker     initialize web worker process hook

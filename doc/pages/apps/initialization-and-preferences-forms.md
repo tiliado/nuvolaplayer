@@ -6,7 +6,7 @@ you might want to get some user input. Theoretically, you could use
 JavaScript method ``window.prompt()``, but Nuvola Player offers better methods:
 initialization and preferences forms.
 
-Initialization From
+Initialization Form
 ===================
 
 Initialization form can be requested at a start-up of a web app instance before any web page is
@@ -15,7 +15,7 @@ For example, Logitech Media Server integration needs to know an address of serve
 because it has no idea what web page to load without this information.
 
 The initialization from is show when ``entries`` parameter of 
-[Nuvola.Core::InitAppRunner](apiref>Nuvola.Core%3A%3AInitAppRunner) signal
+[Nuvola.Core::InitializationForm](apiref>Nuvola.Core%3A%3AInitializationForm) signal
 handler is not left empty. The example bellow asks user to provide name to show a greeting.
 API used in ``WebApp.appendPreferences`` will be [described later](#form-specification).
 
@@ -31,12 +31,17 @@ API used in ``WebApp.appendPreferences`` will be [described later](#form-specifi
     
     var WebApp = Nuvola.$WebApp();
     
-    WebApp._onInitAppRunner = function(emitter, values, entries)
+    WebApp._onInitAppRunner = function(emitter)
     {
-        Nuvola.WebApp._onInitAppRunner.call(this, emitter, values, entries);
+        Nuvola.WebApp._onInitAppRunner.call(this, emitter);
         
         Nuvola.config.setDefault(USER_NAME, "");
         
+        Nuvola.core.connect("InitializationForm", this);
+    }
+    
+    WebApp._onInitializationForm = function(emitter, values, entries)
+    {
         // If user name is not configured, request initialization form
         if (!Nuvola.config.hasKey(USER_NAME))
             this.appendPreferences(values, entries);
@@ -65,7 +70,7 @@ API used in ``WebApp.appendPreferences`` will be [described later](#form-specifi
 ![After initialization form]({filename}/images/guide/after_initialization_form.png)
 
 !!! danger "Global window object not available"
-    The [Nuvola.Core::InitAppRunner](apiref>Nuvola.Core%3A%3AInitAppRunner) signal is executed in a
+    The [Nuvola.Core::InitializationForm](apiref>Nuvola.Core%3A%3AInitializationForm) signal is executed in a
     pure JavaScript environment without [Window object](https://developer.mozilla.org/en/docs/Web/API/Window).
     Use [Nuvola.log()](apiref>Nuvola.log) to print logging and debugging messages to terminal
     instead of [console.log()](https://developer.mozilla.org/en-US/docs/Web/API/console.log).
@@ -95,14 +100,21 @@ API used in ``WebApp.appendPreferences`` will be [described later](#form-specifi
     
     ...
     
-    WebApp._onInitAppRunner = function(emitter, values, entries)
+    WebApp._onInitAppRunner = function(emitter)
     {
-        Nuvola.WebApp._onInitAppRunner.call(this, emitter, values, entries);
+        Nuvola.WebApp._onInitAppRunner.call(this, emitter);
         
-        ...
+        Nuvola.config.setDefault(USER_NAME, "");
         
-        // Call this._onPreferencesForm on PreferencesForm signal
+        Nuvola.core.connect("InitializationForm", this);
         Nuvola.core.connect("PreferencesForm", this);
+    }
+    
+    WebApp._onInitializationForm = function(emitter, values, entries)
+    {
+        // If user name is not configured, request initialization form
+        if (!Nuvola.config.hasKey(USER_NAME))
+            this.appendPreferences(values, entries);
     }
     
     WebApp._onPreferencesForm = function(emitter, values, entries)
@@ -138,7 +150,7 @@ API used in ``WebApp.appendPreferences`` will be [described later](#form-specifi
 Form Specification
 ==================
 
-Both [Nuvola.Core::InitAppRunner](apiref>Nuvola.Core%3A%3AInitAppRunner) and
+Both [Nuvola.Core::InitializationForm](apiref>Nuvola.Core%3A%3AInitializationForm) and
 [Nuvola.Core::PreferencesForm](apiref>Nuvola.Core%3A%3APreferencesForm) signals contain
 ``values`` and ``entries`` parameters to describe forms. ``values`` is an object that contains
 key-value pairs describing current configuration. These values will appear in the form. ``entries``
@@ -212,9 +224,9 @@ This sample form also makes use of [translation functions]({filename}translation
     
     var WebApp = Nuvola.$WebApp();
     
-    WebApp._onInitAppRunner = function(emitter, values, entries)
+    WebApp._onInitAppRunner = function(emitter)
     {
-        Nuvola.WebApp._onInitAppRunner.call(this, emitter, values, entries);
+        Nuvola.WebApp._onInitAppRunner.call(this, emitter);
         
         /* Default configuration */
         Nuvola.config.setDefault(USER_NAME, "Mr. Incognito");
@@ -226,10 +238,16 @@ This sample form also makes use of [translation functions]({filename}translation
         Nuvola.config.setDefault(PORT, "9000");
         Nuvola.config.setDefault(COUNTRY_VARIANT, "fr");
         
-        this.appendPreferences(values, entries);
+        Nuvola.core.connect("InitializationForm", this);
         Nuvola.core.connect("PreferencesForm", this);
     }
     
+    WebApp._onInitializationForm = function(emitter, values, entries)
+    {
+        // If user name is not configured, request initialization form
+        if (!Nuvola.config.hasKey(USER_NAME))
+            this.appendPreferences(values, entries);
+    }
     
     WebApp._onPreferencesForm = function(emitter, values, entries)
     {

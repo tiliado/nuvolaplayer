@@ -40,9 +40,9 @@ only once at start-up.
     
     var WebApp = Nuvola.$WebApp();
     
-    WebApp._onInitAppRunner = function(emitter, values, entries)
+    WebApp._onInitAppRunner = function(emitter)
     {
-        Nuvola.WebApp._onInitAppRunner.call(this, emitter, values, entries);
+        Nuvola.WebApp._onInitAppRunner.call(this, emitter);
         
         Nuvola.config.setDefault(ADDRESS, "default");
         Nuvola.config.setDefault(HOST, "");
@@ -150,9 +150,9 @@ only once at start-up.
     
     var WebApp = Nuvola.$WebApp();
     
-    WebApp._onInitAppRunner = function(emitter, values, entries)
+    WebApp._onInitAppRunner = function(emitter)
     {
-        Nuvola.WebApp._onInitAppRunner.call(this, emitter, values, entries);
+        Nuvola.WebApp._onInitAppRunner.call(this, emitter);
         
         Nuvola.session.setDefault(ADDRESS, "default");
         Nuvola.session.setDefault(HOST, "");

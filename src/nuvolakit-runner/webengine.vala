@@ -40,6 +40,7 @@ public class WebEngine : GLib.Object
 	private Diorite.Ipc.MessageServer server = null;
 	private Diorite.Ipc.MessageClient web_worker = null;
 	private bool web_worker_ready = false;
+	private bool initialized = false;
 	
 	private static const string WEB_WORKER_SUFFIX = ".webworker";
 	private Config config;
@@ -77,7 +78,7 @@ public class WebEngine : GLib.Object
 		set_up_ipc();
 	}
 	
-	public signal void init_request(HashTable<string, Variant> values, Variant entries);
+	public signal void init_form(HashTable<string, Variant> values, Variant entries);
 	
 	private bool inject_api()
 	{
@@ -149,15 +150,33 @@ public class WebEngine : GLib.Object
 	
 	public bool load()
 	{
-		if (!inject_api())
-			return false;
+		if (!initialized)
+		{
+			if (!inject_api())
+				return false;
+			
+			if (!web_worker.wait_for_echo(2000))
+				error("Cannot connect to web worker process.");
+			
+			web_worker_ready = true;
+			
+			var args = new Variant("(s)", "InitAppRunner");
+			try
+			{
+				env.call_function("Nuvola.core.emit", ref args);
+			}
+			catch (JSError e)
+			{
+				app.fatal_error("Initialization error",
+					"%s failed to initialize app runner. Initialization exited with error:\n\n%s".printf(
+					app.app_name, e.message));
+				return false;
+			}
+			
+			initialized = true;
+		}
 		
-		if (!web_worker.wait_for_echo(2000))
-			error("Cannot connect to web worker process.");
-		
-		web_worker_ready = true;
-		
-		if (check_init_request())
+		if (check_init_form())
 			return true;
 		
 		return restore_session();
@@ -255,18 +274,18 @@ public class WebEngine : GLib.Object
 		args.get("(s@a{smv}@av)", null, out values, out entries);
 	}
 	
-	private bool check_init_request()
+	private bool check_init_form()
 	{
 		Variant values;
 		Variant entries;
-		var args = new Variant("(s@a{sv}@av)", "InitAppRunner", new Variant.array(new VariantType("{sv}"), {}), new Variant.array(VariantType.VARIANT, {}));
+		var args = new Variant("(s@a{sv}@av)", "InitializationForm", new Variant.array(new VariantType("{sv}"), {}), new Variant.array(VariantType.VARIANT, {}));
 		try
 		{
 			env.call_function("Nuvola.core.emit", ref args);
 		}
 		catch (JSError e)
 		{
-			app.fatal_error("Initialization error", "%s failed to initialize app runner. Initialization exited with error:\n\n%s".printf(app.app_name, e.message));
+			app.fatal_error("Initialization error", "%s failed to crate initialization form. Initialization exited with error:\n\n%s".printf(app.app_name, e.message));
 			return false;
 		}
 		
@@ -274,7 +293,7 @@ public class WebEngine : GLib.Object
 		var values_hashtable = Diorite.variant_to_hashtable(values);
 		if (values_hashtable.size() > 0)
 		{
-			init_request(values_hashtable, entries);
+			init_form(values_hashtable, entries);
 			return true;
 		}
 		return false;

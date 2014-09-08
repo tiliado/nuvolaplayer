@@ -49,9 +49,9 @@ KeyValueStorage.$init = function(index)
  * @param Variant value    value of the key
  * 
  * ```
- * WebApp._onInitAppRunner = function(emitter, values, entries)
+ * WebApp._onInitAppRunner = function(emitter)
  * {
- *     Nuvola.WebApp._onInitAppRunner.call(this, emitter, values, entries);
+ *     Nuvola.WebApp._onInitAppRunner.call(this, emitter);
  * 
  *     var ADDRESS = "app.address";
  *     // Nuvola.config is a KeyValueStorage

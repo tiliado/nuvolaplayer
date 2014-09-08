@@ -256,7 +256,7 @@ MediaPlayer.addExtraActions = function(actions)
 
 MediaPlayer._BACKGROUND_PLAYBACK = "player.background_playback";
 
-MediaPlayer._onInitAppRunner = function(emitter, values, entries)
+MediaPlayer._onInitAppRunner = function(emitter)
 {
     Nuvola.launcher.setActions(["quit"]);
     Nuvola.actions.addAction("playback", "win", PlayerAction.PLAY, "Play", null, "media-playback-start", null);

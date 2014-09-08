@@ -19,7 +19,8 @@ flexibility, we need more magic:
     ``metadata.json``.
 
 !!! danger "Global window object not available"
-    Both [Nuvola.Core::InitAppRunner](apiref>Nuvola.Core%3A%3AInitAppRunner) and
+    [Nuvola.Core::InitAppRunner](apiref>Nuvola.Core%3A%3AInitAppRunner),
+    [Nuvola.Core::InitializationForm](apiref>Nuvola.Core%3A%3AInitializationForm) and
     [Nuvola.Core::PreferencesForm](apiref>Nuvola.Core%3A%3APreferencesForm) signals mentioned in
     this article are executed in a pure JavaScript environment without
     [Window object](https://developer.mozilla.org/en/docs/Web/API/Window).
@@ -67,9 +68,9 @@ var COUNTRY_VARIANTS = [
 
 var WebApp = Nuvola.$WebApp();
 
-WebApp._onInitAppRunner = function(emitter, values, entries)
+WebApp._onInitAppRunner = function(emitter)
 {
-    Nuvola.WebApp._onInitAppRunner.call(this, emitter, values, entries);
+    Nuvola.WebApp._onInitAppRunner.call(this, emitter);
     
     Nuvola.config.setDefault(COUNTRY_VARIANT, "");
 }
@@ -90,10 +91,15 @@ var _ = Nuvola.Translate.gettext;
 var C_ = Nuvola.Translate.pgettext;
 ...
 
-WebApp._onInitAppRunner = function(emitter, values, entries)
+WebApp._onInitAppRunner = function(emitter)
 {
     ...
     
+    Nuvola.core.connect("InitializationForm", this);
+}
+
+WebApp._onInitializationForm = function(emitter, values, entries)
+{
     if (!Nuvola.config.hasKey(COUNTRY_VARIANT))
         this.appendPreferences(values, entries);
 }
@@ -118,13 +124,11 @@ form, so we reuse ``WebApp.appendPreferences()`` method.
 ```js
 ...
 
-WebApp._onInitAppRunner = function(emitter, values, entries)
+WebApp._onInitAppRunner = function(emitter)
 {
     ...
     
-    if (!Nuvola.config.hasKey(COUNTRY_VARIANT))
-        this.appendPreferences(values, entries);
-    
+    Nuvola.core.connect("InitializationForm", this);
     Nuvola.core.connect("PreferencesForm", this);
 }
 
@@ -192,9 +196,9 @@ var PORT = "app.port";
 
 var WebApp = Nuvola.$WebApp();
 
-WebApp._onInitAppRunner = function(emitter, values, entries)
+WebApp._onInitAppRunner = function(emitter)
 {
-    Nuvola.WebApp._onInitAppRunner.call(this, emitter, values, entries);
+    Nuvola.WebApp._onInitAppRunner.call(this, emitter);
     
     Nuvola.config.setDefault(ADDRESS, ADDRESS_DEFAULT);
     Nuvola.config.setDefault(HOST, "");
@@ -218,10 +222,15 @@ Note that the text entries are disabled (insensitive) when ``ADDRESS`` entry is 
 var _ = Nuvola.Translate.gettext;
 ...
 
-WebApp._onInitAppRunner = function(emitter, values, entries)
+WebApp._onInitAppRunner = function(emitter)
 {
     ...
     
+    Nuvola.core.connect("InitializationForm", this);
+}
+
+WebApp._onInitializationForm = function(emitter, values, entries)
+{
     if (!Nuvola.config.hasKey(ADDRESS))
         this.appendPreferences(values, entries);
 }
@@ -252,13 +261,11 @@ form, so we reuse ``WebApp.appendPreferences()`` method.
 ```js
 ...
 
-WebApp._onInitAppRunner = function(emitter, values, entries)
+WebApp._onInitAppRunner = function(emitter)
 {
     ...
     
-    if (!Nuvola.config.hasKey(ADDRESS))
-        this.appendPreferences(values, entries);
-    
+    Nuvola.core.connect("InitializationForm", this);
     Nuvola.core.connect("PreferencesForm", this);
 }
 

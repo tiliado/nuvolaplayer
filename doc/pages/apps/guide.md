@@ -275,17 +275,20 @@ On start-up, Nuvola Player performs following actions:
 
  1. App Runner emits the [Nuvola.Core::InitAppRunner signal](apiref>Nuvola.Core%3A%3AInitAppRunner)
     that is processed by [Nuvola.WebApp._onInitAppRunner handler](apiref>Nuvola.WebApp._onInitAppRunner)
-    by default. This default handler does nothing, feel free to override it. See an article
+    by default. This default handler does nothing, feel free to override it.
+
+ 2. App Runner emits the [Nuvola.Core::InitializationForm signal](apiref>Nuvola.Core%3A%3AInitializationForm)
+    to construct the initialization form. See an article
     [Initialization and Preferences Forms]({filename}initialization-and-preferences-forms.md)
-    for exmaples of use case.
+    for examples of use case.
     
- 2. App Runner emits the [Nuvola.Core::LastPageRequest signal](apiref>Nuvola.Core%3A%3ALastPageRequest)
+ 3. App Runner emits the [Nuvola.Core::LastPageRequest signal](apiref>Nuvola.Core%3A%3ALastPageRequest)
     that is processed by [Nuvola.WebApp._onLastPageRequest handler](apiref>Nuvola.WebApp._onLastPageRequest)
     by default. This handler returns URL of the last visited page or null. If the URL is valid, it
     is loaded in the Web Worker process and initialization is finished.
     **TODO** Advanced - Specify which URL should not be used as a last visited page
 
- 3. If the last visited page is null, App Runner emits the
+ 4. If the last visited page is null, App Runner emits the
     [Nuvola.Core::HomePageRequest signal](apiref>Nuvola.Core%3A%3AHomePageRequest) that is processed
     by [Nuvola.WebApp._onHomePageRequest handler](apiref>Nuvola.WebApp._onHomePageRequest) by default.
     This handler returns URL specified in the "home_url" field of `metadata.json`. If the URL is

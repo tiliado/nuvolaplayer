@@ -118,7 +118,7 @@ public class AppRunnerController : Diorite.Application
 		connection.session.add_feature_by_type(typeof(Soup.ProxyResolverDefault));
 		
 		web_engine = new WebEngine(this, web_app, config);
-		web_engine.init_request.connect(on_init_request);
+		web_engine.init_form.connect(on_init_form);
 		web_engine.notify.connect_after(on_web_engine_notify);
 		actions.action_changed.connect(on_action_changed);
 		var widget = web_engine.widget;
@@ -497,7 +497,7 @@ public class AppRunnerController : Diorite.Application
 			result = false;
 	}
 	
-	private void on_init_request(HashTable<string, Variant> values, Variant entries)
+	private void on_init_form(HashTable<string, Variant> values, Variant entries)
 	{
 		if (init_form != null)
 		{

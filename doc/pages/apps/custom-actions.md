@@ -40,9 +40,9 @@ var ACTION_RATING = "rating";
 
 var WebApp = Nuvola.$WebApp();
 
-WebApp._onInitAppRunner = function(emitter, values, entries)
+WebApp._onInitAppRunner = function(emitter)
 {
-    Nuvola.WebApp._onInitAppRunner.call(this, emitter, values, entries);
+    Nuvola.WebApp._onInitAppRunner.call(this, emitter);
     
     Nuvola.actions.addAction("playback", "win", ACTION_ALERT, C_("Action", "Alert!"),
         null, null, null, null);

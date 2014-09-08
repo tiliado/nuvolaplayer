@@ -55,19 +55,17 @@ var COUNTRY_VARIANTS = [
 // Create new WebApp prototype
 var WebApp = Nuvola.$WebApp();
 
-WebApp._onInitAppRunner = function(emitter, values, entries)
+WebApp._onInitAppRunner = function(emitter)
 {
-    Nuvola.WebApp._onInitAppRunner.call(this, emitter, values, entries);
+    Nuvola.WebApp._onInitAppRunner.call(this, emitter);
     
     Nuvola.config.setDefault(ADDRESS, ADDRESS_DEFAULT);
     Nuvola.config.setDefault(HOST, "");
     Nuvola.config.setDefault(PORT, "");
     Nuvola.config.setDefault(COUNTRY_VARIANT, "com");
     
+    Nuvola.core.connect("InitializationForm", this);
     Nuvola.core.connect("PreferencesForm", this);
-    
-    if (!Nuvola.config.hasKey(ADDRESS))
-        this.appendPreferences(values, entries);
 }
 
 // Initialization routines
@@ -205,6 +203,12 @@ WebApp._onActionActivated = function(emitter, name, param)
         Nuvola.clickOnElement(document.getElementById("next"));
         break;
     }
+}
+
+WebApp._onInitializationForm = function(emitter, values, entries)
+{
+    if (!Nuvola.config.hasKey(ADDRESS))
+        this.appendPreferences(values, entries);
 }
 
 WebApp._onPreferencesForm = function(emitter, values, entries)

@@ -103,7 +103,7 @@ WebApp._onUriChanged = function(object, uri)
 /**
  * Signal handler for @link{Core::InitAppRunner}
  */
-WebApp._onInitAppRunner = function(emitter, values, entries)
+WebApp._onInitAppRunner = function(emitter)
 {
 }
 
