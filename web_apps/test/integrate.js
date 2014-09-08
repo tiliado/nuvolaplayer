@@ -34,12 +34,23 @@ var player = Nuvola.$object(Nuvola.MediaPlayer);
 var PlaybackState = Nuvola.PlaybackState;
 var PlayerAction = Nuvola.PlayerAction;
 
+// Translations
+var _ = Nuvola.Translate.gettext;
+var C_ = Nuvola.Translate.pgettext;
+
+// Constants
 var ADDRESS = "app.address";
 var ADDRESS_DEFAULT = "default";
 var ADDRESS_CUSTOM = "custom";
 var HOST = "app.host";
 var PORT = "app.port";
 var COUNTRY_VARIANT = "app.country_variant";
+var COUNTRY_VARIANTS = [
+    ["de", C_("Amazon variant", "Germany")],
+    ["fr", C_("Amazon variant", "France")],
+    ["co.uk", C_("Amazon variant", "United Kingdom")],
+    ["com", C_("Amazon variant", "United States")]
+];
 
 // Create new WebApp prototype
 var WebApp = Nuvola.$WebApp();
@@ -206,20 +217,18 @@ WebApp.appendPreferences = function(values, entries)
     values[ADDRESS] = Nuvola.config.get(ADDRESS);
     values[HOST] = Nuvola.config.get(HOST);
     values[PORT] = Nuvola.config.get(PORT);
-    entries.push(["header", "Logitech Media Server"]);
-    entries.push(["label", "Address of your Logitech Media Server"]);
-    entries.push(["option", ADDRESS, ADDRESS_DEFAULT, "use default address ('localhost:9000')", null, [HOST, PORT]]);
-    entries.push(["option", ADDRESS, ADDRESS_CUSTOM, "use custom address", [HOST, PORT], null]);
+    entries.push(["header", _("Logitech Media Server")]);
+    entries.push(["label", _("Address of your Logitech Media Server")]);
+    entries.push(["option", ADDRESS, ADDRESS_DEFAULT, _("use default address ('localhost:9000')"), null, [HOST, PORT]]);
+    entries.push(["option", ADDRESS, ADDRESS_CUSTOM, _("use custom address"), [HOST, PORT], null]);
     entries.push(["string", HOST, "Host"]);
     entries.push(["string", PORT, "Port"]);
     
     values[COUNTRY_VARIANT] = Nuvola.config.get(COUNTRY_VARIANT);
-    entries.push(["header", "Amazon Cloud Player"]);
-    entries.push(["label", "Preferred national variant"]);
-    entries.push(["option", COUNTRY_VARIANT, "de", "Germany"]);
-    entries.push(["option", COUNTRY_VARIANT, "fr", "France"]);
-    entries.push(["option", COUNTRY_VARIANT, "co.uk", "United Kingdom"]);
-    entries.push(["option", COUNTRY_VARIANT, "com", "United States"]);
+    entries.push(["header", _("Amazon Cloud Player")]);
+    entries.push(["label", _("Preferred national variant")]);
+    for (var i = 0; i < COUNTRY_VARIANTS.length; i++)
+        entries.push(["option", COUNTRY_VARIANT, COUNTRY_VARIANTS[i][0], COUNTRY_VARIANTS[i][1]]);
 }
 
 WebApp.testPrototypes = function()
