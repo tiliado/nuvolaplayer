@@ -24,12 +24,14 @@ from letters, digits and dash. Then we create the actions in
     by an array ``ratingOptions`` and the initial state is set to ``0`` (0 starts).
 
 Note that [translation function]({filename}translations.md) alias ``C_`` is used mark short
-translatable strings with context information ("Action").
+translatable strings with context information ("Action") and ``ngettext`` for string with both
+singular and plural forms.
 
 ```js
 ...
 // Translations
 var C_ = Nuvola.Translate.pgettext;
+var ngettext = Nuvola.Translate.ngettext;
 ...
 var ACTION_ALERT = "x-alert";
 var ACTION_THUMBS_UP = "thumbs-up";
@@ -50,15 +52,16 @@ WebApp._onInitAppRunner = function(emitter)
         null, null, null, true);
     Nuvola.actions.addAction("playback", "win", ACTION_THUMBS_DOWN, C_("Action", "Thumbs down"),
         null, null, null, true);
-    var ratingOptions = [
-        // stateId, label, mnemo_label, icon, keybinding
-        [0, "Rating: 0 stars", null, null, null, null],
-        [1, "Rating: 1 star", null, null, null, null],
-        [2, "Rating: 2 stars", null, null, null, null],
-        [3, "Rating: 3 stars", null, null, null, null],
-        [4, "Rating: 4 stars", null, null, null, null],
-        [5, "Rating: 5 stars", null, null, null, null]
-    ];
+    var ratingOptions = [];
+    for (var stars = 0; stars < 6; stars++)
+        ratingOptions.push([
+            stars, // stateId
+            /// Star rating, {1} is a placeholder for a number 
+            Nuvola.format(ngettext("Rating: {1} star", "Rating: {1} stars", stars), stars), // label
+            null, // mnemo_label
+            null, // icon
+            null  // keybinding
+            ]);
     Nuvola.actions.addRadioAction("playback", "win", ACTION_RATING, 0, ratingOptions);
 }
 
