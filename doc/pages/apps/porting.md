@@ -18,9 +18,9 @@ See [sample metadata file in tutorial]({filename}tutorial.md#create-metadata-fil
 Mapping of old ``metadata.conf`` fields to the new ``metadata.json`` fields:
 
 :   
-      * ``id`` - it can now contain letters a-z, digits 0-9 and dash - to separate words, e.g.
-        google-play for Google Play Music, 8tracks for 8tracks.com. The id can differ from the directory
-        name of the service integration.
+      * ``id`` - it can now contain letters ``a-z``, digits ``0-9`` and dash ``_`` to separate
+        words, e.g. ``google_play_music`` for Google Play Music, ``8tracks`` for 8tracks.com.
+        The id can differ from the directory name of the service integration.
       * ``name`` - unchanged
       * ``version`` - increase major version number by one
       * ``version_minor`` - set minor version number to 0

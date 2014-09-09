@@ -437,15 +437,16 @@ public class WebAppRegistry: GLib.Object
 	 */
 	public static bool check_id(string id)
 	{
+		const string ID_REGEX = "^[a-z0-9]+(?:_[a-z0-9]+)*$";
 		if (id_regex == null)
 		{
 			try
 			{
-				id_regex = new Regex("^\\w+(-\\w+)*$");
+				id_regex = new Regex(ID_REGEX);
 			}
 			catch (RegexError e)
 			{
-				error("Unable to compile regular expression /^\\w+$/.");
+				error("Unable to compile regular expression /%s/.", ID_REGEX);
 			}
 		}
 		return id_regex.match(id);

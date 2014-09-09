@@ -66,7 +66,7 @@ Let's look at the example:
 
     :::json
     {
-        "id": "test-integration",
+        "id": "test_integration",
         "name": "My Test Integration",
         "maintainer_name": "Jiří Janoušek",
         "maintainer_link": "https://github.com/fenryxo",
@@ -82,8 +82,8 @@ This file contains several mandatory fields:
 
 `id`
 
-:   Identifier of the service. It can contain only letters `a-z`, digits `0-9` and dash `-` to
-    separate words, e.g. `google-play` for Google Play Music, `8tracks` for 8tracks.com.
+:   Identifier of the service. It can contain only letters `a-z`, digits `0-9` and underscore `_` to
+    separate words, e.g. `google_play_music` for Google Play Music, `8tracks` for 8tracks.com.
     (Nuvola Player 2 required the id must be same as the directory name of the service
     integration, but Nuvola Player 3 doesn't have this limitation.)
 
