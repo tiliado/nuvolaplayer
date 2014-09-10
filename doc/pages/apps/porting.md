@@ -77,7 +77,7 @@ taking into account following porting notes:
     describes how to use this new API.
   
   * Actions ``Nuvola.ACTION_THUMBS_UP/ACTION_THUMBS_DOWN/ACTION_LOVE`` are not defined by default,
-    but you can create them using custom actions API. **TODO** write docs.
+    but you can create them using [Custom Actions API ]({filename}custom-actions.md).
 
 
 Port settings

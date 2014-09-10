@@ -286,7 +286,7 @@ On start-up, Nuvola Player performs following actions:
     that is processed by [Nuvola.WebApp._onLastPageRequest handler](apiref>Nuvola.WebApp._onLastPageRequest)
     by default. This handler returns URL of the last visited page or null. If the URL is valid, it
     is loaded in the Web Worker process and initialization is finished.
-    **TODO** Advanced - Specify which URL should not be used as a last visited page
+    (TODO: Advanced - Specify which URL should not be used as a last visited page)
 
  4. If the last visited page is null, App Runner emits the
     [Nuvola.Core::HomePageRequest signal](apiref>Nuvola.Core%3A%3AHomePageRequest) that is processed
@@ -310,7 +310,7 @@ During run-time, Nuvola Player performs following actions:
   * App Runner emits [Nuvola.Core::NavigationRequest](apiref>Nuvola.Core%3A%3ANavigationRequest)
     just before navigation to a new page. That signal is processed by
     [Nuvola.WebApp._onNavigationRequest handler](apiref>Nuvola.WebApp._onNavigationRequest) by
-    default. **TODO** URL filtering.
+    default and used for [URL Filtering (URL Sandbox)]({filename}url-filtering.md).
     
   * App Runner emits [Nuvola.Core::UriChanged signal](apiref>Nuvola.Core%3A%3ANavigationRequest)
     when a new page is loaded. That signal is processed by

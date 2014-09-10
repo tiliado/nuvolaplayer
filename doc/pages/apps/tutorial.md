@@ -49,7 +49,9 @@ Prepare development environment
     project, because somebody ([*me*][me]) will have to create Git repository from tar.gz archive of your
     service integration anyway.
     
-    See [Git tutorial](https://try.github.io/levels/1/challenges/1).
+    If you are not familiar with the [Git version control system][git],
+    you can check [Git tutorial](https://try.github.io/levels/1/challenges/1)
+    and [Pro Git Book](http://git-scm.com/book).
     
         :::sh
         cd ~/projects/nuvola-player/test-integration
