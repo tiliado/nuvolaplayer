@@ -5,7 +5,16 @@ This guide describes porting of service integrations from Nuvola Player 2 to Nuv
 Prepare development environment
 ===============================
 
-Steps are described in [service integrations tutorial]({filename}tutorial.md).
+[Tiliado organization account](gh>tiliado) at Github.com might already contain a repository for
+your service integration you can base your work on. Names of the repositories of service
+integrations start with ``nuvola-app-``. If there is no repository for your service integration,
+follow steps described in section Prepare development environment of the
+[service integrations tutorial]({filename}tutorial.md).
+
+If you are not familiar with the
+[Git version control system][git], you can check
+[Git tutorial](https://try.github.io/levels/1/challenges/1) and
+[Pro Git Book](http://git-scm.com/book).
 
 Port metadata
 =============
@@ -98,3 +107,5 @@ service integrations for Nuvola Player 3 are more independent and are maintained
 See article [Distribute Service Integration]({filename}distribute.md) for details.
 
 [TOC]
+
+[git]: http://git-scm.com/
