@@ -86,7 +86,7 @@ public class WebEngine : GLib.Object
 			return true;
 		
 		env = new JsRuntime();
-		api = new JSApi(app.storage, web_app.data_dir, web_app.user_config_dir, config, session);
+		api = new JSApi(app.storage, web_app.meta.data_dir, web_app.user_config_dir, config, session);
 		api.send_message_async.connect(on_send_message_async);
 		api.send_message_sync.connect(on_send_message_sync);
 		try
@@ -135,11 +135,11 @@ public class WebEngine : GLib.Object
 		
 		if (uri.has_prefix("nuvola://"))
 		{
-			web_view.load_uri(web_app.data_dir.get_child(uri.substring(9)).get_uri());
+			web_view.load_uri(web_app.meta.data_dir.get_child(uri.substring(9)).get_uri());
 			return true;
 		}
 		
-		if (uri.has_prefix(web_app.data_dir.get_uri()))
+		if (uri.has_prefix(web_app.meta.data_dir.get_uri()))
 		{
 			web_view.load_uri(uri);
 			return true;
@@ -321,7 +321,7 @@ public class WebEngine : GLib.Object
 	private Variant? handle_get_data_dir(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
 		Diorite.Ipc.MessageServer.check_type_str(data, null);
-		return new Variant.string(web_app.data_dir.get_path());
+		return new Variant.string(web_app.meta.data_dir.get_path());
 	}
 	
 	private Variant? handle_get_user_config_dir(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError

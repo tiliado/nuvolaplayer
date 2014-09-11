@@ -62,7 +62,7 @@ public class WebAppListModel : Gtk.ListStore
 		Pos.VERSION, "%d.%d".printf(web_app.meta.version_major, web_app.meta.version_minor),
 		Pos.MAINTAINER_NAME, web_app.meta.maintainer_name,
 		Pos.MAINTAINER_LINK, web_app.meta.maintainer_link,
-		Pos.REMOVABLE, web_app.removable,
+		Pos.REMOVABLE, web_app.meta.removable,
 		-1);
 	}
 	

@@ -89,11 +89,10 @@ public class WebAppRegistry: GLib.Object
 		if  (meta == null)
 			return null;
 		
-		return new WebApp(meta, meta.data_dir,
+		return new WebApp(meta,
 			storage.user_config_dir.get_parent().get_child("apps_data").get_child(meta.id),
 			storage.user_data_dir.get_parent().get_child("apps_data").get_child(meta.id),
-			storage.user_cache_dir.get_parent().get_child("apps_data").get_child(meta.id),
-			meta.removable
+			storage.user_cache_dir.get_parent().get_child("apps_data").get_child(meta.id)
 		);
 	}
 	
@@ -120,12 +119,12 @@ public class WebAppRegistry: GLib.Object
 	public WebApp load_web_app_from_dir(File dir, bool removable=false) throws WebAppError
 	{
 		var meta = WebAppMeta.load_from_dir(dir);
-		return new WebApp(meta, dir,
+		meta.removable = removable;
+		return new WebApp(meta,
 			storage.user_config_dir.get_parent().get_child(WEB_APP_DATA_DIR).get_child(meta.id),
 			storage.user_data_dir.get_parent().get_child(WEB_APP_DATA_DIR).get_child(meta.id),
-			storage.user_cache_dir.get_parent().get_child(WEB_APP_DATA_DIR).get_child(meta.id),
-			removable
-		);
+			storage.user_cache_dir.get_parent().get_child(WEB_APP_DATA_DIR).get_child(meta.id)
+			);
 	}
 	
 	/**
@@ -347,7 +346,7 @@ public class WebAppRegistry: GLib.Object
 		if (!allow_management)
 			throw new WebAppError.NOT_ALLOWED("Web app management is disabled");
 		
-		var dir = app.data_dir;
+		var dir = app.meta.data_dir;
 		if (dir == null)
 			throw new WebAppError.IOERROR("Invalid web app directory");
 		
