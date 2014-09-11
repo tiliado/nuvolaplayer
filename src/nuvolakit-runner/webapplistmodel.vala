@@ -51,18 +51,18 @@ public class WebAppListModel : Gtk.ListStore
 		load();
 	}
 	
-	public void append_web_app(WebApp web_app, Gdk.Pixbuf? icon)
+	public void append_web_app(WebAppMeta web_app, Gdk.Pixbuf? icon)
 	{
 		Gtk.TreeIter iter;
 		append(out iter);
 		@set(iter,
-		Pos.ID, web_app.meta.id,
-		Pos.NAME, web_app.meta.name,
+		Pos.ID, web_app.id,
+		Pos.NAME, web_app.name,
 		Pos.ICON, icon,
-		Pos.VERSION, "%d.%d".printf(web_app.meta.version_major, web_app.meta.version_minor),
-		Pos.MAINTAINER_NAME, web_app.meta.maintainer_name,
-		Pos.MAINTAINER_LINK, web_app.meta.maintainer_link,
-		Pos.REMOVABLE, web_app.meta.removable,
+		Pos.VERSION, "%d.%d".printf(web_app.version_major, web_app.version_minor),
+		Pos.MAINTAINER_NAME, web_app.maintainer_name,
+		Pos.MAINTAINER_LINK, web_app.maintainer_link,
+		Pos.REMOVABLE, web_app.removable,
 		-1);
 	}
 	
@@ -70,7 +70,7 @@ public class WebAppListModel : Gtk.ListStore
 	{
 		var web_apps = web_app_reg.list_web_apps();
 		foreach (var web_app in web_apps.get_values())
-			append_web_app(web_app, WebAppListView.load_icon(web_app.meta.icon, Nuvola.get_app_icon()));
+			append_web_app(web_app, WebAppListView.load_icon(web_app.icon, Nuvola.get_app_icon()));
 	}
 	
 	private void on_app_installed_or_removed()

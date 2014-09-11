@@ -77,26 +77,7 @@ public class WebAppRegistry: GLib.Object
 	 */
 	public signal void app_removed(string id);
 	
-	/**
-	 * Loads service by id.
-	 * 
-	 * @param id service id
-	 * @return service
-	 */
-	public WebApp? get_app(string id)
-	{
-		var meta = lookup_app(id);
-		if  (meta == null)
-			return null;
-		
-		return new WebApp(meta,
-			storage.user_config_dir.get_parent().get_child("apps_data").get_child(meta.id),
-			storage.user_data_dir.get_parent().get_child("apps_data").get_child(meta.id),
-			storage.user_cache_dir.get_parent().get_child("apps_data").get_child(meta.id)
-		);
-	}
-	
-	public WebAppMeta? lookup_app(string id)
+	public WebAppMeta? get_app_meta(string id)
 	{
 		if  (!check_id(id))
 		{
@@ -106,25 +87,13 @@ public class WebAppRegistry: GLib.Object
 		
 		var apps = list_web_apps(id);
 		var app = apps[id];
-		var meta = app == null ? null : app.meta;
 		
-		if (meta != null)
-			message("Using web app %s, version %u.%u", meta.name, meta.version_major, meta.version_minor);
+		if (app != null)
+			message("Using web app %s, version %u.%u", app.name, app.version_major, app.version_minor);
 		else
 			message("Web App %s not found.", id);
 		
-		return meta;
-	}
-	
-	public WebApp load_web_app_from_dir(File dir, bool removable=false) throws WebAppError
-	{
-		var meta = WebAppMeta.load_from_dir(dir);
-		meta.removable = removable;
-		return new WebApp(meta,
-			storage.user_config_dir.get_parent().get_child(WEB_APP_DATA_DIR).get_child(meta.id),
-			storage.user_data_dir.get_parent().get_child(WEB_APP_DATA_DIR).get_child(meta.id),
-			storage.user_cache_dir.get_parent().get_child(WEB_APP_DATA_DIR).get_child(meta.id)
-			);
+		return app;
 	}
 	
 	/**
@@ -132,12 +101,12 @@ public class WebAppRegistry: GLib.Object
 	 * 
 	 * @return hash table of service id - metadata pairs
 	 */
-	public HashTable<string, WebApp> list_web_apps(string? filter_id=null)
+	public HashTable<string, WebAppMeta> list_web_apps(string? filter_id=null)
 	{
-		HashTable<string,  WebApp> result = new HashTable<string, WebApp>(str_hash, str_equal);
+		HashTable<string,  WebAppMeta> result = new HashTable<string, WebAppMeta>(str_hash, str_equal);
 		FileInfo file_info;
-		WebApp? app;
-		WebApp? tmp_app;
+		WebAppMeta? app;
+		WebAppMeta? tmp_app;
 		var user_dir = storage.user_data_dir;
 		string id;
 		
@@ -155,13 +124,14 @@ public class WebAppRegistry: GLib.Object
 					
 					try
 					{
-						app = load_web_app_from_dir(app_dir, allow_management);
-						id = app.meta.id;
+						app = WebAppMeta.load_from_dir(app_dir);
+						app.removable = allow_management;
+						id = app.id;
 						debug("Found web app %s at %s, version %u.%u",
-						app.meta.name, app_dir.get_path(), app.meta.version_major, app.meta.version_minor);
+						app.name, app_dir.get_path(), app.version_major, app.version_minor);
 						
 						if (filter_id == null || filter_id == id)
-							result.insert(id, app);
+							result[id] = app;
 					}
 					catch (WebAppError e)
 					{
@@ -189,7 +159,8 @@ public class WebAppRegistry: GLib.Object
 					
 					try
 					{
-						app = load_web_app_from_dir(app_dir);
+						app = WebAppMeta.load_from_dir(app_dir);
+						app.removable = false;
 					}
 					catch(WebAppError e)
 					{
@@ -198,21 +169,21 @@ public class WebAppRegistry: GLib.Object
 					}
 					
 					debug("Found web app %s at %s, version %u.%u",
-					app.meta.name, app_dir.get_path(), app.meta.version_major, app.meta.version_minor);
+					app.name, app_dir.get_path(), app.version_major, app.version_minor);
 					
-					id = app.meta.id;
+					id = app.id;
 					
 					if (filter_id == null || filter_id == id)
 					{
-						tmp_app = result.lookup(id);
+						tmp_app = result[id];
 						
 						// Insert new value, if web app has not been added yet,
 						// or override previous web app integration, if
 						// the new one has greater version.
 						if(tmp_app == null
-						|| app.meta.version_major > tmp_app.meta.version_major
-						|| app.meta.version_major == tmp_app.meta.version_major && app.meta.version_minor > tmp_app.meta.version_minor)
-							result.insert(id, app);
+						|| app.version_major > tmp_app.version_major
+						|| app.version_major == tmp_app.version_major && app.version_minor > tmp_app.version_minor)
+							result[id] = app;
 					}
 				}
 			}
@@ -225,7 +196,7 @@ public class WebAppRegistry: GLib.Object
 		return result;
 	}
 	
-	public WebApp install_app(File package) throws WebAppError
+	public WebAppMeta install_app(File package) throws WebAppError
 	{
 		if (!allow_management)
 			throw new WebAppError.NOT_ALLOWED("WebApp management is disabled");
@@ -274,7 +245,7 @@ public class WebAppRegistry: GLib.Object
 			if (web_app_dir.query_file_type(0) != FileType.DIRECTORY)
 				throw new WebAppError.INVALID_FILE("Package does not contain directory '%s'.", web_app_id);
 			
-			load_web_app_from_dir(web_app_dir); // throws WebAppError
+			WebAppMeta.load_from_dir(web_app_dir); // throws WebAppError
 			
 			var destination = storage.get_data_path(web_app_id);
 			if (destination.query_exists())
@@ -321,8 +292,8 @@ public class WebAppRegistry: GLib.Object
 				throw new WebAppError.IOERROR("Cannot copy integration to '%s'. %s", destination.get_path(), e.message);
 			}
 			
-			var web_app = load_web_app_from_dir(destination); // throws WebAppError
-			app_installed(web_app.meta.id);
+			var web_app = WebAppMeta.load_from_dir(destination); // throws WebAppError
+			app_installed(web_app.id);
 			return web_app;
 		}
 		catch (ArchiveError e)
@@ -341,12 +312,12 @@ public class WebAppRegistry: GLib.Object
 	 * @param app    web_app to remove
 	 * @throw        WebAppError on failure
 	 */
-	public void remove_app(WebApp app) throws WebAppError
+	public void remove_app(WebAppMeta app) throws WebAppError
 	{
 		if (!allow_management)
 			throw new WebAppError.NOT_ALLOWED("Web app management is disabled");
 		
-		var dir = app.meta.data_dir;
+		var dir = app.data_dir;
 		if (dir == null)
 			throw new WebAppError.IOERROR("Invalid web app directory");
 		
@@ -356,7 +327,7 @@ public class WebAppRegistry: GLib.Object
 			{
 				Diorite.System.purge_directory_content(dir, true);
 				dir.delete();
-				app_removed(app.meta.id);
+				app_removed(app.id);
 			}
 			catch (GLib.Error e)
 			{

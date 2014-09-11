@@ -243,10 +243,9 @@ public class MasterController : Diorite.Application
 			try
 			{
 				var app = web_app_reg.install_app(file);
-				var meta = app.meta;
 				var info = new Diorite.InfoDialog(("Installation successfull"),
-					("Service %1$s (version %2$d.%3$d) has been installed succesfuly").printf(meta.name, meta.version_major, meta.version_minor));
-				
+					("Service %1$s (version %2$d.%3$d) has been installed succesfuly").printf(
+					app.name, app.version_major, app.version_minor));
 //~ 				reload(service.id);
 				info.run();
 			}
@@ -265,21 +264,20 @@ public class MasterController : Diorite.Application
 		if (main_window.selected_web_app == null)
 			return;
 		
-		var web_app = web_app_reg.get_app(main_window.selected_web_app);
+		var web_app = web_app_reg.get_app_meta(main_window.selected_web_app);
 		if (web_app == null)
 			return;
 		try
 		{
 			web_app_reg.remove_app(web_app);
-			var meta = web_app.meta;
 			var info = new Diorite.InfoDialog(("Removal successfull"),
-				("Service %1$s (version %2$d.%3$d) has been succesfuly removed").printf(meta.name, meta.version_major, meta.version_minor));
+				("Service %1$s (version %2$d.%3$d) has been succesfuly removed").printf(web_app.name, web_app.version_major, web_app.version_minor));
 			info.run();
 		}
 		catch (WebAppError e)
 		{
 			var error = new Diorite.ErrorDialog(("Removal failed"),
-				_("Removal of service %s failed.").printf(web_app.meta.name)
+				_("Removal of service %s failed.").printf(web_app.name)
 				+ "\n\n" + e.message);
 			error.run();
 		}
@@ -309,7 +307,7 @@ public class MasterController : Diorite.Application
 			argv[i] = exec_cmd[i];
 		
 		var j = exec_cmd.length;
-		var app_meta = web_app_reg.lookup_app(app_id);
+		var app_meta = web_app_reg.get_app_meta(app_id);
 		assert(app_meta != null);
 		
 		argv[j++] = "-a";
