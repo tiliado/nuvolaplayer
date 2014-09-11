@@ -312,9 +312,9 @@ sidebar), then enable **WebKit Web Inspector** (right-click the web page anywher
 ![Inspect element]({filename}/images/guide/inspect_element.png)
 ![WebKit Web Inspector]({filename}/images/guide/webkit_web_inspector.png)
 
-You can also launch your service integration with id `test-integration` directly.
+You can also launch your service integration with id `test_integration` directly.
 
-    nuvolaplayer3 -D -A ~/projects/nuvola-player -a test-integration
+    nuvolaplayer3 -D -A ~/projects/nuvola-player -a test_integration
 
 Debugging and logging messages
 ==============================

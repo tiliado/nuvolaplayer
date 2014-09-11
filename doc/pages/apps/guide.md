@@ -193,7 +193,7 @@ App Runner Process
 ==================
 
 If you launch your service, either from the list of services or with command
-`nuvolaplayer3 -D -A ~/projects/nuvola-player -a test-integration`, you will see an error
+`nuvolaplayer3 -D -A ~/projects/nuvola-player -a test_integration`, you will see an error
 dialog saying "Invalid home page URL - The web app integration script has provided an empty home
 page URL." and the app will quit. That's because Nuvola Player makes no assumption about where the
 homepage URL is stored and expect service integration script provides this information explicitly
@@ -350,8 +350,6 @@ integration script will be running here.
 
 Initialization
 --------------
-
-[](apiref>Nuvola.%3A%3A)
 
 Web Worker emits [Nuvola.Core::InitWebWorker signal](apiref>Nuvola.Core%3A%3AInitWebWorker) when a
 new page is about to be loaded. The default handler
