@@ -43,6 +43,21 @@ public class WebAppMeta : GLib.Object
 	public int api_minor {get; construct;}
 	public File? data_dir {get; private set; default = null;}
 	public bool removable {get; set; default = false;}
+	public string? icon
+	{
+		owned get
+		{
+			if (data_dir == null)
+				return null;
+			var file = data_dir.get_child("icon.svg");
+			if (file.query_file_type(0) == FileType.REGULAR)
+				return file.get_path();
+			file = data_dir.get_child("icon.png");
+			if (file.query_file_type(0) == FileType.REGULAR)
+				return file.get_path();
+			return null;
+		}
+	}
 	
 	public static WebAppMeta load_from_dir(File dir) throws WebAppError
 	{
@@ -121,19 +136,6 @@ public class WebApp : GLib.Object
 	public File user_cache_dir {get; construct;}
 	public File data_dir {get; construct;}
 	public bool removable {get; construct;}
-	public string? icon
-	{
-		owned get
-		{
-			var file = data_dir.get_child("icon.svg");
-			if (file.query_file_type(0) == FileType.REGULAR)
-				return file.get_path();
-			file = data_dir.get_child("icon.png");
-			if (file.query_file_type(0) == FileType.REGULAR)
-				return file.get_path();
-			return null;
-		}
-	}
 	
 	public WebApp(WebAppMeta meta, File data_dir, File user_config_dir, File user_data_dir, File user_cache_dir, bool removable)
 	{
