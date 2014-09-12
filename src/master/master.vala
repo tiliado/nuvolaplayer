@@ -90,9 +90,8 @@ public int main(string[] args)
 	var storage = new Diorite.XdgStorage.for_project(Nuvola.get_app_id());
 	var web_apps_storage = storage.get_child("web_apps");
 	var web_app_reg = Args.apps_dir != null && Args.apps_dir != ""
-	? new WebAppRegistry.with_data_path(web_apps_storage, Args.apps_dir)
-	: new WebAppRegistry(web_apps_storage, true);
-	
+	? new WebAppRegistry(File.new_for_path(Args.apps_dir), {}, false)
+	: new WebAppRegistry(web_apps_storage.user_data_dir, web_apps_storage.data_dirs, true);
 	
 	string[] exec_cmd = {};
 	

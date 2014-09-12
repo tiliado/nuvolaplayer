@@ -30,8 +30,8 @@ namespace Nuvola
  */
 public class WebAppRegistry: GLib.Object
 {
-	private Diorite.Storage storage;
-	
+	private File user_storage;
+	private File[] system_storage;
 	
 	/**
 	 * Regular expression to check validity of service identifier
@@ -47,19 +47,10 @@ public class WebAppRegistry: GLib.Object
 	 * @param storage             storage with service integrations
 	 * @param allow_management    whether to allow services management (add/remove)
 	 */
-	public WebAppRegistry(Diorite.Storage storage, bool allow_management=true)
+	public WebAppRegistry(File user_storage, File[] system_storage, bool allow_management)
 	{
-		this.storage = storage;
-		this.allow_management = allow_management;
-	}
-	
-	public WebAppRegistry.with_data_path(Diorite.Storage storage, string path, bool allow_management=false)
-	{
-		this.storage = new Diorite.Storage(
-			path, {},
-			storage.user_config_dir.get_path(),
-			storage.user_cache_dir.get_path()
-		);
+		this.user_storage = user_storage;
+		this.system_storage = system_storage;
 		this.allow_management = allow_management;
 	}
 	
@@ -107,18 +98,17 @@ public class WebAppRegistry: GLib.Object
 		FileInfo file_info;
 		WebAppMeta? app;
 		WebAppMeta? tmp_app;
-		var user_dir = storage.user_data_dir;
 		string id;
 		
-		if (user_dir.query_exists())
+		if (user_storage.query_exists())
 		{
 			try
 			{
-				var enumerator = user_dir.enumerate_children(FileAttribute.STANDARD_NAME, 0);
+				var enumerator = user_storage.enumerate_children(FileAttribute.STANDARD_NAME, 0);
 				while ((file_info = enumerator.next_file()) != null)
 				{
 					string dirname = file_info.get_name();
-					var app_dir = user_dir.get_child(dirname);
+					var app_dir = user_storage.get_child(dirname);
 					if (app_dir.query_file_type(0) != FileType.DIRECTORY)
 						continue;
 					
@@ -145,7 +135,7 @@ public class WebAppRegistry: GLib.Object
 			}
 		}
 		
-		foreach (var dir in storage.data_dirs)
+		foreach (var dir in system_storage)
 		{
 			try
 			{
@@ -247,7 +237,7 @@ public class WebAppRegistry: GLib.Object
 			
 			WebAppMeta.load_from_dir(web_app_dir); // throws WebAppError
 			
-			var destination = storage.get_data_path(web_app_id);
+			var destination = user_storage.get_child(web_app_id);
 			if (destination.query_exists())
 			{
 				try
