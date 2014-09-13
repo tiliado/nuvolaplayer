@@ -29,7 +29,8 @@ public void create_desktop_file(WebAppMeta web_app)
 {
 	var app_id = Nuvola.get_app_id();
 	var storage = new Diorite.XdgStorage();
-	var filename = "%s-%s.desktop".printf(app_id, web_app.id);
+	var dashed_id = build_dashed_id(web_app.id);
+	var filename = "%s.desktop".printf(dashed_id);
 	var file = storage.user_data_dir.get_child("applications").get_child(filename);
 	var key_file = new KeyFile();
 	const string GROUP = "Desktop Entry";
@@ -37,8 +38,8 @@ public void create_desktop_file(WebAppMeta web_app)
 	key_file.set_string(GROUP, "Exec", "%s -a %s".printf(app_id, web_app.id));
 	key_file.set_string(GROUP, "Type", "Application");
 	key_file.set_string(GROUP, "Categories", web_app.categories);
-	key_file.set_string(GROUP, "StartupWMClass", "%s-%s".printf(app_id, web_app.id));
 	key_file.set_string(GROUP, "Icon", web_app.icon ?? Nuvola.get_app_icon());
+	key_file.set_string(GROUP, "StartupWMClass", dashed_id);
 	key_file.set_boolean(GROUP, "StartupNotify", true);
 	key_file.set_boolean(GROUP, "Terminal", false);
 	var data = key_file.to_data(null, null);

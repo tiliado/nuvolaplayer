@@ -49,6 +49,23 @@ namespace Actions
 	public const string TOGGLE_SIDEBAR = "toggle-sidebar";
 }
 
+public static string build_camel_id(string web_app_id)
+{
+	var buffer = new StringBuilder(Nuvola.get_app_uid());
+	foreach (var part in web_app_id.split("_"))
+	{
+		buffer.append_c(part[0].toupper());
+		if (part.length > 1)
+			buffer.append(part.substring(1));
+	}
+	return buffer.str;
+}
+
+public static string build_dashed_id(string web_app_id)
+{
+	return "%s-%s".printf(Nuvola.get_app_id(), web_app_id.replace("_", "-"));
+}
+	
 public class AppRunnerController : Diorite.Application
 {
 	private static const string UI_RUNNER_SUFFIX = ".uirunner";
@@ -76,11 +93,12 @@ public class AppRunnerController : Diorite.Application
 	
 	public AppRunnerController(Diorite.Storage? storage, WebAppMeta web_app, WebAppStorage app_storage)
 	{
-		var web_app_id = web_app.id;
-		base("%sX%s".printf(Nuvola.get_app_uid(), web_app_id),
+		var app_id = web_app.id;
+		var dashed_id = build_dashed_id(app_id);
+		base(build_camel_id(app_id),
 		"%s - %s".printf(web_app.name, Nuvola.get_app_name()),
-		"%s-%s.desktop".printf(Nuvola.get_app_id(), web_app_id),
-		"%s-%s".printf(Nuvola.get_app_id(), web_app_id));
+		"%s.desktop".printf(dashed_id),
+		dashed_id);
 		icon = Nuvola.get_app_icon();
 		version = Nuvola.get_version();
 		this.app_storage = app_storage;
