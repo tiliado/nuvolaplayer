@@ -36,9 +36,9 @@ public void create_desktop_file(WebAppMeta web_app)
 	key_file.set_string(GROUP, "Name", web_app.name);
 	key_file.set_string(GROUP, "Exec", "%s -a %s".printf(app_id, web_app.id));
 	key_file.set_string(GROUP, "Type", "Application");
-	key_file.set_string(GROUP, "Icon", Nuvola.get_app_icon());
 	key_file.set_string(GROUP, "Categories", web_app.categories);
 	key_file.set_string(GROUP, "StartupWMClass", "%s-%s".printf(app_id, web_app.id));
+	key_file.set_string(GROUP, "Icon", web_app.icon ?? Nuvola.get_app_icon());
 	key_file.set_boolean(GROUP, "StartupNotify", true);
 	key_file.set_boolean(GROUP, "Terminal", false);
 	var data = key_file.to_data(null, null);
