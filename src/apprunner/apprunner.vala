@@ -93,16 +93,16 @@ public int main(string[] args)
 	try
 	{
 		var app_dir = File.new_for_path(Args.app_dir);
-		var meta = WebAppMeta.load_from_dir(app_dir);
-		meta.removable = false;
+		var web_app = WebAppMeta.load_from_dir(app_dir);
+		web_app.removable = false;
 		var storage = new Diorite.XdgStorage.for_project(Nuvola.get_app_id());
-		var web_app = new WebApp(meta,
-		  storage.user_config_dir.get_child(WEB_APP_DATA_DIR).get_child(meta.id),
-		  storage.user_data_dir.get_child(WEB_APP_DATA_DIR).get_child(meta.id),
-		  storage.user_cache_dir.get_child(WEB_APP_DATA_DIR).get_child(meta.id));
+		var app_storage = new WebAppStorage(
+		  storage.user_config_dir.get_child(WEB_APP_DATA_DIR).get_child(web_app.id),
+		  storage.user_data_dir.get_child(WEB_APP_DATA_DIR).get_child(web_app.id),
+		  storage.user_cache_dir.get_child(WEB_APP_DATA_DIR).get_child(web_app.id));
 	
 		create_desktop_file(web_app);
-		var controller = new AppRunnerController(storage, web_app);
+		var controller = new AppRunnerController(storage, web_app, app_storage);
 		return controller.run(args);
 	}
 	catch (WebAppError e)

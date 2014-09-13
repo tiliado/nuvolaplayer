@@ -55,7 +55,8 @@ public class AppRunnerController : Diorite.Application
 	public WebAppWindow? main_window {get; private set; default = null;}
 	public Diorite.Storage? storage {get; private set; default = null;}
 	public Diorite.ActionsRegistry? actions {get; private set; default = null;}
-	public WebApp web_app {get; private set;}
+	public WebAppMeta web_app {get; private set;}
+	public WebAppStorage app_storage {get; private set;}
 	public WebEngine web_engine {get; private set;}
 	public weak Gtk.Settings gtk_settings {get; private set;}
 	public Config config {get; private set;}
@@ -73,15 +74,16 @@ public class AppRunnerController : Diorite.Application
 	private Diorite.Form? init_form = null;
 	private Diorite.Ipc.MessageClient master = null;
 	
-	public AppRunnerController(Diorite.Storage? storage, WebApp web_app)
+	public AppRunnerController(Diorite.Storage? storage, WebAppMeta web_app, WebAppStorage app_storage)
 	{
-		var web_app_id = web_app.meta.id;
+		var web_app_id = web_app.id;
 		base("%sX%s".printf(Nuvola.get_app_uid(), web_app_id),
-		"%s - %s".printf(web_app.meta.name, Nuvola.get_app_name()),
+		"%s - %s".printf(web_app.name, Nuvola.get_app_name()),
 		"%s-%s.desktop".printf(Nuvola.get_app_id(), web_app_id),
 		"%s-%s".printf(Nuvola.get_app_id(), web_app_id));
 		icon = Nuvola.get_app_icon();
 		version = Nuvola.get_version();
+		this.app_storage = app_storage;
 		this.storage = storage;
 		this.web_app = web_app;
 	}
@@ -104,7 +106,7 @@ public class AppRunnerController : Diorite.Application
 		default_config.insert(ConfigKey.WINDOW_SIDEBAR_POS, new Variant.int64(-1));
 		default_config.insert(ConfigKey.WINDOW_SIDEBAR_VISIBLE, new Variant.boolean(true));
 		default_config.insert(ConfigKey.DARK_THEME, new Variant.boolean(false));
-		config = new Config(web_app.user_config_dir.get_child("config.json"), default_config);
+		config = new Config(app_storage.config_dir.get_child("config.json"), default_config);
 		config.config_changed.connect(on_config_changed);
 		Gtk.Settings.get_default().gtk_application_prefer_dark_theme = config.get_bool(ConfigKey.DARK_THEME);
 		
@@ -114,10 +116,10 @@ public class AppRunnerController : Diorite.Application
 		main_window.can_destroy.connect(on_can_quit);
 		fatal_error.connect(on_fatal_error);
 		show_error.connect(on_show_error);
-		connection = new Connection(new Soup.SessionAsync(), web_app.user_cache_dir.get_child("conn"));
+		connection = new Connection(new Soup.SessionAsync(), app_storage.cache_dir.get_child("conn"));
 		connection.session.add_feature_by_type(typeof(Soup.ProxyResolverDefault));
 		
-		web_engine = new WebEngine(this, web_app, config);
+		web_engine = new WebEngine(this, web_app, app_storage, config);
 		web_engine.init_form.connect(on_init_form);
 		web_engine.notify.connect_after(on_web_engine_notify);
 		actions.action_changed.connect(on_action_changed);
@@ -214,7 +216,7 @@ public class AppRunnerController : Diorite.Application
 		assert(master.wait_for_echo(1000));
 		try
 		{
-			var response = master.send_message("runner_started", new Variant("(ss)", web_app.meta.id, server_name));
+			var response = master.send_message("runner_started", new Variant("(ss)", web_app.id, server_name));
 			assert(response.equal(new Variant.boolean(true)));
 		}
 		catch (Diorite.Ipc.MessageError e)
@@ -357,7 +359,7 @@ public class AppRunnerController : Diorite.Application
 		
 		try
 		{
-			var response = master.send_message("runner_activated", new Variant.string(web_app.meta.id));
+			var response = master.send_message("runner_activated", new Variant.string(web_app.id));
 			warn_if_fail(response.equal(new Variant.boolean(true)));
 		}
 		catch (Diorite.Ipc.MessageError e)

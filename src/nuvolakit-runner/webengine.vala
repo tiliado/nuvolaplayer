@@ -30,7 +30,8 @@ namespace Nuvola
 public class WebEngine : GLib.Object
 {
 	public Gtk.Widget widget {get {return web_view;}}
-	public WebApp web_app {get; private set;}
+	public WebAppMeta web_app {get; private set;}
+	public WebAppStorage storage {get; private set;}
 	public bool can_go_back {get; private set; default = false;}
 	public bool can_go_forward {get; private set; default = false;}
 	private AppRunnerController app;
@@ -46,7 +47,7 @@ public class WebEngine : GLib.Object
 	private Config config;
 	private VariantHashTable session;
 	
-	public WebEngine(AppRunnerController app, WebApp web_app, Config config)
+	public WebEngine(AppRunnerController app, WebAppMeta web_app, WebAppStorage storage, Config config)
 	{
 		server = app.server;
 		var webkit_extension_dir = Nuvola.get_libdir();
@@ -55,13 +56,15 @@ public class WebEngine : GLib.Object
 		
 		var wc = WebKit.WebContext.get_default();
 		wc.set_web_extensions_directory(webkit_extension_dir);
-		wc.set_favicon_database_directory(web_app.user_data_dir.get_child("favicons").get_path());
-		wc.set_disk_cache_directory(web_app.user_cache_dir.get_child("webcache").get_path());
+		wc.set_favicon_database_directory(storage.data_dir.get_child("favicons").get_path());
+		wc.set_disk_cache_directory(storage.cache_dir.get_child("webcache").get_path());
 		
 		var cm = wc.get_cookie_manager();
-		cm.set_persistent_storage(web_app.user_data_dir.get_child("cookies.dat").get_path(), WebKit.CookiePersistentStorage.SQLITE);
+		cm.set_persistent_storage(storage.data_dir.get_child("cookies.dat").get_path(),
+			WebKit.CookiePersistentStorage.SQLITE);
 		
 		this.app = app;
+		this.storage = storage;
 		this.web_app = web_app;
 		this.config = config;
 		this.web_view = new WebKit.WebView();
@@ -86,7 +89,7 @@ public class WebEngine : GLib.Object
 			return true;
 		
 		env = new JsRuntime();
-		api = new JSApi(app.storage, web_app.meta.data_dir, web_app.user_config_dir, config, session);
+		api = new JSApi(app.storage, web_app.data_dir, storage.config_dir, config, session);
 		api.send_message_async.connect(on_send_message_async);
 		api.send_message_sync.connect(on_send_message_sync);
 		try
@@ -135,11 +138,11 @@ public class WebEngine : GLib.Object
 		
 		if (uri.has_prefix("nuvola://"))
 		{
-			web_view.load_uri(web_app.meta.data_dir.get_child(uri.substring(9)).get_uri());
+			web_view.load_uri(web_app.data_dir.get_child(uri.substring(9)).get_uri());
 			return true;
 		}
 		
-		if (uri.has_prefix(web_app.meta.data_dir.get_uri()))
+		if (uri.has_prefix(web_app.data_dir.get_uri()))
 		{
 			web_view.load_uri(uri);
 			return true;
@@ -321,13 +324,13 @@ public class WebEngine : GLib.Object
 	private Variant? handle_get_data_dir(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
 		Diorite.Ipc.MessageServer.check_type_str(data, null);
-		return new Variant.string(web_app.meta.data_dir.get_path());
+		return new Variant.string(web_app.data_dir.get_path());
 	}
 	
 	private Variant? handle_get_user_config_dir(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
 		Diorite.Ipc.MessageServer.check_type_str(data, null);
-		return new Variant.string(web_app.user_config_dir.get_path());
+		return new Variant.string(storage.config_dir.get_path());
 	}
 	
 	private Variant? handle_session_has_key(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError

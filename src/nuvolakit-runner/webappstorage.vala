@@ -25,31 +25,16 @@
 namespace Nuvola
 {
 
-public void create_desktop_file(WebAppMeta web_app)
+public class WebAppStorage : GLib.Object
 {
-	var app_id = Nuvola.get_app_id();
-	var storage = new Diorite.XdgStorage();
-	var filename = "%s-%s.desktop".printf(app_id, web_app.id);
-	var file = storage.user_data_dir.get_child("applications").get_child(filename);
-	var key_file = new KeyFile();
-	const string GROUP = "Desktop Entry";
-	key_file.set_string(GROUP, "Name", web_app.name);
-	key_file.set_string(GROUP, "Exec", "%s -a %s".printf(app_id, web_app.id));
-	key_file.set_string(GROUP, "Type", "Application");
-	key_file.set_string(GROUP, "Icon", Nuvola.get_app_icon());
-	key_file.set_string(GROUP, "Categories", web_app.categories);
-	key_file.set_string(GROUP, "StartupWMClass", "%s-%s".printf(app_id, web_app.id));
-	key_file.set_boolean(GROUP, "StartupNotify", true);
-	key_file.set_boolean(GROUP, "Terminal", false);
-	var data = key_file.to_data(null, null);
-	try
+	public File config_dir {get; construct;}
+	public File data_dir {get; construct;}
+	public File cache_dir {get; construct;}
+	
+	public WebAppStorage(File config_dir, File data_dir, File cache_dir)
 	{
-		Diorite.System.overwrite_file(file, data);
-	}
-	catch (GLib.Error e)
-	{
-		warning("Failed to write key file '%s': %s", file.get_path(), e.message);
+		Object(config_dir: config_dir, data_dir: data_dir, cache_dir: cache_dir);
 	}
 }
 
-} // namespace Nuvola
+}

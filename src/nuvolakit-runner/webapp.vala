@@ -128,17 +128,4 @@ public class WebAppMeta : GLib.Object
 	}
 }
 
-public class WebApp : GLib.Object
-{
-	public WebAppMeta meta {get; construct;}
-	public File user_config_dir {get; construct;}
-	public File user_data_dir {get; construct;}
-	public File user_cache_dir {get; construct;}
-	
-	public WebApp(WebAppMeta meta, File user_config_dir, File user_data_dir, File user_cache_dir)
-	{
-		Object(meta: meta, user_config_dir: user_config_dir, user_data_dir:user_data_dir, user_cache_dir:user_cache_dir);
-	}
-}
-
 } // namespace Nuvola
