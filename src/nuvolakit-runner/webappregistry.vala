@@ -26,7 +26,7 @@ namespace Nuvola
 {
 
 /**
- *  WebAppRegistry deals with management and loading of service integrations.
+ *  WebAppRegistry deals with management and loading of web apps from filesystem.
  */
 public class WebAppRegistry: GLib.Object
 {
@@ -38,13 +38,16 @@ public class WebAppRegistry: GLib.Object
 	 */
 	private static Regex id_regex;
 	
-	
+	/**
+	 * Whether it is allowed to install/remove services.
+	 */
 	public bool allow_management {get; private set;}
 	
 	/**
 	 * Creates new web app registry
 	 * 
-	 * @param storage             storage with service integrations
+	 * @param user_storage        user-specific directory with service integrations
+	 * @param system_storage      system-wide directories with service integrations
 	 * @param allow_management    whether to allow services management (add/remove)
 	 */
 	public WebAppRegistry(File user_storage, File[] system_storage, bool allow_management)
@@ -68,6 +71,9 @@ public class WebAppRegistry: GLib.Object
 	 */
 	public signal void app_removed(string id);
 	
+	/**
+	 * Return web app by id.
+	 */
 	public WebAppMeta? get_app_meta(string id)
 	{
 		if  (!check_id(id))
@@ -88,9 +94,10 @@ public class WebAppRegistry: GLib.Object
 	}
 	
 	/**
-	 * Lists available services
+	 * Lists available web apps
 	 * 
-	 * @return hash table of service id - metadata pairs
+	 * @param filter_id    if not null, filter apps by id
+	 * @return hash table of web app id - metadata pairs
 	 */
 	public HashTable<string, WebAppMeta> list_web_apps(string? filter_id=null)
 	{
@@ -162,7 +169,6 @@ public class WebAppRegistry: GLib.Object
 					app.name, app_dir.get_path(), app.version_major, app.version_minor);
 					
 					id = app.id;
-					
 					if (filter_id == null || filter_id == id)
 					{
 						tmp_app = result[id];
@@ -177,7 +183,7 @@ public class WebAppRegistry: GLib.Object
 					}
 				}
 			}
-			catch (Error e)
+			catch (GLib.Error e)
 			{
 				warning("Filesystem error: %s", e.message);
 			}
@@ -186,6 +192,12 @@ public class WebAppRegistry: GLib.Object
 		return result;
 	}
 	
+	/**
+	 * Installs web app from a package
+	 * 
+	 * @param package    package file
+	 * @return meta object on the installed web app
+	 */
 	public WebAppMeta install_app(File package) throws WebAppError
 	{
 		if (!allow_management)
