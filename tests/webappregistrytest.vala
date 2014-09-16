@@ -19,30 +19,28 @@
  * Tests are under public domain because they might contain useful sample code.
  */
 
-using Diorite.Test;
-
 namespace Nuvola
 {
 
-class WebAppRegistryTest: Diorite.TestCase
+public class WebAppRegistryTest: Diorite.TestCase
 {
 	public void test_load_web_apps()
 	{
-		const string PATH = "../data/nuvolaplayer3/web_apps";
+		const string PATH = "../web_apps";
 		var web_apps_reg = create_registry(PATH);
 		var known_apps = list_web_apps(PATH);
 		var web_apps = web_apps_reg.list_web_apps();
 		string[] found = {};
 		foreach (var web_app in web_apps.get_values())
 		{
-			expect(web_app.meta.id in known_apps);
-			found += web_app.meta.id;
+			expect(web_app.id in known_apps, "");
+			found += web_app.id;
 		}
 		
-		expect(known_apps.length == found.length);
+		expect(known_apps.length == found.length, "");
 		foreach (var id in known_apps)
 		{
-			expect(id in found);
+			expect(id in found, "");
 		}
 	}
 	
@@ -60,7 +58,7 @@ class WebAppRegistryTest: Diorite.TestCase
 		}
 		catch (FileError e)
 		{
-			assert(false);
+			fail("");
 		}
 		
 		try
@@ -70,8 +68,7 @@ class WebAppRegistryTest: Diorite.TestCase
 			var web_app_reg = create_registry(tmp_dir.get_path(), true);
 			foreach(var package_name in packages)
 			{
-				mark = package_name;
-				WebApp? web_app = null;
+				WebAppMeta? web_app = null;
 				try
 				{
 					web_app = web_app_reg.install_app(parent.get_child(package_name));
@@ -80,7 +77,7 @@ class WebAppRegistryTest: Diorite.TestCase
 				{
 					critical("%s: %s", package_name, e.message);
 				}
-				expect(web_app != null);
+				expect(web_app != null, package_name);
 			}
 		}
 		finally
@@ -96,15 +93,15 @@ class WebAppRegistryTest: Diorite.TestCase
 	
 	private WebAppRegistry create_registry(string? path, bool allow_management=false)
 	{
-		var storage = new Diorite.XdgStorage.for_project(Nuvola.get_appname()).get_child("web_apps");
-		return new WebAppRegistry.with_data_path(storage, path, allow_management);
+		return new WebAppRegistry(File.new_for_path(path), {}, allow_management);
 	}
 	
 	private string[] list_web_apps(string path)
 	{
 		string[] apps = {};
 		var parent = File.new_for_path(path);
-		expect(parent.query_exists());
+		message("path %s", parent.get_path());
+		expect(parent.query_exists(), "");
 		if (!parent.query_exists())
 			return apps;
 		
@@ -127,8 +124,7 @@ class WebAppRegistryTest: Diorite.TestCase
 		}
 		catch (GLib.Error e)
 		{
-			warning("Filesystem error: %s", e.message);
-			expect(false);
+			expectation_failed("Filesystem error: %s", e.message);
 		}
 		return apps;
 	}
@@ -137,7 +133,7 @@ class WebAppRegistryTest: Diorite.TestCase
 	{
 		string[] files = {};
 		var parent = File.new_for_path(path);
-		expect(parent.query_exists());
+		expect(parent.query_exists(), "");
 		if (!parent.query_exists())
 			return files;
 		
@@ -159,7 +155,7 @@ class WebAppRegistryTest: Diorite.TestCase
 		catch (GLib.Error e)
 		{
 			warning("Filesystem error: %s", e.message);
-			expect(false);
+			expectation_failed("Filesystem error: %s", e.message);
 		}
 		return files;
 	}
