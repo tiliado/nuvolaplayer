@@ -118,13 +118,13 @@ $ ./waf build
 
 ### Install
 
-```sh
+```
 # ./waf install
 ```
 
 or
 
-```sh    
+```    
 # ./waf install --no-system-hooks
 # /sbin/ldconfig
 # gtk-update-icon-cache ...
@@ -133,6 +133,6 @@ or
 
 helpful:
 
-```sh
+```
 # ./waf --no-system-hooks --destdir=/whatever
 ```
