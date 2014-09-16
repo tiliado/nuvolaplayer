@@ -88,35 +88,51 @@ where /usr/bin/python is Python 2, not Python 3. (Hello, Arch Linux!)
 
 ### Help
 
-    $ ./waf --help
+```sh
+$ ./waf --help
+```
 
 ### Configure
 
-    $ ./waf configure
-    
+```sh
+$ ./waf configure
+```
+
 or
-    
-    $ ./waf configure --with-unity
-    
+
+```sh    
+$ ./waf configure --with-unity
+```
+
 helpful:
-    
-    $ ./waf configure --prefix=/usr
+
+```sh    
+$ ./waf configure --prefix=/usr
+```
 
 ### Build
 
-    $ ./waf build
+```sh
+$ ./waf build
+```
 
 ### Install
 
-    # ./waf install
-    
+```sh
+# ./waf install
+```
+
 or
-    
-    # ./waf install --no-system-hooks
-    # /sbin/ldconfig
-    # gtk-update-icon-cache ...
-    # gtk-update-icon-cache-3.0 ...
-    
+
+```sh    
+# ./waf install --no-system-hooks
+# /sbin/ldconfig
+# gtk-update-icon-cache ...
+# gtk-update-icon-cache-3.0 ...
+```
+
 helpful:
 
-    # ./waf --no-system-hooks --destdir=/whatever
+```sh
+# ./waf --no-system-hooks --destdir=/whatever
+```
