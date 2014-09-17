@@ -83,6 +83,12 @@ public class WebExtension: GLib.Object
 	
 	private void on_window_object_cleared(WebKit.ScriptWorld world, WebKit.WebPage page, WebKit.Frame frame)
 	{
+		if (page.get_id() != 1)
+		{
+			debug("Ignoring JavaScript environment of a page with id = %s", page.get_id().to_string());
+			return;
+		}
+		
 		if (!frame.is_main_frame())
 			return; // TODO: Add api not to ignore non-main frames
 		
