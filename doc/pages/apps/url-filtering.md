@@ -89,10 +89,6 @@ The debugging message contains following information:
     account only for link clicks (``WEBKIT_NAVIGATION_TYPE_LINK_CLICKED``). This may change in the
     future.
 
-!!! danger "Opening in a new window"
-    Opening links in a new window hasn't been implemented yet. If your service's functionality
-    depends on it, [let us know that][np_devel] so we can prioritize this task.
-
 [TOC]
 
 [np_devel]: https://groups.google.com/d/forum/nuvola-player-devel

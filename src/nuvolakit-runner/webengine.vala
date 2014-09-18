@@ -46,6 +46,7 @@ public class WebEngine : GLib.Object
 	private static const string WEB_WORKER_SUFFIX = ".webworker";
 	private Config config;
 	private VariantHashTable session;
+	private SList<WebWindow> web_windows = null;
 	
 	public WebEngine(AppRunnerController app, WebAppMeta web_app, WebAppStorage storage, Config config)
 	{
@@ -78,6 +79,7 @@ public class WebEngine : GLib.Object
 		ws.enable_write_console_messages_to_stdout = true;
 		web_view.notify["uri"].connect(on_uri_changed);
 		web_view.decide_policy.connect(on_decide_policy);
+		web_view.create.connect(on_web_view_create);
 		set_up_ipc();
 	}
 	
@@ -469,8 +471,8 @@ public class WebEngine : GLib.Object
 		if (result)
 		{
 			decision.use();
-			if (new_window_override)
-				warning("Opening links in a new window hasn't been implemented yet.");
+			if (new_window != new_window_override)
+				warning("Overriding of new window flag hasn't been implemented yet.");
 			return true;
 		}
 		else
@@ -548,6 +550,22 @@ public class WebEngine : GLib.Object
 		{
 			app.show_error("Integration script error", "The web app integration caused an error: %s".printf(e.message));
 		}
+	}
+	
+	private Gtk.Widget on_web_view_create()
+	{
+		var web_view = new WebKit.WebView();
+		var web_window = new WebWindow(web_view);
+		web_window.destroy.connect(on_web_window_destroy);
+		web_windows.prepend(web_window);
+		return web_view;
+	}
+	
+	private void on_web_window_destroy(Gtk.Widget window)
+	{
+		var web_window = window as WebWindow;
+		assert(web_window != null);
+		web_windows.remove(web_window);
 	}
 }
 
