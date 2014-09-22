@@ -68,7 +68,8 @@ public class WebEngine : GLib.Object
 		this.storage = storage;
 		this.web_app = web_app;
 		this.config = config;
-		this.web_view = new WebKit.WebView();
+		web_view = new WebView();
+		
 		session = new VariantHashTable();
 		
 		var ws = web_view.get_settings();
@@ -554,7 +555,7 @@ public class WebEngine : GLib.Object
 	
 	private Gtk.Widget on_web_view_create()
 	{
-		var web_view = new WebKit.WebView();
+		var web_view = new WebView();
 		var web_window = new WebWindow(web_view);
 		web_window.destroy.connect(on_web_window_destroy);
 		web_windows.prepend(web_window);
