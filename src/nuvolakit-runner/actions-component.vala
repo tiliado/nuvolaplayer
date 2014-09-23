@@ -25,12 +25,13 @@
 public class Nuvola.ActionsComponent: GLib.Object, Component
 {
 	private SList<ActionsInterface> objects = null;
-	private AppRunnerController runner;
+	private ComponentsManager manager;
+	private Diorite.Ipc.MessageServer server;
 	
-	public ActionsComponent(AppRunnerController runner)
+	public ActionsComponent(ComponentsManager manager, Diorite.Ipc.MessageServer server)
 	{
-		this.runner = runner;
-		var server = runner.server;
+		this.manager = manager;
+		this.server = server;
 		server.add_handler("Nuvola.Actions.addAction", handle_add_action);
 		server.add_handler("Nuvola.Actions.addRadioAction", handle_add_radio_action);
 		server.add_handler("Nuvola.Actions.isEnabled", handle_is_action_enabled);
@@ -42,7 +43,6 @@ public class Nuvola.ActionsComponent: GLib.Object, Component
 	
 	~ActionsComponent()
 	{
-		var server = runner.server;
 		server.remove_handler("Nuvola.Actions.addAction");
 		server.remove_handler("Nuvola.Actions.addRadioAction");
 		server.remove_handler("Nuvola.Actions.isEnabled");
@@ -222,7 +222,7 @@ public class Nuvola.ActionsComponent: GLib.Object, Component
 	{
 		try
 		{
-			runner.web_engine.call_function("Nuvola.actions.emit", new Variant("(ssmv)", "ActionActivated", name, parameter));
+			manager.call_web_worker("Nuvola.actions.emit", new Variant("(ssmv)", "ActionActivated", name, parameter));
 		}
 		catch (Diorite.Ipc.MessageError e)
 		{

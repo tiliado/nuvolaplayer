@@ -26,7 +26,7 @@ public class Nuvola.MediaKeysComponent: GLib.Object, Component
 {
 	private SList<MediaKeysInterface> objects = null;
 	
-	public MediaKeysComponent(AppRunnerController runner)
+	public MediaKeysComponent(ComponentsManager manager, Diorite.Ipc.MessageServer server)
 	{
 	}
 	

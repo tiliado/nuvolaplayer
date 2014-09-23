@@ -25,19 +25,17 @@
 public class Nuvola.MenuBarComponent: GLib.Object, Component
 {
 	private SList<MenuBarInterface> objects = null;
-	private AppRunnerController runner;
+	private Diorite.Ipc.MessageServer server;
 	
-	public MenuBarComponent(AppRunnerController runner)
+	public MenuBarComponent(ComponentsManager manager, Diorite.Ipc.MessageServer server)
 	{
-		this.runner = runner;
-		var server = runner.server;
+		this.server = server;
 		server.add_handler("Nuvola.MenuBar.setMenu", handle_menubar_set_menu);
 		
 	}
 	
 	~MenuBarComponent()
 	{
-		var server = runner.server;
 		server.remove_handler("Nuvola.MenuBar.setMenu");
 	}
 	

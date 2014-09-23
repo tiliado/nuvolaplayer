@@ -42,4 +42,9 @@ public class Nuvola.ComponentsManager: GLib.Object
 		foreach (var component in components)
 			component.add(object);
 	}
+	
+	public void call_web_worker(string func_name, Variant? params) throws Diorite.Ipc.MessageError
+	{
+		runner.web_engine.call_function(func_name, params);
+	}
 }

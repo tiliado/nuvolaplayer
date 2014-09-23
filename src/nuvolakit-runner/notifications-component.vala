@@ -25,12 +25,11 @@
 public class Nuvola.NotificationsComponent: GLib.Object, Component
 {
 	private SList<NotificationsInterface> objects = null;
-	private AppRunnerController runner;
+	private Diorite.Ipc.MessageServer server;
 	
-	public NotificationsComponent(AppRunnerController runner)
+	public NotificationsComponent(ComponentsManager manager, Diorite.Ipc.MessageServer server)
 	{
-		this.runner = runner;
-		var server = runner.server;
+		this.server = server;
 		server.add_handler("Nuvola.Notification.update", handle_update);
 		server.add_handler("Nuvola.Notification.setActions", handle_set_actions);
 		server.add_handler("Nuvola.Notification.removeActions", handle_remove_actions);
@@ -40,7 +39,6 @@ public class Nuvola.NotificationsComponent: GLib.Object, Component
 	
 	~NotificationsComponent()
 	{
-		var server = runner.server;
 		server.remove_handler("Nuvola.Notification.update");
 		server.remove_handler("Nuvola.Notification.setActions");
 		server.remove_handler("Nuvola.Notification.removeActions");

@@ -25,12 +25,11 @@
 public class Nuvola.LauncherComponent: GLib.Object, Component
 {
 	private SList<LauncherInterface> objects = null;
-	private AppRunnerController runner;
+	private Diorite.Ipc.MessageServer server;
 	
-	public LauncherComponent(AppRunnerController runner)
+	public LauncherComponent(ComponentsManager manager, Diorite.Ipc.MessageServer server)
 	{
-		this.runner = runner;
-		var server = runner.server;
+		this.server = server;
 		server.add_handler("Nuvola.Launcher.setTooltip", handle_set_tooltip);
 		server.add_handler("Nuvola.Launcher.setActions", handle_set_actions);
 		server.add_handler("Nuvola.Launcher.addAction", handle_add_action);
@@ -40,7 +39,6 @@ public class Nuvola.LauncherComponent: GLib.Object, Component
 	
 	~Launcher()
 	{
-		var server = runner.server;
 		server.remove_handler("Nuvola.Launcher.setTooltip");
 		server.remove_handler("Nuvola.Launcher.setActions");
 		server.remove_handler("Nuvola.Launcher.addAction");
