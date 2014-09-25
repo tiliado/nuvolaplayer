@@ -22,10 +22,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Nuvola.LauncherBinding: Binding
+public class Nuvola.LauncherBinding: Binding<LauncherInterface>
 {
-	private SList<LauncherInterface> objects = null;
-	
 	public LauncherBinding(Diorite.Ipc.MessageServer server, WebEngine web_engine)
 	{
 		base(server, web_engine, "Nuvola.Launcher");
@@ -34,16 +32,6 @@ public class Nuvola.LauncherBinding: Binding
 		bind("addAction", handle_add_action);
 		bind("removeAction", handle_remove_action);
 		bind("removeActions", handle_remove_actions);
-	}
-	
-	public override bool add(GLib.Object object)
-	{
-		var launcher = object as LauncherInterface;
-		if (launcher == null)
-			return false;
-		
-		objects.prepend(launcher);
-		return true;
 	}
 	
 	private Variant? handle_set_tooltip(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError

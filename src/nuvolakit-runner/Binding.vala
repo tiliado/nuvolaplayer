@@ -22,9 +22,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public abstract class Nuvola.Binding: GLib.Object
+public class Nuvola.Binding<ObjectType>: GLib.Object
 {
 	public string name {get; construct;}
+	protected SList<ObjectType> objects = null;
 	private Diorite.Ipc.MessageServer server;
 	private WebEngine web_engine;
 	private SList<string> handlers = null;
@@ -36,7 +37,14 @@ public abstract class Nuvola.Binding: GLib.Object
 		this.server = server;
 	}
 	
-	public abstract bool add(GLib.Object object);
+	public virtual bool add(GLib.Object object)
+	{
+		if (!(object is ObjectType))
+			return false;
+		
+		objects.prepend((ObjectType) object);
+		return true;
+	}
 	
 	protected void bind(string method, owned Diorite.Ipc.MessageHandler handler)
 	{
@@ -54,6 +62,5 @@ public abstract class Nuvola.Binding: GLib.Object
 	{
 		foreach (var handler in handlers)
 			server.remove_handler(handler);
-		handlers = new SList<string>();
 	}
 }

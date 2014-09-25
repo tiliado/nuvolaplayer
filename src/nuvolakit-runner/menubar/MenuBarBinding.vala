@@ -22,25 +22,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Nuvola.MenuBarBinding: Binding
+public class Nuvola.MenuBarBinding: Binding<MenuBarInterface>
 {
-	private SList<MenuBarInterface> objects = null;
-	
 	public MenuBarBinding(Diorite.Ipc.MessageServer server, WebEngine web_engine)
 	{
 		base(server, web_engine, "Nuvola.MenuBar");
 		bind("setMenu", handle_menubar_set_menu);
 		
-	}
-	
-	public override bool add(GLib.Object object)
-	{
-		var launcher = object as MenuBarInterface;
-		if (launcher == null)
-			return false;
-		
-		objects.prepend(launcher);
-		return true;
 	}
 	
 	private Variant? handle_menubar_set_menu(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError

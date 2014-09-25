@@ -22,25 +22,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Nuvola.NotificationsBinding: Binding
+public class Nuvola.NotificationsBinding: Binding<NotificationsInterface>
 {
-	private SList<NotificationsInterface> objects = null;
-	private Diorite.Ipc.MessageServer server;
-	
 	public NotificationsBinding(Diorite.Ipc.MessageServer server, WebEngine web_engine)
 	{
 		base(server, web_engine, "Nuvola.Notifications");
 		bind("showNotification", handle_show_notification);
-	}
-	
-	public override bool add(GLib.Object object)
-	{
-		var notifier = object as NotificationsInterface;
-		if (notifier == null)
-			return false;
-			
-		objects.prepend(notifier);
-		return true;
 	}
 	
 	private Variant? handle_show_notification(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError

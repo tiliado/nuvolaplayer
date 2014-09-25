@@ -22,10 +22,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Nuvola.ActionsBinding: Binding
+public class Nuvola.ActionsBinding: Binding<ActionsInterface>
 {
-	private SList<ActionsInterface> objects = null;
-	
 	public ActionsBinding(Diorite.Ipc.MessageServer server, WebEngine web_engine)
 	{
 		base(server, web_engine, "Nuvola.Actions");
@@ -40,13 +38,10 @@ public class Nuvola.ActionsBinding: Binding
 	
 	public override bool add(GLib.Object object)
 	{
-		var actions = object as ActionsInterface;
-		if (actions == null)
-			return false;
-		
-		objects.prepend(actions);
-		actions.custom_action_activated.connect(on_custom_action_activated);
-		return true;
+		var result = base.add(object);
+		if (result)
+			(object as ActionsInterface).custom_action_activated.connect(on_custom_action_activated);
+		return result;
 	}
 	
 	private Variant? handle_add_action(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
