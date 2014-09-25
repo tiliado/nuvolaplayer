@@ -252,7 +252,7 @@ def build(ctx):
 	
 	ctx(features = "c cshlib",
 		target = NUVOLAKIT_RUNNER,
-		source = ctx.path.ant_glob('src/nuvolakit-runner/*.vala'),
+		source = ctx.path.ant_glob('src/nuvolakit-runner/*.vala') + ctx.path.ant_glob('src/nuvolakit-runner/*/*.vala'),
 		packages = 'javascriptcoregtk-3.0 webkit2gtk-3.0',
 		uselib =  'JSCORE WEBKIT',
 		use = [NUVOLAKIT_BASE],
