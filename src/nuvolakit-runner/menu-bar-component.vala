@@ -22,11 +22,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Nuvola.MenuBarComponent: Component
+public class Nuvola.MenuBarBinding: Binding
 {
 	private SList<MenuBarInterface> objects = null;
 	
-	public MenuBarComponent(Diorite.Ipc.MessageServer server, WebEngine web_engine)
+	public MenuBarBinding(Diorite.Ipc.MessageServer server, WebEngine web_engine)
 	{
 		base(server, web_engine, "Nuvola.MenuBar");
 		bind("setMenu", handle_menubar_set_menu);

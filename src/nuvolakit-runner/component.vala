@@ -22,14 +22,14 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public abstract class Nuvola.Component: GLib.Object
+public abstract class Nuvola.Binding: GLib.Object
 {
 	public string name {get; construct;}
 	private Diorite.Ipc.MessageServer server;
 	private WebEngine web_engine;
 	private SList<string> handlers = null;
 	
-	public Component(Diorite.Ipc.MessageServer server, WebEngine web_engine, string name)
+	public Binding(Diorite.Ipc.MessageServer server, WebEngine web_engine, string name)
 	{
 		GLib.Object(name: name);
 		this.web_engine = web_engine;
@@ -50,7 +50,7 @@ public abstract class Nuvola.Component: GLib.Object
 		web_engine.call_function(func_name, params);
 	}
 	
-	~Component()
+	~Binding()
 	{
 		foreach (var handler in handlers)
 			server.remove_handler(handler);

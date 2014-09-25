@@ -22,22 +22,22 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Nuvola.ComponentsManager: GLib.Object
+public class Nuvola.Bindings: GLib.Object
 {
-	private SList<Component> components = null;
+	private SList<Binding> bindings = null;
 	
-	public ComponentsManager()
+	public Bindings()
 	{
 	}
 	
-	public void add_component(Component component)
+	public void add_binding(Binding binding)
 	{
-		components.prepend(component);
+		bindings.prepend(binding);
 	}
 	
-	public void add_implementation(GLib.Object object)
+	public void add_object(GLib.Object object)
 	{
-		foreach (var component in components)
-			component.add(object);
+		foreach (var binding in bindings)
+			binding.add(object);
 	}
 }

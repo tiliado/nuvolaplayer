@@ -22,11 +22,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Nuvola.LauncherComponent: Component
+public class Nuvola.LauncherBinding: Binding
 {
 	private SList<LauncherInterface> objects = null;
 	
-	public LauncherComponent(Diorite.Ipc.MessageServer server, WebEngine web_engine)
+	public LauncherBinding(Diorite.Ipc.MessageServer server, WebEngine web_engine)
 	{
 		base(server, web_engine, "Nuvola.Launcher");
 		bind("setTooltip", handle_set_tooltip);

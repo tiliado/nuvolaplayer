@@ -23,11 +23,11 @@
  */
 
 // FIXME: Components without JavaScript interface
-public class Nuvola.MediaKeysComponent: Component
+public class Nuvola.MediaKeysBinding: Binding
 {
 	private SList<MediaKeysInterface> objects = null;
 	
-	public MediaKeysComponent(Diorite.Ipc.MessageServer server, WebEngine web_engine)
+	public MediaKeysBinding(Diorite.Ipc.MessageServer server, WebEngine web_engine)
 	{
 		base(server, web_engine, "Nuvola.MediaKey");
 	}

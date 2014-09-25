@@ -22,11 +22,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Nuvola.ActionsComponent: Component
+public class Nuvola.ActionsBinding: Binding
 {
 	private SList<ActionsInterface> objects = null;
 	
-	public ActionsComponent(Diorite.Ipc.MessageServer server, WebEngine web_engine)
+	public ActionsBinding(Diorite.Ipc.MessageServer server, WebEngine web_engine)
 	{
 		base(server, web_engine, "Nuvola.Actions");
 		bind("addAction", handle_add_action);

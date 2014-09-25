@@ -78,7 +78,7 @@ public class AppRunnerController : Diorite.Application
 	public weak Gtk.Settings gtk_settings {get; private set;}
 	public Config config {get; private set;}
 	public ExtensionsManager extensions {get; private set;}
-	public ComponentsManager components {get; private set;}
+	public Bindings bindings {get; private set;}
 	public Connection connection {get; private set;}
 	public GlobalKeybinder keybinder {get; private set;}
 	public Diorite.Ipc.MessageServer server {get; private set; default=null;}
@@ -328,26 +328,26 @@ public class AppRunnerController : Diorite.Application
 				extensions.load(key);
 		}
 		
-		components = new ComponentsManager();
+		bindings = new Bindings();
 		
-		components.add_component(new ActionsComponent(server, web_engine));
-		components.add_implementation(actions_helper);
+		bindings.add_binding(new ActionsBinding(server, web_engine));
+		bindings.add_object(actions_helper);
 		
-		components.add_component(new LauncherComponent(server, web_engine));
-		components.add_implementation(new TrayIcon(this));
+		bindings.add_binding(new LauncherBinding(server, web_engine));
+		bindings.add_object(new TrayIcon(this));
 		#if UNITY
-		components.add_implementation(new UnityLauncher(this));
+		bindings.add_object(new UnityLauncher(this));
 		#endif
 		
-		components.add_component(new NotificationsComponent(server, web_engine));
-		components.add_component(new NotificationComponent(server, web_engine));
-		components.add_implementation(new Notifications(this));
+		bindings.add_binding(new NotificationsBinding(server, web_engine));
+		bindings.add_binding(new NotificationBinding(server, web_engine));
+		bindings.add_object(new Notifications(this));
 		
-		components.add_component(new MediaKeysComponent(server, web_engine));
-		components.add_implementation(new MediaKeys(this));
+		bindings.add_binding(new MediaKeysBinding(server, web_engine));
+		bindings.add_object(new MediaKeys(this));
 		
-		components.add_component(new MenuBarComponent(server, web_engine));
-		components.add_implementation(menu_bar);
+		bindings.add_binding(new MenuBarBinding(server, web_engine));
+		bindings.add_object(menu_bar);
 	}
 	
 	private void on_fatal_error(string title, string message)

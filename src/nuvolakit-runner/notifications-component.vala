@@ -22,12 +22,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Nuvola.NotificationsComponent: Component
+public class Nuvola.NotificationsBinding: Binding
 {
 	private SList<NotificationsInterface> objects = null;
 	private Diorite.Ipc.MessageServer server;
 	
-	public NotificationsComponent(Diorite.Ipc.MessageServer server, WebEngine web_engine)
+	public NotificationsBinding(Diorite.Ipc.MessageServer server, WebEngine web_engine)
 	{
 		base(server, web_engine, "Nuvola.Notifications");
 		bind("showNotification", handle_show_notification);
