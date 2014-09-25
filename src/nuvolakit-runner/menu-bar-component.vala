@@ -22,24 +22,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Nuvola.MenuBarComponent: GLib.Object, Component
+public class Nuvola.MenuBarComponent: Component
 {
 	private SList<MenuBarInterface> objects = null;
-	private Diorite.Ipc.MessageServer server;
 	
-	public MenuBarComponent(ComponentsManager manager, Diorite.Ipc.MessageServer server)
+	public MenuBarComponent(Diorite.Ipc.MessageServer server, WebEngine web_engine)
 	{
-		this.server = server;
-		server.add_handler("Nuvola.MenuBar.setMenu", handle_menubar_set_menu);
+		base(server, web_engine, "Nuvola.MenuBar");
+		bind("setMenu", handle_menubar_set_menu);
 		
 	}
 	
-	~MenuBarComponent()
-	{
-		server.remove_handler("Nuvola.MenuBar.setMenu");
-	}
-	
-	public bool add(GLib.Object object)
+	public override bool add(GLib.Object object)
 	{
 		var launcher = object as MenuBarInterface;
 		if (launcher == null)

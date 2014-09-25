@@ -328,24 +328,25 @@ public class AppRunnerController : Diorite.Application
 				extensions.load(key);
 		}
 		
-		components = new ComponentsManager(this);
+		components = new ComponentsManager();
 		
-		components.add_component(new ActionsComponent(components, server));
+		components.add_component(new ActionsComponent(server, web_engine));
 		components.add_implementation(actions_helper);
 		
-		components.add_component(new LauncherComponent(components, server));
+		components.add_component(new LauncherComponent(server, web_engine));
 		components.add_implementation(new TrayIcon(this));
 		#if UNITY
 		components.add_implementation(new UnityLauncher(this));
 		#endif
 		
-		components.add_component(new NotificationsComponent(components, server));
+		components.add_component(new NotificationsComponent(server, web_engine));
+		components.add_component(new NotificationComponent(server, web_engine));
 		components.add_implementation(new Notifications(this));
 		
-		components.add_component(new MediaKeysComponent(components, server));
+		components.add_component(new MediaKeysComponent(server, web_engine));
 		components.add_implementation(new MediaKeys(this));
 		
-		components.add_component(new MenuBarComponent(components, server));
+		components.add_component(new MenuBarComponent(server, web_engine));
 		components.add_implementation(menu_bar);
 	}
 	

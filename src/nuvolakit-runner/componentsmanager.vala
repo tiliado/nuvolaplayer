@@ -24,12 +24,10 @@
 
 public class Nuvola.ComponentsManager: GLib.Object
 {
-	private AppRunnerController runner;
 	private SList<Component> components = null;
 	
-	public ComponentsManager(AppRunnerController runner)
+	public ComponentsManager()
 	{
-		this.runner = runner;
 	}
 	
 	public void add_component(Component component)
@@ -41,10 +39,5 @@ public class Nuvola.ComponentsManager: GLib.Object
 	{
 		foreach (var component in components)
 			component.add(object);
-	}
-	
-	public void call_web_worker(string func_name, Variant? params) throws Diorite.Ipc.MessageError
-	{
-		runner.web_engine.call_function(func_name, params);
 	}
 }

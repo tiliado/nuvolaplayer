@@ -22,89 +22,87 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Nuvola.LauncherComponent: Component
+public class Nuvola.NotificationComponent: Component
 {
-	private SList<LauncherInterface> objects = null;
+	private SList<NotificationInterface> objects = null;
+	private Diorite.Ipc.MessageServer server;
 	
-	public LauncherComponent(Diorite.Ipc.MessageServer server, WebEngine web_engine)
+	public NotificationComponent(Diorite.Ipc.MessageServer server, WebEngine web_engine)
 	{
-		base(server, web_engine, "Nuvola.Launcher");
-		bind("setTooltip", handle_set_tooltip);
+		base(server, web_engine, "Nuvola.Notification");
+		bind("update", handle_update);
 		bind("setActions", handle_set_actions);
-		bind("addAction", handle_add_action);
-		bind("removeAction", handle_remove_action);
 		bind("removeActions", handle_remove_actions);
+		bind("show", handle_show);
 	}
 	
 	public override bool add(GLib.Object object)
 	{
-		var launcher = object as LauncherInterface;
-		if (launcher == null)
+		var notifier = object as NotificationInterface;
+		if (notifier == null)
 			return false;
-		
-		objects.prepend(launcher);
+			
+		objects.prepend(notifier);
 		return true;
 	}
 	
-	private Variant? handle_set_tooltip(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_update(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(s)");
-		string text;
-		data.get("(s)", out text);
+		Diorite.Ipc.MessageServer.check_type_str(data, "(sssssb)");
+		string name = null;
+		string title = null;
+		string message = null;
+		string icon_name = null;
+		string icon_path = null;
+		bool resident = false;
+		data.get("(sssssb)", &name, &title, &message, &icon_name, &icon_path);
 		
 		foreach (var object in objects)
-			object.set_tooltip(text);
-		
-		return null;
-	}
-	
-	private Variant? handle_add_action(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
-	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(s)");
-		string name;
-		data.get("(s)", out name);
-		
-		foreach (var object in objects)
-			object.add_action(name);
-		
-		return null;
-	}
-	
-	private Variant? handle_remove_action(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
-	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(s)");
-		string name;
-		data.get("(s)", out name);
-		
-		foreach (var object in objects)
-			object.remove_action(name);
+			object.update(name, title, message, icon_name, icon_path, resident);
 		
 		return null;
 	}
 	
 	private Variant? handle_set_actions(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(av)");
+		Diorite.Ipc.MessageServer.check_type_str(data, "(sav)");
 		
+		string name = null;
 		int i = 0;
 		VariantIter iter = null;
-		data.get("(av)", &iter);
+		data.get("(sav)", &name, &iter);
 		string[] actions = new string[iter.n_children()];
 		Variant item = null;
 		while (iter.next("v", &item))
 			actions[i++] = item.get_string();
 		
 		foreach (var object in objects)
-			object.set_actions(actions);
+			object.set_actions(name, (owned) actions);
 		
 		return null;
 	}
 	
 	private Variant? handle_remove_actions(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, null);
+		Diorite.Ipc.MessageServer.check_type_str(data, "(s)");
+		string name = null;
+		data.get("(s)", &name);
+		
 		foreach (var object in objects)
-			object.remove_actions();
+			object.remove_actions(name);
+		
+		return null;
+	}
+	
+	private Variant? handle_show(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	{
+		Diorite.Ipc.MessageServer.check_type_str(data, "(sb)");
+		string name = null;
+		bool force = false;
+		data.get("(sb)", &name, &force);
+		
+		foreach (var object in objects)
+			object.show(name, force);
 		
 		return null;
 	}

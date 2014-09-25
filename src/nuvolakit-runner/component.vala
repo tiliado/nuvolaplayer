@@ -22,7 +22,38 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public interface Nuvola.Component: GLib.Object
+public abstract class Nuvola.Component: GLib.Object
 {
+	public string name {get; construct;}
+	private Diorite.Ipc.MessageServer server;
+	private WebEngine web_engine;
+	private SList<string> handlers = null;
+	
+	public Component(Diorite.Ipc.MessageServer server, WebEngine web_engine, string name)
+	{
+		GLib.Object(name: name);
+		this.web_engine = web_engine;
+		this.server = server;
+	}
+	
 	public abstract bool add(GLib.Object object);
+	
+	protected void bind(string method, owned Diorite.Ipc.MessageHandler handler)
+	{
+		var full_name = "%s.%s".printf(name, method);
+		server.add_handler(full_name, (owned) handler);
+		handlers.prepend(full_name);
+	}
+	
+	protected void call_web_worker(string func_name, Variant? params) throws Diorite.Ipc.MessageError
+	{
+		web_engine.call_function(func_name, params);
+	}
+	
+	~Component()
+	{
+		foreach (var handler in handlers)
+			server.remove_handler(handler);
+		handlers = new SList<string>();
+	}
 }

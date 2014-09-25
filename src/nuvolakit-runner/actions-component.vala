@@ -22,37 +22,23 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Nuvola.ActionsComponent: GLib.Object, Component
+public class Nuvola.ActionsComponent: Component
 {
 	private SList<ActionsInterface> objects = null;
-	private ComponentsManager manager;
-	private Diorite.Ipc.MessageServer server;
 	
-	public ActionsComponent(ComponentsManager manager, Diorite.Ipc.MessageServer server)
+	public ActionsComponent(Diorite.Ipc.MessageServer server, WebEngine web_engine)
 	{
-		this.manager = manager;
-		this.server = server;
-		server.add_handler("Nuvola.Actions.addAction", handle_add_action);
-		server.add_handler("Nuvola.Actions.addRadioAction", handle_add_radio_action);
-		server.add_handler("Nuvola.Actions.isEnabled", handle_is_action_enabled);
-		server.add_handler("Nuvola.Actions.setEnabled", handle_action_set_enabled);
-		server.add_handler("Nuvola.Actions.getState", handle_action_get_state);
-		server.add_handler("Nuvola.Actions.setState", handle_action_set_state);
-		server.add_handler("Nuvola.Actions.activate", handle_action_activate);
+		base(server, web_engine, "Nuvola.Actions");
+		bind("addAction", handle_add_action);
+		bind("addRadioAction", handle_add_radio_action);
+		bind("isEnabled", handle_is_action_enabled);
+		bind("setEnabled", handle_action_set_enabled);
+		bind("getState", handle_action_get_state);
+		bind("setState", handle_action_set_state);
+		bind("activate", handle_action_activate);
 	}
 	
-	~ActionsComponent()
-	{
-		server.remove_handler("Nuvola.Actions.addAction");
-		server.remove_handler("Nuvola.Actions.addRadioAction");
-		server.remove_handler("Nuvola.Actions.isEnabled");
-		server.remove_handler("Nuvola.Actions.setEnabled");
-		server.remove_handler("Nuvola.Actions.getState");
-		server.remove_handler("Nuvola.Actions.setState");
-		server.remove_handler("Nuvola.Actions.activate");
-	}
-	
-	public bool add(GLib.Object object)
+	public override bool add(GLib.Object object)
 	{
 		var actions = object as ActionsInterface;
 		if (actions == null)
@@ -222,7 +208,7 @@ public class Nuvola.ActionsComponent: GLib.Object, Component
 	{
 		try
 		{
-			manager.call_web_worker("Nuvola.actions.emit", new Variant("(ssmv)", "ActionActivated", name, parameter));
+			call_web_worker("Nuvola.actions.emit", new Variant("(ssmv)", "ActionActivated", name, parameter));
 		}
 		catch (Diorite.Ipc.MessageError e)
 		{

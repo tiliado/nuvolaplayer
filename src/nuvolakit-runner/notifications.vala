@@ -116,7 +116,7 @@ public class Notification
 /**
  * Manages notifications
  */
-public class Notifications : GLib.Object, NotificationsInterface
+public class Notifications : GLib.Object, NotificationsInterface, NotificationInterface
 {
 	private AppRunnerController controller;
 	private Config config;

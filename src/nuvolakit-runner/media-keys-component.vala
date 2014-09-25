@@ -22,15 +22,17 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Nuvola.MediaKeysComponent: GLib.Object, Component
+// FIXME: Components without JavaScript interface
+public class Nuvola.MediaKeysComponent: Component
 {
 	private SList<MediaKeysInterface> objects = null;
 	
-	public MediaKeysComponent(ComponentsManager manager, Diorite.Ipc.MessageServer server)
+	public MediaKeysComponent(Diorite.Ipc.MessageServer server, WebEngine web_engine)
 	{
+		base(server, web_engine, "Nuvola.MediaKey");
 	}
 	
-	public bool add(GLib.Object object)
+	public override bool add(GLib.Object object)
 	{
 		var media_keys = object as MediaKeysInterface;
 		if (media_keys == null)

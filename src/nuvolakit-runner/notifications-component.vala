@@ -22,31 +22,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Nuvola.NotificationsComponent: GLib.Object, Component
+public class Nuvola.NotificationsComponent: Component
 {
 	private SList<NotificationsInterface> objects = null;
 	private Diorite.Ipc.MessageServer server;
 	
-	public NotificationsComponent(ComponentsManager manager, Diorite.Ipc.MessageServer server)
+	public NotificationsComponent(Diorite.Ipc.MessageServer server, WebEngine web_engine)
 	{
-		this.server = server;
-		server.add_handler("Nuvola.Notification.update", handle_update);
-		server.add_handler("Nuvola.Notification.setActions", handle_set_actions);
-		server.add_handler("Nuvola.Notification.removeActions", handle_remove_actions);
-		server.add_handler("Nuvola.Notification.show", handle_show);
-		server.add_handler("Nuvola.Notifications.showNotification", handle_show_notification);
+		base(server, web_engine, "Nuvola.Notifications");
+		bind("showNotification", handle_show_notification);
 	}
 	
-	~NotificationsComponent()
-	{
-		server.remove_handler("Nuvola.Notification.update");
-		server.remove_handler("Nuvola.Notification.setActions");
-		server.remove_handler("Nuvola.Notification.removeActions");
-		server.remove_handler("Nuvola.Notification.show");
-		server.remove_handler("Nuvola.Notifications.showNotification");
-	}
-	
-	public bool add(GLib.Object object)
+	public override bool add(GLib.Object object)
 	{
 		var notifier = object as NotificationsInterface;
 		if (notifier == null)
@@ -54,67 +41,6 @@ public class Nuvola.NotificationsComponent: GLib.Object, Component
 			
 		objects.prepend(notifier);
 		return true;
-	}
-	
-	private Variant? handle_update(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
-	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(sssssb)");
-		string name = null;
-		string title = null;
-		string message = null;
-		string icon_name = null;
-		string icon_path = null;
-		bool resident = false;
-		data.get("(sssssb)", &name, &title, &message, &icon_name, &icon_path);
-		
-		foreach (var object in objects)
-			object.update(name, title, message, icon_name, icon_path, resident);
-		
-		return null;
-	}
-	
-	private Variant? handle_set_actions(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
-	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(sav)");
-		
-		string name = null;
-		int i = 0;
-		VariantIter iter = null;
-		data.get("(sav)", &name, &iter);
-		string[] actions = new string[iter.n_children()];
-		Variant item = null;
-		while (iter.next("v", &item))
-			actions[i++] = item.get_string();
-		
-		foreach (var object in objects)
-			object.set_actions(name, (owned) actions);
-		
-		return null;
-	}
-	
-	private Variant? handle_remove_actions(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
-	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(s)");
-		string name = null;
-		data.get("(s)", &name);
-		
-		foreach (var object in objects)
-			object.remove_actions(name);
-		
-		return null;
-	}
-	
-	private Variant? handle_show(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
-	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(sb)");
-		string name = null;
-		bool force = false;
-		data.get("(sb)", &name, &force);
-		
-		foreach (var object in objects)
-			object.show(name, force);
-		
-		return null;
 	}
 	
 	private Variant? handle_show_notification(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError

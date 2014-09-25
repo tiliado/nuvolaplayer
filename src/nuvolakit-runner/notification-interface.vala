@@ -22,7 +22,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public interface Nuvola.NotificationsInterface: GLib.Object
+public interface Nuvola.NotificationInterface: GLib.Object
 {
-	public abstract void show_anonymous(string summary, string body, string? icon_name, string? icon_path, bool force);
+	public abstract void update(string name, string summary, string body, string? icon_name, string? icon_path, bool resident);
+	
+	public abstract void set_actions(string name, string[] actions);
+	
+	public abstract void remove_actions(string name);
+	
+	public abstract void show(string name, bool force);
 }
