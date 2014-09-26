@@ -344,7 +344,7 @@ public class AppRunnerController : Diorite.Application
 		bindings.add_object(new Notifications(this));
 		
 		bindings.add_binding(new MediaKeysBinding(server, web_engine));
-		bindings.add_object(new MediaKeys(this));
+		bindings.add_object(new MediaKeys(keybinder));
 		
 		bindings.add_binding(new MenuBarBinding(server, web_engine));
 		bindings.add_object(menu_bar);

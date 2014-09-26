@@ -24,4 +24,5 @@
 
 public interface Nuvola.MediaKeysInterface: GLib.Object
 {
+    public signal void media_key_pressed(string key);
 }

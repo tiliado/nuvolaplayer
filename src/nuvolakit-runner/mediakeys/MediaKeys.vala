@@ -44,15 +44,12 @@ public class MediaKeys: GLib.Object, MediaKeysInterface
 	public static const string GNOME_NEXT = "Next";
 
 	private AppRunnerController controller;
-	private WebEngine web_engine;
 	private GlobalKeybinder keybinder;
 	private GnomeMedia? media_keys;
 	
-	public MediaKeys(AppRunnerController controller)
+	public MediaKeys(GlobalKeybinder keybinder)
 	{
-		this.controller = controller;
-		this.web_engine = controller.web_engine;
-		this.keybinder = controller.keybinder;
+		this.keybinder = keybinder;
 		handle_multimedia_keys();
 	}
 	
@@ -136,7 +133,7 @@ public class MediaKeys: GLib.Object, MediaKeysInterface
 		debug("Media key pressed: %s, %s", app_name, key);
 		if (app_name != controller.app_id)
 			return;
-		send_key_signal(key);
+		media_key_pressed(key);
 	}
 
 	/**
@@ -161,36 +158,24 @@ public class MediaKeys: GLib.Object, MediaKeysInterface
 		switch (key)
 		{
 		case X11_PLAY:
-			send_key_signal(GNOME_PLAY);
+			media_key_pressed(GNOME_PLAY);
 			break;
 		case X11_PAUSE:
-			send_key_signal(GNOME_PAUSE);
+			media_key_pressed(GNOME_PAUSE);
 			break;
 		case X11_STOP:
-			send_key_signal(GNOME_STOP);
+			media_key_pressed(GNOME_STOP);
 			break;
 		case X11_PREV:
-			send_key_signal(GNOME_PREV);
+			media_key_pressed(GNOME_PREV);
 			break;
 		case X11_NEXT:
-			send_key_signal(GNOME_NEXT);
+			media_key_pressed(GNOME_NEXT);
 			break;
 		default:
 			warning("Unknown keybinding '%s'.", key);
-			send_key_signal(key);
+			media_key_pressed(key);
 			break;
-		}
-	}
-	
-	private void send_key_signal(string key)
-	{
-		try
-		{
-			web_engine.call_function("Nuvola.mediaKeys.emit", new Variant("(ss)", "MediaKeyPressed", key));
-		}
-		catch (Diorite.Ipc.MessageError e)
-		{
-			warning("Communication failed: %s", e.message);
 		}
 	}
 }

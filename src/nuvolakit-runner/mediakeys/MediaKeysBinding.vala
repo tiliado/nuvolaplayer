@@ -22,11 +22,30 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// FIXME: Components without JavaScript interface
 public class Nuvola.MediaKeysBinding: Binding<MediaKeysInterface>
 {
 	public MediaKeysBinding(Diorite.Ipc.MessageServer server, WebEngine web_engine)
 	{
 		base(server, web_engine, "Nuvola.MediaKey");
+	}
+	
+	public override bool add(GLib.Object object)
+	{
+		var result = base.add(object);
+		if (result)
+			(object as MediaKeysInterface).media_key_pressed.connect(on_media_key_pressed);
+		return result;
+	}
+	
+	private void on_media_key_pressed(string key)
+	{
+		try
+		{
+			call_web_worker("Nuvola.mediaKeys.emit", new Variant("(ss)", "MediaKeyPressed", key));
+		}
+		catch (Diorite.Ipc.MessageError e)
+		{
+			warning("Communication failed: %s", e.message);
+		}
 	}
 }
