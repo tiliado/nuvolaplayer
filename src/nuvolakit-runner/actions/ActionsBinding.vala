@@ -24,9 +24,9 @@
 
 public class Nuvola.ActionsBinding: Binding<ActionsInterface>
 {
-	public ActionsBinding(Diorite.Ipc.MessageServer server, WebEngine web_engine)
+	public ActionsBinding(Diorite.Ipc.MessageServer server, WebWorker web_worker)
 	{
-		base(server, web_engine, "Nuvola.Actions");
+		base(server, web_worker, "Nuvola.Actions");
 		bind("addAction", handle_add_action);
 		bind("addRadioAction", handle_add_radio_action);
 		bind("isEnabled", handle_is_action_enabled);
@@ -205,7 +205,7 @@ public class Nuvola.ActionsBinding: Binding<ActionsInterface>
 		{
 			call_web_worker("Nuvola.actions.emit", new Variant("(ssmv)", "ActionActivated", name, parameter));
 		}
-		catch (Diorite.Ipc.MessageError e)
+		catch (GLib.Error e)
 		{
 			warning("Communication failed: %s", e.message);
 		}

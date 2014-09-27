@@ -24,9 +24,9 @@
 
 public class Nuvola.MediaKeysBinding: Binding<MediaKeysInterface>
 {
-	public MediaKeysBinding(Diorite.Ipc.MessageServer server, WebEngine web_engine)
+	public MediaKeysBinding(Diorite.Ipc.MessageServer server, WebWorker web_worker)
 	{
-		base(server, web_engine, "Nuvola.MediaKey");
+		base(server, web_worker, "Nuvola.MediaKey");
 	}
 	
 	public override bool add(GLib.Object object)
@@ -43,7 +43,7 @@ public class Nuvola.MediaKeysBinding: Binding<MediaKeysInterface>
 		{
 			call_web_worker("Nuvola.mediaKeys.emit", new Variant("(ss)", "MediaKeyPressed", key));
 		}
-		catch (Diorite.Ipc.MessageError e)
+		catch (GLib.Error e)
 		{
 			warning("Communication failed: %s", e.message);
 		}

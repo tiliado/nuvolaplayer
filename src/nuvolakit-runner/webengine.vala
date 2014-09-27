@@ -39,11 +39,8 @@ public class WebEngine : GLib.Object
 	private JsEnvironment? env = null;
 	private JSApi api;
 	private Diorite.Ipc.MessageServer server = null;
-	private Diorite.Ipc.MessageClient web_worker = null;
-	private bool web_worker_ready = false;
 	private bool initialized = false;
 	
-	private static const string WEB_WORKER_SUFFIX = ".webworker";
 	private Config config;
 	private VariantHashTable session;
 	private SList<WebWindow> web_windows = null;
@@ -52,7 +49,6 @@ public class WebEngine : GLib.Object
 	{
 		server = app.server;
 		var webkit_extension_dir = Nuvola.get_libdir();
-		Environment.set_variable("NUVOLA_IPC_WEB_WORKER", app.app_id + WEB_WORKER_SUFFIX, true);
 		debug("Nuvola WebKit Extension directory: %s", webkit_extension_dir);
 		
 		var wc = WebKit.WebContext.get_default();
@@ -161,11 +157,6 @@ public class WebEngine : GLib.Object
 			if (!inject_api())
 				return false;
 			
-			if (!web_worker.wait_for_echo(2000))
-				error("Cannot connect to web worker process.");
-			
-			web_worker_ready = true;
-			
 			var args = new Variant("(s)", "InitAppRunner");
 			try
 			{
@@ -257,15 +248,6 @@ public class WebEngine : GLib.Object
 		web_view.reload();
 	}
 	
-	public void call_function(string name, Variant? params) throws Diorite.Ipc.MessageError
-	{
-		if (!web_worker_ready)
-			throw new Diorite.Ipc.MessageError.NOT_READY("Web worker process is not ready yet");
-		
-		var data = new Variant("(smv)", name, params);
-		web_worker.send_message("call_function", data);
-	}
-	
 	public void get_preferences(out Variant values, out Variant entries)
 	{
 		var args = new Variant("(s@a{sv}@av)", "PreferencesForm", new Variant.array(new VariantType("{sv}"), {}), new Variant.array(VariantType.VARIANT, {}));
@@ -320,8 +302,6 @@ public class WebEngine : GLib.Object
 		server.add_handler("session_set_value", handle_session_set_value);
 		server.add_handler("session_set_default_value", handle_session_set_default_value);
 		server.add_handler("show_error", handle_show_error);
-		
-		web_worker = new Diorite.Ipc.MessageClient(app.app_id + WEB_WORKER_SUFFIX, 5000);
 	}
 	
 	private Variant? handle_get_data_dir(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError

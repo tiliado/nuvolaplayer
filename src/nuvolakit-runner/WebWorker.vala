@@ -22,45 +22,44 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Nuvola.Binding<ObjectType>: GLib.Object
+
+namespace Nuvola
 {
-	public string name {get; construct;}
-	protected SList<ObjectType> objects = null;
-	protected Diorite.Ipc.MessageServer server;
-	protected WebWorker web_worker;
-	private SList<string> handlers = null;
+
+public interface WebWorker: GLib.Object
+{
+	public abstract void send_message(string name, Variant? params) throws GLib.Error;
+	public abstract void call_function(string name, Variant? params) throws GLib.Error;
+}
+
+public class RemoteWebWorker: GLib.Object, WebWorker
+{
+	private bool ready = false;
+	private Diorite.Ipc.MessageClient client;
 	
-	public Binding(Diorite.Ipc.MessageServer server, WebWorker web_worker, string name)
+	public RemoteWebWorker(string name, uint timeout)
 	{
-		GLib.Object(name: name);
-		this.web_worker = web_worker;
-		this.server = server;
+		client = new Diorite.Ipc.MessageClient(name, timeout);
 	}
 	
-	public virtual bool add(GLib.Object object)
+	public RemoteWebWorker.with_client(Diorite.Ipc.MessageClient client)
 	{
-		if (!(object is ObjectType))
-			return false;
+		this.client = client;
+	}
+	
+	public void send_message(string name, Variant? params) throws GLib.Error
+	{
+		if (!ready && !(ready = client.wait_for_echo(2000)))
+			throw new Diorite.Ipc.MessageError.NOT_READY("Web worker process is not ready yet");
 		
-		objects.prepend((ObjectType) object);
-		return true;
+		client.send_message(name, params);
 	}
 	
-	protected void bind(string method, owned Diorite.Ipc.MessageHandler handler)
+	public void call_function(string name, Variant? params) throws GLib.Error
 	{
-		var full_name = "%s.%s".printf(name, method);
-		server.add_handler(full_name, (owned) handler);
-		handlers.prepend(full_name);
-	}
-	
-	protected void call_web_worker(string func_name, Variant? params) throws GLib.Error
-	{
-		web_worker.call_function(func_name, params);
-	}
-	
-	~Binding()
-	{
-		foreach (var handler in handlers)
-			server.remove_handler(handler);
+		var data = new Variant("(smv)", name, params);
+		send_message("call_function", data);
 	}
 }
+
+} // namespace Nuvola

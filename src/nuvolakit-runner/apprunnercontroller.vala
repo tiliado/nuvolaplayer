@@ -69,11 +69,13 @@ public static string build_dashed_id(string web_app_id)
 public class AppRunnerController : Diorite.Application
 {
 	private static const string UI_RUNNER_SUFFIX = ".uirunner";
+	private static const string WEB_WORKER_SUFFIX = ".webworker";
 	public WebAppWindow? main_window {get; private set; default = null;}
 	public Diorite.Storage? storage {get; private set; default = null;}
 	public Diorite.ActionsRegistry? actions {get; private set; default = null;}
 	public WebAppMeta web_app {get; private set;}
 	public WebAppStorage app_storage {get; private set;}
+	private WebWorker web_worker;
 	public WebEngine web_engine {get; private set;}
 	public weak Gtk.Settings gtk_settings {get; private set;}
 	public Config config {get; private set;}
@@ -241,6 +243,10 @@ public class AppRunnerController : Diorite.Application
 		{
 			error("Communication with master process failed: %s", e.message);
 		}
+		
+		var client_name = app_id + WEB_WORKER_SUFFIX;
+		Environment.set_variable("NUVOLA_IPC_WEB_WORKER", client_name, true);
+		web_worker = new RemoteWebWorker(client_name, 5000);
 	}
 	
 	private void do_quit()
@@ -330,23 +336,23 @@ public class AppRunnerController : Diorite.Application
 		
 		bindings = new Bindings();
 		
-		bindings.add_binding(new ActionsBinding(server, web_engine));
+		bindings.add_binding(new ActionsBinding(server, web_worker));
 		bindings.add_object(actions_helper);
 		
-		bindings.add_binding(new LauncherBinding(server, web_engine));
+		bindings.add_binding(new LauncherBinding(server, web_worker));
 		bindings.add_object(new TrayIcon(this));
 		#if UNITY
 		bindings.add_object(new UnityLauncher(this));
 		#endif
 		
-		bindings.add_binding(new NotificationsBinding(server, web_engine));
-		bindings.add_binding(new NotificationBinding(server, web_engine));
+		bindings.add_binding(new NotificationsBinding(server, web_worker));
+		bindings.add_binding(new NotificationBinding(server, web_worker));
 		bindings.add_object(new Notifications(this));
 		
-		bindings.add_binding(new MediaKeysBinding(server, web_engine));
+		bindings.add_binding(new MediaKeysBinding(server, web_worker));
 		bindings.add_object(new MediaKeys(keybinder));
 		
-		bindings.add_binding(new MenuBarBinding(server, web_engine));
+		bindings.add_binding(new MenuBarBinding(server, web_worker));
 		bindings.add_object(menu_bar);
 	}
 	
@@ -450,9 +456,9 @@ public class AppRunnerController : Diorite.Application
 			var result = connection.download_file.end(res, out msg);
 			try
 			{
-				web_engine.call_function("Nuvola.browser._downloadDone", new Variant("(dbusss)", cb_id, result, msg.status_code, msg.reason_phrase, file.get_path(), file.get_uri()));
+				web_worker.call_function("Nuvola.browser._downloadDone", new Variant("(dbusss)", cb_id, result, msg.status_code, msg.reason_phrase, file.get_path(), file.get_uri()));
 			}
-			catch (Diorite.Ipc.MessageError e)
+			catch (GLib.Error e)
 			{
 				warning("Communication failed: %s", e.message);
 			}
@@ -467,9 +473,9 @@ public class AppRunnerController : Diorite.Application
 			return;
 		try
 		{
-			web_engine.call_function("Nuvola.actions.emit", new Variant("(ssb)", "ActionEnabledChanged", action.name, action.enabled));
+			web_worker.call_function("Nuvola.actions.emit", new Variant("(ssb)", "ActionEnabledChanged", action.name, action.enabled));
 		}
-		catch (Diorite.Ipc.MessageError e)
+		catch (GLib.Error e)
 		{
 			if (e is Diorite.Ipc.MessageError.NOT_READY)
 				debug("Communication failed: %s", e.message);
@@ -491,9 +497,9 @@ public class AppRunnerController : Diorite.Application
 		
 		try
 		{
-			web_engine.call_function("Nuvola.config.emit", new Variant("(ss)", "ConfigChanged", key));
+			web_worker.call_function("Nuvola.config.emit", new Variant("(ss)", "ConfigChanged", key));
 		}
-		catch (Diorite.Ipc.MessageError e)
+		catch (GLib.Error e)
 		{
 			warning("Communication failed: %s", e.message);
 		}

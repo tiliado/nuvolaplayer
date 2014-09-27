@@ -24,9 +24,9 @@
 
 public class Nuvola.NotificationBinding: Binding<NotificationInterface>
 {
-	public NotificationBinding(Diorite.Ipc.MessageServer server, WebEngine web_engine)
+	public NotificationBinding(Diorite.Ipc.MessageServer server, WebWorker web_worker)
 	{
-		base(server, web_engine, "Nuvola.Notification");
+		base(server, web_worker, "Nuvola.Notification");
 		bind("update", handle_update);
 		bind("setActions", handle_set_actions);
 		bind("removeActions", handle_remove_actions);
