@@ -46,6 +46,7 @@ public class Nuvola.ActionsBinding: Binding<ActionsInterface>
 	
 	private Variant? handle_add_action(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
+		check_not_empty();
 		Diorite.Ipc.MessageServer.check_type_str(data, "(sssssss@*)");
 		
 		string group = null;
@@ -79,6 +80,7 @@ public class Nuvola.ActionsBinding: Binding<ActionsInterface>
 	
 	private Variant? handle_add_radio_action(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
+		check_not_empty();
 		Diorite.Ipc.MessageServer.check_type_str(data, "(sss@*av)");
 		
 		string group = null;
@@ -120,6 +122,7 @@ public class Nuvola.ActionsBinding: Binding<ActionsInterface>
 	
 	private Variant? handle_is_action_enabled(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
+		check_not_empty();
 		Diorite.Ipc.MessageServer.check_type_str(data, "(s)");
 		
 		string? action_name = null;
@@ -137,6 +140,7 @@ public class Nuvola.ActionsBinding: Binding<ActionsInterface>
 	
 	private Variant? handle_action_set_enabled(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
+		check_not_empty();
 		Diorite.Ipc.MessageServer.check_type_str(data, "(sb)");
 		string? action_name = null;
 		bool enabled = false;
@@ -153,6 +157,7 @@ public class Nuvola.ActionsBinding: Binding<ActionsInterface>
 	
 	private Variant? handle_action_get_state(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
+		check_not_empty();
 		Diorite.Ipc.MessageServer.check_type_str(data, "(s)");
 		string? action_name = null;
 		data.get("(s)", &action_name);
@@ -169,6 +174,7 @@ public class Nuvola.ActionsBinding: Binding<ActionsInterface>
 	
 	private Variant? handle_action_set_state(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
+		check_not_empty();
 		Diorite.Ipc.MessageServer.check_type_str(data, "(s@*)");
 		string? action_name = null;
 		Variant? state = null;
@@ -185,6 +191,7 @@ public class Nuvola.ActionsBinding: Binding<ActionsInterface>
 	
 	private Variant? handle_action_activate(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
+		check_not_empty();
 		Diorite.Ipc.MessageServer.check_type_str(data, "(s)");
 		
 		string? action_name = null;

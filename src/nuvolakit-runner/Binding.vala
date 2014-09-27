@@ -46,6 +46,12 @@ public class Nuvola.Binding<ObjectType>: GLib.Object
 		return true;
 	}
 	
+	protected void check_not_empty() throws Diorite.Ipc.MessageError
+	{
+		if (objects == null)
+			throw new Diorite.Ipc.MessageError.UNSUPPORTED("Binding %s has no registered components.", name);
+	}
+	
 	protected void bind(string method, owned Diorite.Ipc.MessageHandler handler)
 	{
 		var full_name = "%s.%s".printf(name, method);

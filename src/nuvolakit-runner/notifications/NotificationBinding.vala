@@ -35,6 +35,7 @@ public class Nuvola.NotificationBinding: Binding<NotificationInterface>
 	
 	private Variant? handle_update(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
+		check_not_empty();
 		Diorite.Ipc.MessageServer.check_type_str(data, "(sssssb)");
 		string name = null;
 		string title = null;
@@ -52,6 +53,7 @@ public class Nuvola.NotificationBinding: Binding<NotificationInterface>
 	
 	private Variant? handle_set_actions(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
+		check_not_empty();
 		Diorite.Ipc.MessageServer.check_type_str(data, "(sav)");
 		
 		string name = null;
@@ -71,6 +73,7 @@ public class Nuvola.NotificationBinding: Binding<NotificationInterface>
 	
 	private Variant? handle_remove_actions(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
+		check_not_empty();
 		Diorite.Ipc.MessageServer.check_type_str(data, "(s)");
 		string name = null;
 		data.get("(s)", &name);
@@ -83,6 +86,7 @@ public class Nuvola.NotificationBinding: Binding<NotificationInterface>
 	
 	private Variant? handle_show(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
+		check_not_empty();
 		Diorite.Ipc.MessageServer.check_type_str(data, "(sb)");
 		string name = null;
 		bool force = false;

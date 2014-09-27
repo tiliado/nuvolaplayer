@@ -33,6 +33,7 @@ public class Nuvola.MenuBarBinding: Binding<MenuBarInterface>
 	
 	private Variant? handle_menubar_set_menu(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
+		check_not_empty();
 		Diorite.Ipc.MessageServer.check_type_str(data, "(ssav)");
 		string? id = null;
 		string? label = null;

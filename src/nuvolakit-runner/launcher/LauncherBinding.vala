@@ -36,6 +36,7 @@ public class Nuvola.LauncherBinding: Binding<LauncherInterface>
 	
 	private Variant? handle_set_tooltip(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
+		check_not_empty();
 		Diorite.Ipc.MessageServer.check_type_str(data, "(s)");
 		string text;
 		data.get("(s)", out text);
@@ -48,6 +49,7 @@ public class Nuvola.LauncherBinding: Binding<LauncherInterface>
 	
 	private Variant? handle_add_action(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
+		check_not_empty();
 		Diorite.Ipc.MessageServer.check_type_str(data, "(s)");
 		string name;
 		data.get("(s)", out name);
@@ -60,6 +62,7 @@ public class Nuvola.LauncherBinding: Binding<LauncherInterface>
 	
 	private Variant? handle_remove_action(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
+		check_not_empty();
 		Diorite.Ipc.MessageServer.check_type_str(data, "(s)");
 		string name;
 		data.get("(s)", out name);
@@ -72,6 +75,7 @@ public class Nuvola.LauncherBinding: Binding<LauncherInterface>
 	
 	private Variant? handle_set_actions(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
+		check_not_empty();
 		Diorite.Ipc.MessageServer.check_type_str(data, "(av)");
 		
 		int i = 0;
@@ -90,6 +94,7 @@ public class Nuvola.LauncherBinding: Binding<LauncherInterface>
 	
 	private Variant? handle_remove_actions(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
+		check_not_empty();
 		Diorite.Ipc.MessageServer.check_type_str(data, null);
 		foreach (var object in objects)
 			object.remove_actions();

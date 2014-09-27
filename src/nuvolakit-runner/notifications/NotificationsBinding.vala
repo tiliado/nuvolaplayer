@@ -32,6 +32,7 @@ public class Nuvola.NotificationsBinding: Binding<NotificationsInterface>
 	
 	private Variant? handle_show_notification(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
+		check_not_empty();
 		Diorite.Ipc.MessageServer.check_type_str(data, "(ssssb)");
 		string summary = null;
 		string body = null;
