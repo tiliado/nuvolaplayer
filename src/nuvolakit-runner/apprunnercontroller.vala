@@ -65,11 +65,19 @@ public static string build_dashed_id(string web_app_id)
 {
 	return "%s-%s".printf(Nuvola.get_app_id(), web_app_id.replace("_", "-"));
 }
-	
+
+public string build_ui_runner_ipc_id(string web_app_id)
+{
+	return "%s.%s.%s".printf(Nuvola.get_app_id(), web_app_id, "uirunner");
+}
+
+public string build_web_worker_ipc_id(string web_app_id)
+{
+	return "%s.%s.%s".printf(Nuvola.get_app_id(), web_app_id, "webworker");
+}
+
 public class AppRunnerController : Diorite.Application
 {
-	private static const string UI_RUNNER_SUFFIX = ".uirunner";
-	private static const string WEB_WORKER_SUFFIX = ".webworker";
 	public WebAppWindow? main_window {get; private set; default = null;}
 	public Diorite.Storage? storage {get; private set; default = null;}
 	public Diorite.ActionsRegistry? actions {get; private set; default = null;}
@@ -215,7 +223,7 @@ public class AppRunnerController : Diorite.Application
 	{
 		assert(server == null);
 		
-		var server_name = app_id + UI_RUNNER_SUFFIX;
+		var server_name = build_ui_runner_ipc_id(web_app.id);
 		Environment.set_variable("NUVOLA_IPC_UI_RUNNER", server_name, true);
 		try
 		{
@@ -244,7 +252,7 @@ public class AppRunnerController : Diorite.Application
 			error("Communication with master process failed: %s", e.message);
 		}
 		
-		var client_name = app_id + WEB_WORKER_SUFFIX;
+		var client_name = build_web_worker_ipc_id(web_app.id);
 		Environment.set_variable("NUVOLA_IPC_WEB_WORKER", client_name, true);
 		web_worker = new RemoteWebWorker(client_name, 5000);
 	}
