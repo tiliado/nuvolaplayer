@@ -68,7 +68,7 @@ where /usr/bin/python is Python 2, not Python 3. (Hello, Arch Linux!)
 ### Dependencies
 
   * [Python](http://python.org) >= 2.7, < 3.0
-  * [Vala](https://wiki.gnome.org/Projects/Vala) >= 0.16.1
+  * [Vala](https://wiki.gnome.org/Projects/Vala) >= 0.22.1
   * [Diorite library](https://github.com/tiliado/diorite)
   * [glib-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.32
   * [gio-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.32
