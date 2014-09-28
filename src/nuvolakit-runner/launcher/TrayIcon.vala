@@ -152,26 +152,29 @@ public class TrayIcon: GLib.Object, LauncherInterface
 		return null;
 	}
 	
-	public void set_tooltip(string tooltip)
+	public bool set_tooltip(string tooltip)
 	{
 		#if !APPINDICATOR
 		icon.tooltip_text = tooltip;
 		#endif
+		return Binding.CONTINUE;
 	}
 	
-	public void remove_actions()
+	public bool remove_actions()
 	{
 		actions = {};
 		create_menu();
+		return Binding.CONTINUE;
 	}
 	
-	public void add_action(string action)
+	public bool add_action(string action)
 	{
 		actions += action;
 		create_menu();
+		return Binding.CONTINUE;
 	}
 	
-	public void remove_action(string action)
+	public bool remove_action(string action)
 	{
 		var index = -1;
 		for (var i = 0; i < actions.length; i++)
@@ -196,12 +199,14 @@ public class TrayIcon: GLib.Object, LauncherInterface
 			
 			set_actions((owned) new_actions);
 		}
+		return Binding.CONTINUE;
 	}
 	
-	public void set_actions(string[] actions)
+	public bool set_actions(string[] actions)
 	{
 		this.actions = actions;
 		create_menu();
+		return Binding.CONTINUE;
 	}
 	
 	~TrayIcon()

@@ -24,13 +24,13 @@
 
 public interface Nuvola.LauncherInterface: GLib.Object
 {
-	public abstract void set_tooltip(string tooltip);
+	public abstract bool set_tooltip(string tooltip);
 	
-	public abstract void add_action(string name);
+	public abstract bool add_action(string name);
 	
-	public abstract void remove_action(string name);
+	public abstract bool remove_action(string name);
 	
-	public abstract void remove_actions();
+	public abstract bool remove_actions();
 	
-	public abstract void set_actions(string[] names);
+	public abstract bool set_actions(string[] names);
 }

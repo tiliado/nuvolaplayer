@@ -24,6 +24,10 @@
 
 public class Nuvola.Binding<ObjectType>: GLib.Object
 {
+	/**
+	 * Return value to continue propagation of binding handlers.
+	 */
+	public static const bool CONTINUE = false;
 	public string name {get; construct;}
 	protected SList<ObjectType> objects = null;
 	protected Diorite.Ipc.MessageServer server;

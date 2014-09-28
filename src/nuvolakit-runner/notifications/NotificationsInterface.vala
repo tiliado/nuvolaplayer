@@ -24,5 +24,5 @@
 
 public interface Nuvola.NotificationsInterface: GLib.Object
 {
-	public abstract void show_anonymous(string summary, string body, string? icon_name, string? icon_path, bool force);
+	public abstract bool show_anonymous(string summary, string body, string? icon_name, string? icon_path, bool force);
 }

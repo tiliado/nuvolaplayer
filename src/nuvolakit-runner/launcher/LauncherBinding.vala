@@ -42,7 +42,8 @@ public class Nuvola.LauncherBinding: Binding<LauncherInterface>
 		data.get("(s)", out text);
 		
 		foreach (var object in objects)
-			object.set_tooltip(text);
+			if(object.set_tooltip(text))
+				break;
 		
 		return null;
 	}
@@ -55,7 +56,8 @@ public class Nuvola.LauncherBinding: Binding<LauncherInterface>
 		data.get("(s)", out name);
 		
 		foreach (var object in objects)
-			object.add_action(name);
+			if (object.add_action(name))
+				break;
 		
 		return null;
 	}
@@ -68,7 +70,8 @@ public class Nuvola.LauncherBinding: Binding<LauncherInterface>
 		data.get("(s)", out name);
 		
 		foreach (var object in objects)
-			object.remove_action(name);
+			if (object.remove_action(name))
+				break;
 		
 		return null;
 	}
@@ -87,7 +90,8 @@ public class Nuvola.LauncherBinding: Binding<LauncherInterface>
 			actions[i++] = item.get_string();
 		
 		foreach (var object in objects)
-			object.set_actions(actions);
+			if (object.set_actions(actions))
+				break;
 		
 		return null;
 	}
@@ -97,7 +101,8 @@ public class Nuvola.LauncherBinding: Binding<LauncherInterface>
 		check_not_empty();
 		Diorite.Ipc.MessageServer.check_type_str(data, null);
 		foreach (var object in objects)
-			object.remove_actions();
+			if (object.remove_actions())
+				break;
 		
 		return null;
 	}

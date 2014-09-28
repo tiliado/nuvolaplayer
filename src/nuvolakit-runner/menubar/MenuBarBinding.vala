@@ -28,7 +28,6 @@ public class Nuvola.MenuBarBinding: Binding<MenuBarInterface>
 	{
 		base(server, web_worker, "Nuvola.MenuBar");
 		bind("setMenu", handle_menubar_set_menu);
-		
 	}
 	
 	private Variant? handle_menubar_set_menu(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
@@ -47,7 +46,8 @@ public class Nuvola.MenuBarBinding: Binding<MenuBarInterface>
 			actions[i++] = item.get_string();
 		
 		foreach (var object in objects)
-			object.set_menu(id, label, actions);
+			if (object.set_menu(id, label, actions))
+				break;
 		
 		return null;
 	}

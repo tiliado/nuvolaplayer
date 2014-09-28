@@ -46,7 +46,8 @@ public class Nuvola.NotificationBinding: Binding<NotificationInterface>
 		data.get("(sssssb)", &name, &title, &message, &icon_name, &icon_path);
 		
 		foreach (var object in objects)
-			object.update(name, title, message, icon_name, icon_path, resident);
+			if (object.update(name, title, message, icon_name, icon_path, resident))
+				break;
 		
 		return null;
 	}
@@ -66,7 +67,8 @@ public class Nuvola.NotificationBinding: Binding<NotificationInterface>
 			actions[i++] = item.get_string();
 		
 		foreach (var object in objects)
-			object.set_actions(name, (owned) actions);
+			if (object.set_actions(name, (owned) actions))
+				break;
 		
 		return null;
 	}
@@ -79,7 +81,8 @@ public class Nuvola.NotificationBinding: Binding<NotificationInterface>
 		data.get("(s)", &name);
 		
 		foreach (var object in objects)
-			object.remove_actions(name);
+			if (object.remove_actions(name))
+				break;
 		
 		return null;
 	}
@@ -93,7 +96,8 @@ public class Nuvola.NotificationBinding: Binding<NotificationInterface>
 		data.get("(sb)", &name, &force);
 		
 		foreach (var object in objects)
-			object.show(name, force);
+			if (object.show(name, force))
+				break;
 		
 		return null;
 	}

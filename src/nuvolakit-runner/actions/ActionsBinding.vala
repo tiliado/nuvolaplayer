@@ -73,7 +73,8 @@ public class Nuvola.ActionsBinding: Binding<ActionsInterface>
 			state = null;
 		
 		foreach (var object in objects)
-			object.add_action(group, scope, action_name, label, mnemo_label, icon, keybinding, state);
+			if (object.add_action(group, scope, action_name, label, mnemo_label, icon, keybinding, state))
+				break;
 		
 		return null;
 	}
@@ -115,7 +116,8 @@ public class Nuvola.ActionsBinding: Binding<ActionsInterface>
 		}
 		
 		foreach (var object in objects)
-			object.add_radio_action(group, scope, action_name, state, options);
+			if (object.add_radio_action(group, scope, action_name, state, options))
+				break;
 		
 		return null;
 	}
@@ -133,7 +135,8 @@ public class Nuvola.ActionsBinding: Binding<ActionsInterface>
 		
 		bool enabled = false;
 		foreach (var object in objects)
-			object.is_enabled(action_name, ref enabled);
+			if (object.is_enabled(action_name, ref enabled))
+				break;
 		
 		return new Variant.boolean(enabled);
 	}
@@ -150,7 +153,8 @@ public class Nuvola.ActionsBinding: Binding<ActionsInterface>
 			throw new Diorite.Ipc.MessageError.INVALID_ARGUMENTS("Action name must not be null");
 		
 		foreach (var object in objects)
-			object.set_enabled(action_name, enabled);
+			if (object.set_enabled(action_name, enabled))
+				break;
 		
 		return null;
 	}
@@ -167,7 +171,8 @@ public class Nuvola.ActionsBinding: Binding<ActionsInterface>
 		
 		Variant? state = new Variant("mv", null);
 		foreach (var object in objects)
-			object.get_state(action_name, ref state);
+			if (object.get_state(action_name, ref state))
+				break;
 		
 		return state;
 	}
@@ -184,7 +189,8 @@ public class Nuvola.ActionsBinding: Binding<ActionsInterface>
 			throw new Diorite.Ipc.MessageError.INVALID_ARGUMENTS("Action name must not be null");
 		
 		foreach (var object in objects)
-			object.set_state(action_name, state);
+			if (object.set_state(action_name, state))
+				break;
 		
 		return null;
 	}
@@ -201,7 +207,8 @@ public class Nuvola.ActionsBinding: Binding<ActionsInterface>
 			throw new Diorite.Ipc.MessageError.INVALID_ARGUMENTS("Action name must not be null");
 		
 		foreach (var object in objects)
-			object.activate(action_name);
+			if (object.activate(action_name))
+				break;
 		
 		return null;
 	}

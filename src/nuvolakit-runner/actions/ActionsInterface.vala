@@ -26,17 +26,17 @@ public interface Nuvola.ActionsInterface: GLib.Object
 {
 	public signal void custom_action_activated(string name, Variant? parameter);
 	
-	public abstract void activate(string name);
+	public abstract bool activate(string name);
 	
-	public abstract void set_state(string name, Variant? state);
+	public abstract bool set_state(string name, Variant? state);
 	
-	public abstract void get_state(string name, ref Variant? state);
+	public abstract bool get_state(string name, ref Variant? state);
 	
-	public abstract void is_enabled(string action_name, ref bool enabled);
+	public abstract bool is_enabled(string action_name, ref bool enabled);
 	
-	public abstract void set_enabled(string action_name, bool enabled);
+	public abstract bool set_enabled(string action_name, bool enabled);
 	
-	public abstract void add_action(string group, string scope, string action_name, string? label, string? mnemo_label, string? icon, string? keybinding, Variant? state);
+	public abstract bool add_action(string group, string scope, string action_name, string? label, string? mnemo_label, string? icon, string? keybinding, Variant? state);
 	
-	public abstract void add_radio_action(string group, string scope, string name, Variant state, Diorite.RadioOption[] options);
+	public abstract bool add_radio_action(string group, string scope, string name, Variant state, Diorite.RadioOption[] options);
 }

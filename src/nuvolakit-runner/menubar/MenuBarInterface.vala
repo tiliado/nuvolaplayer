@@ -24,5 +24,5 @@
 
 public interface Nuvola.MenuBarInterface: GLib.Object
 {
-	public abstract void set_menu(string id, string label, string[] actions);
+	public abstract bool set_menu(string id, string label, string[] actions);
 }

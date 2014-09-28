@@ -33,42 +33,58 @@ public class Nuvola.ActionsHelper: GLib.Object, ActionsInterface
 		this.config = config;
 	}
 	
-	public void activate(string action_name)
+	public bool activate(string action_name)
 	{
 		var action = actions.get_action(action_name);
-		if (action != null)
-			action.activate(null);
+		if (action == null)
+			return Binding.CONTINUE;
+		
+		action.activate(null);
+		return !Binding.CONTINUE;
 	}
 	
-	public void set_state(string action_name, Variant? state)
+	public bool set_state(string action_name, Variant? state)
 	{
 		var action = actions.get_action(action_name);
-		if (action != null)
-			action.state = state;
+		if (action == null)
+			return Binding.CONTINUE;
+		
+		action.state = state;
+		return !Binding.CONTINUE;
 	}
 	
-	public void get_state(string action_name, ref Variant? state)
+	public bool get_state(string action_name, ref Variant? state)
 	{
 		var action = actions.get_action(action_name);
-		if (action != null)
-			state = action.state;
+		if (action == null)
+			return Binding.CONTINUE;
+		
+		state = action.state;
+		return !Binding.CONTINUE;
 	}
 	
-	public void is_enabled(string action_name, ref bool enabled)
+	public bool is_enabled(string action_name, ref bool enabled)
 	{
 		var action = actions.get_action(action_name);
-		if (action != null)
-			enabled = action.enabled;
+		if (action == null)
+			return Binding.CONTINUE;
+		
+		enabled = action.enabled;
+		return !Binding.CONTINUE;
 	}
 	
-	public void set_enabled(string action_name, bool enabled)
+	public bool set_enabled(string action_name, bool enabled)
 	{
 		var action = actions.get_action(action_name);
-		if (action != null && action.enabled != enabled)
+		if (action == null)
+			return Binding.CONTINUE;
+		
+		if (action.enabled != enabled)
 			action.enabled = enabled;
+		return Binding.CONTINUE;
 	}
 	
-	public void add_action(string group, string scope, string action_name, string? label, string? mnemo_label, string? icon, string? keybinding, Variant? state)
+	public bool add_action(string group, string scope, string action_name, string? label, string? mnemo_label, string? icon, string? keybinding, Variant? state)
 	{
 		Diorite.Action action;
 		if (state == null)
@@ -79,14 +95,16 @@ public class Nuvola.ActionsHelper: GLib.Object, ActionsInterface
 		action.enabled = false;
 		action.activated.connect(on_custom_action_activated);
 		actions.add_action(action);
+		return !Binding.CONTINUE;
 	}
 	
-	public void add_radio_action(string group, string scope, string name, Variant state, Diorite.RadioOption[] options)
+	public bool add_radio_action(string group, string scope, string name, Variant state, Diorite.RadioOption[] options)
 	{
 		var radio = new Diorite.RadioAction(group, scope, name, null, state, options);
 		radio.enabled = false;
 		radio.activated.connect(on_custom_action_activated);
 		actions.add_action(radio);
+		return !Binding.CONTINUE;
 	}
 	
 	public Diorite.SimpleAction simple_action(string group, string scope, string name, string? label, string? mnemo_label, string? icon, string? keybinding, owned Diorite.ActionCallback? callback)

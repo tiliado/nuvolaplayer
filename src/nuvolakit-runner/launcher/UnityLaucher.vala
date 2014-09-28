@@ -50,17 +50,19 @@ public class UnityLauncher: GLib.Object, LauncherInterface
 		remove_menu();
 	}
 	
-	public void set_tooltip(string tooltip)
+	public bool set_tooltip(string tooltip)
 	{
+		return Binding.CONTINUE;
 	}
 	
-	public void add_action(string action)
+	public bool add_action(string action)
 	{
 		actions += action;
 		update_menu();
+		return Binding.CONTINUE;
 	}
 	
-	public void remove_action(string action)
+	public bool remove_action(string action)
 	{
 		return;
 		var index = -1;
@@ -86,18 +88,21 @@ public class UnityLauncher: GLib.Object, LauncherInterface
 			
 			set_actions((owned) new_actions);
 		}
+		return Binding.CONTINUE;
 	}
 	
-	public void remove_actions()
+	public bool remove_actions()
 	{
 		actions = {};
 		update_menu();
+		return Binding.CONTINUE;
 	}
 	
-	public void set_actions(string[] actions)
+	public bool set_actions(string[] actions)
 	{
 		this.actions = actions;
 		update_menu();
+		return Binding.CONTINUE;
 	}
 	
 	private void clear_menu()

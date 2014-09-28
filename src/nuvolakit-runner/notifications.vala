@@ -166,12 +166,13 @@ public class Notifications : GLib.Object, NotificationsInterface, NotificationIn
 		return notification;
 	}
 	
-	public void update(string name, string summary, string body, string? icon_name, string? icon_path, bool resident)
+	public bool update(string name, string summary, string body, string? icon_name, string? icon_path, bool resident)
 	{
 		get_or_create(name).update(summary, body, icon_name, icon_path, persistence_supported && resident);
+		return Binding.CONTINUE;
 	}
 	
-	public void set_actions(string name, string[] actions)
+	public bool set_actions(string name, string[] actions)
 	{
 		Diorite.Action[] actions_found = {};
 		foreach (var action_name in actions)
@@ -184,14 +185,16 @@ public class Notifications : GLib.Object, NotificationsInterface, NotificationIn
 		}
 		
 		get_or_create(name).set_actions(actions_found);
+		return Binding.CONTINUE;
 	}
 	
-	public void remove_actions(string name)
+	public bool remove_actions(string name)
 	{
 		get_or_create(name).remove_actions();
+		return Binding.CONTINUE;
 	}
 	
-	public void show(string name, bool force)
+	public bool show(string name, bool force)
 	{
 		var notification = get_or_create(name);
 		var add_actions = actions_supported && icons_supported;
@@ -199,10 +202,11 @@ public class Notifications : GLib.Object, NotificationsInterface, NotificationIn
 		if (force || !main_window.is_active)
 			notification.show(add_actions);
 		else if (notification.resident)
-				notification.show_once(add_actions);
+			notification.show_once(add_actions);
+		return Binding.CONTINUE;
 	}
 	
-	public void show_anonymous(string summary, string body, string? icon_name, string? icon_path, bool force)
+	public bool show_anonymous(string summary, string body, string? icon_name, string? icon_path, bool force)
 	{
 		if (force || !main_window.is_active)
 		{
@@ -210,6 +214,7 @@ public class Notifications : GLib.Object, NotificationsInterface, NotificationIn
 			notification.update(summary, body, icon_name, icon_path, false);
 			notification.show(false);
 		}
+		return Binding.CONTINUE;
 	}
 	
 	private void show_notifications()

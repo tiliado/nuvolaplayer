@@ -24,11 +24,11 @@
 
 public interface Nuvola.NotificationInterface: GLib.Object
 {
-	public abstract void update(string name, string summary, string body, string? icon_name, string? icon_path, bool resident);
+	public abstract bool update(string name, string summary, string body, string? icon_name, string? icon_path, bool resident);
 	
-	public abstract void set_actions(string name, string[] actions);
+	public abstract bool set_actions(string name, string[] actions);
 	
-	public abstract void remove_actions(string name);
+	public abstract bool remove_actions(string name);
 	
-	public abstract void show(string name, bool force);
+	public abstract bool show(string name, bool force);
 }

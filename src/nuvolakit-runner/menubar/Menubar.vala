@@ -46,7 +46,7 @@ public class MenuBar: GLib.Object, MenuBarInterface
 	{
 		app.set_menubar(menubar);
 		if (export_app_menu)
-				app.set_app_menu(app_menu);
+			app.set_app_menu(app_menu);
 	}
 	
 	public void update()
@@ -75,10 +75,11 @@ public class MenuBar: GLib.Object, MenuBarInterface
 		menus[id] = submenu;
 	}
 	
-	public void set_menu(string id, string label, string[] actions)
+	public bool set_menu(string id, string label, string[] actions)
 	{
 		set_submenu(id, new SubMenu(label, actions));
 		update();
+		return !Binding.CONTINUE;
 	}
 }
 
