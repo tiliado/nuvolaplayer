@@ -43,7 +43,10 @@ public class Nuvola.Binding<ObjectType>: GLib.Object
 	
 	public virtual bool add(GLib.Object object)
 	{
-		if (!(object is ObjectType))
+		/* Valac 0.22: cannot use "is" operator with generics
+		 * if (!(object is ObjectType))
+		 */
+		if (!object.get_type().is_a(typeof(ObjectType)))
 			return false;
 		
 		objects.prepend((ObjectType) object);
