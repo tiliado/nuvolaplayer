@@ -18,83 +18,43 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 if [ "$#" -lt 1 ]; then
-	echo "Usage: $0 build|clean"
+	echo "Usage: $0 list"
 	echo "Usage: $0 run|debug [path]"
 	exit 1
 fi
 
 set -eu
-
 NAME="testcase"
 CMD="$1"
 shift
-OUT=${OUT:-`dirname $PWD`/build/testcase}
+OUT=${OUT:-`dirname $PWD`/build/tests}
 BUILD=${BUILD:-`dirname $PWD`/build}
-CC=${CC:-gcc}
-LIBPREFIX="lib"
-LIBSUFFIX=".so"
+RUN="$OUT/run"
 EXECSUFFIX=""
 LAUNCHER=""
 DEBUGGER="gdb --args"
-TESTGEN="diorite-testgen"
-CFLAGS="${CFLAGS:-} -g -g3"
-LIB_CFLAGS="-fPIC -shared"
-export LD_LIBRARY_PATH="$OUT:$BUILD:${LD_LIBRARY_PATH:-.}"
-
-clean()
-{
-	set -x
-	rm -rf $OUT
-	{ set +x; } 2> /dev/null
-}
-
-build()
-{
-	set -x
-	test -d ${OUT} || mkdir -p ${OUT}
-	
-	valac -d ${OUT} -b . --thread --save-temps -v \
-	--library=${NAME} -H ${OUT}/${NAME}.h -o ${LIBPREFIX}${NAME}${LIBSUFFIX} \
-	-X -fPIC -X -shared \
-	--vapidir $BUILD -X -I$BUILD -X -L$BUILD \
-	--vapidir $OUT -X -I$OUT -X -L$OUT -X -lnuvolaplayer3-runner \
-	--vapidir $BUILD -X -I$BUILD -X -L$BUILD \
-	--vapidir ../vapi --pkg glib-2.0 --target-glib=2.32 \
-	--pkg=dioriteglib-0.1 --pkg nuvolaplayer3-runner \
-	-X '-DG_LOG_DOMAIN="NuvolaTest"' -X -g -X -O2 \
-	*.vala
-	
-	$TESTGEN -o "${OUT}/run-${NAME}.vala" *.vala
-	
-	valac -d ${OUT} -b . --thread --save-temps -v \
-	--vapidir $BUILD -X -I$BUILD -X -L$BUILD \
-	--vapidir $OUT -X -I$OUT -X -L$OUT -X -lnuvolaplayer3-runner -X -l${NAME} \
-	--vapidir ../vapi --pkg glib-2.0 --target-glib=2.32 \
-	--pkg=dioriteglib-0.1 --pkg ${NAME} \
-	-X '-DG_LOG_DOMAIN="NuvolaTest"' -X -g -X -O2 \
-	"${OUT}/run-${NAME}.vala"
-	
-	{ set +x; } 2> /dev/null
-}
+export LD_LIBRARY_PATH="$RUN:$OUT:$BUILD:${LD_LIBRARY_PATH:-.}"
 
 list()
 {
-	${LAUNCHER} ${OUT}/run-${NAME}${EXECSUFFIX} -l
-}
-
-build_run()
-{
-	build
-	run "$@"
+	if [ -e ${RUN}/${NAME}${EXECSUFFIX} ]; then
+		${LAUNCHER} ${RUN}/${NAME}${EXECSUFFIX} -l
+	else
+		echo "Run \`make all\` to build test cases."
+		exit 1
+	fi
 }
 
 run()
 {
+	make all
 	if [ $# = 0 ]; then
 		all_ok=1
-		for path in $(${LAUNCHER} ${OUT}/run-${NAME}${EXECSUFFIX} -l); do
+		for path in $(${LAUNCHER} ${RUN}/${NAME}${EXECSUFFIX} -l); do
+			echo
+			echo \$ $0 run $path
 			set -x
-			${LAUNCHER} ${OUT}/run-${NAME}${EXECSUFFIX} --verbose -p $path || all_ok=0
+			${LAUNCHER} ${RUN}/${NAME}${EXECSUFFIX} --verbose -p $path || all_ok=0
 			{ set +x; } 2> /dev/null
 		done
 		if [ $all_ok = 0 ]; then
@@ -104,7 +64,7 @@ run()
 	else
 		for path in "$@"; do
 			set -x
-			${LAUNCHER} ${OUT}/run-${NAME}${EXECSUFFIX} --verbose -p $path
+			${LAUNCHER} ${RUN}/${NAME}${EXECSUFFIX} --verbose -p $path
 			{ set +x; } 2> /dev/null
 		done
 	fi
@@ -114,9 +74,9 @@ debug()
 {
 	if [ $# = 0 ]; then
 		all_ok=1
-		for path in $(${LAUNCHER} ${OUT}/run-${NAME}${EXECSUFFIX} -l); do
+		for path in $(${LAUNCHER} ${RUN}/${NAME}${EXECSUFFIX} -l); do
 			set -x
-			$DEBUGGER ${OUT}/run-${NAME}${EXECSUFFIX} --verbose -p $path || all_ok=0
+			$DEBUGGER ${RUN}/${NAME}${EXECSUFFIX} --verbose -p $path || all_ok=0
 			{ set +x; } 2> /dev/null
 		done
 		if [ $all_ok = 0 ]; then
@@ -126,7 +86,7 @@ debug()
 	else
 		for path in "$@"; do
 			set -x
-			$DEBUGGER ${OUT}/run-${NAME}${EXECSUFFIX} --verbose -p $path
+			$DEBUGGER ${RUN}/${NAME}${EXECSUFFIX} --verbose -p $path
 			{ set +x; } 2> /dev/null
 		done
 	fi
