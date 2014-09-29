@@ -76,10 +76,27 @@ public string build_web_worker_ipc_id(string web_app_id)
 	return "%s.%s.%s".printf(Nuvola.get_app_id(), web_app_id, "webworker");
 }
 
-public class AppRunnerController : Diorite.Application
+public class RunnerApplication: Diorite.Application
+{
+	public Diorite.Storage storage {get; private set;}
+	
+	public RunnerApplication(string web_app_id, string web_app_name, Diorite.Storage storage)
+	{
+		var dashed_id = build_dashed_id(web_app_id);
+		base(
+			build_camel_id(web_app_id),
+			"%s - %s".printf(web_app_name, Nuvola.get_app_name()),
+			"%s.desktop".printf(dashed_id),
+			dashed_id);
+		this.storage = storage;
+		icon = Nuvola.get_app_icon();
+		version = Nuvola.get_version();
+	}
+}
+
+public class AppRunnerController : RunnerApplication
 {
 	public WebAppWindow? main_window {get; private set; default = null;}
-	public Diorite.Storage? storage {get; private set; default = null;}
 	public Diorite.ActionsRegistry? actions {get; private set; default = null;}
 	public WebAppMeta web_app {get; private set;}
 	public WebAppStorage app_storage {get; private set;}
@@ -101,18 +118,10 @@ public class AppRunnerController : Diorite.Application
 	private Diorite.Form? init_form = null;
 	private Diorite.Ipc.MessageClient master = null;
 	
-	public AppRunnerController(Diorite.Storage? storage, WebAppMeta web_app, WebAppStorage app_storage)
+	public AppRunnerController(Diorite.Storage storage, WebAppMeta web_app, WebAppStorage app_storage)
 	{
-		var app_id = web_app.id;
-		var dashed_id = build_dashed_id(app_id);
-		base(build_camel_id(app_id),
-		"%s - %s".printf(web_app.name, Nuvola.get_app_name()),
-		"%s.desktop".printf(dashed_id),
-		dashed_id);
-		icon = Nuvola.get_app_icon();
-		version = Nuvola.get_version();
+		base(web_app.id, web_app.name, storage);
 		this.app_storage = app_storage;
-		this.storage = storage;
 		this.web_app = web_app;
 	}
 	
@@ -147,7 +156,7 @@ public class AppRunnerController : Diorite.Application
 		connection = new Connection(new Soup.SessionAsync(), app_storage.cache_dir.get_child("conn"));
 		connection.session.add_feature_by_type(typeof(Soup.ProxyResolverDefault));
 		
-		web_engine = new WebEngine(this, web_app, app_storage, config);
+		web_engine = new WebEngine(this, server, web_app, app_storage, config);
 		web_engine.init_form.connect(on_init_form);
 		web_engine.notify.connect_after(on_web_engine_notify);
 		actions.action_changed.connect(on_action_changed);

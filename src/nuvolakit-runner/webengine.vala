@@ -34,7 +34,7 @@ public class WebEngine : GLib.Object
 	public WebAppStorage storage {get; private set;}
 	public bool can_go_back {get; private set; default = false;}
 	public bool can_go_forward {get; private set; default = false;}
-	private AppRunnerController app;
+	private RunnerApplication runner_app;
 	private WebKit.WebView web_view;
 	private JsEnvironment? env = null;
 	private JSApi api;
@@ -45,9 +45,9 @@ public class WebEngine : GLib.Object
 	private VariantHashTable session;
 	private SList<WebWindow> web_windows = null;
 	
-	public WebEngine(AppRunnerController app, WebAppMeta web_app, WebAppStorage storage, Config config)
+	public WebEngine(RunnerApplication runner_app, Diorite.Ipc.MessageServer server, WebAppMeta web_app, WebAppStorage storage, Config config)
 	{
-		server = app.server;
+		this.server = server;
 		var webkit_extension_dir = Nuvola.get_libdir();
 		debug("Nuvola WebKit Extension directory: %s", webkit_extension_dir);
 		
@@ -60,7 +60,7 @@ public class WebEngine : GLib.Object
 		cm.set_persistent_storage(storage.data_dir.get_child("cookies.dat").get_path(),
 			WebKit.CookiePersistentStorage.SQLITE);
 		
-		this.app = app;
+		this.runner_app = runner_app;
 		this.storage = storage;
 		this.web_app = web_app;
 		this.config = config;
@@ -88,7 +88,7 @@ public class WebEngine : GLib.Object
 			return true;
 		
 		env = new JsRuntime();
-		api = new JSApi(app.storage, web_app.data_dir, storage.config_dir, config, session);
+		api = new JSApi(runner_app.storage, web_app.data_dir, storage.config_dir, config, session);
 		api.send_message_async.connect(on_send_message_async);
 		api.send_message_sync.connect(on_send_message_sync);
 		try
@@ -98,7 +98,7 @@ public class WebEngine : GLib.Object
 		}
 		catch (JSError e)
 		{
-			app.fatal_error("Initialization error", e.message);
+			runner_app.fatal_error("Initialization error", e.message);
 			return false;
 		}
 		return true;
@@ -164,9 +164,9 @@ public class WebEngine : GLib.Object
 			}
 			catch (JSError e)
 			{
-				app.fatal_error("Initialization error",
+				runner_app.fatal_error("Initialization error",
 					"%s failed to initialize app runner. Initialization exited with error:\n\n%s".printf(
-					app.app_name, e.message));
+					runner_app.app_name, e.message));
 				return false;
 			}
 			
@@ -190,11 +190,11 @@ public class WebEngine : GLib.Object
 			
 			result = load_uri(url);
 			if (!result)
-				app.show_error("Invalid page URL", "The web app integration script has not provided a valid page URL '%s'.".printf(url));
+				runner_app.show_error("Invalid page URL", "The web app integration script has not provided a valid page URL '%s'.".printf(url));
 		}
 		catch (JSError e)
 		{
-			app.show_error("Initialization error", "%s failed to retrieve a last visited page from previous session. Initialization exited with error:\n\n%s".printf(app.app_name, e.message));
+			runner_app.show_error("Initialization error", "%s failed to retrieve a last visited page from previous session. Initialization exited with error:\n\n%s".printf(runner_app.app_name, e.message));
 		}
 		
 		if (!result)
@@ -214,19 +214,19 @@ public class WebEngine : GLib.Object
 			var url = data_request("HomePageRequest", "url");
 			if (url == null)
 			{
-				app.fatal_error("Invalid home page URL", "The web app integration script has provided an empty home page URL.");
+				runner_app.fatal_error("Invalid home page URL", "The web app integration script has provided an empty home page URL.");
 				return false;
 			}
 			
 			if (!load_uri(url))
 			{
-				app.fatal_error("Invalid home page URL", "The web app integration script has not provided a valid home page URL '%s'.".printf(url));
+				runner_app.fatal_error("Invalid home page URL", "The web app integration script has not provided a valid home page URL '%s'.".printf(url));
 				return false;
 			}
 		}
 		catch (JSError e)
 		{
-			app.fatal_error("Initialization error", "%s failed to retrieve a home page of  a web app. Initialization exited with error:\n\n%s".printf(app.app_name, e.message));
+			runner_app.fatal_error("Initialization error", "%s failed to retrieve a home page of  a web app. Initialization exited with error:\n\n%s".printf(runner_app.app_name, e.message));
 			return false;
 		}
 		
@@ -257,7 +257,7 @@ public class WebEngine : GLib.Object
 		}
 		catch (JSError e)
 		{
-			app.show_error("Integration error", "%s failed to load preferences with error:\n\n%s".printf(app.app_name, e.message));
+			runner_app.show_error("Integration error", "%s failed to load preferences with error:\n\n%s".printf(runner_app.app_name, e.message));
 		}
 		args.get("(s@a{smv}@av)", null, out values, out entries);
 	}
@@ -273,7 +273,7 @@ public class WebEngine : GLib.Object
 		}
 		catch (JSError e)
 		{
-			app.fatal_error("Initialization error", "%s failed to crate initialization form. Initialization exited with error:\n\n%s".printf(app.app_name, e.message));
+			runner_app.fatal_error("Initialization error", "%s failed to crate initialization form. Initialization exited with error:\n\n%s".printf(runner_app.app_name, e.message));
 			return false;
 		}
 		
@@ -404,7 +404,7 @@ public class WebEngine : GLib.Object
 	private Variant? handle_show_error(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
 		Diorite.Ipc.MessageServer.check_type_str(data, "s");
-		app.show_error("Integration error", data.get_string());
+		runner_app.show_error("Integration error", data.get_string());
 		return null;
 	}
 	
@@ -499,7 +499,7 @@ public class WebEngine : GLib.Object
 		}
 		catch (JSError e)
 		{
-			app.show_error("Integration script error", "The web app integration script has not provided a valid response and caused an error: %s".printf(e.message));
+			runner_app.show_error("Integration script error", "The web app integration script has not provided a valid response and caused an error: %s".printf(e.message));
 			return true;
 		}
 		VariantIter iter = args.iterator();
@@ -529,7 +529,7 @@ public class WebEngine : GLib.Object
 		}
 		catch (JSError e)
 		{
-			app.show_error("Integration script error", "The web app integration caused an error: %s".printf(e.message));
+			runner_app.show_error("Integration script error", "The web app integration caused an error: %s".printf(e.message));
 		}
 	}
 	
