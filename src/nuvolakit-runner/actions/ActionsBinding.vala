@@ -206,11 +206,12 @@ public class Nuvola.ActionsBinding: Binding<ActionsInterface>
 		if (action_name == null)
 			throw new Diorite.Ipc.MessageError.INVALID_ARGUMENTS("Action name must not be null");
 		
+		bool handled = false;
 		foreach (var object in objects)
-			if (object.activate(action_name))
+			if (handled = object.activate(action_name))
 				break;
 		
-		return null;
+		return new Variant.boolean(handled);
 	}
 	
 	private void on_custom_action_activated(string name, Variant? parameter)
