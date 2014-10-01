@@ -286,11 +286,12 @@ Actions.updateStates = function(states)
 /**
  * Activate (invoke) action
  * 
- * @param String name    action name
+ * @param String name                   action name
+ * @param optional Variant parameter    parameter to the action
  */
-Actions.activate = function(name)
+Actions.activate = function(name, parameter)
 {
-    Nuvola._sendMessageAsync("Nuvola.Actions.activate", name);
+    Nuvola._sendMessageAsync("Nuvola.Actions.activate", name, parameter == null ? null : parameter);
 }
 
 /**

@@ -33,13 +33,13 @@ public class Nuvola.ActionsHelper: GLib.Object, ActionsInterface
 		this.config = config;
 	}
 	
-	public bool activate(string action_name)
+	public bool activate(string action_name, Variant? parameter=null)
 	{
 		var action = actions.get_action(action_name);
 		if (action == null)
 			return Binding.CONTINUE;
 		
-		action.activate(null);
+		action.activate(parameter);
 		return !Binding.CONTINUE;
 	}
 	

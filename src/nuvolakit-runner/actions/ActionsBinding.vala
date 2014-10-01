@@ -198,17 +198,18 @@ public class Nuvola.ActionsBinding: Binding<ActionsInterface>
 	private Variant? handle_action_activate(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
 		check_not_empty();
-		Diorite.Ipc.MessageServer.check_type_str(data, "(s)");
+		Diorite.Ipc.MessageServer.check_type_str(data, "(s@*)");
 		
 		string? action_name = null;
-		data.get("(s)", &action_name);
+		Variant? parameter = null;
+		data.get("(s@*)", &action_name, &parameter);
 		
 		if (action_name == null)
 			throw new Diorite.Ipc.MessageError.INVALID_ARGUMENTS("Action name must not be null");
 		
 		bool handled = false;
 		foreach (var object in objects)
-			if (handled = object.activate(action_name))
+			if (handled = object.activate(action_name, parameter))
 				break;
 		
 		return new Variant.boolean(handled);

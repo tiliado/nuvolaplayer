@@ -26,7 +26,7 @@ public interface Nuvola.ActionsInterface: GLib.Object
 {
 	public signal void custom_action_activated(string name, Variant? parameter);
 	
-	public abstract bool activate(string name);
+	public abstract bool activate(string name, Variant? parameter=null);
 	
 	public abstract bool set_state(string name, Variant? state);
 	
