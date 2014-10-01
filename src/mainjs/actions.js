@@ -295,30 +295,30 @@ Actions.activate = function(name, parameter)
 }
 
 /**
- * Attach HTML button to an action
+ * Bind HTML button to an action
  * 
  * The button.disabled and action.enabled properties are synchronized and action is activated when button is clicked.
  * 
- * @param String name          action name
- * @param HTMLButton button    HTML button element
+ * @param HTMLButton button             HTML button element
+ * @param String name                   action name
+ * @param optional Variant parameter    parameter to the action
  * 
  * ```
  * var navigateBack = Nuvola.makeElement("button", null, "<");
  * var elm = document.getElementById("bar");
  * elm.appendChild(navigateBack);
- * Nuvola.actions.attachButton(Nuvola.BrowserAction.GO_BACK, navigateBack);
+ * Nuvola.actions.bindButton(navigateBack, Nuvola.BrowserAction.GO_BACK);
  * ```
  */
-Actions.attachButton = function(name, button)
+Actions.bindButton = function(button, name, parameter)
 {
     this.buttons[name] = button;
     button.disabled = !this.isEnabled(name);
-    button.setAttribute("data-action-name", name);
     
-    var self = this;
+    var that = this;
     button.addEventListener('click', function()
     {
-        self.activate(this.getAttribute("data-action-name"));
+        that.activate(name, parameter);
     });
 }
 
