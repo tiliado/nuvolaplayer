@@ -223,6 +223,7 @@ def build(ctx):
 		CFLAGS=""
 	
 	APP_RUNNER = "apprunner"
+	CONTROL = APPNAME + "ctl"
 	NUVOLAKIT_RUNNER = APPNAME + "-runner"
 	NUVOLAKIT_BASE = APPNAME + "-base"
 	NUVOLAKIT_WORKER = APPNAME + "-worker"
@@ -278,6 +279,19 @@ def build(ctx):
 	ctx.program(
 		target = APP_RUNNER,
 		source = ctx.path.ant_glob('src/apprunner/*.vala'),
+		packages = "",
+		uselib = "",
+		use = [NUVOLAKIT_BASE, NUVOLAKIT_RUNNER],
+		vala_defines = vala_defines,
+		defines = ['G_LOG_DOMAIN="Nuvola"'],
+		vapi_dirs = ['vapi'],
+		vala_target_glib = "2.32",
+		install_path = ctx.env.NUVOLA_LIBDIR,
+	)
+	
+	ctx.program(
+		target = CONTROL,
+		source = ctx.path.ant_glob('src/control/*.vala'),
 		packages = "",
 		uselib = "",
 		use = [NUVOLAKIT_BASE, NUVOLAKIT_RUNNER],

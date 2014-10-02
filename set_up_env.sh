@@ -18,6 +18,12 @@ run()
 
 }
 
+ctl()
+{
+    ./waf -v && LD_LIBRARY_PATH=build XDG_DATA_DIRS=build/share:/usr/share:/usr/local/share \
+    NUVOLA_LIBDIR=build build/nuvolaplayer3ctl -D "$@"
+}
+
 debug()
 {
 	./waf -v && LD_LIBRARY_PATH=build XDG_DATA_DIRS=build/share:/usr/share:/usr/local/share \
