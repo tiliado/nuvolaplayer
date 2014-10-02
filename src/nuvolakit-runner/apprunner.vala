@@ -27,16 +27,22 @@ namespace Nuvola
 
 public class AppRunner: Diorite.Subprocess
 {
+	private static bool gdb = false;
 	public string app_id {get; private set;}
 	public bool connected { get{ return client != null;} }
 	private Diorite.Ipc.MessageClient? client = null;
 	private uint check_server_connected_id = 0;
 	
+	static construct
+	{
+		gdb = Environment.get_variable("NUVOLA_APP_RUNNER_GDB_SERVER") != null;
+	}
+	
 	public AppRunner(string app_id, string[] argv) throws GLib.Error
 	{
 		base(argv, Diorite.SubprocessFlags.INHERIT_FDS);
 		this.app_id = app_id;
-		check_server_connected_id = Timeout.add_seconds(30, check_server_connected_cb);
+		check_server_connected_id = Timeout.add_seconds(gdb ? 600 : 30, check_server_connected_cb);
 	}
 	
 	public bool connect_server(string server_name)
