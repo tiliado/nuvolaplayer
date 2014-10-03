@@ -39,4 +39,6 @@ public interface Nuvola.ActionsInterface: GLib.Object
 	public abstract bool add_action(string group, string scope, string action_name, string? label, string? mnemo_label, string? icon, string? keybinding, Variant? state);
 	
 	public abstract bool add_radio_action(string group, string scope, string name, Variant state, Diorite.RadioOption[] options);
+	
+	public abstract bool list_groups(out List<unowned string> groups);
 }

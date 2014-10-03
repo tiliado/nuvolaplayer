@@ -34,6 +34,7 @@ public class Nuvola.ActionsBinding: Binding<ActionsInterface>
 		bind("getState", handle_action_get_state);
 		bind("setState", handle_action_set_state);
 		bind("activate", handle_action_activate);
+		bind("listGroups", handle_list_groups);
 	}
 	
 	public override bool add(GLib.Object object)
@@ -213,6 +214,29 @@ public class Nuvola.ActionsBinding: Binding<ActionsInterface>
 				break;
 		
 		return new Variant.boolean(handled);
+	}
+	
+	private Variant? handle_list_groups(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	{
+		check_not_empty();
+		Diorite.Ipc.MessageServer.check_type_str(data, null);
+		var groups_set = new HashTable<string, unowned string>(str_hash, str_equal);
+		foreach (var object in objects)
+		{
+			List<unowned string> groups_list;
+			var done = object.list_groups(out groups_list);
+			foreach (var group in groups_list)
+				groups_set.add(group);
+			
+			if (done)
+				break;
+		}
+		var builder = new VariantBuilder(new VariantType ("as"));
+		var groups = groups_set.get_keys();
+		foreach (var name in groups)
+			builder.add_value(new Variant.string(name));
+			
+		return builder.end();
 	}
 	
 	private void on_custom_action_activated(string name, Variant? parameter)

@@ -125,4 +125,10 @@ public class Nuvola.ActionsHelper: GLib.Object, ActionsInterface
 	{
 		custom_action_activated(action.name, parameter);
 	}
+	
+	public bool list_groups(out List<unowned string> groups)
+	{
+		groups = actions.list_groups();
+		return Binding.CONTINUE;
+	}
 }
