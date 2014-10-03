@@ -131,4 +131,10 @@ public class Nuvola.ActionsHelper: GLib.Object, ActionsInterface
 		groups = actions.list_groups();
 		return Binding.CONTINUE;
 	}
+	
+	public bool list_group_actions(string group, out SList<Diorite.Action> actions)
+	{
+		actions = this.actions.get_group(group);
+		return Binding.CONTINUE;
+	}
 }

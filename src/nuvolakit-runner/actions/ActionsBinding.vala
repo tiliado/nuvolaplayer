@@ -35,6 +35,7 @@ public class Nuvola.ActionsBinding: Binding<ActionsInterface>
 		bind("setState", handle_action_set_state);
 		bind("activate", handle_action_activate);
 		bind("listGroups", handle_list_groups);
+		bind("listGroupActions", handle_list_group_actions);
 	}
 	
 	public override bool add(GLib.Object object)
@@ -236,6 +237,49 @@ public class Nuvola.ActionsBinding: Binding<ActionsInterface>
 		foreach (var name in groups)
 			builder.add_value(new Variant.string(name));
 			
+		return builder.end();
+	}
+	
+	private Variant? handle_list_group_actions(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	{
+		check_not_empty();
+		Diorite.Ipc.MessageServer.check_type_str(data, "(s)");
+		string? group_name = null;
+		data.get("(s)", &group_name);
+		if (group_name == null)
+			throw new Diorite.Ipc.MessageError.INVALID_ARGUMENTS("Group name must not be null");
+		
+		var builder = new VariantBuilder(new VariantType("aa{sv}"));
+		foreach (var object in objects)
+		{
+			SList<Diorite.Action> actions_list;
+			var done = object.list_group_actions(group_name, out actions_list);
+			foreach (var action in actions_list)
+			{
+				builder.open(new VariantType("a{sv}"));
+				builder.add("{sv}", "name", new Variant.string(action.name));
+				builder.add("{sv}", "label", new Variant.string(action.label ?? ""));
+				builder.add("{sv}", "enabled", new Variant.boolean(action.enabled));
+				var radio = action as Diorite.RadioAction;
+				if (radio != null)
+				{
+					var radio_builder = new VariantBuilder(new VariantType("aa{sv}"));
+					foreach (var option in radio.get_options())
+					{
+						radio_builder.open(new VariantType("a{sv}"));
+						radio_builder.add("{sv}", "param", option.parameter);
+						radio_builder.add("{sv}", "label", new Variant.string(option.label ?? ""));
+						radio_builder.close();
+					}
+					builder.add("{sv}", "options", radio_builder.end());
+				}
+				builder.close();
+			}
+			
+			if (done)
+				break;
+		}
+		
 		return builder.end();
 	}
 	
