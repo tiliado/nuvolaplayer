@@ -67,8 +67,12 @@ private static int quit(int code, string format, ...)
  */
 const string DESCRIPTION = """Commands:
 
-  action NAME [PARAMETER]
-    - invoke action with name NAME and optional parameter PARAMETER
+  list-actions
+    - list available actions
+  
+  action NAME [STATE]
+    - invoke action with name NAME
+    - STATE parameter is used to select option of a radio action
 """;
 
 public int main(string[] args)
@@ -130,6 +134,10 @@ public int main(string[] args)
 				return quit(1, "Error: No action specified.\n");
 			
 			return control.activate_action(Args.command[1], Args.command.length == 2 ? null : Args.command[2]);
+		case "list-actions":
+			if (Args.command.length > 1)
+				return quit(1, "Error: Too many arguments.\n");
+			return control.list_actions();
 		default:
 			return quit(1, "Error: Unknown command '%s'.\n", command);
 		}
@@ -149,6 +157,49 @@ class Control
 	public Control(Diorite.Ipc.MessageClient conn)
 	{
 		this.conn = conn;
+	}
+	
+	public int list_actions() throws Diorite.Ipc.MessageError
+	{
+		var response = conn.send_message("Nuvola.Actions.listGroups");
+		stdout.printf("Available actions\n\nFormat: NAME (is enabled?) - label\n");
+		var iter = response.iterator();
+		string group_name = null;
+		while (iter.next("s", out group_name))
+		{
+			stdout.printf("\nGroup: %s\n\n", group_name);
+			var actions = conn.send_message("Nuvola.Actions.listGroupActions", new Variant("(s)", group_name));
+			Variant action = null;
+			var actions_iter = actions.iterator();
+			while (actions_iter.next("@*", out action))
+			{
+				string name = null;
+				string label = null;
+				bool enabled = false;
+				Variant options = null;
+				assert(action.lookup("name", "s", out name));
+				assert(action.lookup("label", "s", out label));
+				assert(action.lookup("enabled", "b", out enabled));
+				if (action.lookup("options", "@*", out options))
+				{
+					stdout.printf(" *  %s (%s) - %s\n", name, enabled ? "enabled" : "disabled", "invoke with following parameters:");
+					Variant option = null;
+					var options_iter = options.iterator();
+					while (options_iter.next("@*", out option))
+					{
+						Variant parameter = null;
+						assert(option.lookup("param", "@*", out parameter));
+						assert(option.lookup("label", "s", out label));
+						stdout.printf("    %s %s - %s\n", name, parameter.print(false), label != "" ? label : "(No label specified.)");
+					}
+				}
+				else
+				{
+					stdout.printf(" *  %s (%s) - %s\n", name, enabled ? "enabled" : "disabled", label != "" ? label : "(No label specified.)");
+				}
+			}
+		}
+		return 0;
 	}
 	
 	public int activate_action(string name, string? parameter_str) throws Diorite.Ipc.MessageError
