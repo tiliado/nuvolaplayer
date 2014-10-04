@@ -40,6 +40,7 @@ namespace ConfigKey
 
 namespace Actions
 {
+	public const string ACTIVATE = "activate";
 	public const string GO_HOME = "go-home";
 	public const string GO_BACK = "go-back";
 	public const string GO_FORWARD = "go-forward";
@@ -216,6 +217,7 @@ public class AppRunnerController : RunnerApplication
 		unowned ActionsHelper ah = actions_helper;
 		Diorite.Action[] actions_spec = {
 		//          Action(group, scope, name, label?, mnemo_label?, icon?, keybinding?, callback?)
+		ah.simple_action("main", "app", Actions.ACTIVATE, "Activate main window", null, null, null, do_activate),
 		ah.simple_action("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
 		ah.simple_action("main", "app", Actions.KEYBINDINGS, "Keyboard shortcuts", "_Keyboard shortcuts", null, null, do_keybindings),
 		ah.simple_action("main", "app", Actions.PREFERENCES, "Preferences", "_Preferences", null, null, do_preferences),
@@ -269,6 +271,11 @@ public class AppRunnerController : RunnerApplication
 	private void do_quit()
 	{
 		quit();
+	}
+	
+	private void do_activate()
+	{
+		activate();
 	}
 	
 	private void do_keybindings()
