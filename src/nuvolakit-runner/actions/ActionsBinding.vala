@@ -171,7 +171,7 @@ public class Nuvola.ActionsBinding: Binding<ActionsInterface>
 		if (action_name == null)
 			throw new Diorite.Ipc.MessageError.INVALID_ARGUMENTS("Action name must not be null");
 		
-		Variant? state = new Variant("mv", null);
+		Variant? state = null;
 		foreach (var object in objects)
 			if (object.get_state(action_name, ref state))
 				break;
