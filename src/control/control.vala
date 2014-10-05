@@ -84,7 +84,7 @@ public int main(string[] args)
 {
 	try
 	{
-		var opt_context = new OptionContext("- %s".printf(Nuvola.get_app_name()));
+		var opt_context = new OptionContext("- Control %s".printf(Nuvola.get_app_name()));
 		opt_context.set_help_enabled(true);
 		opt_context.add_main_entries(Args.main_options, null);
 		opt_context.set_ignore_unknown_options(false);
@@ -137,7 +137,6 @@ public int main(string[] args)
 		case "action":
 			if (Args.command.length < 2)
 				return quit(1, "Error: No action specified.\n");
-			
 			return control.activate_action(Args.command[1], Args.command.length == 2 ? null : Args.command[2]);
 		case "list-actions":
 			if (Args.command.length > 1)
@@ -155,8 +154,6 @@ public int main(string[] args)
 	{
 		return quit(2, "Error: Communication with %s instance failed: %s\n", Nuvola.get_app_name(), e.message);
 	}
-	
-	return 0;
 }
 
 class Control
