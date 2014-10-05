@@ -73,6 +73,11 @@ const string DESCRIPTION = """Commands:
   action NAME [STATE]
     - invoke action with name NAME
     - STATE parameter is used to select option of a radio action
+  
+  action-state NAME
+    - get state of radio or toggle action with name NAME
+    - does nothing for simple actions
+    - you can set state actions with `action` command
 """;
 
 public int main(string[] args)
@@ -138,6 +143,10 @@ public int main(string[] args)
 			if (Args.command.length > 1)
 				return quit(1, "Error: Too many arguments.\n");
 			return control.list_actions();
+		case "action-state":
+			if (Args.command.length < 2)
+				return quit(1, "Error: No action specified.\n");
+			return control.action_state(Args.command[1]);
 		default:
 			return quit(1, "Error: Unknown command '%s'.\n", command);
 		}
@@ -230,6 +239,14 @@ class Control
 			return quit(3, "%s instance doesn't understand requested action '%s'.\n", Nuvola.get_app_name(), name);
 		
 		message("Action %s %s was successful.", name, parameter_str);
+		return 0;
+	}
+	
+	public int action_state(string name) throws Diorite.Ipc.MessageError
+	{
+		var response = conn.send_message("Nuvola.Actions.getState", new Variant("(s)", name));
+		if (response != null)
+			stdout.printf("%s\n", response.print(false));
 		return 0;
 	}
 }
