@@ -294,16 +294,18 @@ MediaPlayer._setActions = function()
 
 MediaPlayer._sendDevelInfo = function()
 {
-    Nuvola._sendMessageAsync("Nuvola.MediaPlayer._sendDevelInfo", {
+    var info = {
         "title": this._track.title,
         "artist": this._track.artist,
         "album": this._track.album,
-        "artLocation": this._track.artLocation,
+        "artworkLocation": this._track.artLocation,
         "artworkFile": this._artworkFile,
         "baseActions": this._baseActions,
         "extraActions": this._extraActions,
         "state": ["unknown", "paused", "playing"][this._state],
-    });
+    };
+    Nuvola._sendMessageAsync("Nuvola.MediaPlayer.setTrackInfo", info);
+    Nuvola._sendMessageAsync("Nuvola.MediaPlayer._sendDevelInfo", info);
 }
 
 MediaPlayer._onArtworkDownloaded = function(res, changed)
