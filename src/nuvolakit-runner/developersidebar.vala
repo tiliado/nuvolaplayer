@@ -22,6 +22,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using Diorite;
+
 namespace Nuvola.Extensions.DeveloperSidebar
 {
 
@@ -119,26 +121,6 @@ public class Extension : Nuvola.Extension
 		radios = null;
 	}
 	
-	private static string? variant_dict_str(Variant dict, string key)
-	{
-		var val = dict.lookup_value(key, null);
-		if (val == null)
-			return null;
-		
-		if (val.is_of_type(VariantType.MAYBE))
-		{
-			val = val.get_maybe();
-			if (val == null)
-				return null;
-		}
-			
-		if (val.is_of_type(VariantType.VARIANT))
-			val = val.get_variant();
-		if (val.is_of_type(VariantType.STRING))
-			return val.get_string();
-		return null;
-	}
-	
 	private Variant? handle_send_devel_info(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
 		Diorite.Ipc.MessageServer.check_type_str(data, "(@a{smv})");
@@ -191,7 +173,7 @@ public class Extension : Nuvola.Extension
 			Variant target_value;
 			try
 			{
-				Action.parse_detailed_name(action.scope + "." + detailed_name, out action_name, out target_value);
+				GLib.Action.parse_detailed_name(action.scope + "." + detailed_name, out action_name, out target_value);
 			}
 			catch (GLib.Error e)
 			{
