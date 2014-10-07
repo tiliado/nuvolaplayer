@@ -299,7 +299,6 @@ def build(ctx):
 		defines = ['G_LOG_DOMAIN="Nuvola"'],
 		vapi_dirs = ['vapi'],
 		vala_target_glib = "2.32",
-		install_path = ctx.env.NUVOLA_LIBDIR,
 	)
 	
 	ctx(features = "c cshlib",
