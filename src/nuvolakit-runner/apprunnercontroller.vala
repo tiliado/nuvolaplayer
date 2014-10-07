@@ -374,7 +374,7 @@ public class AppRunnerController : RunnerApplication
 		bindings.add_object(new Notifications(this));
 		
 		bindings.add_binding(new MediaKeysBinding(server, web_worker));
-		bindings.add_object(new MediaKeys(keybinder));
+		bindings.add_object(new MediaKeys(this, keybinder));
 		
 		bindings.add_binding(new MenuBarBinding(server, web_worker));
 		bindings.add_object(menu_bar);
