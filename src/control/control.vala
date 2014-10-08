@@ -78,6 +78,11 @@ const string DESCRIPTION = """Commands:
     - get state of radio or toggle action with name NAME
     - does nothing for simple actions
     - you can set state actions with `action` command
+  
+  track-info [KEY]
+   - prints track information
+   - KEY can be 'all' (default), 'title', 'artist', 'album', 'state',
+     'artwork_location' or 'artwork_file'
 """;
 
 public int main(string[] args)
@@ -146,6 +151,10 @@ public int main(string[] args)
 			if (Args.command.length < 2)
 				return quit(1, "Error: No action specified.\n");
 			return control.action_state(Args.command[1]);
+		case "track-info":
+			if (Args.command.length > 2)
+				return quit(1, "Error: Too many arguments.\n");
+			return control.track_info(Args.command.length == 2 ? Args.command[1] : null);
 		default:
 			return quit(1, "Error: Unknown command '%s'.\n", command);
 		}
@@ -244,6 +253,66 @@ class Control
 		var response = conn.send_message("Nuvola.Actions.getState", new Variant("(s)", name));
 		if (response != null)
 			stdout.printf("%s\n", response.print(false));
+		return 0;
+	}
+	
+	public int track_info(string? key=null) throws Diorite.Ipc.MessageError
+	{
+		var response = conn.send_message("Nuvola.MediaPlayer.getTrackInfo");
+		var title = Diorite.variant_dict_str(response, "title");
+		var artist = Diorite.variant_dict_str(response, "artist");
+		var album = Diorite.variant_dict_str(response, "album");
+		var state = Diorite.variant_dict_str(response, "state");
+		var artwork_location = Diorite.variant_dict_str(response, "artworkLocation");
+		var artwork_file = Diorite.variant_dict_str(response, "artworkFile");
+		
+		if (key == null || key == "all")
+		{
+			if (title != null)
+				stdout.printf("Title: %s\n", title);
+			if (artist != null )
+				stdout.printf("Artist: %s\n", artist);
+			if (album != null )
+				stdout.printf("Album: %s\n", album);
+			if (state != null )
+				stdout.printf("State: %s\n", state);
+			if (artwork_location != null )
+				stdout.printf("Artwork location: %s\n", artwork_location);
+			if (artwork_file != null )
+				stdout.printf("Artwork file: %s\n", artwork_file);
+		}
+		else
+		{
+			switch (key)
+			{
+			case "title":
+				if (title != null)
+					stdout.printf("%s\n", title);
+				break;
+			case "artist":
+				if (artist != null)
+					stdout.printf("%s\n", artist);
+				break;
+			case "album":
+				if (album != null)
+					stdout.printf("%s\n", album);
+				break;
+			case "state":
+				if (state != null)
+					stdout.printf("%s\n", state);
+				break;
+			case "artwork_location":
+				if (artwork_location != null)
+					stdout.printf("%s\n", artwork_location);
+				break;
+			case "artwork_file":
+				if (artwork_file != null)
+					stdout.printf("%s\n", artwork_file);
+				break;
+			default:
+				return quit(3, "Unknown key '%s'.\n", key);
+			}
+		}
 		return 0;
 	}
 }
