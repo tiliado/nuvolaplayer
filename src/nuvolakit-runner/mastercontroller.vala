@@ -34,6 +34,12 @@ namespace Actions
 	public const string QUIT = "quit";
 }
 
+
+public string build_master_ipc_id()
+{
+	return Nuvola.get_app_id() + ".master";
+}
+
 public class MasterController : Diorite.Application
 {
 	public WebAppListWindow? main_window {get; private set; default = null;}
@@ -46,7 +52,6 @@ public class MasterController : Diorite.Application
 	private Queue<AppRunner> app_runners = null;
 	private HashTable<string, AppRunner> app_runners_map = null;
 	private Diorite.Ipc.MessageServer server = null;
-	private const string MASTER_SUFFIX = ".master";
 	
 	public MasterController(Diorite.Storage storage, WebAppRegistry web_app_reg, string[] exec_cmd)
 	{
@@ -150,7 +155,7 @@ public class MasterController : Diorite.Application
 		if (server != null)
 			return;
 		
-		var server_name = app_id + MASTER_SUFFIX;
+		var server_name = build_master_ipc_id();
 		Environment.set_variable("NUVOLA_IPC_MASTER", server_name, true);
 		try
 		{
