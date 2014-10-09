@@ -162,6 +162,7 @@ public class MasterController : Diorite.Application
 			server = new Diorite.Ipc.MessageServer(server_name);
 			server.add_handler("runner_started", handle_runner_started);
 			server.add_handler("runner_activated", handle_runner_activated);
+			server.add_handler("get_top_runner", handle_get_top_runner);
 			server.start_service();
 		}
 		catch (Diorite.IOError e)
@@ -203,6 +204,13 @@ public class MasterController : Diorite.Application
 		
 		app_runners.push_head(runner);
 		return new Variant.boolean(true);
+	}
+	
+	private Variant? handle_get_top_runner(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	{
+		Diorite.Ipc.MessageServer.check_type_str(data, null);
+		var runner = app_runners.peek_head();
+		return new Variant("ms", runner == null ? null : runner.app_id);
 	}
 	
 	private void append_actions()
