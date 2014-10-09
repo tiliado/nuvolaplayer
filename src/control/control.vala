@@ -108,9 +108,6 @@ public int main(string[] args)
 		return 0;
 	}
 	
-	if (Args.app == null)
-		return quit(1, "Error: No app specified.\n");
-	
 	FileStream? log = null;
 	if (Args.log_file != null)
 	{
@@ -125,7 +122,30 @@ public int main(string[] args)
 	Diorite.Logger.init(log != null ? log : stderr, Args.debug ? GLib.LogLevelFlags.LEVEL_DEBUG
 	  : (Args.verbose ? GLib.LogLevelFlags.LEVEL_INFO: GLib.LogLevelFlags.LEVEL_WARNING),
 	  "Control");
-
+	
+	if (Args.app == null)
+	{
+		try
+		{
+			var master = new Diorite.Ipc.MessageClient(build_master_ipc_id(), 500);
+			if (!master.wait_for_echo(500))
+				return quit(2, "Error: Failed to connect to %s master instance.\n", Nuvola.get_app_name());
+			
+			var response = master.send_message("get_top_runner");
+			Diorite.Ipc.MessageServer.check_type_str(response, "ms");
+			response.get("ms", out Args.app);
+			
+			if (Args.app == null || Args.app == "")
+				return quit(1, "Error: No %s instance is running.\n", Nuvola.get_app_name());
+			
+			message("Using '%s' as web app id.", Args.app);
+		}
+		catch (Diorite.Ipc.MessageError e)
+		{
+			return quit(2, "Error: Communication with %s master instance failed: %s\n", Nuvola.get_app_name(), e.message);
+		}
+	}
+	
 	if (Args.command.length < 1)
 		return quit(1, "Error: No command specified.\n");
 	
