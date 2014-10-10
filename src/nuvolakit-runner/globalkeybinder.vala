@@ -30,7 +30,7 @@ public class GlobalKeybinder: GLib.Object
 	public delegate void HandlerFunc(string accelerator, Gdk.Event event);
 	
 	private List<Keybinding> keybindings = null;
-	private static uint[] lock_modifiers =
+	private static Gdk.ModifierType[] lock_modifiers =
 	{
 		0,
 		Gdk.ModifierType.MOD2_MASK, // NUM_LOCK
@@ -87,18 +87,27 @@ public class GlobalKeybinder: GLib.Object
 		return true;
 	}
 	
-	private bool grab_ungrab(bool grab, string accelerator, out int keycode, out Gdk.ModifierType modifiers)
+	private bool grab_ungrab(bool grab, string accelerator, out int keycode, out Gdk.ModifierType virt_modifiers)
 	{
-		var bound = is_bound(accelerator);
 		keycode = 0;
-		modifiers = 0;
+		virt_modifiers = 0;
+		var bound = is_bound(accelerator);
 		
 		if (grab == bound)
 			return true;
 		
 		uint keysym;
-		Gtk.accelerator_parse(accelerator, out keysym, out modifiers);
+		Gtk.accelerator_parse(accelerator, out keysym, out virt_modifiers);
 		return_val_if_fail(keysym != 0, false);
+		
+		/* Translate virtual modifiers (SUPER, etc.) to real modifiers (Mod2, etc.) */
+		var keymap = Gdk.Keymap.get_default();
+		Gdk.ModifierType modifiers = virt_modifiers;
+		if (!keymap.map_virtual_modifiers(ref modifiers))
+		{
+			warning("Failed to map virtual modifiers.");
+			return false;
+		}
 		
 		var root_window = Gdk.get_default_root_window() as Gdk.X11.Window;
 		return_val_if_fail(root_window != null, false);
@@ -111,7 +120,7 @@ public class GlobalKeybinder: GLib.Object
 		return_val_if_fail(keycode != 0, false);
 		Gdk.error_trap_push();
 		
-		foreach (uint lock_modifier in lock_modifiers)
+		foreach (Gdk.ModifierType lock_modifier in lock_modifiers)
 		{
 			if (grab)
 				display.grab_key(keycode, modifiers|lock_modifier, xid, false, X.GrabMode.Async, X.GrabMode.Async);
@@ -128,9 +137,23 @@ public class GlobalKeybinder: GLib.Object
 		X.Event* xevent = (X.Event*) gdk_xevent;
 		if (xevent->type == X.EventType.KeyPress)
 		{
+			var keymap = Gdk.Keymap.get_default();
+			Gdk.ModifierType event_mods = (Gdk.ModifierType) (xevent.xkey.state & ~lock_modifiers[7]);
+			Gdk.ModifierType keyboard_state_mods;
+			uint keyval;
+			/* Ignore keyboard state mods */
+			keymap.translate_keyboard_state(xevent->xkey.keycode, event_mods, 0, out keyval, null, null, out keyboard_state_mods);
+			event_mods &= ~keyboard_state_mods;
+			/* Expand real modifiers to virtual modifiers (SUPER, etc.) */
+			keymap.add_virtual_modifiers(ref event_mods);
+			/* Ignore insignificant modifiers */
+			event_mods &= Gtk.accelerator_get_default_mod_mask();
+			/* SUPER + HYPER => SUPER */
+			if ((event_mods & (Gdk.ModifierType.SUPER_MASK | Gdk.ModifierType.HYPER_MASK)) != 0)
+				event_mods &= ~Gdk.ModifierType.HYPER_MASK;
+			
 			foreach (var keybinding in keybindings)
 			{
-				uint event_mods = xevent.xkey.state & ~ (lock_modifiers[7]);
 				if (xevent->xkey.keycode == keybinding.keycode && event_mods == keybinding.modifiers)
 					keybinding.handler(keybinding.accelerator, gdk_event);
 			}
