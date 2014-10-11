@@ -29,16 +29,14 @@ public class GlobalActionsKeyBinder : GLib.Object, ActionsKeyBinder
 {
 	private XKeyGrabber grabber;
 	private Config config;
-	private Diorite.ActionsRegistry actions;
 	private HashTable<string, string> keybindings;
 	
 	private static const string CONF_PREFIX = "nuvola.global_keybindings.";
 	
-	public class GlobalActionsKeyBinder(XKeyGrabber grabber, Config config, Diorite.ActionsRegistry actions)
+	public class GlobalActionsKeyBinder(XKeyGrabber grabber, Config config)
 	{
 		this.grabber = grabber;
 		this.config = config;
-		this.actions = actions;
 		keybindings = new HashTable<string, string>(str_hash, str_equal);
 		grabber.keybinding_pressed.connect(on_keybinding_pressed);
 	}
@@ -130,11 +128,7 @@ public class GlobalActionsKeyBinder : GLib.Object, ActionsKeyBinder
 	{
 		var name = keybindings[accelerator];
 		if (name != null)
-		{
-			var action = actions.get_action(name);
-			return_if_fail(action != null);
-			action.activate(null);
-		}
+			action_activated(name);
 	}
 }
 

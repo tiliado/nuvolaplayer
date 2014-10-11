@@ -34,6 +34,8 @@ public class GlobalKeybindings: GLib.Object
 	{
 		this.keybinder = keybinder;
 		this.actions = actions;
+		
+		keybinder.action_activated.connect(on_action_activated);
 		actions.action_added.connect(update_action);
 		actions.action_removed.connect(on_action_removed);
 		foreach (var action in actions.list_actions())
@@ -50,6 +52,13 @@ public class GlobalKeybindings: GLib.Object
 	{
 		if (!(action is Diorite.RadioAction))
 			keybinder.unbind(action.name);
+	}
+	
+	private void on_action_activated(string name)
+	{
+		var action = actions.get_action(name);
+		return_if_fail(action != null);
+		action.activate(null);
 	}
 }
 

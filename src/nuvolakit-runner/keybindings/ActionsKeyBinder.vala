@@ -27,6 +27,7 @@ namespace Nuvola
 
 public interface ActionsKeyBinder: GLib.Object
 {
+	public signal void action_activated(string action);
 	public abstract string? get_keybinding(string name);
 	public abstract bool set_keybinding(string name, string? keybinding);
 	public abstract bool bind(string name);
