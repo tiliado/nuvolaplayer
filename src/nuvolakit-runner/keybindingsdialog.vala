@@ -33,7 +33,7 @@ public class KeybindingsDialog : Gtk.Dialog
 	private Diorite.Application app;
 	private Diorite.ActionsRegistry actions_reg;
 	private Config config;
-	private GlobalKeybindings global_keybindings;
+	private ActionsKeyBinder global_keybindings;
 	private Gtk.TreeView view;
 	private Gtk.ListStore model;
 	
@@ -42,7 +42,8 @@ public class KeybindingsDialog : Gtk.Dialog
 	 * 
 	 * @param app Application object
 	 */
-	public KeybindingsDialog(Diorite.Application app, Gtk.Window? parent, Diorite.ActionsRegistry actions_reg, Config config, GlobalKeybindings global_keybindings)
+	public KeybindingsDialog(Diorite.Application app, Gtk.Window? parent, Diorite.ActionsRegistry actions_reg,
+	Config config, ActionsKeyBinder global_keybindings)
 	{
 		this.app = app;
 		this.actions_reg = actions_reg;

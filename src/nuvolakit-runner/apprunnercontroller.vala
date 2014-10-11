@@ -169,7 +169,9 @@ public class AppRunnerController : RunnerApplication
 		menu_bar.update();
 		menu_bar.set_menus(this);
 		keybinder = new GlobalKeybinder();
-		global_keybindings = new GlobalKeybindings(keybinder, config, actions);
+		var key_grabber = new XKeyGrabber();
+		var gakb = new GlobalActionsKeyBinder(key_grabber, config, actions);
+		global_keybindings = new GlobalKeybindings(gakb, actions);
 		
 		load_extensions();
 		
@@ -280,7 +282,7 @@ public class AppRunnerController : RunnerApplication
 	
 	private void do_keybindings()
 	{
-		var dialog = new KeybindingsDialog(this, main_window, actions, config, global_keybindings);
+		var dialog = new KeybindingsDialog(this, main_window, actions, config, global_keybindings.keybinder);
 		dialog.run();
 		dialog.destroy();
 	}
