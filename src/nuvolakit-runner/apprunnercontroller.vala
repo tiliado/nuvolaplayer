@@ -169,8 +169,8 @@ public class AppRunnerController : RunnerApplication
 		menu_bar.update();
 		menu_bar.set_menus(this);
 		keybinder = new GlobalKeybinder();
-		var key_grabber = new XKeyGrabber();
-		var gakb = new GlobalActionsKeyBinder(key_grabber, config);
+		
+		var gakb = new ActionsKeyBinderClient(server, master);
 		global_keybindings = new GlobalKeybindings(gakb, actions);
 		
 		load_extensions();
