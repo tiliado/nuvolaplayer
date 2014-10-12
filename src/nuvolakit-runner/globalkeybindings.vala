@@ -54,11 +54,15 @@ public class GlobalKeybindings: GLib.Object
 			keybinder.unbind(action.name);
 	}
 	
-	private void on_action_activated(string name)
+	private void on_action_activated(string name, ref bool handled)
 	{
+		if (handled)
+			return;
+		
 		var action = actions.get_action(name);
 		return_if_fail(action != null);
 		action.activate(null);
+		handled = true;
 	}
 }
 

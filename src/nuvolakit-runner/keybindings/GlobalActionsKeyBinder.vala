@@ -127,8 +127,9 @@ public class GlobalActionsKeyBinder : GLib.Object, ActionsKeyBinder
 	private void on_keybinding_pressed(string accelerator, uint32 time)
 	{
 		var name = keybindings[accelerator];
+		bool handled = false;
 		if (name != null)
-			action_activated(name);
+			action_activated(name, ref handled);
 	}
 }
 
