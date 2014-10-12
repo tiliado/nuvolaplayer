@@ -63,17 +63,12 @@ public class MasterController : Diorite.Application
 		this.storage = storage;
 		this.web_app_reg = web_app_reg;
 		this.exec_cmd = exec_cmd;
-		app_runners = new Queue<AppRunner>();
-		app_runners_map = new HashTable<string, AppRunner>(str_hash, str_equal);
-		var default_config = new HashTable<string, Variant>(str_hash, str_equal);
-		config = new Config(storage.user_config_dir.get_child("master").get_child("config.json"), default_config);
-		config.config_changed.connect(on_config_changed);
 	}
 	
 	public override void activate()
 	{
 		if (main_window == null)
-			start();
+			init_gui();
 		else
 			add_window(main_window);
 		
@@ -81,8 +76,38 @@ public class MasterController : Diorite.Application
 		main_window.present();
 	}
 	
-	private void start()
+	private void init_core()
 	{
+		if (app_runners != null)
+			return;
+		
+		app_runners = new Queue<AppRunner>();
+		app_runners_map = new HashTable<string, AppRunner>(str_hash, str_equal);
+		var default_config = new HashTable<string, Variant>(str_hash, str_equal);
+		config = new Config(storage.user_config_dir.get_child("master").get_child("config.json"), default_config);
+		config.config_changed.connect(on_config_changed);
+		
+		var server_name = build_master_ipc_id();
+		Environment.set_variable("NUVOLA_IPC_MASTER", server_name, true);
+		try
+		{
+			server = new Diorite.Ipc.MessageServer(server_name);
+			server.add_handler("runner_started", handle_runner_started);
+			server.add_handler("runner_activated", handle_runner_activated);
+			server.add_handler("get_top_runner", handle_get_top_runner);
+			server.start_service();
+		}
+		catch (Diorite.IOError e)
+		{
+			warning("Master server error: %s", e.message);
+			quit();
+			return;
+		}
+	}
+	
+	private void init_gui()
+	{
+		init_core();
 		gtk_settings = Gtk.Settings.get_default();
 		append_actions();
 		actions.get_action(Actions.INSTALL_APP).enabled = web_app_reg.allow_management;
@@ -106,7 +131,6 @@ public class MasterController : Diorite.Application
 		var pop_down_model = actions.build_menu({Actions.QUIT});
 		pop_down_menu = new Gtk.Menu.from_model(pop_down_model);
 		pop_down_menu.attach_to_widget(main_window, null);
-		
 	}
 	
 	public override int command_line(ApplicationCommandLine command_line)
@@ -116,7 +140,6 @@ public class MasterController : Diorite.Application
 		release();
 		return result;
 	}
-	
 	
 	private int handle_command_line(ApplicationCommandLine command_line)
 	{
@@ -145,35 +168,13 @@ public class MasterController : Diorite.Application
 			return 1;
 		}
 		
-		start_server();
+		init_core();
 		if (app_id != null)
 			start_app(app_id);
 		else
 			activate();
 		
 		return 0;
-	}
-	
-	private void start_server()
-	{
-		if (server != null)
-			return;
-		
-		var server_name = build_master_ipc_id();
-		Environment.set_variable("NUVOLA_IPC_MASTER", server_name, true);
-		try
-		{
-			server = new Diorite.Ipc.MessageServer(server_name);
-			server.add_handler("runner_started", handle_runner_started);
-			server.add_handler("runner_activated", handle_runner_activated);
-			server.add_handler("get_top_runner", handle_get_top_runner);
-			server.start_service();
-		}
-		catch (Diorite.IOError e)
-		{
-			warning("Master server error: %s", e.message);
-			quit();
-		}
 	}
 	
 	private Variant? handle_runner_started(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
