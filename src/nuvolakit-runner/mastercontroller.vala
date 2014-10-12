@@ -52,6 +52,7 @@ public class MasterController : Diorite.Application
 	private Queue<AppRunner> app_runners = null;
 	private HashTable<string, AppRunner> app_runners_map = null;
 	private Diorite.Ipc.MessageServer server = null;
+	private Config config = null;
 	
 	public MasterController(Diorite.Storage storage, WebAppRegistry web_app_reg, string[] exec_cmd)
 	{
@@ -64,6 +65,9 @@ public class MasterController : Diorite.Application
 		this.exec_cmd = exec_cmd;
 		app_runners = new Queue<AppRunner>();
 		app_runners_map = new HashTable<string, AppRunner>(str_hash, str_equal);
+		var default_config = new HashTable<string, Variant>(str_hash, str_equal);
+		config = new Config(storage.user_config_dir.get_child("master").get_child("config.json"), default_config);
+		config.config_changed.connect(on_config_changed);
 	}
 	
 	public override void activate()
@@ -362,6 +366,24 @@ public class MasterController : Diorite.Application
 			app_runners_map.remove(runner.app_id);
 		
 		release();
+	}
+	
+	private void save_config()
+	{
+		try
+		{
+			debug("Save configuration to %s.", config.file.get_path());
+			config.save();
+		}
+		catch (GLib.Error e)
+		{
+			show_error("Failed to save configuration", "Failed to save configuration to file %s. %s".printf(config.file.get_path(), e.message));
+		}
+	}
+	
+	private void on_config_changed(string key)
+	{
+		save_config();
 	}
 }
 
