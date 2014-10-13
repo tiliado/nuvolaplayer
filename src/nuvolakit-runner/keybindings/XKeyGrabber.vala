@@ -146,9 +146,9 @@ public class XKeyGrabber: GLib.Object
 			Gdk.ModifierType event_mods = (Gdk.ModifierType) (xevent.xkey.state & ~lock_modifiers[7]);
 			Gdk.ModifierType keyboard_state_mods;
 			uint keyval;
-			/* Ignore keyboard state mods */
+			/* Ignore keyboard state mods, but preserve shift (e.g. in Super+Shift+t) */
 			keymap.translate_keyboard_state(xevent->xkey.keycode, event_mods, 0, out keyval, null, null, out keyboard_state_mods);
-			event_mods &= ~keyboard_state_mods;
+			event_mods &= ~(keyboard_state_mods & ~Gdk.ModifierType.SHIFT_MASK);
 			/* Expand real modifiers to virtual modifiers (SUPER, etc.) */
 			keymap.add_virtual_modifiers(ref event_mods);
 			/* Ignore insignificant modifiers */
