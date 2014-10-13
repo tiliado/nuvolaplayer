@@ -30,60 +30,65 @@ namespace Nuvola
  */
 public class MediaKeys: GLib.Object, MediaKeysInterface
 {
-	public static const string X11_PLAY = "XF86AudioPlay";
-//~ 	public const string X11_PLAY = "XF86Calculator";
-	public static const string X11_PAUSE = "XF86AudioPause";
-	public static const string X11_STOP = "XF86AudioStop";
-	public static const string X11_PREV = "XF86AudioPrev";
-	public static const string X11_NEXT = "XF86AudioNext";
-//~ 	public static const string X11_NEXT = "XF86Tools";
-	public static const string GNOME_PLAY = "Play";
-	public static const string GNOME_PAUSE = "Pause";
-	public static const string GNOME_STOP = "Stop";
-	public static const string GNOME_PREV = "Previous";
-	public static const string GNOME_NEXT = "Next";
-
-	private RunnerApplication runner;
-	private GlobalKeybinder keybinder;
-	private GnomeMedia? media_keys;
+	public bool managed {get; private set; default=false;}
+	private string app_id;
+	private XKeyGrabber key_grabber;
+	private GnomeMediaKeys? gnome_media_keys = null;
+	private HashTable<string, string> keymap;
 	
-	public MediaKeys(RunnerApplication runner, GlobalKeybinder keybinder)
+	public MediaKeys(string app_id, XKeyGrabber key_grabber)
 	{
-		this.runner = runner;
-		this.keybinder = keybinder;
-		handle_multimedia_keys();
+		this.app_id = app_id;
+		this.key_grabber = key_grabber;
+		keymap = new HashTable<string, string>(str_hash, str_equal);
+		keymap["XF86AudioPlay"] = "Play";
+		keymap["XF86AudioPause"] = "Pause";
+		keymap["XF86AudioStop"] = "Stop";
+		keymap["XF86AudioPrev"] = "Previous";
+		keymap["XF86AudioNext"] = "Next";
+//~ 		keymap["<Shift><Super>t"] = "Play";
+//~ 		keymap["<Shift><Super>n"] = "Next";
 	}
 	
 	~MediaKeys()
 	{
-		release_multimedia_keys();
-		keybinder = null;
+		unmanage();
 	}
 	
-	private void handle_multimedia_keys()
+	public void manage()
 	{
-		Bus.watch_name(BusType.SESSION, "org.gnome.SettingsDaemon",
-		BusNameWatcherFlags.NONE, gnome_settings_appeared, gnome_settings_vanished);
-	}
-	
-	private void release_multimedia_keys()
-	{
-		media_keys_stop_fallback();
-		if (media_keys == null)
+		if (managed)
 			return;
+		
+		Bus.watch_name(BusType.SESSION, "org.gnome.SettingsDaemon",
+			BusNameWatcherFlags.NONE, gnome_settings_appeared, gnome_settings_vanished);
+		managed = true;
+	}
+	
+	public void unmanage()
+	{
+		if (!managed)
+			return;
+		
+		if (gnome_media_keys == null)
+		{
+			ungrab_media_keys();
+			return;
+		}
 		
 		try
 		{
-			media_keys.release_media_player_keys(runner.app_id);
-			media_keys.media_player_key_pressed.disconnect(on_media_key_pressed);
-			media_keys = null;
-			
+			gnome_media_keys.release_media_player_keys(app_id);
+			gnome_media_keys.media_player_key_pressed.disconnect(on_media_key_pressed);
+			gnome_media_keys = null;
 		}
 		catch (IOError e)
 		{
 			warning("Unable to get proxy for GNOME Media keys: %s", e.message);
-			media_keys = null;
+			gnome_media_keys = null;
 		}
+		
+		managed = false;
 	}
 	
 	/**
@@ -92,24 +97,24 @@ public class MediaKeys: GLib.Object, MediaKeysInterface
 	private void gnome_settings_appeared(DBusConnection conn, string name, string owner)
 	{
 		debug("GNOME settings daemon appeared: %s, %s", name, owner);
-		media_keys_stop_fallback();
-		if (!try_gnome_keys())
+		ungrab_media_keys();
+		if (!grab_gnome_media_keys())
 		{
-			media_keys = null;
-			media_keys_fallback();
+			gnome_media_keys = null;
+			grab_media_keys();
 		}
 	}
 	
-	private bool try_gnome_keys()
+	private bool grab_gnome_media_keys()
 	{
 		try
 		{
-			media_keys = Bus.get_proxy_sync(BusType.SESSION,
+			gnome_media_keys = Bus.get_proxy_sync(BusType.SESSION,
 			"org.gnome.SettingsDaemon",
 			"/org/gnome/SettingsDaemon/MediaKeys");
 			/* Vala includes "return false" if DBus method call fails! */
-			media_keys.grab_media_player_keys(runner.app_id, 0);
-			media_keys.media_player_key_pressed.connect(on_media_key_pressed);
+			gnome_media_keys.grab_media_player_keys(app_id, 0);
+			gnome_media_keys.media_player_key_pressed.connect(on_media_key_pressed);
 			return true;
 			
 		}
@@ -123,67 +128,49 @@ public class MediaKeys: GLib.Object, MediaKeysInterface
 	private void gnome_settings_vanished(DBusConnection conn, string name)
 	{
 		debug("GNOME settings daemon vanished: %s", name);
-		if (media_keys != null)
-			media_keys.media_player_key_pressed.disconnect(on_media_key_pressed);
-		media_keys = null;
-		media_keys_fallback();
+		if (gnome_media_keys != null)
+			gnome_media_keys.media_player_key_pressed.disconnect(on_media_key_pressed);
+		gnome_media_keys = null;
+		grab_media_keys();
 	}
 	
 	private void on_media_key_pressed(string app_name, string key)
 	{
 		debug("Media key pressed: %s, %s", app_name, key);
-		if (app_name != runner.app_id)
+		if (app_name != app_id)
 			return;
 		media_key_pressed(key);
 	}
-
+	
 	/**
 	 * Fallback to use Xorg keybindings
 	 */
-	private void media_keys_fallback()
+	private void grab_media_keys()
 	{
-		string[] keys = {X11_PLAY, X11_PAUSE, X11_STOP, X11_PREV, X11_NEXT};
+		var keys = keymap.get_keys();
 		foreach (var key in keys)
-			keybinder.bind(key, keybinder_handler);
+			key_grabber.grab(key, true);
+		key_grabber.keybinding_pressed.connect(on_keybinding_pressed);
 	}
 	
-	private void media_keys_stop_fallback()
+	private void ungrab_media_keys()
 	{
-		string[] keys = {X11_PLAY, X11_PAUSE, X11_STOP, X11_PREV, X11_NEXT};
+		key_grabber.keybinding_pressed.disconnect(on_keybinding_pressed);
+		var keys = keymap.get_keys();
 		foreach (var key in keys)
-			keybinder.unbind(key);
+			key_grabber.ungrab(key);
 	}
 	
-	private void keybinder_handler(string key, Gdk.Event event)
+	private void on_keybinding_pressed(string accelerator, uint32 time)
 	{
-		switch (key)
-		{
-		case X11_PLAY:
-			media_key_pressed(GNOME_PLAY);
-			break;
-		case X11_PAUSE:
-			media_key_pressed(GNOME_PAUSE);
-			break;
-		case X11_STOP:
-			media_key_pressed(GNOME_STOP);
-			break;
-		case X11_PREV:
-			media_key_pressed(GNOME_PREV);
-			break;
-		case X11_NEXT:
-			media_key_pressed(GNOME_NEXT);
-			break;
-		default:
-			warning("Unknown keybinding '%s'.", key);
-			media_key_pressed(key);
-			break;
-		}
+		var name = keymap[accelerator];
+		if (name != null)
+			media_key_pressed(name);
 	}
 }
 
-
 [DBus(name = "org.gnome.SettingsDaemon.MediaKeys")]
-public interface GnomeMedia: Object
+public interface GnomeMediaKeys: Object
 {
 	public abstract void grab_media_player_keys(string app, uint32 time) throws IOError;
 	public abstract void release_media_player_keys(string app) throws IOError;

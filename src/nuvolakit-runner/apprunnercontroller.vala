@@ -108,7 +108,6 @@ public class AppRunnerController : RunnerApplication
 	public ExtensionsManager extensions {get; private set;}
 	public Bindings bindings {get; private set;}
 	public Connection connection {get; private set;}
-	public GlobalKeybinder keybinder {get; private set;}
 	public Diorite.Ipc.MessageServer server {get; private set; default=null;}
 	public ActionsHelper actions_helper {get; private set; default = null;}
 	private GlobalKeybindings global_keybindings;
@@ -168,7 +167,6 @@ public class AppRunnerController : RunnerApplication
 		menu_bar = new MenuBar(actions, app_menu_shown && !menubar_shown);
 		menu_bar.update();
 		menu_bar.set_menus(this);
-		keybinder = new GlobalKeybinder();
 		
 		var gakb = new ActionsKeyBinderClient(server, master);
 		global_keybindings = new GlobalKeybindings(gakb, actions);
@@ -375,8 +373,10 @@ public class AppRunnerController : RunnerApplication
 		bindings.add_binding(new NotificationBinding(server, web_worker));
 		bindings.add_object(new Notifications(this));
 		
+		var media_keys = new MediaKeys(this.app_id, new XKeyGrabber());
+		media_keys.manage();
 		bindings.add_binding(new MediaKeysBinding(server, web_worker));
-		bindings.add_object(new MediaKeys(this, keybinder));
+		bindings.add_object(media_keys);
 		
 		bindings.add_binding(new MenuBarBinding(server, web_worker));
 		bindings.add_object(menu_bar);
