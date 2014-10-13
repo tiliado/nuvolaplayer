@@ -73,6 +73,9 @@ public class GlobalActionsKeyBinder : GLib.Object, ActionsKeyBinder
 			return true;
 		
 		var bound_action = keybindings[keybinding];
+		if (bound_action == action)
+			return true;
+		
 		if (bound_action != null)
 		{
 			warning("Action %s has keybinding '%s' that is already bound to action %s.",
