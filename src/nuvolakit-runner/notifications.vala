@@ -36,8 +36,10 @@ public class Notification
 	private Diorite.Action[] actions = {};
 	private bool shown_before = false;
 	
-	public Notification()
+	private string desktop_entry;
+	public Notification(string desktop_entry)
 	{
+		this.desktop_entry = desktop_entry;
 	}
 	
 	public void update(string? summary, string? body, string? icon_name, string? icon_path, bool resident)
@@ -92,6 +94,7 @@ public class Notification
 		else
 			notification.set_hint("transient", true);
 		
+		notification.set_hint("desktop-entry", desktop_entry);
 		if (add_actions)
 		{
 			notification.set_hint("action-icons", true);
@@ -159,7 +162,7 @@ public class Notifications : GLib.Object, NotificationsInterface, NotificationIn
 		var notification = notifications[name];
 		if (notification == null)
 		{
-			notification = new Notification();
+			notification = new Notification(controller.app_id);
 			notifications[name] = notification;
 		}
 		
@@ -210,7 +213,7 @@ public class Notifications : GLib.Object, NotificationsInterface, NotificationIn
 	{
 		if (force || !main_window.is_active)
 		{
-			var notification = new Notification();
+			var notification = new Notification(controller.app_id);
 			notification.update(summary, body, icon_name, icon_path, false);
 			notification.show(false);
 		}
