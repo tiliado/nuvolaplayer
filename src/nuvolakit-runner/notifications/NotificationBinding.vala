@@ -43,7 +43,7 @@ public class Nuvola.NotificationBinding: Binding<NotificationInterface>
 		string icon_name = null;
 		string icon_path = null;
 		bool resident = false;
-		data.get("(sssssb)", &name, &title, &message, &icon_name, &icon_path);
+		data.get("(sssssb)", &name, &title, &message, &icon_name, &icon_path, &resident);
 		
 		foreach (var object in objects)
 			if (object.update(name, title, message, icon_name, icon_path, resident))
