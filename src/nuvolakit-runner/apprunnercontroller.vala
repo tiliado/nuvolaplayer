@@ -210,8 +210,6 @@ public class AppRunnerController : RunnerApplication
 		main_window.sidebar.page_changed.connect(on_sidebar_page_changed);
 	}
 	
-	
-	
 	private void append_actions()
 	{
 		unowned ActionsHelper ah = actions_helper;
@@ -373,7 +371,7 @@ public class AppRunnerController : RunnerApplication
 		bindings.add_binding(new NotificationBinding(server, web_worker));
 		bindings.add_object(new Notifications(this));
 		
-		var media_keys = new MediaKeys(this.app_id, new XKeyGrabber());
+		var media_keys = new MediaKeysClient(web_app.id, server, master);
 		media_keys.manage();
 		bindings.add_binding(new MediaKeysBinding(server, web_worker));
 		bindings.add_object(media_keys);

@@ -24,5 +24,8 @@
 
 public interface Nuvola.MediaKeysInterface: GLib.Object
 {
+    public abstract bool managed {get; protected set;}
     public signal void media_key_pressed(string key);
+    public abstract void manage();
+    public abstract void unmanage();
 }

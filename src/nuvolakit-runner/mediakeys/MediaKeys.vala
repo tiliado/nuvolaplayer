@@ -30,7 +30,7 @@ namespace Nuvola
  */
 public class MediaKeys: GLib.Object, MediaKeysInterface
 {
-	public bool managed {get; private set; default=false;}
+	public bool managed {get; protected set; default=false;}
 	private string app_id;
 	private XKeyGrabber key_grabber;
 	private GnomeMediaKeys? gnome_media_keys = null;

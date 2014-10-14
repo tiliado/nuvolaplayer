@@ -53,7 +53,8 @@ public class MasterController : Diorite.Application
 	private HashTable<string, AppRunner> app_runners_map = null;
 	private Diorite.Ipc.MessageServer server = null;
 	private Config config = null;
-	private ActionsKeyBinderServer actions_key_binder;
+	private ActionsKeyBinderServer actions_key_binder = null;
+	private MediaKeysServer media_keys = null;
 	
 	public MasterController(Diorite.Storage storage, WebAppRegistry web_app_reg, string[] exec_cmd)
 	{
@@ -108,6 +109,7 @@ public class MasterController : Diorite.Application
 		var key_grabber = new XKeyGrabber();
 		var key_binder = new GlobalActionsKeyBinder(key_grabber, config);
 		actions_key_binder = new ActionsKeyBinderServer(server, key_binder, app_runners);
+		media_keys = new MediaKeysServer(new MediaKeys(this.app_id, key_grabber), server, app_runners);
 	}
 	
 	private void init_gui()
