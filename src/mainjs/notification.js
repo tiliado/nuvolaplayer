@@ -95,10 +95,13 @@ var Notifications = $prototype(null);
 
 /**
  * Convenience method to creates new named notification.
+ * 
+ * @param String  name        notification name (identifier)
+ * @param Boolean resident    mark the notification as resident by default
  */
-Notifications.getNamedNotification = function(name)
+Notifications.getNamedNotification = function(name, resident)
 {
-    return $object(Notification, name);
+    return $object(Notification, name, resident);
 }
 
 /**
