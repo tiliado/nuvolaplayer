@@ -35,8 +35,9 @@ public class Notification
 	private string icon_path = "";
 	private Diorite.Action[] actions = {};
 	private bool shown_before = false;
-	
 	private string desktop_entry;
+	private uint timeout_id = 0;
+	
 	public Notification(string desktop_entry)
 	{
 		this.desktop_entry = desktop_entry;
@@ -95,6 +96,7 @@ public class Notification
 			notification.set_hint("transient", true);
 		
 		notification.set_hint("desktop-entry", desktop_entry);
+		
 		if (add_actions)
 		{
 			notification.set_hint("action-icons", true);
@@ -103,6 +105,15 @@ public class Notification
 				if (action.enabled)
 					notification.add_action(action.icon, action.label, () => { action.activate(null); });
 		}
+		
+		if (timeout_id != 0)
+			Source.remove(timeout_id);
+		timeout_id = Timeout.add(100, show_cb);
+	}
+	
+	private bool show_cb()
+	{
+		timeout_id = 0;
 		
 		try
 		{
@@ -113,6 +124,7 @@ public class Notification
 		{
 			warning("Unable to show notification: %s", e.message);
 		}
+		return false;
 	}
 }
 
