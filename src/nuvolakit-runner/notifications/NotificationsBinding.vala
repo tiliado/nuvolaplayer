@@ -28,6 +28,7 @@ public class Nuvola.NotificationsBinding: Binding<NotificationsInterface>
 	{
 		base(server, web_worker, "Nuvola.Notifications");
 		bind("showNotification", handle_show_notification);
+		bind("isPersistenceSupported", handle_is_persistence_supported);
 	}
 	
 	private Variant? handle_show_notification(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
@@ -46,5 +47,17 @@ public class Nuvola.NotificationsBinding: Binding<NotificationsInterface>
 				break;
 		
 		return null;
+	}
+	
+	private Variant? handle_is_persistence_supported(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	{
+		check_not_empty();
+		Diorite.Ipc.MessageServer.check_type_str(data, null);
+		bool supported = false;
+		foreach (var object in objects)
+			if (object.is_persistence_supported(ref supported))
+				break;
+		
+		return new Variant.boolean(supported);
 	}
 }

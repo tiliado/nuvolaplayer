@@ -232,6 +232,14 @@ public class Notifications : GLib.Object, NotificationsInterface, NotificationIn
 		return Binding.CONTINUE;
 	}
 	
+	public bool is_persistence_supported(ref bool supported)
+	{
+		if (!supported && persistence_supported)
+			supported = true;
+		
+		return Binding.CONTINUE;
+	}
+	
 	private void show_notifications()
 	{
 		foreach (var notification in notifications.get_values())

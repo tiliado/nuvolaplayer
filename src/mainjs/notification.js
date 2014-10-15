@@ -105,6 +105,16 @@ Notifications.getNamedNotification = function(name, resident)
 }
 
 /**
+ * Check whether persistence is supported
+ * 
+ * @return Boolean true if persistence is supported
+ */
+Notifications.isPersistenceSupported = function()
+{
+    return Nuvola._sendMessageSync("Nuvola.Notifications.isPersistenceSupported");
+}
+
+/**
  * Instantly show anonymous notification.
  * 
  * @param String title        short title
