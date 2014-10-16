@@ -32,13 +32,15 @@ var Notification = $prototype(null);
 /**
  * Creates new named notification.
  * 
- * @param String  name        notification name (identifier)
- * @param Boolean resident    mark the notification as resident by default
+ * @param String  name                notification name (identifier)
+ * @param Boolean resident            mark the notification as resident by default
+ * @param optional String category    category of a notification
  */
-Notification.$init = function(name, resident)
+Notification.$init = function(name, resident, category)
 {
     this.name = name;
     this.resident = !!resident;
+    this.category = category || "";
 }
 
 /**
@@ -57,7 +59,8 @@ Notification.update = function(title, text, iconName, iconPath, resident)
     else
         this.resident = !!resident;
     
-    Nuvola._sendMessageAsync("Nuvola.Notification.update", this.name, title, text, iconName || "", iconPath || "", !!resident);
+    Nuvola._sendMessageAsync("Nuvola.Notification.update",
+        this.name, title, text, iconName || "", iconPath || "", !!resident, this.category);
 }
 
 /**
@@ -96,12 +99,13 @@ var Notifications = $prototype(null);
 /**
  * Convenience method to creates new named notification.
  * 
- * @param String  name        notification name (identifier)
- * @param Boolean resident    mark the notification as resident by default
+ * @param String  name                notification name (identifier)
+ * @param Boolean resident            mark the notification as resident by default
+ * @param optional String category    category of a notification
  */
-Notifications.getNamedNotification = function(name, resident)
+Notifications.getNamedNotification = function(name, resident, category)
 {
-    return $object(Notification, name, resident);
+    return $object(Notification, name, resident, category);
 }
 
 /**
@@ -122,10 +126,11 @@ Notifications.isPersistenceSupported = function()
  * @param String? iconName    name of icon for notification
  * @param String? iconPath    path to an icon for notification
  * @param Boolean force       ensure notification is shown if true, otherwise show it when suitable
+ * @param optional String category    category of a notification
  */
-Notifications.showNotification = function(title, text, iconName, iconPath, force)
+Notifications.showNotification = function(title, text, iconName, iconPath, force, category)
 {
-    Nuvola._sendMessageAsync("Nuvola.Notifications.showNotification", title, text, iconName || "", iconPath || "", !!force);
+    Nuvola._sendMessageAsync("Nuvola.Notifications.showNotification", title, text, iconName || "", iconPath || "", !!force, category || "");
 }
 
 // export public items

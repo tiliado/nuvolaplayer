@@ -36,6 +36,7 @@ public class Notification
 	private Diorite.Action[] actions = {};
 	private bool shown_before = false;
 	private string desktop_entry;
+	private string category = "";
 	private uint timeout_id = 0;
 	
 	public Notification(string desktop_entry)
@@ -43,7 +44,7 @@ public class Notification
 		this.desktop_entry = desktop_entry;
 	}
 	
-	public void update(string? summary, string? body, string? icon_name, string? icon_path, bool resident)
+	public void update(string? summary, string? body, string? icon_name, string? icon_path, bool resident, string category)
 	{
 		if (notification == null)
 			notification = new Notify.Notification(summary ?? "", body ?? "", icon_name ?? "");
@@ -52,6 +53,7 @@ public class Notification
 		
 		this.icon_path = icon_path ?? "";
 		this.resident = resident;
+		this.category = category;
 	}
 	
 	public void set_actions(Diorite.Action[] actions)
@@ -95,6 +97,9 @@ public class Notification
 		else
 			notification.set_hint("transient", true);
 		
+		if (category != null && category != "")
+			notification.set_category(category);
+			
 		notification.set_hint("desktop-entry", desktop_entry);
 		
 		if (add_actions)
@@ -181,9 +186,9 @@ public class Notifications : GLib.Object, NotificationsInterface, NotificationIn
 		return notification;
 	}
 	
-	public bool update(string name, string summary, string body, string? icon_name, string? icon_path, bool resident)
+	public bool update(string name, string summary, string body, string? icon_name, string? icon_path, bool resident, string category)
 	{
-		get_or_create(name).update(summary, body, icon_name, icon_path, persistence_supported && resident);
+		get_or_create(name).update(summary, body, icon_name, icon_path, persistence_supported && resident, category);
 		return Binding.CONTINUE;
 	}
 	
@@ -221,12 +226,12 @@ public class Notifications : GLib.Object, NotificationsInterface, NotificationIn
 		return Binding.CONTINUE;
 	}
 	
-	public bool show_anonymous(string summary, string body, string? icon_name, string? icon_path, bool force)
+	public bool show_anonymous(string summary, string body, string? icon_name, string? icon_path, bool force, string category)
 	{
 		if (force || !main_window.is_active)
 		{
 			var notification = new Notification(controller.app_id);
-			notification.update(summary, body, icon_name, icon_path, false);
+			notification.update(summary, body, icon_name, icon_path, false, category);
 			notification.show(false);
 		}
 		return Binding.CONTINUE;

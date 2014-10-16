@@ -36,17 +36,18 @@ public class Nuvola.NotificationBinding: Binding<NotificationInterface>
 	private Variant? handle_update(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
 		check_not_empty();
-		Diorite.Ipc.MessageServer.check_type_str(data, "(sssssb)");
+		Diorite.Ipc.MessageServer.check_type_str(data, "(sssssbs)");
 		string name = null;
 		string title = null;
 		string message = null;
 		string icon_name = null;
 		string icon_path = null;
 		bool resident = false;
-		data.get("(sssssb)", &name, &title, &message, &icon_name, &icon_path, &resident);
+		string? category = null;
+		data.get("(sssssbs)", &name, &title, &message, &icon_name, &icon_path, &resident, &category);
 		
 		foreach (var object in objects)
-			if (object.update(name, title, message, icon_name, icon_path, resident))
+			if (object.update(name, title, message, icon_name, icon_path, resident, category))
 				break;
 		
 		return null;
