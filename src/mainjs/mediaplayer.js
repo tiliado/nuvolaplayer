@@ -98,7 +98,7 @@ MediaPlayer.$init = function()
     this._extraActions = [];
     this._artworkLoop = 0;
     this._baseActions = [PlayerAction.TOGGLE_PLAY, PlayerAction.PLAY, PlayerAction.PAUSE, PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG];
-    this._notification = Nuvola.notifications.getNamedNotification("mediaplayer", true);
+    this._notification = Nuvola.notifications.getNamedNotification("mediaplayer", true, "x-gnome.music");
     Nuvola.core.connect("InitAppRunner", this);
     Nuvola.core.connect("InitWebWorker", this);
 }
@@ -171,6 +171,7 @@ MediaPlayer.setCanGoNext = function(canGoNext)
     {
         this._canGoNext = canGoNext;
         Nuvola.actions.setEnabled(PlayerAction.NEXT_SONG, !!canGoNext);
+        this._showNotification();
         this._sendDevelInfo();
     }
 }
@@ -188,6 +189,7 @@ MediaPlayer.setCanGoPrev = function(canGoPrev)
     {
         this._canGoPrev = canGoPrev;
         Nuvola.actions.setEnabled(PlayerAction.PREV_SONG, !!canGoPrev);
+        this._showNotification();
         this._sendDevelInfo();
     }
 }
@@ -206,6 +208,7 @@ MediaPlayer.setCanPlay = function(canPlay)
         this._canPlay = canPlay;
         Nuvola.actions.setEnabled(PlayerAction.PLAY, !!canPlay);
         Nuvola.actions.setEnabled(PlayerAction.TOGGLE_PLAY, !!(this._canPlay || this._canPause));
+        this._showNotification();
         this._sendDevelInfo();
     }
 }
@@ -224,6 +227,7 @@ MediaPlayer.setCanPause = function(canPause)
         this._canPause = canPause;
         Nuvola.actions.setEnabled(PlayerAction.PAUSE, !!canPause);
         Nuvola.actions.setEnabled(PlayerAction.TOGGLE_PLAY, !!(this._canPlay || this._canPause));
+        this._showNotification();
         this._sendDevelInfo();
     }
 }
@@ -265,7 +269,7 @@ MediaPlayer._onInitAppRunner = function(emitter)
     Nuvola.actions.addAction("playback", "win", PlayerAction.STOP, "Stop", null, "media-playback-stop", null);
     Nuvola.actions.addAction("playback", "win", PlayerAction.PREV_SONG, "Previous song", null, "media-skip-backward", null);
     Nuvola.actions.addAction("playback", "win", PlayerAction.NEXT_SONG, "Next song", null, "media-skip-forward", null);
-    this._notification.setActions([PlayerAction.PLAY, PlayerAction.PAUSE, PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG]);
+    this._notification.setActions([PlayerAction.PREV_SONG, PlayerAction.PLAY, PlayerAction.PAUSE, PlayerAction.NEXT_SONG]);
     Nuvola.config.setDefault(this._BACKGROUND_PLAYBACK, true);
     this._updateMenu();
     Nuvola.core.connect("PreferencesForm", this);
@@ -341,8 +345,7 @@ MediaPlayer._updateTrackInfo = function(changed)
             message = Nuvola.format("by {1} from {2}", track.artist, track.album);
         
         this._notification.update(title, message, this._artworkFile ? null : "nuvolaplayer", this._artworkFile);
-        if (this._state === PlaybackState.PLAYING)
-            this._notification.show();
+        this._showNotification();
         
         var tooltip = track.artist ? Nuvola.format("{1} by {2}", track.title, track.artist) : track.title;
         Nuvola.launcher.setTooltip(tooltip);
@@ -351,6 +354,12 @@ MediaPlayer._updateTrackInfo = function(changed)
     {
         Nuvola.launcher.setTooltip("Nuvola Player");
     }
+}
+
+MediaPlayer._showNotification = function()
+{
+    if (this._state === PlaybackState.PLAYING || Nuvola.notifications.isPersistenceSupported())
+        this._notification.show();
 }
 
 MediaPlayer._updateMenu = function()
