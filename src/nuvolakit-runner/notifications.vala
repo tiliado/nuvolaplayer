@@ -34,7 +34,6 @@ public class Notification
 	private Notify.Notification notification = null;
 	private string icon_path = "";
 	private Diorite.Action[] actions = {};
-	private bool shown_before = false;
 	private string desktop_entry;
 	private string category = "";
 	private uint timeout_id = 0;
@@ -64,12 +63,6 @@ public class Notification
 	public void remove_actions()
 	{
 		this.actions = {};
-	}
-	
-	public void show_once(bool add_actions)
-	{
-		if (!shown_before)
-			show(add_actions);
 	}
 	
 	public void show(bool add_actions)
@@ -123,7 +116,6 @@ public class Notification
 		try
 		{
 			notification.show();
-			shown_before = true;
 		}
 		catch(Error e)
 		{
@@ -219,10 +211,8 @@ public class Notifications : GLib.Object, NotificationsInterface, NotificationIn
 		var notification = get_or_create(name);
 		var add_actions = actions_supported && icons_supported;
 		
-		if (force || !main_window.is_active)
+		if (force || !main_window.is_active || notification.resident)
 			notification.show(add_actions);
-		else if (notification.resident)
-			notification.show_once(add_actions);
 		return Binding.CONTINUE;
 	}
 	
