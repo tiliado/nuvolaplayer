@@ -25,7 +25,7 @@
 namespace Nuvola
 {
 
-public class WebAppWindow : Gtk.ApplicationWindow
+public class WebAppWindow : Diorite.ApplicationWindow
 {
 	public Gtk.Grid grid {get; private set;}
 	public Gtk.Overlay overlay {get; private set;}
@@ -60,12 +60,14 @@ public class WebAppWindow : Gtk.ApplicationWindow
 	
 	public bool maximized {get; private set; default = false;}
 	private Gtk.Paned paned;
+	
 	private uint sidebar_position_cb_id = 0;
 	
 	private AppRunnerController app;
 	
 	public WebAppWindow(AppRunnerController app)
 	{
+		base(app, true);
 		window_state_event.connect(on_window_state_event);
 		title = app.app_name;
 		try
@@ -83,6 +85,7 @@ public class WebAppWindow : Gtk.ApplicationWindow
 		this.app = app;
 		app.add_window(this);
 		app.actions.window = this;
+		
 		grid = new Gtk.Grid();
 		grid.orientation = Gtk.Orientation.VERTICAL;
 		overlay = new Gtk.Overlay();
@@ -94,7 +97,8 @@ public class WebAppWindow : Gtk.ApplicationWindow
 		paned.pack2(sidebar, false, false);
 		paned.notify["position"].connect_after(on_sidebar_position_changed);
 		paned.show();
-		add(paned);
+		
+		top_grid.add(paned);
 	}
 	
 	public signal void can_destroy(ref bool result);

@@ -151,6 +151,7 @@ public class AppRunnerController : RunnerApplication
 		actions_helper = new ActionsHelper(actions, config);
 		main_window = new WebAppWindow(this);
 		main_window.can_destroy.connect(on_can_quit);
+		
 		fatal_error.connect(on_fatal_error);
 		show_error.connect(on_show_error);
 		connection = new Connection(new Soup.SessionAsync(), app_storage.cache_dir.get_child("conn"));
@@ -164,7 +165,7 @@ public class AppRunnerController : RunnerApplication
 		widget.hexpand = widget.vexpand = true;
 		
 		append_actions();
-		menu_bar = new MenuBar(actions, app_menu_shown && !menubar_shown);
+		menu_bar = new MenuBar(actions);
 		menu_bar.update();
 		menu_bar.set_menus(this);
 		
@@ -208,6 +209,7 @@ public class AppRunnerController : RunnerApplication
 		main_window.notify["sidebar-position"].connect_after((o, p) => config.set_int(ConfigKey.WINDOW_SIDEBAR_POS, (int64) main_window.sidebar_position));
 		main_window.sidebar.notify["visible"].connect_after(on_sidebar_visibility_changed);
 		main_window.sidebar.page_changed.connect(on_sidebar_page_changed);
+		main_window.create_toolbar(this, actions, {Actions.GO_BACK, Actions.GO_FORWARD, Actions.GO_RELOAD, Actions.GO_HOME});
 	}
 	
 	private void append_actions()

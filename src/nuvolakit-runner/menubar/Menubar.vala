@@ -28,15 +28,13 @@ namespace Nuvola
 public class MenuBar: GLib.Object, MenuBarInterface
 {
 	private Diorite.ActionsRegistry actions_reg;
-	private bool export_app_menu;
 	private HashTable<string, SubMenu> menus;
 	private Menu? menubar = null;
 	private Menu? app_menu = null;
 	
-	public MenuBar(Diorite.ActionsRegistry actions_reg, bool export_app_menu)
+	public MenuBar(Diorite.ActionsRegistry actions_reg)
 	{
 		this.actions_reg = actions_reg;
-		this.export_app_menu = export_app_menu;
 		this.menus = new HashTable<string, SubMenu>(str_hash, str_equal);
 		menubar = new Menu();
 		app_menu = new Menu();
@@ -45,8 +43,7 @@ public class MenuBar: GLib.Object, MenuBarInterface
 	public void set_menus(Gtk.Application app)
 	{
 		app.set_menubar(menubar);
-		if (export_app_menu)
-			app.set_app_menu(app_menu);
+		app.set_app_menu(app_menu);
 	}
 	
 	public void update()
@@ -58,10 +55,6 @@ public class MenuBar: GLib.Object, MenuBarInterface
 		var size = tmp_app_menu.get_n_items();
 		for (var i = 0; i < size; i++)
 			app_menu.append_item(new MenuItem.from_model(tmp_app_menu, i));
-		
-		
-		if (!export_app_menu)
-			menubar.append_submenu("_Application", app_menu);
 		
 		menubar.append_submenu("_Go", actions_reg.build_menu({Actions.GO_HOME, Actions.GO_RELOAD, Actions.GO_BACK, Actions.GO_FORWARD}, true, false));
 		
