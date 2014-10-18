@@ -25,9 +25,8 @@
 namespace Nuvola
 {
 
-public class WebAppListWindow : Gtk.ApplicationWindow
+public class WebAppListWindow : Diorite.ApplicationWindow
 {
-	public Gtk.Grid grid {get; private set;}
 	public WebAppListView view {get; private set;}
 	public string? selected_web_app {get; private set; default = null;}
 	private MasterController app;
@@ -38,6 +37,7 @@ public class WebAppListWindow : Gtk.ApplicationWindow
 	
 	public WebAppListWindow(MasterController app, WebAppListView view)
 	{
+		base(app, false);
 		title = "Services - " + app.app_name;
 		try
 		{
@@ -61,16 +61,7 @@ public class WebAppListWindow : Gtk.ApplicationWindow
 		scroll.vexpand = true;
 		scroll.hexpand = true;
 		
-		string[] toolbar_items = {Actions.START_APP, "|", Actions.INSTALL_APP, Actions.REMOVE_APP};
-		if (!app.app_menu_shown)
-		{
-			toolbar_items += " ";
-			toolbar_items += Actions.MENU;
-		}
-		var toolbar = app.actions.build_toolbar(toolbar_items);
-		toolbar.get_style_context().add_class(Gtk.STYLE_CLASS_PRIMARY_TOOLBAR);
-		toolbar.hexpand = true;
-		toolbar.vexpand = false;
+		create_toolbar(app, app.actions, {Actions.START_APP, "|", Actions.INSTALL_APP, Actions.REMOVE_APP});
 		
 		details = new Gtk.Grid();
 		details.orientation = Gtk.Orientation.HORIZONTAL;
@@ -107,12 +98,8 @@ public class WebAppListWindow : Gtk.ApplicationWindow
 		details.hide();
 		details.no_show_all = true;
 		
-		grid = new Gtk.Grid();
-		grid.orientation = Gtk.Orientation.VERTICAL;
-		grid.add(toolbar);
-		grid.add(scroll);
-		grid.add(details);
-		add(grid);
+		top_grid.add(scroll);
+		top_grid.add(details);
 		
 		view.select_path(new Gtk.TreePath.first());
 	}

@@ -30,10 +30,8 @@ namespace Actions
 	public const string START_APP = "start-app";
 	public const string INSTALL_APP = "install-app";
 	public const string REMOVE_APP = "remove-app";
-	public const string MENU = "menu";
 	public const string QUIT = "quit";
 }
-
 
 public string build_master_ipc_id()
 {
@@ -48,7 +46,6 @@ public class MasterController : Diorite.Application
 	public Diorite.ActionsRegistry? actions {get; private set; default = null;}
 	public weak Gtk.Settings gtk_settings {get; private set;}
 	private string[] exec_cmd;
-	private Gtk.Menu pop_down_menu;
 	private Queue<AppRunner> app_runners = null;
 	private HashTable<string, AppRunner> app_runners_map = null;
 	private Diorite.Ipc.MessageServer server = null;
@@ -118,26 +115,20 @@ public class MasterController : Diorite.Application
 		gtk_settings = Gtk.Settings.get_default();
 		append_actions();
 		actions.get_action(Actions.INSTALL_APP).enabled = web_app_reg.allow_management;
+		set_app_menu(actions.build_menu({Actions.QUIT}));
 		
 		var model = new WebAppListModel(web_app_reg);
-	
 		var view = new WebAppListView(model);
 		main_window = new WebAppListWindow(this, view);
 		main_window.delete_event.connect(on_main_window_delete_event);
 		
-		if (app_menu_shown)
-			set_app_menu(actions.build_menu({Actions.QUIT}));
-		
-		if (menubar_shown)
+		if (Gtk.Settings.get_default().gtk_shell_shows_menubar)
 		{
+			/* For Unity */
 			var menu = new Menu();
 			menu.append_submenu("_Apps", actions.build_menu({Actions.START_APP, "|", Actions.INSTALL_APP, Actions.REMOVE_APP}));
 			set_menubar(menu);
 		}
-		
-		var pop_down_model = actions.build_menu({Actions.QUIT});
-		pop_down_menu = new Gtk.Menu.from_model(pop_down_model);
-		pop_down_menu.attach_to_widget(main_window, null);
 	}
 	
 	public override int command_line(ApplicationCommandLine command_line)
@@ -231,7 +222,6 @@ public class MasterController : Diorite.Application
 		Diorite.Action[] actions_spec = {
 		//          Action(group, scope, name, label?, mnemo_label?, icon?, keybinding?, callback?)
 		new Diorite.SimpleAction("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
-		new Diorite.SimpleAction("main", "win", Actions.MENU, "Menu", null, "emblem-system-symbolic", null, do_menu),
 		new Diorite.SimpleAction("main", "win", Actions.START_APP, "Start app", "_Start app", "media-playback-start", "<ctrl>S", do_start_app),
 		new Diorite.SimpleAction("main", "win", Actions.INSTALL_APP, "Install app", "_Install app", "list-add", "<ctrl>plus", do_install_app),
 		new Diorite.SimpleAction("main", "win", Actions.REMOVE_APP, "Remove app", "_Remove app", "list-remove", "<ctrl>minus", do_remove_app)
@@ -306,12 +296,6 @@ public class MasterController : Diorite.Application
 				+ "\n\n" + e.message);
 			error.run();
 		}
-	}
-	
-	private void do_menu()
-	{
-		var event = Gtk.get_current_event();
-		pop_down_menu.popup(null, null, null, event.button.button, event.button.time);
 	}
 	
 	private void do_start_app()
