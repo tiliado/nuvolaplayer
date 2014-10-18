@@ -37,27 +37,20 @@ public class MenuBar: GLib.Object, MenuBarInterface
 		this.actions_reg = actions_reg;
 		this.menus = new HashTable<string, SubMenu>(str_hash, str_equal);
 		menubar = new Menu();
-		app_menu = new Menu();
+		app_menu = actions_reg.build_menu({Actions.TOGGLE_SIDEBAR, Actions.KEYBINDINGS, Actions.PREFERENCES, Actions.QUIT}, true, false);
 	}
 	
 	public void set_menus(Gtk.Application app)
 	{
 		app.set_menubar(menubar);
-		app.set_app_menu(app_menu);
+		if (app.app_menu == null)
+			app.set_app_menu(app_menu);
 	}
 	
 	public void update()
 	{
 		menubar.remove_all();
-		app_menu.remove_all();
-	
-		var tmp_app_menu = actions_reg.build_menu({Actions.TOGGLE_SIDEBAR, Actions.KEYBINDINGS, Actions.PREFERENCES, Actions.QUIT}, true, false);
-		var size = tmp_app_menu.get_n_items();
-		for (var i = 0; i < size; i++)
-			app_menu.append_item(new MenuItem.from_model(tmp_app_menu, i));
-		
 		menubar.append_submenu("_Go", actions_reg.build_menu({Actions.GO_HOME, Actions.GO_RELOAD, Actions.GO_BACK, Actions.GO_FORWARD}, true, false));
-		
 		var submenus = menus.get_values();
 		foreach (var submenu in submenus)
 			submenu.append_to_menu(actions_reg, menubar);
