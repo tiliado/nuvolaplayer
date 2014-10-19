@@ -67,7 +67,7 @@ public class WebAppWindow : Diorite.ApplicationWindow
 	
 	public WebAppWindow(AppRunnerController app)
 	{
-		base(app, true);
+		base(app, false);
 		window_state_event.connect(on_window_state_event);
 		title = app.app_name;
 		try
