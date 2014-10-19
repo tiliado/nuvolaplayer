@@ -134,6 +134,9 @@ public class AppRunnerController : RunnerApplication
 	
 	private void start()
 	{
+		/* Disable GStreamer plugin helper because it is shown too often and quite annoying.  */
+		Environment.set_variable("GST_INSTALL_PLUGINS_HELPER", "/bin/true", true);
+		
 		set_up_communication();
 		
 		gtk_settings = Gtk.Settings.get_default();
