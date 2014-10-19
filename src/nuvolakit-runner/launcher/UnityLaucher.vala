@@ -64,7 +64,6 @@ public class UnityLauncher: GLib.Object, LauncherInterface
 	
 	public bool remove_action(string action)
 	{
-		return;
 		var index = -1;
 		for (var i = 0; i < actions.length; i++)
 		{
