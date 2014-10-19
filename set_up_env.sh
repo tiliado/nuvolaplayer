@@ -27,7 +27,7 @@ ctl()
 debug()
 {
 	./waf -v && LD_LIBRARY_PATH=build XDG_DATA_DIRS=build/share:/usr/share:/usr/local/share \
-	NUVOLA_LIBDIR=build gdb --follow-fork-mode --args build/nuvolaplayer3 -D "$@"
+	NUVOLA_LIBDIR=build gdb --args build/nuvolaplayer3 -D "$@"
 }
 
 debug_criticals()
