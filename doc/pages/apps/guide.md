@@ -268,6 +268,29 @@ Line 31
     Use [Nuvola.log()](apiref>Nuvola.log) to print logging and debugging messages to terminal
     instead of [console.log()](https://developer.mozilla.org/en-US/docs/Web/API/console.log).
 
+
+Developer Tools
+---------------
+
+Launch your service integration, either from the list of services or with command
+`nuvolaplayer3 -D -A ~/projects/nuvola-player -a test_integration`, and show ow important developer
+tools:
+
+  * **Developer's Sidebar** shows information provided by the integration script to the Nuvola Player
+    core. To enable it, click Gear menu or GNOME Shell App Menu → Show sidebar → select "Developer"
+    in the right sidebar.
+
+  * **WebKit Web Inspector** is used to examine HTML & JavaScript code of a web page. Right-click
+    the web page anywhere and select "Inspect element".
+
+![Show sidebar - Unity]({filename}/images/guide/show_sidebar_unity.png)
+
+![Show sidebar - GNOME Shell]({filename}/images/guide/show_sidebar_gnome_shell.png)
+
+![Inspect element]({filename}/images/guide/inspect_element.png)
+
+![WebKit Web Inspector]({filename}/images/guide/webkit_web_inspector.png)
+
 Initialization routines
 -----------------------
 
