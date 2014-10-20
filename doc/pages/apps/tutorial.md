@@ -304,12 +304,16 @@ service, because we told Nuvola Player to load service integrations only from di
 ![A list with single service integration]({filename}/images/guide/app_list_one_service.png)
 
 Launch your service integration and a new window will be opened with the test service. First of all,
-show **developer's sidebar** (menu Application → Show sidebar → select "Developer" in the right 
+show **developer's sidebar** (Gear menu or GNOME Shell App Menu → Show sidebar → select "Developer" in the right 
 sidebar), then enable **WebKit Web Inspector** (right-click the web page anywhere and select
 "Inspect element").
 
-![Show sidebar]({filename}/images/guide/show_sidebar.png)
+![Show sidebar - Unity]({filename}/images/guide/show_sidebar_unity.png)
+
+![Show sidebar - GNOME Shell]({filename}/images/guide/show_sidebar_gnome_shell.png)
+
 ![Inspect element]({filename}/images/guide/inspect_element.png)
+
 ![WebKit Web Inspector]({filename}/images/guide/webkit_web_inspector.png)
 
 You can also launch your service integration with id `test_integration` directly.
