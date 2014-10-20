@@ -44,7 +44,6 @@ public class MasterController : Diorite.Application
 	public Diorite.Storage storage {get; private set; default = null;}
 	public WebAppRegistry web_app_reg {get; private set; default = null;}
 	public Diorite.ActionsRegistry? actions {get; private set; default = null;}
-	public weak Gtk.Settings gtk_settings {get; private set;}
 	private string[] exec_cmd;
 	private Queue<AppRunner> app_runners = null;
 	private HashTable<string, AppRunner> app_runners_map = null;
@@ -66,13 +65,9 @@ public class MasterController : Diorite.Application
 	
 	public override void activate()
 	{
-		if (main_window == null)
-			init_gui();
-		else
-			add_window(main_window);
-		
-		main_window.show_all();
-		main_window.present();
+		hold();
+		show_main_window();
+		release();
 	}
 	
 	private void init_core()
@@ -112,15 +107,21 @@ public class MasterController : Diorite.Application
 	private void init_gui()
 	{
 		init_core();
-		gtk_settings = Gtk.Settings.get_default();
-		append_actions();
+		if (actions != null)
+			return;
+		
+		actions = new Diorite.ActionsRegistry(this, null);
+		Diorite.Action[] actions_spec = {
+		//          Action(group, scope, name, label?, mnemo_label?, icon?, keybinding?, callback?)
+		new Diorite.SimpleAction("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
+		new Diorite.SimpleAction("main", "win", Actions.START_APP, "Start app", "_Start app", "media-playback-start", "<ctrl>S", do_start_app),
+		new Diorite.SimpleAction("main", "win", Actions.INSTALL_APP, "Install app", "_Install app", "list-add", "<ctrl>plus", do_install_app),
+		new Diorite.SimpleAction("main", "win", Actions.REMOVE_APP, "Remove app", "_Remove app", "list-remove", "<ctrl>minus", do_remove_app)
+		};
+		actions.add_actions(actions_spec);
+		
 		actions.get_action(Actions.INSTALL_APP).enabled = web_app_reg.allow_management;
 		set_app_menu(actions.build_menu({Actions.QUIT}));
-		
-		var model = new WebAppListModel(web_app_reg);
-		var view = new WebAppListView(model);
-		main_window = new WebAppListWindow(this, view);
-		main_window.delete_event.connect(on_main_window_delete_event);
 		
 		if (Gtk.Settings.get_default().gtk_shell_shows_menubar)
 		{
@@ -129,6 +130,22 @@ public class MasterController : Diorite.Application
 			menu.append_submenu("_Apps", actions.build_menu({Actions.START_APP, "|", Actions.INSTALL_APP, Actions.REMOVE_APP}));
 			set_menubar(menu);
 		}
+	}
+	
+	private void show_main_window()
+	{
+		if (main_window == null)
+		{
+			init_gui();
+			var model = new WebAppListModel(web_app_reg);
+			var view = new WebAppListView(model);
+			main_window = new WebAppListWindow(this, view);
+			main_window.delete_event.connect(on_main_window_delete_event);
+			view.item_activated.connect_after(on_list_item_activated);
+		}
+		
+		main_window.show_all();
+		main_window.present();
 	}
 	
 	public override int command_line(ApplicationCommandLine command_line)
@@ -216,20 +233,6 @@ public class MasterController : Diorite.Application
 		return new Variant("ms", runner == null ? null : runner.app_id);
 	}
 	
-	private void append_actions()
-	{
-		actions = new Diorite.ActionsRegistry(this, null);
-		Diorite.Action[] actions_spec = {
-		//          Action(group, scope, name, label?, mnemo_label?, icon?, keybinding?, callback?)
-		new Diorite.SimpleAction("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
-		new Diorite.SimpleAction("main", "win", Actions.START_APP, "Start app", "_Start app", "media-playback-start", "<ctrl>S", do_start_app),
-		new Diorite.SimpleAction("main", "win", Actions.INSTALL_APP, "Install app", "_Install app", "list-add", "<ctrl>plus", do_install_app),
-		new Diorite.SimpleAction("main", "win", Actions.REMOVE_APP, "Remove app", "_Remove app", "list-remove", "<ctrl>minus", do_remove_app)
-		};
-		actions.add_actions(actions_spec);
-		
-	}
-	
 	private bool on_main_window_delete_event(Gdk.EventAny event)
 	{
 		do_quit();
@@ -240,6 +243,8 @@ public class MasterController : Diorite.Application
 	{
 		main_window.hide();
 		remove_window(main_window);
+		main_window.destroy();
+		main_window = null;
 	}
 	
 	private void do_install_app()
@@ -296,6 +301,11 @@ public class MasterController : Diorite.Application
 				+ "\n\n" + e.message);
 			error.run();
 		}
+	}
+	
+	private void on_list_item_activated(Gtk.TreePath path)
+	{
+		do_start_app();
 	}
 	
 	private void do_start_app()
