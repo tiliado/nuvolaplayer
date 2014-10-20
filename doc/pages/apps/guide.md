@@ -361,9 +361,28 @@ var WebApp = Nuvola.$WebApp();
 ...
 ```
 
-The first visible effect is a new menu with playback control actions:
+Once MediaPlayer Component is initialized, playback control actions are exported. They are also
+available in the command line controller:
 
-![Without and with media player component]({filename}/images/guide/without_and_with_media_player_component.png)
+```text
+$ nuvolaplayer3ctl list-actions
+Available actions
+
+Format: NAME (is enabled?) - label
+
+...
+
+Group: playback
+
+ *  play (enabled) - Play
+ *  pause (disabled) - Pause
+ *  toggle-play (enabled) - Toggle play/pause
+ *  stop (disabled) - Stop
+ *  prev-song (disabled) - Previous song
+ *  next-song (disabled) - Next song
+
+...
+```
 
 Web Worker Process
 ==================
