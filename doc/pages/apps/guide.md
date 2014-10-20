@@ -686,6 +686,30 @@ WebApp._onActionActivated = function(emitter, name, param)
 
 !!! danger "Always test playback actions"
     You should click action buttons in the developer's sidebar to be sure they are working as expected.
+    You can also trigger actions from command line:
+    
+        :::text
+        $ nuvolaplayer3ctl list-actions
+        Available actions
+        
+        Format: NAME (is enabled?) - label
+        
+        ...
+        
+        Group: playback
+        
+         *  play (enabled) - Play
+         *  pause (disabled) - Pause
+         *  toggle-play (enabled) - Toggle play/pause
+         *  stop (disabled) - Stop
+         *  prev-song (disabled) - Previous song
+         *  next-song (enabled) - Next song
+        
+        ...
+        
+        $ nuvolaplayer3ctl action toggle-play
+        $ nuvolaplayer3ctl action next-song
+
 
 !!! info "If you use Git, commit changes"
         :::sh
