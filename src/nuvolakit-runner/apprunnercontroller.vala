@@ -46,6 +46,7 @@ namespace Actions
 	public const string GO_FORWARD = "go-forward";
 	public const string GO_RELOAD = "go-reload";
 	public const string KEYBINDINGS = "keybindings";
+	public const string FORMAT_SUPPORT = "format-support";
 	public const string PREFERENCES = "preferences";
 	public const string TOGGLE_SIDEBAR = "toggle-sidebar";
 }
@@ -117,6 +118,7 @@ public class AppRunnerController : RunnerApplication
 	private bool hide_on_close = false;
 	private Diorite.Form? init_form = null;
 	private Diorite.Ipc.MessageClient master = null;
+	private FormatSupport format_support = null;
 	
 	public AppRunnerController(Diorite.Storage storage, WebAppMeta web_app, WebAppStorage app_storage)
 	{
@@ -213,6 +215,40 @@ public class AppRunnerController : RunnerApplication
 		main_window.sidebar.notify["visible"].connect_after(on_sidebar_visibility_changed);
 		main_window.sidebar.page_changed.connect(on_sidebar_page_changed);
 		main_window.create_toolbar(this, actions, {Actions.GO_BACK, Actions.GO_FORWARD, Actions.GO_RELOAD, Actions.GO_HOME});
+		
+		format_support = new FormatSupport();
+		format_support.check.begin(format_support_check_done);
+	}
+	
+	private void format_support_check_done(GLib.Object? source_object, GLib.AsyncResult result)
+	{
+		try
+		{
+			var format_support = source_object as FormatSupport;
+			assert(format_support != null);
+			format_support.check.end(result);
+			unowned List<WebPlugin?> plugins = format_support.list_web_plugins();
+			foreach (unowned WebPlugin plugin in plugins)
+				debug("Nuvola.WebPlugin: %s (%s, %s) at %s: %s", plugin.name, plugin.enabled ? "enabled" : "disabled",
+					plugin.is_flash ? "flash" : "not flash", plugin.path, plugin.description);
+			var flash_plugins = format_support.n_flash_plugins;
+			if (flash_plugins == 0)
+				warning("No Flash plugins have been found.");
+			else if (flash_plugins > 1)
+				warning("Too many Flash plugins have been found: %u", flash_plugins);
+			// TODO: Show infobar warning
+		}
+		catch (GLib.Error e)
+		{
+			warning("Plugin listing error: %s", e.message);
+		}
+	}
+	
+	private void do_format_support()
+	{
+		var dialog = new FormatSupportDialog(format_support, main_window);
+		dialog.run();
+		dialog.destroy();
 	}
 	
 	private void append_actions()
@@ -223,6 +259,7 @@ public class AppRunnerController : RunnerApplication
 		ah.simple_action("main", "app", Actions.ACTIVATE, "Activate main window", null, null, null, do_activate),
 		ah.simple_action("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
 		ah.simple_action("main", "app", Actions.KEYBINDINGS, "Keyboard shortcuts", "_Keyboard shortcuts", null, null, do_keybindings),
+		ah.simple_action("main", "app", Actions.FORMAT_SUPPORT, "Format Support", "_Format support", null, null, do_format_support),
 		ah.simple_action("main", "app", Actions.PREFERENCES, "Preferences", "_Preferences", null, null, do_preferences),
 		ah.toggle_action("main", "win", Actions.TOGGLE_SIDEBAR, "Show sidebar", "Show _sidebar", null, null, do_toggle_sidebar, config.get_value(ConfigKey.WINDOW_SIDEBAR_VISIBLE)),
 		ah.simple_action("go", "app", Actions.GO_HOME, "Home", "_Home", "go-home", "<alt>Home", web_engine.go_home),
