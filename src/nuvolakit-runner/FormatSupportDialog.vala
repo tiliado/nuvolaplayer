@@ -25,13 +25,35 @@
 namespace Nuvola
 {
 
+const string FLASH_DETECT_HTML = """<!DOCTYPE html
+<html>
+<head>
+<meta charset="utf-8" />
+<script src="./flash_detect.js"></script>
+<style type="text/css">
+body, html {margin: 0px; padding: 0px;}
+p {margin: 0px; padding: 10px;}
+</style>
+</head>
+<body>
+<script type="text/javascript">
+document.write("<p>" + (FlashDetect.installed
+? (FlashDetect.raw + " is the active Flash plugin.")
+: "<p>No Flash plugin has been loaded.</p>"
+)+ "</p>");
+</script>
+</body>
+</html>
+""";
+
 public class FormatSupportDialog: Gtk.Dialog
 {
 	public FormatSupport format_support {get; construct;}
+	public Diorite.Storage storage {get; construct;}
 	
-	public FormatSupportDialog(FormatSupport format_support, Gtk.Window? parent)
+	public FormatSupportDialog(FormatSupport format_support, Diorite.Storage storage, Gtk.Window? parent)
 	{
-		GLib.Object(title: "Format Support", transient_for: parent, format_support: format_support);
+		GLib.Object(title: "Format Support", transient_for: parent, format_support: format_support, storage: storage);
 		add_button("_Close", Gtk.ResponseType.CLOSE);
 		set_default_size(700, 450);
 		
@@ -54,6 +76,21 @@ public class FormatSupportDialog: Gtk.Dialog
 		frame.add(flash_plugins_grid);
 		plugins_view.add(frame);
 		frame.show();
+		
+		var flash_detect = storage.get_data_file("js/flash_detect.js");
+		if (flash_detect != null)
+		{
+			frame = new Gtk.Frame ("<b>Active Flash plugin</b>");
+			(frame.label_widget as Gtk.Label).use_markup = true;
+			frame.margin = 10;
+			var web_view = new WebKit.WebView();
+			frame.add(web_view);
+			web_view.set_size_request(-1, 50);
+			web_view.show();
+			web_view.load_html(FLASH_DETECT_HTML, flash_detect.get_uri() + ".html"); 
+			plugins_view.add(frame);
+			frame.show();
+		}
 		
 		frame = new Gtk.Frame ("<b>Other plugins</b>");
 		(frame.label_widget as Gtk.Label).use_markup = true;

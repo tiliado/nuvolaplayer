@@ -246,7 +246,7 @@ public class AppRunnerController : RunnerApplication
 	
 	private void do_format_support()
 	{
-		var dialog = new FormatSupportDialog(format_support, main_window);
+		var dialog = new FormatSupportDialog(format_support, storage, main_window);
 		dialog.run();
 		dialog.destroy();
 	}

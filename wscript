@@ -338,6 +338,11 @@ def build(ctx):
 		target = 'share/%s/js/main.js' % APPNAME,
 		install_path = '${PREFIX}/share/%s/js' % APPNAME
 	)
+	ctx(features = "subst",
+		source = ctx.path.find_node("data/js/flash_detect.js"),
+		target = 'share/%s/js/flash_detect.js' % APPNAME,
+		install_path = '${PREFIX}/share/%s/js' % APPNAME
+	)
 	
 	ctx.add_post_fun(post)
 
