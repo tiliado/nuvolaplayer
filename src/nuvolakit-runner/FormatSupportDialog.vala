@@ -148,8 +148,107 @@ public class FormatSupportDialog: Gtk.Dialog
 		
 		plugins_view.show();
 		notebook.append_page(scrolled_window, new Gtk.Label("Web Plugins"));
+		var mp3_view = new Mp3View(format_support);
+		mp3_view.show();
+		notebook.append_page(mp3_view, new Gtk.Label("MP3 format"));
 		notebook.show();
 		get_content_area().add(notebook);
+	}
+	
+	private class Mp3View : Gtk.Grid
+	{
+		private FormatSupport format_support;
+		private Gtk.TextView text_view;
+		private Gtk.Button button;
+		private Gtk.Label result_label;
+		private AudioPipeline? pipeline = null;
+		
+		public Mp3View(FormatSupport format_support)
+		{
+			GLib.Object(orientation: Gtk.Orientation.VERTICAL);
+			this.format_support = format_support;
+			text_view = new Gtk.TextView();
+			text_view.editable = false;
+			text_view.expand = true;
+			result_label = new Gtk.Label(null);
+			result_label.hexpand = true;
+			result_label.margin = 10;
+			update_result_text(format_support.mp3_supported);
+			button = new Gtk.Button();
+			button.margin = 10;
+			set_button_label();
+			button.clicked.connect(toggle_check);
+			attach(result_label, 0, 0, 1, 1);
+			attach(button, 1, 0, 1, 1);
+			var scroll = new Gtk.ScrolledWindow(null, null);
+			scroll.expand = true;
+			scroll.margin = 10;
+			scroll.add(text_view);
+			attach(scroll, 0, 1, 2, 1);
+			result_label.show();
+			button.show();
+			scroll.show_all();
+		}
+		
+		private void update_result_text(bool result)
+		{
+			result_label.label = (pipeline != null
+			? "You should be hearing a really bad song now."
+			:(result ? "MP3 audio format is supported." : "MP3 audio format is not supported."));
+		}
+		
+		private void set_button_label()
+		{
+			button.label = pipeline == null ? "Check again" : "Stop";
+		}
+		
+		private void toggle_check()
+		{
+			if (pipeline != null)
+			{
+				pipeline.stop();
+				return;
+			}
+			
+			pipeline = format_support.get_mp3_pipeline();
+			pipeline.info.connect(on_pipeline_info);
+			pipeline.warn.connect(on_pipeline_warn);
+			text_view.buffer.text = "";
+			set_button_label();
+			update_result_text(false);
+			pipeline.check.begin(false, (o, res) =>
+			{
+				pipeline.info.disconnect(on_pipeline_info);
+				pipeline.warn.disconnect(on_pipeline_warn);
+				var result = pipeline.check.end(res);
+				pipeline = null;
+				update_result_text(result);
+				if (result)
+					add_message("Info", "Playback has been successful.");
+				else
+					add_message("Error", "Playback has failed.");
+				set_button_label();
+			});
+		}
+		
+		private void add_message(string type, string text)
+		{
+			var buffer = text_view.buffer;
+			Gtk.TextIter iter;
+			buffer.get_end_iter(out iter);
+			var data = "%s: %s\n".printf(type, text);
+			buffer.insert(ref iter, data, -1);
+		}
+		
+		private void on_pipeline_info(string text)
+		{
+			add_message("Info", text);
+		}
+		
+		private void on_pipeline_warn(string text)
+		{
+			add_message("Error", text);
+		}
 	}
 }
 

@@ -48,6 +48,11 @@ public class FormatSupport: GLib.Object
 		return web_plugins;
 	}
 	
+	public AudioPipeline get_mp3_pipeline()
+	{
+		return new AudioPipeline(mp3_file);
+	}
+	
 	private async void collect_web_plugins() throws GLib.Error
 	{
 		if (web_plugins != null)
@@ -69,7 +74,7 @@ public class FormatSupport: GLib.Object
 	
 	private async bool check_mp3(string audio_file, bool silent)
 	{
-		var pipeline = new AudioPipeline(audio_file);
+		var pipeline = get_mp3_pipeline();
 		pipeline.info.connect(on_pipeline_info);
 		pipeline.warn.connect(on_pipeline_warn);
 		var result = yield pipeline.check(silent);
