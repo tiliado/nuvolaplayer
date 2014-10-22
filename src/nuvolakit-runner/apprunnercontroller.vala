@@ -216,7 +216,7 @@ public class AppRunnerController : RunnerApplication
 		main_window.sidebar.page_changed.connect(on_sidebar_page_changed);
 		main_window.create_toolbar(this, actions, {Actions.GO_BACK, Actions.GO_FORWARD, Actions.GO_RELOAD, Actions.GO_HOME});
 		
-		format_support = new FormatSupport();
+		format_support = new FormatSupport(storage.get_data_file("audio/audiotest.mp3").get_path());
 		format_support.check.begin(format_support_check_done);
 	}
 	
@@ -236,6 +236,9 @@ public class AppRunnerController : RunnerApplication
 				warning("No Flash plugins have been found.");
 			else if (flash_plugins > 1)
 				warning("Too many Flash plugins have been found: %u", flash_plugins);
+			
+			if (!format_support.mp3_supported)
+				warning("MP3 Audio not supported.");
 			// TODO: Show infobar warning
 		}
 		catch (GLib.Error e)

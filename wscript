@@ -185,6 +185,7 @@ def configure(ctx):
 	ctx.check_dep('webkit2gtk-3.0', 'WEBKIT', '2.2')
 	ctx.check_dep('javascriptcoregtk-3.0', 'JSCORE', '1.8')
 	ctx.check_dep('libnotify', 'NOTIFY', '0.7')
+	ctx.check_dep("gstreamer-1.0", 'GST', "1.0")
 	
 	ctx.env.with_unity = ctx.options.unity
 	if ctx.options.unity:
@@ -254,8 +255,8 @@ def build(ctx):
 	ctx(features = "c cshlib",
 		target = NUVOLAKIT_RUNNER,
 		source = ctx.path.ant_glob('src/nuvolakit-runner/*.vala') + ctx.path.ant_glob('src/nuvolakit-runner/*/*.vala'),
-		packages = 'javascriptcoregtk-3.0 webkit2gtk-3.0',
-		uselib =  'JSCORE WEBKIT',
+		packages = 'javascriptcoregtk-3.0 webkit2gtk-3.0 gstreamer-1.0',
+		uselib =  'JSCORE WEBKIT GST',
 		use = [NUVOLAKIT_BASE],
 		lib = ['m'],
 		vala_defines = vala_defines,
@@ -342,6 +343,11 @@ def build(ctx):
 		source = ctx.path.find_node("data/js/flash_detect.js"),
 		target = 'share/%s/js/flash_detect.js' % APPNAME,
 		install_path = '${PREFIX}/share/%s/js' % APPNAME
+	)
+	ctx(features = "subst",
+		source = ctx.path.find_node("data/audio/audiotest.mp3"),
+		target = 'share/%s/audio/audiotest.mp3' % APPNAME,
+		install_path = '${PREFIX}/share/%s/audio' % APPNAME
 	)
 	
 	ctx.add_post_fun(post)
