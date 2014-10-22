@@ -117,6 +117,11 @@ public class AudioPipeline : GLib.Object
 	public async bool check(bool silent=true)
 	{
 		init_gstreamer();
+		while (pipeline != null)
+		{
+			Idle.add(check.callback, Priority.LOW);
+			yield;
+		}
 		this.silent = silent;
 		var source = Gst.ElementFactory.make ("filesrc", "source");
 		var decoder = Gst.ElementFactory.make ("decodebin", "decoder");
@@ -142,30 +147,32 @@ public class AudioPipeline : GLib.Object
 		switch (pipeline.set_state(Gst.State.PLAYING))
 		{
 		case Gst.StateChangeReturn.SUCCESS:
-			pipeline.set_state(Gst.State.NULL);
-			return true;
+			Idle.add(check.callback, Priority.LOW);
+			yield;
+			return quit(true);
 		case Gst.StateChangeReturn.ASYNC:
 			resume_async = check.callback;
 			yield;
 			return result;
 		default:
-			pipeline.set_state(Gst.State.NULL);
 			warn("Unable to change pipeline status (sync),");
-			return false;
+			Idle.add(check.callback, Priority.LOW);
+			yield;
+			return quit(false);
 		}
 	}
 	
 	public bool stop()
 	{
+		if (resume_async != null)
+		{
+			Idle.add((owned) resume_async);
+			resume_async = null;
+		}
 		if (pipeline != null)
 		{
 			pipeline.set_state(Gst.State.NULL);
 			pipeline = null;
-		}
-		if (resume_async != null)
-		{
-			resume_async();
-			resume_async = null;
 		}
 		return result;
 	}
@@ -184,10 +191,10 @@ public class AudioPipeline : GLib.Object
 		}
 	}
 	
-	private void quit(bool result)
+	private bool quit(bool result)
 	{
 		this.result = result;
-		stop();
+		return stop();
 	}
 	
 	private void on_pad_added (Gst.Element element, Gst.Pad pad)
@@ -237,7 +244,6 @@ public class AudioPipeline : GLib.Object
 			break;
 		case Gst.MessageType.EOS:
 			info(@"End of stream for file $(audio_file).");
-			pipeline.set_state(Gst.State.NULL);
 			quit(true);
 			break;
 		case Gst.MessageType.ERROR:
