@@ -40,6 +40,7 @@ namespace ConfigKey
 
 namespace Actions
 {
+	public const string ABOUT = "about";
 	public const string ACTIVATE = "activate";
 	public const string GO_HOME = "go-home";
 	public const string GO_BACK = "go-back";
@@ -236,6 +237,7 @@ public class AppRunnerController : RunnerApplication
 		ah.simple_action("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
 		ah.simple_action("main", "app", Actions.KEYBINDINGS, "Keyboard shortcuts", "_Keyboard shortcuts", null, null, do_keybindings),
 		ah.simple_action("main", "app", Actions.FORMAT_SUPPORT, "Format Support", "_Format support", null, null, do_format_support),
+		ah.simple_action("main", "app", Actions.ABOUT, "About", "_About", null, "F1", do_about),
 		ah.simple_action("main", "app", Actions.PREFERENCES, "Preferences", "_Preferences", null, null, do_preferences),
 		ah.toggle_action("main", "win", Actions.TOGGLE_SIDEBAR, "Show sidebar", "Show _sidebar", null, null, do_toggle_sidebar, config.get_value(ConfigKey.WINDOW_SIDEBAR_VISIBLE)),
 		ah.simple_action("go", "app", Actions.GO_HOME, "Home", "_Home", "go-home", "<alt>Home", web_engine.go_home),
@@ -292,6 +294,13 @@ public class AppRunnerController : RunnerApplication
 	private void do_activate()
 	{
 		activate();
+	}
+	
+	private void do_about()
+	{
+		var dialog = new AboutDialog(main_window, web_app);
+		dialog.run();
+		dialog.destroy();
 	}
 	
 	private void do_keybindings()

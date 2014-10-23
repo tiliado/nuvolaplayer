@@ -37,7 +37,9 @@ public class MenuBar: GLib.Object, MenuBarInterface
 		this.actions_reg = actions_reg;
 		this.menus = new HashTable<string, SubMenu>(str_hash, str_equal);
 		menubar = new Menu();
-		app_menu = actions_reg.build_menu({Actions.TOGGLE_SIDEBAR, Actions.KEYBINDINGS, Actions.FORMAT_SUPPORT, Actions.PREFERENCES, Actions.QUIT}, true, false);
+		app_menu = actions_reg.build_menu({
+			Actions.TOGGLE_SIDEBAR, Actions.KEYBINDINGS, Actions.FORMAT_SUPPORT,
+			Actions.PREFERENCES, Actions.ABOUT, Actions.QUIT}, true, false);
 	}
 	
 	public void set_menus(Gtk.Application app)
