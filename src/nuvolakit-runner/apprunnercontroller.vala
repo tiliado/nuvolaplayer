@@ -87,7 +87,7 @@ public class RunnerApplication: Diorite.Application
 		var dashed_id = build_dashed_id(web_app_id);
 		base(
 			build_camel_id(web_app_id),
-			"%s - %s".printf(web_app_name, Nuvola.get_app_name()),
+			web_app_name,
 			"%s.desktop".printf(dashed_id),
 			dashed_id);
 		this.storage = storage;
