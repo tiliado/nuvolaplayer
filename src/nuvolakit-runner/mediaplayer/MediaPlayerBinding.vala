@@ -29,6 +29,7 @@ public class Nuvola.MediaPlayerBinding: Binding<MediaPlayerInterface>
 	public MediaPlayerBinding(Diorite.Ipc.MessageServer server, WebWorker web_worker)
 	{
 		base(server, web_worker, "Nuvola.MediaPlayer");
+		bind("setFlag", handle_set_flag);
 		bind("setTrackInfo", handle_set_track_info);
 		bind("getTrackInfo", handle_get_track_info);
 	}
@@ -77,5 +78,32 @@ public class Nuvola.MediaPlayerBinding: Binding<MediaPlayerInterface>
 		builder.add("{sms}", "artworkLocation", artwork_location);
 		builder.add("{sms}", "artworkFile", artwork_file);
 		return builder.end();
+	}
+	
+	private Variant? handle_set_flag(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	{
+		check_not_empty();
+		Diorite.Ipc.MessageServer.check_type_str(data, "(sb)");
+		string name;
+		bool val;
+		data.get("(sb)", out name, out val);
+		bool handled = false;
+		switch (name)
+		{
+		case "can-go-next":
+		case "can-go-previous":
+		case "can-play":
+		case "can-pause":
+			handled = true;
+			Value value = Value(typeof(bool));
+			value.set_boolean(val);
+			foreach (var object in objects)
+				object.@set_property(name, value);
+			break;
+		default:
+			critical("Unknown flag '%s'", name);
+			break;
+		}
+		return new Variant.boolean(handled);
 	}
 }

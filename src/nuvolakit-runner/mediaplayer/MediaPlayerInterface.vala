@@ -24,6 +24,10 @@
 
 public interface Nuvola.MediaPlayerInterface: GLib.Object
 {
+	public abstract bool can_go_next {get; protected set;}
+	public abstract bool can_go_previous {get; protected set;}
+	public abstract bool can_play {get; protected set;}
+	public abstract bool can_pause {get; protected set;}
 	public abstract bool get_track_info(ref string? title, ref string? artist, ref string? album, ref string? state, ref string? artwork_location, ref string? artwork_file);
 	public abstract bool set_track_info(string? title, string? artist, string? album, string? state, string? artwork_location, string? artwork_file);
 }

@@ -171,6 +171,7 @@ MediaPlayer.setCanGoNext = function(canGoNext)
     {
         this._canGoNext = canGoNext;
         Nuvola.actions.setEnabled(PlayerAction.NEXT_SONG, !!canGoNext);
+        Nuvola._sendMessageAsync("Nuvola.MediaPlayer.setFlag", "can-go-next", !!canGoNext);
         this._showNotification();
         this._sendDevelInfo();
     }
@@ -189,6 +190,7 @@ MediaPlayer.setCanGoPrev = function(canGoPrev)
     {
         this._canGoPrev = canGoPrev;
         Nuvola.actions.setEnabled(PlayerAction.PREV_SONG, !!canGoPrev);
+        Nuvola._sendMessageAsync("Nuvola.MediaPlayer.setFlag", "can-go-previous", !!canGoPrev);
         this._showNotification();
         this._sendDevelInfo();
     }
@@ -208,6 +210,7 @@ MediaPlayer.setCanPlay = function(canPlay)
         this._canPlay = canPlay;
         Nuvola.actions.setEnabled(PlayerAction.PLAY, !!canPlay);
         Nuvola.actions.setEnabled(PlayerAction.TOGGLE_PLAY, !!(this._canPlay || this._canPause));
+        Nuvola._sendMessageAsync("Nuvola.MediaPlayer.setFlag", "can-play", !!canPlay);
         this._showNotification();
         this._sendDevelInfo();
     }
@@ -227,6 +230,7 @@ MediaPlayer.setCanPause = function(canPause)
         this._canPause = canPause;
         Nuvola.actions.setEnabled(PlayerAction.PAUSE, !!canPause);
         Nuvola.actions.setEnabled(PlayerAction.TOGGLE_PLAY, !!(this._canPlay || this._canPause));
+        Nuvola._sendMessageAsync("Nuvola.MediaPlayer.setFlag", "can-pause", !!canPause);
         this._showNotification();
         this._sendDevelInfo();
     }

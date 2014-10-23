@@ -30,6 +30,10 @@ public class Nuvola.MediaPlayer: GLib.Object, MediaPlayerInterface
 	private string? state = null;
 	private string? artwork_location = null;
 	private string? artwork_file = null;
+	public bool can_go_next {get; protected set; default = false;}
+	public bool can_go_previous {get; protected set; default = false;}
+	public bool can_play {get; protected set; default = false;}
+	public bool can_pause {get; protected set; default = false;}
 	
 	public MediaPlayer()
 	{
