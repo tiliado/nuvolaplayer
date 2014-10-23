@@ -119,6 +119,7 @@ public class AppRunnerController : RunnerApplication
 	private Diorite.Form? init_form = null;
 	private Diorite.Ipc.MessageClient master = null;
 	private FormatSupportCheck format_support = null;
+	private MPRISProvider mpris = null;
 	
 	public AppRunnerController(Diorite.Storage storage, WebAppMeta web_app, WebAppStorage app_storage)
 	{
@@ -399,6 +400,8 @@ public class AppRunnerController : RunnerApplication
 		bindings.add_binding(new MediaPlayerBinding(server, web_worker));
 		var media_player = new MediaPlayer(actions);
 		bindings.add_object(media_player);
+		
+		mpris = new MPRISProvider(this, media_player);
 	}
 	
 	private void on_fatal_error(string title, string message)

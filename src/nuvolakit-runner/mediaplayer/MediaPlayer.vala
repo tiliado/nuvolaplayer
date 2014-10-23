@@ -24,12 +24,12 @@
 
 public class Nuvola.MediaPlayer: GLib.Object, MediaPlayerInterface
 {
-	private string? title = null;
-	private string? artist = null;
-	private string? album = null;
-	private string? state = null;
-	private string? artwork_location = null;
-	private string? artwork_file = null;
+	public string? title {get; protected set; default = null;}
+	public string? artist {get; protected set; default = null;}
+	public string? album {get; protected set; default = null;}
+	public string? state {get; protected set; default = null;}
+	public string? artwork_location {get; protected set; default = null;}
+	public string? artwork_file {get; protected set; default = null;}
 	public bool can_go_next {get; protected set; default = false;}
 	public bool can_go_previous {get; protected set; default = false;}
 	public bool can_play {get; protected set; default = false;}
