@@ -34,9 +34,11 @@ public class Nuvola.MediaPlayer: GLib.Object, MediaPlayerInterface
 	public bool can_go_previous {get; protected set; default = false;}
 	public bool can_play {get; protected set; default = false;}
 	public bool can_pause {get; protected set; default = false;}
+	private Diorite.ActionsRegistry actions;
 	
-	public MediaPlayer()
+	public MediaPlayer(Diorite.ActionsRegistry actions)
 	{
+		this.actions = actions;
 	}
 	
 	public bool get_track_info(ref string? title, ref string? artist, ref string? album, ref string? state, ref string? artwork_location, ref string? artwork_file)
@@ -59,5 +61,41 @@ public class Nuvola.MediaPlayer: GLib.Object, MediaPlayerInterface
 		this.artwork_location = artwork_location;
 		this.artwork_file = artwork_file;
 		return !Binding.CONTINUE;
+	}
+	
+	public void play()
+	{
+		activate_action("play");
+	}
+	
+	public void pause()
+	{
+		activate_action("pause");
+	}
+	
+	public void toggle_play()
+	{
+		activate_action("toggle-play");
+	}
+	
+	public void stop()
+	{
+		activate_action("stop");
+	}
+	
+	public void prev_song()
+	{
+		activate_action("prev-song");
+	}
+	
+	public void next_song()
+	{
+		activate_action("next-song");
+	}
+	
+	private void activate_action(string name)
+	{
+		if (!actions.activate_action(name))
+			critical("Failed to activate action '%s'.", name);
 	}
 }

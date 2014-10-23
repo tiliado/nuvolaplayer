@@ -397,7 +397,8 @@ public class AppRunnerController : RunnerApplication
 		bindings.add_object(menu_bar);
 		
 		bindings.add_binding(new MediaPlayerBinding(server, web_worker));
-		bindings.add_object(new MediaPlayer());
+		var media_player = new MediaPlayer(actions);
+		bindings.add_object(media_player);
 	}
 	
 	private void on_fatal_error(string title, string message)
