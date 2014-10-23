@@ -50,6 +50,7 @@ public class FormatSupportDialog: Gtk.Dialog
 {
 	public FormatSupport format_support {get; construct;}
 	public Diorite.Storage storage {get; construct;}
+	private Gtk.Notebook notebook;
 	
 	public FormatSupportDialog(FormatSupport format_support, Diorite.Storage storage, Gtk.Window? parent)
 	{
@@ -57,7 +58,7 @@ public class FormatSupportDialog: Gtk.Dialog
 		add_button("_Close", Gtk.ResponseType.CLOSE);
 		set_default_size(700, 450);
 		
-		var notebook = new Gtk.Notebook();
+		notebook = new Gtk.Notebook();
 		notebook.margin = 10;
 		var plugins_view = new Gtk.Grid();
 		plugins_view.orientation = Gtk.Orientation.VERTICAL;
@@ -153,6 +154,17 @@ public class FormatSupportDialog: Gtk.Dialog
 		notebook.append_page(mp3_view, new Gtk.Label("MP3 format"));
 		notebook.show();
 		get_content_area().add(notebook);
+	}
+	
+	public void show_tab(Tab tab)
+	{
+		notebook.page = tab == Tab.DEFAULT ? 0 : (int) tab - 1;
+		present();
+	}
+	
+	public enum Tab
+	{
+		DEFAULT, FLASH, MP3;
 	}
 	
 	private class Mp3View : Gtk.Grid
