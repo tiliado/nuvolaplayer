@@ -201,6 +201,7 @@ def configure(ctx):
 	ctx.define("NUVOLA_UNIQUE_NAME", UNIQUE_NAME)
 	ctx.define("NUVOLA_APP_ICON", APPNAME)
 	ctx.define("NUVOLA_VERSION", VERSION)
+	ctx.define("NUVOLA_REVISION", REVISION_ID)
 	ctx.define("NUVOLA_VERSION_MAJOR", VERSIONS[0])
 	ctx.define("NUVOLA_VERSION_MINOR", VERSIONS[1])
 	ctx.define("NUVOLA_VERSION_BUGFIX", VERSIONS[2])

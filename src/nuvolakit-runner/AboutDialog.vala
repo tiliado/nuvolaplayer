@@ -106,11 +106,20 @@ public class AboutDialog: Gtk.Dialog
 		title.attach(new Gtk.Label("Web App Integration Runtime"), 1, 1, 1, 1);
 		grid.attach(title, 0, 0, 2, 1);
 		grid.attach(new Gtk.Label("Version"), 0, 2, 1, 1);
-		grid.attach(new Gtk.Label(Nuvola.get_version()), 1, 2, 1, 1);
-		grid.attach(new Gtk.Label("Copyright"), 0, 3, 1, 1);
+		label = new Gtk.Label(Nuvola.get_version());
+		label.selectable = true;
+		grid.attach(label, 1, 2, 1, 1);
+		grid.attach(new Gtk.Label("Revision"), 0, 3, 1, 1);
+		var revision = Nuvola.get_revision();
+		if (revision.length > 20)
+			revision = revision[0:20];
+		label = new Gtk.Label(revision);
+		label.selectable = true;
+		grid.attach(label, 1, 3, 1, 1);
+		grid.attach(new Gtk.Label("Copyright"), 0, 4, 1, 1);
 		label = new Gtk.Label(Markup.printf_escaped("© 2011-2014 <a href=\"%s\">%s</a>", "http://gratipay.com/fenryxo", "Jiří Janoušek"));
 		label.use_markup = true;
-		grid.attach(label, 1, 3, 1, 1);
+		grid.attach(label, 1, 4, 1, 1);
 		grid.show_all();
 		box.add(grid);
 	}

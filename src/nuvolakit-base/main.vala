@@ -29,6 +29,7 @@ private extern const string NAME;
 private extern const string UNIQUE_NAME;
 private extern const string APP_ICON;
 private extern const string VERSION;
+private extern const string REVISION;
 private extern const int VERSION_MAJOR;
 private extern const int VERSION_MINOR;
 private extern const int VERSION_BUGFIX;
@@ -55,6 +56,11 @@ public string get_app_id()
 public string get_app_name()
 {
 	return NAME;
+}
+
+public string get_revision()
+{
+	return REVISION;
 }
 
 public string get_version()
