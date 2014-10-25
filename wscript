@@ -29,7 +29,7 @@ top = '.'
 out = 'build'
 
 # Application name and version
-NAME="Nuvola Player 3"
+NAME="Nuvola Player 3 Alpha"
 APPNAME = "nuvolaplayer3"
 VERSION = "3.0.0+"
 UNIQUE_NAME="cz.fenryxo.NuvolaPlayer3"
