@@ -66,6 +66,7 @@ public int main(string[] args)
 	if (Args.version)
 	{
 		stdout.printf("%s %s\n", Nuvola.get_app_name(), Nuvola.get_version());
+		stdout.printf("Revision %s\n", Nuvola.get_revision());
 		return 0;
 	}
 	
