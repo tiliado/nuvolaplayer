@@ -46,6 +46,8 @@ public void create_desktop_file(WebAppMeta web_app)
 	try
 	{
 		Diorite.System.overwrite_file(file, data);
+		if (FileUtils.chmod(file.get_path(), 00755) != 0)
+			warning("chmod 0755 %s failed.", file.get_path());
 	}
 	catch (GLib.Error e)
 	{
