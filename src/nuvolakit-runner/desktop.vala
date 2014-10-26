@@ -25,13 +25,14 @@
 namespace Nuvola
 {
 
-public void create_desktop_file(WebAppMeta web_app)
+public bool create_desktop_file(WebAppMeta web_app)
 {
 	var app_id = Nuvola.get_app_id();
 	var storage = new Diorite.XdgStorage();
 	var dashed_id = build_dashed_id(web_app.id);
 	var filename = "%s.desktop".printf(dashed_id);
 	var file = storage.user_data_dir.get_child("applications").get_child(filename);
+	var existed = file.query_exists();
 	var key_file = new KeyFile();
 	const string GROUP = "Desktop Entry";
 	key_file.set_string(GROUP, "Name", web_app.name);
@@ -53,6 +54,7 @@ public void create_desktop_file(WebAppMeta web_app)
 	{
 		warning("Failed to write key file '%s': %s", file.get_path(), e.message);
 	}
+	return existed;
 }
 
 } // namespace Nuvola

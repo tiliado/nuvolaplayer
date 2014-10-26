@@ -94,14 +94,17 @@ public int main(string[] args)
 	{
 		var app_dir = File.new_for_path(Args.app_dir);
 		var web_app = WebAppMeta.load_from_dir(app_dir);
+		var desktop_file_existed = create_desktop_file(web_app);
 		web_app.removable = false;
 		var storage = new Diorite.XdgStorage.for_project(Nuvola.get_app_id());
 		var app_storage = new WebAppStorage(
 		  storage.user_config_dir.get_child(WEB_APP_DATA_DIR).get_child(web_app.id),
 		  storage.user_data_dir.get_child(WEB_APP_DATA_DIR).get_child(web_app.id),
 		  storage.user_cache_dir.get_child(WEB_APP_DATA_DIR).get_child(web_app.id));
-	
-		create_desktop_file(web_app);
+		
+		/* Sleep a second to give GNOME Shell a chance to register desktop file */
+		if (!desktop_file_existed)
+			Thread.usleep(1000*1000);
 		var controller = new AppRunnerController(storage, web_app, app_storage);
 		return controller.run(args);
 	}
