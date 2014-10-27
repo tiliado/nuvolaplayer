@@ -380,8 +380,8 @@ public Variant variant_from_value(JS.Context ctx, JS.Value val) throws JSError
 		
 		return builder.end();
 	}
-	
-	return new Variant.string("<UNDEFINED>");
+	warning("Attempt to convert `undefined` JavaScript type. This might be a programmer error!");
+	return new Variant.string("<ERROR: UNDEFINED VALUE TYPE>");
 }
 
 } // namespace Nuvola.JSTools
