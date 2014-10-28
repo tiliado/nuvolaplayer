@@ -54,12 +54,15 @@ public class TrayIcon: GLib.Object, LauncherInterface
 		create_menu();
 		#else
 		icon = new Gtk.StatusIcon.from_icon_name(controller.icon);
+		icon.visible = false;
 		icon.title = controller.app_name;
 		set_tooltip(controller.app_name);
 		create_menu();
 		icon.popup_menu.connect(on_popup_menu);
 		icon.activate.connect(() => {controller.activate();});
 		unset_number();
+		Bus.watch_name(BusType.SESSION, "org.gnome.Shell", BusNameWatcherFlags.NONE,
+			on_gnome_shell_dbus_appeared, on_gnome_shell_dbus_vanished);
 		#endif
 	}
 	
@@ -251,6 +254,18 @@ public class TrayIcon: GLib.Object, LauncherInterface
 		menu.popup(null, null, icon.position_menu, button, time);
 	}
 	#endif
+	
+	private void on_gnome_shell_dbus_appeared(DBusConnection connection, string name, string name_owner)
+	{
+		if (icon != null)
+			icon.visible = false;
+	}
+	
+	private void on_gnome_shell_dbus_vanished(DBusConnection connection, string name)
+	{
+		if (icon != null)
+			icon.visible = true;
+	}
 }
 
 } // namespace Nuvola
