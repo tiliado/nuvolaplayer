@@ -88,4 +88,6 @@ public string get_app_runner_path()
 	return get_libdir() + "/apprunner"; 
 }
 
+public const string HELP_URL = "https://groups.google.com/d/forum/nuvola-player-users";
+
 } // namespace Nuvola

@@ -113,7 +113,8 @@ public class MasterController : Diorite.Application
 		actions = new Diorite.ActionsRegistry(this, null);
 		Diorite.Action[] actions_spec = {
 		//          Action(group, scope, name, label?, mnemo_label?, icon?, keybinding?, callback?)
-		new Diorite.SimpleAction("main", "app", Actions.ABOUT, "About", "_About", null, "F1", do_about),
+		new Diorite.SimpleAction("main", "app", Actions.HELP, "Help", "_Help", null, "F1", do_help),
+		new Diorite.SimpleAction("main", "app", Actions.ABOUT, "About", "_About", null, null, do_about),
 		new Diorite.SimpleAction("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
 		new Diorite.SimpleAction("main", "win", Actions.START_APP, "Start app", "_Start app", "media-playback-start", "<ctrl>S", do_start_app),
 		new Diorite.SimpleAction("main", "win", Actions.INSTALL_APP, "Install app", "_Install app", "list-add", "<ctrl>plus", do_install_app),
@@ -122,7 +123,7 @@ public class MasterController : Diorite.Application
 		actions.add_actions(actions_spec);
 		
 		actions.get_action(Actions.INSTALL_APP).enabled = web_app_reg.allow_management;
-		set_app_menu(actions.build_menu({Actions.ABOUT, Actions.QUIT}));
+		set_app_menu(actions.build_menu({Actions.HELP,Actions.ABOUT, Actions.QUIT}));
 		
 		if (Gtk.Settings.get_default().gtk_shell_shows_menubar)
 		{
@@ -314,6 +315,11 @@ public class MasterController : Diorite.Application
 		var dialog = new AboutDialog(main_window, null);
 		dialog.run();
 		dialog.destroy();
+	}
+	
+	private void do_help()
+	{
+		Gtk.show_uri(null, Nuvola.HELP_URL, Gdk.CURRENT_TIME);
 	}
 	
 	private void do_start_app()

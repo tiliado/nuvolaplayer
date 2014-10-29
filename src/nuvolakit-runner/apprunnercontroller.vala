@@ -41,6 +41,7 @@ namespace ConfigKey
 namespace Actions
 {
 	public const string ABOUT = "about";
+	public const string HELP = "help";
 	public const string ACTIVATE = "activate";
 	public const string GO_HOME = "go-home";
 	public const string GO_BACK = "go-back";
@@ -237,7 +238,8 @@ public class AppRunnerController : RunnerApplication
 		ah.simple_action("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
 		ah.simple_action("main", "app", Actions.KEYBINDINGS, "Keyboard shortcuts", "_Keyboard shortcuts", null, null, do_keybindings),
 		ah.simple_action("main", "app", Actions.FORMAT_SUPPORT, "Format Support", "_Format support", null, null, do_format_support),
-		ah.simple_action("main", "app", Actions.ABOUT, "About", "_About", null, "F1", do_about),
+		ah.simple_action("main", "app", Actions.ABOUT, "About", "_About", null, null, do_about),
+		ah.simple_action("main", "app", Actions.HELP, "Help", "_Help", null, "F1", do_help),
 		ah.simple_action("main", "app", Actions.PREFERENCES, "Preferences", "_Preferences", null, null, do_preferences),
 		ah.toggle_action("main", "win", Actions.TOGGLE_SIDEBAR, "Show sidebar", "Show _sidebar", null, null, do_toggle_sidebar, config.get_value(ConfigKey.WINDOW_SIDEBAR_VISIBLE)),
 		ah.simple_action("go", "app", Actions.GO_HOME, "Home", "_Home", "go-home", "<alt>Home", web_engine.go_home),
@@ -370,6 +372,11 @@ public class AppRunnerController : RunnerApplication
 			sidebar.hide();
 		else
 			sidebar.show();
+	}
+	
+	private void do_help()
+	{
+		Gtk.show_uri(null, Nuvola.HELP_URL, Gdk.CURRENT_TIME);
 	}
 	
 	private void load_extensions()

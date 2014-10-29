@@ -39,7 +39,7 @@ public class MenuBar: GLib.Object, MenuBarInterface
 		menubar = new Menu();
 		app_menu = actions_reg.build_menu({
 			Actions.TOGGLE_SIDEBAR, Actions.KEYBINDINGS, Actions.FORMAT_SUPPORT,
-			Actions.PREFERENCES, Actions.ABOUT, Actions.QUIT}, true, false);
+			Actions.PREFERENCES, Actions.HELP, Actions.ABOUT, Actions.QUIT}, true, false);
 	}
 	
 	public void set_menus(Gtk.Application app)
