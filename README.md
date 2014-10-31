@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/tiliado/nuvolaplayer.png?label=ready&title=Ready)](https://waffle.io/tiliado/nuvolaplayer)
 Nuvola Player 3
 ===============
 
