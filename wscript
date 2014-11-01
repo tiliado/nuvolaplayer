@@ -164,6 +164,10 @@ def configure(ctx):
 		elif PLATFORM == WIN:
 			ctx.env.append_unique('CFLAGS', ['-g', '-gdwarf-2'])
 	
+	# Get rid of some annoying warnings (we cannot fix them anyway)
+	#~ ctx.env.append_unique('CFLAGS', ['-Wno-ignored-qualifiers', '-Wno-discarded-qualifiers', '-Wno-incompatible-pointer-types'])
+	ctx.env.append_unique('CFLAGS', ['-w'])
+	
 	# Anti-underlinking and anti-overlinking linker flags.
 	ctx.env.append_unique("LINKFLAGS", ["-Wl,--no-undefined", "-Wl,--as-needed"])
 	
