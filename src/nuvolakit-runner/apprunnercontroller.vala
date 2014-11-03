@@ -376,7 +376,7 @@ public class AppRunnerController : RunnerApplication
 	
 	private void do_help()
 	{
-		Gtk.show_uri(null, Nuvola.HELP_URL, Gdk.CURRENT_TIME);
+		show_uri(Nuvola.HELP_URL);
 	}
 	
 	private void load_extensions()
