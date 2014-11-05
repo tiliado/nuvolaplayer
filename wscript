@@ -173,13 +173,13 @@ def configure(ctx):
 	
 	# Check dependencies
 	ctx.env.DIORITE_SERIES = DIORITE_SERIES = "0.1"
-	ctx.check_dep('glib-2.0', 'GLIB', '2.32')
-	ctx.check_dep('gio-2.0', 'GIO', '2.32')
-	ctx.check_dep('gtk+-3.0', 'GTK+', '3.4')
-	ctx.check_dep('gdk-3.0', 'GDK', '3.4')
-	ctx.check_dep('gdk-x11-3.0', 'GDKX11', '3.4')
+	ctx.check_dep('glib-2.0', 'GLIB', '2.40')
+	ctx.check_dep('gio-2.0', 'GIO', '2.40')
+	ctx.check_dep('gtk+-3.0', 'GTK+', '3.10')
+	ctx.check_dep('gdk-3.0', 'GDK', '3.10')
+	ctx.check_dep('gdk-x11-3.0', 'GDKX11', '3.10')
 	ctx.check_dep('x11', 'XLIB', '0.5')
-	ctx.check_dep('gthread-2.0', 'GTHREAD', '2.32')
+	ctx.check_dep('gthread-2.0', 'GTHREAD', '2.40')
 	ctx.check_dep('dioriteglib-' + DIORITE_SERIES, 'DIORITEGLIB', DIORITE_SERIES)
 	ctx.check_dep('dioritegtk-' + DIORITE_SERIES, 'DIORITEGTK', DIORITE_SERIES)
 	ctx.check_dep('json-glib-1.0', 'JSON-GLIB', '0.7')

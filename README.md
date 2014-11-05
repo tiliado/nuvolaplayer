@@ -70,13 +70,13 @@ where /usr/bin/python is Python 2, not Python 3. (Hello, Arch Linux!)
   * [Python](http://python.org) >= 2.7, < 3.0
   * [Vala](https://wiki.gnome.org/Projects/Vala) >= 0.22.1
   * [Diorite library](https://github.com/tiliado/diorite)
-  * [glib-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.32
-  * [gio-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.32
-  * [gobject-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.32
-  * [gthread-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.32
-  * [gtk+-3.0](http://www.gtk.org/) >= 3.4
-  * [gdk-3.0](http://www.gtk.org/) >= 3.4
-  * [gdk-x11-3.0](http://www.gtk.org/) >= 3.4
+  * [glib-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.40
+  * [gio-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.40
+  * [gobject-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.40
+  * [gthread-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.40
+  * [gtk+-3.0](http://www.gtk.org/) >= 3.10
+  * [gdk-3.0](http://www.gtk.org/) >= 3.10
+  * [gdk-x11-3.0](http://www.gtk.org/) >= 3.10
   * [x11](http://www.x.org/wiki/) >= 0.5
   * [json-glib-1.0](https://wiki.gnome.org/Projects/JsonGlib) >= 0.7
   * [libarchive](http://www.libarchive.org/) >= 3.1
