@@ -97,7 +97,6 @@ public class TrayIcon: GLib.Object, LauncherInterface
 		assert(pixbuf.width == pixbuf.height);
 		var size = pixbuf.width;
 		string text;
-		int offset;
 		double font_size;
 		if (number < 100)
 		{
