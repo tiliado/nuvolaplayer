@@ -50,7 +50,7 @@ public class Sidebar : Gtk.Grid
 		header.hexpand = true;
 		header.halign = Gtk.Align.FILL;
 		header.margin = 8;
-		var button = new Gtk.Button.from_icon_name("window-close", Gtk.IconSize.BUTTON);
+		var button = new Gtk.Button.from_icon_name("window-close-symbolic", Gtk.IconSize.BUTTON);
 		button.relief = Gtk.ReliefStyle.NONE;
 		button.clicked.connect(on_close_button_clicked);
 		button.margin = 8;
