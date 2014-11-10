@@ -303,13 +303,13 @@ MediaPlayer._setActions = function()
 MediaPlayer._sendDevelInfo = function()
 {
     var info = {
-        "title": this._track.title,
-        "artist": this._track.artist,
-        "album": this._track.album,
-        "artworkLocation": this._track.artLocation,
-        "artworkFile": this._artworkFile,
-        "baseActions": this._baseActions,
-        "extraActions": this._extraActions,
+        "title": this._track.title || null,
+        "artist": this._track.artist || null,
+        "album": this._track.album || null,
+        "artworkLocation": this._track.artLocation || null,
+        "artworkFile": this._artworkFile || null,
+        "baseActions": this._baseActions || null,
+        "extraActions": this._extraActions || null,
         "state": ["unknown", "paused", "playing"][this._state],
     };
     Nuvola._sendMessageAsync("Nuvola.MediaPlayer.setTrackInfo", info);
