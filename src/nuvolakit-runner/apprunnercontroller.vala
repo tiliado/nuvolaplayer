@@ -220,7 +220,7 @@ public class AppRunnerController : RunnerApplication
 		main_window.create_toolbar(this, actions, {Actions.GO_BACK, Actions.GO_FORWARD, Actions.GO_RELOAD, Actions.GO_HOME});
 		
 		format_support = new FormatSupportCheck(
-			new FormatSupport(storage.get_data_file("audio/audiotest.mp3").get_path()), main_window, storage);
+			new FormatSupport(storage.get_data_file("audio/audiotest.mp3").get_path()), main_window, storage, config);
 		format_support.check();
 	}
 	

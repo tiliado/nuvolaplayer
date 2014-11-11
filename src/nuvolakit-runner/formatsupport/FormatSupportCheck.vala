@@ -27,18 +27,25 @@ namespace Nuvola
 
 public class FormatSupportCheck : GLib.Object
 {
+	private static const string WARN_FLASH_KEY = "format_support.warn_flash";
+	private static const string WARN_MP3_KEY = "format_support.warn_mp3";
 	private FormatSupport format_support;
 	private Diorite.Storage storage;
 	private Diorite.ApplicationWindow window;
+	private Config config;
 	private FormatSupportDialog format_support_dialog = null;
 	private Gtk.InfoBar? flash_bar = null;
 	private Gtk.InfoBar? mp3_bar = null;
 	
-	public FormatSupportCheck(FormatSupport format_support, Diorite.ApplicationWindow window, Diorite.Storage storage)
+	public FormatSupportCheck(FormatSupport format_support, Diorite.ApplicationWindow window, Diorite.Storage storage,
+	Config config)
 	{
 		this.format_support = format_support;
 		this.window = window;
 		this.storage = storage;
+		this.config = config;
+		config.set_default_value(WARN_FLASH_KEY, true);
+		config.set_default_value(WARN_MP3_KEY, true);
 	}
 	
 	public void check()
@@ -63,7 +70,7 @@ public class FormatSupportCheck : GLib.Object
 	
 	public void show_flash_warning(string text)
 	{
-		if (flash_bar != null)
+		if (flash_bar != null || !config.get_bool(WARN_FLASH_KEY))
 			return;
 		flash_bar = new Gtk.InfoBar();
 		flash_bar.show_close_button = true;
@@ -81,7 +88,7 @@ public class FormatSupportCheck : GLib.Object
 	
 	public void show_mp3_warning(string text)
 	{
-		if (mp3_bar != null)
+		if (mp3_bar != null || !config.get_bool(WARN_MP3_KEY))
 			return;
 		mp3_bar = new Gtk.InfoBar();
 		mp3_bar.show_close_button = true;
