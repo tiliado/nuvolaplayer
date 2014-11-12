@@ -50,6 +50,8 @@ public class FormatSupportDialog: Gtk.Dialog
 {
 	public FormatSupport format_support {get; construct;}
 	public Diorite.Storage storage {get; construct;}
+	public Gtk.Switch flash_warning_switch {get; private set;}
+	public Gtk.Switch mp3_warning_switch {get; private set;}
 	private Gtk.Notebook notebook;
 	
 	public FormatSupportDialog(FormatSupport format_support, Diorite.Storage storage, Gtk.Window? parent)
@@ -58,10 +60,25 @@ public class FormatSupportDialog: Gtk.Dialog
 		add_button("_Close", Gtk.ResponseType.CLOSE);
 		set_default_size(700, 450);
 		
+		Gtk.Label label = null;
+		
 		notebook = new Gtk.Notebook();
 		notebook.margin = 10;
 		var plugins_view = new Gtk.Grid();
+		plugins_view.margin = 10;
+		plugins_view.row_spacing = 10;
+		plugins_view.column_spacing = 10;
 		plugins_view.orientation = Gtk.Orientation.VERTICAL;
+		
+		flash_warning_switch = new Gtk.Switch();
+		flash_warning_switch.vexpand = flash_warning_switch.hexpand = false;
+		flash_warning_switch.show();
+		label = new Gtk.Label("Show Flash support warnings at start-up");
+		label.hexpand = true;
+		label.show();
+		plugins_view.attach(label, 0, 0, 1, 1);
+		plugins_view.attach(flash_warning_switch, 1, 0, 1, 1);
+		
 		var scrolled_window = new Gtk.ScrolledWindow(null, null);
 		scrolled_window.add(plugins_view);
 		scrolled_window.expand = true;
@@ -70,12 +87,11 @@ public class FormatSupportDialog: Gtk.Dialog
 		
 		var frame = new Gtk.Frame ("<b>Flash plugins</b>");
 		(frame.label_widget as Gtk.Label).use_markup = true;
-		frame.margin = 10;
 		var flash_plugins_grid = new Gtk.Grid();
 		flash_plugins_grid.orientation = Gtk.Orientation.VERTICAL;
 		flash_plugins_grid.margin = 10;
 		frame.add(flash_plugins_grid);
-		plugins_view.add(frame);
+		plugins_view.attach(frame, 0, 2, 2, 1);
 		frame.show();
 		
 		var flash_detect = storage.get_data_file("js/flash_detect.js");
@@ -83,27 +99,24 @@ public class FormatSupportDialog: Gtk.Dialog
 		{
 			frame = new Gtk.Frame ("<b>Active Flash plugin</b>");
 			(frame.label_widget as Gtk.Label).use_markup = true;
-			frame.margin = 10;
 			var web_view = new WebKit.WebView();
 			frame.add(web_view);
 			web_view.set_size_request(-1, 50);
 			web_view.show();
 			web_view.load_html(FLASH_DETECT_HTML, flash_detect.get_uri() + ".html"); 
-			plugins_view.add(frame);
+			plugins_view.attach(frame, 0, 3, 2, 1);
 			frame.show();
 		}
 		
 		frame = new Gtk.Frame ("<b>Other plugins</b>");
 		(frame.label_widget as Gtk.Label).use_markup = true;
-		frame.margin = 10;
 		var other_plugins_grid = new Gtk.Grid();
 		other_plugins_grid.orientation = Gtk.Orientation.VERTICAL;
 		other_plugins_grid.margin = 10;
 		frame.add(other_plugins_grid);
-		plugins_view.add(frame);
+		plugins_view.attach(frame, 0, 4, 2, 1);
 		frame.show();
 		
-		Gtk.Label label = null;
 		unowned List<WebPlugin?> plugins = format_support.list_web_plugins();
 		foreach (unowned WebPlugin plugin in plugins)
 		{
@@ -137,9 +150,8 @@ public class FormatSupportDialog: Gtk.Dialog
 			info_bar.get_content_area().add(new Gtk.Label(format_support.n_flash_plugins == 0
 			? "No Flash plugins have been found."
 			: "Too many Flash plugins have been found, wrong version may have been used."));
-			info_bar.margin = 10;
 			info_bar.show_all();
-			plugins_view.attach_next_to(info_bar, flash_plugins_grid.get_parent(), Gtk.PositionType.TOP, 1, 1);
+			plugins_view.attach(info_bar, 0, 1, 2, 1);
 		}
 		
 		if (flash_plugins_grid.get_children() == null)
@@ -149,7 +161,10 @@ public class FormatSupportDialog: Gtk.Dialog
 		
 		plugins_view.show();
 		notebook.append_page(scrolled_window, new Gtk.Label("Web Plugins"));
-		var mp3_view = new Mp3View(format_support);
+		mp3_warning_switch = new Gtk.Switch();
+		mp3_warning_switch.vexpand = flash_warning_switch.hexpand = false;
+		mp3_warning_switch.show();
+		var mp3_view = new Mp3View(format_support, mp3_warning_switch);
 		mp3_view.show();
 		notebook.append_page(mp3_view, new Gtk.Label("MP3 format"));
 		notebook.show();
@@ -175,28 +190,35 @@ public class FormatSupportDialog: Gtk.Dialog
 		private Gtk.Label result_label;
 		private AudioPipeline? pipeline = null;
 		
-		public Mp3View(FormatSupport format_support)
+		public Mp3View(FormatSupport format_support, Gtk.Switch warning_switch)
 		{
 			GLib.Object(orientation: Gtk.Orientation.VERTICAL);
 			this.format_support = format_support;
+			margin = 10;
+			row_spacing = 10;
+			column_spacing = 10;
+			
+			var label = new Gtk.Label("Show MP3 format support warnings at start-up");
+			label.hexpand = true;
+			label.show();
+			attach(label, 0, 0, 1, 1);
+			attach(warning_switch, 1, 0, 1, 1);
+			
 			text_view = new Gtk.TextView();
 			text_view.editable = false;
 			text_view.expand = true;
 			result_label = new Gtk.Label(null);
 			result_label.hexpand = true;
-			result_label.margin = 10;
 			update_result_text(format_support.mp3_supported);
 			button = new Gtk.Button();
-			button.margin = 10;
 			set_button_label();
 			button.clicked.connect(toggle_check);
-			attach(result_label, 0, 0, 1, 1);
-			attach(button, 1, 0, 1, 1);
+			attach(result_label, 0, 1, 1, 1);
+			attach(button, 1, 1, 1, 1);
 			var scroll = new Gtk.ScrolledWindow(null, null);
 			scroll.expand = true;
-			scroll.margin = 10;
 			scroll.add(text_view);
-			attach(scroll, 0, 1, 2, 1);
+			attach(scroll, 0, 2, 2, 1);
 			result_label.show();
 			button.show();
 			scroll.show_all();

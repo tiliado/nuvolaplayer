@@ -58,8 +58,14 @@ public class FormatSupportCheck : GLib.Object
 		if (format_support_dialog == null)
 		{
 			format_support_dialog = new FormatSupportDialog(format_support, storage, window);
+			format_support_dialog.flash_warning_switch.active = config.get_bool(WARN_FLASH_KEY);
+			format_support_dialog.mp3_warning_switch.active = config.get_bool(WARN_MP3_KEY);
 			Idle.add(() => {
+				format_support_dialog.flash_warning_switch.notify["active"].connect_after(on_flash_warning_switched);
+				format_support_dialog.mp3_warning_switch.notify["active"].connect_after(on_mp3_warning_switched);
 				format_support_dialog.run();
+				format_support_dialog.flash_warning_switch.notify["active"].disconnect(on_flash_warning_switched);
+				format_support_dialog.mp3_warning_switch.notify["active"].disconnect(on_mp3_warning_switched);
 				format_support_dialog.destroy();
 				format_support_dialog = null;
 				return false;
@@ -158,6 +164,16 @@ public class FormatSupportCheck : GLib.Object
 			show_dialog(FormatSupportDialog.Tab.MP3);
 		window.info_bars.remove(mp3_bar);
 		mp3_bar = null;
+	}
+	
+	private void on_flash_warning_switched(GLib.Object o, ParamSpec p)
+	{
+		config.set_bool(WARN_FLASH_KEY, (o as Gtk.Switch).active);
+	}
+	
+	private void on_mp3_warning_switched(GLib.Object o, ParamSpec p)
+	{
+		config.set_bool(WARN_MP3_KEY, (o as Gtk.Switch).active);
 	}
 }
 
