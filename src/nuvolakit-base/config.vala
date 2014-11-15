@@ -30,13 +30,14 @@ public class Config : GLib.Object, KeyValueStorage
 	public File file {get; private set;}
 	public HashTable<string, Variant> defaults {get; private set;}
 	private Json.Node? root;
-	
+	private uint save_cb_id = 0;
 	
 	public Config(File file, HashTable<string, Variant>? defaults = null)
 	{
 		this.file = file;
 		this.defaults = defaults != null ? defaults : new HashTable<string, Variant>(str_hash, str_equal);
 		load();
+		config_changed.connect(on_changed);
 	}
 	
 	public signal void reloaded();
@@ -80,24 +81,6 @@ public class Config : GLib.Object, KeyValueStorage
 		generator.root = root;
 		generator.pretty = true;
 		return generator.to_data(null);
-	}
-	
-	public bool save() throws GLib.Error
-	{
-		var generator = new Json.Generator();
-		generator.root = root;
-		generator.pretty = true;
-		try
-		{
-			file.get_parent().make_directory_with_parents();
-		}
-		catch (GLib.Error e)
-		{
-		}
-		
-		generator.to_file(file.get_path());
-		return true;
-		
 	}
 	
 	public bool has_key(string key)
@@ -295,6 +278,38 @@ public class Config : GLib.Object, KeyValueStorage
 		
 		member_name = keys[keys.length - 1];
 		return node.get_object();
+	}
+	
+	private void on_changed(string key)
+	{
+		if (save_cb_id != 0)
+			Source.remove(save_cb_id);
+		save_cb_id = Timeout.add(250, save_cb);
+	}
+	
+	private bool save_cb()
+	{
+		save_cb_id = 0;
+		var generator = new Json.Generator();
+		generator.root = root;
+		generator.pretty = true;
+		try
+		{
+			file.get_parent().make_directory_with_parents();
+		}
+		catch (GLib.Error e)
+		{
+		}
+		try
+		{
+			generator.to_file(file.get_path());
+			message("Config saved to %s", file.get_path());
+		}
+		catch (GLib.Error e)
+		{
+			warning("Failed to save file %s. %s", file.get_path(), e.message);
+		}
+		return false;
 	}
 }
 

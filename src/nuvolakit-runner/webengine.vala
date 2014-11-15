@@ -292,7 +292,6 @@ public class WebEngine : GLib.Object
 		assert(server != null);
 		server.add_handler("get_data_dir", handle_get_data_dir);
 		server.add_handler("get_user_config_dir", handle_get_user_config_dir);
-		server.add_handler("config_save", handle_config_save);
 		server.add_handler("config_has_key", handle_config_has_key);
 		server.add_handler("config_get_value", handle_config_get_value);
 		server.add_handler("config_set_value", handle_config_set_value);
@@ -386,19 +385,6 @@ public class WebEngine : GLib.Object
 		data.get("(smv)", &key, &value);
 		config.set_default_value(key, value);
 		return null;
-	}
-	
-	private Variant? handle_config_save(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
-	{
-		Diorite.Ipc.MessageServer.check_type_str(data, null);
-		try
-		{
-			return new Variant.boolean(config.save());
-		}
-		catch (GLib.Error e)
-		{
-			throw new Diorite.Ipc.MessageError.REMOTE_ERROR("Failed to save configuration: %s", e.message);
-		}
 	}
 	
 	private Variant? handle_show_error(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError

@@ -457,19 +457,6 @@ public class AppRunnerController : RunnerApplication
 		}
 	}
 	
-	private void save_config()
-	{
-		try
-		{
-			message(config.file.get_path());
-			config.save();
-		}
-		catch (GLib.Error e)
-		{
-			show_error("Failed to save configuration", "Failed to save configuration to file %s. %s".printf(config.file.get_path(), e.message));
-		}
-	}
-	
 	private bool on_configure_event(Gdk.EventConfigure event)
 	{
 		if (configure_event_cb_id != 0)
@@ -556,8 +543,6 @@ public class AppRunnerController : RunnerApplication
 			Gtk.Settings.get_default().gtk_application_prefer_dark_theme = config.get_bool(ConfigKey.DARK_THEME);
 			break;
 		}
-		
-		save_config();
 		
 		try
 		{

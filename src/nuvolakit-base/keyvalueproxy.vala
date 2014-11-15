@@ -36,15 +36,6 @@ public class KeyValueProxy: GLib.Object, KeyValueStorage
 		this.prefix = prefix;
 	}
 	
-	public bool save() throws GLib.Error
-	{
-		var response = client.send_message(prefix + "_save", new Variant.byte(0));
-		if (response.is_of_type(VariantType.BOOLEAN))
-			return response.get_boolean();
-		critical("Invalid response to KeyValueProxy.save: %s", response.print(false));
-		return false;
-	}
-	
 	public bool has_key(string key)
 	{
 		try

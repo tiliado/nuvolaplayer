@@ -29,8 +29,6 @@ public interface KeyValueStorage : GLib.Object
 {
 	public signal void config_changed(string key);
 	
-	public abstract bool save() throws GLib.Error;
-	
 	public abstract bool has_key(string key);
 	
 	public abstract Variant? get_value(string key);

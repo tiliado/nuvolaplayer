@@ -79,7 +79,6 @@ public class MasterController : Diorite.Application
 		app_runners_map = new HashTable<string, AppRunner>(str_hash, str_equal);
 		var default_config = new HashTable<string, Variant>(str_hash, str_equal);
 		config = new Config(storage.user_config_dir.get_child("master").get_child("config.json"), default_config);
-		config.config_changed.connect(on_config_changed);
 		
 		var server_name = build_master_ipc_id();
 		Environment.set_variable("NUVOLA_IPC_MASTER", server_name, true);
@@ -382,24 +381,6 @@ public class MasterController : Diorite.Application
 			app_runners_map.remove(runner.app_id);
 		
 		release();
-	}
-	
-	private void save_config()
-	{
-		try
-		{
-			debug("Save configuration to %s.", config.file.get_path());
-			config.save();
-		}
-		catch (GLib.Error e)
-		{
-			show_error("Failed to save configuration", "Failed to save configuration to file %s. %s".printf(config.file.get_path(), e.message));
-		}
-	}
-	
-	private void on_config_changed(string key)
-	{
-		save_config();
 	}
 }
 
