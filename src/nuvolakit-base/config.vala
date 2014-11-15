@@ -37,7 +37,7 @@ public class Config : GLib.Object, KeyValueStorage
 		this.file = file;
 		this.defaults = defaults != null ? defaults : new HashTable<string, Variant>(str_hash, str_equal);
 		load();
-		config_changed.connect(on_changed);
+		changed.connect(on_changed);
 	}
 	
 	public signal void reloaded();
@@ -113,34 +113,33 @@ public class Config : GLib.Object, KeyValueStorage
 		string? member_name;
 		unowned Json.Object? object = create_parent_object(key, out member_name);
 		return_if_fail(object != null);
+		Variant? old_value = null;
+		if (object.has_member(member_name))
+		{
+			try
+			{
+				old_value = Json.gvariant_deserialize(object.get_member(member_name), null);
+			}
+			catch (GLib.Error e)
+			{
+				assert_not_reached();
+			}
+		}
 		if (value == null)
 		{
 			if (object.has_member(member_name))
 			{
 				object.remove_member(member_name);
-				config_changed(key);
+				changed(key, old_value);
 			}
 		}
 		else
 		{
-			Variant? old_value = null;
-			if (object.has_member(member_name))
-			{
-				try
-				{
-					old_value = Json.gvariant_deserialize(object.get_member(member_name), null);
-				}
-				catch (GLib.Error e)
-				{
-					assert_not_reached();
-				}
-			}
-			
 			if (old_value == null || !old_value.equal(value))
 			{
 				var node = Json.gvariant_serialize(value);
 				object.set_member(member_name, (owned) node);
-				config_changed(key);
+				changed(key, old_value);
 			}
 		}
 	}
@@ -280,7 +279,7 @@ public class Config : GLib.Object, KeyValueStorage
 		return node.get_object();
 	}
 	
-	private void on_changed(string key)
+	private void on_changed(string key, Variant? old_value)
 	{
 		if (save_cb_id != 0)
 			Source.remove(save_cb_id);

@@ -27,7 +27,7 @@ namespace Nuvola
 
 public interface KeyValueStorage : GLib.Object
 {
-	public signal void config_changed(string key);
+	public signal void changed(string key, Variant? old_value);
 	
 	public abstract bool has_key(string key);
 	
