@@ -25,7 +25,7 @@
 namespace Nuvola
 {
 
-public class KeyValueProxy: GLib.Object, KeyValueStorage
+public class KeyValueProxy: GLib.Object, Diorite.KeyValueStorage
 {
 	private Diorite.Ipc.MessageClient client;
 	private string prefix;
@@ -88,6 +88,11 @@ public class KeyValueProxy: GLib.Object, KeyValueStorage
 		{
 			critical("Master client error: %s", e.message);
 		}
+	}
+	
+	public void unset(string key)
+	{
+		warn_if_reached(); // FIXME
 	}
 }
 

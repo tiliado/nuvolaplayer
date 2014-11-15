@@ -25,7 +25,7 @@
 namespace Nuvola
 {
 
-public class VariantHashTable : GLib.Object, KeyValueStorage
+public class VariantHashTable : GLib.Object, Diorite.KeyValueStorage
 {
 	public HashTable<string, Variant?> values {get; private set;}
 	private HashTable<string, bool> keys {get; set;}
@@ -69,6 +69,11 @@ public class VariantHashTable : GLib.Object, KeyValueStorage
 	{
 		if (value != null && !values.contains(key))
 			values.insert(key, value);
+	}
+	
+	public void unset(string key)
+	{
+		warn_if_reached(); // FIXME
 	}
 }
 

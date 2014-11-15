@@ -102,10 +102,10 @@ public class JSApi : GLib.Object
 	private Diorite.Storage storage;
 	private File data_dir;
 	private File config_dir;
-	private KeyValueStorage[] key_value_storages;
+	private Diorite.KeyValueStorage[] key_value_storages;
 	
-	public JSApi(Diorite.Storage storage, File data_dir, File config_dir, KeyValueStorage config,
-	KeyValueStorage session)
+	public JSApi(Diorite.Storage storage, File data_dir, File config_dir, Diorite.KeyValueStorage config,
+	Diorite.KeyValueStorage session)
 	{
 		this.storage = storage;
 		this.data_dir = data_dir;

@@ -25,7 +25,7 @@
 namespace Nuvola
 {
 
-public class Config : GLib.Object, KeyValueStorage
+public class Config : GLib.Object, Diorite.KeyValueStorage
 {
 	public File file {get; private set;}
 	public HashTable<string, Variant> defaults {get; private set;}
@@ -152,56 +152,9 @@ public class Config : GLib.Object, KeyValueStorage
 			defaults.insert(key, value);
 	}
 	
-	public bool get_bool(string key)
+	public void unset(string key)
 	{
-		var value = get_value(key);
-		if (value != null && value.is_of_type(VariantType.BOOLEAN))
-			return value.get_boolean();
-		return false;
-	}
-	
-	public int64 get_int(string key)
-	{
-		var value = get_value(key);
-		if (value != null && value.is_of_type(VariantType.INT64))
-			return value.get_int64();
-		return (int64) 0;
-	}
-	
-	public double get_double(string key)
-	{
-		var value = get_value(key);
-		if (value != null && value.is_of_type(VariantType.DOUBLE))
-			return value.get_double();
-		return 0.0;
-	}
-	
-	public string? get_string(string key)
-	{
-		var value = get_value(key);
-		if (value != null && value.is_of_type(VariantType.STRING))
-			return value.get_string();
-		return null;
-	}
-	
-	public void set_string(string key, string? value)
-	{
-		set_value(key, value != null ? new Variant.string(value) : null);
-	}
-	
-	public void set_int(string key, int64 value)
-	{
-		set_value(key, new Variant.int64(value));
-	}
-	
-	public void set_bool(string key, bool value)
-	{
-		set_value(key, new Variant.boolean(value));
-	}
-	
-	public void set_double(string key, double value)
-	{
-		set_value(key, new Variant.double(value));
+		set_value(key, null);
 	}
 	
 	private bool load()

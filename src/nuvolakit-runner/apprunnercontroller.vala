@@ -187,13 +187,13 @@ public class AppRunnerController : RunnerApplication
 		main_window.grid.add(widget);
 		widget.show();
 		
-		int x = (int) config.get_int(ConfigKey.WINDOW_X);
-		int y = (int) config.get_int(ConfigKey.WINDOW_Y);
+		int x = (int) config.get_int64(ConfigKey.WINDOW_X);
+		int y = (int) config.get_int64(ConfigKey.WINDOW_Y);
 		if (x >= 0 && y >= 0)
 			main_window.move(x, y);
 			
-		int w = (int) config.get_int(ConfigKey.WINDOW_WIDTH);
-		int h = (int) config.get_int(ConfigKey.WINDOW_HEIGHT);
+		int w = (int) config.get_int64(ConfigKey.WINDOW_WIDTH);
+		int h = (int) config.get_int64(ConfigKey.WINDOW_HEIGHT);
 		main_window.resize(w > MINIMAL_REMEMBERED_WINDOW_SIZE ? w: 1010, h > MINIMAL_REMEMBERED_WINDOW_SIZE ? h : 600);
 		
 		if (config.get_bool(ConfigKey.WINDOW_MAXIMIZED))
@@ -210,11 +210,11 @@ public class AppRunnerController : RunnerApplication
 			main_window.sidebar.show();
 		else
 			main_window.sidebar.hide();
-		main_window.sidebar_position = (int) config.get_int(ConfigKey.WINDOW_SIDEBAR_POS);
+		main_window.sidebar_position = (int) config.get_int64(ConfigKey.WINDOW_SIDEBAR_POS);
 		var sidebar_page = config.get_string(ConfigKey.WINDOW_SIDEBAR_PAGE);
 		if (sidebar_page != null)
 			main_window.sidebar.page = sidebar_page;
-		main_window.notify["sidebar-position"].connect_after((o, p) => config.set_int(ConfigKey.WINDOW_SIDEBAR_POS, (int64) main_window.sidebar_position));
+		main_window.notify["sidebar-position"].connect_after((o, p) => config.set_int64(ConfigKey.WINDOW_SIDEBAR_POS, (int64) main_window.sidebar_position));
 		main_window.sidebar.notify["visible"].connect_after(on_sidebar_visibility_changed);
 		main_window.sidebar.page_changed.connect(on_sidebar_page_changed);
 		main_window.create_toolbar(this, actions, {Actions.GO_BACK, Actions.GO_FORWARD, Actions.GO_RELOAD, Actions.GO_HOME});
@@ -476,10 +476,10 @@ public class AppRunnerController : RunnerApplication
 			int height;
 			main_window.get_position (out x, out y);
 			main_window.get_size(out width, out height);
-			config.set_int(ConfigKey.WINDOW_X, (int64) x);
-			config.set_int(ConfigKey.WINDOW_Y, (int64) y);
-			config.set_int(ConfigKey.WINDOW_WIDTH, (int64) width);
-			config.set_int(ConfigKey.WINDOW_HEIGHT, (int64) height);
+			config.set_int64(ConfigKey.WINDOW_X, (int64) x);
+			config.set_int64(ConfigKey.WINDOW_Y, (int64) y);
+			config.set_int64(ConfigKey.WINDOW_WIDTH, (int64) width);
+			config.set_int64(ConfigKey.WINDOW_HEIGHT, (int64) height);
 		}
 		return false;
 	}
@@ -627,7 +627,7 @@ public class AppRunnerController : RunnerApplication
 		var visible = main_window.sidebar.visible;
 		config.set_bool(ConfigKey.WINDOW_SIDEBAR_VISIBLE, visible);
 		if (visible)
-			main_window.sidebar_position = (int) config.get_int(ConfigKey.WINDOW_SIDEBAR_POS);
+			main_window.sidebar_position = (int) config.get_int64(ConfigKey.WINDOW_SIDEBAR_POS);
 		
 		actions.get_action(Actions.TOGGLE_SIDEBAR).state = new Variant.boolean(visible);
 	}
