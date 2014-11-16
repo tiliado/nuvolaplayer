@@ -42,7 +42,7 @@ public class WebEngine : GLib.Object
 	private bool initialized = false;
 	
 	private Config config;
-	private VariantHashTable session;
+	private Diorite.KeyValueStorage session;
 	private SList<WebWindow> web_windows = null;
 	
 	public WebEngine(RunnerApplication runner_app, Diorite.Ipc.MessageServer server, WebAppMeta web_app, WebAppStorage storage, Config config)
@@ -66,7 +66,7 @@ public class WebEngine : GLib.Object
 		this.config = config;
 		web_view = new WebView();
 		
-		session = new VariantHashTable();
+		session = new Diorite.KeyValueMap();
 		
 		var ws = web_view.get_settings();
 		ws.enable_developer_extras = true;
