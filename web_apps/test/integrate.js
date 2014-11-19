@@ -91,6 +91,17 @@ WebApp._onPageReady = function()
 
     // Start update routine
     this.update();
+    
+    Nuvola.global._config_set_object = function()
+    {
+        var track = {
+        artist: "Jane Bobo",
+        album: "Best hits",
+        title: "How I met you"
+        }
+        Nuvola.config.set("integration.track", track);
+        console.log(Nuvola.config.get("integration.track"));
+    }
 }
 
 // Extract data from the web page

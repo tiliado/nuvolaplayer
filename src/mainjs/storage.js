@@ -100,6 +100,8 @@ KeyValueStorage.get = function(key)
  */
 KeyValueStorage.set = function(key, value)
 {
+    if (Object.prototype.toString.call(value) == "[object Object]")
+        throw new Error("Key-value storage is for primitive types only. It is not yet possible to store objects.");
     Nuvola._keyValueStorageSetValue(this.index, key, value);
 }
 
