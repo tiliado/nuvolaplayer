@@ -108,7 +108,7 @@ public class Config : GLib.Object, Diorite.KeyValueStorage
 		}
 	}
 	
-	public void set_value(string key, Variant? value)
+	protected void set_value_unboxed(string key, Variant? value)
 	{
 		string? member_name;
 		unowned Json.Object? object = create_parent_object(key, out member_name);
@@ -144,7 +144,7 @@ public class Config : GLib.Object, Diorite.KeyValueStorage
 		}
 	}
 	
-	public void set_default_value(string key, Variant? value)
+	protected void set_default_value_unboxed(string key, Variant? value)
 	{
 		if (value == null)
 			defaults.remove(key);

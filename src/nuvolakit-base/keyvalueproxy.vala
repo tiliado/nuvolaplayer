@@ -66,7 +66,7 @@ public class KeyValueProxy: GLib.Object, Diorite.KeyValueStorage
 		}
 	}
 	
-	public void set_value(string key, Variant? value)
+	protected void set_value_unboxed(string key, Variant? value)
 	{
 		try
 		{
@@ -78,7 +78,7 @@ public class KeyValueProxy: GLib.Object, Diorite.KeyValueStorage
 		}
 	}
 	
-	public void set_default_value(string key, Variant? value)
+	protected void set_default_value_unboxed(string key, Variant? value)
 	{
 		try
 		{
