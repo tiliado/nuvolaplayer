@@ -108,6 +108,7 @@ public class AppRunnerController : RunnerApplication
 	public WebEngine web_engine {get; private set;}
 	public weak Gtk.Settings gtk_settings {get; private set;}
 	public Config config {get; private set;}
+	public Diorite.KeyValueStorage master_config {get; private set;}
 	public ExtensionsManager extensions {get; private set;}
 	public Bindings bindings {get; private set;}
 	public Connection connection {get; private set;}
@@ -283,6 +284,8 @@ public class AppRunnerController : RunnerApplication
 			error("Communication with master process failed: %s", e.message);
 		}
 		
+		var storage_client = new Diorite.KeyValueStorageClient(master, server);
+		master_config = storage_client.get_proxy("master.config", 5000);
 		var client_name = build_web_worker_ipc_id(web_app.id);
 		Environment.set_variable("NUVOLA_IPC_WEB_WORKER", client_name, true);
 		web_worker = new RemoteWebWorker(client_name, 5000);

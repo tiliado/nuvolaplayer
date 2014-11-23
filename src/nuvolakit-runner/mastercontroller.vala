@@ -49,6 +49,7 @@ public class MasterController : Diorite.Application
 	private HashTable<string, AppRunner> app_runners_map = null;
 	private Diorite.Ipc.MessageServer server = null;
 	private Config config = null;
+	private Diorite.KeyValueStorageServer storage_server = null;
 	private ActionsKeyBinderServer actions_key_binder = null;
 	private MediaKeysServer media_keys = null;
 	
@@ -96,6 +97,9 @@ public class MasterController : Diorite.Application
 			quit();
 			return;
 		}
+		
+		storage_server = new Diorite.KeyValueStorageServer(server);
+		storage_server.add_provider("master.config", config);
 		
 		var key_grabber = new XKeyGrabber();
 		var key_binder = new GlobalActionsKeyBinder(key_grabber, config);
