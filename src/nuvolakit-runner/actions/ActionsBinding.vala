@@ -221,7 +221,7 @@ public class Nuvola.ActionsBinding: Binding<ActionsInterface>
 	{
 		check_not_empty();
 		Diorite.Ipc.MessageServer.check_type_str(data, null);
-		var groups_set = new HashTable<string, unowned string>(str_hash, str_equal);
+		var groups_set = new GenericSet<string>(str_hash, str_equal);
 		foreach (var object in objects)
 		{
 			List<unowned string> groups_list;
@@ -233,7 +233,7 @@ public class Nuvola.ActionsBinding: Binding<ActionsInterface>
 				break;
 		}
 		var builder = new VariantBuilder(new VariantType ("as"));
-		var groups = groups_set.get_keys();
+		var groups = groups_set.get_values();
 		foreach (var name in groups)
 			builder.add_value(new Variant.string(name));
 			

@@ -30,14 +30,14 @@ public class MediaKeysServer: GLib.Object
 	private MediaKeysInterface media_keys;
 	private Diorite.Ipc.MessageServer server;
 	private unowned Queue<AppRunner> app_runners;
-	private HashTable<string, unowned string> clients;
+	private GenericSet<string> clients;
 	
 	public MediaKeysServer(MediaKeysInterface media_keys, Diorite.Ipc.MessageServer server, Queue<AppRunner> app_runners)
 	{
 		this.media_keys = media_keys;
 		this.server = server;
 		this.app_runners = app_runners;
-		clients = new HashTable<string, unowned string>(str_hash, str_equal);
+		clients = new GenericSet<string>(str_hash, str_equal);
 		media_keys.media_key_pressed.connect(on_media_key_pressed);
 		server.add_handler("Nuvola.MediaKeys.manage", handle_manage);
 		server.add_handler("Nuvola.MediaKeys.unmanage", handle_unmanage);
@@ -52,7 +52,7 @@ public class MediaKeysServer: GLib.Object
 			return new Variant.boolean(false);
 		
 		clients.add(app_id);
-		if (clients.size() == 1 && !media_keys.managed)
+		if (clients.length == 1 && !media_keys.managed)
 			media_keys.manage();
 		
 		return new Variant.boolean(true);
@@ -67,7 +67,7 @@ public class MediaKeysServer: GLib.Object
 			return new Variant.boolean(false);
 		
 		clients.remove(app_id);
-		if (clients.size() == 0 && media_keys.managed)
+		if (clients.length == 0 && media_keys.managed)
 			media_keys.unmanage();
 		
 		return new Variant.boolean(true);
