@@ -28,15 +28,18 @@ namespace Nuvola
 
 public class WebView: WebKit.WebView
 {
-    public WebView()
-    {
-        button_release_event.connect(on_mouse_button_released);
-    }
-    
-    /**
+	public static const double ZOOM_DEFAULT = 1.0;
+	public static const double ZOOM_STEP = 1.2;
+	
+	public WebView()
+	{
+		button_release_event.connect(on_button_released);
+	}
+	
+	/**
 	 * Handles special mouse buttons (back & forward navigation)
 	 */
-	private bool on_mouse_button_released(Gdk.EventButton event)
+	private bool on_button_released(Gdk.EventButton event)
 	{
 		switch (event.button)
 		{
@@ -49,6 +52,21 @@ public class WebView: WebKit.WebView
             default:
                 return false;
 		}
+	}
+	
+	public void zoom_in()
+	{
+		zoom_level *= ZOOM_STEP;
+	}
+	
+	public void zoom_out()
+	{
+		zoom_level /= ZOOM_STEP;
+	}
+	
+	public void zoom_reset()
+	{
+		zoom_level = ZOOM_DEFAULT;
 	}
 }
 

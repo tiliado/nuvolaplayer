@@ -35,7 +35,7 @@ public class WebEngine : GLib.Object
 	public bool can_go_back {get; private set; default = false;}
 	public bool can_go_forward {get; private set; default = false;}
 	private RunnerApplication runner_app;
-	private WebKit.WebView web_view;
+	private WebView web_view;
 	private JsEnvironment? env = null;
 	private JSApi api;
 	private Diorite.Ipc.MessageServer server = null;
@@ -246,6 +246,21 @@ public class WebEngine : GLib.Object
 	public void reload()
 	{
 		web_view.reload();
+	}
+	
+	public void zoom_in()
+	{
+		web_view.zoom_in();
+	}
+	
+	public void zoom_out()
+	{
+		web_view.zoom_out();
+	}
+	
+	public void zoom_reset()
+	{
+		web_view.zoom_reset();
 	}
 	
 	public void get_preferences(out Variant values, out Variant entries)
