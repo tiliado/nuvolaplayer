@@ -51,6 +51,9 @@ namespace Actions
 	public const string FORMAT_SUPPORT = "format-support";
 	public const string PREFERENCES = "preferences";
 	public const string TOGGLE_SIDEBAR = "toggle-sidebar";
+	public const string ZOOM_IN = "zoom-in";
+	public const string ZOOM_OUT = "zoom-out";
+	public const string ZOOM_RESET = "zoom-reset";
 }
 
 public static string build_camel_id(string web_app_id)
@@ -246,7 +249,10 @@ public class AppRunnerController : RunnerApplication
 		ah.simple_action("go", "app", Actions.GO_HOME, "Home", "_Home", "go-home", "<alt>Home", web_engine.go_home),
 		ah.simple_action("go", "app", Actions.GO_BACK, "Back", "_Back", "go-previous", "<alt>Left", web_engine.go_back),
 		ah.simple_action("go", "app", Actions.GO_FORWARD, "Forward", "_Forward", "go-next", "<alt>Right", web_engine.go_forward),
-		ah.simple_action("go", "app", Actions.GO_RELOAD, "Reload", "_Reload", "view-refresh", "<ctrl>R", web_engine.reload)
+		ah.simple_action("go", "app", Actions.GO_RELOAD, "Reload", "_Reload", "view-refresh", "<ctrl>R", web_engine.reload),
+		ah.simple_action("view", "win", Actions.ZOOM_IN, "Zoom in", null, "zoom-in", "<ctrl>plus", web_engine.zoom_in),
+		ah.simple_action("view", "win", Actions.ZOOM_OUT, "Zoom out", null, "zoom-out", "<ctrl>minus", web_engine.zoom_out),
+		ah.simple_action("view", "win", Actions.ZOOM_RESET, "Original zoom", null, "zoom-original", "<ctrl>0", web_engine.zoom_reset),
 		};
 		actions.add_actions(actions_spec);
 	}
