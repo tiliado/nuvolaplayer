@@ -104,7 +104,6 @@ public class RunnerApplication: Diorite.Application
 public class AppRunnerController : RunnerApplication
 {
 	public WebAppWindow? main_window {get; private set; default = null;}
-	public Diorite.ActionsRegistry? actions {get; private set; default = null;}
 	public WebAppMeta web_app {get; private set;}
 	public WebAppStorage app_storage {get; private set;}
 	private WebWorker web_worker;
@@ -159,7 +158,6 @@ public class AppRunnerController : RunnerApplication
 		config.changed.connect(on_config_changed);
 		Gtk.Settings.get_default().gtk_application_prefer_dark_theme = config.get_bool(ConfigKey.DARK_THEME);
 		
-		actions = new Diorite.ActionsRegistry(this, null);
 		actions_helper = new ActionsHelper(actions, config);
 		main_window = new WebAppWindow(this);
 		main_window.can_destroy.connect(on_can_quit);
@@ -221,7 +219,7 @@ public class AppRunnerController : RunnerApplication
 		main_window.notify["sidebar-position"].connect_after((o, p) => config.set_int64(ConfigKey.WINDOW_SIDEBAR_POS, (int64) main_window.sidebar_position));
 		main_window.sidebar.notify["visible"].connect_after(on_sidebar_visibility_changed);
 		main_window.sidebar.page_changed.connect(on_sidebar_page_changed);
-		main_window.create_toolbar(this, actions, {Actions.GO_BACK, Actions.GO_FORWARD, Actions.GO_RELOAD, Actions.GO_HOME});
+		main_window.create_toolbar({Actions.GO_BACK, Actions.GO_FORWARD, Actions.GO_RELOAD, Actions.GO_HOME});
 		
 		format_support = new FormatSupportCheck(
 			new FormatSupport(storage.get_data_file("audio/audiotest.mp3").get_path()), main_window, storage, config);

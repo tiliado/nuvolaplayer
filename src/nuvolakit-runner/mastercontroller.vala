@@ -43,7 +43,6 @@ public class MasterController : Diorite.Application
 	public WebAppListWindow? main_window {get; private set; default = null;}
 	public Diorite.Storage storage {get; private set; default = null;}
 	public WebAppRegistry web_app_reg {get; private set; default = null;}
-	public Diorite.ActionsRegistry? actions {get; private set; default = null;}
 	private string[] exec_cmd;
 	private Queue<AppRunner> app_runners = null;
 	private HashTable<string, AppRunner> app_runners_map = null;
@@ -52,6 +51,7 @@ public class MasterController : Diorite.Application
 	private Diorite.KeyValueStorageServer storage_server = null;
 	private ActionsKeyBinderServer actions_key_binder = null;
 	private MediaKeysServer media_keys = null;
+	private InitState init_state = InitState.NONE;
 	
 	public MasterController(Diorite.Storage storage, WebAppRegistry web_app_reg, string[] exec_cmd)
 	{
@@ -73,7 +73,7 @@ public class MasterController : Diorite.Application
 	
 	private void init_core()
 	{
-		if (app_runners != null)
+		if (init_state >= InitState.CORE)
 			return;
 		
 		app_runners = new Queue<AppRunner>();
@@ -105,15 +105,15 @@ public class MasterController : Diorite.Application
 		var key_binder = new GlobalActionsKeyBinder(key_grabber, config);
 		actions_key_binder = new ActionsKeyBinderServer(server, key_binder, app_runners);
 		media_keys = new MediaKeysServer(new MediaKeys(this.app_id, key_grabber), server, app_runners);
+		init_state = InitState.CORE;
 	}
 	
 	private void init_gui()
 	{
 		init_core();
-		if (actions != null)
+		if (init_state >= InitState.GUI)
 			return;
 		
-		actions = new Diorite.ActionsRegistry(this, null);
 		Diorite.Action[] actions_spec = {
 		//          Action(group, scope, name, label?, mnemo_label?, icon?, keybinding?, callback?)
 		new Diorite.SimpleAction("main", "app", Actions.HELP, "Help", "_Help", null, "F1", do_help),
@@ -135,6 +135,7 @@ public class MasterController : Diorite.Application
 			menu.append_submenu("_Apps", actions.build_menu({Actions.START_APP, "|", Actions.INSTALL_APP, Actions.REMOVE_APP}));
 			set_menubar(menu);
 		}
+		init_state = InitState.GUI;
 	}
 	
 	private void show_main_window()
@@ -385,6 +386,13 @@ public class MasterController : Diorite.Application
 			app_runners_map.remove(runner.app_id);
 		
 		release();
+	}
+	
+	private enum InitState
+	{
+		NONE,
+		CORE,
+		GUI;
 	}
 }
 

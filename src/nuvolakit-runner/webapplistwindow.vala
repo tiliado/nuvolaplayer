@@ -50,8 +50,6 @@ public class WebAppListWindow : Diorite.ApplicationWindow
 		set_default_size(500, 500);
 		
 		this.app = app;
-		app.add_window(this);
-		app.actions.window = this;
 		app.actions.get_action(Actions.REMOVE_APP).enabled = false;
 		app.actions.get_action(Actions.START_APP).enabled = false;
 		this.view = view;
@@ -61,7 +59,7 @@ public class WebAppListWindow : Diorite.ApplicationWindow
 		scroll.vexpand = true;
 		scroll.hexpand = true;
 		
-		create_toolbar(app, app.actions, {Actions.START_APP, "|", Actions.INSTALL_APP, Actions.REMOVE_APP});
+		create_toolbar({Actions.START_APP, "|", Actions.INSTALL_APP, Actions.REMOVE_APP});
 		
 		details = new Gtk.Grid();
 		details.orientation = Gtk.Orientation.HORIZONTAL;
