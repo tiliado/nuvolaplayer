@@ -126,7 +126,7 @@ public class MasterController : Diorite.Application
 		actions.add_actions(actions_spec);
 		
 		actions.get_action(Actions.INSTALL_APP).enabled = web_app_reg.allow_management;
-		set_app_menu(actions.build_menu({Actions.HELP,Actions.ABOUT, Actions.QUIT}));
+		set_app_menu(actions.build_menu({Actions.HELP,Actions.ABOUT, Actions.QUIT}, true, false));
 		
 		if (Gtk.Settings.get_default().gtk_shell_shows_menubar)
 		{
