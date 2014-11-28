@@ -62,7 +62,7 @@ public class KeybindingsDialog : Gtk.Dialog
 			warning("Unable to load application icon.");
 		}
 		
-		set_default_size(400, -1);
+		set_default_size(400, 400);
 		
 		if (parent != null)
 			set_transient_for(parent);
@@ -127,7 +127,11 @@ public class KeybindingsDialog : Gtk.Dialog
 		accel_cell.accel_cleared.connect(on_glob_accel_cleared);
 		view.insert_column_with_attributes(-1, "Global Shortcut", accel_cell, "accel-key", 4, "accel-mods", 5);
 		
-		get_content_area().add(view);
+		var scroll = new Gtk.ScrolledWindow(null, null);
+		scroll.vexpand = scroll.hexpand = true;
+		scroll.add(view);
+		scroll.show();
+		get_content_area().add(scroll);
 		view.show();
 	}
 	
