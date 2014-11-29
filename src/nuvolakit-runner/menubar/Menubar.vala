@@ -38,7 +38,7 @@ public class MenuBar: GLib.Object, MenuBarInterface
 		this.menus = new HashTable<string, SubMenu>(str_hash, str_equal);
 		menubar = new Menu();
 		app_menu = actions_reg.build_menu({
-			Actions.TOGGLE_SIDEBAR, Actions.KEYBINDINGS, Actions.FORMAT_SUPPORT,
+			Actions.KEYBINDINGS, Actions.FORMAT_SUPPORT,
 			Actions.PREFERENCES, Actions.HELP, Actions.ABOUT, Actions.QUIT}, true, false);
 	}
 	
@@ -53,7 +53,7 @@ public class MenuBar: GLib.Object, MenuBarInterface
 	{
 		menubar.remove_all();
 		menubar.append_submenu("_Go", actions_reg.build_menu({Actions.GO_HOME, Actions.GO_RELOAD, Actions.GO_BACK, Actions.GO_FORWARD}, true, false));
-		menubar.append_submenu("_View", actions_reg.build_menu({Actions.ZOOM_IN, Actions.ZOOM_OUT, Actions.ZOOM_RESET}, true, false));
+		menubar.append_submenu("_View", actions_reg.build_menu({Actions.ZOOM_IN, Actions.ZOOM_OUT, Actions.ZOOM_RESET, "|", Actions.TOGGLE_SIDEBAR}, true, false));
 		var submenus = menus.get_values();
 		foreach (var submenu in submenus)
 			submenu.append_to_menu(actions_reg, menubar);
