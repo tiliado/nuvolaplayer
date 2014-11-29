@@ -219,6 +219,7 @@ public class AppRunnerController : RunnerApplication
 		main_window.notify["sidebar-position"].connect_after((o, p) => config.set_int64(ConfigKey.WINDOW_SIDEBAR_POS, (int64) main_window.sidebar_position));
 		main_window.sidebar.notify["visible"].connect_after(on_sidebar_visibility_changed);
 		main_window.sidebar.page_changed.connect(on_sidebar_page_changed);
+		main_window.create_menu_button({Actions.ZOOM_IN, Actions.ZOOM_OUT, Actions.ZOOM_RESET});
 		main_window.create_toolbar({Actions.GO_BACK, Actions.GO_FORWARD, Actions.GO_RELOAD, Actions.GO_HOME});
 		
 		format_support = new FormatSupportCheck(
