@@ -125,6 +125,7 @@ public class AppRunnerController : RunnerApplication
 	private Diorite.Ipc.MessageClient master = null;
 	private FormatSupportCheck format_support = null;
 	private MPRISProvider mpris = null;
+	private Tiliado.Account tiliado_account = null;
 	
 	public AppRunnerController(Diorite.Storage storage, WebAppMeta web_app, WebAppStorage app_storage)
 	{
@@ -225,6 +226,19 @@ public class AppRunnerController : RunnerApplication
 		format_support = new FormatSupportCheck(
 			new FormatSupport(storage.get_data_file("audio/audiotest.mp3").get_path()), main_window, storage, config);
 		format_support.check();
+		
+		tiliado_account = new Tiliado.Account(connection.session, master_config, "https://tiliado.eu", "nuvolaplayer");
+		tiliado_account.refresh.begin((o, res) => {
+			try
+			{
+				tiliado_account.refresh.end(res);
+				message("Logged in as %s", tiliado_account.tiliado.current_user.to_string());
+			}
+			catch (Tiliado.ApiError e)
+			{
+				warning("Api Error: %s", e.message);
+			}
+		});
 	}
 	
 	private void do_format_support()
@@ -355,7 +369,7 @@ public class AppRunnerController : RunnerApplication
 				.printf(e.message));
 		}
 		
-		var dialog = new PreferencesDialog(this, main_window, form);
+		var dialog = new PreferencesDialog(this, main_window, form, new Tiliado.AccountForm(tiliado_account));
 		var response = dialog.run();
 		if (response == Gtk.ResponseType.OK)
 		{

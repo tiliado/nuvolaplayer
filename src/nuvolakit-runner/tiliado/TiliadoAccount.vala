@@ -25,56 +25,41 @@
 namespace Nuvola
 {
 
-
-public class PreferencesDialog : Gtk.Dialog
+private class Tiliado.Account: GLib.Object
 {
-	/// Preferences dialog title
-	private const string TITLE = ("Preferences");
-	private Diorite.Application app;
+	public Tiliado.Api tiliado {get; private set;}
+	public Diorite.KeyValueStorage config {get; construct;}
+	public string project {get; construct;}
+	public string server {get; construct;}
 	
-	/**
-	 * Constructs new main window
-	 * 
-	 * @param app Application object
-	 */
-	public PreferencesDialog(Diorite.Application app, Gtk.Window? parent, Diorite.Form form, Gtk.Widget account_form)
+	public Account(Soup.Session connection, Diorite.KeyValueStorage config, string server, string project)
 	{
-		this.app = app;
-		
-		window_position = Gtk.WindowPosition.CENTER;
-		title = TITLE;
-		border_width = 5;
-		try
-		{
-			icon = Gtk.IconTheme.get_default().load_icon(app.icon, 48, 0);
-		}
-		catch (Error e)
-		{
-			warning("Unable to load application icon.");
-		}
-		
-		set_default_size(400, -1);
-		
-		if (parent != null)
-			set_transient_for(parent);
-		modal = true;
-		
-		add_buttons(Gtk.Stock.CLOSE, Gtk.ResponseType.CLOSE, Gtk.Stock.OK, Gtk.ResponseType.OK);
-		var notebook = new Gtk.Notebook();
-		notebook.margin_bottom = 10;
-		form.show();
-		notebook.append_page(form, new Gtk.Label("Preferences"));
-		account_form.show();
-		account_form.valign = account_form.halign = Gtk.Align.CENTER;
-		notebook.append_page(account_form, new Gtk.Label("Tiliado Account"));
-		get_content_area().add(notebook);
-		form.check_toggles();
-		notebook.show();
+		GLib.Object(config: config, server: server, project: project);
+		tiliado = new Tiliado.Api(connection,
+			server + "/api-auth/obtain-token/",
+			server + "/api/",
+			config.get_string("tiliado.account.username"),
+			config.get_string("tiliado.account.token"));
 	}
 	
-	public override bool delete_event(Gdk.EventAny event)
+	public async void refresh() throws ApiError
 	{
-		return false;
+		yield tiliado.fetch_current_user();
+	}
+	
+	public async void login(string username, string password) throws ApiError
+	{
+		yield tiliado.login(username, password, "nuvola,app");
+		config.set_string("tiliado.account.username", tiliado.username);
+		config.set_string("tiliado.account.token", tiliado.token);
+	}
+	
+	public async void logout() throws ApiError
+	{
+		tiliado.log_out();
+		config.unset("tiliado.account.username");
+		config.unset("tiliado.account.token");
+		yield refresh();
 	}
 }
 

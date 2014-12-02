@@ -30,8 +30,32 @@ private errordomain Tiliado.ApiError
 	UNKNOWN_ERROR,
 	INVALID_CREDENTIALS,
 	AUTHENTICATION_FAILED,
+	UNAUTHORIZED,
 	JSON_PARSE_ERROR,
 	INVALID_RESPONSE
+}
+
+private class Tiliado.User
+{
+	public int id {get; private set;}
+	public string username {get; private set;}
+	public string name {get; private set;}
+	public bool is_authenticated {get; private set;}
+	public bool is_active {get; private set;}
+	
+	public class User(int id, string username, string name, bool is_authenticated, bool is_active)
+	{
+		this.id = id;
+		this.username = username;
+		this.name = name;
+		this.is_authenticated = is_authenticated;
+		this.is_active = is_active;
+	}
+	
+	public string to_string()
+	{
+		return "%s (%s)".printf(name, username);
+	}
 }
 
 private class Tiliado.Api: GLib.Object
@@ -39,6 +63,7 @@ private class Tiliado.Api: GLib.Object
 	public Soup.Session connection {get; construct;}
 	public string? username {get; private set; default = null;}
 	public string? token {get; private set; default = null;}
+	public User? current_user {get; private set; default = null;}
 	private string api_root;
 	private string api_auth;
 	
@@ -101,6 +126,142 @@ private class Tiliado.Api: GLib.Object
 		this.username = username;
 		this.token = reader.get_string_value();
 		reader.end_member();
+		
+		yield fetch_current_user();
+	}
+	
+	public void log_out()
+	{
+		username = null;
+		token = null;
+		current_user = null;
+	}
+	
+	public async Soup.Message send_request(string method, string path, HashTable<string, string>? form_data_set=null)
+		throws ApiError
+	{
+		var uri = api_root + path;
+		var message = form_data_set == null
+		? new Soup.Message(method, uri) : Soup.Form.request_new_from_hash(method, uri, form_data_set);
+		
+		if (username != null && token != null)
+			message.request_headers.append("Authorization", "Token %s %s".printf(Base64.encode(username.data), token));
+		
+		SourceFunc callback = send_request.callback;
+		connection.queue_message(message, () => {Idle.add((owned) callback);});
+		yield;
+		return message;
+	}
+	
+	public async Json.Reader send_request_json(string method, string path,
+		HashTable<string, string>? form_data_set=null) throws ApiError
+	{
+		var message = yield send_request(method, path, form_data_set);
+		if (message.status_code == 400)
+			throw new ApiError.AUTHENTICATION_FAILED("Unable to login with provided credentials.");
+		
+		if (message.status_code == 401)
+			throw new ApiError.UNAUTHORIZED("Tiliado account session seems to be expired.");
+		
+		if (message.status_code > 401)
+			throw new ApiError.UNKNOWN_ERROR("Unexpected error: %u %s", message.status_code, message.reason_phrase);
+		
+		var response = (string) message.response_body.flatten().data;
+		var parser = new Json.Parser();
+		try
+		{
+			parser.load_from_data(response);
+		}
+		catch (GLib.Error e)
+		{
+			debug("Response: \n%s", response);
+			throw new ApiError.JSON_PARSE_ERROR(e.message);
+		}
+		
+		var root_node = parser.get_root();
+		if (root_node == null)
+			throw new ApiError.INVALID_RESPONSE("Invalid response from server: Null root node.");
+		
+		var reader = new Json.Reader(root_node);
+		if (!reader.is_object())
+			throw new ApiError.INVALID_RESPONSE("Invalid response from server: Root node is not object.");
+		
+		return reader;
+	}
+	
+	public async void fetch_current_user() throws ApiError
+	{
+		var reader = yield send_request_json("GET", "me/");
+		
+		var id = read_int64(reader, "id");
+		var name = read_string(reader, "name");
+		var username = read_string(reader, "username");
+		bool is_active;
+		try
+		{
+			is_active = read_bool(reader, "is_active");
+		}
+		catch (ApiError e)
+		{
+			is_active = false;
+		}
+		bool is_authenticated;
+		try
+		{
+			is_authenticated = read_bool(reader, "is_authenticated");
+		}
+		catch (ApiError e)
+		{
+			is_authenticated = false;
+		}
+		
+		current_user = new User((int) id, username, name, is_authenticated, is_active);
+	}
+	
+	private Json.Node read_value(Json.Reader reader, string member_name) throws ApiError
+	{
+		if (!reader.read_member(member_name))
+		{
+			reader.end_member();
+			throw new ApiError.INVALID_RESPONSE("Invalid response from server: '%s' member not found.", member_name);
+		}
+		
+		if (!reader.is_value())
+		{
+			reader.end_member();
+			throw new ApiError.INVALID_RESPONSE("Invalid response from server: '%s' member is not a value type.", member_name);
+		}
+		
+		var node = reader.get_value();
+		reader.end_member();
+		return node;
+	}
+	
+	private bool read_bool(Json.Reader reader, string member_name) throws ApiError
+	{
+		var node = read_value(reader, member_name);
+		if (node.get_value_type() != typeof(bool))
+			throw new ApiError.INVALID_RESPONSE("Invalid response from server: '%s' member is not a bool type.", member_name);
+		
+		return node.get_boolean();
+	}
+	
+	private int64 read_int64(Json.Reader reader, string member_name) throws ApiError
+	{
+		var node = read_value(reader, member_name);
+		if (node.get_value_type() != typeof(int64))
+			throw new ApiError.INVALID_RESPONSE("Invalid response from server: '%s' member is not an int64 type.", member_name);
+		
+		return node.get_int();
+	}
+	
+	private string read_string(Json.Reader reader, string member_name) throws ApiError
+	{
+		var node = read_value(reader, member_name);
+		if (node.get_value_type() != typeof(string))
+			throw new ApiError.INVALID_RESPONSE("Invalid response from server: '%s' member is not a string type.", member_name);
+		
+		return node.get_string();
 	}
 }
 
