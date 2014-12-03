@@ -46,7 +46,8 @@ private class Tiliado.AccountForm: Gtk.Grid
 		info_bar.get_content_area().add(info_bar_label);
 		info_bar_label.show();
 		display_user_info(account.tiliado.current_user);
-		account.tiliado.notify["current-user"].connect_after(on_current_user_changed);
+		account.tiliado.notify["current-user"].connect_after(on_user_data_changed);
+		account.notify["is-patron"].connect_after(on_user_data_changed);
 	}
 	
 	private void display_user_info(User? user)
@@ -90,21 +91,28 @@ private class Tiliado.AccountForm: Gtk.Grid
 			attach(label, 0, 2, 1, 1);
 			label = new Gtk.Label(user.name);
 			attach(label, 1, 2, 1, 1);
+			label = new Gtk.Label("Patron membership:");
+			attach(label, 0, 3, 1, 1);
+			label = new Gtk.Label(account.is_patron
+				? "yes, thank you"
+				: "no (<a href=\"%s/%s/funding/\">make a donation</a>)".printf(account.server, account.project_id));
+			label.use_markup = true;
+			attach(label, 1, 3, 1, 1);
 			button = new Gtk.LinkButton.with_label(account.server + "/accounts/profile/", "Visit profile page");
-			attach(button, 0, 3, 2, 1);
+			attach(button, 0, 4, 2, 1);
 			button = new Gtk.Button.with_label("Refresh");
 			button.clicked.connect(on_refresh_clicked);
 			buttons.prepend(button);
-			attach(button, 0, 4, 1, 1);
+			attach(button, 0, 5, 1, 1);
 			button = new Gtk.Button.with_label("Log out");
 			button.clicked.connect(on_logout_clicked);
 			buttons.prepend(button);
-			attach(button, 1, 4, 1, 1);
+			attach(button, 1, 5, 1, 1);
 		}
 		show_all();
 	}
 	
-	private void on_current_user_changed(GLib.Object o, ParamSpec p)
+	private void on_user_data_changed(GLib.Object o, ParamSpec p)
 	{
 		display_user_info(account.tiliado.current_user);
 	}

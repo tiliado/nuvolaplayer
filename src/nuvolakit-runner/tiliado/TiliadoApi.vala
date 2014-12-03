@@ -60,6 +60,25 @@ private class Tiliado.User
 	}
 }
 
+private class Tiliado.Project
+{
+	public string id {get; private set;}
+	public string name {get; private set;}
+	public int[] patron_groups {get; private set;}
+	
+	public class Project(string id, string name, owned int[] patron_groups)
+	{
+		this.id = id;
+		this.name = name;
+		this.patron_groups = (owned) patron_groups;
+	}
+	
+	public string to_string()
+	{
+		return "%s (%s)".printf(name, id);
+	}
+}
+
 private class Tiliado.Api: GLib.Object
 {
 	public Soup.Session connection {get; construct;}
@@ -229,6 +248,21 @@ private class Tiliado.Api: GLib.Object
 		current_user = new User((int) id, username, name, is_authenticated, is_active, groups);
 	}
 	
+	public async Project get_project(string id) throws ApiError
+	{
+		var reader = yield send_request_json("GET", "projects/projects/%s".printf(id));
+		int[] groups;
+		try
+		{
+			groups = read_int_array(reader, "patron_groups");
+		}
+		catch (ApiError e)
+		{
+			groups = {};
+		}
+		return new Project(read_string(reader, "id"), read_string(reader, "name"), groups);
+	}
+	
 	private Json.Node read_value(Json.Reader reader, string member_name) throws ApiError
 	{
 		if (!reader.read_member(member_name))
@@ -277,36 +311,40 @@ private class Tiliado.Api: GLib.Object
 	
 	private int[] read_int_array(Json.Reader reader, string member_name) throws ApiError
 	{
-		if (!reader.read_member(member_name))
-		{
-			reader.end_member();
-			throw new ApiError.INVALID_RESPONSE("Invalid response from server: '%s' member not found.", member_name);
-		}
-		
-		if (!reader.is_array())
-		{
-			reader.end_member();
-			throw new ApiError.INVALID_RESPONSE("Invalid response from server: '%s' member is not an array type.", member_name);
-		}
-		
-		var size = reader.count_elements();
-		var array = new int[size];
-		for (var i = 0; i < size; i++)
-		{
-			reader.read_element(i);
-			if (!reader.is_value())
-			{
-				reader.end_element();
-				throw new ApiError.INVALID_RESPONSE("Invalid response from server: %s[%d] element is not a value type.", member_name, i);
-			}
+		try{
+			if (!reader.read_member(member_name))
+				throw new ApiError.INVALID_RESPONSE("Invalid response from server: '%s' member not found.", member_name);
 			
-			var node = reader.get_value();
-			reader.end_element();
-			if (node.get_value_type() != typeof(int64))
-				throw new ApiError.INVALID_RESPONSE("Invalid response from server: %s[%d] element is not an int64 type.", member_name, i);
-			array[i] = (int) node.get_int();
+			if (!reader.is_array())
+				throw new ApiError.INVALID_RESPONSE("Invalid response from server: '%s' member is not an array type.", member_name);
+			
+			var size = reader.count_elements();
+			var array = new int[size];
+			for (var i = 0; i < size; i++)
+			{
+				try
+				{
+					reader.read_element(i);
+					if (!reader.is_value())
+						throw new ApiError.INVALID_RESPONSE("Invalid response from server: %s[%d] element is not a value type.", member_name, i);
+					
+					var node = reader.get_value();
+					if (node.get_value_type() != typeof(int64))
+						throw new ApiError.INVALID_RESPONSE("Invalid response from server: %s[%d] element is not an int64 type.", member_name, i);
+					array[i] = (int) node.get_int();
+				}
+				finally
+				{
+					reader.end_element();
+				}
+			}
+			reader.end_member();
+			return array;
 		}
-		return array;
+		finally
+		{
+			reader.end_member();
+		}
 	}
 }
 

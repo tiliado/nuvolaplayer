@@ -29,12 +29,13 @@ private class Tiliado.Account: GLib.Object
 {
 	public Tiliado.Api tiliado {get; private set;}
 	public Diorite.KeyValueStorage config {get; construct;}
-	public string project {get; construct;}
+	public string project_id {get; construct;}
 	public string server {get; construct;}
+	public bool is_patron {get; private set; default = false;}
 	
-	public Account(Soup.Session connection, Diorite.KeyValueStorage config, string server, string project)
+	public Account(Soup.Session connection, Diorite.KeyValueStorage config, string server, string project_id)
 	{
-		GLib.Object(config: config, server: server, project: project);
+		GLib.Object(config: config, server: server, project_id: project_id);
 		tiliado = new Tiliado.Api(connection,
 			server + "/api-auth/obtain-token/",
 			server + "/api/",
@@ -45,11 +46,34 @@ private class Tiliado.Account: GLib.Object
 	public async void refresh() throws ApiError
 	{
 		yield tiliado.fetch_current_user();
+		is_patron = yield check_is_patron();
+	}
+	
+	private async bool check_is_patron()
+	{
+		if (tiliado.current_user == null)
+			return false;
+		
+		try
+		{
+			var user_groups = tiliado.current_user.groups;
+			var patron_groups = (yield tiliado.get_project(project_id)).patron_groups;
+			for (var i = 0; i <user_groups.length; i++)
+				for (var j = 0; j < patron_groups.length; j++)
+					if (user_groups[i] == patron_groups[j])
+						return true;
+		}
+		catch (ApiError e)
+		{
+			warning("Failed to fetch project '%s': %s", project_id, e.message);
+		}
+		return false;
 	}
 	
 	public async void login(string username, string password) throws ApiError
 	{
 		yield tiliado.login(username, password, "nuvola,app");
+		is_patron = yield check_is_patron();
 		config.set_string("tiliado.account.username", tiliado.username);
 		config.set_string("tiliado.account.token", tiliado.token);
 	}
