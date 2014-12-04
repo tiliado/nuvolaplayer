@@ -263,6 +263,22 @@ public class Tiliado.Api: GLib.Object
 		return new Project(read_string(reader, "id"), read_string(reader, "name"), groups);
 	}
 	
+	public async string get_donation_text(string project_id, int major, int minor, int bugfix) throws ApiError
+	{
+		var params = new HashTable<string, string>(str_hash, str_equal);
+		params["version"] = "%d.%d.%d".printf(major, minor, bugfix);
+		var reader = yield send_request_json("GET", "funding/donation_text/%s/".printf(project_id),
+			false, params);
+		return read_string(reader, "text");
+	}
+	
+	public async bool is_fundraiser_goal_reached(string project_id) throws ApiError
+	{
+		var reader = yield send_request_json("GET",
+			"funding/current_fundraiser/%s/".printf(project_id), false);
+		return read_bool(reader, "goal_reached");
+	}
+	
 	private Json.Node read_value(Json.Reader reader, string member_name) throws ApiError
 	{
 		if (!reader.read_member(member_name))
