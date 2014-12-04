@@ -158,14 +158,14 @@ public class Tiliado.Api: GLib.Object
 		current_user = null;
 	}
 	
-	public async Soup.Message send_request(string method, string path, HashTable<string, string>? form_data_set=null)
-		throws ApiError
+	public async Soup.Message send_request(string method, string path, bool authorized=true,
+		HashTable<string, string>? form_data_set=null) throws ApiError
 	{
 		var uri = api_root + path;
 		var message = form_data_set == null
 		? new Soup.Message(method, uri) : Soup.Form.request_new_from_hash(method, uri, form_data_set);
 		
-		if (username != null && token != null)
+		if (authorized && username != null && token != null)
 			message.request_headers.append("Authorization", "Token %s %s".printf(Base64.encode(username.data), token));
 		
 		SourceFunc callback = send_request.callback;
@@ -174,10 +174,10 @@ public class Tiliado.Api: GLib.Object
 		return message;
 	}
 	
-	public async Json.Reader send_request_json(string method, string path,
+	public async Json.Reader send_request_json(string method, string path, bool authorized=true,
 		HashTable<string, string>? form_data_set=null) throws ApiError
 	{
-		var message = yield send_request(method, path, form_data_set);
+		var message = yield send_request(method, path, authorized, form_data_set);
 		if (message.status_code == 400)
 			throw new ApiError.AUTHENTICATION_FAILED("Unable to login with provided credentials.");
 		
