@@ -25,7 +25,7 @@
 namespace Nuvola
 {
 
-private errordomain Tiliado.ApiError
+public errordomain Tiliado.ApiError
 {
 	UNKNOWN_ERROR,
 	INVALID_CREDENTIALS,
@@ -35,7 +35,7 @@ private errordomain Tiliado.ApiError
 	INVALID_RESPONSE
 }
 
-private class Tiliado.User
+public class Tiliado.User
 {
 	public int id {get; private set;}
 	public string username {get; private set;}
@@ -60,7 +60,7 @@ private class Tiliado.User
 	}
 }
 
-private class Tiliado.Project
+public class Tiliado.Project
 {
 	public string id {get; private set;}
 	public string name {get; private set;}
@@ -79,7 +79,7 @@ private class Tiliado.Project
 	}
 }
 
-private class Tiliado.Api: GLib.Object
+public class Tiliado.Api: GLib.Object
 {
 	public Soup.Session connection {get; construct;}
 	public string? username {get; private set; default = null;}
