@@ -58,56 +58,65 @@ private class Tiliado.AccountForm: Gtk.Grid
 		
 		Gtk.Label label;
 		Gtk.Button button;
-		attach(info_bar, 0, 0, 2, 1);
+		int row = -1;
+		
+		label = new Gtk.Label("<i>Tiliado account is not necessary for proper functionality of Nuvola Player, but you might get extra benefits. For example, donate bar is not shown if you have been granted Nuvola Patrons membership.</i>");
+		label.use_markup = true;
+		label.set_line_wrap(true);
+		label.margin_bottom = 10;
+		attach(label, 0, ++row, 2, 1);
+		
+		attach(info_bar, 0, ++row, 2, 1);
+		
 		if (user == null || ! user.is_authenticated)
 		{
 			label = new Gtk.Label("Username:");
-			attach(label, 0, 1, 1, 1);
+			attach(label, 0, ++row, 1, 1);
 			username = new Gtk.Entry();
-			attach(username, 1, 1, 1, 1);
+			attach(username, 1, row, 1, 1);
 			label = new Gtk.Label("Password:");
-			attach(label, 0, 2, 1, 1);
+			attach(label, 0, ++row, 1, 1);
 			password = new Gtk.Entry();
 			password.visibility = false;
-			attach(password, 1, 2, 1, 1);
+			attach(password, 1, row, 1, 1);
 			button = new Gtk.Button.with_label("Log in");
 			button.clicked.connect(on_login_clicked);
 			buttons.prepend(button);
-			attach(button, 0, 3, 2, 1);
+			attach(button, 0, ++row, 2, 1);
 			button = new Gtk.LinkButton.with_label(account.server + "/accounts/profile/", "Forgot password?");
-			attach(button, 0, 4, 2, 1);
+			attach(button, 0, ++row, 2, 1);
 			button = new Gtk.LinkButton.with_label(account.server + "/accounts/signup/", "Don't have an account?");
-			attach(button, 0, 5, 2, 1);
+			attach(button, 0, ++row, 2, 1);
 		}
 		else
 		{
 			username = null;
 			password = null;
 			label = new Gtk.Label("Username:");
-			attach(label, 0, 1, 1, 1);
+			attach(label, 0, ++row, 1, 1);
 			label = new Gtk.Label(user.username);
-			attach(label, 1, 1, 1, 1);
+			attach(label, 1, row, 1, 1);
 			label = new Gtk.Label("Name:");
-			attach(label, 0, 2, 1, 1);
+			attach(label, 0, ++row, 1, 1);
 			label = new Gtk.Label(user.name);
-			attach(label, 1, 2, 1, 1);
+			attach(label, 1, row, 1, 1);
 			label = new Gtk.Label("Patron membership:");
-			attach(label, 0, 3, 1, 1);
+			attach(label, 0, ++row, 1, 1);
 			label = new Gtk.Label(account.is_patron
 				? "yes, thank you"
 				: "no (<a href=\"%s/%s/funding/\">make a donation</a>)".printf(account.server, account.project_id));
 			label.use_markup = true;
-			attach(label, 1, 3, 1, 1);
+			attach(label, 1, row, 1, 1);
 			button = new Gtk.LinkButton.with_label(account.server + "/accounts/profile/", "Visit profile page");
-			attach(button, 0, 4, 2, 1);
+			attach(button, 0, ++row, 2, 1);
 			button = new Gtk.Button.with_label("Refresh");
 			button.clicked.connect(on_refresh_clicked);
 			buttons.prepend(button);
-			attach(button, 0, 5, 1, 1);
+			attach(button, 0, ++row, 1, 1);
 			button = new Gtk.Button.with_label("Log out");
 			button.clicked.connect(on_logout_clicked);
 			buttons.prepend(button);
-			attach(button, 1, 5, 1, 1);
+			attach(button, 1, row, 1, 1);
 		}
 		show_all();
 	}
