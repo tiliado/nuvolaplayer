@@ -238,6 +238,9 @@ public class AppRunnerController : RunnerApplication
 			{
 				warning("Api Error: %s", e.message);
 			}
+			
+			if (!tiliado_account.is_patron)
+				show_donation_bar.begin();
 		});
 	}
 	
@@ -440,6 +443,50 @@ public class AppRunnerController : RunnerApplication
 		bindings.add_object(media_player);
 		
 		mpris = new MPRISProvider(this, media_player);
+	}
+	
+	private async void show_donation_bar()
+	{
+		try
+		{
+			var reached = yield tiliado_account.tiliado.is_fundraiser_goal_reached(
+				tiliado_account.project_id);
+			if (!reached)
+			{
+				var versions = Nuvola.get_versions();
+				var text = yield tiliado_account.tiliado.get_donation_text(
+					tiliado_account.project_id, versions[0], versions[1], versions[2]);
+				if (text != null && text != "" && text != "null")
+				{
+					var info_bar = new Gtk.InfoBar();
+					info_bar.message_type = Gtk.MessageType.INFO;
+					var label = new Gtk.Label(text);
+					label.use_markup = true;
+					label.set_line_wrap(true);
+					label.show();
+					info_bar.get_content_area().add(label);
+					info_bar.show_close_button = true;
+					info_bar.response.connect(on_donation_bar_response);
+					info_bar.add_button("Donate", Gtk.ResponseType.ACCEPT);
+					info_bar.show();
+					main_window.info_bars.add(info_bar);
+				}
+			}
+		}
+		catch (Tiliado.ApiError e)
+		{
+			warning("Tiliado API error: %s", e.message);
+		}
+	}
+	
+	private void on_donation_bar_response(Gtk.InfoBar bar, int response_id)
+	{
+		if (response_id == Gtk.ResponseType.ACCEPT)
+			show_uri("%s/%s/funding/".printf(tiliado_account.server, tiliado_account.project_id));
+		
+		var parent = bar.get_parent() as Gtk.Container;
+		if (parent != null)
+			parent.remove(bar);
 	}
 	
 	private void on_fatal_error(string title, string message)
