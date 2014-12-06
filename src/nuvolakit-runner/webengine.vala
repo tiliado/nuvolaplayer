@@ -29,6 +29,7 @@ namespace Nuvola
 
 public class WebEngine : GLib.Object
 {
+	private static const string ZOOM_LEVEL_CONF = "webview.zoom_level";
 	public Gtk.Widget widget {get {return web_view;}}
 	public WebAppMeta web_app {get; private set;}
 	public WebAppStorage storage {get; private set;}
@@ -65,6 +66,8 @@ public class WebEngine : GLib.Object
 		this.web_app = web_app;
 		this.config = config;
 		web_view = new WebView();
+		config.set_default_value(ZOOM_LEVEL_CONF, 1.0);
+		web_view.zoom_level = config.get_double(ZOOM_LEVEL_CONF);
 		
 		session = new Diorite.KeyValueMap();
 		
@@ -75,6 +78,7 @@ public class WebEngine : GLib.Object
 		ws.enable_smooth_scrolling = true;
 		ws.enable_write_console_messages_to_stdout = true;
 		web_view.notify["uri"].connect(on_uri_changed);
+		web_view.notify["zoom-level"].connect(on_zoom_level_changed);
 		web_view.decide_policy.connect(on_decide_policy);
 		web_view.create.connect(on_web_view_create);
 		set_up_ipc();
@@ -548,6 +552,11 @@ public class WebEngine : GLib.Object
 		var web_window = window as WebWindow;
 		assert(web_window != null);
 		web_windows.remove(web_window);
+	}
+	
+	private void on_zoom_level_changed(GLib.Object o, ParamSpec p)
+	{
+		config.set_double(ZOOM_LEVEL_CONF, web_view.zoom_level);
 	}
 }
 
