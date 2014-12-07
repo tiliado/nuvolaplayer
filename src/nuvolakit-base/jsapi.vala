@@ -509,9 +509,20 @@ public class JSApi : GLib.Object
 		for (var i = 0; i < args.length; i++)
 		{
 			if (args[i].is_undefined(ctx))
+			{
 				debug("Nuvola.log: undefined");
+			}
 			else
-				debug("Nuvola.log: %s", variant_from_value(ctx, args[i]).print(false));
+			{
+				try
+				{
+					debug("Nuvola.log: %s", variant_from_value(ctx, args[i]).print(false));
+				}
+				catch (JSError e)
+				{
+					warning("Nuvola.log (JSError): %s", e.message);
+				}
+			}
 		}
 		return JS.Value.undefined(ctx);
 	}
@@ -522,9 +533,20 @@ public class JSApi : GLib.Object
 		for (var i = 0; i < args.length; i++)
 		{
 			if (args[i].is_undefined(ctx))
+			{
 				warning("Nuvola.warn: undefined");
+			}
 			else
-				warning("Nuvola.warn: %s", variant_from_value(ctx, args[i]).print(false));
+			{
+				try
+				{
+					warning("Nuvola.warn: %s", variant_from_value(ctx, args[i]).print(false));
+				}
+				catch (JSError e)
+				{
+					warning("Nuvola.warn (JSError): %s", e.message);
+				}
+			}
 		}
 		return JS.Value.undefined(ctx);
 	}
