@@ -227,23 +227,23 @@ public class JSApi : GLib.Object
 	{
 		unowned ClassDefinition class_def =
 		{
-		    1,
-		    JS.ClassAttribute.None,
-		    "Nuvola JavaScript API",
-		    null,   
-		    null,
-		    static_functions,
-		    null, 
-		    null, 
-		    null, 
-		    null,
-		    null, 
-		    null, 
-		    null, 
-		    null, 
-		    null, 
-		    null, 
-		    null  
+			1,
+			JS.ClassAttribute.None,
+			"Nuvola JavaScript API",
+			null,   
+			null,
+			static_functions,
+			null, 
+			null, 
+			null, 
+			null,
+			null, 
+			null, 
+			null, 
+			null, 
+			null, 
+			null, 
+			null  
 		};
 		klass = JS.create_class(class_def);
 		klass.retain();
