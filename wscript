@@ -200,6 +200,12 @@ def configure(ctx):
 		ctx.check_dep('appindicator3-0.1', 'APPINDICATOR', '0.4')
 		ctx.vala_def("APPINDICATOR")
 	
+	valac_version = ctx.env.VALAC_VERSION
+	glib_version = tuple(int(i) for i in ctx.check_cfg(modversion='glib-2.0').split("."))
+	if glib_version >= (2, 41, 2) and valac_version < (0, 25, 2):
+		args = glib_version + valac_version + ("https://mail.gnome.org/archives/vala-list/2014-December/msg00018.html",)
+		ctx.fatal("glib2 {}.{}.{} and valac {}.{}.{} are not compatible: \n{}".format(*args))
+	
 	ctx.define("NUVOLA_APPNAME", APPNAME)
 	ctx.define("NUVOLA_NAME", NAME)
 	ctx.define("NUVOLA_UNIQUE_NAME", UNIQUE_NAME)
