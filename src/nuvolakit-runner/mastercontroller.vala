@@ -165,8 +165,9 @@ public class MasterController : Diorite.Application
 	private int handle_command_line(ApplicationCommandLine command_line)
 	{
 		string? app_id = null;
-		OptionEntry[] options = new OptionEntry[1];
+		OptionEntry[] options = new OptionEntry[2];
 		options[0] = { "app-id", 'a', 0, OptionArg.STRING, ref app_id, "Web app to run.", "ID" };
+		options[1] = { null };
 		
 		// We have to make an extra copy of the array, since .parse assumes
 		// that it can remove strings from the array without freeing them.
