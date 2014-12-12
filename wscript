@@ -41,11 +41,11 @@ try:
 	try:
 		# Read revision info from file revision-info created by ./waf dist
 		short_id, long_id = open("revision-info", "r").read().split(" ", 1)
-	except Exception, e:
+	except Exception as e:
 		# Read revision info from current branch
 		output = subprocess.Popen(["git", "log", "-n", "1", "--pretty=format:%h %H"], stdout=subprocess.PIPE).communicate()[0]
 		short_id, long_id = output.split(" ", 1)
-except Exception, e:
+except Exception as e:
 	short_id, long_id = "fuzzy_id", "fuzzy_id"
 
 REVISION_ID = str(long_id).strip()
@@ -59,15 +59,15 @@ elif VERSION_SUFFIX == "":
 	suffix = "{}.{}".format(datetime.utcnow().strftime("%Y%m%d%H%M"), short_id)
 	VERSION_SUFFIX += suffix
 	VERSION += suffix
-VERSIONS = map(int, VERSIONS.split("."))
+VERSIONS = tuple(int(i) for i in VERSIONS.split("."))
 
 import sys
 from waflib.Configure import conf
 from waflib.Errors import ConfigurationError
 from waflib.Context import WAFVERSION
 
-WAF_VERSION = map(int, WAFVERSION.split("."))
-REQUIRED_VERSION = [1, 7, 14] 
+WAF_VERSION = tuple(int(i) for i in WAFVERSION.split("."))
+REQUIRED_VERSION = (1, 7, 14) 
 if WAF_VERSION < REQUIRED_VERSION:
 	print("Too old waflib %s < %s. Use waf binary distributed with the source code!" % (WAF_VERSION, REQUIRED_VERSION))
 	sys.exit(1)
@@ -104,7 +104,7 @@ def check_dep(ctx, pkg, uselib, version, mandatory=True, store=None, vala_def=No
 		if define:
 			for key, value in define.iteritems():
 				ctx.define(key, value)
-	except ConfigurationError, e:
+	except ConfigurationError as e:
 		result = False
 		if mandatory:
 			raise e
@@ -410,7 +410,7 @@ def _mergejs_taskgen(self):
 	elif not isinstance(target, Node.Node):
 		raise Errors.WafError('invalid target for %r' % self)
 	
-	for i in xrange(len(source)):
+	for i in range(len(source)):
 		item = source[i]
 		if isinstance(item, str):
 			source[i] =  self.path.find_resource(item)

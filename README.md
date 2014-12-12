@@ -62,12 +62,10 @@ jump in.
 Build and Install
 -----------------
 
-**Note:** Following instructions expect you are using a sane distribution
-where /usr/bin/python is Python 2, not Python 3. (Hello, Arch Linux!)
-
 ### Dependencies
 
-  * [Python](http://python.org) >= 2.7, < 3.0
+  * [Python 2](http://python.org) >= 2.7 (recommended)
+    or [Python 3](http://python.org) >= 3.4 (not well tested)
   * [Vala](https://wiki.gnome.org/Projects/Vala) >= 0.22.1
   * [Diorite library](https://github.com/tiliado/diorite)
   * [glib-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.38
