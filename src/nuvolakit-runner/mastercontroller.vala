@@ -76,6 +76,12 @@ public class MasterController : Diorite.Application
 		if (init_state >= InitState.CORE)
 			return;
 		
+		/*
+		 * Workaround for a GPU-related WebKit issue
+		 * https://github.com/tiliado/nuvolaplayer/issues/24
+		 */
+		Environment.set_variable("LIBGL_DRI3_DISABLE", "1", true);
+		
 		app_runners = new Queue<AppRunner>();
 		app_runners_map = new HashTable<string, AppRunner>(str_hash, str_equal);
 		var default_config = new HashTable<string, Variant>(str_hash, str_equal);
@@ -113,12 +119,6 @@ public class MasterController : Diorite.Application
 		init_core();
 		if (init_state >= InitState.GUI)
 			return;
-		
-		/*
-		 * Workaround for a GPU-related WebKit issue
-		 * https://github.com/tiliado/nuvolaplayer/issues/24
-		 */
-		Environment.set_variable("LIBGL_DRI3_DISABLE", "1", true);
 		
 		Diorite.Action[] actions_spec = {
 		//          Action(group, scope, name, label?, mnemo_label?, icon?, keybinding?, callback?)
