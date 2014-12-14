@@ -42,6 +42,7 @@ namespace Actions
 {
 	public const string ABOUT = "about";
 	public const string HELP = "help";
+	public const string DONATE = "donate";
 	public const string ACTIVATE = "activate";
 	public const string GO_HOME = "go-home";
 	public const string GO_BACK = "go-back";
@@ -221,7 +222,7 @@ public class AppRunnerController : RunnerApplication
 		main_window.sidebar.notify["visible"].connect_after(on_sidebar_visibility_changed);
 		main_window.sidebar.page_changed.connect(on_sidebar_page_changed);
 		main_window.create_menu_button({Actions.ZOOM_IN, Actions.ZOOM_OUT, Actions.ZOOM_RESET, "|", Actions.TOGGLE_SIDEBAR});
-		main_window.create_toolbar({Actions.GO_BACK, Actions.GO_FORWARD, Actions.GO_RELOAD, Actions.GO_HOME});
+		toggle_donate_button(false);
 		
 		format_support = new FormatSupportCheck(
 			new FormatSupport(storage.get_data_file("audio/audiotest.mp3").get_path()), main_window, storage, config);
@@ -241,6 +242,8 @@ public class AppRunnerController : RunnerApplication
 			
 			if (!tiliado_account.is_patron)
 				show_donation_bar.begin();
+			
+			tiliado_account.notify["is-patron"].connect_after(on_is_patron_changed);
 		});
 	}
 	
@@ -260,6 +263,7 @@ public class AppRunnerController : RunnerApplication
 		ah.simple_action("main", "app", Actions.FORMAT_SUPPORT, "Format Support", "_Format support", null, null, do_format_support),
 		ah.simple_action("main", "app", Actions.ABOUT, "About", "_About", null, null, do_about),
 		ah.simple_action("main", "app", Actions.HELP, "Help", "_Help", null, "F1", do_help),
+		ah.simple_action("main", "app", Actions.DONATE, "Donate", null, "emblem-favorite", null, do_donate),
 		ah.simple_action("main", "app", Actions.PREFERENCES, "Preferences", "_Preferences", null, null, do_preferences),
 		ah.toggle_action("main", "win", Actions.TOGGLE_SIDEBAR, "Show sidebar", "Show _sidebar", null, null, do_toggle_sidebar, config.get_value(ConfigKey.WINDOW_SIDEBAR_VISIBLE)),
 		ah.simple_action("go", "app", Actions.GO_HOME, "Home", "_Home", "go-home", "<alt>Home", web_engine.go_home),
@@ -471,22 +475,48 @@ public class AppRunnerController : RunnerApplication
 					info_bar.show();
 					main_window.info_bars.add(info_bar);
 				}
+				else
+				{
+					toggle_donate_button(true);
+				}
 			}
 		}
 		catch (Tiliado.ApiError e)
 		{
+			toggle_donate_button(true);
 			warning("Tiliado API error: %s", e.message);
 		}
+	}
+	
+	private void toggle_donate_button(bool visible)
+	{
+		if (visible)
+			main_window.create_toolbar({Actions.GO_BACK, Actions.GO_FORWARD, Actions.GO_RELOAD, Actions.GO_HOME, " ", Actions.DONATE});
+		else
+			main_window.create_toolbar({Actions.GO_BACK, Actions.GO_FORWARD, Actions.GO_RELOAD, Actions.GO_HOME});
+		
+	}
+	
+	private void on_is_patron_changed(GLib.Object? o, ParamSpec p)
+	{
+		toggle_donate_button(!tiliado_account.is_patron);
 	}
 	
 	private void on_donation_bar_response(Gtk.InfoBar bar, int response_id)
 	{
 		if (response_id == Gtk.ResponseType.ACCEPT)
-			show_uri("%s/%s/funding/".printf(tiliado_account.server, tiliado_account.project_id));
+			do_donate();
+		else
+			toggle_donate_button(true);
 		
 		var parent = bar.get_parent() as Gtk.Container;
 		if (parent != null)
 			parent.remove(bar);
+	}
+	
+	private void do_donate()
+	{
+		show_uri("%s/%s/funding/".printf(tiliado_account.server, tiliado_account.project_id));
 	}
 	
 	private void on_fatal_error(string title, string message)
