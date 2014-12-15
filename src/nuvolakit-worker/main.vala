@@ -110,7 +110,7 @@ public class WebExtension: GLib.Object
 	
 	private void init_frame(WebKit.ScriptWorld world, WebKit.WebPage page, WebKit.Frame frame)
 	{
-		unowned JS.GlobalContext context = frame.get_javascript_context_for_script_world(world);
+		unowned JS.GlobalContext context = (JS.GlobalContext) frame.get_javascript_context_for_script_world(world);
 		debug("Window object cleared: %s, %p, %p, %p", frame.get_uri(), frame, page, context);
 		var bridge = new FrameBridge(frame, context);
 		bridges.insert(frame, bridge);

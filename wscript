@@ -184,10 +184,25 @@ def configure(ctx):
 	ctx.check_dep('dioritegtk-' + DIORITE_SERIES, 'DIORITEGTK', DIORITE_SERIES)
 	ctx.check_dep('json-glib-1.0', 'JSON-GLIB', '0.7')
 	ctx.check_dep('libarchive', 'LIBARCHIVE', '3.1')
-	ctx.check_dep('webkit2gtk-3.0', 'WEBKIT', '2.2')
-	ctx.check_dep('javascriptcoregtk-3.0', 'JSCORE', '1.8')
 	ctx.check_dep('libnotify', 'NOTIFY', '0.7')
 	ctx.check_dep("gstreamer-1.0", 'GST', "1.0")
+	
+	try:
+		ctx.env.WEBKIT = 'webkit2gtk-3.0'
+		ctx.env.WEBKITEXT = 'webkit2gtk-web-extension-3.0'
+		ctx.env.JSCORE = 'javascriptcoregtk-3.0'
+		ctx.check_dep(ctx.env.WEBKIT, 'WEBKIT', '2.2')
+		ctx.check_dep(ctx.env.JSCORE, 'JSCORE', '1.8')
+		ctx.vala_def("WEBKIT2GTK3")
+	except ctx.errors.ConfigurationError:
+		ctx.env.WEBKIT = 'webkit2gtk-4.0'
+		ctx.env.WEBKITEXT = 'webkit2gtk-web-extension-4.0'
+		ctx.env.JSCORE = 'javascriptcoregtk-4.0'
+		ctx.check_dep(ctx.env.WEBKIT, 'WEBKIT', '2.6')
+		ctx.check_dep(ctx.env.WEBKITEXT, 'WEBKITEXT', '2.6')
+		ctx.check_dep(ctx.env.JSCORE, 'JSCORE', '2.6')
+		ctx.vala_def("WEBKIT2GTK4")
+		sys.stderr.write("\n*** WARNING ***\nBuild with webkit2gtk-4.0 is not functional yet.\nhttps://github.com/tiliado/nuvolaplayer/issues/2\n\n")
 	
 	ctx.env.with_unity = ctx.options.unity
 	if ctx.options.unity:
@@ -233,8 +248,8 @@ def build(ctx):
 	NUVOLAKIT_WORKER = APPNAME + "-worker"
 	
 	packages = 'dioritegtk-{0} dioriteglib-{0} '.format(ctx.env.DIORITE_SERIES)
-	packages += 'libnotify javascriptcoregtk-3.0  libarchive gtk+-3.0 gdk-3.0 gdk-x11-3.0 x11 posix json-glib-1.0 glib-2.0 gio-2.0'
-	uselib = 'NOTIFY JSCORE  LIBARCHIVE DIORITEGTK DIORITEGLIB GTK+ GDK GDKX11 XLIB JSON-GLIB GLIB GTHREAD GIO'
+	packages += ctx.env.JSCORE + ' libnotify libarchive gtk+-3.0 gdk-3.0 gdk-x11-3.0 x11 posix json-glib-1.0 glib-2.0 gio-2.0'
+	uselib = 'NOTIFY JSCORE LIBARCHIVE DIORITEGTK DIORITEGLIB GTK+ GDK GDKX11 XLIB JSON-GLIB GLIB GTHREAD GIO'
 	
 	if ctx.env.with_unity:
 		packages += " unity Dbusmenu-0.4"
@@ -258,7 +273,7 @@ def build(ctx):
 	ctx(features = "c cshlib",
 		target = NUVOLAKIT_RUNNER,
 		source = ctx.path.ant_glob('src/nuvolakit-runner/*.vala') + ctx.path.ant_glob('src/nuvolakit-runner/*/*.vala'),
-		packages = 'javascriptcoregtk-3.0 webkit2gtk-3.0 gstreamer-1.0',
+		packages = " ".join((ctx.env.WEBKIT, ctx.env.JSCORE, 'gstreamer-1.0')),
 		uselib =  'JSCORE WEBKIT GST',
 		use = [NUVOLAKIT_BASE],
 		lib = ['m'],
@@ -308,7 +323,7 @@ def build(ctx):
 	ctx(features = "c cshlib",
 		target = NUVOLAKIT_WORKER,
 		source = ctx.path.ant_glob('src/nuvolakit-worker/*.vala'),
-		packages = "dioriteglib-{0} webkit2gtk-web-extension-3.0 javascriptcoregtk-3.0".format(ctx.env.DIORITE_SERIES),
+		packages = "dioriteglib-{0} {1} {2}".format(ctx.env.DIORITE_SERIES, ctx.env.WEBKITEXT, ctx.env.JSCORE),
 		uselib = "DIORITEGLIB DIORITEGTK WEBKIT JSCORE",
 		use = [NUVOLAKIT_BASE],
 		vala_defines = vala_defines,
