@@ -29,12 +29,14 @@ public class Nuvola.MediaKeysBinding: Binding<MediaKeysInterface>
 		base(server, web_worker, "Nuvola.MediaKey");
 	}
 	
-	public override bool add(GLib.Object object)
+	protected override void object_added(MediaKeysInterface object)
 	{
-		var result = base.add(object);
-		if (result)
-			(object as MediaKeysInterface).media_key_pressed.connect(on_media_key_pressed);
-		return result;
+		object.media_key_pressed.connect(on_media_key_pressed);
+	}
+	
+	protected override void object_removed(MediaKeysInterface object)
+	{
+		object.media_key_pressed.disconnect(on_media_key_pressed);
 	}
 	
 	private void on_media_key_pressed(string key)

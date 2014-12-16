@@ -29,6 +29,10 @@ public class Nuvola.MediaPlayerBinding: Binding<MediaPlayerInterface>
 	public MediaPlayerBinding(Diorite.Ipc.MessageServer server, WebWorker web_worker)
 	{
 		base(server, web_worker, "Nuvola.MediaPlayer");
+	}
+	
+	protected override void bind_methods()
+	{
 		bind("setFlag", handle_set_flag);
 		bind("setTrackInfo", handle_set_track_info);
 		bind("getTrackInfo", handle_get_track_info);

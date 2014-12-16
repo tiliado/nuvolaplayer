@@ -27,6 +27,10 @@ public class Nuvola.MenuBarBinding: Binding<MenuBarInterface>
 	public MenuBarBinding(Diorite.Ipc.MessageServer server, WebWorker web_worker)
 	{
 		base(server, web_worker, "Nuvola.MenuBar");
+	}
+	
+	protected override void bind_methods()
+	{
 		bind("setMenu", handle_menubar_set_menu);
 	}
 	

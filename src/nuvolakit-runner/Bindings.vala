@@ -40,4 +40,10 @@ public class Nuvola.Bindings: GLib.Object
 		foreach (var binding in bindings)
 			binding.add(object);
 	}
+	
+	public void remove_object(GLib.Object object)
+	{
+		foreach (var binding in bindings)
+			binding.remove(object);
+	}
 }

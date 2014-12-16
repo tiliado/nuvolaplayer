@@ -22,13 +22,15 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Nuvola.Binding<ObjectType>: GLib.Object
+public abstract class Nuvola.Binding<ObjectType>: GLib.Object
 {
 	/**
 	 * Return value to continue propagation of binding handlers.
 	 */
 	public static const bool CONTINUE = false;
 	public string name {get; construct;}
+	public bool active {get; private set; default = false;}
+	
 	protected SList<ObjectType> objects = null;
 	protected Diorite.Ipc.MessageServer server;
 	protected WebWorker web_worker;
@@ -41,7 +43,7 @@ public class Nuvola.Binding<ObjectType>: GLib.Object
 		this.server = server;
 	}
 	
-	public virtual bool add(GLib.Object object)
+	public bool add(GLib.Object object)
 	{
 		/* Valac 0.22: cannot use "is" operator with generics
 		 * if (!(object is ObjectType))
@@ -50,12 +52,54 @@ public class Nuvola.Binding<ObjectType>: GLib.Object
 			return false;
 		
 		objects.prepend((ObjectType) object);
+		if (objects.next == null)
+		{
+			bind_methods();
+			active = true;
+		}
+		object_added((ObjectType) object);
 		return true;
+	}
+	
+	public bool remove(GLib.Object object)
+	{
+		/* Valac 0.22: cannot use "is" operator with generics
+		 * if (!(object is ObjectType))
+		 */
+		if (!object.get_type().is_a(typeof(ObjectType)))
+			return false;
+		
+		objects.remove((ObjectType) object);
+		if (objects == null)
+			unbind_methods();
+		
+		object_removed((ObjectType) object);
+		return true;
+	}
+	
+	protected virtual void bind_methods()
+	{
+	}
+	
+	protected virtual void object_added(ObjectType object)
+	{
+	}
+	
+	protected virtual void object_removed(ObjectType object)
+	{
+	}
+	
+	protected void unbind_methods()
+	{
+		foreach (var handler in handlers)
+			server.remove_handler(handler);
+		handlers = null;
+		active = false;
 	}
 	
 	protected void check_not_empty() throws Diorite.Ipc.MessageError
 	{
-		if (objects == null)
+		if (!active)
 			throw new Diorite.Ipc.MessageError.UNSUPPORTED("Binding %s has no registered components.", name);
 	}
 	
@@ -73,7 +117,6 @@ public class Nuvola.Binding<ObjectType>: GLib.Object
 	
 	~Binding()
 	{
-		foreach (var handler in handlers)
-			server.remove_handler(handler);
+		unbind_methods();
 	}
 }

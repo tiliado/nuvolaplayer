@@ -27,6 +27,10 @@ public class Nuvola.NotificationBinding: Binding<NotificationInterface>
 	public NotificationBinding(Diorite.Ipc.MessageServer server, WebWorker web_worker)
 	{
 		base(server, web_worker, "Nuvola.Notification");
+	}
+	
+	protected override void bind_methods()
+	{
 		bind("update", handle_update);
 		bind("setActions", handle_set_actions);
 		bind("removeActions", handle_remove_actions);

@@ -27,6 +27,10 @@ public class Nuvola.LauncherBinding: Binding<LauncherInterface>
 	public LauncherBinding(Diorite.Ipc.MessageServer server, WebWorker web_worker)
 	{
 		base(server, web_worker, "Nuvola.Launcher");
+	}
+	
+	protected override void bind_methods()
+	{
 		bind("setTooltip", handle_set_tooltip);
 		bind("setActions", handle_set_actions);
 		bind("addAction", handle_add_action);

@@ -27,6 +27,10 @@ public class Nuvola.ActionsBinding: Binding<ActionsInterface>
 	public ActionsBinding(Diorite.Ipc.MessageServer server, WebWorker web_worker)
 	{
 		base(server, web_worker, "Nuvola.Actions");
+	}
+	
+	protected override void bind_methods()
+	{
 		bind("addAction", handle_add_action);
 		bind("addRadioAction", handle_add_radio_action);
 		bind("isEnabled", handle_is_action_enabled);
@@ -38,12 +42,14 @@ public class Nuvola.ActionsBinding: Binding<ActionsInterface>
 		bind("listGroupActions", handle_list_group_actions);
 	}
 	
-	public override bool add(GLib.Object object)
+	protected override void object_added(ActionsInterface object)
 	{
-		var result = base.add(object);
-		if (result)
-			(object as ActionsInterface).custom_action_activated.connect(on_custom_action_activated);
-		return result;
+		object.custom_action_activated.connect(on_custom_action_activated);
+	}
+	
+	protected override void object_removed(ActionsInterface object)
+	{
+		object.custom_action_activated.disconnect(on_custom_action_activated);
 	}
 	
 	private Variant? handle_add_action(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
