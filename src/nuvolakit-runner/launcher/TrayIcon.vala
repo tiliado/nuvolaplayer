@@ -25,17 +25,29 @@
 namespace Nuvola
 {
 
+public static string[] slist_strings_to_array(SList<string> list)
+{
+	string[] array = new string[list.length()];
+	int i = 0;
+	unowned SList<string> cursor = list;
+	while (cursor != null)
+	{
+		array[i++] = cursor.data;
+		cursor = cursor.next;
+	}
+	return (owned) array;
+}
+
 /**
  * Tray icon is used to control playback when the main window is not visible
  * (it's minimized, hidden or covered by other windows) and to bring the hidden main
  * window to foreground.
  */
-public class TrayIcon: GLib.Object, LauncherInterface
+public class TrayIcon: GLib.Object
 {
 	private AppRunnerController controller;
 	private Diorite.ActionsRegistry actions_reg;
-	
-	private string[] actions = {};
+	private LauncherModel model;
 	private Gtk.Menu? menu = null;
 	#if APPINDICATOR
 	private AppIndicator.Indicator? indicator = null;
@@ -43,10 +55,12 @@ public class TrayIcon: GLib.Object, LauncherInterface
 	private Gtk.StatusIcon? icon;
 	#endif
 	
-	public TrayIcon(AppRunnerController controller)
+	public TrayIcon(AppRunnerController controller, LauncherModel model)
 	{
 		this.controller = controller;
 		this.actions_reg = controller.actions;
+		this.model = model;
+		model.notify.connect_after(on_model_changed);
 		#if APPINDICATOR
 		critical("AppIndicator support is incomplete");
 		indicator = new AppIndicator.Indicator(controller.path_name, controller.icon, AppIndicator.IndicatorCategory.APPLICATION_STATUS);
@@ -56,7 +70,7 @@ public class TrayIcon: GLib.Object, LauncherInterface
 		icon = new Gtk.StatusIcon.from_icon_name(controller.icon);
 		icon.visible = false;
 		icon.title = controller.app_name;
-		set_tooltip(controller.app_name);
+		icon.tooltip_text = model.tooltip;
 		create_menu();
 		icon.popup_menu.connect(on_popup_menu);
 		icon.activate.connect(() => {controller.activate();});
@@ -154,67 +168,23 @@ public class TrayIcon: GLib.Object, LauncherInterface
 		return null;
 	}
 	
-	public bool set_tooltip(string tooltip)
+	private void on_model_changed(GLib.Object o, ParamSpec p)
 	{
-		#if !APPINDICATOR
-		icon.tooltip_text = tooltip;
-		#endif
-		return Binding.CONTINUE;
-	}
-	
-	public bool remove_actions()
-	{
-		actions = {};
-		create_menu();
-		return Binding.CONTINUE;
-	}
-	
-	public bool add_action(string action)
-	{
-		actions += action;
-		create_menu();
-		return Binding.CONTINUE;
-	}
-	
-	public bool remove_action(string action)
-	{
-		var index = -1;
-		for (var i = 0; i < actions.length; i++)
+		switch (p.name)
 		{
-			if (action == actions[i])
-			{
-				index = i;
-				break;
-			}
+		case "tooltip":
+			#if !APPINDICATOR
+			icon.tooltip_text = model.tooltip;
+			#endif
+			break;
+		case "actions":
+			create_menu();
+			break;
 		}
-		
-		if (index >= 0)
-		{
-			var new_actions = new string[actions.length - 1];
-			for (var i = 0; i < actions.length; i++)
-			{
-				if (i < index)
-					new_actions[i] = actions[i];
-				else if (i > index)
-					new_actions[i - 1] = actions[i];
-			}
-			
-			set_actions((owned) new_actions);
-		}
-		return Binding.CONTINUE;
-	}
-	
-	public bool set_actions(string[] actions)
-	{
-		this.actions = actions;
-		create_menu();
-		return Binding.CONTINUE;
 	}
 	
 	~TrayIcon()
 	{
-		remove_actions();
-		
 		#if APPINDICATOR
 		indicator = null;
 		#else
@@ -234,7 +204,7 @@ public class TrayIcon: GLib.Object, LauncherInterface
 			menu.detach();
 		#endif
 		
-		var model = actions_reg.build_menu(actions, false, true);
+		var model = actions_reg.build_menu(slist_strings_to_array(model.actions), false, true);
 		menu = new Gtk.Menu.from_model(model);
 		
 		#if APPINDICATOR

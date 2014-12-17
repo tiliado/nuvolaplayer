@@ -29,9 +29,7 @@ public abstract class Nuvola.Binding<ObjectType>: GLib.Object
 	 */
 	public static const bool CONTINUE = false;
 	public string name {get; construct;}
-	public bool active {get; private set; default = false;}
-	
-	protected SList<ObjectType> objects = null;
+	public bool active {get; protected set; default = false;}
 	protected Diorite.Ipc.MessageServer server;
 	protected WebWorker web_worker;
 	private SList<string> handlers = null;
@@ -41,6 +39,51 @@ public abstract class Nuvola.Binding<ObjectType>: GLib.Object
 		GLib.Object(name: name);
 		this.web_worker = web_worker;
 		this.server = server;
+	}
+	
+	protected virtual void bind_methods()
+	{
+	}
+	
+	protected void unbind_methods()
+	{
+		foreach (var handler in handlers)
+			server.remove_handler(handler);
+		handlers = null;
+		active = false;
+	}
+	
+	protected void check_not_empty() throws Diorite.Ipc.MessageError
+	{
+		if (!active)
+			throw new Diorite.Ipc.MessageError.UNSUPPORTED("Binding %s has no registered components.", name);
+	}
+	
+	protected void bind(string method, owned Diorite.Ipc.MessageHandler handler)
+	{
+		var full_name = "%s.%s".printf(name, method);
+		server.add_handler(full_name, (owned) handler);
+		handlers.prepend(full_name);
+	}
+	
+	protected void call_web_worker(string func_name, Variant? params) throws GLib.Error
+	{
+		web_worker.call_function(func_name, params);
+	}
+	
+	~BaseBinding()
+	{
+		unbind_methods();
+	}
+}
+
+public abstract class Nuvola.ObjectBinding<ObjectType>: Binding<ObjectType>
+{
+	protected SList<ObjectType> objects = null;
+	
+	public ObjectBinding(Diorite.Ipc.MessageServer server, WebWorker web_worker, string name)
+	{
+		base(server, web_worker, name);
 	}
 	
 	public bool add(GLib.Object object)
@@ -77,10 +120,6 @@ public abstract class Nuvola.Binding<ObjectType>: GLib.Object
 		return true;
 	}
 	
-	protected virtual void bind_methods()
-	{
-	}
-	
 	protected virtual void object_added(ObjectType object)
 	{
 	}
@@ -88,35 +127,23 @@ public abstract class Nuvola.Binding<ObjectType>: GLib.Object
 	protected virtual void object_removed(ObjectType object)
 	{
 	}
+}
+
+/**
+ * Binding of model object.
+ * 
+ * Model object should only store and manipulate with data, but not to expose them in user interface, because
+ * view objects that use a particular model as data source are responsible for that.
+ */
+public abstract class Nuvola.ModelBinding<ModelType>: Binding<ModelType>
+{
+	public ModelType model {get; private set;}
 	
-	protected void unbind_methods()
+	public ModelBinding(Diorite.Ipc.MessageServer server, WebWorker web_worker, string name, ModelType model)
 	{
-		foreach (var handler in handlers)
-			server.remove_handler(handler);
-		handlers = null;
-		active = false;
-	}
-	
-	protected void check_not_empty() throws Diorite.Ipc.MessageError
-	{
-		if (!active)
-			throw new Diorite.Ipc.MessageError.UNSUPPORTED("Binding %s has no registered components.", name);
-	}
-	
-	protected void bind(string method, owned Diorite.Ipc.MessageHandler handler)
-	{
-		var full_name = "%s.%s".printf(name, method);
-		server.add_handler(full_name, (owned) handler);
-		handlers.prepend(full_name);
-	}
-	
-	protected void call_web_worker(string func_name, Variant? params) throws GLib.Error
-	{
-		web_worker.call_function(func_name, params);
-	}
-	
-	~Binding()
-	{
-		unbind_methods();
+		base(server, web_worker, name);
+		this.model = model;
+		bind_methods();
+		active = true;
 	}
 }

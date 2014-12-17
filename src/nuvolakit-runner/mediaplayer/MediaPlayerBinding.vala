@@ -24,7 +24,7 @@
 
 using Diorite;
 
-public class Nuvola.MediaPlayerBinding: Binding<MediaPlayerInterface>
+public class Nuvola.MediaPlayerBinding: ObjectBinding<MediaPlayerInterface>
 {
 	public MediaPlayerBinding(Diorite.Ipc.MessageServer server, WebWorker web_worker)
 	{

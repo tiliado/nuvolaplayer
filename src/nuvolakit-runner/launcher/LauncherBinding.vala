@@ -22,11 +22,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Nuvola.LauncherBinding: Binding<LauncherInterface>
+public class Nuvola.LauncherBinding: ModelBinding<LauncherModel>
 {
-	public LauncherBinding(Diorite.Ipc.MessageServer server, WebWorker web_worker)
+	public LauncherBinding(Diorite.Ipc.MessageServer server, WebWorker web_worker, LauncherModel? model=null)
 	{
-		base(server, web_worker, "Nuvola.Launcher");
+		base(server, web_worker, "Nuvola.Launcher", model ?? new LauncherModel());
 	}
 	
 	protected override void bind_methods()
@@ -40,74 +40,49 @@ public class Nuvola.LauncherBinding: Binding<LauncherInterface>
 	
 	private Variant? handle_set_tooltip(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
-		check_not_empty();
 		Diorite.Ipc.MessageServer.check_type_str(data, "(s)");
 		string text;
 		data.get("(s)", out text);
-		
-		foreach (var object in objects)
-			if(object.set_tooltip(text))
-				break;
-		
+		model.tooltip = text;
 		return null;
 	}
 	
 	private Variant? handle_add_action(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
-		check_not_empty();
 		Diorite.Ipc.MessageServer.check_type_str(data, "(s)");
 		string name;
 		data.get("(s)", out name);
-		
-		foreach (var object in objects)
-			if (object.add_action(name))
-				break;
-		
+		model.add_action(name);
 		return null;
 	}
 	
 	private Variant? handle_remove_action(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
-		check_not_empty();
 		Diorite.Ipc.MessageServer.check_type_str(data, "(s)");
 		string name;
 		data.get("(s)", out name);
-		
-		foreach (var object in objects)
-			if (object.remove_action(name))
-				break;
-		
+		model.remove_action(name);
 		return null;
 	}
 	
 	private Variant? handle_set_actions(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
-		check_not_empty();
 		Diorite.Ipc.MessageServer.check_type_str(data, "(av)");
-		
-		int i = 0;
 		VariantIter iter = null;
 		data.get("(av)", &iter);
-		string[] actions = new string[iter.n_children()];
+		SList<string> actions = null;
 		Variant item = null;
 		while (iter.next("v", &item))
-			actions[i++] = item.get_string();
-		
-		foreach (var object in objects)
-			if (object.set_actions(actions))
-				break;
-		
+			actions.prepend(item.get_string());
+		actions.reverse();
+		model.actions = (owned) actions;
 		return null;
 	}
 	
 	private Variant? handle_remove_actions(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
-		check_not_empty();
 		Diorite.Ipc.MessageServer.check_type_str(data, null);
-		foreach (var object in objects)
-			if (object.remove_actions())
-				break;
-		
+		model.remove_actions();
 		return null;
 	}
 }

@@ -22,7 +22,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Nuvola.MenuBarBinding: Binding<MenuBarInterface>
+public class Nuvola.MenuBarBinding: ObjectBinding<MenuBarInterface>
 {
 	public MenuBarBinding(Diorite.Ipc.MessageServer server, WebWorker web_worker)
 	{

@@ -29,20 +29,22 @@ namespace Nuvola
 /**
  * Manages dock item at Unity Launcher
  */
-public class UnityLauncher: GLib.Object, LauncherInterface
+public class UnityLauncher: GLib.Object
 {
 	private AppRunnerController controller;
 	private Diorite.ActionsRegistry actions_reg;
 	private Unity.LauncherEntry dock_item;
-	private string[] actions = {};
+	private LauncherModel model;
 	private SList<ActionAdaptor> adaptors = null;
 	
-	public UnityLauncher(AppRunnerController controller)
+	public UnityLauncher(AppRunnerController controller, LauncherModel model)
 	{
 		this.controller = controller;
 		this.actions_reg = controller.actions;
+		this.model = model;
 		this.dock_item = Unity.LauncherEntry.get_for_desktop_id(controller.desktop_name);
 		this.dock_item.quicklist = new Dbusmenu.Menuitem();
+		model.notify.connect_after(on_model_changed);
 	}
 	
 	~UnityLauncher()
@@ -50,58 +52,14 @@ public class UnityLauncher: GLib.Object, LauncherInterface
 		remove_menu();
 	}
 	
-	public bool set_tooltip(string tooltip)
+	private void on_model_changed(GLib.Object o, ParamSpec p)
 	{
-		return Binding.CONTINUE;
-	}
-	
-	public bool add_action(string action)
-	{
-		actions += action;
-		update_menu();
-		return Binding.CONTINUE;
-	}
-	
-	public bool remove_action(string action)
-	{
-		var index = -1;
-		for (var i = 0; i < actions.length; i++)
+		switch (p.name)
 		{
-			if (action == actions[i])
-			{
-				index = i;
-				break;
-			}
+		case "actions":
+			update_menu();
+			break;
 		}
-		
-		if (index >= 0)
-		{
-			var new_actions = new string[actions.length - 1];
-			for (var i = 0; i < actions.length; i++)
-			{
-				if (i < index)
-					new_actions[i] = actions[i];
-				else if (i > index)
-					new_actions[i - 1] = actions[i];
-			}
-			
-			set_actions((owned) new_actions);
-		}
-		return Binding.CONTINUE;
-	}
-	
-	public bool remove_actions()
-	{
-		actions = {};
-		update_menu();
-		return Binding.CONTINUE;
-	}
-	
-	public bool set_actions(string[] actions)
-	{
-		this.actions = actions;
-		update_menu();
-		return Binding.CONTINUE;
 	}
 	
 	private void clear_menu()
@@ -118,7 +76,7 @@ public class UnityLauncher: GLib.Object, LauncherInterface
 	{
 		clear_menu();
 		var menu = dock_item.quicklist;
-		foreach (var action_name in actions)
+		foreach (var action_name in model.actions)
 		{
 			var item = create_menu_item(action_name);
 			if (item != null)

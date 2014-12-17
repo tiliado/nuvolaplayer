@@ -22,15 +22,27 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public interface Nuvola.LauncherInterface: GLib.Object
+public class Nuvola.LauncherModel: GLib.Object
 {
-	public abstract bool set_tooltip(string tooltip);
+	public string? tooltip {get; set; default = null;}
+	public SList<string> actions {get; owned set; default = null;}
 	
-	public abstract bool add_action(string name);
+	public LauncherModel()
+	{
+	}
 	
-	public abstract bool remove_action(string name);
+	public void add_action(string name)
+	{
+		actions.append(name);
+	}
 	
-	public abstract bool remove_actions();
+	public void remove_action(string name)
+	{
+		actions.remove(name);
+	}
 	
-	public abstract bool set_actions(string[] names);
+	public void remove_actions()
+	{
+		actions = null;
+	}
 }

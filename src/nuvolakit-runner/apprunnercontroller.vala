@@ -420,32 +420,32 @@ public class AppRunnerController : RunnerApplication
 		}
 		
 		bindings = new Bindings();
-		
 		bindings.add_binding(new ActionsBinding(server, web_worker));
-		bindings.add_object(actions_helper);
-		
-		bindings.add_binding(new LauncherBinding(server, web_worker));
-		bindings.add_object(new TrayIcon(this));
-		#if UNITY
-		bindings.add_object(new UnityLauncher(this));
-		#endif
-		
 		bindings.add_binding(new NotificationsBinding(server, web_worker));
 		bindings.add_binding(new NotificationBinding(server, web_worker));
-		bindings.add_object(new Notifications(this));
+		bindings.add_binding(new LauncherBinding(server, web_worker));
+		bindings.add_binding(new MediaKeysBinding(server, web_worker));
+		bindings.add_binding(new MenuBarBinding(server, web_worker));
+		bindings.add_binding(new MediaPlayerBinding(server, web_worker));
 		
+		bindings.add_object(actions_helper);
+		// TODO: TrayIconComponent
+		this.set_data<TrayIcon>("components.tray_icon", new TrayIcon(this, bindings.get_model<LauncherModel>()));
+		#if UNITY
+		// TODO: UnityLauncherComponent
+		this.set_data<UnityLauncher>("components.unity_launcher", new UnityLauncher(this, bindings.get_model<LauncherModel>()));
+		#endif
+		bindings.add_object(new Notifications(this));
+		// TODO: MediaKeysComponent
 		var media_keys = new MediaKeysClient(web_app.id, server, master);
 		media_keys.manage();
-		bindings.add_binding(new MediaKeysBinding(server, web_worker));
 		bindings.add_object(media_keys);
-		
-		bindings.add_binding(new MenuBarBinding(server, web_worker));
 		bindings.add_object(menu_bar);
 		
-		bindings.add_binding(new MediaPlayerBinding(server, web_worker));
+		// TODO: MediaPlayerModel
 		var media_player = new MediaPlayer(actions);
 		bindings.add_object(media_player);
-		
+		// TODO: MPRISComponent
 		mpris = new MPRISProvider(this, media_player);
 	}
 	

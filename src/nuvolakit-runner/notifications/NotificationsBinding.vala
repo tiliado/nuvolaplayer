@@ -22,7 +22,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Nuvola.NotificationsBinding: Binding<NotificationsInterface>
+public class Nuvola.NotificationsBinding: ObjectBinding<NotificationsInterface>
 {
 	public NotificationsBinding(Diorite.Ipc.MessageServer server, WebWorker web_worker)
 	{

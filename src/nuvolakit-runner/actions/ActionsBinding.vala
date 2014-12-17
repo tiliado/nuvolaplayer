@@ -22,7 +22,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Nuvola.ActionsBinding: Binding<ActionsInterface>
+public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 {
 	public ActionsBinding(Diorite.Ipc.MessageServer server, WebWorker web_worker)
 	{

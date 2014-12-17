@@ -38,12 +38,28 @@ public class Nuvola.Bindings: GLib.Object
 	public void add_object(GLib.Object object)
 	{
 		foreach (var binding in bindings)
-			binding.add(object);
+			if (binding is ObjectBinding)
+				((ObjectBinding) binding).add(object);
 	}
 	
 	public void remove_object(GLib.Object object)
 	{
 		foreach (var binding in bindings)
-			binding.remove(object);
+			if (binding is ObjectBinding)
+				((ObjectBinding) binding).remove(object);
+	}
+	
+	public ModelType? get_model<ModelType>()
+	{
+		foreach (var binding in bindings)
+		{
+			if (binding is ModelBinding)
+			{
+				var model_binding = binding as ModelBinding<ModelType>;
+				if (model_binding != null)
+					return model_binding.model;
+			}
+		}
+		return null;
 	}
 }

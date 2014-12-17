@@ -22,7 +22,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Nuvola.MediaKeysBinding: Binding<MediaKeysInterface>
+public class Nuvola.MediaKeysBinding: ObjectBinding<MediaKeysInterface>
 {
 	public MediaKeysBinding(Diorite.Ipc.MessageServer server, WebWorker web_worker)
 	{
