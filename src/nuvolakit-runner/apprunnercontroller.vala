@@ -125,7 +125,6 @@ public class AppRunnerController : RunnerApplication
 	private Diorite.Form? init_form = null;
 	private Diorite.Ipc.MessageClient master = null;
 	private FormatSupportCheck format_support = null;
-	private MPRISProvider mpris = null;
 	private Tiliado.Account tiliado_account = null;
 	
 	public AppRunnerController(Diorite.Storage storage, WebAppMeta web_app, WebAppStorage app_storage)
@@ -426,7 +425,7 @@ public class AppRunnerController : RunnerApplication
 		bindings.add_binding(new LauncherBinding(server, web_worker));
 		bindings.add_binding(new MediaKeysBinding(server, web_worker));
 		bindings.add_binding(new MenuBarBinding(server, web_worker));
-		bindings.add_binding(new MediaPlayerBinding(server, web_worker));
+		bindings.add_binding(new MediaPlayerBinding(server, web_worker, new MediaPlayer(actions)));
 		
 		bindings.add_object(actions_helper);
 		// TODO: TrayIconComponent
@@ -442,11 +441,8 @@ public class AppRunnerController : RunnerApplication
 		bindings.add_object(media_keys);
 		bindings.add_object(menu_bar);
 		
-		// TODO: MediaPlayerModel
-		var media_player = new MediaPlayer(actions);
-		bindings.add_object(media_player);
 		// TODO: MPRISComponent
-		mpris = new MPRISProvider(this, media_player);
+		this.set_data<MPRISProvider>("components.MPRISProvider", new MPRISProvider(this, bindings.get_model<MediaPlayerModel>()));
 	}
 	
 	private async void show_donation_bar()

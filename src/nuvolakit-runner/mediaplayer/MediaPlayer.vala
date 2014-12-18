@@ -22,18 +22,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Nuvola.MediaPlayer: GLib.Object, MediaPlayerInterface
+public class Nuvola.MediaPlayer: GLib.Object, Nuvola.MediaPlayerModel
 {
-	public string? title {get; protected set; default = null;}
-	public string? artist {get; protected set; default = null;}
-	public string? album {get; protected set; default = null;}
-	public string? state {get; protected set; default = null;}
-	public string? artwork_location {get; protected set; default = null;}
-	public string? artwork_file {get; protected set; default = null;}
-	public bool can_go_next {get; protected set; default = false;}
-	public bool can_go_previous {get; protected set; default = false;}
-	public bool can_play {get; protected set; default = false;}
-	public bool can_pause {get; protected set; default = false;}
+	public string? title {get; set; default = null;}
+	public string? artist {get; set; default = null;}
+	public string? album {get; set; default = null;}
+	public string? state {get; set; default = null;}
+	public string? artwork_location {get; set; default = null;}
+	public string? artwork_file {get; set; default = null;}
+	public bool can_go_next {get; set; default = false;}
+	public bool can_go_previous {get; set; default = false;}
+	public bool can_play {get; set; default = false;}
+	public bool can_pause {get; set; default = false;}
 	private Diorite.ActionsRegistry actions;
 	
 	public MediaPlayer(Diorite.ActionsRegistry actions)
@@ -41,18 +41,8 @@ public class Nuvola.MediaPlayer: GLib.Object, MediaPlayerInterface
 		this.actions = actions;
 	}
 	
-	public bool get_track_info(ref string? title, ref string? artist, ref string? album, ref string? state, ref string? artwork_location, ref string? artwork_file)
-	{
-		title = this.title;
-		artist = this.artist;
-		album = this.album;
-		state = this.state;
-		artwork_location = this.artwork_location;
-		artwork_file = this.artwork_file;
-		return !Binding.CONTINUE;
-	}
-	
-	public bool set_track_info(string? title, string? artist, string? album, string? state, string? artwork_location, string? artwork_file)
+	public void set_track_info(string? title, string? artist, string? album, string? state, string? artwork_location,
+		string? artwork_file)
 	{
 		this.title = title;
 		this.artist = artist;
@@ -60,7 +50,6 @@ public class Nuvola.MediaPlayer: GLib.Object, MediaPlayerInterface
 		this.state = state;
 		this.artwork_location = artwork_location;
 		this.artwork_file = artwork_file;
-		return !Binding.CONTINUE;
 	}
 	
 	public void play()

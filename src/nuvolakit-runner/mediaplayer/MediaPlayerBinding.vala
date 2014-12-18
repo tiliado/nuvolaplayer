@@ -24,11 +24,11 @@
 
 using Diorite;
 
-public class Nuvola.MediaPlayerBinding: ObjectBinding<MediaPlayerInterface>
+public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 {
-	public MediaPlayerBinding(Diorite.Ipc.MessageServer server, WebWorker web_worker)
+	public MediaPlayerBinding(Diorite.Ipc.MessageServer server, WebWorker web_worker, MediaPlayerModel model)
 	{
-		base(server, web_worker, "Nuvola.MediaPlayer");
+		base(server, web_worker, "Nuvola.MediaPlayer", model);
 	}
 	
 	protected override void bind_methods()
@@ -50,37 +50,21 @@ public class Nuvola.MediaPlayerBinding: ObjectBinding<MediaPlayerInterface>
 		var state = variant_dict_str(dict, "state");
 		var artwork_location = variant_dict_str(dict, "artworkLocation");
 		var artwork_file = variant_dict_str(dict, "artworkFile");
-		
-		bool handled = false;
-		foreach (var object in objects)
-			if (handled = object.set_track_info(title, artist, album, state, artwork_location, artwork_file))
-				break;
-		
-		return new Variant.boolean(handled);
+		model.set_track_info(title, artist, album, state, artwork_location, artwork_file);
+		return new Variant.boolean(true);
 	}
 	
 	private Variant? handle_get_track_info(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
 		check_not_empty();
 		Diorite.Ipc.MessageServer.check_type_str(data, null);
-		
-		string? title = null;
-		string? artist = null;
-		string? album = null;
-		string? state = null;
-		string? artwork_location = null;
-		string? artwork_file = null;
-		foreach (var object in objects)
-			if (object.get_track_info(ref title, ref artist, ref album, ref state, ref artwork_location, ref artwork_file))
-				break;
-		
 		var builder = new VariantBuilder(new VariantType("a{sms}"));
-		builder.add("{sms}", "title", title);
-		builder.add("{sms}", "artist", artist);
-		builder.add("{sms}", "album", album);
-		builder.add("{sms}", "state", state);
-		builder.add("{sms}", "artworkLocation", artwork_location);
-		builder.add("{sms}", "artworkFile", artwork_file);
+		builder.add("{sms}", "title", model.title);
+		builder.add("{sms}", "artist", model.artist);
+		builder.add("{sms}", "album", model.album);
+		builder.add("{sms}", "state", model.state);
+		builder.add("{sms}", "artworkLocation", model.artwork_location);
+		builder.add("{sms}", "artworkFile", model.artwork_file);
 		return builder.end();
 	}
 	
@@ -88,10 +72,10 @@ public class Nuvola.MediaPlayerBinding: ObjectBinding<MediaPlayerInterface>
 	{
 		check_not_empty();
 		Diorite.Ipc.MessageServer.check_type_str(data, "(sb)");
+		bool handled = false;
 		string name;
 		bool val;
 		data.get("(sb)", out name, out val);
-		bool handled = false;
 		switch (name)
 		{
 		case "can-go-next":
@@ -101,8 +85,7 @@ public class Nuvola.MediaPlayerBinding: ObjectBinding<MediaPlayerInterface>
 			handled = true;
 			Value value = Value(typeof(bool));
 			value.set_boolean(val);
-			foreach (var object in objects)
-				object.@set_property(name, value);
+			model.@set_property(name, value);
 			break;
 		default:
 			critical("Unknown flag '%s'", name);

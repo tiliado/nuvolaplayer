@@ -29,11 +29,11 @@ public class MPRISProvider: GLib.Object
 {
 	private uint owner_id = 0;
 	private Diorite.Application app;
-	private MediaPlayer player;
+	private MediaPlayerModel player;
 	private MPRISApplication mpris_app;
 	private MPRISPlayer mpris_player;
 	
-	public MPRISProvider(Diorite.Application app, MediaPlayer player)
+	public MPRISProvider(Diorite.Application app, MediaPlayerModel player)
 	{
 		this.app = app;
 		this.player = player;

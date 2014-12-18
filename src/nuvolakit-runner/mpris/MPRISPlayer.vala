@@ -29,11 +29,11 @@ namespace Nuvola
 public class MPRISPlayer : GLib.Object
 {
 	private DBusConnection conn;
-	private MediaPlayer player;
+	private MediaPlayerModel player;
 	private HashTable<string, Variant> pending_update;
 	private uint pending_update_id = 0;
 	
-	public MPRISPlayer(MediaPlayer player, DBusConnection conn)
+	public MPRISPlayer(MediaPlayerModel player, DBusConnection conn)
 	{
 		this.player = player;
 		this.conn = conn;
