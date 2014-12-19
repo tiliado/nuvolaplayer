@@ -240,7 +240,14 @@ public class AppRunnerController : RunnerApplication
 			}
 			
 			if (!tiliado_account.is_patron)
-				show_donation_bar.begin();
+			{
+				toggle_donate_button(true);
+				Timeout.add_seconds(60*60, () => {
+					if (!tiliado_account.is_patron)
+						show_donation_bar.begin();
+					return false;
+				});
+			}
 			
 			tiliado_account.notify["is-patron"].connect_after(on_is_patron_changed);
 		});
