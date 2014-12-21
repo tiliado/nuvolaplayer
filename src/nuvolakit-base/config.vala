@@ -27,6 +27,7 @@ namespace Nuvola
 
 public class Config : GLib.Object, Diorite.KeyValueStorage
 {
+	public Diorite.SingleList<Diorite.PropertyBinding> property_bindings {get; protected set;}
 	public File file {get; private set;}
 	public HashTable<string, Variant> defaults {get; private set;}
 	private Json.Node? root;

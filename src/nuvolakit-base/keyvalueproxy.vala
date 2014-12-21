@@ -27,6 +27,7 @@ namespace Nuvola
 
 public class KeyValueProxy: GLib.Object, Diorite.KeyValueStorage
 {
+	public Diorite.SingleList<Diorite.PropertyBinding> property_bindings {get; protected set;}
 	private Diorite.Ipc.MessageClient client;
 	private string prefix;
 	
