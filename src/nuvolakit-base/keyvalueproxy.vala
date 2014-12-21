@@ -33,6 +33,7 @@ public class KeyValueProxy: GLib.Object, Diorite.KeyValueStorage
 	
 	public KeyValueProxy(Diorite.Ipc.MessageClient client, string prefix)
 	{
+		property_bindings = new Diorite.SingleList<Diorite.PropertyBinding>();
 		this.client = client;
 		this.prefix = prefix;
 	}

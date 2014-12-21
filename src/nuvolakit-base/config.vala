@@ -35,6 +35,7 @@ public class Config : GLib.Object, Diorite.KeyValueStorage
 	
 	public Config(File file, HashTable<string, Variant>? defaults = null)
 	{
+		property_bindings = new Diorite.SingleList<Diorite.PropertyBinding>();
 		this.file = file;
 		this.defaults = defaults != null ? defaults : new HashTable<string, Variant>(str_hash, str_equal);
 		load();
