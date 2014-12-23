@@ -73,7 +73,7 @@ public class TrayIcon: GLib.Object
 		icon.tooltip_text = model.tooltip;
 		create_menu();
 		icon.popup_menu.connect(on_popup_menu);
-		icon.activate.connect(() => {controller.activate();});
+		icon.activate.connect(on_activate);
 		unset_number();
 		#endif
 	}
@@ -164,6 +164,11 @@ public class TrayIcon: GLib.Object
 		}
 		
 		return null;
+	}
+	
+	private void on_activate()
+	{
+		controller.activate();
 	}
 	
 	private void on_model_changed(GLib.Object o, ParamSpec p)
