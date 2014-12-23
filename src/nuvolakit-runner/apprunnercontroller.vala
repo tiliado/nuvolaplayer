@@ -435,8 +435,8 @@ public class AppRunnerController : RunnerApplication
 		bindings.add_binding(new MediaPlayerBinding(server, web_worker, new MediaPlayer(actions)));
 		
 		bindings.add_object(actions_helper);
-		// TODO: TrayIconComponent
-		this.set_data<TrayIcon>("components.tray_icon", new TrayIcon(this, bindings.get_model<LauncherModel>()));
+		
+		this.set_data<TrayIconComponent>("components.tray_icon", new TrayIconComponent(this, bindings, config));
 		#if UNITY
 		// TODO: UnityLauncherComponent
 		this.set_data<UnityLauncher>("components.unity_launcher", new UnityLauncher(this, bindings.get_model<LauncherModel>()));
