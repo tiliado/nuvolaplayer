@@ -31,13 +31,14 @@ public class PreferencesDialog : Gtk.Dialog
 	/// Preferences dialog title
 	private const string TITLE = ("Preferences");
 	private Diorite.Application app;
+	private Gtk.Notebook notebook;
 	
 	/**
 	 * Constructs new main window
 	 * 
 	 * @param app Application object
 	 */
-	public PreferencesDialog(Diorite.Application app, Gtk.Window? parent, Diorite.Form form, Gtk.Widget account_form)
+	public PreferencesDialog(Diorite.Application app, Gtk.Window? parent, Diorite.Form form)
 	{
 		this.app = app;
 		
@@ -60,16 +61,19 @@ public class PreferencesDialog : Gtk.Dialog
 		modal = true;
 		
 		add_buttons(Gtk.Stock.CLOSE, Gtk.ResponseType.CLOSE, Gtk.Stock.OK, Gtk.ResponseType.OK);
-		var notebook = new Gtk.Notebook();
+		notebook = new Gtk.Notebook();
 		notebook.margin_bottom = 10;
 		form.show();
 		notebook.append_page(form, new Gtk.Label("Preferences"));
-		account_form.show();
-		account_form.valign = account_form.halign = Gtk.Align.CENTER;
-		notebook.append_page(account_form, new Gtk.Label("Tiliado Account"));
 		get_content_area().add(notebook);
 		form.check_toggles();
 		notebook.show();
+	}
+	
+	public void add_tab(string label, Gtk.Widget widget)
+	{
+		widget.show();
+		notebook.append_page(widget, new Gtk.Label(label));
 	}
 	
 	public override bool delete_event(Gdk.EventAny event)

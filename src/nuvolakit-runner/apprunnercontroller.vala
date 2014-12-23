@@ -382,7 +382,10 @@ public class AppRunnerController : RunnerApplication
 				.printf(e.message));
 		}
 		
-		var dialog = new PreferencesDialog(this, main_window, form, new Tiliado.AccountForm(tiliado_account));
+		var dialog = new PreferencesDialog(this, main_window, form);
+		var account_form = new Tiliado.AccountForm(tiliado_account);
+		account_form.valign = account_form.halign = Gtk.Align.CENTER;
+		dialog.add_tab("Tiliado Account", account_form);
 		var response = dialog.run();
 		if (response == Gtk.ResponseType.OK)
 		{
