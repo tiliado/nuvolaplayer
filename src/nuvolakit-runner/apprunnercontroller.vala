@@ -126,6 +126,7 @@ public class AppRunnerController : RunnerApplication
 	private Diorite.Ipc.MessageClient master = null;
 	private FormatSupportCheck format_support = null;
 	private Tiliado.Account tiliado_account = null;
+	private Diorite.SingleList<Component> components = null;
 	
 	public AppRunnerController(Diorite.Storage storage, WebAppMeta web_app, WebAppStorage app_storage)
 	{
@@ -383,6 +384,7 @@ public class AppRunnerController : RunnerApplication
 		}
 		
 		var dialog = new PreferencesDialog(this, main_window, form);
+		dialog.add_tab("Components", new ComponentsManager(components));
 		var account_form = new Tiliado.AccountForm(tiliado_account);
 		account_form.valign = account_form.halign = Gtk.Align.CENTER;
 		dialog.add_tab("Tiliado Account", account_form);
@@ -419,6 +421,7 @@ public class AppRunnerController : RunnerApplication
 	
 	private void load_extensions()
 	{
+		components = new Diorite.SingleList<Component>();
 		extensions = new ExtensionsManager(this);
 		var available_extensions = extensions.available_extensions;
 		foreach (var key in available_extensions.get_keys())
@@ -439,7 +442,7 @@ public class AppRunnerController : RunnerApplication
 		
 		bindings.add_object(actions_helper);
 		
-		this.set_data<TrayIconComponent>("components.tray_icon", new TrayIconComponent(this, bindings, config));
+		components.prepend(new TrayIconComponent(this, bindings, config));
 		#if UNITY
 		// TODO: UnityLauncherComponent
 		this.set_data<UnityLauncher>("components.unity_launcher", new UnityLauncher(this, bindings.get_model<LauncherModel>()));
