@@ -454,8 +454,7 @@ public class AppRunnerController : RunnerApplication
 		bindings.add_object(media_keys);
 		bindings.add_object(menu_bar);
 		
-		// TODO: MPRISComponent
-		this.set_data<MPRISProvider>("components.MPRISProvider", new MPRISProvider(this, bindings.get_model<MediaPlayerModel>()));
+		components.prepend(new MPRISComponent(this, bindings, config));
 	}
 	
 	private async void show_donation_bar()

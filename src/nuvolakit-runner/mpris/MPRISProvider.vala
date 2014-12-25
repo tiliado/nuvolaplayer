@@ -25,32 +25,46 @@
 namespace Nuvola
 {
 
-public class MPRISProvider: GLib.Object
+public class MPRISProvider
 {
+	private MediaPlayerModel player;
 	private uint owner_id = 0;
 	private Diorite.Application app;
-	private MediaPlayerModel player;
-	private MPRISApplication mpris_app;
-	private MPRISPlayer mpris_player;
+	private MPRISApplication? mpris_app = null;
+	private MPRISPlayer? mpris_player = null;
+	private DBusConnection? conn = null;
+	private uint[] registered_objects = new uint[2];
 	
 	public MPRISProvider(Diorite.Application app, MediaPlayerModel player)
 	{
-		this.app = app;
 		this.player = player;
+		this.app = app;
+	}
+	
+	public void start()
+	{
 		var app_id = app.application_id;
 		string bus_name = "org.mpris.MediaPlayer2." + app_id.substring(app_id.last_index_of_char('.') + 1);
+		// Watch out! Bus.own_name takes three references!
 		owner_id = Bus.own_name(BusType.SESSION, bus_name, BusNameOwnerFlags.NONE,
 			on_bus_acquired, on_name_acquired, on_name_lost);
-		if(owner_id == 0)
+		if (owner_id == 0)
 			critical("Unable to obtain bus name %s", bus_name);
 	}
 	
-	~MPRISProvider()
+	public void stop()
 	{
 		if (owner_id > 0)
 		{
 			Bus.unown_name(owner_id);
 			owner_id = 0;
+		}
+		
+		if (conn != null)
+		{
+			foreach (var registration_id in registered_objects)
+				conn.unregister_object(registration_id);
+			conn = null;
 		}
 	}
 	
@@ -61,8 +75,9 @@ public class MPRISProvider: GLib.Object
 		mpris_player = new MPRISPlayer(player, conn); 
 		try
 		{
-			conn.register_object("/org/mpris/MediaPlayer2", mpris_app);
-			conn.register_object("/org/mpris/MediaPlayer2", mpris_player);
+			registered_objects[0] = conn.register_object("/org/mpris/MediaPlayer2", mpris_app);
+			registered_objects[1] = conn.register_object("/org/mpris/MediaPlayer2", mpris_player);
+			this.conn = conn;
 		} 
 		catch(IOError e)
 		{
