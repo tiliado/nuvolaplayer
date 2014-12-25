@@ -28,7 +28,7 @@ namespace Nuvola
 /**
  * Component classes represent a particular component/feature.
  */
-public class Component: GLib.Object
+public abstract class Component: GLib.Object
 {
 	public string id {get; construct;}
 	public string name {get; construct;}
@@ -44,8 +44,20 @@ public class Component: GLib.Object
 	
 	public virtual void toggle(bool enabled)
 	{
+		if (this.enabled != enabled)
+		{
+			if (enabled)
+				activate();
+			else
+				deactivate();
+		}
+		
 		this.enabled = enabled;
 	}
+	
+	protected abstract void activate();
+	
+	protected abstract void deactivate();
 }
 
 } // namespace Nuvola

@@ -66,25 +66,12 @@ public class TrayIconComponent: Component
 		}
 	}
 	
-	public override void toggle(bool enabled)
-	{
-		if (this.enabled != enabled)
-		{
-			if (enabled)
-				activate();
-			else
-				deactivate();
-		}
-		
-		this.enabled = enabled;
-	}
-	
-	private void activate()
+	protected override void activate()
 	{
 		tray_icon = new TrayIcon(controller, bindings.get_model<LauncherModel>());
 	}
 	
-	private void deactivate()
+	protected override void deactivate()
 	{
 		tray_icon = null;
 	}
