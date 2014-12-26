@@ -444,8 +444,7 @@ public class AppRunnerController : RunnerApplication
 		
 		components.prepend(new TrayIconComponent(this, bindings, config));
 		#if UNITY
-		// TODO: UnityLauncherComponent
-		this.set_data<UnityLauncher>("components.unity_launcher", new UnityLauncher(this, bindings.get_model<LauncherModel>()));
+		components.prepend(new UnityLauncherComponent(this, bindings, config));
 		#endif
 		bindings.add_object(new Notifications(this));
 		// TODO: MediaKeysComponent

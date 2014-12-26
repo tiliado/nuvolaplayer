@@ -31,13 +31,13 @@ namespace Nuvola
  */
 public class UnityLauncher: GLib.Object
 {
-	private AppRunnerController controller;
+	private Diorite.Application controller;
 	private Diorite.ActionsRegistry actions_reg;
 	private Unity.LauncherEntry dock_item;
 	private LauncherModel model;
 	private SList<ActionAdaptor> adaptors = null;
 	
-	public UnityLauncher(AppRunnerController controller, LauncherModel model)
+	public UnityLauncher(Diorite.Application controller, LauncherModel model)
 	{
 		this.controller = controller;
 		this.actions_reg = controller.actions;
