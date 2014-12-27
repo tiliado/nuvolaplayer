@@ -109,6 +109,20 @@ public class Notification
 		timeout_id = Timeout.add(100, show_cb);
 	}
 	
+	public bool close()
+	{
+		try
+		{
+			notification.close();
+			return true;
+		}
+		catch (GLib.Error e)
+		{
+			warning("Failed to close notification: %s", e.message);
+			return false;
+		}
+	}
+	
 	private bool show_cb()
 	{
 		timeout_id = 0;
@@ -125,44 +139,56 @@ public class Notification
 	}
 }
 
+
 /**
  * Manages notifications
  */
 public class Notifications : GLib.Object, NotificationsInterface, NotificationInterface
 {
-	private AppRunnerController controller;
-	private Config config;
-	private Gtk.Window main_window;
+	public bool running {get; private set; default = false;}
+	private RunnerApplication app;
+	private ActionsHelper actions_helper;
 	private Diorite.ActionsRegistry actions_reg;
-	
 	private HashTable<string, Notification> notifications;
 	private bool actions_supported = false;
 	private bool persistence_supported = false;
 	private bool icons_supported = false;
+	private Diorite.Action? action;
 	
-	public Notifications(AppRunnerController controller)
+	public Notifications(RunnerApplication app, ActionsHelper actions_helper)
 	{
-		this.controller = controller;
-		this.config = controller.config;
-		this.main_window = controller.main_window;
-		this.actions_reg = controller.actions;
-		
+		this.app = app;
+		this.actions_helper = actions_helper;
 		notifications = new HashTable<string, Notification>(str_hash, str_equal);
-		
-		Notify.init(controller.app_name);
+	}
+	
+	public void start()
+	{
+		return_if_fail(!running);
+		running = true;
+		Notify.init(app.app_name);
 		unowned List<string> capabilities = Notify.get_server_caps();
 		persistence_supported =  capabilities.find_custom("persistence", strcmp) != null;
 		actions_supported =  capabilities.find_custom("actions", strcmp) != null;
 		icons_supported =  capabilities.find_custom("action-icons", strcmp) != null;
 		debug(@"Notifications: persistence $persistence_supported, actions $actions_supported, icons $icons_supported");
-		
-		var action = controller.actions_helper.simple_action("view", "app", "show-notification", "Show notification", null, null, null, show_notifications);
-		actions_reg.add_action(action);
+		action = actions_helper.simple_action(
+			"view", "app", "show-notification", "Show notification", null, null, null, show_notifications); // ref++
+		app.actions.add_action(action);
 	}
 	
-	~Notifications()
+	public void stop()
 	{
-
+		return_if_fail(running);
+		running = false;
+		app.actions.remove_action(action);
+		action = null;
+		notifications.foreach_remove((key, notification) =>
+		{
+			notification.close();
+			return true; // remove
+		});
+		// TODO: close anonymous notifications
 		Notify.uninit();
 	}
 	
@@ -171,7 +197,7 @@ public class Notifications : GLib.Object, NotificationsInterface, NotificationIn
 		var notification = notifications[name];
 		if (notification == null)
 		{
-			notification = new Notification(controller.app_id);
+			notification = new Notification(app.app_id);
 			notifications[name] = notification;
 		}
 		
@@ -211,16 +237,16 @@ public class Notifications : GLib.Object, NotificationsInterface, NotificationIn
 		var notification = get_or_create(name);
 		var add_actions = actions_supported && icons_supported;
 		
-		if (force || !main_window.is_active || notification.resident)
+		if (force || !app.main_window.is_active || notification.resident)
 			notification.show(add_actions);
 		return Binding.CONTINUE;
 	}
 	
 	public bool show_anonymous(string summary, string body, string? icon_name, string? icon_path, bool force, string category)
 	{
-		if (force || !main_window.is_active)
+		if (force || !app.main_window.is_active)
 		{
-			var notification = new Notification(controller.app_id);
+			var notification = new Notification(app.app_id);
 			notification.update(summary, body, icon_name, icon_path, false, category);
 			notification.show(false);
 		}

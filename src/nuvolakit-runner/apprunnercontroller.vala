@@ -84,9 +84,11 @@ public string build_web_worker_ipc_id(string web_app_id)
 	return "%s.%s.%s".printf(Nuvola.get_app_id(), web_app_id, "webworker");
 }
 
-public class RunnerApplication: Diorite.Application
+public abstract class RunnerApplication: Diorite.Application
 {
 	public Diorite.Storage storage {get; private set;}
+	public Config config {get; protected set; default = null;}
+	public WebAppWindow? main_window {get; protected set; default = null;}
 	
 	public RunnerApplication(string web_app_id, string web_app_name, Diorite.Storage storage)
 	{
@@ -104,13 +106,11 @@ public class RunnerApplication: Diorite.Application
 
 public class AppRunnerController : RunnerApplication
 {
-	public WebAppWindow? main_window {get; private set; default = null;}
 	public WebAppMeta web_app {get; private set;}
 	public WebAppStorage app_storage {get; private set;}
 	private WebWorker web_worker;
 	public WebEngine web_engine {get; private set;}
 	public weak Gtk.Settings gtk_settings {get; private set;}
-	public Config config {get; private set;}
 	public Diorite.KeyValueStorage master_config {get; private set;}
 	public ExtensionsManager extensions {get; private set;}
 	public Bindings bindings {get; private set;}
@@ -446,7 +446,7 @@ public class AppRunnerController : RunnerApplication
 		#if UNITY
 		components.prepend(new UnityLauncherComponent(this, bindings, config));
 		#endif
-		bindings.add_object(new Notifications(this));
+		components.prepend(new NotificationsComponent(this, bindings, actions_helper));
 		// TODO: MediaKeysComponent
 		var media_keys = new MediaKeysClient(web_app.id, server, master);
 		media_keys.manage();
