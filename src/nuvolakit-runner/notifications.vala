@@ -148,7 +148,6 @@ public class Notifications : GLib.Object, NotificationsInterface, NotificationIn
 	public bool running {get; private set; default = false;}
 	private RunnerApplication app;
 	private ActionsHelper actions_helper;
-	private Diorite.ActionsRegistry actions_reg;
 	private HashTable<string, Notification> notifications;
 	private bool actions_supported = false;
 	private bool persistence_supported = false;
@@ -215,7 +214,7 @@ public class Notifications : GLib.Object, NotificationsInterface, NotificationIn
 		Diorite.Action[] actions_found = {};
 		foreach (var action_name in actions)
 		{
-			var action = actions_reg.get_action(action_name);
+			var action = app.actions.get_action(action_name);
 			if (action != null)
 				actions_found += action;
 			else
