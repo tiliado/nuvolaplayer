@@ -79,11 +79,12 @@ public abstract class Nuvola.Binding<ObjectType>: GLib.Object
 
 public abstract class Nuvola.ObjectBinding<ObjectType>: Binding<ObjectType>
 {
-	protected SList<ObjectType> objects = null;
+	protected Diorite.SingleList<ObjectType> objects;
 	
 	public ObjectBinding(Diorite.Ipc.MessageServer server, WebWorker web_worker, string name)
 	{
 		base(server, web_worker, name);
+		objects = new Diorite.SingleList<ObjectType>();
 	}
 	
 	public bool add(GLib.Object object)
@@ -94,8 +95,8 @@ public abstract class Nuvola.ObjectBinding<ObjectType>: Binding<ObjectType>
 		if (!object.get_type().is_a(typeof(ObjectType)))
 			return false;
 		
-		objects.prepend((ObjectType) object);
-		if (objects.next == null)
+		objects.prepend(object);
+		if (objects.length == 1)
 		{
 			bind_methods();
 			active = true;
@@ -113,7 +114,7 @@ public abstract class Nuvola.ObjectBinding<ObjectType>: Binding<ObjectType>
 			return false;
 		
 		objects.remove((ObjectType) object);
-		if (objects == null)
+		if (objects.length == 0)
 			unbind_methods();
 		
 		object_removed((ObjectType) object);
