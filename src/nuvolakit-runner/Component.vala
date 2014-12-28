@@ -55,6 +55,11 @@ public abstract class Component: GLib.Object
 		this.enabled = enabled;
 	}
 	
+	public virtual Gtk.Widget? get_settings()
+	{
+		return null;
+	}
+	
 	protected abstract void activate();
 	
 	protected abstract void deactivate();

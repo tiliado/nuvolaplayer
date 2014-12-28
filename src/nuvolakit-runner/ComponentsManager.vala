@@ -25,20 +25,24 @@
 namespace Nuvola
 {
 
-public class ComponentsManager: Gtk.ScrolledWindow
+public class ComponentsManager: Gtk.Stack
 {
 	public Diorite.SingleList<Component> components {get; construct;}
 	private SList<Row> rows = null;
 	private Gtk.Grid grid;
+	private Settings? component_settings = null;
 
 	public ComponentsManager(Diorite.SingleList<Component> components)
 	{
-		GLib.Object(components: components);
+		GLib.Object(components: components, transition_type: Gtk.StackTransitionType.SLIDE_LEFT_RIGHT);
 		grid = new Gtk.Grid();
 		grid.margin = 10;
 		grid.column_spacing = 10;
 		refresh();
-		add(grid);
+		var scroll = new Gtk.ScrolledWindow(null, null);
+		scroll.add(grid);
+		scroll.show();
+		add_named(scroll, "list");
 	}
 	
 	public void refresh()
@@ -59,20 +63,41 @@ public class ComponentsManager: Gtk.ScrolledWindow
 				grid.attach(separator, 0, row++, 3, 1);
 			}
 			
-			rows.prepend(new Row(grid, row++, component));
+			rows.prepend(new Row(grid, row++, this, component));
 		}
 		grid.show_all();
+	}
+	
+	public void show_settings(Component? component)
+	{
+		if (component == null)
+		{
+			if (component_settings != null)
+			{
+				this.visible_child_name = "list";
+				this.remove(component_settings.widget);
+				component_settings = null;
+			}
+		}
+		else
+		{
+			component_settings = new Settings(this, component);
+			this.add(component_settings.widget);
+			this.visible_child = component_settings.widget;
+		}
 	}
 	
 	[Compact]
 	private class Row
 	{
+		public unowned ComponentsManager manager;
 		public unowned Component component;
 		public Gtk.Button? button;
 		public Gtk.Switch checkbox;
 		
-		public Row(Gtk.Grid grid, int row, Component component)
+		public Row(Gtk.Grid grid, int row, ComponentsManager manager, Component component)
 		{
+			this.manager = manager;
 			this.component = component;
 			
 			checkbox = new Gtk.Switch();
@@ -84,7 +109,7 @@ public class ComponentsManager: Gtk.ScrolledWindow
 			grid.attach(checkbox, 0, row, 1, 1);
 			
 			var label = new Gtk.Label(Markup.printf_escaped(
-				"<span size='medium'><b>%s</b></span>\n<span foreground='#A19C9C' size='small'>%s</span>",
+				"<span size='medium'><b>%s</b></span>\n<span foreground='#999999' size='small'>%s</span>",
 				component.name, component.description));
 			label.use_markup = true;
 			label.vexpand = false;
@@ -134,7 +159,58 @@ public class ComponentsManager: Gtk.ScrolledWindow
 		
 		private void on_settings_clicked()
 		{
-			warning("FIXME: ComponentsManager.Row.on_settings_clicked");
+			manager.show_settings(component);
+		}
+	}
+	
+	[Compact]
+	private class Settings
+	{
+		public Gtk.Container widget;
+		public unowned ComponentsManager manager;
+		public Component component;
+		
+		public Settings(ComponentsManager manager, Component component)
+		{
+			this.manager = manager;
+			this.component = component;
+			var grid = new Gtk.Grid();
+			grid.column_spacing = grid.row_spacing = grid.margin = 10;
+			widget = grid;
+			var button = new Gtk.Button.from_icon_name("go-previous-symbolic", Gtk.IconSize.SMALL_TOOLBAR);
+			button.vexpand = button.hexpand = false;
+			button.valign = button.halign = Gtk.Align.CENTER;
+			button.clicked.connect(on_back_clicked);
+			grid.attach(button, 0, 0, 1, 1);
+			var label = new Gtk.Label(Markup.printf_escaped(
+				"<span size='medium'><b>%s</b></span>\n<span foreground='#999999' size='small'>%s</span>",
+				component.name, component.description));
+			label.use_markup = true;
+			label.vexpand = false;
+			label.hexpand = true;
+			label.halign = Gtk.Align.START;
+			label.set_line_wrap(true);
+			grid.attach(label, 1, 0, 1, 1);
+			
+			
+			var component_widget = component.get_settings();
+			if (component_widget != null)
+			{
+				var scroll = new Gtk.ScrolledWindow(null, null);
+				scroll.vexpand = scroll.hexpand = true;
+				scroll.add(component_widget);
+				grid.attach(scroll, 0, 1, 2, 1);
+			}
+			else
+			{
+				grid.attach(new Gtk.Label("No settings available"), 0, 1, 2, 1);
+			}
+			widget.show_all();
+		}
+		
+		private void on_back_clicked()
+		{
+			manager.show_settings(null);
 		}
 	}
 }
