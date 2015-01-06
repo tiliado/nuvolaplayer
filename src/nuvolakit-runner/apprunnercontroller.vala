@@ -166,6 +166,7 @@ public class AppRunnerController : RunnerApplication
 		
 		fatal_error.connect(on_fatal_error);
 		show_error.connect(on_show_error);
+		show_warning.connect(on_show_warning);
 		connection = new Connection(new Soup.SessionAsync(), app_storage.cache_dir.get_child("conn"));
 		connection.session.add_feature_by_type(typeof(Soup.ProxyResolverDefault));
 		
@@ -538,6 +539,27 @@ public class AppRunnerController : RunnerApplication
 		var dialog = new Diorite.ErrorDialog(title, message + "\n\nThe application might not function properly.");
 		dialog.run();
 		dialog.destroy();
+	}
+	
+	private void on_show_warning(string title, string message)
+	{
+		var info_bar = new Gtk.InfoBar();
+		info_bar.show_close_button = true;
+		var label = new Gtk.Label(Markup.printf_escaped("<span size='medium'><b>%s</b></span> %s", title, message));
+		label.use_markup = true;
+		label.vexpand = false;
+		label.hexpand = true;
+		label.halign = Gtk.Align.START;
+		label.set_line_wrap(true);
+		(info_bar.get_content_area() as Gtk.Container).add(label);
+		info_bar.response.connect(on_close_warning);
+		info_bar.show_all();
+		main_window.info_bars.add(info_bar);
+	}
+	
+	private void on_close_warning(Gtk.InfoBar info_bar, int response_id)
+	{
+		(info_bar.get_parent() as Gtk.Container).remove(info_bar);
 	}
 	
 	private bool on_window_state_event(Gdk.EventWindowState event)
