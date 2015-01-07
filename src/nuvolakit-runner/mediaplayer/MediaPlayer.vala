@@ -41,7 +41,7 @@ public class Nuvola.MediaPlayer: GLib.Object, Nuvola.MediaPlayerModel
 		this.actions = actions;
 	}
 	
-	public void set_track_info(string? title, string? artist, string? album, string? state, string? artwork_location,
+	protected void handle_set_track_info(string? title, string? artist, string? album, string? state, string? artwork_location,
 		string? artwork_file)
 	{
 		this.title = title;

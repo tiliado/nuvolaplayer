@@ -35,7 +35,12 @@ public interface Nuvola.MediaPlayerModel: GLib.Object
 	public abstract bool can_play {get; set;}
 	public abstract bool can_pause {get; set;}
 	
-	public abstract void set_track_info(string? title, string? artist, string? album, string? state, string? artwork_location, string? artwork_file);
+	public virtual signal void set_track_info(string? title, string? artist, string? album, string? state, string? artwork_location, string? artwork_file)
+	{
+		handle_set_track_info(title, artist, album, state, artwork_location, artwork_file);
+	}
+	
+	protected abstract void handle_set_track_info(string? title, string? artist, string? album, string? state, string? artwork_location, string? artwork_file);
 	
 	public abstract void play();
 	
