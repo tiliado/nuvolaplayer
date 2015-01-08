@@ -32,6 +32,7 @@ public class AudioScrobblerComponent: Component
 	private Soup.Session connection;
 	private unowned Diorite.KeyValueStorage config;
 	private AudioScrobbler? scrobbler = null;
+	private MediaPlayerModel? player = null;
 	
 	public AudioScrobblerComponent(
 		Diorite.Application app, Bindings bindings, Diorite.KeyValueStorage config, Soup.Session connection)
@@ -73,11 +74,44 @@ public class AudioScrobblerComponent: Component
 		this.scrobbler = scrobbler;
 		if (scrobbler.has_session)
 			scrobbler.retrieve_username.begin();
+		player = bindings.get_model<MediaPlayerModel>();
+		player.set_track_info.connect(on_set_track_info);
+		on_set_track_info(player.title, player.artist, player.album, player.state);
 	}
 	
 	protected override void deactivate()
 	{
 		scrobbler = null;
+		player.set_track_info.disconnect(on_set_track_info);
+		player = null;
+	}
+	
+	private void on_set_track_info(
+		string? title, string? artist, string? album, string? state)
+	{
+		if (scrobbler.can_update_now_playing)
+		{
+			if (title != null && artist != null && state == "playing" )
+				scrobbler.update_now_playing.begin(title, artist, on_update_now_playing_done);
+		}
+	}
+	
+	private void on_update_now_playing_done(GLib.Object? o, AsyncResult res)
+	{
+		var scrobbler = o as AudioScrobbler;
+		return_if_fail(scrobbler != null);
+		try
+		{
+			scrobbler.update_now_playing.end(res);
+		}
+		catch (AudioScrobblerError e)
+		{
+			warning("Update now playing failed for %s (%s): %s", scrobbler.name, scrobbler.id, e.message);
+			app.show_warning(
+				"%s Error".printf(scrobbler.name),
+				"Failed to update information about now playing track and this functionality has been disabled");
+			scrobbler.can_update_now_playing = false;
+		}
 	}
 }
 

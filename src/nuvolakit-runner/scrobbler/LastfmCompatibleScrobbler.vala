@@ -57,7 +57,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
 			"component.scrobbler.%s.".printf(id), this, "scrobbling_enabled").set_default(true).update_property();
 		config.bind_object_property("component.scrobbler.%s.".printf(id), this, "session").update_property();
 		config.bind_object_property("component.scrobbler.%s.".printf(id), this, "username").update_property();
-		can_scrobble = scrobbling_enabled && has_session;
+		can_update_now_playing = scrobbling_enabled && has_session;
 		notify.connect_after(on_notify);
 	}
 	
@@ -150,6 +150,31 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
 		username = user.get_string_member("name");
 		if (username == null || username == "")
 			throw new AudioScrobblerError.WRONG_RESPONSE("%s: Response contains empty username.", API_METHOD);
+	}
+	
+	/**
+	 * Updates now playing status on Last.fm
+	 * 
+	 * @param song song name
+	 * @param artist artist name
+	 * @throws AudioScrobblerError on failure
+	 */
+	public async override void update_now_playing(string song, string artist) throws AudioScrobblerError
+	{
+		return_if_fail(session != null);
+		const string API_METHOD = "track.updateNowPlaying";
+		debug("%s update now playing: %s by %s", id, song, artist);
+		// http://www.last.fm/api/show/track.updateNowPlaying
+		var params = new HashTable<string,string>(null, null);
+		params.insert("method", API_METHOD);
+		params.insert("api_key", api_key);
+		params.insert("sk", session);
+		params.insert("track", song);
+		params.insert("artist", artist);
+	
+		var response = yield send_request(HTTP_POST, params);
+		if (!response.has_member("nowplaying"))
+			throw new AudioScrobblerError.WRONG_RESPONSE("%s: Response doesn't contain nowplaying member.", API_METHOD);
 	}
 	
 	/**
@@ -281,10 +306,10 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
 		switch (param.name)
 		{
 		case "scrobbling-enabled":
-			can_scrobble = scrobbling_enabled && has_session;
+			can_update_now_playing = scrobbling_enabled && has_session;
 			break;
 		case "session":
-			can_scrobble = scrobbling_enabled && has_session;
+			can_update_now_playing = scrobbling_enabled && has_session;
 			break;
 		}
 	}
