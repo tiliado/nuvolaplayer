@@ -27,12 +27,17 @@ namespace Nuvola
 
 public class AudioScrobblerComponent: Component
 {
+	private static const int SCROBBLE_SONG_DELAY = 30;
+	
 	private Bindings bindings;
 	private Diorite.Application app;
 	private Soup.Session connection;
 	private unowned Diorite.KeyValueStorage config;
 	private AudioScrobbler? scrobbler = null;
 	private MediaPlayerModel? player = null;
+	private uint scrobble_timeout = 0;
+	private string? scrobble_title = null;
+	private string? scrobble_artist = null;
 	
 	public AudioScrobblerComponent(
 		Diorite.Application app, Bindings bindings, Diorite.KeyValueStorage config, Soup.Session connection)
@@ -81,6 +86,12 @@ public class AudioScrobblerComponent: Component
 	
 	protected override void deactivate()
 	{
+		if (scrobble_timeout != 0)
+		{
+			Source.remove(scrobble_timeout);
+			scrobble_timeout = 0;
+		}
+		
 		scrobbler = null;
 		player.set_track_info.disconnect(on_set_track_info);
 		player = null;
@@ -93,6 +104,26 @@ public class AudioScrobblerComponent: Component
 		{
 			if (title != null && artist != null && state == "playing" )
 				scrobbler.update_now_playing.begin(title, artist, on_update_now_playing_done);
+		}
+		
+		if (scrobble_timeout != 0)
+		{
+			Source.remove(scrobble_timeout);
+			scrobble_timeout = 0;
+		}
+		
+		if (scrobbler.can_scrobble)
+		{
+			if (title != null && artist != null && state == "playing" )
+			{
+				scrobble_title = title;
+				scrobble_artist = artist;
+				scrobble_timeout = Timeout.add_seconds(SCROBBLE_SONG_DELAY, scrobble_cb);
+			}
+			else
+			{
+				scrobble_artist = scrobble_title = null;
+			}
 		}
 	}
 	
@@ -111,6 +142,35 @@ public class AudioScrobblerComponent: Component
 				"%s Error".printf(scrobbler.name),
 				"Failed to update information about now playing track and this functionality has been disabled");
 			scrobbler.can_update_now_playing = false;
+		}
+	}
+	
+	private bool scrobble_cb()
+	{
+		scrobble_timeout = 0;
+		if (scrobbler.can_scrobble)
+		{
+			var datetime = new DateTime.now_utc();
+			scrobbler.scrobble_track.begin(scrobble_title, scrobble_artist, datetime.to_unix(), on_scrobble_track_done);
+		}
+		return false;
+	}
+	
+	private void on_scrobble_track_done(GLib.Object? o, AsyncResult res)
+	{
+		var scrobbler = o as AudioScrobbler;
+		return_if_fail(scrobbler != null);
+		try
+		{
+			scrobbler.scrobble_track.end(res);
+		}
+		catch (AudioScrobblerError e)
+		{
+			warning("Scrobbling failed for %s (%s): %s", scrobbler.name, scrobbler.id, e.message);
+			app.show_warning(
+				"%s Error".printf(scrobbler.name),
+				"Failed to scrobble track. This functionality has been disabled");
+			scrobbler.can_scrobble = false;
 		}
 	}
 }

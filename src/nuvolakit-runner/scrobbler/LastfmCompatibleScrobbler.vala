@@ -58,6 +58,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
 		config.bind_object_property("component.scrobbler.%s.".printf(id), this, "session").update_property();
 		config.bind_object_property("component.scrobbler.%s.".printf(id), this, "username").update_property();
 		can_update_now_playing = scrobbling_enabled && has_session;
+		can_scrobble = scrobbling_enabled && has_session;
 		notify.connect_after(on_notify);
 	}
 	
@@ -175,6 +176,32 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
 		var response = yield send_request(HTTP_POST, params);
 		if (!response.has_member("nowplaying"))
 			throw new AudioScrobblerError.WRONG_RESPONSE("%s: Response doesn't contain nowplaying member.", API_METHOD);
+	}
+	
+	/**
+	 * Scrobbles track to Last.fm
+	 * 
+	 * @param song song name
+	 * @param artist artist name
+	 * @param timestamp Unix time
+	 * @throws AudioScrobblerError on failure
+	 */
+	public async override void scrobble_track(string song, string artist, int64 timestamp) throws AudioScrobblerError
+	{
+		return_if_fail(session != null);
+		debug("%s scrobble: %s by %s, %s", id, song, artist, timestamp.to_string());
+		// http://www.last.fm/api/show/track.scrobble
+		var params = new HashTable<string,string>(null, null);
+		params.insert("method", "track.scrobble");
+		params.insert("api_key", api_key);
+		params.insert("sk", session);
+		params.insert("track", song);
+		params.insert("artist", artist);
+		params.insert("timestamp", timestamp.to_string());
+	
+		var response = yield send_request(HTTP_POST, params);
+		if (!response.has_member("scrobbles"))
+			throw new AudioScrobblerError.WRONG_RESPONSE("Response doesn't contain scrobbles member.");
 	}
 	
 	/**
@@ -302,14 +329,11 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
 	
 	private void on_notify(ParamSpec param)
 	{
-		message(" **** %s", param.name);
 		switch (param.name)
 		{
 		case "scrobbling-enabled":
-			can_update_now_playing = scrobbling_enabled && has_session;
-			break;
 		case "session":
-			can_update_now_playing = scrobbling_enabled && has_session;
+			can_scrobble = can_update_now_playing = scrobbling_enabled && has_session;
 			break;
 		}
 	}
