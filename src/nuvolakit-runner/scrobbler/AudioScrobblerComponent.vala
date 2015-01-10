@@ -33,6 +33,7 @@ public class AudioScrobblerComponent: Component
 	private Diorite.Application app;
 	private Soup.Session connection;
 	private unowned Diorite.KeyValueStorage config;
+	private unowned Diorite.KeyValueStorage global_config;
 	private AudioScrobbler? scrobbler = null;
 	private MediaPlayerModel? player = null;
 	private uint scrobble_timeout = 0;
@@ -40,11 +41,12 @@ public class AudioScrobblerComponent: Component
 	private string? scrobble_artist = null;
 	
 	public AudioScrobblerComponent(
-		Diorite.Application app, Bindings bindings, Diorite.KeyValueStorage config, Soup.Session connection)
+		Diorite.Application app, Bindings bindings, Diorite.KeyValueStorage global_config, Diorite.KeyValueStorage config, Soup.Session connection)
 	{
 		base("scrobbler", "Audio Scrobbler Services", "Integration with audio scrobbling services like Last FM and Libre FM.");
 		this.bindings = bindings;
 		this.app = app;
+		this.global_config = global_config;
 		this.config = config;
 		this.connection = connection;
 		has_settings = true;
@@ -75,7 +77,7 @@ public class AudioScrobblerComponent: Component
 	
 	protected override void activate()
 	{
-		var scrobbler = new LastfmScrobbler(connection, config);
+		var scrobbler = new LastfmScrobbler(connection, global_config, config);
 		this.scrobbler = scrobbler;
 		if (scrobbler.has_session)
 			scrobbler.retrieve_username.begin();

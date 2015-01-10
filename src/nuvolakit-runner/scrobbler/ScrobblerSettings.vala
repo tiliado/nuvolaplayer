@@ -29,15 +29,12 @@ public class ScrobblerSettings: Gtk.Grid
 {
 	private LastfmCompatibleScrobbler scrobbler;
 	private unowned Diorite.Application app;
-	private unowned Diorite.KeyValueStorage config;
 	private Gtk.Switch checkbox;
 	
-	public ScrobblerSettings(
-		LastfmCompatibleScrobbler scrobbler, Diorite.Application app, Diorite.KeyValueStorage config)
+	public ScrobblerSettings(LastfmCompatibleScrobbler scrobbler, Diorite.Application app)
 	{
 		Object(orientation: Gtk.Orientation.VERTICAL, column_spacing: 10, row_spacing: 10);
 		this.scrobbler = scrobbler;
-		this.config = config;
 		this.app = app;
 		
 		var row = 2;

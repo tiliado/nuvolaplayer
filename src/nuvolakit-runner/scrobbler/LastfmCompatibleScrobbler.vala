@@ -35,7 +35,6 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
 	public bool scrobbling_enabled {get; set; default = false;}
 	public string? username { get; protected set; default = null;}
 	private Soup.Session connection;
-	private unowned Diorite.KeyValueStorage config;
 	private string api_key;
 	private string api_secret;
 	private string api_root;
@@ -43,20 +42,19 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
 	private string? token = null;
 	
 	public LastfmCompatibleScrobbler(
-		Soup.Session connection, Diorite.KeyValueStorage config, string id, string name, string auth_endpoint,
-		string api_key, string api_secret, string api_root)
+		Soup.Session connection, Diorite.KeyValueStorage global_config, Diorite.KeyValueStorage config, string id,
+		string name, string auth_endpoint, string api_key, string api_secret, string api_root)
 	{
 		GLib.Object(id: id, name: name);
 		this.connection = connection;
-		this.config = config;
 		this.auth_endpoint = auth_endpoint;
 		this.api_key = api_key;
 		this.api_secret = api_secret;
 		this.api_root = api_root;
 		config.bind_object_property(
 			"component.scrobbler.%s.".printf(id), this, "scrobbling_enabled").set_default(true).update_property();
-		config.bind_object_property("component.scrobbler.%s.".printf(id), this, "session").update_property();
-		config.bind_object_property("component.scrobbler.%s.".printf(id), this, "username").update_property();
+		global_config.bind_object_property("component.scrobbler.%s.".printf(id), this, "session").update_property();
+		global_config.bind_object_property("component.scrobbler.%s.".printf(id), this, "username").update_property();
 		can_update_now_playing = scrobbling_enabled && has_session;
 		can_scrobble = scrobbling_enabled && has_session;
 		notify.connect_after(on_notify);
@@ -64,7 +62,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
 	
 	public override Gtk.Widget? get_settings(Diorite.Application app)
 	{
-		return new ScrobblerSettings(this, app, config);
+		return new ScrobblerSettings(this, app);
 	}
 	
 	/**
