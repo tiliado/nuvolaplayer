@@ -79,24 +79,72 @@ public class AudioScrobblerComponent: Component
 	{
 		var scrobbler = new LastfmScrobbler(connection, global_config, config);
 		this.scrobbler = scrobbler;
+		
 		if (scrobbler.has_session)
 			scrobbler.retrieve_username.begin();
 		player = bindings.get_model<MediaPlayerModel>();
 		player.set_track_info.connect(on_set_track_info);
+		scrobbler.notify.connect_after(on_scrobbler_notify);
 		on_set_track_info(player.title, player.artist, player.album, player.state);
 	}
 	
 	protected override void deactivate()
+	{
+		scrobbler.notify.disconnect(on_scrobbler_notify);
+		scrobbler = null;
+		player.set_track_info.disconnect(on_set_track_info);
+		player = null;
+		cancel_scrobbling();
+	}
+	
+	
+	
+	private void schedule_scrobbling(string? title, string? artist, string? state)
+	{
+		if (scrobble_timeout == 0)
+		{
+			if (title != null && artist != null && state == "playing")
+			{
+				scrobble_title = title;
+				scrobble_artist = artist;
+				scrobble_timeout = Timeout.add_seconds(SCROBBLE_SONG_DELAY, scrobble_cb);
+			}
+			else
+			{
+				scrobble_artist = scrobble_title = null;
+			}
+		}
+	}
+	
+	private void cancel_scrobbling()
 	{
 		if (scrobble_timeout != 0)
 		{
 			Source.remove(scrobble_timeout);
 			scrobble_timeout = 0;
 		}
-		
-		scrobbler = null;
-		player.set_track_info.disconnect(on_set_track_info);
-		player = null;
+	}
+	
+	private void on_scrobbler_notify(GLib.Object o, ParamSpec p)
+	{
+		var scrobbler = o as AudioScrobbler;
+		return_if_fail(scrobbler != null);
+		switch (p.name)
+		{
+		case "can-update-now-playing":
+			if (scrobbler.can_update_now_playing)
+			{
+				if (player.title != null && player.artist != null && player.state == "playing")
+					scrobbler.update_now_playing.begin(player.title, player.artist, on_update_now_playing_done);
+			}
+			break;
+		case "can-scrobble":
+			if (scrobbler.can_scrobble)
+				schedule_scrobbling(player.title, player.artist, player.state);
+			else
+				cancel_scrobbling();
+			break;
+		}
 	}
 	
 	private void on_set_track_info(
@@ -108,25 +156,10 @@ public class AudioScrobblerComponent: Component
 				scrobbler.update_now_playing.begin(title, artist, on_update_now_playing_done);
 		}
 		
-		if (scrobble_timeout != 0)
-		{
-			Source.remove(scrobble_timeout);
-			scrobble_timeout = 0;
-		}
+		cancel_scrobbling();
 		
 		if (scrobbler.can_scrobble)
-		{
-			if (title != null && artist != null && state == "playing" )
-			{
-				scrobble_title = title;
-				scrobble_artist = artist;
-				scrobble_timeout = Timeout.add_seconds(SCROBBLE_SONG_DELAY, scrobble_cb);
-			}
-			else
-			{
-				scrobble_artist = scrobble_title = null;
-			}
-		}
+			schedule_scrobbling(title, artist, state);
 	}
 	
 	private void on_update_now_playing_done(GLib.Object? o, AsyncResult res)
