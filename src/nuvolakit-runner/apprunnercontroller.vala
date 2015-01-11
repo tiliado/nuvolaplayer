@@ -453,7 +453,7 @@ public class AppRunnerController : RunnerApplication
 		media_keys.manage();
 		bindings.add_object(media_keys);
 		bindings.add_object(menu_bar);
-		
+		components.prepend(new AudioScrobblerComponent(this, bindings, master_config, config, connection.session));
 		components.prepend(new MPRISComponent(this, bindings, config));
 	}
 	
