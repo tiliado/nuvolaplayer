@@ -57,7 +57,15 @@ public class WebExtension: GLib.Object
 		{
 			error("Web Worker server error: %s", e.message);
 		}
-		
+		Idle.add(late_init_cb);
+	}
+	
+	private bool late_init_cb()
+	{
+		/* 
+		 * For unknown reason, runner.wait_for_echo() in WebExtension constructor blocks window_object_cleared signal,
+		 * so it has been moved to the late init method.
+		 */
 		assert(runner.wait_for_echo(1000));
 		
 		Variant response;
@@ -79,6 +87,7 @@ public class WebExtension: GLib.Object
 		js_api.send_message_async.connect(on_send_message_async);
 		js_api.send_message_sync.connect(on_send_message_sync);
 		initialized = true;
+		return false;
 	}
 	
 	private void on_window_object_cleared(WebKit.ScriptWorld world, WebKit.WebPage page, WebKit.Frame frame)
