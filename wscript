@@ -202,7 +202,6 @@ def configure(ctx):
 		ctx.check_dep(ctx.env.WEBKITEXT, 'WEBKITEXT', '2.6')
 		ctx.check_dep(ctx.env.JSCORE, 'JSCORE', '2.6')
 		ctx.vala_def("WEBKIT2GTK4")
-		sys.stderr.write("\n*** WARNING ***\nBuild with webkit2gtk-4.0 is not functional yet.\nhttps://github.com/tiliado/nuvolaplayer/issues/2\n\n")
 	
 	ctx.env.with_unity = ctx.options.unity
 	if ctx.options.unity:
