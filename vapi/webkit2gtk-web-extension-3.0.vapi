@@ -3658,7 +3658,7 @@ namespace WebKit {
 		protected WebPage ();
 		public uint64 get_id ();
 		public unowned string get_uri ();
-		public Frame get_main_frame ();
+		public unowned WebKit.Frame get_main_frame ();
 		public string uri { get; }
 		public signal void document_loaded ();
 		public signal bool send_request (WebKit.URIRequest request, WebKit.URIResponse redirected_response);
