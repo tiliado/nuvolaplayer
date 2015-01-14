@@ -42,9 +42,10 @@ public abstract class AudioScrobbler : GLib.Object
 {
 	public string id {get; protected construct;}
 	public string name {get; protected construct;}
-	public bool can_scrobble {get; set; default = false;}
 	public bool has_settings {get; protected set; default = false;}
-	public bool can_update_now_playing {get; set; default = false;}
+	public bool scrobbling_enabled {get; set; default = false;}
+	public bool can_scrobble {get; protected set; default = false;}
+	public bool can_update_now_playing {get; protected set; default = false;}
 	
 	public virtual Gtk.Widget? get_settings(Diorite.Application app)
 	{

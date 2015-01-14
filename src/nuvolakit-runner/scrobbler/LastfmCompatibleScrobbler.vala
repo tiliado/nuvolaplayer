@@ -32,7 +32,6 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
 	
 	public string? session {get; protected set; default = null;}
 	public bool has_session { get{ return session != null; }}
-	public bool scrobbling_enabled {get; set; default = false;}
 	public string? username { get; protected set; default = null;}
 	private Soup.Session connection;
 	private string api_key;
@@ -42,7 +41,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
 	private string? token = null;
 	
 	public LastfmCompatibleScrobbler(
-		Soup.Session connection, Diorite.KeyValueStorage global_config, Diorite.KeyValueStorage config, string id,
+		Soup.Session connection, string id,
 		string name, string auth_endpoint, string api_key, string api_secret, string api_root)
 	{
 		GLib.Object(id: id, name: name);
@@ -51,10 +50,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
 		this.api_key = api_key;
 		this.api_secret = api_secret;
 		this.api_root = api_root;
-		config.bind_object_property(
-			"component.scrobbler.%s.".printf(id), this, "scrobbling_enabled").set_default(true).update_property();
-		global_config.bind_object_property("component.scrobbler.%s.".printf(id), this, "session").update_property();
-		global_config.bind_object_property("component.scrobbler.%s.".printf(id), this, "username").update_property();
+		
 		can_update_now_playing = scrobbling_enabled && has_session;
 		can_scrobble = scrobbling_enabled && has_session;
 		notify.connect_after(on_notify);

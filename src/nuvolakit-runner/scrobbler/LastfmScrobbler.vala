@@ -27,9 +27,9 @@ namespace Nuvola
 
 public class LastfmScrobbler : LastfmCompatibleScrobbler
 {
-	public LastfmScrobbler(Soup.Session connection, Diorite.KeyValueStorage global_config, Diorite.KeyValueStorage config)
+	public LastfmScrobbler(Soup.Session connection)
 	{
-		base(connection, global_config, config, "lastfm", "Last.fm",
+		base(connection, "lastfm", "Last.fm",
 			"http://www.last.fm/api/auth/",
 			"209d19abf80aa2c6d049216ce46830d7",
 			"d157730073941bdd851eac950f3154e6",

@@ -77,8 +77,12 @@ public class AudioScrobblerComponent: Component
 	
 	protected override void activate()
 	{
-		var scrobbler = new LastfmScrobbler(connection, global_config, config);
+		var scrobbler = new LastfmScrobbler(connection);
 		this.scrobbler = scrobbler;
+		var base_key = "component.%s.%s.".printf(id, scrobbler.id);
+		config.bind_object_property(base_key, scrobbler, "scrobbling_enabled").set_default(true).update_property();
+		global_config.bind_object_property(base_key, scrobbler, "session").update_property();
+		global_config.bind_object_property(base_key, scrobbler, "username").update_property();
 		
 		if (scrobbler.has_session)
 			scrobbler.retrieve_username.begin();
@@ -176,7 +180,7 @@ public class AudioScrobblerComponent: Component
 			app.show_warning(
 				"%s Error".printf(scrobbler.name),
 				"Failed to update information about now playing track and this functionality has been disabled");
-			scrobbler.can_update_now_playing = false;
+			scrobbler.scrobbling_enabled = false;
 		}
 	}
 	
@@ -205,7 +209,7 @@ public class AudioScrobblerComponent: Component
 			app.show_warning(
 				"%s Error".printf(scrobbler.name),
 				"Failed to scrobble track. This functionality has been disabled");
-			scrobbler.can_scrobble = false;
+			scrobbler.scrobbling_enabled = false;
 		}
 	}
 }
