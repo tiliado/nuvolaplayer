@@ -27,7 +27,7 @@ namespace Nuvola
 
 public class AudioScrobblerComponent: Component
 {
-	private static const int SCROBBLE_SONG_DELAY = 30;
+	private static const int SCROBBLE_SONG_DELAY = 60;
 	
 	private Bindings bindings;
 	private Diorite.Application app;
@@ -39,6 +39,7 @@ public class AudioScrobblerComponent: Component
 	private uint scrobble_timeout = 0;
 	private string? scrobble_title = null;
 	private string? scrobble_artist = null;
+	private bool scrobbled = false;
 	
 	public AudioScrobblerComponent(
 		Diorite.Application app, Bindings bindings, Diorite.KeyValueStorage global_config, Diorite.KeyValueStorage config, Soup.Session connection)
@@ -99,24 +100,24 @@ public class AudioScrobblerComponent: Component
 		player.set_track_info.disconnect(on_set_track_info);
 		player = null;
 		cancel_scrobbling();
+		scrobble_title = null;
+		scrobble_artist = null;
+		scrobbled = false;
 	}
-	
-	
 	
 	private void schedule_scrobbling(string? title, string? artist, string? state)
 	{
-		if (scrobble_timeout == 0)
+		if (scrobble_timeout == 0 && title != null && artist != null && state == "playing")
 		{
-			if (title != null && artist != null && state == "playing")
+			if (scrobble_title != title || scrobble_artist != artist)
 			{
 				scrobble_title = title;
 				scrobble_artist = artist;
+				scrobbled = false;
+			}
+			
+			if (!scrobbled)
 				scrobble_timeout = Timeout.add_seconds(SCROBBLE_SONG_DELAY, scrobble_cb);
-			}
-			else
-			{
-				scrobble_artist = scrobble_title = null;
-			}
 		}
 	}
 	
@@ -189,6 +190,7 @@ public class AudioScrobblerComponent: Component
 		scrobble_timeout = 0;
 		if (scrobbler.can_scrobble)
 		{
+			scrobbled = true;
 			var datetime = new DateTime.now_utc();
 			scrobbler.scrobble_track.begin(scrobble_title, scrobble_artist, datetime.to_unix(), on_scrobble_track_done);
 		}
