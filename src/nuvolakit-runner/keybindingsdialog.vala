@@ -62,7 +62,7 @@ public class KeybindingsDialog : Gtk.Dialog
 			warning("Unable to load application icon.");
 		}
 		
-		set_default_size(400, 400);
+		set_default_size(500, 400);
 		
 		if (parent != null)
 			set_transient_for(parent);
