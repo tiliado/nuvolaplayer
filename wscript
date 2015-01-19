@@ -40,13 +40,16 @@ import subprocess
 try:
 	try:
 		# Read revision info from file revision-info created by ./waf dist
-		short_id, long_id = open("revision-info", "r").read().split(" ", 1)
+		timestamp, short_id, long_id = open("upstream-revision", "r").read().split(" ", 2)
 	except Exception as e:
 		# Read revision info from current branch
-		output = subprocess.Popen(["git", "log", "-n", "1", "--pretty=format:%h %H"], stdout=subprocess.PIPE).communicate()[0]
-		short_id, long_id = output.split(" ", 1)
+		output = subprocess.Popen(["git", "log", "-n", "1", "--pretty=format:%ct %h %H"], stdout=subprocess.PIPE).communicate()[0]
+		timestamp, short_id, long_id = output.split(" ", 2)
+	
+	from datetime import datetime
+	timestamp = datetime.utcfromtimestamp(int(timestamp))
 except Exception as e:
-	short_id, long_id = "fuzzy_id", "fuzzy_id"
+	timestamp, short_id, long_id = None, "fuzzy", "fuzzy"
 
 REVISION_ID = str(long_id).strip()
 
@@ -55,10 +58,13 @@ VERSIONS, VERSION_SUFFIX = VERSION.split("+")
 if VERSION_SUFFIX == "stable":
 	VERSION = VERSIONS
 elif VERSION_SUFFIX == "":
-	from datetime import datetime
-	suffix = "{}.{}".format(datetime.utcnow().strftime("%Y%m%d%H%M"), short_id)
-	VERSION_SUFFIX += suffix
-	VERSION += suffix
+	if timestamp:
+		suffix = "{}.{}".format(timestamp.strftime("%Y%m%d%H%M"), short_id)
+		VERSION_SUFFIX += suffix
+		VERSION += suffix
+	else:
+		VERSION = VERSIONS
+
 VERSIONS = tuple(int(i) for i in VERSIONS.split("."))
 
 import sys
@@ -132,8 +138,11 @@ def configure(ctx):
 		sys.exit(1)
 	
 	
-	ctx.msg("Revision id", REVISION_ID, "GREEN")
-	
+	ctx.msg("Version", VERSION, "GREEN")
+	if REVISION_ID != "fuzzy":
+		ctx.msg("Upstream revision", REVISION_ID, "GREEN")
+	else:
+		ctx.msg("Upstream revision", "unknown (unsupported build)", "RED")
 	ctx.define(PLATFORM, 1)
 	ctx.env.VALA_DEFINES = [PLATFORM]
 	ctx.msg('Target platform', PLATFORM, "GREEN")
@@ -387,11 +396,11 @@ def post(ctx):
 def dist(ctx):
 	ctx.algo = "tar.gz"
 	ctx.excl = '.git .gitignore build/* **/.waf* **/*~ **/*.swp **/.lock* bzrcommit.txt **/*.pyc'
-	ctx.exec_command("git log -n 1 --pretty='format:%h %H' > revision-info")
+	ctx.exec_command("git log -n 1 --pretty='format:%ct %h %H' > upstream-revision")
 	
 	def archive():
 		ctx._archive()
-		node = ctx.path.find_node("revision-info")
+		node = ctx.path.find_node("upstream-revision")
 		if node:
 			node.delete()
 	ctx._archive = ctx.archive
