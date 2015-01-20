@@ -346,14 +346,24 @@ public class MasterController : Diorite.Application
 	private void start_app(string app_id)
 	{
 		hold();
+		
+		var app_meta = web_app_reg.get_app_meta(app_id);
+		if (app_meta == null)
+		{
+			var dialog = new Diorite.ErrorDialog(
+				"Web App Loading Error",
+				"The web application with id '%s' has not been found.".printf(app_id));
+			dialog.run();
+			dialog.destroy();
+			release();
+			return;
+		}
+		
 		string[] argv = new string[exec_cmd.length + 3];
 		for (var i = 0; i < exec_cmd.length; i++)
 			argv[i] = exec_cmd[i];
 		
 		var j = exec_cmd.length;
-		var app_meta = web_app_reg.get_app_meta(app_id);
-		assert(app_meta != null);
-		
 		argv[j++] = "-a";
 		argv[j++] = app_meta.data_dir.get_path();
 		argv[j++] = null;
@@ -367,6 +377,11 @@ public class MasterController : Diorite.Application
 		catch (GLib.Error e)
 		{
 			warning("Failed to launch app runner for '%s'. %s", app_id, e.message);
+			var dialog = new Diorite.ErrorDialog(
+				"Web App Loading Error",
+				"The web application '%s' has failed to load.".printf(app_meta.name));
+			dialog.run();
+			dialog.destroy();
 			release();
 			return;
 		}
