@@ -167,7 +167,7 @@ public class AppRunnerController : RunnerApplication
 		fatal_error.connect(on_fatal_error);
 		show_error.connect(on_show_error);
 		show_warning.connect(on_show_warning);
-		connection = new Connection(new Soup.SessionAsync(), app_storage.cache_dir.get_child("conn"));
+		connection = new Connection(new Soup.Session(), app_storage.cache_dir.get_child("conn"));
 		connection.session.add_feature_by_type(typeof(Soup.ProxyResolverDefault));
 		
 		web_engine = new WebEngine(this, server, web_app, app_storage, config);

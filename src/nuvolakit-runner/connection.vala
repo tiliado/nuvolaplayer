@@ -27,10 +27,10 @@ namespace Nuvola
 
 public class Connection : GLib.Object
 {
-	public Soup.SessionAsync session {get; construct set;}
+	public Soup.Session session {get; construct set;}
 	public File cache_dir {get; construct set;}
 	
-	public Connection(Soup.SessionAsync session, File cache_dir)
+	public Connection(Soup.Session session, File cache_dir)
 	{
 		Object(session: session, cache_dir: cache_dir);
 	}
