@@ -68,7 +68,7 @@ public class KeybindingsDialog : Gtk.Dialog
 			set_transient_for(parent);
 		modal = true;
 		
-		add_buttons(Gtk.Stock.CLOSE, Gtk.ResponseType.CLOSE);
+		add_buttons("Close", Gtk.ResponseType.CLOSE);
 		
 		model = new Gtk.ListStore(6, typeof(string), typeof(string), typeof(uint), typeof(Gdk.ModifierType), typeof(uint), typeof(Gdk.ModifierType));
 		Gtk.TreeIter iter;

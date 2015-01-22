@@ -263,8 +263,8 @@ public class MasterController : Diorite.Application
 	private void do_install_app()
 	{
 		var dialog = new Gtk.FileChooserDialog(("Choose service integration package"),
-			main_window, Gtk.FileChooserAction.OPEN, Gtk.Stock.CANCEL,
-			Gtk.ResponseType.CANCEL, Gtk.Stock.OPEN, Gtk.ResponseType.ACCEPT
+			main_window, Gtk.FileChooserAction.OPEN, "Cancel",
+			Gtk.ResponseType.CANCEL, "Open", Gtk.ResponseType.ACCEPT
 		);
 		dialog.set_default_size(400, -1);
 		var response = dialog.run();

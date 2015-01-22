@@ -60,7 +60,7 @@ public class PreferencesDialog : Gtk.Dialog
 			set_transient_for(parent);
 		modal = true;
 		
-		add_buttons(Gtk.Stock.CLOSE, Gtk.ResponseType.CLOSE, Gtk.Stock.OK, Gtk.ResponseType.OK);
+		add_buttons("Cancel", Gtk.ResponseType.CLOSE, "Save changes", Gtk.ResponseType.OK);
 		notebook = new Gtk.Notebook();
 		notebook.margin_bottom = 10;
 		form.show();
