@@ -67,7 +67,9 @@ public class Notification
 	
 	public void show(bool add_actions)
 	{
-		return_if_fail(notification != null);
+		if (notification == null)
+			return;
+		
 		notification.clear_hints();
 		notification.clear_actions();
 		
@@ -171,9 +173,6 @@ public class Notifications : GLib.Object, NotificationsInterface, NotificationIn
 		actions_supported =  capabilities.find_custom("actions", strcmp) != null;
 		icons_supported =  capabilities.find_custom("action-icons", strcmp) != null;
 		debug(@"Notifications: persistence $persistence_supported, actions $actions_supported, icons $icons_supported");
-		action = actions_helper.simple_action(
-			"view", "app", "show-notification", "Show notification", null, null, null, show_notifications); // ref++
-		app.actions.add_action(action);
 	}
 	
 	public void stop()
@@ -258,12 +257,6 @@ public class Notifications : GLib.Object, NotificationsInterface, NotificationIn
 			supported = true;
 		
 		return Binding.CONTINUE;
-	}
-	
-	private void show_notifications()
-	{
-		foreach (var notification in notifications.get_values())
-			notification.show(true);
 	}
 }
 

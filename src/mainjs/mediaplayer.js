@@ -59,6 +59,10 @@ var PlayerAction = {
      * Skip to previous track
      */
     NEXT_SONG: "next-song",
+    /**
+     * Show playback notification
+     */
+    PLAYBACK_NOTIFICATION: "playback-notification",
 }
 
 /**
@@ -273,6 +277,7 @@ MediaPlayer._onInitAppRunner = function(emitter)
     Nuvola.actions.addAction("playback", "win", PlayerAction.STOP, "Stop", null, "media-playback-stop", null);
     Nuvola.actions.addAction("playback", "win", PlayerAction.PREV_SONG, "Previous song", null, "media-skip-backward", null);
     Nuvola.actions.addAction("playback", "win", PlayerAction.NEXT_SONG, "Next song", null, "media-skip-forward", null);
+    Nuvola.actions.addAction("playback", "win", PlayerAction.PLAYBACK_NOTIFICATION, "Show playback notification", null, null, null);
     this._notification.setActions([PlayerAction.PREV_SONG, PlayerAction.PLAY, PlayerAction.PAUSE, PlayerAction.NEXT_SONG]);
     Nuvola.config.setDefault(this._BACKGROUND_PLAYBACK, true);
     this._updateMenu();
@@ -283,6 +288,7 @@ MediaPlayer._onInitWebWorker = function(emitter)
 {
     Nuvola.config.connect("ConfigChanged", this);
     Nuvola.mediaKeys.connect("MediaKeyPressed", this);
+    Nuvola.actions.connect("ActionActivated", this);
     this._track = {
         "title": undefined,
         "artist": undefined,
@@ -290,6 +296,16 @@ MediaPlayer._onInitWebWorker = function(emitter)
         "artLocation": undefined
     };
     this._setActions();
+}
+
+MediaPlayer._onActionActivated = function(emitter, name, param)
+{
+    switch (name)
+    {
+    case PlayerAction.PLAYBACK_NOTIFICATION:
+        this._notification.show();
+        break;
+    }
 }
 
 MediaPlayer._setActions = function()
