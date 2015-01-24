@@ -167,7 +167,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
 		params.insert("track", song);
 		params.insert("artist", artist);
 	
-		var response = yield send_request(HTTP_POST, params);
+		var response = yield send_request(HTTP_POST, params, 20);
 		if (!response.has_member("nowplaying"))
 			throw new AudioScrobblerError.WRONG_RESPONSE("%s: Response doesn't contain nowplaying member.", API_METHOD);
 	}
@@ -193,7 +193,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
 		params.insert("artist", artist);
 		params.insert("timestamp", timestamp.to_string());
 	
-		var response = yield send_request(HTTP_POST, params);
+		var response = yield send_request(HTTP_POST, params, 20);
 		if (!response.has_member("scrobbles"))
 			throw new AudioScrobblerError.WRONG_RESPONSE("Response doesn't contain scrobbles member.");
 	}
@@ -206,7 +206,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
 	 * @return Root JSON object of the response
 	 * @throws AudioScrobblerError on failure
 	 */
-	private async Json.Object send_request(string method, HashTable<string,string> params) throws AudioScrobblerError
+	private async Json.Object send_request(string method, HashTable<string,string> params, uint retry=0) throws AudioScrobblerError
 	{
 		Soup.Message message;
 		var request = create_signed_request(params) + "&format=json";
@@ -226,37 +226,55 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
 			error("Last.fm: Unsupported request method: %s", method);
 		}
 		
-		SourceFunc callback = send_request.callback;
-		connection.queue_message(message, () =>
+		while (true)
 		{
-			Idle.add((owned) callback);
-		});
-		yield;
-		
-		var response = (string) message.response_body.flatten().data;
-		var parser = new Json.Parser();
-		try
-		{
-			parser.load_from_data(response);
+			SourceFunc resume = send_request.callback;
+			connection.queue_message(message, () =>
+			{
+				Idle.add((owned) resume);
+			});
+			yield;
+			
+			var response = (string) message.response_body.flatten().data;
+			var parser = new Json.Parser();
+			try
+			{
+				parser.load_from_data(response);
+			}
+			catch (GLib.Error e)
+			{
+				debug("Send request: %s\n---------\n%s\n----------", (string) request.data, response);
+				throw new AudioScrobblerError.JSON_PARSE_ERROR(e.message);
+			}
+			
+			var root = parser.get_root();
+			if (root == null)
+				throw new AudioScrobblerError.WRONG_RESPONSE("Empty response from the server.");
+			var root_object = root.get_object();
+			if (root_object.has_member("error") && root_object.has_member("message"))
+			{
+				var error_code = root_object.get_int_member("error");
+				var error_message = root_object.get_string_member("message");
+				switch (error_code)
+				{
+				case 11:  // Service Offline - This service is temporarily offline. Try again later.
+				case 16:  // There was a temporary error processing your request. Please try again
+				case 29:  // Rate limit exceeded - Your IP has made too many requests in a short period
+					if (retry == 0)
+						throw new AudioScrobblerError.LASTFM_ERROR("%s: %s", error_code.to_string(), error_message);
+					
+					retry--;
+					warning("%s: %s", error_code.to_string(), error_message);
+					resume = send_request.callback;
+					Timeout.add_seconds(15, (owned) resume);
+					yield;
+					continue;
+				default:
+					throw new AudioScrobblerError.LASTFM_ERROR("%s: %s", error_code.to_string(), error_message);
+				}
+			}
+			return root_object;
 		}
-		catch (GLib.Error e)
-		{
-			debug("Send request: %s\n---------\n%s\n----------", (string) request.data, response);
-			throw new AudioScrobblerError.JSON_PARSE_ERROR(e.message);
-		}
-		
-		var root = parser.get_root();
-		if (root == null)
-			throw new AudioScrobblerError.WRONG_RESPONSE("Empty response from the server.");
-		var root_object = root.get_object();
-		if (root_object.has_member("error") && root_object.has_member("message"))
-		{
-			throw new AudioScrobblerError.LASTFM_ERROR("%s: %s".printf(
-				root_object.get_int_member("error").to_string(),
-				root_object.get_string_member("message")
-				));
-		}
-		return root_object;
 	}
 	
 	/**
