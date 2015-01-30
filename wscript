@@ -280,7 +280,11 @@ def build(ctx):
 	
 	ctx(features = "c cshlib",
 		target = NUVOLAKIT_RUNNER,
-		source = ctx.path.ant_glob('src/nuvolakit-runner/*.vala') + ctx.path.ant_glob('src/nuvolakit-runner/*/*.vala'),
+		source = (
+			ctx.path.ant_glob('src/nuvolakit-runner/*.vala')
+			+ ctx.path.ant_glob('src/nuvolakit-runner/*/*.vala')
+			+ ctx.path.ant_glob('src/nuvolakit-runner/*/*/*.vala')
+			),
 		packages = " ".join((ctx.env.WEBKIT, ctx.env.JSCORE, 'gstreamer-1.0')),
 		uselib =  'JSCORE WEBKIT GST',
 		use = [NUVOLAKIT_BASE],
