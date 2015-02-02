@@ -8,5 +8,6 @@
 	"api_major": 3,
 	"api_minor": 0,
 	"categories": "AudioVideo;Audio;",
-	"home_url": "nuvola://home.html"
+	"home_url": "nuvola://home.html",
+	"hidden": true
 }

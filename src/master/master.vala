@@ -112,7 +112,7 @@ public int main(string[] args)
 	else if (Args.verbose)
 		exec_cmd += "-v";
 	
-	var controller = new MasterController(storage, web_app_reg, (owned) exec_cmd);
+	var controller = new MasterController(storage, web_app_reg, (owned) exec_cmd, Args.debug);
 	return controller.run(args);
 }
 

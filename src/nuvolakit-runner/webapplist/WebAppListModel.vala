@@ -28,16 +28,19 @@ namespace Nuvola
 public class WebAppListModel : Gtk.ListStore
 {
 	private WebAppRegistry web_app_reg;
+	private bool show_hidden;
 	
 	public enum Pos
 	{
 		ID, NAME, ICON, VERSION, MAINTAINER_NAME, MAINTAINER_LINK, REMOVABLE;
 	}
 	
-	public WebAppListModel(WebAppRegistry web_app_reg)
+	public WebAppListModel(WebAppRegistry web_app_reg, bool show_hidden=false)
 	{
 		Object();
 		this.web_app_reg = web_app_reg;
+		this.show_hidden = show_hidden;
+		
 		//                         id            name            icon                version  maintainer_name maintainer_link    removable
 		set_column_types({typeof(string), typeof(string), typeof(Gdk.Pixbuf), typeof(string), typeof(string), typeof(string), typeof(bool)});
 		load();
@@ -70,7 +73,8 @@ public class WebAppListModel : Gtk.ListStore
 	{
 		var web_apps = web_app_reg.list_web_apps();
 		foreach (var web_app in web_apps.get_values())
-			append_web_app(web_app, WebAppListView.load_icon(web_app.icon, Nuvola.get_app_icon()));
+			if (show_hidden || !web_app.hidden)
+				append_web_app(web_app, WebAppListView.load_icon(web_app.icon, Nuvola.get_app_icon()));
 	}
 	
 	private void on_app_installed_or_removed()

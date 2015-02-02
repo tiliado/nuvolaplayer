@@ -52,8 +52,9 @@ public class MasterController : Diorite.Application
 	private ActionsKeyBinderServer actions_key_binder = null;
 	private MediaKeysServer media_keys = null;
 	private InitState init_state = InitState.NONE;
+	private bool debuging;
 	
-	public MasterController(Diorite.Storage storage, WebAppRegistry web_app_reg, string[] exec_cmd)
+	public MasterController(Diorite.Storage storage, WebAppRegistry web_app_reg, string[] exec_cmd, bool debuging=false)
 	{
 		var app_id = Nuvola.get_app_id();
 		base(Nuvola.get_app_uid(), Nuvola.get_app_name(), "%s.desktop".printf(app_id), app_id, ApplicationFlags.HANDLES_COMMAND_LINE);
@@ -62,6 +63,7 @@ public class MasterController : Diorite.Application
 		this.storage = storage;
 		this.web_app_reg = web_app_reg;
 		this.exec_cmd = exec_cmd;
+		this.debuging = debuging;
 	}
 	
 	public override void activate()
@@ -149,7 +151,7 @@ public class MasterController : Diorite.Application
 		if (main_window == null)
 		{
 			init_gui();
-			var model = new WebAppListModel(web_app_reg);
+			var model = new WebAppListModel(web_app_reg, debuging);
 			var view = new WebAppListView(model);
 			main_window = new WebAppListWindow(this, view);
 			main_window.delete_event.connect(on_main_window_delete_event);

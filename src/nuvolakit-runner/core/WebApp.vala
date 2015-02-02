@@ -43,6 +43,7 @@ public class WebAppMeta : GLib.Object
 	public int api_minor {get; construct;}
 	public File? data_dir {get; private set; default = null;}
 	public bool removable {get; set; default = false;}
+	public bool hidden {get; set; default = false;}
 	public string? icon
 	{
 		owned get
