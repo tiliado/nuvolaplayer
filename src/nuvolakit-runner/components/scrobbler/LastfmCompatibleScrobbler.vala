@@ -257,6 +257,9 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
 				var error_message = root_object.get_string_member("message");
 				switch (error_code)
 				{
+				case 9:  // Invalid session key - Please re-authenticate
+					drop_session();
+					throw new AudioScrobblerError.NO_SESSION("Session expired. Please re-authenticate. %s", error_message);
 				case 11:  // Service Offline - This service is temporarily offline. Try again later.
 				case 16:  // There was a temporary error processing your request. Please try again
 				case 29:  // Rate limit exceeded - Your IP has made too many requests in a short period
