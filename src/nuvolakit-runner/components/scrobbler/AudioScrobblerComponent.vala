@@ -40,6 +40,7 @@ public class AudioScrobblerComponent: Component
 	private string? scrobble_title = null;
 	private string? scrobble_artist = null;
 	private bool scrobbled = false;
+	private uint track_info_cb_id = 0;
 	
 	public AudioScrobblerComponent(
 		Diorite.Application app, Bindings bindings, Diorite.KeyValueStorage global_config, Diorite.KeyValueStorage config, Soup.Session connection)
@@ -155,16 +156,28 @@ public class AudioScrobblerComponent: Component
 	private void on_set_track_info(
 		string? title, string? artist, string? album, string? state)
 	{
-		if (scrobbler.can_update_now_playing)
+		
+		if (track_info_cb_id != 0)
 		{
-			if (title != null && artist != null && state == "playing" )
-				scrobbler.update_now_playing.begin(title, artist, on_update_now_playing_done);
+			Source.remove(track_info_cb_id);
+			track_info_cb_id = 0;
 		}
 		
-		cancel_scrobbling();
-		
-		if (scrobbler.can_scrobble)
-			schedule_scrobbling(title, artist, state);
+		track_info_cb_id = Timeout.add_seconds(1, () =>
+		{
+			track_info_cb_id = 0;
+			if (scrobbler.can_update_now_playing)
+			{
+				if (title != null && artist != null && state == "playing" )
+					scrobbler.update_now_playing.begin(title, artist, on_update_now_playing_done);
+			}
+			
+			cancel_scrobbling();
+			
+			if (scrobbler.can_scrobble)
+				schedule_scrobbling(title, artist, state);
+			return false;
+		});
 	}
 	
 	private void on_update_now_playing_done(GLib.Object? o, AsyncResult res)
