@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2015 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -324,12 +324,10 @@ MediaPlayer._sendDevelInfo = function()
         "album": this._track.album || null,
         "artworkLocation": this._track.artLocation || null,
         "artworkFile": this._artworkFile || null,
-        "baseActions": this._baseActions || null,
-        "extraActions": this._extraActions || null,
+        "playbackActions": this._baseActions.concat(this._extraActions),
         "state": ["unknown", "paused", "playing"][this._state],
     };
     Nuvola._sendMessageAsync("Nuvola.MediaPlayer.setTrackInfo", info);
-    Nuvola._sendMessageAsync("Nuvola.MediaPlayer._sendDevelInfo", info);
 }
 
 MediaPlayer._onArtworkDownloaded = function(res, changed)

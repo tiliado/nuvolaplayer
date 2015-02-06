@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2015 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -34,6 +34,7 @@ public interface Nuvola.MediaPlayerModel: GLib.Object
 	public abstract bool can_go_previous {get; set;}
 	public abstract bool can_play {get; set;}
 	public abstract bool can_pause {get; set;}
+	public abstract SList<string> playback_actions {get; owned set;}
 	
 	public virtual signal void set_track_info(string? title, string? artist, string? album, string? state, string? artwork_location, string? artwork_file)
 	{

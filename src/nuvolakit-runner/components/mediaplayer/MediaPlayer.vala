@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2015 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -34,6 +34,7 @@ public class Nuvola.MediaPlayer: GLib.Object, Nuvola.MediaPlayerModel
 	public bool can_go_previous {get; set; default = false;}
 	public bool can_play {get; set; default = false;}
 	public bool can_pause {get; set; default = false;}
+	public SList<string> playback_actions {get; owned set;}
 	private Diorite.ActionsRegistry actions;
 	
 	public MediaPlayer(Diorite.ActionsRegistry actions)

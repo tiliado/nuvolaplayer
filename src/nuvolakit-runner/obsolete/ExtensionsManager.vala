@@ -138,7 +138,6 @@ public class ExtensionsManager
 		// TODO: load extensions from libraries
 		
 		// Built-in extensions
-		available_extensions.insert("developersidebar", Nuvola.Extensions.DeveloperSidebar.get_info());
 	}
 }
 

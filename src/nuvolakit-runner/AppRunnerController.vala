@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2015 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -455,6 +455,7 @@ public class AppRunnerController : RunnerApplication
 		bindings.add_object(menu_bar);
 		components.prepend(new AudioScrobblerComponent(this, bindings, master_config, config, connection.session));
 		components.prepend(new MPRISComponent(this, bindings, config));
+		components.prepend(new DeveloperComponent(this, bindings, config));
 	}
 	
 	private async void show_donation_bar()

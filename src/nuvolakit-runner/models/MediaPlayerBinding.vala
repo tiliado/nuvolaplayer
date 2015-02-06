@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2015 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -51,6 +51,14 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 		var artwork_location = variant_dict_str(dict, "artworkLocation");
 		var artwork_file = variant_dict_str(dict, "artworkFile");
 		model.set_track_info(title, artist, album, state, artwork_location, artwork_file);
+		
+		SList<string> playback_actions = null;
+		var actions = Diorite.variant_to_strv(dict.lookup_value("playbackActions", null).get_maybe().get_variant());
+		foreach (var action in actions)
+			playback_actions.prepend(action);
+		
+		playback_actions.reverse();
+		model.playback_actions = (owned) playback_actions;
 		return new Variant.boolean(true);
 	}
 	

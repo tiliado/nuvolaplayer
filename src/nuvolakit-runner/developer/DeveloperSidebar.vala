@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2015 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -22,24 +22,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using Diorite;
-
-namespace Nuvola.Extensions.DeveloperSidebar
+namespace Nuvola
 {
 
-public Nuvola.ExtensionInfo get_info()
-{
-	return
-	{
-		_("Developer's sidebar"),
-		Nuvola.get_version(),
-		_("<p>This plugin shows data sent by integration script.</p>"),
-		"Jiří Janoušek",
-		typeof(Extension),
-		true
-	};
-}
-
+// TODO: Move to Diorite
 public class HeaderLabel: Gtk.Label
 {
 	public HeaderLabel(string? text)
@@ -52,89 +38,92 @@ public class HeaderLabel: Gtk.Label
 	}
 }
 
-public class Extension : Nuvola.Extension
+public class DeveloperSidebar: Gtk.Grid
 {
-	private weak AppRunnerController controller;
-	private WebEngine? web_engine;
 	private Diorite.ActionsRegistry? actions_reg;
-	private Gtk.Grid? grid = null;
 	private Gtk.Label? song = null; 
 	private Gtk.Label? artist = null;
 	private Gtk.Label? album = null;
 	private Gtk.Label? state = null;
 	private SList<Gtk.Widget> action_widgets = null;
 	private HashTable<string, Gtk.RadioButton>? radios = null;
+	private MediaPlayerModel player;
 	
-	/**
-	 * {@inheritDoc}
-	 */
-	public override void load(AppRunnerController controller) throws ExtensionError
+	public DeveloperSidebar(RunnerApplication app, MediaPlayerModel player)
 	{
-		this.controller = controller;
-		web_engine = controller.web_engine;
-		actions_reg = controller.actions;
+		actions_reg = app.actions;
+		this.player = player;
+		
 		radios = new HashTable<string, Gtk.RadioButton>(str_hash, str_equal);
-		grid = new Gtk.Grid();
-		grid.orientation = Gtk.Orientation.VERTICAL;
+		orientation = Gtk.Orientation.VERTICAL;
 		var label = new HeaderLabel("Song");
 		label.halign = Gtk.Align.START;
-		grid.add(label);
-		song = new Gtk.Label(null);
+		add(label);
+		song = new Gtk.Label(player.title ?? "(null)");
 		song.set_line_wrap(true);
 		song.halign = Gtk.Align.START;
-		grid.attach_next_to(song, label, Gtk.PositionType.BOTTOM, 1, 1);
+		attach_next_to(song, label, Gtk.PositionType.BOTTOM, 1, 1);
 		label = new HeaderLabel("Artist");
 		label.halign = Gtk.Align.START;
-		grid.add(label);
-		artist = new Gtk.Label(null);
+		add(label);
+		artist = new Gtk.Label(player.artist ?? "(null)");
 		artist.set_line_wrap(true);
 		artist.halign = Gtk.Align.START;
-		grid.attach_next_to(artist, label, Gtk.PositionType.BOTTOM, 1, 1);
+		attach_next_to(artist, label, Gtk.PositionType.BOTTOM, 1, 1);
 		label = new HeaderLabel("Album");
 		label.halign = Gtk.Align.START;
-		grid.add(label);
-		album = new Gtk.Label(null);
+		add(label);
+		album = new Gtk.Label(player.album);
 		album.set_line_wrap(true);
 		album.halign = Gtk.Align.START;
-		grid.attach_next_to(album, label, Gtk.PositionType.BOTTOM, 1, 1);
+		attach_next_to(album, label, Gtk.PositionType.BOTTOM, 1, 1);
 		label = new HeaderLabel("Playback state");
 		label.halign = Gtk.Align.START;
-		grid.add(label);
-		state = new Gtk.Label(null);
+		add(label);
+		state = new Gtk.Label(player.state);
 		state.halign = Gtk.Align.START;
-		grid.attach_next_to(state, label, Gtk.PositionType.BOTTOM, 1, 1);
-		grid.show_all();
+		attach_next_to(state, label, Gtk.PositionType.BOTTOM, 1, 1);
+		set_actions(player.playback_actions);
+		show_all();
 		
-		controller.main_window.sidebar.add_page("developersidebar", _("Developer"), grid);
-		controller.server.add_handler("Nuvola.MediaPlayer._sendDevelInfo", handle_send_devel_info);
+		player.notify.connect_after(on_player_notify);
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 */
-	public override void unload()
-	{
-		controller.server.remove_handler("Nuvola.MediaPlayer._sendDevelInfo");
-		if (grid != null)
-		{
-			controller.main_window.sidebar.remove_page(grid);
-			grid = null;
-		}
+	~DeveloperSidebar()
+	{	
+		player.notify.disconnect(on_player_notify);
 		action_widgets = null;
 		radios = null;
 	}
 	
-	private Variant? handle_send_devel_info(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private void on_player_notify(GLib.Object o, ParamSpec p)
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(@a{smv})");
-		Variant dict;
-		data.get("(@a{smv})", out dict);
-		message("Song %s %s", dict.get_type_string(), dict.print(true));
-		song.label = variant_dict_str(dict, "title") ?? "(null)";
-		artist.label = variant_dict_str(dict, "artist") ?? "(null)";
-		album.label = variant_dict_str(dict, "album") ?? "(null)";
-		state.label = variant_dict_str(dict, "state") ?? "(null)";
-		
+		var player = o as MediaPlayerModel;
+		switch (p.name)
+		{
+		case "title":
+			song.label = player.title ?? "(null)";
+			break;
+		case "artist":
+			artist.label = player.artist ?? "(null)";
+			break;
+		case "album":
+			album.label = player.album ?? "(null)";
+			break;
+		case "state":
+			state.label = player.state ?? "(null)";
+			break;
+		case "playback-actions":
+			set_actions(player.playback_actions);
+			break;
+		default:
+			debug("Media player notify: %s", p.name);
+			break;
+		}
+	}
+	
+	private void set_actions(SList<string> playback_actions)
+	{
 		lock (action_widgets)
 		{
 			if (action_widgets != null)
@@ -143,26 +132,16 @@ public class Extension : Nuvola.Extension
 			action_widgets = null;
 			radios.remove_all();
 			
-			var label = new HeaderLabel("Base actions");
+			var label = new HeaderLabel("Playback Actions");
 			label.halign = Gtk.Align.START;
 			label.show();
 			action_widgets.prepend(label);
-			grid.add(label);
-			var base_actions = Diorite.variant_to_strv(dict.lookup_value("baseActions", null).get_maybe().get_variant());
-			foreach (var full_name in base_actions)
+			add(label);
+			
+			foreach (var full_name in playback_actions)
 				add_action(full_name);
 			
-			label = new HeaderLabel("Extra actions");
-			label.halign = Gtk.Align.START;
-			label.show();
-			action_widgets.prepend(label);
-			grid.add(label);
-			var extra_actions = Diorite.variant_to_strv(dict.lookup_value("extraActions", null).get_maybe().get_variant());
-			foreach (var full_name in extra_actions)
-				add_action(full_name);
 		}
-		
-		return null;
 	}
 	
 	private void add_action(string full_name)
@@ -191,7 +170,7 @@ public class Extension : Nuvola.Extension
 				button.margin = 2;
 				button.show();
 				action_widgets.prepend(button);
-				grid.add(button);
+				add(button);
 			}
 			else if (action is Diorite.ToggleAction)
 			{
@@ -201,7 +180,7 @@ public class Extension : Nuvola.Extension
 				button.margin = 2;
 				button.show();
 				action_widgets.prepend(button);
-				grid.add(button);
+				add(button);
 			}
 			else if (action is Diorite.RadioAction)
 			{
@@ -215,7 +194,7 @@ public class Extension : Nuvola.Extension
 				button.margin = 2;
 				button.show();
 				action_widgets.prepend(button);
-				grid.add(button);
+				add(button);
 				button.set_active(action.state.equal(target_value));
 				button.set_data<string>("full-name", full_name);
 				button.clicked.connect_after(on_radio_clicked);
@@ -254,7 +233,7 @@ public class Extension : Nuvola.Extension
 	
 	private void unset_button(Gtk.Widget widget)
 	{
-		grid.remove(widget);
+		remove(widget);
 		var radio = widget as Gtk.RadioButton;
 		if (radio != null)
 		{
@@ -269,5 +248,5 @@ public class Extension : Nuvola.Extension
 	}
 }
 
-} // namespace Nuvola.Extensions.DeveloperSidebar
+} // namespace Nuvola
 
