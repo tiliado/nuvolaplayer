@@ -1,17 +1,10 @@
 Nuvola Player 3
 ===============
 
-*Nuvola Player 2 is a runtime for web-based music streaming services providing more native user
+*Nuvola Player 3 is a runtime for web-based music streaming services providing more native user
 experience and integration with Linux desktop environments than usual web browsers can offer.
 Nuvola Players handles multimedia keys, shows desktop notifications, integrates with various sound
-menus, applets and launchers and more. Additional features include Last FM and Libre FM scrobling
-and lyrics fetching.*
-
-**Nuvola Player 3 is a new code-base written from scratch** and the current development stage can be
-described as "early alpha and everything in progress", so please be patient and ask questions at
-[a development mailing list][1].
-
-[1]: https://groups.google.com/d/forum/nuvola-player-devel).
+menus, applets and launchers and more. Additional features include Last FM scrobling.*
 
 
 Code hosting and issue tracker
