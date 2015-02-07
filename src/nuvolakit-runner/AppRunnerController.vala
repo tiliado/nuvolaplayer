@@ -112,7 +112,6 @@ public class AppRunnerController : RunnerApplication
 	public WebEngine web_engine {get; private set;}
 	public weak Gtk.Settings gtk_settings {get; private set;}
 	public Diorite.KeyValueStorage master_config {get; private set;}
-	public ExtensionsManager extensions {get; private set;}
 	public Bindings bindings {get; private set;}
 	public Connection connection {get; private set;}
 	public Diorite.Ipc.MessageServer server {get; private set; default=null;}
@@ -421,17 +420,7 @@ public class AppRunnerController : RunnerApplication
 	}
 	
 	private void load_extensions()
-	{
-		components = new Diorite.SingleList<Component>();
-		extensions = new ExtensionsManager(this);
-		var available_extensions = extensions.available_extensions;
-		foreach (var key in available_extensions.get_keys())
-		{
-			var enabled = config.get_value(ConfigKey.EXTENSION_ENABLED.printf(key)) ?? new Variant.boolean(available_extensions.lookup(key).autoload);
-			if (enabled.get_boolean())
-				extensions.load(key);
-		}
-		
+	{	
 		bindings = new Bindings();
 		bindings.add_binding(new ActionsBinding(server, web_worker));
 		bindings.add_binding(new NotificationsBinding(server, web_worker));
@@ -440,9 +429,9 @@ public class AppRunnerController : RunnerApplication
 		bindings.add_binding(new MediaKeysBinding(server, web_worker));
 		bindings.add_binding(new MenuBarBinding(server, web_worker));
 		bindings.add_binding(new MediaPlayerBinding(server, web_worker, new MediaPlayer(actions)));
-		
 		bindings.add_object(actions_helper);
 		
+		components = new Diorite.SingleList<Component>();
 		components.prepend(new TrayIconComponent(this, bindings, config));
 		#if UNITY
 		components.prepend(new UnityLauncherComponent(this, bindings, config));
