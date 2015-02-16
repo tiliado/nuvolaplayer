@@ -456,9 +456,22 @@ public class WebEngine : GLib.Object
 		
 		if (result)
 		{
-			decision.use();
 			if (new_window != new_window_override)
-				warning("Overriding of new window flag hasn't been implemented yet.");
+			{
+				if (!new_window_override)
+				{
+					// Open in current window instead of a new window
+					decision.ignore();
+					Idle.add(() => 
+					{
+						web_view.load_uri(uri);
+						return false;
+					});
+					return true;
+				}
+				warning("Overriding of new window flag false -> true hasn't been implemented yet.");
+			}
+			decision.use();
 			return true;
 		}
 		else
