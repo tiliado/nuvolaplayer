@@ -23,6 +23,7 @@
  */
 
 require("prototype");
+require("signals");
 
 /**
  * @enum Identifiers of media keys
