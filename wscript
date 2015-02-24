@@ -355,9 +355,10 @@ def build(ctx):
 		GENERIC_NAME=GENERIC_NAME,
 	)
 	
+	ctx.install_as('${PREFIX}/share/appdata/%s.appdata.xml' % APPNAME, ctx.path.find_node("data/nuvolaplayer3.appdata.xml"))
+	
 	web_apps = ctx.path.find_dir("web_apps")
 	ctx.install_files('${PREFIX}/share/' + APPNAME, web_apps.ant_glob('**'), cwd=web_apps.parent, relative_trick=True)
-	
 	
 	app_icons = ctx.path.find_node("data/icons")
 	for size in (16, 22, 24, 32, 48, 64):

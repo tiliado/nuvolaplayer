@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2015 Jiří Janoušek <janousek.jiri@gmail.com> -->
+<component type="desktop">
+ <id>nuvolaplayer3.desktop</id>
+ <metadata_license>CC0-1.0</metadata_license>
+ <project_license>BSD-2-Clause</project_license>
+ <name>Nuvola Player</name>
+ <summary>Cloud music integration for your desktop</summary>
+ <description>
+  <p>
+   Nuvola Player is a runtime for web-based music streaming services providing more native user experience and
+   integration with Linux desktop environments than usual web browsers can offer. It tries to feel and look
+   like a native application as possible. 
+  </p>
+ </description>
+ <screenshots>
+  <screenshot type="default">
+   <image>https://tiliado.github.io/nuvolaplayer/documentation/images/3.0/new/orig/gnome_grooveshark_add_to_favorites.png</image>
+   <caption>Nuvola Player creates desktop launchers for quick access to streaming services</caption>
+  </screenshot>
+  <screenshot>
+   <image>https://tiliado.github.io/nuvolaplayer/documentation/images/3.0/new/orig/gnome_media_keys.png</image>
+   <caption>Nuvola Player allows you to use multimedia keys to control playback</caption>
+  </screenshot>
+  <screenshot>
+   <image>https://tiliado.github.io/nuvolaplayer/documentation/images/3.0/gnome/orig/gnome_notification_expanded.png</image>
+   <caption>Nuvola Player provides notifications with playback controls</caption>
+  </screenshot>
+  <screenshot>
+   <image>https://tiliado.github.io/nuvolaplayer/documentation/images/3.0/gnome/orig/gnome_lock_screen_controls.png</image>
+   <caption>You can control Nuvola Player from a lock screen</caption>
+  </screenshot>
+  <screenshot>
+   <image>https://tiliado.github.io/nuvolaplayer/documentation/images/3.0/unity/orig/unity_google_play_music_launcher_star_rating.png</image>
+   <caption>Integration with Unity Launcher provides Quick List items</caption>
+  </screenshot>
+  <screenshot>
+   <image>https://tiliado.github.io/nuvolaplayer/documentation/images/3.0/unity/orig/unity_grooveshark_lock_to_launcher.png</image>
+   <caption>Nuvola Player creates desktop launchers for quick access to streaming services</caption>
+  </screenshot>
+  <screenshot>
+   <image>https://tiliado.github.io/nuvolaplayer/documentation/images/3.0/unity/orig/unity_grooveshark_hud_toggle_play.png</image>
+   <caption>Nuvola Player integrates with Unity Head-Up display</caption>
+  </screenshot>
+  <screenshot>
+   <image>https://tiliado.github.io/nuvolaplayer/documentation/images/3.0/unity/orig/unity_grooveshark_sound_menu.png</image>
+   <caption>You can control Nuvola Player from Unity Sound indicator</caption>
+  </screenshot>
+  <screenshot>
+   <image></image>
+   <caption></caption>
+  </screenshot>
+ </screenshots>
+ <url type="homepage">https://tiliado.eu/nuvolaplayer/</url>
+ <updatecontact>janousek.jiri@gmail.com</updatecontact>
+ <project_group>Tiliado</project_group>
+</component>
