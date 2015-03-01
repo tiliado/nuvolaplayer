@@ -25,25 +25,13 @@
 namespace Nuvola
 {
 
-public bool create_desktop_file(WebAppMeta web_app)
+public bool write_desktop_file_sync(WebAppMeta web_app)
 {
-	var app_id = Nuvola.get_app_id();
 	var storage = new Diorite.XdgStorage();
-	var dashed_id = build_dashed_id(web_app.id);
-	var filename = "%s.desktop".printf(dashed_id);
+	var filename = "%s.desktop".printf(build_dashed_id(web_app.id));
 	var file = storage.user_data_dir.get_child("applications").get_child(filename);
 	var existed = file.query_exists();
-	var key_file = new KeyFile();
-	const string GROUP = "Desktop Entry";
-	key_file.set_string(GROUP, "Name", web_app.name);
-	key_file.set_string(GROUP, "Exec", "%s -a %s".printf(app_id, web_app.id));
-	key_file.set_string(GROUP, "Type", "Application");
-	key_file.set_string(GROUP, "Categories", web_app.categories);
-	key_file.set_string(GROUP, "Icon", web_app.icon ?? Nuvola.get_app_icon());
-	key_file.set_string(GROUP, "StartupWMClass", dashed_id);
-	key_file.set_boolean(GROUP, "StartupNotify", true);
-	key_file.set_boolean(GROUP, "Terminal", false);
-	var data = key_file.to_data(null, null);
+	var data = create_desktop_file(web_app).to_data(null, null);
 	try
 	{
 		Diorite.System.overwrite_file(file, data);
@@ -55,6 +43,21 @@ public bool create_desktop_file(WebAppMeta web_app)
 		warning("Failed to write key file '%s': %s", file.get_path(), e.message);
 	}
 	return existed;
+}
+
+public KeyFile create_desktop_file(WebAppMeta web_app)
+{
+	var key_file = new KeyFile();
+	const string GROUP = "Desktop Entry";
+	key_file.set_string(GROUP, "Name", web_app.name);
+	key_file.set_string(GROUP, "Exec", "%s -a %s".printf(Nuvola.get_app_id(), web_app.id));
+	key_file.set_string(GROUP, "Type", "Application");
+	key_file.set_string(GROUP, "Categories", web_app.categories);
+	key_file.set_string(GROUP, "Icon", web_app.icon ?? Nuvola.get_app_icon());
+	key_file.set_string(GROUP, "StartupWMClass", build_dashed_id(web_app.id));
+	key_file.set_boolean(GROUP, "StartupNotify", true);
+	key_file.set_boolean(GROUP, "Terminal", false);
+	return key_file;
 }
 
 } // namespace Nuvola
