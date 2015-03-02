@@ -25,6 +25,16 @@
 namespace Nuvola
 {
 
+public async void create_desktop_files(WebAppRegistry web_app_reg, bool create_hidden)
+{
+	Idle.add(create_desktop_files.callback);
+	yield;
+	var web_apps = web_app_reg.list_web_apps();
+	foreach (var web_app in web_apps.get_values())
+		if (create_hidden || !web_app.hidden)
+			yield write_desktop_file(web_app);
+}
+	
 public bool write_desktop_file_sync(WebAppMeta web_app)
 {
 	var storage = new Diorite.XdgStorage();
@@ -35,6 +45,26 @@ public bool write_desktop_file_sync(WebAppMeta web_app)
 	try
 	{
 		Diorite.System.overwrite_file(file, data);
+		if (FileUtils.chmod(file.get_path(), 00755) != 0)
+			warning("chmod 0755 %s failed.", file.get_path());
+	}
+	catch (GLib.Error e)
+	{
+		warning("Failed to write key file '%s': %s", file.get_path(), e.message);
+	}
+	return existed;
+}
+
+public async bool write_desktop_file(WebAppMeta web_app)
+{
+	var storage = new Diorite.XdgStorage();
+	var filename = "%s.desktop".printf(build_dashed_id(web_app.id));
+	var file = storage.user_data_dir.get_child("applications").get_child(filename);
+	var existed = file.query_exists();
+	var data = create_desktop_file(web_app).to_data(null, null);
+	try
+	{
+		yield Diorite.System.overwrite_file_async(file, data);
 		if (FileUtils.chmod(file.get_path(), 00755) != 0)
 			warning("chmod 0755 %s failed.", file.get_path());
 	}

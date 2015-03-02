@@ -152,6 +152,7 @@ public class MasterController : Diorite.Application
 		if (main_window == null)
 		{
 			init_gui();
+			create_desktop_files.begin(web_app_reg, false, (o, res) => {create_desktop_files.end(res);});
 			var model = new WebAppListModel(web_app_reg, debuging);
 			var view = new WebAppListView(model);
 			main_window = new WebAppListWindow(this, view);
