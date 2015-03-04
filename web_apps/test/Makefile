@@ -22,15 +22,33 @@
 
 # Service integration id
 APP_ID = test
+# Dependencies
+DEPS = rsvg-convert
 # Default installation destination
 DEST ?= $(HOME)/.local/share/nuvolaplayer3/web_apps
+# Size of PNG app icon
+ICON_SIZE ?= 128
 
 help:
+	@echo "make deps                - check whether dependencies are satisfied"
+	@echo "make build               - build files (graphics, etc.)"
+	@echo "make clean               - clean source directory"
 	@echo "make install             - install to user's local directory (~/.local)"
 	@echo "make install DEST=/path  - install to '/path' directory"
 	@echo "make uninstall           - uninstall from user's local directory (~/.local)"
 
-install: LICENSE metadata.json integrate.js
+deps:
+	@$(foreach dep, $(DEPS), which $(dep) > /dev/null || (echo "Program $(dep) not found"; exit 1;);)
+
+build: deps icon.png 
+
+icon.png : src/icon.svg
+	rsvg-convert -w $(ICON_SIZE) -h $(ICON_SIZE) $< -o $@
+
+clean:
+	rm -f icon.png
+
+install: LICENSE metadata.json integrate.js icon.png
 	install -vCd $(DEST)/$(APP_ID)
 	install -vC $^ $(DEST)/$(APP_ID)
 

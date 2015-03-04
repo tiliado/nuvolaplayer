@@ -24,21 +24,15 @@ Create Makefile
 ===============
 
 Makefile is a recipe how to build and install your service integration. The test service comes
-with samples of two Makefiles:
+with sample ``Makefile``. All you need to do is to change service
+integration id ``APP_ID``. Run ``make help`` to see available actions.
 
+!!! info "Service icon"
+    You can replace generic Nuvola Player icon ``src/icon.svg`` with an actual icon of the service. However, beware of
+    any copyright violations, you cannot just download the offical icon and modify it. Better option is to let
+    Alexander King, the author of other service icons, to create a new icon for your service.
 
-``Makefile.full``
-
-:   Use ``Makefile.full`` and rename it to ``Makefile`` if you need to build a PNG icon from source
-    SVG icon. This Makefile expects icon to be named ``src/icon.svg``. Also change service
-    integration id ``APP_ID``. Run ``make help`` to see available actions.
-
-``Makefile.basic``
-
-:   If you don't need to do something special, use ``Makefile.basic`` and rename it to ``Makefile``.
-    Change service integration id ``APP_ID``. Run ``make help`` to see available actions.
-
-Let's try out your Makefile:
+Let's try out your Makefile. You will need application ``rsvg-convert`` to proceed.
 
     :::sh
     cd ~/projects/nuvola-player/test-integration
