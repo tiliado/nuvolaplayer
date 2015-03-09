@@ -2,10 +2,13 @@
 <!-- Copyright 2015 Jiří Janoušek <janousek.jiri@gmail.com> -->
 <component type="desktop">
  <id>nuvolaplayer3.desktop</id>
+ <pkgname>nuvolaplayer3</pkgname>
  <metadata_license>CC0-1.0</metadata_license>
  <project_license>BSD-2-Clause</project_license>
- <name>Nuvola Player</name>
+ <name>Nuvola Player 3</name>
  <summary>Cloud music integration for your desktop</summary>
+ <icon type="stock">nuvolaplayer3</icon>
+ <icon type="remote" width="96" height="96">https://tiliado.eu/static/nuvolaplayer/logo.png</icon>
  <description>
   <p>
    Nuvola Player is a runtime for web-based music streaming services providing more native user experience and
@@ -46,12 +49,13 @@
    <image>https://tiliado.github.io/nuvolaplayer/documentation/images/3.0/unity/orig/unity_grooveshark_sound_menu.png</image>
    <caption>You can control Nuvola Player from Unity Sound indicator</caption>
   </screenshot>
-  <screenshot>
-   <image></image>
-   <caption></caption>
-  </screenshot>
  </screenshots>
  <url type="homepage">https://tiliado.eu/nuvolaplayer/</url>
  <updatecontact>janousek.jiri@gmail.com</updatecontact>
  <project_group>Tiliado</project_group>
+ <categories>
+​  <category>AudioVideo</category>
+​  <category>Audio</category>
+​  <category>Network</category>
+​ </categories>
 </component>
