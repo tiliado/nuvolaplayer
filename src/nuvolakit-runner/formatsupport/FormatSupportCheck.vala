@@ -31,17 +31,17 @@ public class FormatSupportCheck : GLib.Object
 	private static const string WARN_MP3_KEY = "format_support.warn_mp3";
 	private FormatSupport format_support;
 	private Diorite.Storage storage;
-	private Diorite.ApplicationWindow window;
+	private Diorite.Application app;
 	private Config config;
 	private FormatSupportDialog format_support_dialog = null;
 	private Gtk.InfoBar? flash_bar = null;
 	private Gtk.InfoBar? mp3_bar = null;
 	
-	public FormatSupportCheck(FormatSupport format_support, Diorite.ApplicationWindow window, Diorite.Storage storage,
+	public FormatSupportCheck(FormatSupport format_support, Diorite.Application app, Diorite.Storage storage,
 	Config config)
 	{
 		this.format_support = format_support;
-		this.window = window;
+		this.app = app;
 		this.storage = storage;
 		this.config = config;
 		config.set_default_value(WARN_FLASH_KEY, true);
@@ -57,7 +57,7 @@ public class FormatSupportCheck : GLib.Object
 	{
 		if (format_support_dialog == null)
 		{
-			format_support_dialog = new FormatSupportDialog(format_support, storage, window);
+			format_support_dialog = new FormatSupportDialog(app, format_support, storage, app.active_window);
 			format_support_dialog.flash_warning_switch.active = config.get_bool(WARN_FLASH_KEY);
 			format_support_dialog.mp3_warning_switch.active = config.get_bool(WARN_MP3_KEY);
 			Idle.add(() => {
@@ -76,7 +76,8 @@ public class FormatSupportCheck : GLib.Object
 	
 	public void show_flash_warning(string text)
 	{
-		if (flash_bar != null || !config.get_bool(WARN_FLASH_KEY))
+		var window = app.active_window as Diorite.ApplicationWindow;
+		if (flash_bar != null || !config.get_bool(WARN_FLASH_KEY) || window == null)
 			return;
 		flash_bar = new Gtk.InfoBar();
 		flash_bar.show_close_button = true;
@@ -94,7 +95,8 @@ public class FormatSupportCheck : GLib.Object
 	
 	public void show_mp3_warning(string text)
 	{
-		if (mp3_bar != null || !config.get_bool(WARN_MP3_KEY))
+		var window = app.active_window as Diorite.ApplicationWindow;
+		if (mp3_bar != null || !config.get_bool(WARN_MP3_KEY) || window == null)
 			return;
 		mp3_bar = new Gtk.InfoBar();
 		mp3_bar.show_close_button = true;
@@ -153,7 +155,9 @@ public class FormatSupportCheck : GLib.Object
 		flash_bar.response.disconnect(on_flash_response);
 		if (response == Gtk.ResponseType.ACCEPT)
 			show_dialog(FormatSupportDialog.Tab.FLASH);
-		window.info_bars.remove(flash_bar);
+		var parent = flash_bar.get_parent() as Gtk.Container;
+		if (parent != null)
+			parent.remove(flash_bar);
 		flash_bar = null;
 	}
 	
@@ -162,7 +166,9 @@ public class FormatSupportCheck : GLib.Object
 		mp3_bar.response.disconnect(on_flash_response);
 		if (response == Gtk.ResponseType.ACCEPT)
 			show_dialog(FormatSupportDialog.Tab.MP3);
-		window.info_bars.remove(mp3_bar);
+		var parent = mp3_bar.get_parent() as Gtk.Container;
+		if (parent != null)
+			parent.remove(mp3_bar);
 		mp3_bar = null;
 	}
 	

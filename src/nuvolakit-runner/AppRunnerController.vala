@@ -225,7 +225,7 @@ public class AppRunnerController : RunnerApplication
 		toggle_donate_button(false);
 		
 		format_support = new FormatSupportCheck(
-			new FormatSupport(storage.get_data_file("audio/audiotest.mp3").get_path()), main_window, storage, config);
+			new FormatSupport(storage.get_data_file("audio/audiotest.mp3").get_path()), this, storage, config);
 		format_support.check();
 		
 		tiliado_account = new Tiliado.Account(connection.session, master_config, "https://tiliado.eu", "nuvolaplayer");

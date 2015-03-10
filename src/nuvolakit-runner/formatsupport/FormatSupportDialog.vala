@@ -48,15 +48,16 @@ document.write("<p>" + (FlashDetect.installed
 
 public class FormatSupportDialog: Gtk.Dialog
 {
+	public Diorite.Application app {get; construct;}
 	public FormatSupport format_support {get; construct;}
 	public Diorite.Storage storage {get; construct;}
 	public Gtk.Switch flash_warning_switch {get; private set;}
 	public Gtk.Switch mp3_warning_switch {get; private set;}
 	private Gtk.Notebook notebook;
 	
-	public FormatSupportDialog(FormatSupport format_support, Diorite.Storage storage, Gtk.Window? parent)
+	public FormatSupportDialog(Diorite.Application app, FormatSupport format_support, Diorite.Storage storage, Gtk.Window? parent)
 	{
-		GLib.Object(title: "Format Support", transient_for: parent, format_support: format_support, storage: storage);
+		GLib.Object(title: "Format Support", transient_for: parent, format_support: format_support, storage: storage, app:app);
 		add_button("_Close", Gtk.ResponseType.CLOSE);
 		set_default_size(700, 450);
 		
@@ -150,6 +151,8 @@ public class FormatSupportDialog: Gtk.Dialog
 			info_bar.get_content_area().add(new Gtk.Label(format_support.n_flash_plugins == 0
 			? "No Flash plugins have been found."
 			: "Too many Flash plugins have been found, wrong version may have been used."));
+			if (format_support.n_flash_plugins == 0)
+				info_bar.add_button("Help", 0).clicked.connect(() => {app.show_uri("http://tiliado.github.io/nuvolaplayer/documentation/3.0/install.html");});
 			info_bar.show_all();
 			plugins_view.attach(info_bar, 0, 1, 2, 1);
 		}
@@ -164,7 +167,9 @@ public class FormatSupportDialog: Gtk.Dialog
 		mp3_warning_switch = new Gtk.Switch();
 		mp3_warning_switch.vexpand = flash_warning_switch.hexpand = false;
 		mp3_warning_switch.show();
-		var mp3_view = new Mp3View(format_support, mp3_warning_switch);
+		var help_button = new Gtk.Button.with_label("Help");
+		help_button.clicked.connect(() => {app.show_uri("http://tiliado.github.io/nuvolaplayer/documentation/3.0/install.html");});
+		var mp3_view = new Mp3View(format_support, mp3_warning_switch, help_button);
 		mp3_view.show();
 		notebook.append_page(mp3_view, new Gtk.Label("MP3 format"));
 		notebook.show();
@@ -189,11 +194,13 @@ public class FormatSupportDialog: Gtk.Dialog
 		private Gtk.Button button;
 		private Gtk.Label result_label;
 		private AudioPipeline? pipeline = null;
+		private Gtk.Button help_button;
 		
-		public Mp3View(FormatSupport format_support, Gtk.Switch warning_switch)
+		public Mp3View(FormatSupport format_support, Gtk.Switch warning_switch, Gtk.Button help_button)
 		{
 			GLib.Object(orientation: Gtk.Orientation.VERTICAL);
 			this.format_support = format_support;
+			this.help_button = help_button;
 			margin = 10;
 			row_spacing = 10;
 			column_spacing = 10;
@@ -201,8 +208,8 @@ public class FormatSupportDialog: Gtk.Dialog
 			var label = new Gtk.Label("Show MP3 format support warnings at start-up");
 			label.hexpand = true;
 			label.show();
-			attach(label, 0, 0, 1, 1);
-			attach(warning_switch, 1, 0, 1, 1);
+			attach(label, 0, 0, 2, 1);
+			attach(warning_switch, 2, 0, 1, 1);
 			
 			text_view = new Gtk.TextView();
 			text_view.editable = false;
@@ -210,11 +217,13 @@ public class FormatSupportDialog: Gtk.Dialog
 			result_label = new Gtk.Label(null);
 			result_label.hexpand = true;
 			update_result_text(format_support.mp3_supported);
+			
 			button = new Gtk.Button();
 			set_button_label();
 			button.clicked.connect(toggle_check);
 			attach(result_label, 0, 1, 1, 1);
-			attach(button, 1, 1, 1, 1);
+			attach(help_button, 1, 1, 1, 1);
+			attach(button, 2, 1, 1, 1);
 			var scroll = new Gtk.ScrolledWindow(null, null);
 			scroll.expand = true;
 			scroll.add(text_view);
@@ -229,6 +238,7 @@ public class FormatSupportDialog: Gtk.Dialog
 			result_label.label = (pipeline != null
 			? "You should be hearing a really bad song now."
 			:(result ? "MP3 audio format is supported." : "MP3 audio format is not supported."));
+			help_button.visible = !result;
 		}
 		
 		private void set_button_label()
