@@ -153,7 +153,7 @@ public class AppRunnerController : RunnerApplication
 		default_config.insert(ConfigKey.WINDOW_X, new Variant.int64(-1));
 		default_config.insert(ConfigKey.WINDOW_Y, new Variant.int64(-1));
 		default_config.insert(ConfigKey.WINDOW_SIDEBAR_POS, new Variant.int64(-1));
-		default_config.insert(ConfigKey.WINDOW_SIDEBAR_VISIBLE, new Variant.boolean(true));
+		default_config.insert(ConfigKey.WINDOW_SIDEBAR_VISIBLE, new Variant.boolean(false));
 		default_config.insert(ConfigKey.DARK_THEME, new Variant.boolean(false));
 		config = new Config(app_storage.config_dir.get_child("config.json"), default_config);
 		config.changed.connect(on_config_changed);
