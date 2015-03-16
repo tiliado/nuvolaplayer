@@ -1,6 +1,12 @@
 export NUVOLA_WEB_APPS_DIR="web_apps"
 export DIORITE_LOG_IPC_SERVER="yes"
 export DIORITE_LOG_MESSAGE_SERVER="yes"
+export LD_LIBRARY_PATH="build"
+
+if [ -e /etc/fedora-release ]; then
+    export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib64"
+    export PKG_CONFIG_PATH="/usr/local/lib64/pkgconfig:/usr/lib64/pkgconfig"
+fi
 
 prompt_prefix='\[\033[1;33m\]Nuvola\[\033[00m\]'
 [[ "$PS1" = "$prompt_prefix"* ]] || export PS1="$prompt_prefix $PS1"
@@ -13,39 +19,39 @@ rebuild()
 
 run()
 {
-	./waf -v && LD_LIBRARY_PATH=build XDG_DATA_DIRS=build/share:/usr/share:/usr/local/share \
+	./waf -v && XDG_DATA_DIRS=build/share:/usr/share:/usr/local/share \
 	NUVOLA_LIBDIR=build build/nuvolaplayer3 -D "$@"
 
 }
 
 ctl()
 {
-    ./waf -v && LD_LIBRARY_PATH=build XDG_DATA_DIRS=build/share:/usr/share:/usr/local/share \
+    ./waf -v && XDG_DATA_DIRS=build/share:/usr/share:/usr/local/share \
     NUVOLA_LIBDIR=build build/nuvolaplayer3ctl -D "$@"
 }
 
 debug()
 {
-	./waf -v && LD_LIBRARY_PATH=build XDG_DATA_DIRS=build/share:/usr/share:/usr/local/share \
+	./waf -v && XDG_DATA_DIRS=build/share:/usr/share:/usr/local/share \
 	NUVOLA_LIBDIR=build gdb --args build/nuvolaplayer3 -D "$@"
 }
 
 debug_criticals()
 {
-	./waf -v && LD_LIBRARY_PATH=build XDG_DATA_DIRS=build/share:/usr/share:/usr/local/share \
+	./waf -v && XDG_DATA_DIRS=build/share:/usr/share:/usr/local/share \
 	NUVOLA_LIBDIR=build G_DEBUG=fatal-criticals \
 	gdb  --args build/nuvolaplayer3 -D "$@"
 }
 
 debug_app_runner()
 {
-	./waf -v && LD_LIBRARY_PATH=build XDG_DATA_DIRS=build/share:/usr/share:/usr/local/share \
+	./waf -v && XDG_DATA_DIRS=build/share:/usr/share:/usr/local/share \
 	NUVOLA_LIBDIR=build NUVOLA_APP_RUNNER_GDB_SERVER='localhost:9090' build/nuvolaplayer3 -D "$@"
 }
 
 debug_app_runner_criticals()
 {
-	./waf -v && LD_LIBRARY_PATH=build XDG_DATA_DIRS=build/share:/usr/share:/usr/local/share \
+	./waf -v && XDG_DATA_DIRS=build/share:/usr/share:/usr/local/share \
 	NUVOLA_LIBDIR=build G_DEBUG=fatal-criticals NUVOLA_APP_RUNNER_GDB_SERVER='localhost:9090' \
 	build/nuvolaplayer3 -D "$@"
 }
