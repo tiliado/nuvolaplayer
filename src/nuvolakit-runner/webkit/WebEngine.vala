@@ -84,6 +84,17 @@ public class WebEngine : GLib.Object
 		set_up_ipc();
 	}
 	
+	public static uint get_webkit_version()
+	{
+		return WebKit.get_major_version() * 10000 + WebKit.get_minor_version() * 100 + WebKit.get_micro_version(); 
+	}
+	
+	public static bool check_webkit_version(uint min, uint max=0)
+	{
+		var version = get_webkit_version();
+ 		return version >= min && (max == 0 || version < max);
+	}
+	
 	public signal void init_form(HashTable<string, Variant> values, Variant entries);
 	
 	private bool inject_api()

@@ -919,4 +919,16 @@ namespace WebKit {
 	public const string EDITING_COMMAND_SELECT_ALL;
 	[CCode (cheader_filename = "webkit2/webkit2.h", cname = "WEBKIT_EDITING_COMMAND_UNDO")]
 	public const string EDITING_COMMAND_UNDO;
+	[CCode (cheader_filename = "webkit2/webkit2.h", cname = "WEBKIT_MAJOR_VERSION")]
+	public const int MAJOR_VERSION;
+	[CCode (cheader_filename = "webkit2/webkit2.h", cname = "WEBKIT_MICRO_VERSION")]
+	public const int MICRO_VERSION;
+	[CCode (cheader_filename = "webkit2/webkit2.h", cname = "WEBKIT_MINOR_VERSION")]
+	public const int MINOR_VERSION;
+	[CCode (cheader_filename = "webkit2/webkit2.h")]
+	public static uint get_major_version ();
+	[CCode (cheader_filename = "webkit2/webkit2.h")]
+	public static uint get_micro_version ();
+	[CCode (cheader_filename = "webkit2/webkit2.h")]
+	public static uint get_minor_version ();
 }
