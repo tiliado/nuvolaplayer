@@ -56,6 +56,8 @@ public class WebEngine : GLib.Object
 		wc.set_web_extensions_directory(webkit_extension_dir);
 		wc.set_favicon_database_directory(storage.data_dir.get_child("favicons").get_path());
 		wc.set_disk_cache_directory(storage.cache_dir.get_child("webcache").get_path());
+		if (WebEngine.check_webkit_version(20800))
+			wc.set_property("local-storage-directory", storage.data_dir.get_child("local_storage").get_path());
 		
 		var cm = wc.get_cookie_manager();
 		cm.set_persistent_storage(storage.data_dir.get_child("cookies.dat").get_path(),
