@@ -37,9 +37,10 @@ public class ComponentsManager: Gtk.Stack
 		GLib.Object(components: components, transition_type: Gtk.StackTransitionType.SLIDE_LEFT_RIGHT);
 		grid = new Gtk.Grid();
 		grid.margin = 10;
-		grid.column_spacing = 10;
+		grid.column_spacing = 15;
 		refresh();
 		var scroll = new Gtk.ScrolledWindow(null, null);
+		scroll.hexpand = scroll.vexpand = true;
 		scroll.add(grid);
 		scroll.show();
 		add_named(scroll, "list");
@@ -109,12 +110,13 @@ public class ComponentsManager: Gtk.Stack
 			grid.attach(checkbox, 0, row, 1, 1);
 			
 			var label = new Gtk.Label(Markup.printf_escaped(
-				"<span size='medium'><b>%s</b></span>\n<span foreground='#999999' size='small'>%s</span>",
+				"<span size='medium'><b>%s</b></span>\n<span foreground='#666666' size='small'>%s</span>",
 				component.name, component.description));
 			label.use_markup = true;
 			label.vexpand = false;
 			label.hexpand = true;
 			label.halign = Gtk.Align.START;
+			label.yalign = label.xalign = 0.0f;
 			label.set_line_wrap(true);
 			grid.attach(label, 1, row, 1, 1);
 			
