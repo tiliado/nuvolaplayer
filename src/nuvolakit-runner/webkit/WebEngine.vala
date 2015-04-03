@@ -30,6 +30,10 @@ namespace Nuvola
 public class WebEngine : GLib.Object
 {
 	private static const string ZOOM_LEVEL_CONF = "webview.zoom_level";
+	private static const string PROXY_TYPE_CONF = "webview.proxy.type";
+	private static const string PROXY_HOST_CONF = "webview.proxy.host";
+	private static const string PROXY_PORT_CONF = "webview.proxy.port";
+	
 	public Gtk.Widget widget {get {return web_view;}}
 	public WebAppMeta web_app {get; private set;}
 	public WebAppStorage storage {get; private set;}
@@ -49,8 +53,18 @@ public class WebEngine : GLib.Object
 	public WebEngine(RunnerApplication runner_app, Diorite.Ipc.MessageServer server, WebAppMeta web_app, WebAppStorage storage, Config config)
 	{
 		this.server = server;
+		this.runner_app = runner_app;
+		this.storage = storage;
+		this.web_app = web_app;
+		this.config = config;
+		
 		var webkit_extension_dir = Nuvola.get_libdir();
 		debug("Nuvola WebKit Extension directory: %s", webkit_extension_dir);
+		
+		config.set_default_value(PROXY_TYPE_CONF, NetworkProxyType.SYSTEM.to_string());
+		config.set_default_value(PROXY_HOST_CONF, "");
+		config.set_default_value(PROXY_PORT_CONF, 0);
+		apply_network_proxy();
 		
 		var wc = WebKit.WebContext.get_default();
 		wc.set_web_extensions_directory(webkit_extension_dir);
@@ -63,10 +77,6 @@ public class WebEngine : GLib.Object
 		cm.set_persistent_storage(storage.data_dir.get_child("cookies.dat").get_path(),
 			WebKit.CookiePersistentStorage.SQLITE);
 		
-		this.runner_app = runner_app;
-		this.storage = storage;
-		this.web_app = web_app;
-		this.config = config;
 		web_view = new WebView();
 		config.set_default_value(ZOOM_LEVEL_CONF, 1.0);
 		web_view.zoom_level = config.get_double(ZOOM_LEVEL_CONF);
@@ -89,6 +99,55 @@ public class WebEngine : GLib.Object
 	public static uint get_webkit_version()
 	{
 		return WebKit.get_major_version() * 10000 + WebKit.get_minor_version() * 100 + WebKit.get_micro_version(); 
+	}
+	
+	public void store_network_proxy(NetworkProxyType type, string? server, int port)
+	{
+		config.set_string(PROXY_TYPE_CONF, type.to_string());
+		config.set_string(PROXY_HOST_CONF, server);
+		config.set_int64(PROXY_PORT_CONF, (int64) port);
+	}
+	
+	public NetworkProxyType get_network_proxy(out string? host, out int port)
+	{
+		host = config.get_string(PROXY_HOST_CONF);
+		port = (int) config.get_int64(PROXY_PORT_CONF);
+		return NetworkProxyType.from_string(config.get_string(PROXY_TYPE_CONF));
+	}
+	
+	private void apply_network_proxy()
+	{
+		string? host;
+		int port; 
+		var type = get_network_proxy(out host, out port);
+		if (type != NetworkProxyType.SYSTEM)
+		{
+			/* This is an ugly hack! See https://bugs.webkit.org/show_bug.cgi?id=128674 */
+			Environment.unset_variable("GNOME_DESKTOP_SESSION_ID");
+			Environment.unset_variable("DESKTOP_SESSION");
+			if (host == null || host == "")
+				host = "127.0.0.1";
+			string proxy;
+			switch (type)
+			{
+			case NetworkProxyType.HTTP:
+				proxy = "http://%s:%d/".printf(host, port);
+				break;
+			case NetworkProxyType.SOCKS:
+				proxy = "socks://%s:%d/".printf(host, port);
+				break;
+			default:
+				proxy = "direct://";
+				break;
+			}
+			debug("Network Proxy: '%s'", proxy);
+			Environment.set_variable("http_proxy", proxy, true);
+			Environment.set_variable("https_proxy", proxy, true);
+		}
+		else
+		{
+			debug("Network Proxy: system settings");
+		}
 	}
 	
 	public static bool check_webkit_version(uint min, uint max=0)
@@ -583,6 +642,45 @@ public class WebEngine : GLib.Object
 	private void on_zoom_level_changed(GLib.Object o, ParamSpec p)
 	{
 		config.set_double(ZOOM_LEVEL_CONF, web_view.zoom_level);
+	}
+}
+
+public enum NetworkProxyType
+{
+	SYSTEM,
+	DIRECT,
+	HTTP,
+	SOCKS;
+	
+	public static NetworkProxyType from_string(string type)
+	{
+		switch (type.down())
+		{
+		case "none":
+		case "direct":
+			return DIRECT;
+		case "http":
+			return HTTP;
+		case "socks":
+			return SOCKS;
+		default:
+			return SYSTEM;
+		}
+	}
+	
+	public string to_string()
+	{
+		switch (this)
+		{
+		case DIRECT:
+			return "direct";
+		case HTTP:
+			return "http";
+		case SOCKS:
+			return "socks";
+		default:
+			return "system";
+		}
 	}
 }
 
