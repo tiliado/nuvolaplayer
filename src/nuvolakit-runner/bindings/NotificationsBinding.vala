@@ -45,7 +45,7 @@ public class Nuvola.NotificationsBinding: ObjectBinding<NotificationsInterface>
 		string icon_path = null;
 		bool force = false;
 		string? category = null;
-		data.get("(ssssb)", &summary, &body, &icon_name, &icon_path, &force, &category);
+		data.get("(ssssbs)", &summary, &body, &icon_name, &icon_path, &force, &category);
 		
 		foreach (var object in objects)
 			if (object.show_anonymous(summary, body, icon_name, icon_path, force, category))

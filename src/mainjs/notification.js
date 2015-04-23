@@ -130,7 +130,7 @@ Notifications.isPersistenceSupported = function()
  */
 Notifications.showNotification = function(title, text, iconName, iconPath, force, category)
 {
-    Nuvola._sendMessageAsync("Nuvola.Notifications.showNotification", title, text, iconName || "", iconPath || "", !!force, category || "");
+    Nuvola._sendMessageAsync("Nuvola.Notifications.showNotification", title, text || "", iconName || "", iconPath || "", !!force, category || "");
 }
 
 // export public items
