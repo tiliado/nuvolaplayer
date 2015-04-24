@@ -93,6 +93,7 @@ public class WebEngine : GLib.Object
 		web_view.notify["zoom-level"].connect(on_zoom_level_changed);
 		web_view.decide_policy.connect(on_decide_policy);
 		web_view.create.connect(on_web_view_create);
+		web_view.script_dialog.connect(on_script_dialog);
 		set_up_ipc();
 	}
 	
@@ -100,6 +101,8 @@ public class WebEngine : GLib.Object
 	{
 		return WebKit.get_major_version() * 10000 + WebKit.get_minor_version() * 100 + WebKit.get_micro_version(); 
 	}
+	
+	public signal void show_alert_dialog(ref bool handled, string message);
 	
 	public void store_network_proxy(NetworkProxyType type, string? server, int port)
 	{
@@ -642,6 +645,14 @@ public class WebEngine : GLib.Object
 	private void on_zoom_level_changed(GLib.Object o, ParamSpec p)
 	{
 		config.set_double(ZOOM_LEVEL_CONF, web_view.zoom_level);
+	}
+	
+	private bool on_script_dialog(WebKit.ScriptDialog dialog)
+	{
+		bool handled = false;
+		if (dialog.get_dialog_type() == WebKit.ScriptDialogType.ALERT)
+			show_alert_dialog(ref handled, dialog.get_message());
+		return handled;
 	}
 }
 

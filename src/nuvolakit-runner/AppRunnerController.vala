@@ -172,6 +172,7 @@ public class AppRunnerController : RunnerApplication
 		web_engine = new WebEngine(this, server, web_app, app_storage, config);
 		web_engine.init_form.connect(on_init_form);
 		web_engine.notify.connect_after(on_web_engine_notify);
+		web_engine.show_alert_dialog.connect(on_show_alert_dialog);
 		actions.action_changed.connect(on_action_changed);
 		var widget = web_engine.widget;
 		widget.hexpand = widget.vexpand = true;
@@ -765,6 +766,12 @@ public class AppRunnerController : RunnerApplication
 	private void on_sidebar_page_removed(Sidebar sidebar, Gtk.Widget child)
 	{
 		actions.get_action(Actions.TOGGLE_SIDEBAR).enabled = !sidebar.is_empty();
+	}
+	
+	private void on_show_alert_dialog(ref bool handled, string text)
+	{
+		main_window.show_overlay_alert(text);
+		handled = true;
 	}
 }
 

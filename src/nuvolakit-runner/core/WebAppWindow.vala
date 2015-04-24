@@ -101,6 +101,44 @@ public class WebAppWindow : Diorite.ApplicationWindow
 	
 	public signal void can_destroy(ref bool result);
 	
+	public void show_overlay_alert(string text)
+	{
+		var loop = new MainLoop();
+		var title = new Gtk.Label(Markup.printf_escaped("<b>%s</b>", "Web App Alert"));
+		title.use_markup = true;
+		var body = new Gtk.Label(text);
+		body.halign = Gtk.Align.START;
+		body.yalign = body.xalign = 0.0f;
+		body.set_line_wrap(true);
+		var close_button = new Gtk.Button.with_label("Close");
+		close_button.hexpand = false;
+		close_button.clicked.connect(() => loop.quit());
+		var grid = new Gtk.Grid();
+		grid.margin = grid.row_spacing = 12;
+		grid.orientation = Gtk.Orientation.VERTICAL;
+		grid.valign = grid.halign = Gtk.Align.CENTER;
+		grid.add(title);
+		grid.add(body);
+		grid.add(close_button);
+		
+		var outer_box = new Gtk.EventBox();
+		outer_box.vexpand = outer_box.hexpand = true;
+		outer_box.valign = outer_box.halign = Gtk.Align.FILL;
+		outer_box.override_background_color(Gtk.StateFlags.NORMAL, {0.0, 0.0, 0.0, 0.5});
+		
+		var inner_box = new Gtk.EventBox();
+		inner_box.valign = inner_box.halign = Gtk.Align.CENTER;
+		var color = get_style_context().get_background_color(Gtk.StateFlags.NORMAL);
+		inner_box.override_background_color(Gtk.StateFlags.NORMAL, color);
+		
+		outer_box.add(inner_box);
+		inner_box.add(grid);
+		outer_box.show_all();
+		overlay.add_overlay(outer_box);
+		loop.run();
+		overlay.remove(outer_box);
+	}
+	
 	public bool on_delete_event(Gdk.EventAny event)
 	{
 		hide();
