@@ -53,6 +53,7 @@ public class TrayIcon: GLib.Object
 	private AppIndicator.Indicator? indicator = null;
 	#else
 	private Gtk.StatusIcon? icon;
+	private int number = -1;
 	#endif
 	
 	public TrayIcon(AppRunnerController controller, LauncherModel model)
@@ -63,7 +64,8 @@ public class TrayIcon: GLib.Object
 		model.notify.connect_after(on_model_changed);
 		#if APPINDICATOR
 		critical("AppIndicator support is incomplete");
-		indicator = new AppIndicator.Indicator(controller.path_name, controller.icon, AppIndicator.IndicatorCategory.APPLICATION_STATUS);
+		indicator = new AppIndicator.Indicator(
+			controller.path_name, controller.icon, AppIndicator.IndicatorCategory.APPLICATION_STATUS);
 		indicator.set_status(AppIndicator.IndicatorStatus.ACTIVE);
 		create_menu();
 		#else
@@ -74,7 +76,8 @@ public class TrayIcon: GLib.Object
 		create_menu();
 		icon.popup_menu.connect(on_popup_menu);
 		icon.activate.connect(on_activate);
-		unset_number();
+		icon.size_changed.connect(on_size_changed);
+		render_icon();
 		#endif
 	}
 	
@@ -86,17 +89,8 @@ public class TrayIcon: GLib.Object
 	public void set_number(int number)
 	{
 		#if !APPINDICATOR
-		var icon_name = controller.icon;
-		var icon_pixbuf = load_icon({icon_name, icon_name[0:icon_name.length - 1]}, icon.size);
-		if (icon_pixbuf == null)
-		{
-			warning("Cannot load icon for StatusIcon");
-		}
-		else
-		{
-			render_number(number, ref icon_pixbuf);
-			icon.set_from_pixbuf(icon_pixbuf);
-		}
+		this.number = number;
+		render_icon();
 		#endif
 	}
 	
@@ -149,6 +143,45 @@ public class TrayIcon: GLib.Object
 		cairo.show_text(text);
 		pixbuf = Gdk.pixbuf_get_from_surface (surface, 0, 0, size, size);
 	}
+	
+	#if !APPINDICATOR
+	private bool on_size_changed(int size)
+	{
+		render_icon();
+		return true; // The icon was updated for the new size.
+	}
+	
+	private void render_icon()
+	{
+		Gdk.Pixbuf? pixbuf = null;
+		var size = icon.size;
+		var icon_name = controller.icon;
+		var icon_file = controller.web_app.icon;
+		if (icon_file != null)
+		{
+			try
+			{
+				pixbuf = new Gdk.Pixbuf.from_file_at_scale(icon_file, size, size, false);
+			}
+			catch (GLib.Error e)
+			{
+				warning("Failed to load icon from file %s: %s", icon_file, e.message);
+			}
+		}
+		
+		if (pixbuf == null)
+			pixbuf = load_icon({icon_name, icon_name[0:icon_name.length - 1]}, size);
+		
+		if (pixbuf == null)
+		{
+			warning("Failed to load icon from icon name %s.", icon_name);
+			return;
+		}
+		
+		render_number(number, ref pixbuf);
+		icon.set_from_pixbuf(pixbuf);
+	}
+	#endif
 	
 	public static Gdk.Pixbuf? load_icon(string[] names, int size)
 	{
