@@ -153,22 +153,9 @@ public class TrayIcon: GLib.Object
 	
 	private void render_icon()
 	{
-		Gdk.Pixbuf? pixbuf = null;
 		var size = icon.size;
 		var icon_name = controller.icon;
-		var icon_file = controller.web_app.icon;
-		if (icon_file != null)
-		{
-			try
-			{
-				pixbuf = new Gdk.Pixbuf.from_file_at_scale(icon_file, size, size, false);
-			}
-			catch (GLib.Error e)
-			{
-				warning("Failed to load icon from file %s: %s", icon_file, e.message);
-			}
-		}
-		
+		var pixbuf = controller.web_app.lookup_icon(size);
 		if (pixbuf == null)
 			pixbuf = load_icon({icon_name, icon_name[0:icon_name.length - 1]}, size);
 		
