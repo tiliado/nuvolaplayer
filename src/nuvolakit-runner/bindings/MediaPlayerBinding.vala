@@ -91,7 +91,7 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 		case "can-play":
 		case "can-pause":
 			handled = true;
-			Value value = Value(typeof(bool));
+			GLib.Value value = GLib.Value(typeof(bool));
 			value.set_boolean(val);
 			model.@set_property(name, value);
 			break;
