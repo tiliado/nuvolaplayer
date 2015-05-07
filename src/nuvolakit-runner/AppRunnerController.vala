@@ -48,7 +48,6 @@ namespace Actions
 	public const string GO_BACK = "go-back";
 	public const string GO_FORWARD = "go-forward";
 	public const string GO_RELOAD = "go-reload";
-	public const string KEYBINDINGS = "keybindings";
 	public const string FORMAT_SUPPORT = "format-support";
 	public const string PREFERENCES = "preferences";
 	public const string TOGGLE_SIDEBAR = "toggle-sidebar";
@@ -267,7 +266,6 @@ public class AppRunnerController : RunnerApplication
 		//          Action(group, scope, name, label?, mnemo_label?, icon?, keybinding?, callback?)
 		ah.simple_action("main", "app", Actions.ACTIVATE, "Activate main window", null, null, null, do_activate),
 		ah.simple_action("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
-		ah.simple_action("main", "app", Actions.KEYBINDINGS, "Keyboard shortcuts", "_Keyboard shortcuts", null, null, do_keybindings),
 		ah.simple_action("main", "app", Actions.FORMAT_SUPPORT, "Format Support", "_Format support", null, null, do_format_support),
 		ah.simple_action("main", "app", Actions.ABOUT, "About", "_About", null, null, do_about),
 		ah.simple_action("main", "app", Actions.HELP, "Help", "_Help", null, "F1", do_help),
@@ -342,13 +340,6 @@ public class AppRunnerController : RunnerApplication
 		dialog.destroy();
 	}
 	
-	private void do_keybindings()
-	{
-		var dialog = new KeybindingsDialog(this, main_window, actions, config, global_keybindings.keybinder);
-		dialog.run();
-		dialog.destroy();
-	}
-	
 	private void do_preferences()
 	{
 		var values = new HashTable<string, Variant>(str_hash, str_equal);
@@ -385,6 +376,7 @@ public class AppRunnerController : RunnerApplication
 		}
 		
 		var dialog = new PreferencesDialog(this, main_window, form);
+		dialog.add_tab("Keyboard shortcuts", new KeybindingsSettings(actions, config, global_keybindings.keybinder));
 		dialog.add_tab("Components", new ComponentsManager(components));
 		var account_form = new Tiliado.AccountForm(tiliado_account);
 		account_form.valign = account_form.halign = Gtk.Align.CENTER;

@@ -25,12 +25,8 @@
 namespace Nuvola
 {
 
-
-public class KeybindingsDialog : Gtk.Dialog
+public class KeybindingsSettings : Gtk.ScrolledWindow
 {
-	/// Preferences dialog title
-	private const string TITLE = ("Keyboard shortcuts");
-	private Diorite.Application app;
 	private Diorite.ActionsRegistry actions_reg;
 	private Config config;
 	private ActionsKeyBinder global_keybindings;
@@ -42,35 +38,15 @@ public class KeybindingsDialog : Gtk.Dialog
 	 * 
 	 * @param app Application object
 	 */
-	public KeybindingsDialog(Diorite.Application app, Gtk.Window? parent, Diorite.ActionsRegistry actions_reg,
-	Config config, ActionsKeyBinder global_keybindings)
+	public KeybindingsSettings(Diorite.ActionsRegistry actions_reg, Config config, ActionsKeyBinder global_keybindings)
 	{
-		this.app = app;
 		this.actions_reg = actions_reg;
 		this.config = config;
 		this.global_keybindings = global_keybindings;
 		
-		window_position = Gtk.WindowPosition.CENTER;
-		title = TITLE;
-		border_width = 5;
-		try
-		{
-			icon = Gtk.IconTheme.get_default().load_icon(app.icon, 48, 0);
-		}
-		catch (Error e)
-		{
-			warning("Unable to load application icon.");
-		}
-		
-		set_default_size(500, 400);
-		
-		if (parent != null)
-			set_transient_for(parent);
-		modal = true;
-		
-		add_buttons("Close", Gtk.ResponseType.CLOSE);
-		
-		model = new Gtk.ListStore(6, typeof(string), typeof(string), typeof(uint), typeof(Gdk.ModifierType), typeof(uint), typeof(Gdk.ModifierType));
+		model = new Gtk.ListStore(
+			6, typeof(string), typeof(string), typeof(uint),
+			typeof(Gdk.ModifierType), typeof(uint), typeof(Gdk.ModifierType));
 		Gtk.TreeIter iter;
 		foreach (var action in actions_reg.list_actions())
 		{
@@ -127,17 +103,10 @@ public class KeybindingsDialog : Gtk.Dialog
 		accel_cell.accel_cleared.connect(on_glob_accel_cleared);
 		view.insert_column_with_attributes(-1, "Global Shortcut", accel_cell, "accel-key", 4, "accel-mods", 5);
 		
-		var scroll = new Gtk.ScrolledWindow(null, null);
-		scroll.vexpand = scroll.hexpand = true;
-		scroll.add(view);
-		scroll.show();
-		get_content_area().add(scroll);
+		vexpand = hexpand = true;
+		add(view);
+		show();
 		view.show();
-	}
-	
-	public override bool delete_event(Gdk.EventAny event)
-	{
-		return false;
 	}
 	
 	private void on_accel_edited(string path_string, uint accel_key, Gdk.ModifierType accel_mods, uint hardware_keycode)

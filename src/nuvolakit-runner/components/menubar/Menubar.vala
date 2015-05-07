@@ -38,7 +38,7 @@ public class MenuBar: GLib.Object, MenuBarInterface
 		this.menus = new HashTable<string, SubMenu>(str_hash, str_equal);
 		menubar = new Menu();
 		app_menu = actions_reg.build_menu({
-			Actions.KEYBINDINGS, Actions.FORMAT_SUPPORT, Actions.DONATE,
+			Actions.FORMAT_SUPPORT, Actions.DONATE,
 			Actions.PREFERENCES, Actions.HELP, Actions.ABOUT, Actions.QUIT}, true, false);
 	}
 	

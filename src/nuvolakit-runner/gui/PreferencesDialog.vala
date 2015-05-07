@@ -54,7 +54,7 @@ public class PreferencesDialog : Gtk.Dialog
 			warning("Unable to load application icon.");
 		}
 		
-		set_default_size(400, -1);
+		set_default_size(600, -1);
 		
 		if (parent != null)
 			set_transient_for(parent);
@@ -63,6 +63,7 @@ public class PreferencesDialog : Gtk.Dialog
 		add_buttons("Cancel", Gtk.ResponseType.CLOSE, "Save changes", Gtk.ResponseType.OK);
 		notebook = new Gtk.Notebook();
 		notebook.margin_bottom = 10;
+		notebook.tab_pos = Gtk.PositionType.LEFT;
 		form.show();
 		notebook.append_page(form, new Gtk.Label("Preferences"));
 		get_content_area().add(notebook);
