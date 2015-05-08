@@ -377,6 +377,7 @@ public class AppRunnerController : RunnerApplication
 		
 		var dialog = new PreferencesDialog(this, main_window, form);
 		dialog.add_tab("Keyboard shortcuts", new KeybindingsSettings(actions, config, global_keybindings.keybinder));
+		dialog.add_tab("Network", new NetworkSettings(web_engine));
 		dialog.add_tab("Components", new ComponentsManager(components));
 		var account_form = new Tiliado.AccountForm(tiliado_account);
 		account_form.valign = account_form.halign = Gtk.Align.CENTER;
