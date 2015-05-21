@@ -37,6 +37,7 @@ public class WebExtension: GLib.Object
 	private File user_config_dir;
 	private JSApi js_api;
 	private bool initialized = false;
+	private bool nuvola_issue_100_hotfix;
 	
 	public WebExtension(WebKit.WebExtension extension, Diorite.Ipc.MessageClient runner, Diorite.Ipc.MessageServer server)
 	{
@@ -44,6 +45,7 @@ public class WebExtension: GLib.Object
 		this.runner = runner;
 		this.server = server;
 		
+		nuvola_issue_100_hotfix = Environment.get_variable("NUVOLA_ISSUE_100_HOTFIX") == "true";
 		WebKit.ScriptWorld.get_default().window_object_cleared.connect(on_window_object_cleared);
 		extension.page_created.connect(on_web_page_created);
 		
@@ -197,8 +199,32 @@ public class WebExtension: GLib.Object
 	private void on_web_page_created(WebKit.WebExtension extension, WebKit.WebPage web_page)
 	{
 		debug("Page %u created for %s", (uint) web_page.get_id(), web_page.get_uri());
+		
+		if (web_page.get_id() != 1)
+			return;
+		if(nuvola_issue_100_hotfix)
+		{
+			message("Nuvola Issue #100 hotfix enabled. https://github.com/tiliado/nuvolaplayer/issues/100");
+			web_page.send_request.connect(on_send_request);
+		}
+		else
+		{
+			message("Nuvola Issue #100 hotfix not enabled. https://github.com/tiliado/nuvolaplayer/issues/100");
+		}
 	}
-
+	
+	private bool on_send_request(WebKit.URIRequest request, WebKit.URIResponse? redirected_response)
+	{
+		const string FIXED_WEB_COMPONENTS = "https://raw.githubusercontent.com/kbhomes/radiant-player-mac/master/radiant-player-mac/js/webcomponents.js";
+		var uri = request.uri;
+		if (uri.has_suffix("webcomponents.js") && uri != FIXED_WEB_COMPONENTS)
+		{
+			message("Broken web components: %s", uri);
+			request.uri = FIXED_WEB_COMPONENTS;
+			message("Fixed web components: %s", request.uri);
+		}
+		return false;
+	}
 }
 
 } // namespace Nuvola
