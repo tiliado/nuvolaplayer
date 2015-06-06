@@ -132,7 +132,7 @@ public class WebExtension: GLib.Object
 			var args = new Variant("(s)", "InitWebWorker");
 			bridge.call_function("Nuvola.core.emit", ref args);
 		}
-		catch (JSError e)
+		catch (GLib.Error e)
 		{
 			show_error("Failed to inject JavaScript API. %s".printf(e.message));
 		}
@@ -151,7 +151,7 @@ public class WebExtension: GLib.Object
 			{
 				env.call_function(name, ref params);
 			}
-			catch (JSError e)
+			catch (GLib.Error e)
 			{
 				show_error("Error during call of %s: %s".printf(name, e.message));
 			}

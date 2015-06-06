@@ -183,7 +183,7 @@ public class WebEngine : GLib.Object
 		return true;
 	}
 	
-	private string? data_request(string name, string key, string? default_value=null) throws JSError
+	private string? data_request(string name, string key, string? default_value=null) throws GLib.Error
 	{
 		string? result = null;
 		var builder = new VariantBuilder(new VariantType("a{smv}"));
@@ -241,7 +241,7 @@ public class WebEngine : GLib.Object
 			{
 				env.call_function("Nuvola.core.emit", ref args);
 			}
-			catch (JSError e)
+			catch (GLib.Error e)
 			{
 				runner_app.fatal_error("Initialization error",
 					"%s failed to initialize app runner. Initialization exited with error:\n\n%s".printf(
@@ -271,7 +271,7 @@ public class WebEngine : GLib.Object
 			if (!result)
 				runner_app.show_error("Invalid page URL", "The web app integration script has not provided a valid page URL '%s'.".printf(url));
 		}
-		catch (JSError e)
+		catch (GLib.Error e)
 		{
 			runner_app.show_error("Initialization error", "%s failed to retrieve a last visited page from previous session. Initialization exited with error:\n\n%s".printf(runner_app.app_name, e.message));
 		}
@@ -303,7 +303,7 @@ public class WebEngine : GLib.Object
 				return false;
 			}
 		}
-		catch (JSError e)
+		catch (GLib.Error e)
 		{
 			runner_app.fatal_error("Initialization error", "%s failed to retrieve a home page of  a web app. Initialization exited with error:\n\n%s".printf(runner_app.app_name, e.message));
 			return false;
@@ -349,7 +349,7 @@ public class WebEngine : GLib.Object
 		{
 			env.call_function("Nuvola.core.emit", ref args);
 		}
-		catch (JSError e)
+		catch (GLib.Error e)
 		{
 			runner_app.show_error("Integration error", "%s failed to load preferences with error:\n\n%s".printf(runner_app.app_name, e.message));
 		}
@@ -365,7 +365,7 @@ public class WebEngine : GLib.Object
 		{
 			env.call_function("Nuvola.core.emit", ref args);
 		}
-		catch (JSError e)
+		catch (GLib.Error e)
 		{
 			runner_app.fatal_error("Initialization error", "%s failed to crate initialization form. Initialization exited with error:\n\n%s".printf(runner_app.app_name, e.message));
 			return false;
@@ -590,7 +590,7 @@ public class WebEngine : GLib.Object
 		{
 			env.call_function("Nuvola.core.emit", ref args);
 		}
-		catch (JSError e)
+		catch (GLib.Error e)
 		{
 			runner_app.show_error("Integration script error", "The web app integration script has not provided a valid response and caused an error: %s".printf(e.message));
 			return true;
@@ -620,7 +620,7 @@ public class WebEngine : GLib.Object
 		{
 			env.call_function("Nuvola.core.emit", ref args);
 		}
-		catch (JSError e)
+		catch (GLib.Error e)
 		{
 			runner_app.show_error("Integration script error", "The web app integration caused an error: %s".printf(e.message));
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2015 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -66,9 +66,9 @@ public abstract class Nuvola.Binding<ObjectType>: GLib.Object
 		handlers.prepend(full_name);
 	}
 	
-	protected void call_web_worker(string func_name, Variant? params) throws GLib.Error
+	protected void call_web_worker(string func_name, ref Variant? params) throws GLib.Error
 	{
-		web_worker.call_function(func_name, params);
+		web_worker.call_function(func_name, ref params);
 	}
 	
 	~BaseBinding()

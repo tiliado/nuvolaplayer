@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2011-2015 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -32,7 +32,7 @@ public enum ValueType
 	STRING, INT, DOUBLE, NULL, JS_VALUE;
 }
 
-public class JsEnvironment: GLib.Object
+public class JsEnvironment: GLib.Object, JSExecutor
 {
 	public unowned JS.GlobalContext context {get; private set;}
 	private unowned JS.Object? _main_object = null;
@@ -109,7 +109,7 @@ public class JsEnvironment: GLib.Object
 		return value;
 	}
 	
-	public unowned JS.Value call_function(string name, ref Variant args) throws JSError
+	public void call_function(string name, ref Variant? args) throws GLib.Error
 	{
 		unowned JS.Context ctx = context;
 		string[] names = name.split(".");
@@ -128,24 +128,35 @@ public class JsEnvironment: GLib.Object
 			throw new JSError.WRONG_TYPE("'%s' is not a function.'", name);
 		
 //~ 		debug("Args before: %s", args.print(true));
-		assert(args.is_container()); // FIXME
-		var size = args.n_children();
-		void*[] params = new void*[size];
-		int i = 0;
-		foreach (var item in args)
-			params[i++] = (void*) value_from_variant(ctx, item);
+		(unowned JS.Value)[] params;
+		var size = 0;
+		if (args != null)
+		{
+			assert(args.is_container()); // FIXME
+			size = (int) args.n_children();
+			params = new (unowned JS.Value)[size];
+			int i = 0;
+			foreach (var item in args)
+				params[i++] = value_from_variant(ctx, item);
+		}
+		else
+		{
+			params = {};
+		}
 		
 		JS.Value? exception;
-		unowned JS.Value result = func.call_as_function(ctx, object, (JS.Value[]) params,  out exception);
+		func.call_as_function(ctx, object, params,  out exception);
 		if (exception != null)
 			throw new JSError.FUNC_FAILED("Function '%s' failed. %s", name, exception_to_string(ctx, exception) ?? "(null)");
 		
-		Variant[] items = new Variant[size];
-		for (i = 0; i < size; i++)
-			items[i] = variant_from_value(ctx, (JS.Value) params[i]);
-		args = new Variant.tuple(items);
+		if (args != null)
+		{
+			Variant[] items = new Variant[size];
+			for (var i = 0; i < size; i++)
+				items[i] = variant_from_value(ctx, params[i]);
+			args = new Variant.tuple(items);
+		}
 //~ 		debug("Args after: %s", args.print(true));
-		return result;
 	}
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2015 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -26,13 +26,12 @@
 namespace Nuvola
 {
 
-public interface WebWorker: GLib.Object
+public interface WebWorker: GLib.Object, JSExecutor
 {
-	public abstract void send_message(string name, Variant? params) throws GLib.Error;
-	public abstract void call_function(string name, Variant? params) throws GLib.Error;
+	public abstract Variant? send_message(string name, Variant? params) throws GLib.Error;
 }
 
-public class RemoteWebWorker: GLib.Object, WebWorker
+public class RemoteWebWorker: GLib.Object, JSExecutor, WebWorker
 {
 	private bool ready = false;
 	private Diorite.Ipc.MessageClient client;
@@ -47,18 +46,20 @@ public class RemoteWebWorker: GLib.Object, WebWorker
 		this.client = client;
 	}
 	
-	public void send_message(string name, Variant? params) throws GLib.Error
+	public Variant? send_message(string name, Variant? params) throws GLib.Error
 	{
 		if (!ready && !(ready = client.wait_for_echo(2000)))
 			throw new Diorite.Ipc.MessageError.NOT_READY("Web worker process is not ready yet");
 		
-		client.send_message(name, params);
+		return client.send_message(name, params);
 	}
 	
-	public void call_function(string name, Variant? params) throws GLib.Error
+	public void call_function(string name, ref Variant? params) throws GLib.Error
 	{
 		var data = new Variant("(smv)", name, params);
-		send_message("call_function", data);
+//~ 		message("Payload before: %s", params == null ? "null" : params.print(true));
+		params = send_message("call_function", data);
+//~ 		message("Payload after: %s", params == null ? "null" : params.print(true));
 	}
 }
 

@@ -22,33 +22,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Nuvola.MediaKeysBinding: ObjectBinding<MediaKeysInterface>
+
+namespace Nuvola
 {
-	public MediaKeysBinding(Diorite.Ipc.MessageServer server, WebWorker web_worker)
-	{
-		base(server, web_worker, "Nuvola.MediaKey");
-	}
-	
-	protected override void object_added(MediaKeysInterface object)
-	{
-		object.media_key_pressed.connect(on_media_key_pressed);
-	}
-	
-	protected override void object_removed(MediaKeysInterface object)
-	{
-		object.media_key_pressed.disconnect(on_media_key_pressed);
-	}
-	
-	private void on_media_key_pressed(string key)
-	{
-		try
-		{
-			var payload = new Variant("(ss)", "MediaKeyPressed", key);
-			call_web_worker("Nuvola.mediaKeys.emit", ref payload);
-		}
-		catch (GLib.Error e)
-		{
-			warning("Communication failed: %s", e.message);
-		}
-	}
+
+public interface JSExecutor: GLib.Object
+{
+	public abstract void call_function(string name, ref Variant? params) throws GLib.Error;
 }
+
+} // namespace Nuvola

@@ -619,7 +619,9 @@ public class AppRunnerController : RunnerApplication
 			var result = connection.download_file.end(res, out msg);
 			try
 			{
-				web_worker.call_function("Nuvola.browser._downloadDone", new Variant("(dbusss)", cb_id, result, msg.status_code, msg.reason_phrase, file.get_path(), file.get_uri()));
+				var payload = new Variant(
+					"(dbusss)", cb_id, result, msg.status_code, msg.reason_phrase, file.get_path(), file.get_uri());
+				web_worker.call_function("Nuvola.browser._downloadDone", ref payload);
 			}
 			catch (GLib.Error e)
 			{
@@ -636,7 +638,8 @@ public class AppRunnerController : RunnerApplication
 			return;
 		try
 		{
-			web_worker.call_function("Nuvola.actions.emit", new Variant("(ssb)", "ActionEnabledChanged", action.name, action.enabled));
+			var payload = new Variant("(ssb)", "ActionEnabledChanged", action.name, action.enabled);
+			web_worker.call_function("Nuvola.actions.emit", ref payload);
 		}
 		catch (GLib.Error e)
 		{
@@ -658,7 +661,8 @@ public class AppRunnerController : RunnerApplication
 		
 		try
 		{
-			web_worker.call_function("Nuvola.config.emit", new Variant("(ss)", "ConfigChanged", key));
+			var payload = new Variant("(ss)", "ConfigChanged", key);
+			web_worker.call_function("Nuvola.config.emit", ref payload);
 		}
 		catch (GLib.Error e)
 		{
