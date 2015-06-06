@@ -66,13 +66,14 @@ WebApp._onInitAppRunner = function(emitter)
     
     Nuvola.core.connect("InitializationForm", this);
     Nuvola.core.connect("PreferencesForm", this);
+    Nuvola.core.connect("ResourceRequest", this);
 }
 
 // Initialization routines
 WebApp._onInitWebWorker = function(emitter)
 {
     Nuvola.WebApp._onInitWebWorker.call(this, emitter);
-
+    
     var state = document.readyState;
     if (state === "interactive" || state === "complete")
         this._onPageReady();
@@ -244,6 +245,11 @@ WebApp.appendPreferences = function(values, entries)
     entries.push(["label", _("Preferred national variant")]);
     for (var i = 0; i < COUNTRY_VARIANTS.length; i++)
         entries.push(["option", COUNTRY_VARIANT, COUNTRY_VARIANTS[i][0], COUNTRY_VARIANTS[i][1]]);
+}
+
+WebApp._onResourceRequest = function(emitter, request)
+{
+    request.url = request.url.replace("webcomponents.js", "webcomponents2.js");
 }
 
 WebApp.testPrototypes = function()

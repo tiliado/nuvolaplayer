@@ -36,8 +36,10 @@ public class WebExtension: GLib.Object
 	private File data_dir;
 	private File user_config_dir;
 	private JSApi js_api;
-	private bool initialized = false;
-	private bool nuvola_issue_100_hotfix;
+	private JsRuntime bare_env;
+	private JSApi bare_api;
+	
+	public InitState initialized {get; private set; default = InitState.NONE;}
 	
 	public WebExtension(WebKit.WebExtension extension, Diorite.Ipc.MessageClient runner, Diorite.Ipc.MessageServer server)
 	{
@@ -45,7 +47,6 @@ public class WebExtension: GLib.Object
 		this.runner = runner;
 		this.server = server;
 		
-		nuvola_issue_100_hotfix = Environment.get_variable("NUVOLA_ISSUE_100_HOTFIX") == "true";
 		WebKit.ScriptWorld.get_default().window_object_cleared.connect(on_window_object_cleared);
 		extension.page_created.connect(on_web_page_created);
 		
@@ -59,11 +60,21 @@ public class WebExtension: GLib.Object
 		{
 			error("Web Worker server error: %s", e.message);
 		}
+		
 		Idle.add(late_init_cb);
 	}
 	
 	private bool late_init_cb()
 	{
+		switch (initialized)
+		{
+		case InitState.DONE:
+		case InitState.PENDING:
+			return false;
+		}
+		
+		initialized = InitState.PENDING;
+		
 		/* 
 		 * For unknown reason, runner.wait_for_echo() in WebExtension constructor blocks window_object_cleared signal,
 		 * so it has been moved to the late init method.
@@ -88,7 +99,24 @@ public class WebExtension: GLib.Object
 		new KeyValueProxy(runner, "session"));
 		js_api.send_message_async.connect(on_send_message_async);
 		js_api.send_message_sync.connect(on_send_message_sync);
-		initialized = true;
+		
+		bare_env = new JsRuntime();
+		bare_api = new JSApi(storage, data_dir, user_config_dir, new KeyValueProxy(runner, "config"),
+			new KeyValueProxy(runner, "session"));
+		try
+		{
+			bare_api.inject(bare_env);
+			bare_api.initialize(bare_env);
+			// TODO: differentiate from the JS environment in the runner process
+			var args = new Variant("(s)", "InitAppRunner");
+			bare_env.call_function("Nuvola.core.emit", ref args);
+		}
+		catch (GLib.Error e)
+		{
+			critical("Initialization error: %s", e.message);
+		}
+		
+		initialized = InitState.DONE;
 		return false;
 	}
 	
@@ -103,20 +131,8 @@ public class WebExtension: GLib.Object
 		if (!frame.is_main_frame())
 			return; // TODO: Add api not to ignore non-main frames
 		
-		if (initialized)
-		{
-			init_frame(world, page, frame);
-			return;
-		}
-		
-		Idle.add(() =>
-		{
-			if (!initialized)
-				return true;
-			
-			init_frame(world, page, frame);
-			return false;
-		});
+		wait_until_initialized();
+		init_frame(world, page, frame);
 	}
 	
 	private void init_frame(WebKit.ScriptWorld world, WebKit.WebPage page, WebKit.Frame frame)
@@ -157,6 +173,21 @@ public class WebExtension: GLib.Object
 			}
 		}
 		return params;
+	}
+	
+	public void wait_until_initialized()
+	{
+		if (initialized == InitState.DONE)
+			return;
+		
+		Idle.add(late_init_cb);
+		var loop = new MainLoop();
+		var handler_id = notify["initialized"].connect_after((o, p) => {
+			if (initialized == InitState.DONE)
+				loop.quit();
+		});
+		loop.run();
+		disconnect(handler_id);
 	}
 	
 	private void show_error(string message)
@@ -202,28 +233,58 @@ public class WebExtension: GLib.Object
 		
 		if (web_page.get_id() != 1)
 			return;
-		if(nuvola_issue_100_hotfix)
-		{
-			message("Nuvola Issue #100 hotfix enabled. https://github.com/tiliado/nuvolaplayer/issues/100");
-			web_page.send_request.connect(on_send_request);
-		}
-		else
-		{
-			message("Nuvola Issue #100 hotfix not enabled. https://github.com/tiliado/nuvolaplayer/issues/100");
-		}
+		
+		web_page.send_request.connect(on_send_request);
 	}
 	
 	private bool on_send_request(WebKit.URIRequest request, WebKit.URIResponse? redirected_response)
 	{
-		const string FIXED_WEB_COMPONENTS = "https://raw.githubusercontent.com/kbhomes/radiant-player-mac/master/radiant-player-mac/js/webcomponents.js";
+		var approved = true;
 		var uri = request.uri;
-		if (uri.has_suffix("webcomponents.js") && uri != FIXED_WEB_COMPONENTS)
+		resource_request(ref uri, ref approved);
+		request.uri = uri;
+		return !approved;
+	}
+	
+	private void resource_request(ref string url, ref bool approved)
+	{
+		wait_until_initialized();
+		var builder = new VariantBuilder(new VariantType("a{smv}"));
+		builder.add("{smv}", "url", new Variant.string(url));
+		builder.add("{smv}", "approved", new Variant.boolean(true));
+		var args = new Variant("(s@a{smv})", "ResourceRequest", builder.end());
+		
+		try
 		{
-			message("Broken web components: %s", uri);
-			request.uri = FIXED_WEB_COMPONENTS;
-			message("Fixed web components: %s", request.uri);
+			bare_env.call_function("Nuvola.core.emit", ref args);
 		}
-		return false;
+		catch (GLib.Error e)
+		{
+			critical(e.message);
+			var msg = "The web app integration script has not provided a valid response and caused an error: %s";
+			show_error(msg.printf(e.message));
+			return;
+		}
+		
+		VariantIter iter = args.iterator();
+		assert(iter.next("s", null));
+		assert(iter.next("a{smv}", &iter));
+		string key = null;
+		Variant value = null;
+		while (iter.next("{smv}", &key, &value))
+		{
+			if (key == "approved")
+				approved = value != null ? value.get_boolean() : false;
+			else if (key == "url" && value != null)
+				url = value.get_string();
+		}
+	}
+	
+	public enum InitState
+	{
+		NONE,
+		PENDING,
+		DONE;
 	}
 }
 

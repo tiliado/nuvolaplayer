@@ -92,6 +92,21 @@ Core.$init = function()
     this.addSignal("NavigationRequest");
     
     /**
+     * Emitted on request for loading a web resource.
+     * 
+     * @param String request.url           URL of the resource (can be overwritten)
+     * @param Boolean request.approved     whether the resource loading is approved
+     * 
+     * ```
+     * var _onResourceRequest = function(emitter, request)
+     * {
+     *     request.url = request.url.replace("webcomponents.js", "webcomponents2.js");
+     * }
+     * ```
+     */
+    this.addSignal("ResourceRequest");
+    
+    /**
      * Emitted on request for the last visited URL.
      * 
      * @param String|null result.url    property to assign the last visited URL to
