@@ -27,7 +27,7 @@ using Nuvola.JSTools;
 namespace Nuvola
 {
 
-public class WebEngine : GLib.Object
+public class WebEngine : GLib.Object, JSExecutor
 {
 	private static const string ZOOM_LEVEL_CONF = "webview.zoom_level";
 	private static const string PROXY_TYPE_CONF = "webview.proxy.type";
@@ -183,29 +183,6 @@ public class WebEngine : GLib.Object
 		return true;
 	}
 	
-	private string? data_request(string name, string key, string? default_value=null) throws GLib.Error
-	{
-		string? result = null;
-		var builder = new VariantBuilder(new VariantType("a{smv}"));
-		builder.add("{smv}", key, default_value == null ? null : new Variant.string(default_value));
-		var args = new Variant("(s@a{smv})", name, builder.end());
-		env.call_function("Nuvola.core.emit", ref args);
-		VariantIter iter = args.iterator();
-		assert(iter.next("s", null));
-		assert(iter.next("a{smv}", &iter));
-		string dict_key = null;
-		Variant value = null;
-		while (iter.next("{smv}", &dict_key, &value))
-			if (dict_key == key)
-				result =  value != null && value.is_of_type(VariantType.STRING)
-				?  value.get_string() : null;
-		
-		if(result == "")
-			result = null;
-		return result;
-	}
-	
-	
 	private bool load_uri(string uri)
 	{
 		if (uri.has_prefix("http://") || uri.has_prefix("https://"))
@@ -263,7 +240,7 @@ public class WebEngine : GLib.Object
 		var result = false;
 		try
 		{
-			var url = data_request("LastPageRequest", "url");
+			var url = env.send_data_request_string("LastPageRequest", "url");
 			if (url == null)
 				return try_go_home();
 			
@@ -290,7 +267,7 @@ public class WebEngine : GLib.Object
 	{
 		try
 		{
-			var url = data_request("HomePageRequest", "url");
+			var url = env.send_data_request_string("HomePageRequest", "url");
 			if (url == null)
 			{
 				runner_app.fatal_error("Invalid home page URL", "The web app integration script has provided an empty home page URL.");
@@ -354,6 +331,11 @@ public class WebEngine : GLib.Object
 			runner_app.show_error("Integration error", "%s failed to load preferences with error:\n\n%s".printf(runner_app.app_name, e.message));
 		}
 		args.get("(s@a{smv}@av)", null, out values, out entries);
+	}
+
+	public void call_function(string name, ref Variant? params) throws GLib.Error
+	{
+		env.call_function(name, ref params);
 	}
 	
 	private bool check_init_form()

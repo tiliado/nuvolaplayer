@@ -29,6 +29,42 @@ namespace Nuvola
 public interface JSExecutor: GLib.Object
 {
 	public abstract void call_function(string name, ref Variant? params) throws GLib.Error;
+	
+	public string? send_data_request_string(string name, string key, string? default_value=null) throws GLib.Error
+	{
+		var default_variant = default_value == null ? null : new Variant.string(default_value);
+		var variant = send_data_request_variant(name, key, default_variant);
+		if (variant == null || !variant.is_of_type(VariantType.STRING))
+			return null;
+		var result = variant.get_string();
+		
+		return result != "" ? result : null;
+	}
+	
+	public bool send_data_request_bool(string name, string key, bool default_value) throws GLib.Error
+	{
+		var variant = send_data_request_variant(name, key, new Variant.boolean(default_value));
+		if (variant == null || !variant.is_of_type(VariantType.BOOLEAN))
+			return default_value;
+		return variant.get_boolean();
+	}
+	
+	private Variant? send_data_request_variant(string name, string key, Variant? default_value=null) throws GLib.Error
+	{
+		var builder = new VariantBuilder(new VariantType("a{smv}"));
+		builder.add("{smv}", key, default_value);
+		var args = new Variant("(s@a{smv})", name, builder.end());
+		call_function("Nuvola.core.emit", ref args);
+		VariantIter iter = args.iterator();
+		assert(iter.next("s", null));
+		assert(iter.next("a{smv}", &iter));
+		string dict_key = null;
+		Variant value = null;
+		while (iter.next("{smv}", &dict_key, &value))
+			if (dict_key == key)
+				return value;
+		return null;
+	}
 }
 
 } // namespace Nuvola
