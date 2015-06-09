@@ -71,7 +71,7 @@ public abstract class Nuvola.Binding<ObjectType>: GLib.Object
 		web_worker.call_function(func_name, ref params);
 	}
 	
-	~BaseBinding()
+	~Binding()
 	{
 		unbind_methods();
 	}
