@@ -24,6 +24,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import os
+from codecs import open
 
 class Source:
 	def __init__(self, name, path, requires, data):
@@ -54,7 +55,7 @@ def parse_sources(files):
 		data = []
 		head = True
 		
-		with open(path) as f:
+		with open(path, encoding="utf-8") as f:
 			lineno = 0
 			for line in f:
 				bare_line = line.strip()
