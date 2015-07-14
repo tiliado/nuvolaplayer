@@ -25,13 +25,15 @@
 namespace Nuvola
 {
 
-public class KeybindingsSettings : Gtk.ScrolledWindow
+public class KeybindingsSettings : Gtk.Grid
 {
 	private Diorite.ActionsRegistry actions_reg;
 	private Config config;
 	private ActionsKeyBinder global_keybindings;
 	private Gtk.TreeView view;
 	private Gtk.ListStore model;
+	private Gtk.InfoBar info_bar;
+	private Gtk.Label error_label;
 	
 	/**
 	 * Constructs new main window
@@ -40,9 +42,26 @@ public class KeybindingsSettings : Gtk.ScrolledWindow
 	 */
 	public KeybindingsSettings(Diorite.ActionsRegistry actions_reg, Config config, ActionsKeyBinder global_keybindings)
 	{
+		
 		this.actions_reg = actions_reg;
 		this.config = config;
 		this.global_keybindings = global_keybindings;
+		
+		vexpand = hexpand = true;
+		row_spacing = 18;
+		
+		error_label = new Gtk.Label("");
+		error_label.set_line_wrap(true);
+		error_label.hexpand = true;
+		error_label.show();
+		info_bar = new Gtk.InfoBar();
+		info_bar.message_type = Gtk.MessageType.INFO;
+		info_bar.get_content_area().add(error_label);
+		info_bar.no_show_all = true;
+		attach(info_bar, 0, 0, 1, 1);
+		var scroll = new Gtk.ScrolledWindow(null, null);
+		attach(scroll, 0, 1, 1, 1);
+		scroll.show_all();
 		
 		model = new Gtk.ListStore(
 			6, typeof(string), typeof(string), typeof(uint),
@@ -103,8 +122,8 @@ public class KeybindingsSettings : Gtk.ScrolledWindow
 		accel_cell.accel_cleared.connect(on_glob_accel_cleared);
 		view.insert_column_with_attributes(-1, "Global Shortcut", accel_cell, "accel-key", 4, "accel-mods", 5);
 		
-		vexpand = hexpand = true;
-		add(view);
+		scroll.vexpand = scroll.hexpand = true;
+		scroll.add(view);
 		show();
 		view.show();
 	}
@@ -151,9 +170,17 @@ public class KeybindingsSettings : Gtk.ScrolledWindow
 		
 		
 		if (global_keybindings.set_keybinding(name, keybinding))
+		{
 			model.set(iter, 4, accel_key, 5, accel_mods, -1);
+			set_error(null);
+		}
 		else
+		{
 			model.set(iter, 4, 0, 5, 0, -1);
+			set_error(
+				("Failed to set keybinding '%s'. Make sure it is not already used by your system or other"
+				+ " programs (Google Chrome, for example).").printf(keybinding));
+		}
 	}
 	
 	private void on_glob_accel_cleared(string path_string)
@@ -165,6 +192,20 @@ public class KeybindingsSettings : Gtk.ScrolledWindow
 		model.get(iter, 0, out name, -1);
 		global_keybindings.set_keybinding(name, null);
 		model.set(iter, 4, 0, 5, 0, -1);
+		set_error(null);
+	}
+	
+	private void set_error(string? error)
+	{
+		if (error != null)
+		{
+			error_label.label = error;
+			info_bar.show();
+		}
+		else
+		{
+			info_bar.hide();
+		}
 	}
 }
 
