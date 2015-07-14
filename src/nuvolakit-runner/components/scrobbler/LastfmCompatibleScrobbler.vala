@@ -180,10 +180,11 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
 	 * @param timestamp Unix time
 	 * @throws AudioScrobblerError on failure
 	 */
-	public async override void scrobble_track(string song, string artist, int64 timestamp) throws AudioScrobblerError
+	public async override void scrobble_track(string song, string artist, string? album, int64 timestamp)
+		throws AudioScrobblerError
 	{
 		return_if_fail(session != null);
-		debug("%s scrobble: %s by %s, %s", id, song, artist, timestamp.to_string());
+		debug("%s scrobble: %s by %s from %s, %s", id, song, artist, album, timestamp.to_string());
 		// http://www.last.fm/api/show/track.scrobble
 		var params = new HashTable<string,string>(null, null);
 		params.insert("method", "track.scrobble");
@@ -192,6 +193,8 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
 		params.insert("track", song);
 		params.insert("artist", artist);
 		params.insert("timestamp", timestamp.to_string());
+		if (album != null)
+			params.insert("album", album);
 	
 		var response = yield send_request(HTTP_POST, params, 20);
 		if (!response.has_member("scrobbles"))

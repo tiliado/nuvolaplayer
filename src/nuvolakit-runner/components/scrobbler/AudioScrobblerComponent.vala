@@ -39,6 +39,7 @@ public class AudioScrobblerComponent: Component
 	private uint scrobble_timeout = 0;
 	private string? scrobble_title = null;
 	private string? scrobble_artist = null;
+	private string? scrobble_album = null;
 	private bool scrobbled = false;
 	private uint track_info_cb_id = 0;
 	
@@ -103,10 +104,11 @@ public class AudioScrobblerComponent: Component
 		cancel_scrobbling();
 		scrobble_title = null;
 		scrobble_artist = null;
+		scrobble_album = null;
 		scrobbled = false;
 	}
 	
-	private void schedule_scrobbling(string? title, string? artist, string? state)
+	private void schedule_scrobbling(string? title, string? artist, string? album, string? state)
 	{
 		if (scrobble_timeout == 0 && title != null && artist != null && state == "playing")
 		{
@@ -114,6 +116,7 @@ public class AudioScrobblerComponent: Component
 			{
 				scrobble_title = title;
 				scrobble_artist = artist;
+				scrobble_album = album;
 				scrobbled = false;
 			}
 			
@@ -146,7 +149,7 @@ public class AudioScrobblerComponent: Component
 			break;
 		case "can-scrobble":
 			if (scrobbler.can_scrobble)
-				schedule_scrobbling(player.title, player.artist, player.state);
+				schedule_scrobbling(player.title, player.artist, player.album, player.state);
 			else
 				cancel_scrobbling();
 			break;
@@ -175,7 +178,7 @@ public class AudioScrobblerComponent: Component
 			cancel_scrobbling();
 			
 			if (scrobbler.can_scrobble)
-				schedule_scrobbling(title, artist, state);
+				schedule_scrobbling(title, artist, album, state);
 			return false;
 		});
 	}
@@ -205,7 +208,8 @@ public class AudioScrobblerComponent: Component
 		{
 			scrobbled = true;
 			var datetime = new DateTime.now_utc();
-			scrobbler.scrobble_track.begin(scrobble_title, scrobble_artist, datetime.to_unix(), on_scrobble_track_done);
+			scrobbler.scrobble_track.begin(
+				scrobble_title, scrobble_artist, scrobble_album, datetime.to_unix(), on_scrobble_track_done);
 		}
 		return false;
 	}
