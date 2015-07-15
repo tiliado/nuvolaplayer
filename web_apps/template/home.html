@@ -1,0 +1,285 @@
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>Happy Songs</title>
+		<style type="text/css">
+		td, th {border: 1px solid black; padding: 5px;}
+		tbody tr {cursor: pointer;}
+		.playing td {font-weight: bold; background-color: yellow;}
+		#nowplaying {display:none;}
+		</style>
+	</head>
+	<body>
+		<h1>Welcome to Happy Songs</h1>
+		<script type="text/javascript">true;</script>
+		<p>
+		<strong id="status"></strong>
+		<span id="timer"></span>
+		<span id="nowplaying"><i id="track"></i> by <i id="artist"></i> from <i id="album"></i></span>
+		</p>
+		<p>
+		<button id="pp" onclick="player.togglePlay();">Play</button>
+		<button id="prev" onclick="player.prev();">Prev</button>
+		<button id="next" onclick="player.next();">Next</button>
+		</p>
+		<table>
+			<thead>
+				<tr><th>Id</th><th>Song</th><th>Artist</th><th>Album</th></tr>
+			</thead>
+			<tbody id="playlist"></tbody>
+		</table>
+		
+<script type="text/javascript">
+var Nuvola = {};
+/**
+ * Creates HTML text node
+ * @param text	text of the node
+ * @return		new text node
+ */
+Nuvola.makeText = function(text)
+{
+	return document.createTextNode(text);
+}
+
+/**
+ * Creates HTML element
+ * @param name			element name
+ * @param attributes	element attributes (optional)
+ * @param text			text of the element (optional)
+ * @return				new HTML element
+ */
+Nuvola.makeElement = function(name, attributes, text)
+{
+	var elm = document.createElement(name);
+	attributes = attributes || {};
+	for (var key in attributes)
+	{
+		elm.setAttribute(key, attributes[key]);
+	}
+	if (text !== undefined && text !== null)
+	{
+		elm.appendChild(Nuvola.makeText(text));
+	}
+	return elm;
+}
+
+var Player = function()
+{
+	this.playlist = document.getElementById("playlist");
+	var self = this;
+	for (var i = 0; i < Player.songs.length; i++)
+	{
+		var song = Player.songs[i];
+		var tr = Nuvola.makeElement("tr");
+		tr.appendChild(Nuvola.makeElement("td", null, i));
+		tr.appendChild(Nuvola.makeElement("td", null, song.name));
+		tr.appendChild(Nuvola.makeElement("td", null, song.artist));
+		tr.appendChild(Nuvola.makeElement("td", null, song.album));
+		tr.setAttribute("data-i", i);
+		tr.onclick = function()
+		{
+			self.setPos(this.getAttribute("data-i") * 1);
+			self.play();
+		};
+		this.playlist.appendChild(tr);
+	}
+	
+	this.elm = {
+		pp: document.getElementById("pp"),
+		prev: document.getElementById("prev"),
+		next: document.getElementById("next"),
+		status: document.getElementById("status"),
+		timer: document.getElementById("timer"),
+		nowplaying: document.getElementById("nowplaying"),
+		track: document.getElementById("track"),
+		artist: document.getElementById("artist"),
+		album: document.getElementById("album"),
+	}
+	
+	this.elm.prev.disabled = true;
+	this.elm.next.disabled = true;
+	this.setStatus(0);
+	this.pos = -1;
+	this.timer = -1;
+	this.timerId = 0;
+}
+
+Player.songs = 
+[
+	{
+		name: "Surrender",
+		artist: "Billy Talent",
+		album: "Billy Talent II"
+	},
+	{
+		name: "Holiday",
+		artist: "Green Day",
+		album: "American Idiot"
+	},
+	{
+		name: "Fallen Leaves",
+		artist: "Billy Talent",
+		album: "Billy Talent II"
+	},
+	{
+		name: "Boten Anna",
+		artist: "Basshunter",
+		album: "LOL"
+	},
+	{
+		name: "Set Your Monster Free",
+		artist: "Quiet Company",
+		album: "We Are All Where We Belong"
+	},
+	{
+		name: "Come Home",
+		artist: "Morandi",
+		album: "Mindfields"
+	},
+	{
+		name: "Dancer in the Dark",
+		artist: "The Rasmus",
+		album: "Hide From the Sun"
+	},
+	{
+		name: "Have You Ever",
+		artist: "The Offspring",
+		album: "Americana"
+	},
+	{
+		name: "Pushing Me Away",
+		artist: "Linkin Park",
+		album: "Hybrid Theory"
+	}
+];
+
+Player.statuses = ["Not playing", "Playing", "Paused"];
+
+Player.prototype.setStatus = function(status)
+{
+	this.status = status;
+	this.elm.status.innerText = Player.statuses[status];
+	this.elm.pp.innerText = status == 1 ? "Pause" : "Play";
+}
+
+Player.prototype.setPos = function(pos)
+{
+	this.pos = pos;
+	var rows = document.querySelectorAll("#playlist tr");
+	for (var i = 0; i < rows.length; i++)
+		rows[i].className = i == pos ? "playing" : "";
+	
+	this.elm.prev.disabled = pos <= 0;
+	this.elm.next.disabled = pos < 0 || pos == Player.songs.length - 1;
+	this.timer = 5;
+	
+	if (pos >= 0)
+	{
+		var track = Player.songs[pos];
+		this.elm.timer.innerText = this.timer;
+		this.elm.track.innerText = track.name;
+		this.elm.artist.innerText = track.artist;
+		this.elm.album.innerText = track.album;
+		this.elm.nowplaying.style.display = "inline";
+	}
+	else
+	{
+		this.elm.timer.innerText = "";
+		this.elm.track.innerText = "";
+		this.elm.artist.innerText = "";
+		this.elm.album.innerText = "";
+		this.elm.nowplaying.style.display = "none";
+	}
+}
+
+Player.prototype.play = function()
+{
+	if (this.status == 2)
+	{
+		this.setStatus(1);
+		this.timerId = setTimeout(this.tick.bind(this), 1000);
+	}
+	else if (this.status == 0)
+	{
+		if (this.pos < 0)
+			this.setPos(0);
+		this.setStatus(1);
+		this.startTimer();
+	}
+}
+
+Player.prototype.pause = function()
+{
+	if (this.status == 1)
+	{
+		this.setStatus(2);
+		clearTimeout(this.timerId);
+		this.timerId = 0;
+	}
+}
+
+Player.prototype.togglePlay = function()
+{
+	if (this.status == 1)
+		this.pause();
+	else
+		this.play();
+}
+
+Player.prototype.next = function()
+{
+	if (this.pos < Player.songs.length - 1)
+	{
+		this.setPos(this.pos + 1);
+		return true;
+	}
+	return false;
+}
+
+Player.prototype.prev = function()
+{
+	if (this.pos > 0)
+	{
+		this.setPos(this.pos - 1);
+		return true;
+	}
+	return false;
+}
+
+Player.prototype.startTimer = function()
+{
+	if (this.timer <= 0)
+		this.timer = 5;
+	this.tick();
+}
+
+Player.prototype.tick = function()
+{
+	if (this.timer > 0)
+	{
+		this.elm.timer.innerText = this.timer--;
+		this.timerId = setTimeout(this.tick.bind(this), 1000);
+	}
+	else
+	{
+		if(this.next())
+			this.startTimer();
+		else
+			this.reset();
+	}
+}
+
+Player.prototype.reset = function()
+{
+	this.setPos(-1);
+	this.setStatus(0);
+	this.elm.timer.innerText = "";
+	this.timerId = 0;
+}
+
+var player = new Player();
+
+
+</script>
+	</body>
+</html>

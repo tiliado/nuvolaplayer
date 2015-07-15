@@ -3,8 +3,9 @@ Title: Service Integrations Tutorial
 [TOC]
 
 This tutorial briefly describes creation of **a new service integration for Nuvola Player 3 from
-scratch**. The goal is to write an integration script for *Test service* shipped with Nuvola Player
-and to prepare you to create your own service integration. I'm looking forward to a code review ;-)
+scratch**. The goal is to write an integration script for *fake Happy Songs  service* shipped with
+Nuvola Player and to prepare you to create your own service integration.
+I'm looking forward to a code review ;-)
 There is also more detailed [Service Integrations Guide]({filename}guide.md) that provides
 insight to the NuvolaKit core. 
 
@@ -18,30 +19,23 @@ Prepare development environment
         :::sh
         mkdir -p ~/projects/nuvola-player
      
- 3. Create a copy of the test service shipped with Nuvola Player 3.
+ 3. Create a copy of the template shipped with Nuvola Player 3.
     
-        :::sh
+        :::shs
         cd ~/projects/nuvola-player
-        cp -r /usr/share/nuvolaplayer3/web_apps/test ./test-integration
+        cp -r /usr/share/nuvolaplayer3/web_apps/template ./happy-songs
         # or
-        cp -r /usr/local/share/nuvolaplayer3/web_apps/test ./test-integration
+        cp -r /usr/local/share/nuvolaplayer3/web_apps/template ./happy-songs
     
- 4. Rename old integration files (or remove it).
-    
-        :::sh
-        cd ~/projects/nuvola-player/test-integration
-        mv metadata.json metadata.old.json
-        mv integrate.js integrate.old.js
-    
- 5. Create new integration files and open them in your preferred plan-text editor (Gedit,
+ 4. Create new integration files and open them in your preferred plan-text editor (Gedit,
     for example).
     
         :::sh
-        cd ~/projects/nuvola-player/test-integration
+        cd ~/projects/nuvola-player/happy-songs
         touch metadata.json integrate.js
         gedit metadata.json integrate.js >/dev/null 2>&1 &
 
- 6. Initialize a new [Git][git] repository for your service integration.
+ 5. Initialize a new [Git][git] repository for your service integration.
     
     You can skip this step if you don't know [Git version control system][git]. However, if you
     would like to have your service integration maintained as a part of the Nuvola Player project
@@ -54,7 +48,7 @@ Prepare development environment
     and [Pro Git Book](http://git-scm.com/book).
     
         :::sh
-        cd ~/projects/nuvola-player/test-integration
+        cd ~/projects/nuvola-player/happy-songs
         git init .
         git add metadata.json integrate.js
         git commit -m "Initial commit"
@@ -68,8 +62,8 @@ Let's look at the example:
 
     :::json
     {
-        "id": "test_integration",
-        "name": "My Test Integration",
+        "id": "happy_songs",
+        "name": "Happy Songs",
         "maintainer_name": "Jiří Janoušek",
         "maintainer_link": "https://github.com/fenryxo",
         "version_major": 1,
@@ -124,8 +118,8 @@ This file contains several mandatory fields:
 
 `home_url`
 
-:   Home page of your service. The test integration service uses `nuvola://home.html` that refers to
-    file  `home.html` in the service's directory. You will use real homepage later in your own
+:   Home page of your service. The template contains fake service home page `home.html`, which
+    has a special address `nuvola://home.html`. You will use a real homepage later in your own
     service integration (e.g. `https://play.google.com/music/` for Google Play Music).
     
     This field is not required if you use custom function to handle home page request.
@@ -133,7 +127,7 @@ This file contains several mandatory fields:
 
 !!! info "If you use Git, commit changes"
         :::sh
-        cd ~/projects/nuvola-player/test-integration
+        cd ~/projects/nuvola-player/happy-songs
         git add metadata.json
         git commit -m "Add initial metadata for service"
 
@@ -150,7 +144,7 @@ modifications.
 ```
 #!js
 /*
- * Copyright 2014 Your name <your e-mail>
+ * Copyright 2015 Your name <your e-mail>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -288,7 +282,7 @@ Line 84
 
 !!! info "If you use Git, commit changes"
         :::sh
-        cd ~/projects/nuvola-player/test-integration
+        cd ~/projects/nuvola-player/happy-songs
         git add integrate.js
         git commit -m "Add skeleton of integration script"
 
@@ -296,19 +290,33 @@ Launch Nuvola Player
 ====================
 
 Run Nuvola Player 3 from terminal with following command and you will see a list with only one
-service, because we told Nuvola Player to load service integrations only from directory
+service Happy Songs, because we told Nuvola Player to load service integrations only from directory
 `~/projects/nuvola-player`.
     
-    nuvolaplayer3 -D -A ~/projects/nuvola-player
+    $ nuvolaplayer3 -D -A ~/projects/nuvola-player
+    ...
+    [Master:DEBUG    Nuvola] WebAppRegistry.vala:128: Found web app Happy Songs at /home/fenryxo/projects/nuvola-player/happy-songs, version 1.0
+    ...
+
+
+
+!!! danger "Make sure all Nuvola Player instances have been closed"
+    If you see following warning in terminal, there is a running instance of Nuvola Player
+    that must be closed. Otherwise, the `-A` parameter is ignored.
+    
+    
+        [Master:INFO     Nuvola] master.vala:135: Nuvola Player 3 Beta instance is already running
+        and will be activated.
+        [Master:WARNING  Nuvola] master.vala:137: Some command line parameters (-D, -v, -A, -L) are
+        ignored because they apply only to a new instance. You might want to close all Nuvola Player
+        instances and run it again with your parameters.
 
 ![A list with single service integration]({filename}/images/guide/app_list_one_service.png)
 
 Launch your service integration and a new window will be opened with the test service. First of all,
-show **developer's sidebar** (Gear menu or GNOME Shell App Menu → Show sidebar → select "Developer" in the right 
+show **developer's sidebar** (Gear menu → Show sidebar → select "Developer" in the right 
 sidebar), then enable **WebKit Web Inspector** (right-click the web page anywhere and select
 "Inspect element").
-
-![Show sidebar - Unity]({filename}/images/guide/show_sidebar_unity.png)
 
 ![Show sidebar - GNOME Shell]({filename}/images/guide/show_sidebar_gnome_shell.png)
 
@@ -316,9 +324,9 @@ sidebar), then enable **WebKit Web Inspector** (right-click the web page anywher
 
 ![WebKit Web Inspector]({filename}/images/guide/webkit_web_inspector.png)
 
-You can also launch your service integration with id `test_integration` directly.
+You can also launch your service integration with id `happy_songs` directly.
 
-    nuvolaplayer3 -D -A ~/projects/nuvola-player -a test_integration
+    nuvolaplayer3 -D -A ~/projects/nuvola-player -a happy_songs
 
 Debugging and logging messages
 ==============================
@@ -456,7 +464,7 @@ WebApp.update = function()
 
 !!! info "If you use Git, commit changes"
         :::sh
-        cd ~/projects/nuvola-player/test-integration
+        cd ~/projects/nuvola-player/happy-songs
         git add integrate.js
         git commit -m "Extract metadata and playback state"
 
@@ -572,7 +580,7 @@ WebApp._onActionActivated = function(emitter, name, param)
 
 !!! info "If you use Git, commit changes"
         :::sh
-        cd ~/projects/nuvola-player/test-integration
+        cd ~/projects/nuvola-player/happy-songs
         git add integrate.js
         git commit -m "Add player actions handling"
 
