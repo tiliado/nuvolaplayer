@@ -142,7 +142,6 @@ public class FormatSupportCheck : GLib.Object
 					"<b>Format support issue:</b> No GStreamer MP3 Audio decoder has been found. Music playback may fail.");
 				warning("MP3 Audio not supported.");
 			}
-			// TODO: Show infobar warning
 		}
 		catch (GLib.Error e)
 		{
