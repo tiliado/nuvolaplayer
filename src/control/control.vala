@@ -147,7 +147,7 @@ public int main(string[] args)
 	}
 	
 	if (Args.command.length < 1)
-		return quit(1, "Error: No command specified.\n");
+		return quit(1, "Error: No command specified. Type `%s --help` for help.\n", args[0]);
 	
 	var client = new Diorite.Ipc.MessageClient(build_ui_runner_ipc_id(Args.app), 500);
 	if (!client.wait_for_echo(500))
