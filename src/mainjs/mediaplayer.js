@@ -93,7 +93,7 @@ var MediaPlayer = $prototype(null);
  */
 MediaPlayer.$init = function()
 {
-    this._state = PlaybackState.UNKNOWN;
+    this._state = null;
     this._artworkFile = null;
     this._canGoPrev = null;
     this._canGoNext = null;
@@ -295,6 +295,7 @@ MediaPlayer._onInitWebWorker = function(emitter)
         "album": undefined,
         "artLocation": undefined
     };
+    this.setPlaybackState(PlaybackState.UNKNOWN);
     this._setActions();
 }
 
