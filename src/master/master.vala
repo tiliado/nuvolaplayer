@@ -70,9 +70,11 @@ public int main(string[] args)
 		return 0;
 	}
 	
+	var local_only_args = false;
 	FileStream? log = null;
 	if (Args.log_file != null)
 	{
+		local_only_args = true;
 		log = FileStream.open(Args.log_file, "w");
 		if (log == null)
 		{
@@ -90,9 +92,17 @@ public int main(string[] args)
 	
 	var storage = new Diorite.XdgStorage.for_project(Nuvola.get_app_id());
 	var web_apps_storage = storage.get_child("web_apps");
-	var web_app_reg = Args.apps_dir != null && Args.apps_dir != ""
-	? new WebAppRegistry(File.new_for_path(Args.apps_dir), {}, false)
-	: new WebAppRegistry(web_apps_storage.user_data_dir, web_apps_storage.data_dirs, true);
+	
+	WebAppRegistry web_app_reg;
+	if (Args.apps_dir != null && Args.apps_dir != "")
+	{
+		local_only_args = true;
+		web_app_reg = new WebAppRegistry(File.new_for_path(Args.apps_dir), {}, false);
+	}
+	else
+	{
+		web_app_reg = new WebAppRegistry(web_apps_storage.user_data_dir, web_apps_storage.data_dirs, true);
+	}
 	
 	string[] exec_cmd = {};
 	
@@ -108,12 +118,27 @@ public int main(string[] args)
 	exec_cmd += Nuvola.get_app_runner_path();
 	
 	if (Args.debug)
+	{
+		local_only_args = true;
 		exec_cmd += "-D";
+	}
 	else if (Args.verbose)
+	{
+		local_only_args = true;
 		exec_cmd += "-v";
+	}
 	
 	var controller = new MasterController(storage, web_app_reg, (owned) exec_cmd, Args.debug);
-	return controller.run(args);
+	var result = controller.run(args);
+	if (controller.is_remote)
+	{
+		message("%s instance is already running and will be activated.", Nuvola.get_app_name());
+		if (local_only_args)
+			warning(
+				"Some command line parameters (-D, -v, -A, -L) are ignored because they apply only to a new instance."
+				+ " You might want to close all Nuvola Player instances and run it again with your parameters.");
+	}
+	return result;
 }
 
 } // namespace Nuvola
