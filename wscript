@@ -197,13 +197,6 @@ def configure(ctx):
 	ctx.check_dep("gstreamer-1.0", 'GST', "1.0")
 	
 	try:
-		ctx.env.WEBKIT = 'webkit2gtk-3.0'
-		ctx.env.WEBKITEXT = 'webkit2gtk-web-extension-3.0'
-		ctx.env.JSCORE = 'javascriptcoregtk-3.0'
-		ctx.check_dep(ctx.env.WEBKIT, 'WEBKIT', '2.2')
-		ctx.check_dep(ctx.env.JSCORE, 'JSCORE', '1.8')
-		ctx.vala_def("WEBKIT2GTK3")
-	except ctx.errors.ConfigurationError:
 		ctx.env.WEBKIT = 'webkit2gtk-4.0'
 		ctx.env.WEBKITEXT = 'webkit2gtk-web-extension-4.0'
 		ctx.env.JSCORE = 'javascriptcoregtk-4.0'
@@ -211,6 +204,17 @@ def configure(ctx):
 		ctx.check_dep(ctx.env.WEBKITEXT, 'WEBKITEXT', '2.6')
 		ctx.check_dep(ctx.env.JSCORE, 'JSCORE', '2.6')
 		ctx.vala_def("WEBKIT2GTK4")
+	except ctx.errors.ConfigurationError:
+		try:
+			ctx.env.WEBKIT = 'webkit2gtk-3.0'
+			ctx.env.WEBKITEXT = 'webkit2gtk-web-extension-3.0'
+			ctx.env.JSCORE = 'javascriptcoregtk-3.0'
+			ctx.check_dep(ctx.env.WEBKIT, 'WEBKIT', '2.2')
+			ctx.check_dep(ctx.env.JSCORE, 'JSCORE', '1.8')
+			ctx.vala_def("WEBKIT2GTK3")
+		except ctx.errors.ConfigurationError:
+			ctx.fatal("Failed to find both webkit2gtk-3.0 and webkit2gtk-4.0")
+		
 	
 	ctx.env.with_unity = ctx.options.unity
 	if ctx.options.unity:
