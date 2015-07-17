@@ -34,7 +34,8 @@ public errordomain AudioScrobblerError
 	JSON_PARSE_ERROR,
 	LASTFM_ERROR,
 	WRONG_RESPONSE,
-	NO_SESSION
+	NO_SESSION,
+	RETRY
 }
 
 

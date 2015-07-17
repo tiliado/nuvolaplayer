@@ -231,55 +231,69 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
 		
 		while (true)
 		{
-			SourceFunc resume = send_request.callback;
-			connection.queue_message(message, () =>
-			{
-				Idle.add((owned) resume);
-			});
-			yield;
-			
-			var response = (string) message.response_body.flatten().data;
-			var parser = new Json.Parser();
 			try
 			{
-				parser.load_from_data(response);
-			}
-			catch (GLib.Error e)
-			{
-				debug("Send request: %s\n---------\n%s\n----------", (string) request.data, response);
-				throw new AudioScrobblerError.JSON_PARSE_ERROR(e.message);
-			}
-			
-			var root = parser.get_root();
-			if (root == null)
-				throw new AudioScrobblerError.WRONG_RESPONSE("Empty response from the server.");
-			var root_object = root.get_object();
-			if (root_object.has_member("error") && root_object.has_member("message"))
-			{
-				var error_code = root_object.get_int_member("error");
-				var error_message = root_object.get_string_member("message");
-				switch (error_code)
+				SourceFunc resume = send_request.callback;
+				connection.queue_message(message, () =>
 				{
-				case 9:  // Invalid session key - Please re-authenticate
-					drop_session();
-					throw new AudioScrobblerError.NO_SESSION("Session expired. Please re-authenticate. %s", error_message);
-				case 11:  // Service Offline - This service is temporarily offline. Try again later.
-				case 16:  // There was a temporary error processing your request. Please try again
-				case 29:  // Rate limit exceeded - Your IP has made too many requests in a short period
-					if (retry == 0)
-						throw new AudioScrobblerError.LASTFM_ERROR("%s: %s", error_code.to_string(), error_message);
-					
-					retry--;
-					warning("%s: %s", error_code.to_string(), error_message);
-					resume = send_request.callback;
-					Timeout.add_seconds(15, (owned) resume);
-					yield;
-					continue;
-				default:
-					throw new AudioScrobblerError.LASTFM_ERROR("%s: %s", error_code.to_string(), error_message);
+					Idle.add((owned) resume);
+				});
+				yield;
+				
+				var response = (string) message.response_body.flatten().data;
+				var parser = new Json.Parser();
+				try
+				{
+					parser.load_from_data(response);
 				}
+				catch (GLib.Error e)
+				{
+					var data = (string) request.data;
+					if ("Your request timed out" in data)
+					{
+						throw new AudioScrobblerError.RETRY("%s", data);
+					}
+					else
+					{
+						debug("Send request: %s\n---------\n%s\n----------", data, response);
+						throw new AudioScrobblerError.JSON_PARSE_ERROR(e.message);
+					}
+				}
+				
+				var root = parser.get_root();
+				if (root == null)
+					throw new AudioScrobblerError.WRONG_RESPONSE("Empty response from the server.");
+				var root_object = root.get_object();
+				if (root_object.has_member("error") && root_object.has_member("message"))
+				{
+					var error_code = root_object.get_int_member("error");
+					var error_message = root_object.get_string_member("message");
+					switch (error_code)
+					{
+					case 9:  // Invalid session key - Please re-authenticate
+						drop_session();
+						throw new AudioScrobblerError.NO_SESSION("Session expired. Please re-authenticate. %s", error_message);
+					case 11:  // Service Offline - This service is temporarily offline. Try again later.
+					case 16:  // There was a temporary error processing your request. Please try again
+					case 29:  // Rate limit exceeded - Your IP has made too many requests in a short period
+						throw new AudioScrobblerError.RETRY("%s: %s", error_code.to_string(), error_message); 
+					default:
+						throw new AudioScrobblerError.LASTFM_ERROR("%s: %s", error_code.to_string(), error_message);
+					}
+				}
+				return root_object;
 			}
-			return root_object;
+			catch (AudioScrobblerError e)
+			{
+				if (retry == 0 && !(e is AudioScrobblerError.RETRY))
+					throw e;
+				
+				retry--;
+				warning("Retry: %s", e.message);
+				SourceFunc resume = send_request.callback;
+				Timeout.add_seconds(15, (owned) resume);
+				yield;
+			}
 		}
 	}
 	
