@@ -29,7 +29,7 @@ public class LyricsComponent: Component
 {
 	private Bindings bindings;
 	private RunnerApplication app;
-	private LyricsProvider? provider = null;
+	private LyricsSidebar? sidebar = null;
 	
 	public LyricsComponent(RunnerApplication app, Bindings bindings, Diorite.KeyValueStorage config)
 	{
@@ -47,13 +47,16 @@ public class LyricsComponent: Component
 		debug("Activate component: %s", id);
 		SList<LyricsFetcher> fetchers = null;
 		fetchers.append(new AZLyricsFetcher(app.connection.session));
-		provider = new LyricsProvider(bindings.get_model<MediaPlayerModel>(), (owned) fetchers);
+		var provider = new LyricsProvider(bindings.get_model<MediaPlayerModel>(), (owned) fetchers);
+		sidebar = new LyricsSidebar(app, provider);
+		app.main_window.sidebar.add_page("lyricssidebar", _("Lyrics"), sidebar);
 	}
 	
 	protected override void deactivate()
 	{
 		debug("Deactivate component: %s", id);
-		provider = null;
+		app.main_window.sidebar.remove_page(sidebar);
+		sidebar = null;
 	}
 }
 
