@@ -98,7 +98,7 @@ public class AZLyricsFetcher : GLib.Object, LyricsFetcher
 				{
 					warning("RegexError: %s", e.message);
 				}
-				return lyrics.strip() + "\n";
+				return replace_html_entities(lyrics.strip()) + "\n";
 			}
 		}
 		stderr.printf("%s\n", response);
@@ -124,6 +124,11 @@ public class AZLyricsFetcher : GLib.Object, LyricsFetcher
 				buffer.append_unichar(c);
 		}
 		return buffer.str;
+	}
+	
+	public static string replace_html_entities(string text)
+	{
+		return text.replace("&quot;", "\"").replace("&amp;", "&");
 	}
 }
 
