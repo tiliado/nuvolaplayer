@@ -101,6 +101,7 @@ public class AZLyricsFetcher : GLib.Object, LyricsFetcher
 				return lyrics.strip() + "\n";
 			}
 		}
+		stderr.printf("%s\n", response);
 		return "";
 	}
 	
