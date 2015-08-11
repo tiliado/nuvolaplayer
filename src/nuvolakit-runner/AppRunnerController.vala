@@ -87,6 +87,7 @@ public abstract class RunnerApplication: Diorite.Application
 {
 	public Diorite.Storage storage {get; private set;}
 	public Config config {get; protected set; default = null;}
+	public Connection connection {get; protected set;}
 	public WebAppWindow? main_window {get; protected set; default = null;}
 	
 	public RunnerApplication(string web_app_id, string web_app_name, Diorite.Storage storage)
@@ -112,7 +113,6 @@ public class AppRunnerController : RunnerApplication
 	public weak Gtk.Settings gtk_settings {get; private set;}
 	public Diorite.KeyValueStorage master_config {get; private set;}
 	public Bindings bindings {get; private set;}
-	public Connection connection {get; private set;}
 	public Diorite.Ipc.MessageServer server {get; private set; default=null;}
 	public ActionsHelper actions_helper {get; private set; default = null;}
 	private GlobalKeybindings global_keybindings;
@@ -438,6 +438,7 @@ public class AppRunnerController : RunnerApplication
 		bindings.add_object(menu_bar);
 		components.prepend(new AudioScrobblerComponent(this, bindings, master_config, config, connection.session));
 		components.prepend(new MPRISComponent(this, bindings, config));
+		components.prepend(new LyricsComponent(this, bindings, config));
 		components.prepend(new DeveloperComponent(this, bindings, config));
 	}
 	
