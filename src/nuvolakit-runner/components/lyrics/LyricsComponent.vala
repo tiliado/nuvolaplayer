@@ -44,7 +44,6 @@ public class LyricsComponent: Component
 	
 	protected override void activate()
 	{
-		debug("Activate component: %s", id);
 		SList<LyricsFetcher> fetchers = null;
 		fetchers.append(new LyricsFetcherCache(app.storage.get_cache_path("lyrics")));
 		fetchers.append(new AZLyricsFetcher(app.connection.session));
@@ -55,7 +54,6 @@ public class LyricsComponent: Component
 	
 	protected override void deactivate()
 	{
-		debug("Deactivate component: %s", id);
 		app.main_window.sidebar.remove_page(sidebar);
 		sidebar = null;
 	}

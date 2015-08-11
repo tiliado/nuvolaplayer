@@ -72,7 +72,6 @@ public class LyricsProvider: GLib.Object
 	
 	private void song_changed(string? title, string? artist)
 	{
-		debug("song changed %s == %s, %s == %s", this.title, title, this.artist, artist);
 		if (this.title == title && this.artist == artist)
 			return;
 		
@@ -121,12 +120,9 @@ public class LyricsProvider: GLib.Object
 	}
 	
 	/**
-	 * Emmtted when there is no valid song info, so there is nothing to fetch.
+	 * Emitted when there is no valid song info, so there is nothing to fetch.
 	 */
-	public virtual signal void no_song_info()
-	{
-		debug("no song info");
-	}
+	public signal void no_song_info();
 	
 	/**
 	 * Emitted when lyrics is available.
@@ -135,10 +131,7 @@ public class LyricsProvider: GLib.Object
 	 * @param song      song name
 	 * @param lyrics    lyrics text
 	 */
-	public virtual signal void lyrics_available(string artist, string song, string lyrics)
-	{
-		debug("available for '%s' by '%s':\n%s", artist, song, lyrics);
-	}
+	public signal void lyrics_available(string artist, string song, string lyrics);
 	
 	/**
 	 * Emitted when lyrics has not been found.
@@ -146,10 +139,7 @@ public class LyricsProvider: GLib.Object
 	 * @param artist    artist name
 	 * @param song      song name
 	 */
-	public virtual signal void lyrics_not_found(string artist, string song)
-	{
-		debug("not found for '%s' by '%s'", artist, song);
-	}
+	public signal void lyrics_not_found(string artist, string song);
 	
 	/**
 	 * Emitted when lyrics fetching was enqueued. 
@@ -157,10 +147,7 @@ public class LyricsProvider: GLib.Object
 	 * @param artist    artist name
 	 * @param song      song name
 	 */
-	public virtual signal void lyrics_loading(string artist, string song)
-	{
-		debug("loading for '%s' by '%s'", artist, song);
-	}
+	public signal void lyrics_loading(string artist, string song);
 }
 
 } // namespace Nuvola
