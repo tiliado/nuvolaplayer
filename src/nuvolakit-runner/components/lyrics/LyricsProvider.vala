@@ -41,11 +41,20 @@ public class LyricsProvider: GLib.Object
 	public LyricsStatus status {get; private set; default = LyricsStatus.NO_SONG;}
 	private MediaPlayerModel player;
 	private SList<LyricsFetcher> fetchers;
+	private LyricsFetcherCache? cache = null;
 
 	public LyricsProvider(MediaPlayerModel player, owned SList<LyricsFetcher> fetchers)
 	{
 		this.player = player;
 		this.fetchers = (owned) fetchers;
+		foreach (var fetcher in this.fetchers)
+		{
+			if (fetcher is LyricsFetcherCache)
+			{
+				cache = (LyricsFetcherCache) fetcher;
+				break;
+			}
+		}
 		player.set_track_info.connect(on_song_changed);
 		song_changed(player.title, player.artist);
 	}
@@ -96,8 +105,10 @@ public class LyricsProvider: GLib.Object
 			try
 			{
 				var lyrics = yield fetcher.fetch_lyrics(artist, song);
-				
 				lyrics_available(artist, song, lyrics);
+				if (cache != null && fetcher != cache)
+					yield cache.store(artist, song, lyrics);
+				
 				return;
 			}
 			catch (GLib.Error e)

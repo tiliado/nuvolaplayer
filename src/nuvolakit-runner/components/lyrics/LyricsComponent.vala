@@ -46,6 +46,7 @@ public class LyricsComponent: Component
 	{
 		debug("Activate component: %s", id);
 		SList<LyricsFetcher> fetchers = null;
+		fetchers.append(new LyricsFetcherCache(app.storage.get_cache_path("lyrics")));
 		fetchers.append(new AZLyricsFetcher(app.connection.session));
 		var provider = new LyricsProvider(bindings.get_model<MediaPlayerModel>(), (owned) fetchers);
 		sidebar = new LyricsSidebar(app, provider);
