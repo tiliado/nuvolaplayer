@@ -29,7 +29,7 @@ namespace Nuvola
 public class PreferencesDialog : Gtk.Dialog
 {
 	/// Preferences dialog title
-	private const string TITLE = ("Preferences");
+	private const string TITLE = ("Web App Preferences");
 	private Diorite.Application app;
 	private Gtk.Notebook notebook;
 	
@@ -65,7 +65,7 @@ public class PreferencesDialog : Gtk.Dialog
 		notebook.margin_bottom = 10;
 		notebook.tab_pos = Gtk.PositionType.LEFT;
 		form.show();
-		notebook.append_page(form, new Gtk.Label("Preferences"));
+		notebook.append_page(form, new Gtk.Label("General"));
 		get_content_area().add(notebook);
 		form.check_toggles();
 		notebook.show();
