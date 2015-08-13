@@ -42,7 +42,7 @@ WebApp._onInitAppRunner = function(emitter)
     Nuvola.launcher.setActions(["quit"]);
     Nuvola.WebApp._onInitAppRunner.call(this, emitter);
     Nuvola.config.setDefault(RUN_IN_BACKGROUND, true);
-    Nuvola.core.setHideOnClose(Nuvola.config.get(RUN_IN_BACKGROUND));
+    Nuvola.core.connect("QuitRequest", this);
     Nuvola.core.connect("PreferencesForm", this);
 }
 
@@ -71,7 +71,7 @@ WebApp._onInitWebWorker = function(emitter)
 // Page is ready for magic
 WebApp._onPageReady = function()
 {
-    Nuvola.config.connect("ConfigChanged", this);
+    // Nothing to do for now.
 }
 
 
@@ -81,14 +81,10 @@ WebApp._onPreferencesForm = function(emitter, values, entries)
 }
 
 
-WebApp._onConfigChanged = function(emitter, key)
+WebApp._onQuitRequest = function(emitter, result)
 {
-    switch (key)
-    {
-    case this.RUN_IN_BACKGROUND:
-        Nuvola.core.setHideOnClose(Nuvola.config.get(RUN_IN_BACKGROUND));
-        break;
-    }
+    if (Nuvola.config.get(RUN_IN_BACKGROUND))
+        result.approved = false;
 }
 
 

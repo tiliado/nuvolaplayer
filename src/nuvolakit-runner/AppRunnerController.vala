@@ -119,7 +119,6 @@ public class AppRunnerController : RunnerApplication
 	private static const int MINIMAL_REMEMBERED_WINDOW_SIZE = 300;
 	private uint configure_event_cb_id = 0;
 	private MenuBar menu_bar;
-	private bool hide_on_close = false;
 	private Diorite.Form? init_form = null;
 	private Diorite.Ipc.MessageClient master = null;
 	private FormatSupportCheck format_support = null;
@@ -292,7 +291,6 @@ public class AppRunnerController : RunnerApplication
 		try
 		{
 			server = new Diorite.Ipc.MessageServer(server_name);
-			server.add_handler("Nuvola.setHideOnClose", handle_set_hide_on_close);
 			server.add_handler("Nuvola.Browser.downloadFileAsync", handle_download_file_async);
 			server.start_service();
 		}
@@ -597,13 +595,6 @@ public class AppRunnerController : RunnerApplication
 		return false;
 	}
 	
-	private Variant? handle_set_hide_on_close(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
-	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(b)");
-		data.get("(b)", &hide_on_close);
-		return null;
-	}
-	
 	private Variant? handle_download_file_async(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
 		Diorite.Ipc.MessageServer.check_type_str(data, "(ssd)");
@@ -684,10 +675,24 @@ public class AppRunnerController : RunnerApplication
 		}
 	}
 	
-	private void on_can_quit(ref bool result)
+	private void on_can_quit(ref bool can_quit)
 	{
-		if (hide_on_close)
-			result = false;
+		try
+		{
+			can_quit = web_worker.send_data_request_bool("QuitRequest", "approved", can_quit);
+		}
+		catch (GLib.Error e)
+		{
+			warning("QuitRequest failed in web worker: %s", e.message);
+		}
+		try
+		{
+			can_quit = web_engine.send_data_request_bool("QuitRequest", "approved", can_quit);
+		}
+		catch (GLib.Error e)
+		{
+			warning("QuitRequest failed in web engine: %s", e.message);
+		}
 	}
 	
 	private void on_init_form(HashTable<string, Variant> values, Variant entries)

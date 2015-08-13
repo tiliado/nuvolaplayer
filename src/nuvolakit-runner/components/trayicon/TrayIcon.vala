@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2011-2015 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -45,6 +45,7 @@ public static string[] slist_strings_to_array(SList<string> list)
  */
 public class TrayIcon: GLib.Object
 {
+	public bool visible {get; private set; default = false;}
 	private AppRunnerController controller;
 	private Diorite.ActionsRegistry actions_reg;
 	private LauncherModel model;
@@ -77,6 +78,8 @@ public class TrayIcon: GLib.Object
 		icon.popup_menu.connect(on_popup_menu);
 		icon.activate.connect(on_activate);
 		icon.size_changed.connect(on_size_changed);
+		icon.notify.connect_after(on_icon_notifify);
+		this.visible = icon.visible && icon.embedded;
 		render_icon();
 		#endif
 	}
@@ -244,6 +247,17 @@ public class TrayIcon: GLib.Object
 		
 		menu.show_all();
 		menu.popup(null, null, icon.position_menu, button, time);
+	}
+	
+	private void on_icon_notifify(GLib.Object o, ParamSpec p)
+	{
+		switch (p.name)
+		{
+		case "visible":
+		case "embedded":
+			visible = icon.visible && icon.embedded;
+			break;
+		}
 	}
 	#endif
 }

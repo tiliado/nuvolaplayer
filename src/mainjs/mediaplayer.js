@@ -156,7 +156,6 @@ MediaPlayer.setPlaybackState = function(state)
     if (this._state !== state)
     {
         this._state = state;
-        this._setHideOnClose();
         this._setActions();
         this._updateTrackInfo(["state"]);
     }
@@ -286,9 +285,9 @@ MediaPlayer._onInitAppRunner = function(emitter)
 
 MediaPlayer._onInitWebWorker = function(emitter)
 {
-    Nuvola.config.connect("ConfigChanged", this);
     Nuvola.mediaKeys.connect("MediaKeyPressed", this);
     Nuvola.actions.connect("ActionActivated", this);
+    Nuvola.core.connect("QuitRequest", this);
     this._track = {
         "title": undefined,
         "artist": undefined,
@@ -386,29 +385,17 @@ MediaPlayer._updateMenu = function()
     Nuvola.menuBar.setMenu("playback", "_Control", this._baseActions.concat(this._extraActions));
 }
 
-MediaPlayer._setHideOnClose = function()
+MediaPlayer._onQuitRequest = function(emitter, result)
 {
-    if (this._state === PlaybackState.PLAYING)
-        Nuvola.core.setHideOnClose(Nuvola.config.get(this._BACKGROUND_PLAYBACK));
-    else
-        Nuvola.core.setHideOnClose(false);
+    if (this._state === PlaybackState.PLAYING && Nuvola.config.get(this._BACKGROUND_PLAYBACK))
+        result.approved = false;
 }
 
 MediaPlayer._onPreferencesForm = function(object, values, entries)
 {
     values[this._BACKGROUND_PLAYBACK] = Nuvola.config.get(this._BACKGROUND_PLAYBACK);
     entries.push(["bool", this._BACKGROUND_PLAYBACK, "Keep playing in background when window is closed"]);
-}
-
-MediaPlayer._onConfigChanged = function(emitter, key)
-{
-    switch (key)
-    {
-    case this._BACKGROUND_PLAYBACK:
-        this._setHideOnClose();
-        break;
-    }
-}
+}    
 
 MediaPlayer._onMediaKeyPressed = function(emitter, key)
 {

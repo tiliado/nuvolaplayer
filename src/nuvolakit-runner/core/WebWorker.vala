@@ -57,9 +57,9 @@ public class RemoteWebWorker: GLib.Object, JSExecutor, WebWorker
 	public void call_function(string name, ref Variant? params) throws GLib.Error
 	{
 		var data = new Variant("(smv)", name, params);
-//~ 		message("Payload before: %s", params == null ? "null" : params.print(true));
+//~ 		debug("Payload before: %s", params == null ? "null" : params.print(true));
 		params = send_message("call_function", data);
-//~ 		message("Payload after: %s", params == null ? "null" : params.print(true));
+//~ 		debug("Payload after: %s", params == null ? "null" : params.print(true));
 	}
 }
 
