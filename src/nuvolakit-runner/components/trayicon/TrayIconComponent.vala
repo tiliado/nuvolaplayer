@@ -38,36 +38,13 @@ public class TrayIconComponent: Component
 		this.has_settings = true;
 		this.bindings = bindings;
 		this.controller = controller;
-		var enabled_key = "component.tray_icon.enabled";
 		config.bind_object_property("component.tray_icon.", this, "always_close_to_tray")
 			.set_default(true).update_property();
-		
-		if (config.has_key(enabled_key))
-		{
-			config.bind_object_property(enabled_key, this, "enabled").update_property();
-			enabled_set = true;
-			if (enabled)
-				activate();
-		}
-		else
-		{
-			uint watch_id = 0;
-			watch_id = Bus.watch_name(BusType.SESSION, "org.gnome.Shell", BusNameWatcherFlags.NONE,
-				() =>
-				{
-					toggle(false);
-					enabled_set = true;
-					config.bind_object_property(enabled_key, this, "enabled");
-					Bus.unwatch_name(watch_id);
-				},
-				() =>
-				{
-					toggle(true);
-					enabled_set = true;
-					config.bind_object_property(enabled_key, this, "enabled");
-					Bus.unwatch_name(watch_id);
-				});
-		}
+		config.bind_object_property("component.tray_icon.", this, "enabled")
+			.set_default(false).update_property();
+		enabled_set = true;
+		if (enabled)
+			activate();
 	}
 	
 	protected override void activate()
