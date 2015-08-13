@@ -121,6 +121,24 @@ Core.$init = function()
     this.addSignal("LastPageRequest");
     
     /**
+     * Emitted on request to quit the application by closing the main window.
+     * 
+     * This signal is emitted in both App Runner and Web Worker processes.
+     * 
+     * @param bool result.approved    Whether application can quit. If false, application will continue
+     *     running in background.
+     * 
+     * ```
+     * var _onQuitRequest = function(emitter, result)
+     * {
+     *      if (Nuvola.config.get("myapp.run_in_background"))
+     *          result.approved = false;
+     * }
+     * ```
+     */
+    this.addSignal("QuitRequest");
+    
+    /**
      * Emitted after @link{Core::NavigationRequest|approved navigation} to a new page URL.
      * 
      * @param string uri    URI of the new page
@@ -143,17 +161,6 @@ Core.$init = function()
      *     for details
      */
     this.addSignal("PreferencesForm");
-}
-
-/**
- * Set whether the main window should be hidden when close button is pressed
- * and run in background.
- * 
- * @param Boolean hide    whether to hide on close
- */
-Core.setHideOnClose = function(hide)
-{
-    return Nuvola._sendMessageSync("Nuvola.setHideOnClose", hide);
 }
 
 // export public items
