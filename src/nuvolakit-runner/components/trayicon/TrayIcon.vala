@@ -157,11 +157,7 @@ public class TrayIcon: GLib.Object
 	private void render_icon()
 	{
 		var size = icon.size;
-		var icon_name = controller.icon;
 		var pixbuf = controller.web_app.get_icon_pixbuf(size);
-		if (pixbuf == null)
-			pixbuf = Diorite.Icons.load_theme_icon({icon_name}, size);
-		
 		if (pixbuf == null)
 		{
 			warning("Failed to load pixbuf for tray icon.");

@@ -138,6 +138,7 @@ public class WebAppMeta : GLib.Object
 				}
 			}
 		}
+		
 		var default_icon = get_old_main_icon();
 		if (default_icon != null)
 		{
@@ -150,7 +151,8 @@ public class WebAppMeta : GLib.Object
 				warning("Failed to load icon from file %s: %s", default_icon, e.message);
 			}
 		}
-		return null;
+		
+		return Diorite.Icons.load_theme_icon({Nuvola.get_app_icon()}, size);
 	}
 	
 	private void lookup_icons(bool refresh=false)
