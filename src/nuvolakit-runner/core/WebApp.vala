@@ -120,7 +120,7 @@ public class WebAppMeta : GLib.Object
 				}
 			}
 		}
-		var default_icon = this.icon;
+		var default_icon = get_old_main_icon();
 		if (default_icon != null)
 		{
 			try
@@ -195,6 +195,12 @@ public class WebAppMeta : GLib.Object
 			categories = "Network;";
 			warning("Empty 'categories' entry for web app '%s'. Using '%s' as a fallback.", id, categories);
 		}
+	}
+	
+	private string? get_old_main_icon()
+	{
+		// TODO: get rid of old main icon
+		return this.icon;
 	}
 	
 	private struct IconInfo
