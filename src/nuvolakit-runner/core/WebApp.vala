@@ -43,24 +43,8 @@ public class WebAppMeta : GLib.Object
 	public int api_minor {get; construct;}
 	public File? data_dir {get; private set; default = null;}
 	public bool removable {get; set; default = false;}
-	public bool hidden {get; set; default = false;}
-	public string? icon
-	{
-		owned get
-		{
-			if (data_dir == null)
-				return null;
-			var file = data_dir.get_child("icon.svg");
-			if (file.query_file_type(0) == FileType.REGULAR)
-				return file.get_path();
-			file = data_dir.get_child("icon.png");
-			if (file.query_file_type(0) == FileType.REGULAR)
-				return file.get_path();
-			return null;
-		}
-	}
-	
-	private SList<IconInfo?> icons = null;
+	public bool hidden {get; set; default = false;}	
+	private List<IconInfo?> icons = null;
 	private bool icons_set = false;
 	
 	public static WebAppMeta load_from_dir(File dir) throws WebAppError
@@ -103,36 +87,91 @@ public class WebAppMeta : GLib.Object
 		return meta;
 	}
 	
-	public Gdk.Pixbuf? lookup_icon(int size)
+	/**
+	 * Returns icon path for the given size.
+	 * 
+	 * @param size    minimal size of the icon or `0` for the largest (scalable) icon
+	 * @return        path of the icon
+	 */
+	public string? get_icon_path(int size)
 	{
 		lookup_icons();
+		if (size <= 0)
+			return icons != null ? icons.last().data.path : get_old_main_icon();
+		
 		foreach (var icon in icons)
-		{
 			if (icon.size <= 0 || icon.size >= size)
+				return icon.path;
+		
+		return get_old_main_icon();
+	}
+	
+	/**
+	 * Returns icon pixbuf for the given size.
+	 * 
+	 * @param size    minimal size of the icon or `0` for the largest (scalable) icon
+	 * @return        pixbuf with icon scaled to the given size
+	 */
+	public Gdk.Pixbuf? get_icon_pixbuf(int size)
+	{		
+		lookup_icons();
+		if (size <= 0)
+		{
+			/* Return the largest icon */
+			unowned List<IconInfo?>? cursor = icons != null ? icons.last() : null;
+			while (cursor != null)
 			{
+				unowned IconInfo icon = cursor.data;
 				try
 				{
-					return new Gdk.Pixbuf.from_file_at_scale(icon.path, size, size, false);
+					var pixbuf = new Gdk.Pixbuf.from_file_at_scale(icon.path, size, size, false);
+					if (pixbuf != null)
+						return pixbuf;
 				}
 				catch (GLib.Error e)
 				{
 					warning("Failed to load icon from file %s: %s", icon.path, e.message);
 				}
+				cursor = cursor.prev;
 			}
 		}
-		var default_icon = this.icon;
+		else
+		{
+			/* Return the first icon >= size */
+			foreach (var icon in icons)
+			{
+				if (icon.size <= 0 || icon.size >= size)
+				{
+					try
+					{
+						var pixbuf =  new Gdk.Pixbuf.from_file_at_scale(icon.path, size, size, false);
+						if (pixbuf != null)
+							return pixbuf;
+					}
+					catch (GLib.Error e)
+					{
+						warning("Failed to load icon from file %s: %s", icon.path, e.message);
+					}
+				}
+			}
+		}
+		
+		var default_icon = get_old_main_icon();
 		if (default_icon != null)
 		{
 			try
 			{
-				return new Gdk.Pixbuf.from_file_at_scale(default_icon, size, size, false);
+				var pixbuf =  new Gdk.Pixbuf.from_file_at_scale(default_icon, size, size, false);
+				if (pixbuf != null)
+					return pixbuf;
 			}
 			catch (GLib.Error e)
 			{
 				warning("Failed to load icon from file %s: %s", default_icon, e.message);
 			}
 		}
-		return null;
+		
+		return Diorite.Icons.load_theme_icon({Nuvola.get_app_icon()}, size);
 	}
 	
 	private void lookup_icons(bool refresh=false)
@@ -195,6 +234,20 @@ public class WebAppMeta : GLib.Object
 			categories = "Network;";
 			warning("Empty 'categories' entry for web app '%s'. Using '%s' as a fallback.", id, categories);
 		}
+	}
+	
+	private string? get_old_main_icon()
+	{
+		// TODO: get rid of old main icon
+		if (data_dir == null)
+			return null;
+		var file = data_dir.get_child("icon.svg");
+		if (file.query_file_type(0) == FileType.REGULAR)
+			return file.get_path();
+		file = data_dir.get_child("icon.png");
+		if (file.query_file_type(0) == FileType.REGULAR)
+			return file.get_path();
+		return null;
 	}
 	
 	private struct IconInfo

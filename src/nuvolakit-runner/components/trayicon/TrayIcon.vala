@@ -157,14 +157,10 @@ public class TrayIcon: GLib.Object
 	private void render_icon()
 	{
 		var size = icon.size;
-		var icon_name = controller.icon;
-		var pixbuf = controller.web_app.lookup_icon(size);
-		if (pixbuf == null)
-			pixbuf = load_icon({icon_name, icon_name[0:icon_name.length - 1]}, size);
-		
+		var pixbuf = controller.web_app.get_icon_pixbuf(size);
 		if (pixbuf == null)
 		{
-			warning("Failed to load icon from icon name %s.", icon_name);
+			warning("Failed to load pixbuf for tray icon.");
 			return;
 		}
 		
@@ -172,22 +168,6 @@ public class TrayIcon: GLib.Object
 		icon.set_from_pixbuf(pixbuf);
 	}
 	#endif
-	
-	public static Gdk.Pixbuf? load_icon(string[] names, int size)
-	{
-		foreach (var name in names)
-		{
-			try
-			{
-				return Gtk.IconTheme.get_default().load_icon(name, size, 0);
-			}
-			catch (Error e)
-			{
-			}
-		}
-		
-		return null;
-	}
 	
 	private void on_activate()
 	{

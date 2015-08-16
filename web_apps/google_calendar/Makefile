@@ -33,11 +33,10 @@ ICON_SIZES ?= 16 22 24 32 48 64 128 256
 
 # Filenames
 SOURCE_ICON ?= src/icon.svg
-DEFAULT_ICON = icon.png
 ICONS_DIR ?= icons
 PNG_ICONS = $(foreach size,$(ICON_SIZES),$(ICONS_DIR)/$(size).png)
 SCALABLE_ICON = $(ICONS_DIR)/scalable.svg
-ALL_ICONS = $(SCALABLE_ICON) $(PNG_ICONS) $(DEFAULT_ICON)
+ALL_ICONS = $(SCALABLE_ICON) $(PNG_ICONS)
 
 help:
 	@echo $(PNG_ICONS)
@@ -53,9 +52,7 @@ deps:
 
 build: deps $(ALL_ICONS)
 
-$(DEFAULT_ICON) : $(ICONS_DIR)/$(ICON_SIZE).png
-	cp $< $@
-	
+
 $(SCALABLE_ICON) : $(SOURCE_ICON) | $(ICONS_DIR)
 	cp $< $@
 
@@ -66,11 +63,4 @@ $(ICONS_DIR):
 	mkdir -p $@
 
 clean:
-	rm -rf $(DEFAULT_ICON) $(ICONS_DIR)
-
-install: LICENSE metadata.json integrate.js icon.png
-	install -vCd $(DEST)/$(APP_ID)
-	install -vC $^ $(DEST)/$(APP_ID)
-
-uninstall:
-	rm -rv $(DEST)/$(APP_ID)
+	rm -rf $(ICONS_DIR)
