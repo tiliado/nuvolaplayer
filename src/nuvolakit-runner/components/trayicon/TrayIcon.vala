@@ -160,11 +160,11 @@ public class TrayIcon: GLib.Object
 		var icon_name = controller.icon;
 		var pixbuf = controller.web_app.get_icon_pixbuf(size);
 		if (pixbuf == null)
-			pixbuf = Diorite.Icons.load_theme_icon({icon_name, icon_name[0:icon_name.length - 1]}, size);
+			pixbuf = Diorite.Icons.load_theme_icon({icon_name}, size);
 		
 		if (pixbuf == null)
 		{
-			warning("Failed to load icon from icon name %s.", icon_name);
+			warning("Failed to load pixbuf for tray icon.");
 			return;
 		}
 		
