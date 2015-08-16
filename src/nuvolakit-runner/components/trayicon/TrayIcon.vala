@@ -160,7 +160,7 @@ public class TrayIcon: GLib.Object
 		var icon_name = controller.icon;
 		var pixbuf = controller.web_app.get_icon_pixbuf(size);
 		if (pixbuf == null)
-			pixbuf = load_icon({icon_name, icon_name[0:icon_name.length - 1]}, size);
+			pixbuf = Diorite.Icons.load_theme_icon({icon_name, icon_name[0:icon_name.length - 1]}, size);
 		
 		if (pixbuf == null)
 		{
@@ -172,22 +172,6 @@ public class TrayIcon: GLib.Object
 		icon.set_from_pixbuf(pixbuf);
 	}
 	#endif
-	
-	public static Gdk.Pixbuf? load_icon(string[] names, int size)
-	{
-		foreach (var name in names)
-		{
-			try
-			{
-				return Gtk.IconTheme.get_default().load_icon(name, size, 0);
-			}
-			catch (Error e)
-			{
-			}
-		}
-		
-		return null;
-	}
 	
 	private void on_activate()
 	{
