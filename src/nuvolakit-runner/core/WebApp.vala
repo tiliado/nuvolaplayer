@@ -60,7 +60,7 @@ public class WebAppMeta : GLib.Object
 		}
 	}
 	
-	private SList<IconInfo?> icons = null;
+	private List<IconInfo?> icons = null;
 	private bool icons_set = false;
 	
 	public static WebAppMeta load_from_dir(File dir) throws WebAppError
@@ -122,19 +122,51 @@ public class WebAppMeta : GLib.Object
 		return get_old_main_icon();
 	}
 	
+	/**
+	 * Returns icon pixbuf for the given size.
+	 * 
+	 * @param size    minimal size of the icon or `0` for the largest (scalable) icon
+	 * @return        pixbuf with icon scaled to the given size
+	 */
 	public Gdk.Pixbuf? get_icon_pixbuf(int size)
 	{		
-		foreach (var icon in icons)
+		if (size <= 0)
 		{
-			if (icon.size <= 0 || icon.size >= size)
+			/* Return the largest icon */
+			unowned List<IconInfo?>? cursor = icons != null ? icons.last() : null;
+			while (cursor != null)
 			{
+				unowned IconInfo icon = cursor.data;
 				try
 				{
-					return new Gdk.Pixbuf.from_file_at_scale(icon.path, size, size, false);
+					var pixbuf = new Gdk.Pixbuf.from_file_at_scale(icon.path, size, size, false);
+					if (pixbuf != null)
+						return pixbuf;
 				}
 				catch (GLib.Error e)
 				{
 					warning("Failed to load icon from file %s: %s", icon.path, e.message);
+				}
+				cursor = cursor.prev;
+			}
+		}
+		else
+		{
+			/* Return the first icon >= size */
+			foreach (var icon in icons)
+			{
+				if (icon.size <= 0 || icon.size >= size)
+				{
+					try
+					{
+						var pixbuf =  new Gdk.Pixbuf.from_file_at_scale(icon.path, size, size, false);
+						if (pixbuf != null)
+							return pixbuf;
+					}
+					catch (GLib.Error e)
+					{
+						warning("Failed to load icon from file %s: %s", icon.path, e.message);
+					}
 				}
 			}
 		}
@@ -144,7 +176,9 @@ public class WebAppMeta : GLib.Object
 		{
 			try
 			{
-				return new Gdk.Pixbuf.from_file_at_scale(default_icon, size, size, false);
+				var pixbuf =  new Gdk.Pixbuf.from_file_at_scale(default_icon, size, size, false);
+				if (pixbuf != null)
+					return pixbuf;
 			}
 			catch (GLib.Error e)
 			{
