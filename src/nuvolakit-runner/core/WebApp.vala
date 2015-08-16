@@ -103,7 +103,7 @@ public class WebAppMeta : GLib.Object
 		return meta;
 	}
 	
-	public Gdk.Pixbuf? lookup_icon(int size)
+	public Gdk.Pixbuf? get_icon_pixbuf(int size)
 	{
 		lookup_icons();
 		foreach (var icon in icons)

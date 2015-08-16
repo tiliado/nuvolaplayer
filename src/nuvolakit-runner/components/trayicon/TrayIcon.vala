@@ -158,7 +158,7 @@ public class TrayIcon: GLib.Object
 	{
 		var size = icon.size;
 		var icon_name = controller.icon;
-		var pixbuf = controller.web_app.lookup_icon(size);
+		var pixbuf = controller.web_app.get_icon_pixbuf(size);
 		if (pixbuf == null)
 			pixbuf = load_icon({icon_name, icon_name[0:icon_name.length - 1]}, size);
 		
