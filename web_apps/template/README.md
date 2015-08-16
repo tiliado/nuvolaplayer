@@ -23,10 +23,10 @@ Copyright
 ---------
 
   - `Makefile`
-    + Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
+    + Copyright 2014-2015 Jiří Janoušek <janousek.jiri@gmail.com>
     + License: [2-Clause BSD-license](./LICENSE-BSD.txt)
 
-  - `src/icon.svg`
+  - `src/icon*.svg`
     + Copyright 2011 Alexander King <alexanderddking@gmail.com >
     + Copyright 2011 Arturo Torres Sánchez <arturo.ilhuitemoc@gmail.com>
     + License: [CC-BY-3.0](./LICENSE-CC-BY.txt)
