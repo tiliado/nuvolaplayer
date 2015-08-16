@@ -103,9 +103,27 @@ public class WebAppMeta : GLib.Object
 		return meta;
 	}
 	
-	public Gdk.Pixbuf? get_icon_pixbuf(int size)
+	/**
+	 * Returns icon path for the given size.
+	 * 
+	 * @param size    minimal size of the icon or `0` for the largest (scalable) icon
+	 * @return        path of the icon
+	 */
+	public string? get_icon_path(int size)
 	{
 		lookup_icons();
+		if (size <= 0)
+			return icons != null ? icons.last().data.path : get_old_main_icon();
+		
+		foreach (var icon in icons)
+			if (icon.size <= 0 || icon.size >= size)
+				return icon.path;
+		
+		return get_old_main_icon();
+	}
+	
+	public Gdk.Pixbuf? get_icon_pixbuf(int size)
+	{		
 		foreach (var icon in icons)
 		{
 			if (icon.size <= 0 || icon.size >= size)
