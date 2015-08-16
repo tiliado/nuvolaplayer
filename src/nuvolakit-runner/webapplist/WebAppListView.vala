@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2015 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -25,52 +25,18 @@
 namespace Nuvola
 {
 
-private static const int ICON_SIZE = 48; 
-
 public class WebAppListView : Gtk.IconView
 {
+	public static const int ICON_SIZE = 48;
+	
 	public WebAppListView(WebAppListModel model)
 	{
-		Object(pixbuf_column: WebAppListModel.Pos.ICON, text_column: WebAppListModel.Pos.NAME,
-		item_padding: 5, row_spacing: 5, item_width: 3*ICON_SIZE/2,
-		selection_mode: Gtk.SelectionMode.BROWSE);
+		Object(
+			pixbuf_column: WebAppListModel.Pos.ICON, text_column: WebAppListModel.Pos.NAME,
+			item_padding: 5, row_spacing: 5, item_width: 3 * ICON_SIZE / 2,
+			selection_mode: Gtk.SelectionMode.BROWSE);
 		set_model(model);
 	}
-	
-	public static Gdk.Pixbuf? load_icon(string? path, string fallback_icon)
-	{
-		if (path != null)
-		{
-			try
-			{
-				return new Gdk.Pixbuf.from_file_at_size(path, ICON_SIZE, ICON_SIZE);
-			}
-			catch(GLib.Error e)
-			{
-				warning("Failde to load icon '%s': %s", path, e.message);
-			}
-		}
-		try
-		{
-			return Gtk.IconTheme.get_default().load_icon(fallback_icon, ICON_SIZE, 0);
-		}
-		catch (Error e)
-		{
-			var fallback2 = fallback_icon[0:fallback_icon.length - 1];
-			warning("Unable to load fallback icon '%s'. %s. Trying '%s' instead.", fallback_icon, e.message, fallback2);
-			
-			try
-			{
-				return Gtk.IconTheme.get_default().load_icon(fallback2, ICON_SIZE, 0);
-			}
-			catch (Error e)
-			{
-				warning("Unable to load fallback icon '%s'. %s", fallback2, e.message);
-			}
-		}
-		return null;
-	}
-
 }
 
 } // namespace Nuvola
