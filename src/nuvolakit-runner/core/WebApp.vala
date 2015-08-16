@@ -114,6 +114,7 @@ public class WebAppMeta : GLib.Object
 	 */
 	public Gdk.Pixbuf? get_icon_pixbuf(int size)
 	{		
+		lookup_icons();
 		if (size <= 0)
 		{
 			/* Return the largest icon */
