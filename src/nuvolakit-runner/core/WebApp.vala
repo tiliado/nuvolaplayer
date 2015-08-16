@@ -43,23 +43,7 @@ public class WebAppMeta : GLib.Object
 	public int api_minor {get; construct;}
 	public File? data_dir {get; private set; default = null;}
 	public bool removable {get; set; default = false;}
-	public bool hidden {get; set; default = false;}
-	public string? icon
-	{
-		owned get
-		{
-			if (data_dir == null)
-				return null;
-			var file = data_dir.get_child("icon.svg");
-			if (file.query_file_type(0) == FileType.REGULAR)
-				return file.get_path();
-			file = data_dir.get_child("icon.png");
-			if (file.query_file_type(0) == FileType.REGULAR)
-				return file.get_path();
-			return null;
-		}
-	}
-	
+	public bool hidden {get; set; default = false;}	
 	private List<IconInfo?> icons = null;
 	private bool icons_set = false;
 	
@@ -254,7 +238,15 @@ public class WebAppMeta : GLib.Object
 	private string? get_old_main_icon()
 	{
 		// TODO: get rid of old main icon
-		return this.icon;
+		if (data_dir == null)
+			return null;
+		var file = data_dir.get_child("icon.svg");
+		if (file.query_file_type(0) == FileType.REGULAR)
+			return file.get_path();
+		file = data_dir.get_child("icon.png");
+		if (file.query_file_type(0) == FileType.REGULAR)
+			return file.get_path();
+		return null;
 	}
 	
 	private struct IconInfo
