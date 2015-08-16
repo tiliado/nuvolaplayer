@@ -36,7 +36,8 @@ public class AboutDialog: Gtk.Dialog
 		Pango.AttrList attributes = null;
 		Gtk.Grid grid, title;
 		Gtk.Label label;
-		Gtk.Image? img;
+		Gtk.Image? img = null;
+		var icon_size = 64;
 		
 		if (web_app != null)
 		{
@@ -47,12 +48,15 @@ public class AboutDialog: Gtk.Dialog
 			title = new Gtk.Grid();
 			title.column_spacing = 10;
 			title.margin = 10;
-			img = load_icon_image(64, web_app.icon, Nuvola.get_app_icon());
-			if (img != null)
+			
+			var pixbuf = web_app.get_icon_pixbuf(icon_size);
+			if (pixbuf != null)
 			{
+				img = new Gtk.Image.from_pixbuf(pixbuf);
 				img.valign = img.halign = Gtk.Align.CENTER;
 				title.attach(img, 0, 0, 1, 2);
 			}
+			
 			label = new Gtk.Label(web_app.name);
 			attributes = new Pango.AttrList() ;
 			attributes.insert(new Pango.AttrSize(18*1000));
@@ -91,12 +95,15 @@ public class AboutDialog: Gtk.Dialog
 		title = new Gtk.Grid();
 		title.column_spacing = 10;
 		title.margin = 10;
-		img = load_icon_image(64, null, Nuvola.get_app_icon());
-		if (img != null)
+		
+		var pixbuf = Diorite.Icons.load_theme_icon({Nuvola.get_app_icon()}, icon_size);
+		if (pixbuf != null)
 		{
+			img = new Gtk.Image.from_pixbuf(pixbuf);
 			img.valign = img.halign = Gtk.Align.CENTER;
 			title.attach(img, 0, 0, 1, 2);
 		}
+		
 		label = new Gtk.Label(Nuvola.get_app_name());
 		attributes = new Pango.AttrList() ;
 		attributes.insert(new Pango.AttrSize(18*1000));
@@ -122,48 +129,6 @@ public class AboutDialog: Gtk.Dialog
 		grid.attach(label, 1, 4, 1, 1);
 		grid.show_all();
 		box.add(grid);
-	}
-	
-	private Gtk.Image? load_icon_image(int size, string? path, string fallback_icon)
-	{
-		var pixbuf = load_icon_pixbuf(size, path, fallback_icon);
-		if (pixbuf == null)
-			return null;
-		return new Gtk.Image.from_pixbuf(pixbuf);
-	}
-	
-	private static Gdk.Pixbuf? load_icon_pixbuf(int size, string? path, string fallback_icon)
-	{
-		if (path != null)
-		{
-			try
-			{
-				return new Gdk.Pixbuf.from_file_at_size(path, size, size);
-			}
-			catch(GLib.Error e)
-			{
-				warning("Failde to load icon '%s': %s", path, e.message);
-			}
-		}
-		try
-		{
-			return Gtk.IconTheme.get_default().load_icon(fallback_icon, size, 0);
-		}
-		catch (Error e)
-		{
-			var fallback2 = fallback_icon[0:fallback_icon.length - 1];
-			warning("Unable to load fallback icon '%s'. %s. Trying '%s' instead.", fallback_icon, e.message, fallback2);
-			
-			try
-			{
-				return Gtk.IconTheme.get_default().load_icon(fallback2, size, 0);
-			}
-			catch (Error e)
-			{
-				warning("Unable to load fallback icon '%s'. %s", fallback2, e.message);
-			}
-		}
-		return null;
 	}
 }
 
