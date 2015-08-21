@@ -278,6 +278,25 @@ public class WebExtension: GLib.Object
 			else if (key == "url" && value != null)
 				url = value.get_string();
 		}
+		
+		if (url.has_prefix("nuvola://"))
+		{
+			var child = data_dir.get_child(url.substring(9));
+			if (!child.has_prefix(data_dir))
+			{
+				warning("URI '%s' is not a child of data dir '%s'.", url, data_dir.get_path());
+				approved = false;
+			}
+			else
+			{
+				url = child.get_uri();
+			}
+		}
+		else if (!url.has_prefix("http://") && !url.has_prefix("https://") && !url.has_prefix("data:"))
+		{
+			warning("Invalid URI protocol '%s'.", url);
+			approved = false;
+		}
 	}
 	
 	public enum InitState
