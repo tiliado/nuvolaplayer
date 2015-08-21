@@ -32,7 +32,7 @@ public class WebAppListModel : Gtk.ListStore
 	
 	public enum Pos
 	{
-		ID, NAME, ICON, VERSION, MAINTAINER_NAME, MAINTAINER_LINK, REMOVABLE;
+		ID, NAME, ICON, VERSION, MAINTAINER_NAME, MAINTAINER_LINK, REMOVABLE, META;
 	}
 	
 	public WebAppListModel(WebAppRegistry web_app_reg, bool show_hidden=false)
@@ -41,8 +41,16 @@ public class WebAppListModel : Gtk.ListStore
 		this.web_app_reg = web_app_reg;
 		this.show_hidden = show_hidden;
 		
-		//                         id            name            icon                version  maintainer_name maintainer_link    removable
-		set_column_types({typeof(string), typeof(string), typeof(Gdk.Pixbuf), typeof(string), typeof(string), typeof(string), typeof(bool)});
+		set_column_types({
+			typeof(string),  // id
+			typeof(string),  // name
+			typeof(Gdk.Pixbuf),  // icon
+			typeof(string),  // version
+			typeof(string),  // maintainer_name
+			typeof(string),  // maintainer_link
+			typeof(bool),  // removable
+			typeof(WebAppMeta) // meta
+			});
 		load();
 		web_app_reg.app_installed.connect(on_app_installed_or_removed);
 		web_app_reg.app_removed.connect(on_app_installed_or_removed);
@@ -59,14 +67,15 @@ public class WebAppListModel : Gtk.ListStore
 		Gtk.TreeIter iter;
 		append(out iter);
 		@set(iter,
-		Pos.ID, web_app.id,
-		Pos.NAME, web_app.name,
-		Pos.ICON, icon,
-		Pos.VERSION, "%d.%d".printf(web_app.version_major, web_app.version_minor),
-		Pos.MAINTAINER_NAME, web_app.maintainer_name,
-		Pos.MAINTAINER_LINK, web_app.maintainer_link,
-		Pos.REMOVABLE, web_app.removable,
-		-1);
+			Pos.ID, web_app.id,
+			Pos.NAME, web_app.name,
+			Pos.ICON, icon,
+			Pos.VERSION, "%d.%d".printf(web_app.version_major, web_app.version_minor),
+			Pos.MAINTAINER_NAME, web_app.maintainer_name,
+			Pos.MAINTAINER_LINK, web_app.maintainer_link,
+			Pos.REMOVABLE, web_app.removable,
+			Pos.META, web_app,
+			-1);
 	}
 	
 	private void load()
