@@ -88,6 +88,24 @@ public class WebAppMeta : GLib.Object
 	}
 	
 	/**
+	 * Returns true if web app belongs to given category
+	 * 
+	 * @param category    category id
+	 * @return true if web app belongs to given category
+	 */
+	public bool in_category(string category)
+	{
+		var categories = this.categories.split(";");
+		foreach (var item in categories)
+		{
+			item = item.strip();
+			if (category[0] != 0 && item == category)
+				return true;
+		}
+		return false;
+	}
+	
+	/**
 	 * Returns icon path for the given size.
 	 * 
 	 * @param size    minimal size of the icon or `0` for the largest (scalable) icon
