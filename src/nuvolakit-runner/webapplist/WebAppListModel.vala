@@ -71,8 +71,10 @@ public class WebAppListModel : Gtk.ListStore
 	
 	private void load()
 	{
-		var web_apps = web_app_reg.list_web_apps();
-		foreach (var web_app in web_apps.get_values())
+		var web_apps_map = web_app_reg.list_web_apps();
+		var web_apps = web_apps_map.get_values();
+		web_apps.sort(WebAppMeta.cmp_by_name);
+		foreach (var web_app in web_apps)
 			if (show_hidden || !web_app.hidden)
 				append_web_app(web_app, web_app.get_icon_pixbuf(WebAppListView.ICON_SIZE));
 	}

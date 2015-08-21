@@ -250,6 +250,11 @@ public class WebAppMeta : GLib.Object
 		return null;
 	}
 	
+	public static inline int cmp_by_name(WebAppMeta a, WebAppMeta b)
+	{
+		return strcmp(a.name, b.name);
+	}
+	
 	private struct IconInfo
 	{
 		string path;
