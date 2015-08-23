@@ -69,7 +69,14 @@ public class MasterController : Diorite.Application
 	public override void activate()
 	{
 		hold();
-		show_main_window();
+		if (main_window == null)
+		{
+			create_main_window();
+			main_window.category = "Audio";
+		}
+		
+		main_window.show_all();
+		main_window.present();
 		release();
 	}
 	
@@ -147,20 +154,14 @@ public class MasterController : Diorite.Application
 		init_state = InitState.GUI;
 	}
 	
-	private void show_main_window()
+	private void create_main_window()
 	{
-		if (main_window == null)
-		{
-			init_gui();
-			create_desktop_files.begin(web_app_reg, false, (o, res) => {create_desktop_files.end(res);});
-			var model = new WebAppListFilter(new WebAppListModel(web_app_reg), debuging, null);
-			main_window = new WebAppListWindow(this, model);
-			main_window.delete_event.connect(on_main_window_delete_event);
-			main_window.view.item_activated.connect_after(on_list_item_activated);
-		}
-		
-		main_window.show_all();
-		main_window.present();
+		init_gui();
+		create_desktop_files.begin(web_app_reg, false, (o, res) => {create_desktop_files.end(res);});
+		var model = new WebAppListFilter(new WebAppListModel(web_app_reg), debuging, null);
+		main_window = new WebAppListWindow(this, model);
+		main_window.delete_event.connect(on_main_window_delete_event);
+		main_window.view.item_activated.connect_after(on_list_item_activated);
 	}
 	
 	public override int command_line(ApplicationCommandLine command_line)

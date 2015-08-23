@@ -29,6 +29,7 @@ public class WebAppListWindow : Diorite.ApplicationWindow
 {
 	public WebAppListView view {get; private set;}
 	public WebAppListFilter model {get; private set;}
+	public string? category {get; set; default = null;}
 	public string? selected_web_app {get; private set; default = null;}
 	private MasterController app;
 	private Gtk.Grid details;
@@ -102,6 +103,8 @@ public class WebAppListWindow : Diorite.ApplicationWindow
 		top_grid.add(details);
 		
 		view.select_path(new Gtk.TreePath.first());
+		category = model.category;
+		notify["category"].connect_after(on_category_changed);
 	}
 	
 	private void on_selection_changed()
@@ -119,7 +122,6 @@ public class WebAppListWindow : Diorite.ApplicationWindow
 			app.actions.get_action(Actions.START_APP).enabled = false;
 			return;
 		}
-		
 		
 		var model = view.get_model();
 		Gtk.TreeIter iter;
@@ -157,7 +159,10 @@ public class WebAppListWindow : Diorite.ApplicationWindow
 		app.actions.get_action(Actions.START_APP).enabled = true;
 	}
 	
-
+	private void on_category_changed(GLib.Object o, ParamSpec param)
+	{
+		model.category = category;
+	}
 }
 
 } // namespace Nuvola
