@@ -80,6 +80,32 @@ public class MasterController : Diorite.Application
 		release();
 	}
 	
+	public void activate_nuvola_player()
+	{
+		hold();
+		if (main_window == null)
+			create_main_window();
+			
+		main_window.title = "Services - " + app_name;
+		main_window.category = "Audio";
+		main_window.show_all();
+		main_window.present();
+		release();
+	}
+	
+	public void activate_nuvola_apps()
+	{
+		hold();
+		if (main_window == null)
+			create_main_window();
+			
+		main_window.title = "Select a web app - Nuvola Apps Alpha";
+		main_window.category = null;
+		main_window.show_all();
+		main_window.present();
+		release();
+	}
+	
 	private void init_core()
 	{
 		if (init_state >= InitState.CORE)
@@ -200,11 +226,29 @@ public class MasterController : Diorite.Application
 			return 1;
 		}
 		
+		var nuvola_apps = false;
+		foreach (var arg in _args)
+		{
+			if (arg == "__nuvola_apps__")
+			{
+				nuvola_apps = true;
+				break;
+			}
+		}
+		
+		if (_args.length > (nuvola_apps ? 2 : 1))
+		{
+			stderr.printf("Too many arguments.\n");
+			return 1;
+		}
+		
 		init_core();
 		if (app_id != null)
 			start_app(app_id);
+		else if (nuvola_apps)
+			activate_nuvola_apps();
 		else
-			activate();
+			activate_nuvola_player();
 		
 		return 0;
 	}
