@@ -28,6 +28,7 @@ namespace Nuvola
 public class WebAppListWindow : Diorite.ApplicationWindow
 {
 	public WebAppListView view {get; private set;}
+	public WebAppListFilter model {get; private set;}
 	public string? selected_web_app {get; private set; default = null;}
 	private MasterController app;
 	private Gtk.Grid details;
@@ -35,7 +36,7 @@ public class WebAppListWindow : Diorite.ApplicationWindow
 	private Gtk.Label app_version;
 	private Gtk.Label app_maintainer;
 	
-	public WebAppListWindow(MasterController app, WebAppListView view)
+	public WebAppListWindow(MasterController app, WebAppListFilter model)
 	{
 		base(app, false);
 		title = "Services - " + app.app_name;
@@ -52,7 +53,8 @@ public class WebAppListWindow : Diorite.ApplicationWindow
 		this.app = app;
 		app.actions.get_action(Actions.REMOVE_APP).enabled = false;
 		app.actions.get_action(Actions.START_APP).enabled = false;
-		this.view = view;
+		this.model = model;
+		view = new WebAppListView(model);
 		view.selection_changed.connect(on_selection_changed);
 		var scroll = new Gtk.ScrolledWindow(null, null);
 		scroll.add(view);
