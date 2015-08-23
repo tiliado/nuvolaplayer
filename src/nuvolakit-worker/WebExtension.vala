@@ -288,6 +288,8 @@ public class WebExtension: GLib.Object
 			else
 			{
 				url = child.get_uri();
+				if (!child.query_exists())
+					warning("File '%s' doesn't exist.", child.get_path());
 			}
 		}
 		else if (!url.has_prefix("http://") && !url.has_prefix("https://") && !url.has_prefix("data:"))
