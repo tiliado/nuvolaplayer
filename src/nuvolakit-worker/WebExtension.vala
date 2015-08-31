@@ -278,24 +278,20 @@ public class WebExtension: GLib.Object
 		}
 		
 		if (url.has_prefix("nuvola://"))
+			url = data_dir.get_child(url.substring(9)).get_uri();
+			
+		if (url.has_prefix("file:"))
 		{
-			var child = data_dir.get_child(url.substring(9));
-			if (!child.has_prefix(data_dir))
+			var file = File.new_for_uri(url);
+			if (!file.has_prefix(data_dir))
 			{
-				warning("URI '%s' is not a child of data dir '%s'.", url, data_dir.get_path());
+				warning("URI '%s' is blocked because it is not a child of data dir '%s'.", url, data_dir.get_path());
 				approved = false;
 			}
-			else
+			else if (!file.query_exists())
 			{
-				url = child.get_uri();
-				if (!child.query_exists())
-					warning("File '%s' doesn't exist.", child.get_path());
+				warning("File '%s' doesn't exist.", file.get_path());
 			}
-		}
-		else if (!url.has_prefix("http://") && !url.has_prefix("https://") && !url.has_prefix("data:"))
-		{
-			warning("Invalid URI protocol '%s'.", url);
-			approved = false;
 		}
 	}
 	
