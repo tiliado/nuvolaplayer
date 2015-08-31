@@ -12,7 +12,7 @@ Code hosting and issue tracker
 
 Nuvola Player uses [Git version control system][2] for its code base and [GitHub][3] for
 both code hosting and issue tracking. All official Git repositories are located under
-[Tiliado organization account](https://github.com/>tiliado). The code-base is divided to three parts:
+[Tiliado organization account](https://github.com/tiliado). The code-base is divided to three parts:
 
  1. [Diorite library](https://github.com/tiliado/diorite): Private utility and widget library for
     Nuvola Player project based on GLib, GIO and GTK.
