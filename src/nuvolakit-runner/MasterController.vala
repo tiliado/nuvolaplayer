@@ -219,6 +219,7 @@ public class MasterController : Diorite.Application
 			opt_context.add_main_entries(options, null);
 			unowned string[] tmp = _args;
 			opt_context.parse(ref tmp);
+			_args.length = tmp.length;
 		}
 		catch (OptionError e)
 		{
