@@ -31,7 +31,9 @@ public class WebAppListWindow : Diorite.ApplicationWindow
 	public WebAppListFilter model {get; private set;}
 	public string? category {get; set; default = null;}
 	public string? selected_web_app {get; private set; default = null;}
+	private AppCategoriesView categories;
 	private MasterController app;
+	private Gtk.Grid grid;
 	private Gtk.Grid details;
 	private Gtk.Label app_name;
 	private Gtk.Label app_version;
@@ -57,8 +59,13 @@ public class WebAppListWindow : Diorite.ApplicationWindow
 		this.model = model;
 		view = new WebAppListView(model);
 		view.selection_changed.connect(on_selection_changed);
+		view.halign = Gtk.Align.FILL;
+		view.vexpand = true;
+		view.hexpand = true;
+		
 		var scroll = new Gtk.ScrolledWindow(null, null);
 		scroll.add(view);
+		scroll.halign = Gtk.Align.FILL;
 		scroll.vexpand = true;
 		scroll.hexpand = true;
 		
@@ -99,12 +106,24 @@ public class WebAppListWindow : Diorite.ApplicationWindow
 		details.hide();
 		details.no_show_all = true;
 		
-		top_grid.add(scroll);
-		top_grid.add(details);
+		categories = new AppCategoriesView();
+		categories.hexpand = false;
+		categories.no_show_all = true;
+		categories.show();
+		
+		grid = new Gtk.Grid();
+		grid.margin = 8;
+		grid.column_spacing = 8;
+		top_grid.add(grid);
+		grid.attach(categories, 0, 0, 1, 1);
+		grid.attach(scroll, 1, 0, 1, 1);
+		grid.attach(details, 0, 1, 2, 1);
 		
 		view.select_path(new Gtk.TreePath.first());
 		category = model.category;
 		notify["category"].connect_after(on_category_changed);
+		model.bind_property(
+			"category", categories, "category", GLib.BindingFlags.BIDIRECTIONAL|GLib.BindingFlags.SYNC_CREATE);
 	}
 	
 	private void on_selection_changed()
@@ -162,6 +181,7 @@ public class WebAppListWindow : Diorite.ApplicationWindow
 	private void on_category_changed(GLib.Object o, ParamSpec param)
 	{
 		model.category = category;
+		categories.visible = category == null;
 	}
 }
 

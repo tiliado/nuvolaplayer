@@ -87,7 +87,7 @@ public class MasterController : Diorite.Application
 			create_main_window();
 			
 		main_window.title = "Services - " + app_name;
-		main_window.category = "Audio";
+		main_window.category = "AudioVideo";
 		main_window.show_all();
 		main_window.present();
 		release();
