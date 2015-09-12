@@ -2,7 +2,7 @@
 Name=@APP_NAME@
 GenericName=@GENERIC_NAME@
 Comment=@BLURB@
-Exec=@APP_ID@
+Exec=@EXEC@
 Icon=@APP_ID@
 Terminal=false
 Type=Application
