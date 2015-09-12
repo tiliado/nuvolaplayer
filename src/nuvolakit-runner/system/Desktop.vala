@@ -90,4 +90,35 @@ public KeyFile create_desktop_file(WebAppMeta web_app)
 	return key_file;
 }
 
+
+private static HashTable<string,string> desktop_categories = null;
+
+public HashTable<string, string> get_desktop_categories()
+{
+	if (desktop_categories == null)
+	{
+		desktop_categories = new HashTable<string, string>(str_hash, str_equal);
+		desktop_categories["AudioVideo"] = _("Multimedia");
+		desktop_categories["Audio"] = _("Audio");
+		desktop_categories["Video"] = _("Video");
+		desktop_categories["Development"] = _("Development");
+		desktop_categories["Education"] = _("Education");
+		desktop_categories["Game"] = _("Game");
+		desktop_categories["Graphics"] = _("Graphics");
+		desktop_categories["Network"] = _("Network");
+		desktop_categories["Office"] = _("Office");
+		desktop_categories["Science"] = _("Science");
+		desktop_categories["Settings"] = _("Settings");
+		desktop_categories["System"] = _("System Tools");
+		desktop_categories["Utility"] = _("Accessories");
+		desktop_categories["Other"] = _("Other");
+	}
+	return desktop_categories;
+}
+
+public string? get_desktop_category_name(string id)
+{
+	return get_desktop_categories()[id];
+}
+
 } // namespace Nuvola

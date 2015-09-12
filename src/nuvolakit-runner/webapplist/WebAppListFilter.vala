@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2015 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -25,17 +25,40 @@
 namespace Nuvola
 {
 
-public class WebAppListView : Gtk.IconView
+public class WebAppListFilter : Gtk.TreeModelFilter
 {
-	public static const int ICON_SIZE = 48;
+	public string? category {get; set; default = null;}
+	public bool show_hidden {get; set; default = false;}
 	
-	public WebAppListView(Gtk.TreeModel model)
+	public WebAppListFilter(WebAppListModel model, bool show_hidden=false, string? category=null)
 	{
-		Object(
-			pixbuf_column: WebAppListModel.Pos.ICON, text_column: WebAppListModel.Pos.NAME,
-			item_padding: 5, row_spacing: 5, item_width: 3 * ICON_SIZE / 2,
-			selection_mode: Gtk.SelectionMode.BROWSE);
-		set_model(model);
+		Object(child_model: model, category: category, show_hidden: show_hidden);
+		set_visible_func(visible_func);
+		notify.connect_after(on_notify);
+	}
+	
+	private bool visible_func(Gtk.TreeModel model, Gtk.TreeIter iter)
+	{
+		WebAppMeta web_app = null;
+		model.get(iter, WebAppListModel.Pos.META, out web_app);
+		assert(web_app != null);
+		if (!show_hidden && web_app.hidden)
+			return false;
+		if (category == null)
+			return true;
+		return web_app.in_category(category);
+	}
+	
+	private void on_notify(GLib.Object o, ParamSpec param)
+	{
+		assert(this == o);
+		switch (param.name)
+		{
+		case "category":
+		case "show-hidden":
+			refilter();
+			break;
+		}
 	}
 }
 

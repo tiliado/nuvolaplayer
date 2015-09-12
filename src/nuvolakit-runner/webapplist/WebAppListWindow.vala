@@ -28,14 +28,18 @@ namespace Nuvola
 public class WebAppListWindow : Diorite.ApplicationWindow
 {
 	public WebAppListView view {get; private set;}
+	public WebAppListFilter model {get; private set;}
+	public string? category {get; set; default = null;}
 	public string? selected_web_app {get; private set; default = null;}
+	private AppCategoriesView categories;
 	private MasterController app;
+	private Gtk.Grid grid;
 	private Gtk.Grid details;
 	private Gtk.Label app_name;
 	private Gtk.Label app_version;
 	private Gtk.Label app_maintainer;
 	
-	public WebAppListWindow(MasterController app, WebAppListView view)
+	public WebAppListWindow(MasterController app, WebAppListFilter model)
 	{
 		base(app, false);
 		title = "Services - " + app.app_name;
@@ -47,15 +51,21 @@ public class WebAppListWindow : Diorite.ApplicationWindow
 		{
 			warning("Unable to load application icon.");
 		}
-		set_default_size(500, 500);
+		set_default_size(600, 500);
 		
 		this.app = app;
 		app.actions.get_action(Actions.REMOVE_APP).enabled = false;
 		app.actions.get_action(Actions.START_APP).enabled = false;
-		this.view = view;
+		this.model = model;
+		view = new WebAppListView(model);
 		view.selection_changed.connect(on_selection_changed);
+		view.halign = Gtk.Align.FILL;
+		view.vexpand = true;
+		view.hexpand = true;
+		
 		var scroll = new Gtk.ScrolledWindow(null, null);
 		scroll.add(view);
+		scroll.halign = Gtk.Align.FILL;
 		scroll.vexpand = true;
 		scroll.hexpand = true;
 		
@@ -96,10 +106,24 @@ public class WebAppListWindow : Diorite.ApplicationWindow
 		details.hide();
 		details.no_show_all = true;
 		
-		top_grid.add(scroll);
-		top_grid.add(details);
+		categories = new AppCategoriesView();
+		categories.hexpand = false;
+		categories.no_show_all = true;
+		categories.margin_right = 8;
+		categories.show();
+		
+		grid = new Gtk.Grid();
+		grid.margin = 8;
+		top_grid.add(grid);
+		grid.attach(categories, 0, 0, 1, 1);
+		grid.attach(scroll, 1, 0, 1, 1);
+		grid.attach(details, 0, 1, 2, 1);
 		
 		view.select_path(new Gtk.TreePath.first());
+		category = model.category;
+		notify["category"].connect_after(on_category_changed);
+		model.bind_property(
+			"category", categories, "category", GLib.BindingFlags.BIDIRECTIONAL|GLib.BindingFlags.SYNC_CREATE);
 	}
 	
 	private void on_selection_changed()
@@ -117,7 +141,6 @@ public class WebAppListWindow : Diorite.ApplicationWindow
 			app.actions.get_action(Actions.START_APP).enabled = false;
 			return;
 		}
-		
 		
 		var model = view.get_model();
 		Gtk.TreeIter iter;
@@ -155,7 +178,11 @@ public class WebAppListWindow : Diorite.ApplicationWindow
 		app.actions.get_action(Actions.START_APP).enabled = true;
 	}
 	
-
+	private void on_category_changed(GLib.Object o, ParamSpec param)
+	{
+		model.category = category;
+		categories.visible = category == null;
+	}
 }
 
 } // namespace Nuvola

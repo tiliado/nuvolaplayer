@@ -129,6 +129,7 @@ def options(ctx):
 	ctx.add_option('--no-debug', action='store_false', dest='debug', help="Turn off debugging symbols")
 	ctx.add_option('--no-system-hooks', action='store_false', default=True, dest='system_hooks', help="Don't run system hooks after installation (ldconfig, icon cache update, ...")
 	ctx.add_option('--platform', default=_PLATFORM, help="Target platform")
+	ctx.add_option('--with-apps-alpha', action='store_true', default=False, dest='apps_alpha', help="Include Nuvola Apps Alpha launcher.")
 
 # Configure build process
 def configure(ctx):
@@ -226,6 +227,8 @@ def configure(ctx):
 	if ctx.options.appindicator:
 		ctx.check_dep('appindicator3-0.1', 'APPINDICATOR', '0.4')
 		ctx.vala_def("APPINDICATOR")
+	
+	ctx.env.with_apps_alpha = ctx.options.apps_alpha
 	
 	ctx.define("NUVOLA_APPNAME", APPNAME)
 	ctx.define("NUVOLA_NAME", NAME)
@@ -356,8 +359,21 @@ def build(ctx):
 		BLURB = BLURB,
 		APP_NAME = NAME,
 		APP_ID = APPNAME,
+		EXEC = APPNAME,
 		GENERIC_NAME=GENERIC_NAME,
 	)
+	
+	if ctx.env.with_apps_alpha:
+		ctx(features = 'subst',
+			source = 'data/templates/launcher.desktop',
+			target = "share/applications/%s.desktop" % "nuvola",
+			install_path = '${PREFIX}/share/applications',
+			BLURB = "Web Apps for your desktop.",
+			APP_NAME = "Nuvola Apps Alpha",
+			APP_ID = APPNAME,
+			EXEC = APPNAME + " __nuvola_apps__",
+			GENERIC_NAME="Web Apps",
+		)
 	
 	ctx.install_as('${PREFIX}/share/appdata/%s.appdata.xml' % APPNAME, ctx.path.find_node("data/nuvolaplayer3.appdata.xml"))
 	

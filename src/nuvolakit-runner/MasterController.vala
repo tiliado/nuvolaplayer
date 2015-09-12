@@ -69,7 +69,40 @@ public class MasterController : Diorite.Application
 	public override void activate()
 	{
 		hold();
-		show_main_window();
+		if (main_window == null)
+		{
+			create_main_window();
+			main_window.category = "Audio";
+		}
+		
+		main_window.show_all();
+		main_window.present();
+		release();
+	}
+	
+	public void activate_nuvola_player()
+	{
+		hold();
+		if (main_window == null)
+			create_main_window();
+			
+		main_window.title = "Services - " + app_name;
+		main_window.category = "AudioVideo";
+		main_window.show_all();
+		main_window.present();
+		release();
+	}
+	
+	public void activate_nuvola_apps()
+	{
+		hold();
+		if (main_window == null)
+			create_main_window();
+			
+		main_window.title = "Select a web app - Nuvola Apps Alpha";
+		main_window.category = null;
+		main_window.show_all();
+		main_window.present();
 		release();
 	}
 	
@@ -147,21 +180,14 @@ public class MasterController : Diorite.Application
 		init_state = InitState.GUI;
 	}
 	
-	private void show_main_window()
+	private void create_main_window()
 	{
-		if (main_window == null)
-		{
-			init_gui();
-			create_desktop_files.begin(web_app_reg, false, (o, res) => {create_desktop_files.end(res);});
-			var model = new WebAppListModel(web_app_reg, debuging);
-			var view = new WebAppListView(model);
-			main_window = new WebAppListWindow(this, view);
-			main_window.delete_event.connect(on_main_window_delete_event);
-			view.item_activated.connect_after(on_list_item_activated);
-		}
-		
-		main_window.show_all();
-		main_window.present();
+		init_gui();
+		create_desktop_files.begin(web_app_reg, false, (o, res) => {create_desktop_files.end(res);});
+		var model = new WebAppListFilter(new WebAppListModel(web_app_reg), debuging, null);
+		main_window = new WebAppListWindow(this, model);
+		main_window.delete_event.connect(on_main_window_delete_event);
+		main_window.view.item_activated.connect_after(on_list_item_activated);
 	}
 	
 	public override int command_line(ApplicationCommandLine command_line)
@@ -193,6 +219,7 @@ public class MasterController : Diorite.Application
 			opt_context.add_main_entries(options, null);
 			unowned string[] tmp = _args;
 			opt_context.parse(ref tmp);
+			_args.length = tmp.length;
 		}
 		catch (OptionError e)
 		{
@@ -200,11 +227,29 @@ public class MasterController : Diorite.Application
 			return 1;
 		}
 		
+		var nuvola_apps = false;
+		foreach (var arg in _args)
+		{
+			if (arg == "__nuvola_apps__")
+			{
+				nuvola_apps = true;
+				break;
+			}
+		}
+		
+		if (_args.length > (nuvola_apps ? 2 : 1))
+		{
+			stderr.printf("Too many arguments.\n");
+			return 1;
+		}
+		
 		init_core();
 		if (app_id != null)
 			start_app(app_id);
+		else if (nuvola_apps)
+			activate_nuvola_apps();
 		else
-			activate();
+			activate_nuvola_player();
 		
 		return 0;
 	}
