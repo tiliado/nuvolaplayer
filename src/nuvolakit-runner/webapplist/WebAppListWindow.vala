@@ -51,7 +51,7 @@ public class WebAppListWindow : Diorite.ApplicationWindow
 		{
 			warning("Unable to load application icon.");
 		}
-		set_default_size(500, 500);
+		set_default_size(600, 500);
 		
 		this.app = app;
 		app.actions.get_action(Actions.REMOVE_APP).enabled = false;
@@ -109,11 +109,11 @@ public class WebAppListWindow : Diorite.ApplicationWindow
 		categories = new AppCategoriesView();
 		categories.hexpand = false;
 		categories.no_show_all = true;
+		categories.margin_right = 8;
 		categories.show();
 		
 		grid = new Gtk.Grid();
 		grid.margin = 8;
-		grid.column_spacing = 8;
 		top_grid.add(grid);
 		grid.attach(categories, 0, 0, 1, 1);
 		grid.attach(scroll, 1, 0, 1, 1);
