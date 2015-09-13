@@ -379,7 +379,10 @@ public class AppRunnerController : RunnerApplication
 		dialog.add_tab("Components", new ComponentsManager(components));
 		var account_form = new Tiliado.AccountForm(tiliado_account);
 		account_form.valign = account_form.halign = Gtk.Align.CENTER;
-		dialog.add_tab("Tiliado Account", account_form);
+		var scroll = new Gtk.ScrolledWindow(null, null);
+		scroll.add(account_form);
+		scroll.show_all();
+		dialog.add_tab("Tiliado Account", scroll);
 		var response = dialog.run();
 		if (response == Gtk.ResponseType.OK)
 		{
