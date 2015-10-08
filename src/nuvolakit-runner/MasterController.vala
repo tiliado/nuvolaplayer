@@ -183,7 +183,6 @@ public class MasterController : Diorite.Application
 	private void create_main_window()
 	{
 		init_gui();
-		create_desktop_files.begin(web_app_reg, false, (o, res) => {create_desktop_files.end(res);});
 		var model = new WebAppListFilter(new WebAppListModel(web_app_reg), debuging, null);
 		main_window = new WebAppListWindow(this, model);
 		main_window.delete_event.connect(on_main_window_delete_event);
