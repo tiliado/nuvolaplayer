@@ -57,9 +57,7 @@ public bool write_desktop_file_sync(WebAppMeta web_app)
 
 public async bool write_desktop_file(WebAppMeta web_app)
 {
-	var storage = new Diorite.XdgStorage();
-	var filename = "%s.desktop".printf(build_dashed_id(web_app.id));
-	var file = storage.user_data_dir.get_child("applications").get_child(filename);
+	var file = get_desktop_file(web_app);
 	var existed = file.query_exists();
 	var data = create_desktop_file(web_app).to_data(null, null);
 	try
@@ -90,6 +88,56 @@ public KeyFile create_desktop_file(WebAppMeta web_app)
 	return key_file;
 }
 
+public async void delete_desktop_file(WebAppMeta web_app) throws GLib.Error
+{
+	yield get_desktop_file(web_app).delete_async();
+}
+
+public string get_desktop_file_name(string web_app_id)
+{
+	return "%s.desktop".printf(build_dashed_id(web_app_id));
+}
+
+public File get_desktop_file(WebAppMeta web_app)
+{
+	var storage = new Diorite.XdgStorage();
+	return storage.user_data_dir.get_child("applications").get_child(get_desktop_file_name(web_app.id));
+}
+
+public async void delete_desktop_files(GenericSet<string>? filenames_whitelist)
+{
+	var pattern = new PatternSpec("nuvolaplayer3-*.desktop");
+	var dir = new Diorite.XdgStorage().user_data_dir.get_child("applications");
+	try
+	{
+		var enumerator = yield dir.enumerate_children_async(
+			FileAttribute.STANDARD_NAME, FileQueryInfoFlags.NOFOLLOW_SYMLINKS);
+		FileInfo info;
+		while ((info = enumerator.next_file(null)) != null)
+		{
+			var name = info.get_name();
+			if (pattern.match_string(name))
+			{
+				if (filenames_whitelist == null || !(name in filenames_whitelist))
+				{
+					var file = dir.get_child(name);
+					try
+					{
+						yield file.delete_async();
+					}
+					catch (GLib.Error e)
+					{
+						warning("Failed to delete desktop file %s. %s", file.get_path(), e.message);
+					}
+				}
+			}
+		}
+	}
+	catch (GLib.Error e)
+	{
+		warning("Directory enumeration failed: %s. %s\n", dir.get_path(), e.message);
+	}
+}
 
 private static HashTable<string,string> desktop_categories = null;
 

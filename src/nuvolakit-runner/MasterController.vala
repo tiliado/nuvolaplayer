@@ -32,6 +32,7 @@ namespace Actions
 	public const string REMOVE_APP = "remove-app";
 	public const string QUIT = "quit";
 	public const string CREATE_LAUNCHERS = "create-launchers";
+	public const string DELETE_LAUNCHERS = "delete-launchers";
 }
 
 public string build_master_ipc_id()
@@ -162,6 +163,7 @@ public class MasterController : Diorite.Application
 		new Diorite.SimpleAction("main", "app", Actions.ABOUT, "About", "_About", null, null, do_about),
 		new Diorite.SimpleAction("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
 		new Diorite.SimpleAction("main", "app", Actions.CREATE_LAUNCHERS, "Create application launchers", null, null, null, do_create_launchers),
+		new Diorite.SimpleAction("main", "app", Actions.DELETE_LAUNCHERS, "Delete application launchers", null, null, null, do_delete_launchers),
 		new Diorite.SimpleAction("main", "win", Actions.START_APP, "Start app", "_Start app", "media-playback-start", "<ctrl>S", do_start_app),
 		new Diorite.SimpleAction("main", "win", Actions.INSTALL_APP, "Install app", "_Install app", "list-add", "<ctrl>plus", do_install_app),
 		new Diorite.SimpleAction("main", "win", Actions.REMOVE_APP, "Remove app", "_Remove app", "list-remove", "<ctrl>minus", do_remove_app)
@@ -170,7 +172,7 @@ public class MasterController : Diorite.Application
 		
 		// TODO: actions.get_action(Actions.INSTALL_APP).enabled = web_app_reg.allow_management;
 		
-		set_app_menu(actions.build_menu({Actions.CREATE_LAUNCHERS, "|", Actions.HELP,Actions.ABOUT, Actions.QUIT}, true, false));
+		set_app_menu(actions.build_menu({Actions.CREATE_LAUNCHERS, Actions.DELETE_LAUNCHERS, "|", Actions.HELP,Actions.ABOUT, Actions.QUIT}, true, false));
 		
 		if (Gtk.Settings.get_default().gtk_shell_shows_menubar)
 		{
@@ -404,6 +406,18 @@ public class MasterController : Diorite.Application
 			create_desktop_files.end(res);
 			 if (main_window != null)
 				main_window.info_bars.create_info_bar("Application launchers have been created.");
+		});
+	}
+	
+	private void do_delete_launchers()
+	{
+		var whitelist = new GenericSet<string>(str_hash, str_equal, null);
+		app_runners_map.foreach ((key, val) => { whitelist.add(get_desktop_file_name(key)); });
+		delete_desktop_files.begin(whitelist, (o, res) =>
+		{
+			delete_desktop_files.end(res);
+			if (main_window != null)
+				main_window.info_bars.create_info_bar("Application launchers have been deleted.");
 		});
 	}
 	
