@@ -183,9 +183,9 @@ def configure(ctx):
 	
 	# Check dependencies
 	ctx.env.DIORITE_SERIES = DIORITE_SERIES = "0.1"
-	ctx.check_dep('glib-2.0', 'GLIB', '2.38')
-	ctx.check_dep('gio-2.0', 'GIO', '2.38')
-	ctx.check_dep('gthread-2.0', 'GTHREAD', '2.38')
+	ctx.check_dep('glib-2.0', 'GLIB', '2.40')
+	ctx.check_dep('gio-2.0', 'GIO', '2.40')
+	ctx.check_dep('gthread-2.0', 'GTHREAD', '2.40')
 	ctx.check_dep('gtk+-3.0', 'GTK+', '3.10')
 	ctx.check_dep('gdk-3.0', 'GDK', '3.10')
 	ctx.check_dep('gdk-x11-3.0', 'GDKX11', '3.10')
@@ -210,8 +210,8 @@ def configure(ctx):
 			ctx.env.WEBKIT = 'webkit2gtk-3.0'
 			ctx.env.WEBKITEXT = 'webkit2gtk-web-extension-3.0'
 			ctx.env.JSCORE = 'javascriptcoregtk-3.0'
-			ctx.check_dep(ctx.env.WEBKIT, 'WEBKIT', '2.2')
-			ctx.check_dep(ctx.env.JSCORE, 'JSCORE', '1.8')
+			ctx.check_dep(ctx.env.WEBKIT, 'WEBKIT', '2.4')
+			ctx.check_dep(ctx.env.JSCORE, 'JSCORE', '2.4')
 			ctx.vala_def("WEBKIT2GTK3")
 		except ctx.errors.ConfigurationError:
 			ctx.fatal("Failed to find both webkit2gtk-3.0 and webkit2gtk-4.0")
