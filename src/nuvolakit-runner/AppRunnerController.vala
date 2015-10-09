@@ -164,10 +164,9 @@ public class AppRunnerController : RunnerApplication
 		fatal_error.connect(on_fatal_error);
 		show_error.connect(on_show_error);
 		show_warning.connect(on_show_warning);
-		connection = new Connection(new Soup.Session(), app_storage.cache_dir.get_child("conn"));
-		connection.session.add_feature_by_type(typeof(Soup.ProxyResolverDefault));
 		
-		web_engine = new WebEngine(this, server, web_app, app_storage, config);
+		connection = new Connection(new Soup.Session(), app_storage.cache_dir.get_child("conn"), config);
+		web_engine = new WebEngine(this, server, web_app, app_storage, config, connection.proxy_uri);
 		web_engine.init_form.connect(on_init_form);
 		web_engine.notify.connect_after(on_web_engine_notify);
 		web_engine.show_alert_dialog.connect(on_show_alert_dialog);
@@ -375,7 +374,7 @@ public class AppRunnerController : RunnerApplication
 		
 		var dialog = new PreferencesDialog(this, main_window, form);
 		dialog.add_tab("Keyboard shortcuts", new KeybindingsSettings(actions, config, global_keybindings.keybinder));
-		dialog.add_tab("Network", new NetworkSettings(web_engine));
+		dialog.add_tab("Network", new NetworkSettings(connection));
 		dialog.add_tab("Components", new ComponentsManager(components));
 		var account_form = new Tiliado.AccountForm(tiliado_account);
 		account_form.valign = account_form.halign = Gtk.Align.CENTER;

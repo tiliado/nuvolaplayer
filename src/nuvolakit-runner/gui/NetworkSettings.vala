@@ -27,7 +27,7 @@ namespace Nuvola
 
 public class NetworkSettings: Gtk.Grid
 {
-    private WebEngine web_engine;
+    private Connection connection;
     private Gtk.InfoBar info_bar; 
     private Gtk.RadioButton proxy_types[4];
     private Gtk.Entry proxy_server;
@@ -36,10 +36,10 @@ public class NetworkSettings: Gtk.Grid
     private string? original_host;
     private int original_port;
     
-    public NetworkSettings(WebEngine web_engine)
+    public NetworkSettings(Connection connection)
     {
-	this.web_engine = web_engine;
-	original_type = web_engine.get_network_proxy(out original_host, out original_port);
+	this.connection = connection;
+	original_type = connection.get_network_proxy(out original_host, out original_port);
 	
 	hexpand = true;
 	halign = Gtk.Align.FILL;
@@ -127,7 +127,7 @@ public class NetworkSettings: Gtk.Grid
 	else if (proxy_types[3].active)
 	    type = NetworkProxyType.SOCKS;
 	
-	web_engine.store_network_proxy(type, host, port);
+	connection.store_network_proxy(type, host, port);
 	    
 	var manual_settings = type == NetworkProxyType.HTTP || type == NetworkProxyType.SOCKS;
 	proxy_server.sensitive = manual_settings;

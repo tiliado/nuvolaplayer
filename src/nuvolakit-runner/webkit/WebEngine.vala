@@ -30,9 +30,6 @@ namespace Nuvola
 public class WebEngine : GLib.Object, JSExecutor
 {
 	private static const string ZOOM_LEVEL_CONF = "webview.zoom_level";
-	private static const string PROXY_TYPE_CONF = "webview.proxy.type";
-	private static const string PROXY_HOST_CONF = "webview.proxy.host";
-	private static const string PROXY_PORT_CONF = "webview.proxy.port";
 	
 	public Gtk.Widget widget {get {return web_view;}}
 	public WebAppMeta web_app {get; private set;}
@@ -50,7 +47,8 @@ public class WebEngine : GLib.Object, JSExecutor
 	private Diorite.KeyValueStorage session;
 	private SList<WebWindow> web_windows = null;
 	
-	public WebEngine(RunnerApplication runner_app, Diorite.Ipc.MessageServer server, WebAppMeta web_app, WebAppStorage storage, Config config)
+	public WebEngine(RunnerApplication runner_app, Diorite.Ipc.MessageServer server, WebAppMeta web_app,
+		WebAppStorage storage, Config config, string? proxy_uri)
 	{
 		this.server = server;
 		this.runner_app = runner_app;
@@ -60,11 +58,7 @@ public class WebEngine : GLib.Object, JSExecutor
 		
 		var webkit_extension_dir = Nuvola.get_libdir();
 		debug("Nuvola WebKit Extension directory: %s", webkit_extension_dir);
-		
-		config.set_default_value(PROXY_TYPE_CONF, NetworkProxyType.SYSTEM.to_string());
-		config.set_default_value(PROXY_HOST_CONF, "");
-		config.set_default_value(PROXY_PORT_CONF, 0);
-		apply_network_proxy();
+		apply_network_proxy(proxy_uri);
 		
 		var wc = WebKit.WebContext.get_default();
 		wc.set_web_extensions_directory(webkit_extension_dir);
@@ -104,52 +98,15 @@ public class WebEngine : GLib.Object, JSExecutor
 	
 	public signal void show_alert_dialog(ref bool handled, string message);
 	
-	public void store_network_proxy(NetworkProxyType type, string? server, int port)
+	private void apply_network_proxy(string? proxy_uri)
 	{
-		config.set_string(PROXY_TYPE_CONF, type.to_string());
-		config.set_string(PROXY_HOST_CONF, server);
-		config.set_int64(PROXY_PORT_CONF, (int64) port);
-	}
-	
-	public NetworkProxyType get_network_proxy(out string? host, out int port)
-	{
-		host = config.get_string(PROXY_HOST_CONF);
-		port = (int) config.get_int64(PROXY_PORT_CONF);
-		return NetworkProxyType.from_string(config.get_string(PROXY_TYPE_CONF));
-	}
-	
-	private void apply_network_proxy()
-	{
-		string? host;
-		int port; 
-		var type = get_network_proxy(out host, out port);
-		if (type != NetworkProxyType.SYSTEM)
+		if (proxy_uri != null)
 		{
 			/* This is an ugly hack! See https://bugs.webkit.org/show_bug.cgi?id=128674 */
 			Environment.unset_variable("GNOME_DESKTOP_SESSION_ID");
 			Environment.unset_variable("DESKTOP_SESSION");
-			if (host == null || host == "")
-				host = "127.0.0.1";
-			string proxy;
-			switch (type)
-			{
-			case NetworkProxyType.HTTP:
-				proxy = "http://%s:%d/".printf(host, port);
-				break;
-			case NetworkProxyType.SOCKS:
-				proxy = "socks://%s:%d/".printf(host, port);
-				break;
-			default:
-				proxy = "direct://";
-				break;
-			}
-			debug("Network Proxy: '%s'", proxy);
-			Environment.set_variable("http_proxy", proxy, true);
-			Environment.set_variable("https_proxy", proxy, true);
-		}
-		else
-		{
-			debug("Network Proxy: system settings");
+			Environment.set_variable("http_proxy", proxy_uri, true);
+			Environment.set_variable("https_proxy", proxy_uri, true);
 		}
 	}
 	

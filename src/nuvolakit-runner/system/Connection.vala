@@ -27,12 +27,23 @@ namespace Nuvola
 
 public class Connection : GLib.Object
 {
+	private static const string PROXY_TYPE_CONF = "webview.proxy.type";
+	private static const string PROXY_HOST_CONF = "webview.proxy.host";
+	private static const string PROXY_PORT_CONF = "webview.proxy.port";
+	
 	public Soup.Session session {get; construct set;}
 	public File cache_dir {get; construct set;}
+	public string? proxy_uri {get; private set; default = null;}
+	private Config config;
 	
-	public Connection(Soup.Session session, File cache_dir)
+	public Connection(Soup.Session session, File cache_dir, Config config)
 	{
 		Object(session: session, cache_dir: cache_dir);
+		this.config = config;
+		config.set_default_value(PROXY_TYPE_CONF, NetworkProxyType.SYSTEM.to_string());
+		config.set_default_value(PROXY_HOST_CONF, "");
+		config.set_default_value(PROXY_PORT_CONF, 0);
+		apply_network_proxy();
 	}
 	
 	public async bool download_file(string uri, File local_file, out Soup.Message msg=null)
@@ -89,8 +100,54 @@ public class Connection : GLib.Object
 		}
 		return true;
 	}
+	
+	private void apply_network_proxy()
+	{ 
+		string? host;
+		int port;
+		var type = get_network_proxy(out host, out port);
+		if (type != NetworkProxyType.SYSTEM)
+		{
+			if (host == null || host == "")
+				host = "127.0.0.1";
+			switch (type)
+			{
+			case NetworkProxyType.HTTP:
+				proxy_uri = "http://%s:%d/".printf(host, port);
+				break;
+			case NetworkProxyType.SOCKS:
+				proxy_uri = "socks://%s:%d/".printf(host, port);
+				break;
+			default:
+				proxy_uri = "direct://";
+				break;
+			}
+			debug("Network Proxy: '%s'", proxy_uri);
+			Environment.set_variable("http_proxy", proxy_uri, true);
+			Environment.set_variable("https_proxy", proxy_uri, true);
+			session.proxy_uri = new Soup.URI(proxy_uri);
+		}
+		else
+		{
+			debug("Network Proxy: system settings");
+			proxy_uri = null;
+			session.add_feature_by_type(typeof(Soup.ProxyResolverDefault));
+		}
+	}
+	
+	public void store_network_proxy(NetworkProxyType type, string? server, int port)
+	{
+		config.set_string(PROXY_TYPE_CONF, type.to_string());
+		config.set_string(PROXY_HOST_CONF, server);
+		config.set_int64(PROXY_PORT_CONF, (int64) port);
+	}
+	
+	public NetworkProxyType get_network_proxy(out string? host, out int port)
+	{
+		host = config.get_string(PROXY_HOST_CONF);
+		port = (int) config.get_int64(PROXY_PORT_CONF);
+		return NetworkProxyType.from_string(config.get_string(PROXY_TYPE_CONF));
+	}
 }
-
-
 
 } // namespace Nuvola
