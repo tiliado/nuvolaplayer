@@ -110,7 +110,6 @@ public class AppRunnerController : RunnerApplication
 	public WebAppStorage app_storage {get; private set;}
 	private WebWorker web_worker;
 	public WebEngine web_engine {get; private set;}
-	public weak Gtk.Settings gtk_settings {get; private set;}
 	public Diorite.KeyValueStorage master_config {get; private set;}
 	public Bindings bindings {get; private set;}
 	public Diorite.Ipc.MessageServer server {get; private set; default=null;}
@@ -146,16 +145,17 @@ public class AppRunnerController : RunnerApplication
 		
 		set_up_communication();
 		
-		gtk_settings = Gtk.Settings.get_default();
+		var gtk_settings = Gtk.Settings.get_default();
 		var default_config = new HashTable<string, Variant>(str_hash, str_equal);
 		default_config.insert(ConfigKey.WINDOW_X, new Variant.int64(-1));
 		default_config.insert(ConfigKey.WINDOW_Y, new Variant.int64(-1));
 		default_config.insert(ConfigKey.WINDOW_SIDEBAR_POS, new Variant.int64(-1));
 		default_config.insert(ConfigKey.WINDOW_SIDEBAR_VISIBLE, new Variant.boolean(false));
-		default_config.insert(ConfigKey.DARK_THEME, new Variant.boolean(false));
+		default_config.insert(
+			ConfigKey.DARK_THEME, new Variant.boolean(gtk_settings.gtk_application_prefer_dark_theme));
 		config = new Config(app_storage.config_dir.get_child("config.json"), default_config);
 		config.changed.connect(on_config_changed);
-		Gtk.Settings.get_default().gtk_application_prefer_dark_theme = config.get_bool(ConfigKey.DARK_THEME);
+		gtk_settings.gtk_application_prefer_dark_theme = config.get_bool(ConfigKey.DARK_THEME);
 		
 		actions_helper = new ActionsHelper(actions, config);
 		main_window = new WebAppWindow(this);
