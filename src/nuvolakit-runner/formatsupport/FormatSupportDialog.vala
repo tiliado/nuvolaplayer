@@ -54,6 +54,7 @@ public class FormatSupportDialog: Gtk.Dialog
 	public Gtk.Switch flash_warning_switch {get; private set;}
 	public Gtk.Switch mp3_warning_switch {get; private set;}
 	public Gtk.Switch gstreamer_switch {get; private set;}
+	public Gtk.Switch web_plugins_switch {get; private set;}
 	private Gtk.Notebook notebook;
 	
 	public FormatSupportDialog(Diorite.Application app, FormatSupport format_support, Diorite.Storage storage, Gtk.Window? parent)
@@ -72,14 +73,23 @@ public class FormatSupportDialog: Gtk.Dialog
 		plugins_view.column_spacing = 10;
 		plugins_view.orientation = Gtk.Orientation.VERTICAL;
 		
+		web_plugins_switch = new Gtk.Switch();
+		web_plugins_switch.vexpand = web_plugins_switch.hexpand = false;
+		web_plugins_switch.show();
+		label = new Gtk.Label("Load web plugins (Flash)");
+		label.hexpand = true;
+		label.show();
+		plugins_view.attach(label, 0, 0, 1, 1);
+		plugins_view.attach(web_plugins_switch, 1, 0, 1, 1);
+		
 		flash_warning_switch = new Gtk.Switch();
 		flash_warning_switch.vexpand = flash_warning_switch.hexpand = false;
 		flash_warning_switch.show();
 		label = new Gtk.Label("Show Flash support warnings at start-up");
 		label.hexpand = true;
 		label.show();
-		plugins_view.attach(label, 0, 0, 1, 1);
-		plugins_view.attach(flash_warning_switch, 1, 0, 1, 1);
+		plugins_view.attach(label, 0, 1, 1, 1);
+		plugins_view.attach(flash_warning_switch, 1, 1, 1, 1);
 		
 		var scrolled_window = new Gtk.ScrolledWindow(null, null);
 		scrolled_window.add(plugins_view);
@@ -93,7 +103,7 @@ public class FormatSupportDialog: Gtk.Dialog
 		flash_plugins_grid.orientation = Gtk.Orientation.VERTICAL;
 		flash_plugins_grid.margin = 10;
 		frame.add(flash_plugins_grid);
-		plugins_view.attach(frame, 0, 2, 2, 1);
+		plugins_view.attach(frame, 0, 3, 2, 1);
 		frame.show();
 		
 		var flash_detect = storage.get_data_file("js/flash_detect.js");
@@ -106,7 +116,7 @@ public class FormatSupportDialog: Gtk.Dialog
 			web_view.set_size_request(-1, 50);
 			web_view.show();
 			web_view.load_html(FLASH_DETECT_HTML, flash_detect.get_uri() + ".html"); 
-			plugins_view.attach(frame, 0, 3, 2, 1);
+			plugins_view.attach(frame, 0, 4, 2, 1);
 			frame.show();
 		}
 		
@@ -116,7 +126,7 @@ public class FormatSupportDialog: Gtk.Dialog
 		other_plugins_grid.orientation = Gtk.Orientation.VERTICAL;
 		other_plugins_grid.margin = 10;
 		frame.add(other_plugins_grid);
-		plugins_view.attach(frame, 0, 4, 2, 1);
+		plugins_view.attach(frame, 0, 5, 2, 1);
 		frame.show();
 		
 		unowned List<WebPlugin?> plugins = format_support.list_web_plugins();
@@ -155,7 +165,7 @@ public class FormatSupportDialog: Gtk.Dialog
 			if (format_support.n_flash_plugins == 0)
 				info_bar.add_button("Help", 0).clicked.connect(() => {app.show_uri("http://tiliado.github.io/nuvolaplayer/documentation/3.0/install.html");});
 			info_bar.show_all();
-			plugins_view.attach(info_bar, 0, 1, 2, 1);
+			plugins_view.attach(info_bar, 0, 5, 2, 1);
 		}
 		
 		if (flash_plugins_grid.get_children() == null)

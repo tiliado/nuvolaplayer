@@ -30,27 +30,32 @@ public class FormatSupportCheck : GLib.Object
 	private static const string WARN_FLASH_KEY = "format_support.warn_flash";
 	private static const string WARN_MP3_KEY = "format_support.warn_mp3";
 	private static const string GSTREAMER_KEY = "format_support.gstreamer";
+	private static const string WEB_PLUGINS_KEY = "format_support.web_plugins";
 	private FormatSupport format_support;
 	private Diorite.Storage storage;
 	private Diorite.Application app;
 	private Config config;
 	private WebWorker web_worker;
+	private WebEngine web_engine;
 	private FormatSupportDialog format_support_dialog = null;
 	private Gtk.InfoBar? flash_bar = null;
 	private Gtk.InfoBar? mp3_bar = null;
 	
 	public FormatSupportCheck(FormatSupport format_support, Diorite.Application app, Diorite.Storage storage,
-	Config config, WebWorker web_worker)
+	Config config, WebWorker web_worker, WebEngine web_engine)
 	{
 		this.format_support = format_support;
 		this.app = app;
 		this.storage = storage;
 		this.config = config;
 		this.web_worker = web_worker;
+		this.web_engine = web_engine;
 		
 		config.set_default_value(WARN_FLASH_KEY, true);
 		config.set_default_value(WARN_MP3_KEY, true);
+		config.set_default_value(WEB_PLUGINS_KEY, true);
 		config.set_default_value(GSTREAMER_KEY, true);
+		web_engine.web_plugins = config.get_bool(WEB_PLUGINS_KEY);
 		if (!config.get_bool(GSTREAMER_KEY))
 		{
 			format_support.disable_gstreamer();
@@ -69,14 +74,17 @@ public class FormatSupportCheck : GLib.Object
 		{
 			format_support_dialog = new FormatSupportDialog(app, format_support, storage, app.active_window);
 			format_support_dialog.flash_warning_switch.active = config.get_bool(WARN_FLASH_KEY);
+			format_support_dialog.web_plugins_switch.active = config.get_bool(WEB_PLUGINS_KEY);
 			format_support_dialog.mp3_warning_switch.active = config.get_bool(WARN_MP3_KEY);
 			format_support_dialog.gstreamer_switch.active = config.get_bool(GSTREAMER_KEY);
 			Idle.add(() => {
 				format_support_dialog.flash_warning_switch.notify["active"].connect_after(on_flash_warning_switched);
+				format_support_dialog.web_plugins_switch.notify["active"].connect_after(on_web_plugins_switched);
 				format_support_dialog.mp3_warning_switch.notify["active"].connect_after(on_mp3_warning_switched);
 				format_support_dialog.gstreamer_switch.notify["active"].connect_after(on_gstreamer_switched);
 				format_support_dialog.run();
 				format_support_dialog.flash_warning_switch.notify["active"].disconnect(on_flash_warning_switched);
+				format_support_dialog.web_plugins_switch.notify["active"].disconnect(on_web_plugins_switched);
 				format_support_dialog.mp3_warning_switch.notify["active"].disconnect(on_mp3_warning_switched);
 				format_support_dialog.gstreamer_switch.notify["active"].disconnect(on_gstreamer_switched);
 				format_support_dialog.destroy();
@@ -90,7 +98,7 @@ public class FormatSupportCheck : GLib.Object
 	public void show_flash_warning(string text)
 	{
 		var window = app.active_window as Diorite.ApplicationWindow;
-		if (flash_bar != null || !config.get_bool(WARN_FLASH_KEY) || window == null)
+		if (!web_engine.web_plugins || flash_bar != null || !config.get_bool(WARN_FLASH_KEY) || window == null)
 			return;
 		flash_bar = new Gtk.InfoBar();
 		flash_bar.show_close_button = true;
@@ -192,6 +200,14 @@ public class FormatSupportCheck : GLib.Object
 	private void on_mp3_warning_switched(GLib.Object o, ParamSpec p)
 	{
 		config.set_bool(WARN_MP3_KEY, (o as Gtk.Switch).active);
+	}
+	
+	private void on_web_plugins_switched(GLib.Object o, ParamSpec p)
+	{
+		var enabled = (o as Gtk.Switch).active;
+		config.set_bool(WEB_PLUGINS_KEY, enabled);
+		web_engine.web_plugins = enabled;
+		web_engine.reload();
 	}
 	
 	private void on_gstreamer_switched(GLib.Object o, ParamSpec p)
