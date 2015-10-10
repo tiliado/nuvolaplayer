@@ -218,6 +218,7 @@ public class FormatSupportCheck : GLib.Object
 		{
 			format_support.disable_gstreamer();
 			web_worker.disable_gstreamer();
+			web_engine.reload();
 		}
 		else if (enabled && format_support.gstreamer_disabled)
 		{
