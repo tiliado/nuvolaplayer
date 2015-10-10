@@ -49,6 +49,7 @@ public class WebExtension: GLib.Object
 		extension.page_created.connect(on_web_page_created);
 		
 		server.add_handler("call_function", handle_call_function);
+		server.add_handler("disable_gstreamer", handle_disable_gstreamer);
 		bridges = new HashTable<unowned WebKit.Frame, FrameBridge>(direct_hash, direct_equal);
 		try
 		{
@@ -171,6 +172,12 @@ public class WebExtension: GLib.Object
 			}
 		}
 		return params;
+	}
+	
+	private Variant? handle_disable_gstreamer(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	{
+		Diorite.Ipc.MessageServer.check_type_str(data, null);
+		return Nuvola.Gstreamer.disable_gstreamer();
 	}
 	
 	public void wait_until_initialized()

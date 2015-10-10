@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2015 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -53,6 +53,7 @@ public class FormatSupportDialog: Gtk.Dialog
 	public Diorite.Storage storage {get; construct;}
 	public Gtk.Switch flash_warning_switch {get; private set;}
 	public Gtk.Switch mp3_warning_switch {get; private set;}
+	public Gtk.Switch gstreamer_switch {get; private set;}
 	private Gtk.Notebook notebook;
 	
 	public FormatSupportDialog(Diorite.Application app, FormatSupport format_support, Diorite.Storage storage, Gtk.Window? parent)
@@ -167,9 +168,12 @@ public class FormatSupportDialog: Gtk.Dialog
 		mp3_warning_switch = new Gtk.Switch();
 		mp3_warning_switch.vexpand = flash_warning_switch.hexpand = false;
 		mp3_warning_switch.show();
+		gstreamer_switch = new Gtk.Switch();
+		gstreamer_switch.vexpand = flash_warning_switch.hexpand = false;
+		gstreamer_switch.show();
 		var help_button = new Gtk.Button.with_label("Help");
 		help_button.clicked.connect(() => {app.show_uri("http://tiliado.github.io/nuvolaplayer/documentation/3.0/install.html");});
-		var mp3_view = new Mp3View(format_support, mp3_warning_switch, help_button);
+		var mp3_view = new Mp3View(format_support, mp3_warning_switch, gstreamer_switch, help_button);
 		mp3_view.show();
 		notebook.append_page(mp3_view, new Gtk.Label("MP3 format"));
 		notebook.show();
@@ -196,7 +200,8 @@ public class FormatSupportDialog: Gtk.Dialog
 		private AudioPipeline? pipeline = null;
 		private Gtk.Button help_button;
 		
-		public Mp3View(FormatSupport format_support, Gtk.Switch warning_switch, Gtk.Button help_button)
+		public Mp3View(
+			FormatSupport format_support, Gtk.Switch warning_switch, Gtk.Switch gstreamer_switch, Gtk.Button help_button)
 		{
 			GLib.Object(orientation: Gtk.Orientation.VERTICAL);
 			this.format_support = format_support;
@@ -205,11 +210,17 @@ public class FormatSupportDialog: Gtk.Dialog
 			row_spacing = 10;
 			column_spacing = 10;
 			
-			var label = new Gtk.Label("Show MP3 format support warnings at start-up");
+			var label = new Gtk.Label("Load GStreamer HTML5 Audio backend");
 			label.hexpand = true;
 			label.show();
 			attach(label, 0, 0, 2, 1);
-			attach(warning_switch, 2, 0, 1, 1);
+			attach(gstreamer_switch, 2, 0, 1, 1);
+			
+			label = new Gtk.Label("Show MP3 format support warnings at start-up");
+			label.hexpand = true;
+			label.show();
+			attach(label, 0, 1, 2, 1);
+			attach(warning_switch, 2, 1, 1, 1);
 			
 			text_view = new Gtk.TextView();
 			text_view.editable = false;
@@ -221,13 +232,13 @@ public class FormatSupportDialog: Gtk.Dialog
 			button = new Gtk.Button();
 			set_button_label();
 			button.clicked.connect(toggle_check);
-			attach(result_label, 0, 1, 1, 1);
-			attach(help_button, 1, 1, 1, 1);
-			attach(button, 2, 1, 1, 1);
+			attach(result_label, 0, 2, 1, 1);
+			attach(help_button, 1, 2, 1, 1);
+			attach(button, 2, 2, 1, 1);
 			var scroll = new Gtk.ScrolledWindow(null, null);
 			scroll.expand = true;
 			scroll.add(text_view);
-			attach(scroll, 0, 2, 2, 1);
+			attach(scroll, 0, 3, 3, 1);
 			result_label.show();
 			button.show();
 			scroll.show_all();

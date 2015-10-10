@@ -22,57 +22,42 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-namespace Nuvola
+namespace Nuvola.Gstreamer
 {
-
-public interface WebWorker: GLib.Object, JSExecutor
-{
-	public abstract Variant? send_message(string name, Variant? params) throws GLib.Error;
 	
-	public void disable_gstreamer()
+	public void init_gstreamer()
 	{
+		string[] a = {};
+		unowned string[] b = a;
 		try
 		{
-			send_message("disable_gstreamer", null);
+			Gst.init_check(ref b);
 		}
-		catch (GLib.Error e)
+		catch(Error e)
 		{
-			warning("Failed to send message 'disable_gstreamer': %s", e.message);
+			debug("Unable to init %s: %s", Gst.version_string(), e.message);
 		}
 	}
-}
+	
+	public bool disable_gstreamer()
+	{
+		init_gstreamer();
+		var registry = Gst.Registry.@get();
+		// This is a hack how to make GStreamer non-functional,
+		// remove an essential plugin
+		var plugin = registry.find_plugin("typefindfunctions");
+		if (plugin != null)
+		{
+			registry.remove_plugin(plugin);
+			plugin.ref(); // prevents critical warnings
+			debug("GStreamer has been disabled.");
+			return true;
+		}
+		else
+		{
+			warning("Failed to disable GStreamer");
+			return false;
+		}
+	}
 
-public class RemoteWebWorker: GLib.Object, JSExecutor, WebWorker
-{
-	private bool ready = false;
-	private Diorite.Ipc.MessageClient client;
-	
-	public RemoteWebWorker(string name, uint timeout)
-	{
-		client = new Diorite.Ipc.MessageClient(name, timeout);
-	}
-	
-	public RemoteWebWorker.with_client(Diorite.Ipc.MessageClient client)
-	{
-		this.client = client;
-	}
-	
-	public Variant? send_message(string name, Variant? params) throws GLib.Error
-	{
-		if (!ready && !(ready = client.wait_for_echo(2000)))
-			throw new Diorite.Ipc.MessageError.NOT_READY("Web worker process is not ready yet");
-		
-		return client.send_message(name, params);
-	}
-	
-	public void call_function(string name, ref Variant? params) throws GLib.Error
-	{
-		var data = new Variant("(smv)", name, params);
-//~ 		debug("Payload before: %s", params == null ? "null" : params.print(true));
-		params = send_message("call_function", data);
-//~ 		debug("Payload after: %s", params == null ? "null" : params.print(true));
-	}
-}
-
-} // namespace Nuvola
+} // namespace Nuvola.Gstreamer

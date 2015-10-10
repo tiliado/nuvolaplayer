@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2015 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -29,23 +29,33 @@ public class FormatSupportCheck : GLib.Object
 {
 	private static const string WARN_FLASH_KEY = "format_support.warn_flash";
 	private static const string WARN_MP3_KEY = "format_support.warn_mp3";
+	private static const string GSTREAMER_KEY = "format_support.gstreamer";
 	private FormatSupport format_support;
 	private Diorite.Storage storage;
 	private Diorite.Application app;
 	private Config config;
+	private WebWorker web_worker;
 	private FormatSupportDialog format_support_dialog = null;
 	private Gtk.InfoBar? flash_bar = null;
 	private Gtk.InfoBar? mp3_bar = null;
 	
 	public FormatSupportCheck(FormatSupport format_support, Diorite.Application app, Diorite.Storage storage,
-	Config config)
+	Config config, WebWorker web_worker)
 	{
 		this.format_support = format_support;
 		this.app = app;
 		this.storage = storage;
 		this.config = config;
+		this.web_worker = web_worker;
+		
 		config.set_default_value(WARN_FLASH_KEY, true);
 		config.set_default_value(WARN_MP3_KEY, true);
+		config.set_default_value(GSTREAMER_KEY, true);
+		if (!config.get_bool(GSTREAMER_KEY))
+		{
+			format_support.disable_gstreamer();
+			web_worker.disable_gstreamer();
+		}
 	}
 	
 	public void check()
@@ -60,12 +70,15 @@ public class FormatSupportCheck : GLib.Object
 			format_support_dialog = new FormatSupportDialog(app, format_support, storage, app.active_window);
 			format_support_dialog.flash_warning_switch.active = config.get_bool(WARN_FLASH_KEY);
 			format_support_dialog.mp3_warning_switch.active = config.get_bool(WARN_MP3_KEY);
+			format_support_dialog.gstreamer_switch.active = config.get_bool(GSTREAMER_KEY);
 			Idle.add(() => {
 				format_support_dialog.flash_warning_switch.notify["active"].connect_after(on_flash_warning_switched);
 				format_support_dialog.mp3_warning_switch.notify["active"].connect_after(on_mp3_warning_switched);
+				format_support_dialog.gstreamer_switch.notify["active"].connect_after(on_gstreamer_switched);
 				format_support_dialog.run();
 				format_support_dialog.flash_warning_switch.notify["active"].disconnect(on_flash_warning_switched);
 				format_support_dialog.mp3_warning_switch.notify["active"].disconnect(on_mp3_warning_switched);
+				format_support_dialog.gstreamer_switch.notify["active"].disconnect(on_gstreamer_switched);
 				format_support_dialog.destroy();
 				format_support_dialog = null;
 				return false;
@@ -96,7 +109,7 @@ public class FormatSupportCheck : GLib.Object
 	public void show_mp3_warning(string text)
 	{
 		var window = app.active_window as Diorite.ApplicationWindow;
-		if (mp3_bar != null || !config.get_bool(WARN_MP3_KEY) || window == null)
+		if (format_support.gstreamer_disabled || mp3_bar != null || !config.get_bool(WARN_MP3_KEY) || window == null)
 			return;
 		mp3_bar = new Gtk.InfoBar();
 		mp3_bar.show_close_button = true;
@@ -179,6 +192,26 @@ public class FormatSupportCheck : GLib.Object
 	private void on_mp3_warning_switched(GLib.Object o, ParamSpec p)
 	{
 		config.set_bool(WARN_MP3_KEY, (o as Gtk.Switch).active);
+	}
+	
+	private void on_gstreamer_switched(GLib.Object o, ParamSpec p)
+	{
+		var enabled = (o as Gtk.Switch).active;
+		config.set_bool(GSTREAMER_KEY, enabled);
+		if (!enabled && !format_support.gstreamer_disabled)
+		{
+			format_support.disable_gstreamer();
+			web_worker.disable_gstreamer();
+		}
+		else if (enabled && format_support.gstreamer_disabled)
+		{
+			var window = app.active_window as Diorite.ApplicationWindow;
+			if (window != null)
+			{
+				window.info_bars.create_info_bar("GStreamer HTML5 backend will be enabled after application restart.");
+			}
+			
+		}
 	}
 }
 

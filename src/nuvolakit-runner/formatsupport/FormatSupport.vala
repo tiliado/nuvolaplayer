@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2015 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -29,6 +29,7 @@ public class FormatSupport: GLib.Object
 {
 	public uint n_flash_plugins { get; private set; default = 0;}
 	public bool mp3_supported { get; private set; default = false;}
+	public bool gstreamer_disabled {get; private set; default = false;}
 	private List<WebPlugin?> web_plugins = null;
 	private string mp3_file;
 	
@@ -51,6 +52,20 @@ public class FormatSupport: GLib.Object
 	public AudioPipeline get_mp3_pipeline()
 	{
 		return new AudioPipeline(mp3_file);
+	}
+	
+	public bool disable_gstreamer()
+	{
+		if (gstreamer_disabled)
+			return true;
+		
+		if (Nuvola.Gstreamer.disable_gstreamer())
+		{
+			gstreamer_disabled = true;
+			return true;
+		}
+		
+		return false;
 	}
 	
 	private async void collect_web_plugins() throws GLib.Error
@@ -121,7 +136,7 @@ public class AudioPipeline : GLib.Object
 	
 	public async bool check(bool silent=true)
 	{
-		init_gstreamer();
+		Nuvola.Gstreamer.init_gstreamer();
 		while (pipeline != null)
 		{
 			Idle.add(check.callback, Priority.LOW);
@@ -180,20 +195,6 @@ public class AudioPipeline : GLib.Object
 			pipeline = null;
 		}
 		return result;
-	}
-	
-	private void init_gstreamer()
-	{
-		string[] a = {};
-		unowned string[] b = a;
-		try
-		{
-			Gst.init_check(ref b);
-		}
-		catch(Error e)
-		{
-			warning("Unable to init %s: %s", Gst.version_string(), e.message);
-		}
 	}
 	
 	private bool quit(bool result)

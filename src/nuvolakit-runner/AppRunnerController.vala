@@ -144,7 +144,7 @@ public class AppRunnerController : RunnerApplication
 		/* Disable GStreamer plugin helper because it is shown too often and quite annoying.  */
 		Environment.set_variable("GST_INSTALL_PLUGINS_HELPER", "/bin/true", true);
 		
-		set_up_communication();
+		set_up_communication(); // Now we have WebWorker
 		
 		var gtk_settings = Gtk.Settings.get_default();
 		var default_config = new HashTable<string, Variant>(str_hash, str_equal);
@@ -226,7 +226,8 @@ public class AppRunnerController : RunnerApplication
 		toggle_donate_button(false);
 		
 		format_support = new FormatSupportCheck(
-			new FormatSupport(storage.get_data_file("audio/audiotest.mp3").get_path()), this, storage, config);
+			new FormatSupport(storage.get_data_file("audio/audiotest.mp3").get_path()), this, storage, config,
+			web_worker);
 		format_support.check();
 		
 		tiliado_account = new Tiliado.Account(connection.session, master_config, "https://tiliado.eu", "nuvolaplayer");
