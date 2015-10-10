@@ -36,6 +36,7 @@ namespace ConfigKey
 	public const string WINDOW_SIDEBAR_VISIBLE = "nuvola.window.sidebar.visible";
 	public const string WINDOW_SIDEBAR_PAGE = "nuvola.window.sidebar.page";
 	public const string DARK_THEME = "nuvola.dark_theme";
+	public const string WEB_PLUGINS = "nuvola.web_plugins";
 }
 
 namespace Actions
@@ -166,7 +167,9 @@ public class AppRunnerController : RunnerApplication
 		show_warning.connect(on_show_warning);
 		
 		connection = new Connection(new Soup.Session(), app_storage.cache_dir.get_child("conn"), config);
+		default_config.insert(ConfigKey.WEB_PLUGINS, new Variant.boolean(true));
 		web_engine = new WebEngine(this, server, web_app, app_storage, config, connection.proxy_uri);
+		web_engine.web_plugins = config.get_bool(ConfigKey.WEB_PLUGINS);
 		web_engine.init_form.connect(on_init_form);
 		web_engine.notify.connect_after(on_web_engine_notify);
 		web_engine.show_alert_dialog.connect(on_show_alert_dialog);
@@ -341,12 +344,14 @@ public class AppRunnerController : RunnerApplication
 	{
 		var values = new HashTable<string, Variant>(str_hash, str_equal);
 		values.insert(ConfigKey.DARK_THEME, config.get_value(ConfigKey.DARK_THEME));
+		values.insert(ConfigKey.WEB_PLUGINS, config.get_value(ConfigKey.WEB_PLUGINS));
 		Diorite.Form form;
 		try
 		{
 			form = Diorite.Form.create_from_spec(values, new Variant.tuple({
 				new Variant.tuple({new Variant.string("header"), new Variant.string("Basic settings")}),
-				new Variant.tuple({new Variant.string("bool"), new Variant.string(ConfigKey.DARK_THEME), new Variant.string("Prefer dark theme")})
+				new Variant.tuple({new Variant.string("bool"), new Variant.string(ConfigKey.DARK_THEME), new Variant.string("Prefer dark theme")}),
+				new Variant.tuple({new Variant.string("bool"), new Variant.string(ConfigKey.WEB_PLUGINS), new Variant.string("Load web plugins (Flash)")})
 			}));
 		}
 		catch (Diorite.FormError e)
@@ -650,6 +655,10 @@ public class AppRunnerController : RunnerApplication
 		{
 		case ConfigKey.DARK_THEME:
 			Gtk.Settings.get_default().gtk_application_prefer_dark_theme = config.get_bool(ConfigKey.DARK_THEME);
+			break;
+		case ConfigKey.WEB_PLUGINS:
+			web_engine.web_plugins = config.get_bool(ConfigKey.WEB_PLUGINS);
+			web_engine.reload();
 			break;
 		}
 		

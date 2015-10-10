@@ -36,6 +36,12 @@ public class WebEngine : GLib.Object, JSExecutor
 	public WebAppStorage storage {get; private set;}
 	public bool can_go_back {get; private set; default = false;}
 	public bool can_go_forward {get; private set; default = false;}
+	public bool web_plugins
+	{
+		get {return web_view.get_settings().enable_plugins;}
+		set {web_view.get_settings().enable_plugins = value;}
+	}
+	
 	private RunnerApplication runner_app;
 	private WebView web_view;
 	private JsEnvironment? env = null;
