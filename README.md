@@ -21,8 +21,8 @@ both code hosting and issue tracking. All official Git repositories are located 
  3. Service integrations that have certain degree of independence and are maintained in separate
     [repositories](https://github.com/tiliado) named ``nuvola-app-...``.
 
-[2]: https://github.com
-[3]: http://git-scm.com/
+[2]: http://git-scm.com/
+[3]: https://github.com
 
 
 How can I help
