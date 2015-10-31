@@ -156,6 +156,7 @@ MediaPlayer.setPlaybackState = function(state)
     if (this._state !== state)
     {
         this._state = state;
+        Nuvola.actions.setEnabled(PlayerAction.PLAYBACK_NOTIFICATION, this._state !== PlaybackState.UNKNOWN);
         this._setActions();
         this._updateTrackInfo(["state"]);
     }
