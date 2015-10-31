@@ -90,6 +90,7 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 		case "can-go-previous":
 		case "can-play":
 		case "can-pause":
+		case "can-stop":
 			handled = true;
 			GLib.Value value = GLib.Value(typeof(bool));
 			value.set_boolean(val);

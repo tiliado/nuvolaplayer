@@ -232,8 +232,10 @@ MediaPlayer.setCanPause = function(canPause)
     {
         this._canPause = canPause;
         Nuvola.actions.setEnabled(PlayerAction.PAUSE, !!canPause);
+        Nuvola.actions.setEnabled(PlayerAction.STOP, !!canPause);
         Nuvola.actions.setEnabled(PlayerAction.TOGGLE_PLAY, !!(this._canPlay || this._canPause));
         Nuvola._sendMessageAsync("Nuvola.MediaPlayer.setFlag", "can-pause", !!canPause);
+        Nuvola._sendMessageAsync("Nuvola.MediaPlayer.setFlag", "can-stop", !!canPause);
         this._showNotification();
         this._sendDevelInfo();
     }
