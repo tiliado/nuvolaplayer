@@ -756,6 +756,10 @@ def generate_doc(ns, out_file, sources_dir, config_file, template=None):
     data["index"] = index
     data["body"] = body
     
+    try:
+        os.makedirs(os.path.dirname(out_file))
+    except OSError:
+        pass
     with open(out_file, "wt", "utf-8") as f:
         f.write(process_template(template, data))
 
