@@ -150,6 +150,10 @@ This file contains several **mandatory fields**:
     This field is not required if you use custom function to handle home page request.
     See [Web apps with a variable home page URL]({filename}variable-home-page-url.md).
 
+!!! danger "Extra rules for metadata.json"
+    If you want to have your integration script maintained and distributed as a part of the Nuvola
+    Player project, you have to follow rules in [Service Integrations Guidelines]({filename}guidelines.md).
+
 !!! info "If you use Git, commit changes"
         :::sh
         cd ~/projects/nuvola-player/happy-songs
@@ -731,6 +735,11 @@ WebApp._onActionActivated = function(emitter, name, param)
 What to do next
 ===============
 
+If you would like to have your service integration **maintained as a part of Nuvola
+Player project** and distributed in Nuvola Player repository, you have to follow
+[Service Integration Guidelines]({filename}guidelines.md). Once you have **finished your
+service integration**, the next step is to [distribute]({filename}distribute.md) it.
+
 Supposing you have followed this guide, you have enough knowledge to create your own service
 integration. You are encouraged to take a look at articles in advanced section to spice up your work:
 
@@ -747,11 +756,6 @@ integration. You are encouraged to take a look at articles in advanced section t
   * [Translations]({filename}translations.md): How to mark translatable strings for 
     [Gettext-based](http://www.gnu.org/software/gettext/manual/gettext.html)
     translations framework for service integration scripts.
-
-If you would like to have your service integration **maintained as a part of Nuvola
-Player project** and distributed in Nuvola Player repository, you have to follow
-[Service Integration Guidelines]({filename}guidelines.md). Once you have **finished your
-service integration**, the next step is to [distribute]({filename}distribute.md) it.
 
 [git]: http://git-scm.com/
 [me]: http://fenryxo.cz
