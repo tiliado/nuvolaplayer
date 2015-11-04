@@ -76,6 +76,146 @@ source SVG icons.
     first rule regarding to copyright and license and affected integration scripts were rejected
     until the file was removed
 
+Git & GitHub Guidelines
+=======================
+
+### Commit Messages
+
+Commit messages should follow this template:
+
+```
+Short (50 chars or less) summary of changes
+
+More detailed explanatory text, if necessary.  Wrap it to
+about 72 characters or so. The blank line separating the
+summary from the body is critical (unless you omit the body
+entirely); tools like rebase can get confused if you run
+the two together.
+
+Further paragraphs come after blank lines. Also don't
+forget to link to issues.
+    
+Issue: tiliado/nuvolaplayer#128
+```
+
+* Write **useful commit summary** (the first line. max 50 chars):
+    + Use verbs and don't end summary with a dot, e.g. "Add test for AboutDialog" instead of
+      "Added test for AboutDialog." or "Adding test for AboutDialog."
+    + Be specific, e.g. "Increase version to 2.1" instead of "Update metadata", "Remove extra comma
+      to fix JSON parse error" instead "Fix JSON file".
+    + You can use shortcuts "w/" = with, "w/o" = without, etc.
+* If short summary is not clear enough, add one or a few paragraphs with **description** about what you
+  changed and why.
+* Add link to a **Github issue**, e.g. `tiliado/nuvolaplayer#128`, if there is any. See 
+  [Writing on GitHub](https://help.github.com/articles/writing-on-github/#references) for details.
+
+### Pull Requests
+
+If you would like to **get your code** contributions **merged** to the main repository,
+[create a pull request](https://help.github.com/articles/creating-a-pull-request/).
+Pull request should follow similar template like commit messages, because a merge commit message
+will be based it:
+
+```
+Short (50 chars or less) summary of changes
+
+More detailed explanatory text, if necessary.  Wrap it to
+about 72 characters or so. The blank line separating the
+summary from the body is critical (unless you omit the body
+entirely); tools like rebase can get confused if you run
+the two together.
+
+Further paragraphs come after blank lines. Also don't
+forget to link to issues.
+    
+- Author: Pull Request Author Name <your@email>
+- Reviewed by: FIXME <FIXME>
+- Issue: tiliado/nuvolaplayer#128
+
+---
+
+If you have some other notes regarding the pull request,
+add a separator "---" and then write anything you want to ;-)
+This part won't be included in a commit message.
+```
+
+* The same rules as for the commit summary apply to **the title** of a pull requests.
+* Always provide **description** of the pull request: what you changed and why. The merge commit
+  message will be based on this description.
+* Add lines:
+   +  `Author: Pull Request Author Name <your@email>` - you will be recorded as the *author* of the
+      merge commit (see bellow)
+   +  `Reviewed by: FIXME <FIXME>` - the `FIXME` placeholder will be filled by a *reviewer*,
+ * Add link to a related issue, if there is any: `Issue: tiliado/nuvolaplayer#128`
+
+
+### Merge Commits
+
+If you are a **maintainer of a repository**, follow these rules how to accept pull requests and
+create merge commits. First of all, check whether the **title** of a pull request and a
+**description conforms guidelines** above. If not, notify the author of the pull request (less work
+for you) or prepare a well formed commit message on your own (more work for you).
+
+**Message of merge commits** should follow this template:
+
+```
+Short (50 chars or less) summary of changes
+
+More detailed explanatory text, if necessary.  Wrap it to
+about 72 characters or so. The blank line separating the
+summary from the body is critical (unless you omit the body
+entirely); tools like rebase can get confused if you run
+the two together.
+
+Further paragraphs come after blank lines. Also don't
+forget to link to issues.
+
+ - Reviewed by: Your Name <your@email>
+ - Reviewed by: Another Reviewer <his@email>
+ - Pull Request: fenryxo/test#2
+ - Issue: fenryxo/test#3
+```
+
+* Link to a pull request `https://github.com/fenryxo/test/pull/2` → ` - Pull request: fenryxo/test#2`
+* Link to an issue `https://github.com/fenryxo/test/issues/3` -> `+ - Issue: fenryxo/test#3`
+
+**Don't use GitHub to do a merge.** It's a pure crap:
+
+ -  It creates a commit summary like "Merge pull request #1 from fenryxo/mybranch.". That has
+    **zero** information **value**.
+ -  It provides only a basic text box to fill in a commit description. No control of line wrapping
+    at 75 characters. 
+
+![no_github_merge](https://cloud.githubusercontent.com/assets/853706/8862021/fb68290e-318d-11e5-8e5e-5989d7df0a83.png)
+
+Always **merge** pull requests **via command line**:
+
+ * Add remote repository if necessary:
+   `git remote add gh-USER https://github.com/USER/REPO.git; git fetch gh-USER`
+ * Switch to the branch of the pull request: `git checkout gh-USER/BRANCH`
+ * Review and test changes.
+ * Switch to the master branch: `git checkout master` 
+ * Use `git merge --no-ff --no-commit gh-USER/BRANCH` instead of a plain `git merge` to merge the
+   pull request.
+ * Use `git commit --author "Pull Request Author Name <author@email>"` to commit the merge on
+   behalf of the pull request author with a very descriptive commit message:
+    * Fill in  `Reviewed by: Your Name <Your@email>`
+    * Link to a pull request `https://github.com/fenryxo/test/pull/2` → ` - Pull Request: fenryxo/test#2`
+    * Link to an issue `https://github.com/fenryxo/test/issues/3` -> `+ - Issue: fenryxo/test#3`
+ * *Optionally*, you can squash all commits of the pull request and the merge commit into one final
+   commit. However, you should not ask author of the pull request to do rebasing and squashing to
+   keep entrance barrier for contributors as low as possible.
+ * Finally, ``git push``.
+ * *Optionally*, you can remove remote repository: `git remote remove gh-USER/BRANCH`
+
+### Releases
+
+  * Create a Github issue "Make release X.Y" and assing it to @fenryxo when ready for a new release, but don't increase version fields in metadata.
+  * Don't hesitate to release often. Packages of service integration script are lightweight
+    with a typical build time a few seconds thanks to [fpm](https://github.com/jordansissel/fpm).
+  * Users will love you if you release a fix as soon as possible.
+
+
 Coding Style
 ============
 
@@ -205,7 +345,6 @@ var success = !failed;
 
 ```
 
-  
 [github]: https://github.com
 [JS_STRICT]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions_and_function_scope/Strict_mode
 [JS_SEAF]: http://markdalgleish.com/2011/03/self-executing-anonymous-functions/
