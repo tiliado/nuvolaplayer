@@ -3,17 +3,22 @@ Title: Service Integration Guidelines
 If you would like to have your service integration **maintained as a part of the Nuvola Player project
 and distributed in the Nuvola Player repository**, following rules apply.
 
-Rules
-=====
+Formal Rules
+============
 
-1. Your work must have license approved by [the Open Source Initiative](http://opensource.org/licenses),
+1. Copyright and license of all files must be clearly documented in `README.md`. All files must
+   have license approved by [the Open Source Initiative](http://opensource.org/licenses),
    preferably the same license as Nuvola Player (BSD 2-Clause "Simplified" or "FreeBSD" license).
+   Full text of a license must be provided in file `LICENSE` or `LICENSE.txt`. If more than one
+   license are used, add a distinguishing suffix, e.g. `LICENSE-BSD.txt`. You can look at
+   [README.md template](https://github.com/tiliado/nuvolaplayer/blob/master/web_apps/template/README.md)
+   for inspiration.
 
 2. The field ``maintainer_link`` of ``metadata.json`` must contain URL of your
    [Github profile][github]. (You will be subscribed to bug reports related to your service
    integrations).
 
-3. You must provide contact e-mail.
+3. You must provide contact e-mail in `README.md`, e.g. inside Copyright section.
 
 4. You must use a consistent coding style of ``integrate.json``, preferably the coding style of
    Nuvola Player.
@@ -28,8 +33,9 @@ Rules
 License
 ======= 
 
-You should use the same license as Nuvola Player does (BSD 2-Clause "Simplified" or "FreeBSD"
-license) unless you have severe reasons to choose different license. In that case you should stick
+You should use the same license as Nuvola Player does
+([BSD 2-Clause "Simplified" or "FreeBSD" license](http://opensource.org/licenses/BSD-2-Clause))
+unless you have severe reasons to choose different license. In that case you should stick
 to the popular open-source licenses with strong communities:
 
   * [Apache License 2.0](http://opensource.org/licenses/Apache-2.0)
@@ -37,8 +43,8 @@ to the popular open-source licenses with strong communities:
   * [BSD 2-Clause "Simplified" or "FreeBSD" license](http://opensource.org/licenses/BSD-2-Clause)
   * [GNU General Public License (GPL)](http://opensource.org/licenses/gpl-license)
   * [GNU Library or "Lesser" General Public License (LGPL)](http://opensource.org/licenses/lgpl-license)
-  * [MIT license](/licenses/MIT)
-  * [Mozilla Public License 2.0](/licenses/MPL-2.0)
+  * [MIT license](http://opensource.org/licenses/MIT)
+  * [Mozilla Public License 2.0](http://opensource.org/licenses/MPL-2.0)
 
 Coding Style
 ============
