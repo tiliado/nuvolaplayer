@@ -46,6 +46,36 @@ to the popular open-source licenses with strong communities:
   * [MIT license](http://opensource.org/licenses/MIT)
   * [Mozilla Public License 2.0](http://opensource.org/licenses/MPL-2.0)
 
+Artwork
+=======
+
+Nuvola Player expects your integration to provide a set of icons in the `icons` directory. However,
+you don't have to care about it as service integration template already contains generic Nuvola
+Player source icons and a Makefile target to build the icon set from them. These generic icons
+will be later replaced by icons provided by Alexander King. In case you insist on providing your
+own icons, the resulting icon set must consist of:
+
+ * `16.png` - 16×16 px PNG icon
+ * `22.png` - 22×22 px PNG icon
+ * `24.png` - 24×24 px PNG icon
+ * `32.png` - 32×32 px PNG icon
+ * `48.png` - 48×48 px PNG icon
+ * `64.png` - 64×64 px PNG icon
+ * `128.png` - 128×128 px PNG icon
+ * `256.png` - 256×256 px PNG icon
+ * `scalable.svg` - scalable SVG icon
+
+All PNG icons should be build from source SVG icons via a Makefile rule. While the file
+`scalable.svg` can be used to build icon sizes 32-256, smaller icons will need their own fine-tuned
+source SVG icons.
+
+!!! danger "Beware of copyright infringement"
+
+    Common mistake is to take an official logo of a particular streaming service, resize it or crop
+    it and then use it as icon for Nuvola Player. This approach has always led to violation of the
+    first rule regarding to copyright and license and affected integration scripts were rejected
+    until the file was removed
+
 Coding Style
 ============
 
