@@ -132,24 +132,12 @@ Push your work upstream
 If you would like to have your service integration **maintained as a part of the Nuvola Player project
 and distributed in the Nuvola Player repository**, follow the instructions bellow.
 
-Git way (preferred)
--------------------
-
  1. Push your repository to GitHub. Repository name is ``fenryxo/nuvola-app-test`` for this example.
  2. Create new issue in your repository titled "Push to Nuvola Player project"
- 3. Create new topic at [Nuvola Player Development forum](https://groups.google.com/d/forum/nuvola-player-devel)
-    with subject "Code review of You Service Name integration" and post a link the the issue created
+ 3. Create new issue at [Nuvola Player repository](https://github.com/tiliado/nuvolaplayer/issues/new)
+    with subject "Code review: You Service Name integration" and post a link the the issue created
     above.
  4. Don't hesitate to ask any question.   
  5. Wait for a review ;-)
-
-Tar archives (slow)
--------------------
-
- 1. Create tar archive (see previous section).
- 2. Create new topic at [Nuvola Player Development forum](https://groups.google.com/d/forum/nuvola-player-devel)
-    with subject "Code review of You Service Name integration" and attach the tar archive.
- 3. Don't hesitate to ask any question.   
- 4. Wait for a review, it may take a while.
 
 [TOC]
