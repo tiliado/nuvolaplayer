@@ -30,6 +30,11 @@ Formal Rules
 
 7. You have to [mark translatable strings]({filename}translations.md) in ``integrate.js``.
 
+8. Your repository must contain file `CONTRIBUTING.md` with instructions for contributors.
+   You can copy
+   [CONTRIBUTING.md template XXX](https://github.com/tiliado/nuvolaplayer/blob/master/web_apps/template/CONTRIBUTING.md)
+   and adjust it to your needs.
+
 License
 ======= 
 
