@@ -88,6 +88,6 @@ public string get_app_runner_path()
 	return get_libdir() + "/apprunner"; 
 }
 
-public const string HELP_URL = "http://tiliado.github.io/nuvolaplayer/documentation/3.0.html";
+public const string HELP_URL = "https://tiliado.github.io/nuvolaplayer/documentation/3.0/help.html";
 
 } // namespace Nuvola
