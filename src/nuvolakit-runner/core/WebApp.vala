@@ -41,6 +41,8 @@ public class WebAppMeta : GLib.Object
 	public int version_minor {get; construct;}
 	public int api_major {get; construct;}
 	public int api_minor {get; construct;}
+	public int window_width {get; construct;}
+	public int window_height {get; construct;}
 	public File? data_dir {get; private set; default = null;}
 	public bool removable {get; set; default = false;}
 	public bool hidden {get; set; default = false;}	
@@ -240,6 +242,10 @@ public class WebAppMeta : GLib.Object
 			throw new WebAppError.INVALID_METADATA("Major api_version must be greater than zero");
 		if (api_minor < 0)
 			throw new WebAppError.INVALID_METADATA("Minor api_version must be greater or equal to zero");
+		if (window_width < 0)
+			throw new WebAppError.INVALID_METADATA("Property window_width must be greater or equal to zero");
+		if (window_height < 0)
+			throw new WebAppError.INVALID_METADATA("Property window_height must be greater or equal to zero");
 		if (maintainer_name == "")
 			throw new WebAppError.INVALID_METADATA("Empty 'maintainer_name' entry");
 		if (!maintainer_link.has_prefix("http://")

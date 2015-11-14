@@ -194,9 +194,10 @@ public class AppRunnerController : RunnerApplication
 		if (x >= 0 && y >= 0)
 			main_window.move(x, y);
 			
-		int w = (int) config.get_int64(ConfigKey.WINDOW_WIDTH);
-		int h = (int) config.get_int64(ConfigKey.WINDOW_HEIGHT);
-		main_window.resize(w > MINIMAL_REMEMBERED_WINDOW_SIZE ? w: 1010, h > MINIMAL_REMEMBERED_WINDOW_SIZE ? h : 600);
+		int win_width = (int) config.get_int64(ConfigKey.WINDOW_WIDTH);
+		int win_height = (int) config.get_int64(ConfigKey.WINDOW_HEIGHT);
+		if (win_width > MINIMAL_REMEMBERED_WINDOW_SIZE && win_height > MINIMAL_REMEMBERED_WINDOW_SIZE)
+			main_window.resize(win_width, win_height);
 		
 		if (config.get_bool(ConfigKey.WINDOW_MAXIMIZED))
 			main_window.maximize();

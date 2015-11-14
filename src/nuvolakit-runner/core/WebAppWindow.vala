@@ -78,7 +78,12 @@ public class WebAppWindow : Diorite.ApplicationWindow
 		{
 			warning("Unable to load application icon.");
 		}
-		set_default_size(500, 500);
+		
+		var app_window_width = app.web_app.window_width;
+		var app_window_height = app.web_app.window_height;
+		set_default_size(
+			int.min(Gdk.Screen.width() - 100, app_window_width > 0 ? app_window_width : 1100),
+			int.min(Gdk.Screen.height() - 100, app_window_height > 0 ? app_window_height : 600));
 		
 		delete_event.connect(on_delete_event);
 		

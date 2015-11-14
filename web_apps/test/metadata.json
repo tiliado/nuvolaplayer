@@ -9,5 +9,7 @@
 	"api_minor": 0,
 	"categories": "AudioVideo;Audio;",
 	"home_url": "nuvola://home.html",
-	"hidden": true
+	"hidden": true,
+	"window_width": 2000,
+	"window_height": 2000
 }

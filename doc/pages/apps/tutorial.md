@@ -125,6 +125,12 @@ This file contains several mandatory fields:
     This field is not required if you use custom function to handle home page request.
     See [Web apps with a variable home page URL]({filename}variable-home-page-url.md).
 
+This file can include also optional fields:
+
+`window_width`, `window_height`
+
+: Suggested window width or height in pixels.
+
 !!! danger "Extra rules for metadata.json"
     If you want to have your integration script maintained and distributed as a part of the Nuvola
     Player project, you have to follow rules in [Service Integrations Guidelines]({filename}guidelines.md).
