@@ -39,6 +39,7 @@ public class WebView: WebKit.WebView
 		ws.enable_page_cache = false;
 		ws.enable_smooth_scrolling = true;
 		ws.enable_write_console_messages_to_stdout = true;
+		ws.enable_caret_browsing = true;  // accessibility
 		button_release_event.connect(on_button_released);
 	}
 	
