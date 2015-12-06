@@ -83,12 +83,6 @@ public class WebEngine : GLib.Object, JSExecutor
 		
 		session = new Diorite.KeyValueMap();
 		
-		var ws = web_view.get_settings();
-		ws.enable_developer_extras = true;
-		ws.enable_java = false;
-		ws.enable_page_cache = false;
-		ws.enable_smooth_scrolling = true;
-		ws.enable_write_console_messages_to_stdout = true;
 		web_view.notify["uri"].connect(on_uri_changed);
 		web_view.notify["zoom-level"].connect(on_zoom_level_changed);
 		web_view.decide_policy.connect(on_decide_policy);

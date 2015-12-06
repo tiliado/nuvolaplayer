@@ -33,6 +33,12 @@ public class WebView: WebKit.WebView
 	
 	public WebView()
 	{
+		unowned WebKit.Settings ws = get_settings();
+		ws.enable_developer_extras = true;
+		ws.enable_java = false;
+		ws.enable_page_cache = false;
+		ws.enable_smooth_scrolling = true;
+		ws.enable_write_console_messages_to_stdout = true;
 		button_release_event.connect(on_button_released);
 	}
 	
