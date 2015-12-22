@@ -41,6 +41,7 @@ public class HeaderLabel: Gtk.Label
 public class DeveloperSidebar: Gtk.Grid
 {
 	private Diorite.ActionsRegistry? actions_reg;
+	private Gtk.Image? artwork = null;
 	private Gtk.Label? song = null; 
 	private Gtk.Label? artist = null;
 	private Gtk.Label? album = null;
@@ -56,9 +57,13 @@ public class DeveloperSidebar: Gtk.Grid
 		
 		radios = new HashTable<string, Gtk.RadioButton>(str_hash, str_equal);
 		orientation = Gtk.Orientation.VERTICAL;
+		
+		artwork = new Gtk.Image();
+		clear_artwork(false);
+		add(artwork);
 		var label = new HeaderLabel("Song");
 		label.halign = Gtk.Align.START;
-		add(label);
+		attach_next_to(label, artwork, Gtk.PositionType.BOTTOM, 1, 1);
 		song = new Gtk.Label(player.title ?? "(null)");
 		song.set_line_wrap(true);
 		song.halign = Gtk.Align.START;
@@ -96,11 +101,45 @@ public class DeveloperSidebar: Gtk.Grid
 		radios = null;
 	}
 	
+	private void clear_artwork(bool broken)
+	{
+		try
+		{
+			var icon_name = broken ? "dialog-error": "audio-x-generic";
+			var pixbuf = Gtk.IconTheme.get_default().load_icon(icon_name, 100, 0);
+			artwork.set_from_pixbuf(pixbuf);
+		}
+		catch (GLib.Error e)
+		{
+			warning("Pixbuf error: %s", e.message);
+			artwork.clear();
+		}
+	}
+	
 	private void on_player_notify(GLib.Object o, ParamSpec p)
 	{
 		var player = o as MediaPlayerModel;
 		switch (p.name)
 		{
+		case "artwork-file":
+			if (player.artwork_file == null)
+			{
+				clear_artwork(false);
+			}
+			else
+			{
+				try
+				{
+					var pixbuf = new Gdk.Pixbuf.from_file_at_scale(player.artwork_file, 100, 100, true);
+					artwork.set_from_pixbuf(pixbuf);
+				}
+				catch (GLib.Error e)
+				{
+					warning("Pixbuf error: %s", e.message);
+					clear_artwork(true);
+				}
+			}
+			break;
 		case "title":
 			song.label = player.title ?? "(null)";
 			break;
