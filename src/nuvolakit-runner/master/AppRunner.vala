@@ -43,10 +43,38 @@ public class AppRunner : GLib.Object
 	public AppRunner(string app_id, string[] argv) throws GLib.Error
 	{
 		this.app_id = app_id;
-		process = new GLib.Subprocess.newv(argv, GLib.SubprocessFlags.STDIN_INHERIT|GLib.SubprocessFlags.STDERR_MERGE);
+		process = new GLib.Subprocess.newv(argv, GLib.SubprocessFlags.STDIN_INHERIT|GLib.SubprocessFlags.STDERR_PIPE);
 		running = true;
+		log_stderr.begin(on_log_stderr_done);
 		process.wait_async.begin(null, on_wait_async_done);
 		check_server_connected_id = Timeout.add_seconds(gdb ? 600 : 30, check_server_connected_cb);
+	}
+	
+	private async void log_stderr()
+	{
+		while (running)
+		{
+			uint8[] buffer = new uint8[1024];
+			try
+			{
+				yield process.get_stderr_pipe().read_async(buffer);
+				unowned string str = (string) buffer;
+				if (str.has_prefix("Worker:") || str.has_prefix("Runner:"))
+					Diorite.Logger.puts(str);
+				else
+					Diorite.Logger.printf("Runner: %s", str);
+			}
+			catch (GLib.Error e)
+			{
+				warning("Subprocess stderr pipe error: %s", e.message);
+				break;
+			}
+		}
+	}
+	
+	private void on_log_stderr_done(GLib.Object? o, AsyncResult res)
+	{
+		log_stderr.end(res);
 	}
 	
 	/**
