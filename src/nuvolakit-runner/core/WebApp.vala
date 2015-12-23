@@ -79,12 +79,6 @@ public class WebAppMeta : GLib.Object
 		}
 		
 		meta.check();
-
-//			FIXME:
-//~ 		if(!JSApi.is_supported(api_major, api_minor)){
-//~ 			throw new ServiceError.LOADING_FAILED(
-//~ 				"Requested unsupported api: %d.%d'".printf(api_major, api_minor));
-//~ 		}
 		meta.data_dir = dir;
 		return meta;
 	}
@@ -252,6 +246,10 @@ public class WebAppMeta : GLib.Object
 		&&  !maintainer_link.has_prefix("https://")
 		&&  !maintainer_link.has_prefix("mailto:"))
 			throw new WebAppError.INVALID_METADATA("Empty or invalid 'maintainer_link' entry: '%s'", maintainer_link);
+		
+		if (!JSApi.is_supported(api_major, api_minor))
+			throw new WebAppError.INVALID_METADATA(
+				"Requested unsupported NuvolaKit API '%d.%d'.".printf(api_major, api_minor));
 		
 		if (categories == null || categories == "")
 		{

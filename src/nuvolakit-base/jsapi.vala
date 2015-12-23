@@ -113,6 +113,11 @@ public class JSApi : GLib.Object
 		this.key_value_storages = {config, session};
 	}
 	
+	public static bool is_supported(int api_major, int api_minor)
+	{
+		return api_major == API_VERSION_MAJOR && api_minor <= API_VERSION_MINOR;
+	}
+	
 	public signal void send_message_async(string name, Variant? data);
 	public signal void send_message_sync(string name, Variant? data, ref Variant? result);
 	
