@@ -473,10 +473,8 @@ public class MasterController : Diorite.Application
 			app_runners_map[app_id] = runner;
 	}
 	
-	private void on_runner_exited(Diorite.Subprocess subprocess)
+	private void on_runner_exited(AppRunner runner)
 	{
-		var runner = subprocess as AppRunner;
-		assert(runner != null);
 		debug("Runner exited: %s, was connected: %s", runner.app_id, runner.connected.to_string());
 		runner.exited.disconnect(on_runner_exited);
 		if (!app_runners.remove(runner))

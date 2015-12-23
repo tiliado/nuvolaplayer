@@ -25,13 +25,15 @@
 namespace Nuvola
 {
 
-public class AppRunner: Diorite.Subprocess
+public class AppRunner : GLib.Object
 {
 	private static bool gdb = false;
 	public string app_id {get; private set;}
-	public bool connected { get{ return client != null;} }
+	public bool connected {get{ return client != null;}}
+	public bool running {get; private set; default = false;}
 	private Diorite.Ipc.MessageClient? client = null;
 	private uint check_server_connected_id = 0;
+	private GLib.Subprocess process;
 	
 	static construct
 	{
@@ -40,10 +42,17 @@ public class AppRunner: Diorite.Subprocess
 	
 	public AppRunner(string app_id, string[] argv) throws GLib.Error
 	{
-		base(argv, Diorite.SubprocessFlags.INHERIT_FDS);
 		this.app_id = app_id;
+		process = new GLib.Subprocess.newv(argv, GLib.SubprocessFlags.STDIN_INHERIT|GLib.SubprocessFlags.STDERR_MERGE);
+		running = true;
+		process.wait_async.begin(null, on_wait_async_done);
 		check_server_connected_id = Timeout.add_seconds(gdb ? 600 : 30, check_server_connected_cb);
 	}
+	
+	/**
+	 * Emitted when the subprocess exited.
+	 */
+	public signal void exited();
 	
 	public bool connect_server(string server_name)
 	{
@@ -74,9 +83,23 @@ public class AppRunner: Diorite.Subprocess
 		warning("Connection has not been se up in time for app runner '%s'.", app_id);
 		
 		if (running)
-			force_exit();
+			process.force_exit();
 		
 		return false;
+	}
+	
+	private void on_wait_async_done(GLib.Object? o, AsyncResult res)
+	{
+		try
+		{
+			process.wait_async.end(res);
+		}
+		catch (GLib.Error e)
+		{
+			warning("Subprocess wait error: %s", e.message);
+		}
+		running = false;
+		exited();
 	}
 }
 
