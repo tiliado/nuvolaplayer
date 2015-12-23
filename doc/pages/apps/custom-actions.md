@@ -23,7 +23,7 @@ from letters, digits and dash. Then we create the actions in
     [Nuvola.Actions.addRadioAction](apiref>Nuvola.Actions.addRadioAction). Options are specified
     by an array ``ratingOptions`` and the initial state is set to ``0`` (0 starts).
 
-Note that [translation function]({filename}translations.md) alias ``C_`` is used mark short
+Note that [translation function](:apps/translations.html) alias ``C_`` is used mark short
 translatable strings with context information ("Action") and ``ngettext`` for string with both
 singular and plural forms.
 
@@ -110,7 +110,7 @@ WebApp._onPageReady = function()
 
 The media player component than orders Nuvola Player to show the actions in user interface:
 
-![Custom actions]({filename}/images/guide/custom_actions.png)
+![Custom actions](:images/guide/custom_actions.png)
 
 Manage Actions
 ==============
@@ -155,14 +155,14 @@ WebApp.update = function()
 
 ...
 ```
-![Custom actions - enabled]({filename}/images/guide/custom_actions_enabled.png)
+![Custom actions - enabled](:images/guide/custom_actions_enabled.png)
 
 Respond to Actions
 ==================
 
 The final step is to write handlers for the new actions similarly like for
 [player actions](apiref>Nuvola.PlayerAction): extend ``WebApp._onActionActivated`` method
-from [tutorial]({filename}tutorial.md).
+from [tutorial](:apps/tutorial.html).
 
 ```js
 ...
@@ -209,7 +209,7 @@ WebApp._onActionActivated = function(emitter, name, param)
 ...
 ```
 
-![Custom action - Alert!]({filename}/images/guide/custom_action_alert.png)
+![Custom action - Alert!](:images/guide/custom_action_alert.png)
 
 !!! info "Implementation detail"
     [Player actions](apiref>Nuvola.PlayerAction) are created by
@@ -220,7 +220,7 @@ Keyboard Shortcuts
 
 Users can assign keyboard shortcuts to custom actions ;-)
 
-![Custom action - Keyboard shortcuts]({filename}/images/guide/custom_actions_keyboard_shortcuts.png)
+![Custom action - Keyboard shortcuts](:images/guide/custom_actions_keyboard_shortcuts.png)
 
 Conditional Actions
 ===================

@@ -68,9 +68,9 @@ watch_and_build()
 	while true; do inotifywait -e delete -e create -e modify -r src; sleep 1; ./waf; done
 }
 
-build_pelican_doc()
+build_webgen_doc()
 {
-    (cd doc; pelican -r -t theme)
+    (cd doc; webgen -i . -t theme)
 }
 
 build_js_doc()

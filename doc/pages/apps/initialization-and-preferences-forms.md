@@ -1,7 +1,7 @@
 Title: Initialization and Preferences Forms
 
 Since Nuvola Player 3 allows service integrations to store
-[a persistent configuration]({filename}configuration-and-session-storage.md),
+[a persistent configuration](:apps/configuration-and-session-storage.html),
 you might want to get some user input. Theoretically, you could use
 JavaScript method ``window.prompt()``, but Nuvola Player offers better methods:
 initialization and preferences forms.
@@ -66,8 +66,8 @@ API used in ``WebApp.appendPreferences`` will be [described later](#form-specifi
     ...
 
 
-![Initialization form]({filename}/images/guide/initialization_form.png)
-![After initialization form]({filename}/images/guide/after_initialization_form.png)
+![Initialization form](:images/guide/initialization_form.png)
+![After initialization form](:images/guide/after_initialization_form.png)
 
 !!! danger "Global window object not available"
     The [Nuvola.Core::InitializationForm](apiref>Nuvola.Core%3A%3AInitializationForm) signal is executed in a
@@ -131,7 +131,7 @@ API used in ``WebApp.appendPreferences`` will be [described later](#form-specifi
     
     ...
 
-![Preferences form]({filename}/images/guide/preferences_form.png)
+![Preferences form](:images/guide/preferences_form.png)
 
 !!! danger "Global window object not available"
     The [Nuvola.Core::PreferencesForm](apiref>Nuvola.Core%3A%3APreferencesForm) signal is executed in a
@@ -185,9 +185,9 @@ Option entry: ``["option", key, value, label, enableEntries, disableEntries]``
 Sample Form
 ===========
 
-This sample form also makes use of [translation functions]({filename}translations.md).
+This sample form also makes use of [translation functions](:apps/translations.html).
 
-![Example of form fields]({filename}/images/guide/form_fields_example.png)
+![Example of form fields](:images/guide/form_fields_example.png)
 
     :::js
     ...
@@ -290,7 +290,7 @@ This sample form also makes use of [translation functions]({filename}translation
 Use cases
 =========
 
-See article [Web apps with a variable home page URL]({filename}variable-home-page-url.md) for
+See article [Web apps with a variable home page URL](:apps/variable-home-page-url.html) for
 use cases of Initialization and Preferences Forms to allow user specify a custom home page url.
 
 [TOC]

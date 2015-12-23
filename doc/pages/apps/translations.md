@@ -65,8 +65,8 @@ Disambiguating message context
 
 You might sometimes have short strings that could be translated differently depending on a context.
 For example, "Back" string in navigation or in a body part. You should use this function for
-labels of [custom actions]({filename}custom-actions.md) or entries of
-[initialization and preferences forms]({filename}initialization-and-preferences-forms.md).
+labels of [custom actions](:apps/custom-actions.html) or entries of
+[initialization and preferences forms](:apps/initialization-and-preferences-forms.html).
 
 
   * Use function [Translate.pgettext](apiref>Nuvola.Translate.pgettext).

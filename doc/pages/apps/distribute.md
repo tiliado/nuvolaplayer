@@ -1,7 +1,7 @@
 Title: Distribute Service Integration
 
-After going through [Service Integrations Tutorial]({filename}tutorial.md)
-or [Service Integrations Guide]({filename}guide.md), you have a brand new functional
+After going through [Service Integrations Tutorial](:apps/tutorial.html)
+or [Service Integrations Guide](:apps/guide.html), you have a brand new functional
 service integration on your disk. This guide describe various ways how to distribute
 your work for other users to use it.
 
@@ -9,12 +9,14 @@ Copyright and license
 =====================
 
   * Make sure your ``integrate.js`` contain proper copyright information 
-    "Copyright 2014 Your name <your e-mail>".
+    "Copyright 2014 Your name &lt;your e-mail&gt;".
   * The test service used in tutorial and guide contains 2-Clause BSD license. If you have severe
     reasons to choose a different license, update license text in both ``integrate.js`` and
     ``LICENSE`` files.
 
 !!! info "If you use Git, commit changes"
+    Type into terminal following commands (adjust if necessary):
+    
         :::sh
         cd ~/projects/nuvola-player/test-integration
         git add integrate.js LICENSE
@@ -43,6 +45,8 @@ If everything goes well, you should have your service integration installed to
 ``~/.local/share/nuvolaplayer3/web_apps`` and Nuvola Player can find it.
 
 !!! info "If you use Git, commit changes"
+    Type into terminal following commands (adjust if necessary):
+    
         :::sh
         cd ~/projects/nuvola-player/test-integration
         git add Makefile
@@ -87,6 +91,8 @@ Copyright
 ```
 
 !!! info "If you use Git, commit changes"
+    Type into terminal following commands (adjust if necessary):
+    
         :::sh
         cd ~/projects/nuvola-player/test-integration
         git add README.md

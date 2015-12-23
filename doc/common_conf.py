@@ -8,3 +8,8 @@ INTERLINKS = {
     "tiliado": TILIADOWEB,
     "gh": "https://github.com/"
 }
+
+CONSTANTS = {
+    "TILIADOWEB": TILIADOWEB,
+    "DEFAULT_LANG": "en",
+}

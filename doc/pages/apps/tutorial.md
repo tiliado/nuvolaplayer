@@ -6,7 +6,7 @@ This tutorial briefly describes creation of **a new service integration for Nuvo
 scratch**. The goal is to write an integration script for *fake Happy Songs  service* shipped with
 Nuvola Player and to prepare you to create your own service integration.
 I'm looking forward to a code review ;-)
-There is also more detailed [Service Integrations Guide]({filename}guide.md) that provides
+There is also more detailed [Service Integrations Guide](:apps/guide.html) that provides
 insight to the NuvolaKit core. 
 
 Prepare development environment
@@ -123,7 +123,7 @@ This file contains several mandatory fields:
     service integration (e.g. `https://play.google.com/music/` for Google Play Music).
     
     This field is not required if you use custom function to handle home page request.
-    See [Web apps with a variable home page URL]({filename}variable-home-page-url.md).
+    See [Web apps with a variable home page URL](:apps/variable-home-page-url.html).
 
 This file can include also optional fields:
 
@@ -133,9 +133,11 @@ This file can include also optional fields:
 
 !!! danger "Extra rules for metadata.json"
     If you want to have your integration script maintained and distributed as a part of the Nuvola
-    Player project, you have to follow rules in [Service Integrations Guidelines]({filename}guidelines.md).
+    Player project, you have to follow rules in [Service Integrations Guidelines](:apps/guidelines.html).
 
 !!! info "If you use Git, commit changes"
+    Type into terminal following commands (adjust if necessary):
+    
         :::sh
         cd ~/projects/nuvola-player/happy-songs
         git add metadata.json
@@ -146,7 +148,7 @@ Create integration script
 
 **The integration script is the fundamental part of the service integration.** It's written in
 JavaScript and called ``integrate.js``. This script is called once at start-up of the web app to
-perform initialization of the main process (covered in [the guide]({filename}guide.md)) and again
+perform initialization of the main process (covered in [the guide](:apps/guide.html)) and again
 in the web page rendering process every-time a web page is loaded in the web view. Let's look at the
 next sample integration script that doesn't actually do much, but will be used as a base for further
 modifications.
@@ -291,6 +293,8 @@ Line 84
 :   Convenience method to create and register new instance of your web app integration.
 
 !!! info "If you use Git, commit changes"
+    Type into terminal following commands (adjust if necessary):
+    
         :::sh
         cd ~/projects/nuvola-player/happy-songs
         git add integrate.js
@@ -321,18 +325,18 @@ service Happy Songs, because we told Nuvola Player to load service integrations 
         ignored because they apply only to a new instance. You might want to close all Nuvola Player
         instances and run it again with your parameters.
 
-![A list with single service integration]({filename}/images/guide/app_list_one_service.png)
+![A list with single service integration](:images/guide/app_list_one_service.png)
 
 Launch your service integration and a new window will be opened with the test service. First of all,
 show **developer's sidebar** (Gear menu → Show sidebar → select "Developer" in the right 
 sidebar), then enable **WebKit Web Inspector** (right-click the web page anywhere and select
 "Inspect element").
 
-![Show sidebar - GNOME Shell]({filename}/images/guide/show_sidebar_gnome_shell.png)
+![Show sidebar - GNOME Shell](:images/guide/show_sidebar_gnome_shell.png)
 
-![Inspect element]({filename}/images/guide/inspect_element.png)
+![Inspect element](:images/guide/inspect_element.png)
 
-![WebKit Web Inspector]({filename}/images/guide/webkit_web_inspector.png)
+![WebKit Web Inspector](:images/guide/webkit_web_inspector.png)
 
 You can also launch your service integration with id `happy_songs` directly.
 
@@ -434,7 +438,7 @@ WebApp.update = function()
     ...
 }
 ```
-![Playback state]({filename}/images/guide/playback_state.png)
+![Playback state](:images/guide/playback_state.png)
 
 Track details
 -------------
@@ -470,9 +474,11 @@ WebApp.update = function()
 }
 ```
 
-![Track details]({filename}/images/guide/track_details.png)
+![Track details](:images/guide/track_details.png)
 
 !!! info "If you use Git, commit changes"
+    Type into terminal following commands (adjust if necessary):
+    
         :::sh
         cd ~/projects/nuvola-player/happy-songs
         git add integrate.js
@@ -542,7 +548,7 @@ WebApp.update = function()
 }
 ```
 
-![Playback actions]({filename}/images/guide/playback_actions.png)
+![Playback actions](:images/guide/playback_actions.png)
 
 To handle playback actions defined in an enumeration [PlayerAction](apiref>Nuvola.PlayerAction),
 it is necessary to connect to [Actions::ActionActivated signal](apiref>Nuvola.Actions%3A%3AActionActivated).
@@ -589,13 +595,15 @@ WebApp._onActionActivated = function(emitter, name, param)
     You should click action buttons in the developer's sidebar to be sure they are working as expected.
 
 !!! info "If you use Git, commit changes"
+    Type into terminal following commands (adjust if necessary):
+    
         :::sh
         cd ~/projects/nuvola-player/happy-songs
         git add integrate.js
         git commit -m "Add player actions handling"
 
 !!! info "Custom actions"
-    Service integrations can also create [custom Actions]({filename}custom-actions.md) like thumbs
+    Service integrations can also create [custom Actions](:apps/custom-actions.html) like thumbs
     up/down or star rating.
 
 What to do next
@@ -603,26 +611,26 @@ What to do next
 
 If you would like to have your service integration **maintained as a part of Nuvola
 Player project** and distributed in Nuvola Player repository, you have to follow
-[Service Integration Guidelines]({filename}guidelines.md). Once you have **finished your
-service integration**, the next step is to [distribute]({filename}distribute.md) it.
+[Service Integration Guidelines](:apps/guidelines.html). Once you have **finished your
+service integration**, the next step is to [distribute](:apps/distribute.html) it.
 
 Supposing you have followed this tutorial, you have enough knowledge to create your own service
 integration. You are encouraged to take a look at articles in advanced section to spice up your work:
 
-  * [Full Service Integration Guide]({filename}guide.md): This guide describes creation of a new service
+  * [Full Service Integration Guide](:apps/guide.html): This guide describes creation of a new service
     integration for Nuvola Player 3 from scratch in a much detail, provides **insight to the Nuvola
     Player Core** and explain some design decisions.
-  * [URL Filtering (URL Sandbox)]({filename}url-filtering.md):
+  * [URL Filtering (URL Sandbox)](:apps/url-filtering.html):
     Decide which urls are opened in a default web browser instead of Nuvola Player.
-  * [Configuration and session storage]({filename}configuration-and-session-storage.md):
+  * [Configuration and session storage](:apps/configuration-and-session-storage.html):
     Nuvola Player 3 allows service integrations to store both a persistent configuration and a temporary session information.
-  * [Initialization and Preferences Forms]({filename}initialization-and-preferences-forms.md):
+  * [Initialization and Preferences Forms](:apps/initialization-and-preferences-forms.html):
     These forms are useful when you need to get user input.
-  * [Web apps with a variable home page URL]({filename}variable-home-page-url.md):
+  * [Web apps with a variable home page URL](:apps/variable-home-page-url.html):
     This article covers Web apps that don't have a single (constant) home page URL, so their home page has to be specified by user.
-  * [Custom Actions]({filename}custom-actions.md):
+  * [Custom Actions](:apps/custom-actions.html):
     This article covers API that allows you to add custom actions like thumbs up/down rating.
-  * [Translations]({filename}translations.md): How to mark translatable strings for 
+  * [Translations](:apps/translations.html): How to mark translatable strings for 
     [Gettext-based](http://www.gnu.org/software/gettext/manual/gettext.html)
     translations framework for service integration scripts.
 

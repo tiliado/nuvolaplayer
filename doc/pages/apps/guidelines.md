@@ -24,15 +24,15 @@ Formal Rules
    Nuvola Player.
 
 5. You must use [strict JavaScript mode][JS_STRICT] and [self-executing anonymous function][JS_SEAF].
-   (See [tutorial]({filename}tutorial.md).)
+   (See [tutorial](:apps/tutorial.html).)
 
 6. You have to use Nuvola Player JavaScript API >= 3.0.
 
-7. You have to [mark translatable strings]({filename}translations.md) in ``integrate.js``.
+7. You have to [mark translatable strings](:apps/translations.html) in ``integrate.js``.
 
 8. Your repository must contain file `CONTRIBUTING.md` with instructions for contributors.
    You can copy
-   [CONTRIBUTING.md template XXX](https://github.com/tiliado/nuvolaplayer/blob/master/web_apps/template/CONTRIBUTING.md)
+   [CONTRIBUTING.md template](https://github.com/tiliado/nuvolaplayer/blob/master/web_apps/template/CONTRIBUTING.md)
    and adjust it to your needs.
 
 License

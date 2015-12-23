@@ -223,9 +223,9 @@ Forms for user input
 ====================
 
 If you require input from user, take look at
-[Initialization and preferences forms]({filename}initialization-and-preferences-forms.md).
+[Initialization and preferences forms](:apps/initialization-and-preferences-forms.html).
 
-![App initialization form]({filename}/images/guide/form_fields_example.png)
+![App initialization form](:images/guide/form_fields_example.png)
 
 
 [TOC]

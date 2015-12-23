@@ -10,11 +10,11 @@ This article covers Web apps that don't have a single (constant) home page URL
 In such cases, the constant ``home_url`` field of ``metadata.json`` doesn't provide enough
 flexibility, we need more magic:
 
-  * Create [an initialization form]({filename}initialization-and-preferences-forms.md)
+  * Create [an initialization form](:apps/initialization-and-preferences-forms.html)
     to get some details from user.
-  * Save user input to [app configuration storage]({filename}configuration-and-session-storage.md).
+  * Save user input to [app configuration storage](:apps/configuration-and-session-storage.html).
   * Allow user to change this settings later in 
-    [a preferences form]({filename}initialization-and-preferences-forms.md).
+    [a preferences form](:apps/initialization-and-preferences-forms.html).
   * Override the default home page request handler that looks for ``home_url`` field of
     ``metadata.json``.
 
@@ -34,15 +34,15 @@ Amazon Cloud Player has multiple national variants, each with a different addres
 just use ``home_url`` field in ``metadata.json`` and we have to offer user a way how to specify
 the preferred national variant.
 
-![App initialization form]({filename}/images/guide/amazon_initialization_form.png)
+![App initialization form](:images/guide/amazon_initialization_form.png)
 
 Configuration
 -------------
 
-We use only one [configuration]({filename}configuration-and-session-storage.md) key,
+We use only one [configuration](:apps/configuration-and-session-storage.html) key,
 ``COUNTRY_VARIANT``, to hold which national variant is preferred. Other defined variables
 (constants by convention) will be used later. Note that 
-[translation function]({filename}translations.md) alias ``C_`` is used mark short translatable
+[translation function](:apps/translations.html) alias ``C_`` is used mark short translatable
 strings with context information.
 
 ```js
@@ -79,10 +79,10 @@ WebApp._onInitAppRunner = function(emitter)
 Initialization Form
 -------------------
 
-The [initialization form]({filename}initialization-and-preferences-forms.md) contains one radio
+The [initialization form](:apps/initialization-and-preferences-forms.html) contains one radio
 entry for each value of ``COUNTRY_VARIANT`` key. The empty string as a default value ensures the
 first radio entry is selected by default. Note that 
-[translation function]({filename}translations.md) alias ``_`` is used mark translatable strings.
+[translation function](:apps/translations.html) alias ``_`` is used mark translatable strings.
 
 ```js
 ...
@@ -118,7 +118,7 @@ Preferences Form
 ----------------
 
 Since we don't need any extra configuration, the
-[preferences form]({filename}initialization-and-preferences-forms.md) is same as the initialization
+[preferences form](:apps/initialization-and-preferences-forms.html) is same as the initialization
 form, so we reuse ``WebApp.appendPreferences()`` method.
 
 ```js
@@ -165,12 +165,12 @@ instance is ``http://localhost:9000/``. However, user can choose a different add
 just use ``"home_url": "http://localhost:9000/"`` in ``metadata.json`` and we have to offer user a way
 how to specify address of his instance.
 
-![App initialization form]({filename}/images/guide/lms_initialization_form.png)
+![App initialization form](:images/guide/lms_initialization_form.png)
 
 Configuration
 -------------
 
-We use three [configuration]({filename}configuration-and-session-storage.md) keys:
+We use three [configuration](:apps/configuration-and-session-storage.html) keys:
 
   * ``ADDRESS`` - whether user wants to use default (``ADDRESS_DEFAULT``) or custom
     (``ADDRESS_CUSTOM``) address
@@ -210,11 +210,11 @@ WebApp._onInitAppRunner = function(emitter)
 Initialization Form
 -------------------
 
-The [initialization form]({filename}initialization-and-preferences-forms.md) contains two radio
+The [initialization form](:apps/initialization-and-preferences-forms.html) contains two radio
 entries (one for each value of ``ADDRESS`` key) and two text entries for ``HOST`` and ``PORT`` keys.
 Note that the text entries are disabled (insensitive) when ``ADDRESS`` entry is set to
 ``ADDRESS_DEFAULT``. Try it out ;-) Note that 
-[translation function]({filename}translations.md) alias ``_`` is used mark translatable strings.
+[translation function](:apps/translations.html) alias ``_`` is used mark translatable strings.
 
 ```js
 ...
@@ -255,7 +255,7 @@ Preferences Form
 ----------------
 
 Since we don't need any extra configuration, the
-[preferences form]({filename}initialization-and-preferences-forms.md) is same as the initialization
+[preferences form](:apps/initialization-and-preferences-forms.html) is same as the initialization
 form, so we reuse ``WebApp.appendPreferences()`` method.
 
 ```js

@@ -5,7 +5,7 @@ Title: Service Integrations Guide
 This guide describes creation of **a new service integration for Nuvola Player 3 from
 scratch**. The goal is to write an integration script for *a fake Happy Songs service* shipped
 with Nuvola Player and to prepare you to create your own service integration. Unlike the
-[Service Integrations Tutorial]({filename}guide.md), this guide provides also insight to the Nuvola
+[Service Integrations Tutorial](:apps/guide.html), this guide provides also insight to the Nuvola
 Player Core and explain some design decisions.
 
 Prepare development environment
@@ -79,7 +79,7 @@ failed to load your service integration because of invalid metadata file. So let
     '/home/fenryxo/projects/nuvola-player/happy-songs/metadata.json'.
     Expecting a JSON object, but the root node is of type '(null)'
 
-![Empty list of service integrations]({filename}/images/guide/empty_app_list.png)
+![Empty list of service integrations](:images/guide/empty_app_list.png)
 
 **Metadata file contains basic information about your service integrations.** It uses
 [JSON format](http://en.wikipedia.org/wiki/JSON) and it's called ``metadata.json``.
@@ -148,7 +148,7 @@ This file contains several **mandatory fields**:
     service integration (e.g. `https://play.google.com/music/` for Google Play Music).
     
     This field is not required if you use custom function to handle home page request.
-    See [Web apps with a variable home page URL]({filename}variable-home-page-url.md).
+    See [Web apps with a variable home page URL](:apps/variable-home-page-url.html).
 
 This file can include also optional fields:
 
@@ -158,9 +158,11 @@ This file can include also optional fields:
 
 !!! danger "Extra rules for metadata.json"
     If you want to have your integration script maintained and distributed as a part of the Nuvola
-    Player project, you have to follow rules in [Service Integrations Guidelines]({filename}guidelines.md).
+    Player project, you have to follow rules in [Service Integrations Guidelines](:apps/guidelines.html).
 
 !!! info "If you use Git, commit changes"
+    Type into terminal following commands (adjust if necessary):
+    
         :::sh
         cd ~/projects/nuvola-player/happy-songs
         git add metadata.json
@@ -169,7 +171,7 @@ This file can include also optional fields:
 
 Run `nuvolaplayer3 -D -A ~/projects/nuvola-player` again and you will see a list with one service :-)
 
-![A list with single service integration]({filename}/images/guide/app_list_one_service.png)
+![A list with single service integration](:images/guide/app_list_one_service.png)
 
 App Runner and Web Worker
 =========================
@@ -299,11 +301,11 @@ tools:
 
 
 
-![Show sidebar - GNOME Shell]({filename}/images/guide/show_sidebar_gnome_shell.png)
+![Show sidebar - GNOME Shell](:images/guide/show_sidebar_gnome_shell.png)
 
-![Inspect element]({filename}/images/guide/inspect_element.png)
+![Inspect element](:images/guide/inspect_element.png)
 
-![WebKit Web Inspector]({filename}/images/guide/webkit_web_inspector.png)
+![WebKit Web Inspector](:images/guide/webkit_web_inspector.png)
 
 Initialization routines
 -----------------------
@@ -316,7 +318,7 @@ On start-up, Nuvola Player performs following actions:
 
  2. App Runner emits the [Nuvola.Core::InitializationForm signal](apiref>Nuvola.Core%3A%3AInitializationForm)
     to construct the initialization form. See an article
-    [Initialization and Preferences Forms]({filename}initialization-and-preferences-forms.md)
+    [Initialization and Preferences Forms](:apps/initialization-and-preferences-forms.html)
     for examples of use case.
     
  3. App Runner emits the [Nuvola.Core::LastPageRequest signal](apiref>Nuvola.Core%3A%3ALastPageRequest)
@@ -332,7 +334,7 @@ On start-up, Nuvola Player performs following actions:
     valid, it is loaded in the Web Worker process and initialization is finished, otherwise Nuvola
     Player will quit with an error "Invalid home page URL - The web app integration script has
     provided an empty home page URL." See article
-    [Web apps with a variable home page URL]({filename}variable-home-page-url.md) for
+    [Web apps with a variable home page URL](:apps/variable-home-page-url.html) for
     a typical example when it's necessary to override this signal handler.
 
 Run-time events
@@ -347,7 +349,7 @@ During run-time, Nuvola Player performs following actions:
   * App Runner emits [Nuvola.Core::NavigationRequest](apiref>Nuvola.Core%3A%3ANavigationRequest)
     just before navigation to a new page. That signal is processed by
     [Nuvola.WebApp._onNavigationRequest handler](apiref>Nuvola.WebApp._onNavigationRequest) by
-    default and used for [URL Filtering (URL Sandbox)]({filename}url-filtering.md).
+    default and used for [URL Filtering (URL Sandbox)](:apps/url-filtering.html).
     
   * App Runner emits [Nuvola.Core::UriChanged signal](apiref>Nuvola.Core%3A%3ANavigationRequest)
     when a new page is loaded. That signal is processed by
@@ -551,7 +553,7 @@ WebApp.update = function()
     ...
 }
 ```
-![Playback state]({filename}/images/guide/playback_state.png)
+![Playback state](:images/guide/playback_state.png)
 
 ### Track details
 
@@ -586,9 +588,11 @@ WebApp.update = function()
 }
 ```
 
-![Track details]({filename}/images/guide/track_details.png)
+![Track details](:images/guide/track_details.png)
 
 !!! info "If you use Git, commit changes"
+    Type into terminal following commands (adjust if necessary):
+    
         :::sh
         cd ~/projects/nuvola-player/happy-songs
         git add integrate.js
@@ -658,7 +662,7 @@ WebApp.update = function()
 }
 ```
 
-![Playback actions]({filename}/images/guide/playback_actions.png)
+![Playback actions](:images/guide/playback_actions.png)
 
 To handle playback actions defined in an enumeration [PlayerAction](apiref>Nuvola.PlayerAction),
 it is necessary to connect to [Actions::ActionActivated signal](apiref>Nuvola.Actions%3A%3AActionActivated).
@@ -729,13 +733,15 @@ WebApp._onActionActivated = function(emitter, name, param)
 
 
 !!! info "If you use Git, commit changes"
+    Type into terminal following commands (adjust if necessary):
+    
         :::sh
         cd ~/projects/nuvola-player/happy-songs
         git add integrate.js
         git commit -m "Add player actions handling"
 
 !!! info "Custom actions"
-    Service integrations can also create [custom Actions]({filename}custom-actions.md) like thumbs
+    Service integrations can also create [custom Actions](:apps/custom-actions.html) like thumbs
     up/down or star rating.
 
 What to do next
@@ -743,23 +749,23 @@ What to do next
 
 If you would like to have your service integration **maintained as a part of Nuvola
 Player project** and distributed in Nuvola Player repository, you have to follow
-[Service Integration Guidelines]({filename}guidelines.md). Once you have **finished your
-service integration**, the next step is to [distribute]({filename}distribute.md) it.
+[Service Integration Guidelines](:apps/guidelines.html). Once you have **finished your
+service integration**, the next step is to [distribute](:apps/distribute.html) it.
 
 Supposing you have followed this guide, you have enough knowledge to create your own service
 integration. You are encouraged to take a look at articles in advanced section to spice up your work:
 
-  * [URL Filtering (URL Sandbox)]({filename}url-filtering.md):
+  * [URL Filtering (URL Sandbox)](:apps/url-filtering.html):
     Decide which urls are opened in a default web browser instead of Nuvola Player.
-  * [Configuration and session storage]({filename}configuration-and-session-storage.md):
+  * [Configuration and session storage](:apps/configuration-and-session-storage.html):
     Nuvola Player 3 allows service integrations to store both a persistent configuration and a temporary session information.
-  * [Initialization and Preferences Forms]({filename}initialization-and-preferences-forms.md):
+  * [Initialization and Preferences Forms](:apps/initialization-and-preferences-forms.html):
     These forms are useful when you need to get user input.
-  * [Web apps with a variable home page URL]({filename}variable-home-page-url.md):
+  * [Web apps with a variable home page URL](:apps/variable-home-page-url.html):
     This article covers Web apps that don't have a single (constant) home page URL, so their home page has to be specified by user.
-  * [Custom Actions]({filename}custom-actions.md):
+  * [Custom Actions](:apps/custom-actions.html):
     This article covers API that allows you to add custom actions like thumbs up/down rating.
-  * [Translations]({filename}translations.md): How to mark translatable strings for 
+  * [Translations](:apps/translations.html): How to mark translatable strings for 
     [Gettext-based](http://www.gnu.org/software/gettext/manual/gettext.html)
     translations framework for service integration scripts.
 
