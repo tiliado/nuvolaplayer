@@ -155,7 +155,7 @@ namespace JS{
 		public size_t get_maximum_utf8_string_size ();
 
 		[CCode (cname = "JSStringGetUTF8CString")]
-		public size_t get_utf8_string (string buffer, size_t buffer_size);
+		public size_t get_utf8_string (uint8[] buffer);
 
 		[CCode (cname = "JSStringIsEqual")]
 		public bool is_equal (String b);

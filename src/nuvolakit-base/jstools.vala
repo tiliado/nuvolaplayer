@@ -32,12 +32,10 @@ namespace Nuvola.JSTools
  * @return Vala UTF-8 string
  */
 public static string utf8_string(JS.String jsstring){
-	string str = string.nfill(jsstring.get_maximum_utf8_string_size(), ' ');
-	// TODO: check real size!
-//~ 		var size = jsstring.get_utf8_string(str, str.length);
-//~ 		return strsubstring(0, (long) size);
-	jsstring.get_utf8_string(str, str.length);
-	return str;
+	var max_size = jsstring.get_maximum_utf8_string_size();
+	uint8[] buffer = new uint8[max_size];
+	jsstring.get_utf8_string(buffer);
+	return (string) buffer;
 }
 
 /**
