@@ -35,7 +35,7 @@ public class Sidebar : Gtk.Grid
 	}
 	
 	private Gtk.Stack stack;
-	private StackMenuButton header;
+	private Diorite.StackMenuButton header;
 	
 	public Sidebar()
 	{
@@ -44,7 +44,7 @@ public class Sidebar : Gtk.Grid
 		stack.margin = 8;
 		stack.show();
 		stack.notify["visible-child-name"].connect_after(on_page_changed);
-		header = new StackMenuButton(stack);
+		header = new Diorite.StackMenuButton(stack);
 		header.stack = stack;
 		header.show();
 		header.hexpand = true;
