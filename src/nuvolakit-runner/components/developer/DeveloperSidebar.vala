@@ -25,7 +25,6 @@
 namespace Nuvola
 {
 
-// TODO: Move to Diorite
 public class HeaderLabel: Gtk.Label
 {
 	public HeaderLabel(string? text)
