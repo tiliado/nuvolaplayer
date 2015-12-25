@@ -101,6 +101,16 @@ public class WebAppMeta : GLib.Object
 		return false;
 	}
 	
+	public string? get_icon_name(int size)
+	{
+		return lookup_theme_icon(size) != null ? "nuvolaplayer3_" + id : null;
+	}
+	
+	public string? get_icon_name_or_path(int size)
+	{
+		return get_icon_name(size) ?? get_icon_path(size);
+	}
+	
 	/**
 	 * Returns icon path for the given size.
 	 * 
@@ -109,6 +119,14 @@ public class WebAppMeta : GLib.Object
 	 */
 	public string? get_icon_path(int size)
 	{
+		var theme_icon = lookup_theme_icon(size);
+		if (theme_icon != null)
+		{
+			var path = theme_icon.get_filename();
+			if (path != null && path[0] != '\0')
+				return path;
+		}
+		
 		lookup_icons();
 		if (size <= 0)
 			return icons != null ? icons.last().data.path : get_old_main_icon();
@@ -127,6 +145,16 @@ public class WebAppMeta : GLib.Object
 	 */
 	public Gdk.Pixbuf? get_icon_pixbuf(int size) requires (size > 0)
 	{		
+		try
+		{
+			var theme = Gtk.IconTheme.get_default();
+			return theme.load_icon("nuvolaplayer3_" + id, size, Gtk.IconLookupFlags.FORCE_SIZE).copy();
+		}
+		catch (GLib.Error e)
+		{
+			debug("Icon pixbuf %d: %s", size, e.message);
+		}
+		
 		lookup_icons();
 		/* Return the first icon >= size */
 		foreach (var icon in icons)
@@ -162,6 +190,14 @@ public class WebAppMeta : GLib.Object
 		}
 		
 		return Diorite.Icons.load_theme_icon({Nuvola.get_app_icon()}, size);
+	}
+	
+	private Gtk.IconInfo? lookup_theme_icon(int size, Gtk.IconLookupFlags flags=0)
+	{
+		var icon = Gtk.IconTheme.get_default().lookup_icon("nuvolaplayer3_" + id, size > 0 ? size : 1024, 0);
+		if (icon == null)
+			debug("Theme icon %s %d not found.", "nuvolaplayer3_" + id, size);
+		return icon;
 	}
 	
 	private void lookup_icons(bool refresh=false)
