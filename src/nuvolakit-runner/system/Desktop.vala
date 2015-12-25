@@ -81,7 +81,7 @@ public KeyFile create_desktop_file(WebAppMeta web_app)
 	key_file.set_string(GROUP, "Exec", "%s -a %s".printf(Nuvola.get_app_id(), web_app.id));
 	key_file.set_string(GROUP, "Type", "Application");
 	key_file.set_string(GROUP, "Categories", web_app.categories);
-	key_file.set_string(GROUP, "Icon", web_app.get_icon_path(0) ?? Nuvola.get_app_icon());
+	key_file.set_string(GROUP, "Icon", web_app.get_icon_name_or_path(-1) ?? Nuvola.get_app_icon());
 	key_file.set_string(GROUP, "StartupWMClass", build_dashed_id(web_app.id));
 	key_file.set_boolean(GROUP, "StartupNotify", true);
 	key_file.set_boolean(GROUP, "Terminal", false);
