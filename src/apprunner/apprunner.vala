@@ -90,6 +90,10 @@ public int main(string[] args)
 	  : (Args.verbose ? GLib.LogLevelFlags.LEVEL_INFO: GLib.LogLevelFlags.LEVEL_WARNING),
 	  "Runner");
 	
+	// Init GTK early to have be able to use Gtk.IconTheme stuff
+	string[] empty_argv = {};
+	Gtk.init(ref empty_argv);
+	
 	try
 	{
 		var app_dir = File.new_for_path(Args.app_dir);
