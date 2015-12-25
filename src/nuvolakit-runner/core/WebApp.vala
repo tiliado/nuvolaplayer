@@ -123,49 +123,25 @@ public class WebAppMeta : GLib.Object
 	/**
 	 * Returns icon pixbuf for the given size.
 	 * 
-	 * @param size    minimal size of the icon or `0` for the largest (scalable) icon
 	 * @return        pixbuf with icon scaled to the given size
 	 */
-	public Gdk.Pixbuf? get_icon_pixbuf(int size)
+	public Gdk.Pixbuf? get_icon_pixbuf(int size) requires (size > 0)
 	{		
 		lookup_icons();
-		if (size <= 0)
+		/* Return the first icon >= size */
+		foreach (var icon in icons)
 		{
-			/* Return the largest icon */
-			unowned List<IconInfo?>? cursor = icons != null ? icons.last() : null;
-			while (cursor != null)
+			if (icon.size <= 0 || icon.size >= size)
 			{
-				unowned IconInfo icon = cursor.data;
 				try
 				{
-					var pixbuf = new Gdk.Pixbuf.from_file_at_scale(icon.path, size, size, false);
+					var pixbuf =  new Gdk.Pixbuf.from_file_at_scale(icon.path, size, size, false);
 					if (pixbuf != null)
 						return pixbuf;
 				}
 				catch (GLib.Error e)
 				{
 					warning("Failed to load icon from file %s: %s", icon.path, e.message);
-				}
-				cursor = cursor.prev;
-			}
-		}
-		else
-		{
-			/* Return the first icon >= size */
-			foreach (var icon in icons)
-			{
-				if (icon.size <= 0 || icon.size >= size)
-				{
-					try
-					{
-						var pixbuf =  new Gdk.Pixbuf.from_file_at_scale(icon.path, size, size, false);
-						if (pixbuf != null)
-							return pixbuf;
-					}
-					catch (GLib.Error e)
-					{
-						warning("Failed to load icon from file %s: %s", icon.path, e.message);
-					}
 				}
 			}
 		}
