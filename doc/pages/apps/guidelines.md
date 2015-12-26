@@ -68,18 +68,20 @@ own icons, the resulting icon set must consist of:
  * `64.png` - 64×64 px PNG icon
  * `128.png` - 128×128 px PNG icon
  * `256.png` - 256×256 px PNG icon
- * `scalable.svg` - scalable SVG icon
+ * `scalable.svg` - scalable SVG icon with base size 512×512 px
 
-All PNG icons should be build from source SVG icons via a Makefile rule. While the file
-`scalable.svg` can be used to build icon sizes 32-256, smaller icons will need their own fine-tuned
-source SVG icons.
+All PNG icons must be build from source SVG icons via a Makefile rule. While the file
+`scalable.svg` can be used to build icon sizes 64-256, smaller icons will need their own fine-tuned
+source SVG icons: icons 16, 22 and 24 from a SVG image with base size 16 px and icons 32 and 48 from a SVG image
+with base size 32 px. See [template](https://github.com/tiliado/nuvolaplayer/blob/master/web_apps/template/)
+for inspiration.
 
 !!! danger "Beware of copyright infringement"
 
-    Common mistake is to take an official logo of a particular streaming service, resize it or crop
+    A common mistake is to take an official logo of a particular streaming service, resize it or crop
     it and then use it as icon for Nuvola Player. This approach has always led to violation of the
     first rule regarding to copyright and license and affected integration scripts were rejected
-    until the file was removed
+    until the file was removed.
 
 Git & GitHub Guidelines
 =======================
