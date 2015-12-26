@@ -29,10 +29,11 @@ DEST ?= $(HOME)/.local/share/nuvolaplayer3/web_apps
 # Sizes of the whole icon set
 ICON_SIZES ?= 16 22 24 32 48 64 128 256
 # Filenames
+INSTALL_FILES = metadata.json integrate.js
 LICENSES = LICENSE-BSD.txt LICENSE-CC-BY.txt
 SOURCE_ICON ?= src/icon.svg
-SOURCE_ICON_16 ?= src/icon.16.svg
-SOURCE_ICON_22 ?= src/icon.22.svg
+SOURCE_ICON_XS ?= src/icon-xs.svg
+SOURCE_ICON_SM ?= src/icon-sm.svg
 ICONS_DIR ?= icons
 PNG_ICONS = $(foreach size,$(ICON_SIZES),$(ICONS_DIR)/$(size).png)
 SCALABLE_ICON = $(ICONS_DIR)/scalable.svg
@@ -57,23 +58,31 @@ build: deps $(PNG_ICONS) $(SCALABLE_ICON)
 $(ICONS_DIR):
 	mkdir -p $@
 	
-# Icon 16
-$(ICONS_DIR)/16.png : $(SOURCE_ICON_16) | $(ICONS_DIR)
+# Generate icon 16
+$(ICONS_DIR)/16.png: $(SOURCE_ICON_XS) | $(ICONS_DIR)
 	rsvg-convert -w 16 -h 16 $< -o $@
 
-# Icon 22	
-$(ICONS_DIR)/22.png : $(SOURCE_ICON_22) | $(ICONS_DIR)
+# Generate icon 22	
+$(ICONS_DIR)/22.png : $(SOURCE_ICON_XS) | $(ICONS_DIR)
 	rsvg-convert -w 22 -h 22 $< -o $@
 
-# Icon 24	
-$(ICONS_DIR)/24.png : $(SOURCE_ICON_22) | $(ICONS_DIR)
+# Generate icon 24	
+$(ICONS_DIR)/24.png : $(SOURCE_ICON_XS) | $(ICONS_DIR)
 	rsvg-convert -w 24 -h 24 $< -o $@
 
-# Icons 32 48 64 128 256
+# Generate icon 32	
+$(ICONS_DIR)/32.png : $(SOURCE_ICON_SM) | $(ICONS_DIR)
+	rsvg-convert -w 32 -h 32 $< -o $@
+
+# Generate icon 48
+$(ICONS_DIR)/48.png : $(SOURCE_ICON_SM) | $(ICONS_DIR)
+	rsvg-convert -w 48 -h 48 $< -o $@
+
+# Generate icons 64 128 256
 $(ICONS_DIR)/%.png : $(SOURCE_ICON) | $(ICONS_DIR)
 	rsvg-convert -w $* -h $* $< -o $@
 
-# Scalable icon
+# Copy scalable icon
 $(SCALABLE_ICON) : $(SOURCE_ICON) | $(ICONS_DIR)
 	cp $< $@
 
@@ -83,10 +92,25 @@ clean:
 
 # Install files
 install: $(LICENSES) metadata.json integrate.js $(PNG_ICONS) $(SCALABLE_ICON)
+	# Install data
 	install -vCd $(DEST)/$(APP_ID)/$(ICONS_DIR)
 	install -vC -t $(DEST)/$(APP_ID) $(LICENSES) metadata.json integrate.js
 	install -vC -t $(DEST)/$(APP_ID)/$(ICONS_DIR) $(PNG_ICONS) $(SCALABLE_ICON)
+	
+	# Create symlinks to icons
+	mkdir -pv $(DEST)/../../icons/hicolor/scalable/apps || true
+	ln -s -f -v -T $(DEST)/$(APP_ID)/$(SCALABLE_ICON) \
+		$(DEST)/../../icons/hicolor/scalable/apps/nuvolaplayer3_$(APP_ID).svg;
+	for size in $(ICON_SIZES); do \
+		mkdir -pv $(DEST)/../../icons/hicolor/$${size}x$${size}/apps || true ; \
+		ln -s -f -v -T $(DEST)/$(APP_ID)/$(ICONS_DIR)/$$size.png \
+		$(DEST)/../../icons/hicolor/$${size}x$${size}/apps/nuvolaplayer3_$(APP_ID).png; \
+	done
 
 # Uninstall files
 uninstall:
-	rm -rv $(DEST)/$(APP_ID)
+	rm -fv $(DEST)/../../icons/hicolor/scalable/apps/nuvolaplayer3_$(APP_ID).svg
+	for size in $(ICON_SIZES); do \
+		rm -fv $(DEST)/../../icons/hicolor/$${size}x$${size}/apps/nuvolaplayer3_$(APP_ID).png; \
+	done
+	rm -rfv $(DEST)/$(APP_ID)
