@@ -145,14 +145,17 @@ public class WebAppMeta : GLib.Object
 	 */
 	public Gdk.Pixbuf? get_icon_pixbuf(int size) requires (size > 0)
 	{		
-		try
+		var info = lookup_theme_icon(size, Gtk.IconLookupFlags.FORCE_SIZE);
+		if (info != null)
 		{
-			var theme = Gtk.IconTheme.get_default();
-			return theme.load_icon("nuvolaplayer3_" + id, size, Gtk.IconLookupFlags.FORCE_SIZE).copy();
-		}
-		catch (GLib.Error e)
-		{
-			debug("Icon pixbuf %d: %s", size, e.message);
+			try
+			{
+				return info.load_icon().copy();
+			}
+			catch (GLib.Error e)
+			{
+				warning("Icon pixbuf %d: %s", size, e.message);
+			}
 		}
 		
 		lookup_icons();
@@ -194,7 +197,14 @@ public class WebAppMeta : GLib.Object
 	
 	private Gtk.IconInfo? lookup_theme_icon(int size, Gtk.IconLookupFlags flags=0)
 	{
-		var icon = Gtk.IconTheme.get_default().lookup_icon("nuvolaplayer3_" + id, size > 0 ? size : 1024, 0);
+		/* Any large icon requested */
+		if (size <= 0)
+			size = 1024;
+		/* Avoid use of SVG icon for small icon sizes because of a too large borders for this icon sizes */	
+		else if (size <= 32)
+			flags |= Gtk.IconLookupFlags.NO_SVG;
+		
+		var icon = Gtk.IconTheme.get_default().lookup_icon("nuvolaplayer3_" + id, size, flags);
 		if (icon == null)
 			debug("Theme icon %s %d not found.", "nuvolaplayer3_" + id, size);
 		return icon;
