@@ -32,6 +32,26 @@ public WebExtension extension;
 public void webkit_web_extension_initialize(WebKit.WebExtension extension)
 {
 	Diorite.Logger.init(stderr, GLib.LogLevelFlags.LEVEL_DEBUG, "Worker");
+	
+	var debug_sleep = Environment.get_variable("NUVOLA_WEB_WORKER_SLEEP");
+	if (debug_sleep != null)
+	{
+		var seconds = int.parse(debug_sleep);
+		if (seconds > 0)
+		{
+			warning("WebWorker is going to sleep for %d seconds.", seconds);
+			#if LINUX
+			warning("Run `gdb -p %d` to debug it with gdb.", (int) Posix.getpid());
+			#endif
+			GLib.Thread.usleep(seconds * 1000000);
+			warning("WebWorker is awake.");
+		}
+		else
+		{
+			warning("Invalid NUVOLA_WEB_WORKER_SLEEP variable: %s", debug_sleep);
+		}
+	}
+	
 	if (Environment.get_variable("NUVOLA_TEST_ABORT") == "worker")
 		error("Web Worker abort requested.");
 		

@@ -58,10 +58,22 @@ debug_app_runner_criticals()
 
 debug_app_runner_join()
 {
-	echo Use "'target remote localhost:9090'"
+	echo Wait for App Runner process to start, then type "'target remote localhost:9090'" and "'continue'"
 	libtool --mode=execute gdb build/apprunner
 }
 
+debug_web_worker()
+{
+	./waf -v && XDG_DATA_DIRS=build/share:/usr/share:/usr/local/share \
+	NUVOLA_LIBDIR=build NUVOLA_WEB_WORKER_SLEEP=30 build/nuvolaplayer3 -D "$@"
+}
+
+debug_web_worker_criticals()
+{
+	./waf -v && XDG_DATA_DIRS=build/share:/usr/share:/usr/local/share \
+	NUVOLA_LIBDIR=build G_DEBUG=fatal-criticals NUVOLA_WEB_WORKER_SLEEP=30 \
+	build/nuvolaplayer3 -D "$@"
+}
 
 watch_and_build()
 {
