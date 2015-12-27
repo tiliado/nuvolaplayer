@@ -32,6 +32,9 @@ public WebExtension extension;
 public void webkit_web_extension_initialize(WebKit.WebExtension extension)
 {
 	Diorite.Logger.init(stderr, GLib.LogLevelFlags.LEVEL_DEBUG, "Worker");
+	if (Environment.get_variable("NUVOLA_TEST_ABORT") == "worker")
+		error("Web Worker abort requested.");
+		
 	var runner = new Diorite.Ipc.MessageClient(Environment.get_variable("NUVOLA_IPC_UI_RUNNER"), 5000);
 	var server = new Diorite.Ipc.MessageServer(Environment.get_variable("NUVOLA_IPC_WEB_WORKER"));
 	Nuvola.extension = new Nuvola.WebExtension(extension, runner, server); 

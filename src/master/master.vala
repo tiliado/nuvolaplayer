@@ -87,6 +87,9 @@ public int main(string[] args)
 	 : (Args.verbose ? GLib.LogLevelFlags.LEVEL_INFO: GLib.LogLevelFlags.LEVEL_WARNING),
 	 "Master");
 	
+	if (Environment.get_variable("NUVOLA_TEST_ABORT") == "master")
+		error("Master abort requested.");
+	
 	if (Args.apps_dir == null)
 		Args.apps_dir = Environment.get_variable("NUVOLA_WEB_APPS_DIR");
 	

@@ -90,6 +90,9 @@ public int main(string[] args)
 	  : (Args.verbose ? GLib.LogLevelFlags.LEVEL_INFO: GLib.LogLevelFlags.LEVEL_WARNING),
 	  "Runner");
 	
+	if (Environment.get_variable("NUVOLA_TEST_ABORT") == "runner")
+		error("App runner abort requested.");
+	
 	// Init GTK early to have be able to use Gtk.IconTheme stuff
 	string[] empty_argv = {};
 	Gtk.init(ref empty_argv);
