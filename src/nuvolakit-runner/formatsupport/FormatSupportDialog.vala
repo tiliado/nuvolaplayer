@@ -165,7 +165,7 @@ public class FormatSupportDialog: Gtk.Dialog
 			if (format_support.n_flash_plugins == 0)
 				info_bar.add_button("Help", 0).clicked.connect(() => {app.show_uri("http://tiliado.github.io/nuvolaplayer/documentation/3.0/install.html");});
 			info_bar.show_all();
-			plugins_view.attach(info_bar, 0, 5, 2, 1);
+			plugins_view.attach(info_bar, 0, 2, 2, 1);
 		}
 		
 		if (flash_plugins_grid.get_children() == null)
