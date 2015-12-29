@@ -50,7 +50,20 @@ public bool write_desktop_file_sync(WebAppMeta web_app)
 	}
 	catch (GLib.Error e)
 	{
-		warning("Failed to write key file '%s': %s", file.get_path(), e.message);
+		var readonly = false;
+		try
+		{
+			var info = file.query_info("access::can-write", 0, null);
+			readonly = !info.get_attribute_boolean("access::can-write");
+		}
+		catch (GLib.Error e2)
+		{
+			warning("Query file info error: %s", e2.message);
+		}
+		if (readonly)
+			message("Desktop launcher '%s' has not been modified because it is read-only.", file.get_path());
+		else
+			warning("Failed to write key file '%s': %s", file.get_path(), e.message);
 	}
 	return existed;
 }
@@ -68,7 +81,20 @@ public async bool write_desktop_file(WebAppMeta web_app)
 	}
 	catch (GLib.Error e)
 	{
-		warning("Failed to write key file '%s': %s", file.get_path(), e.message);
+		var readonly = false;
+		try
+		{
+			var info = file.query_info("access::can-write", 0, null);
+			readonly = !info.get_attribute_boolean("access::can-write");
+		}
+		catch (GLib.Error e2)
+		{
+			warning("Query file info error: %s", e2.message);
+		}
+		if (readonly)
+			message("Desktop launcher '%s' is read-only.", file.get_path());
+		else
+			warning("Failed to write key file '%s': %s", file.get_path(), e.message);
 	}
 	return existed;
 }
