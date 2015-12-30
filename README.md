@@ -111,3 +111,8 @@ or
 helpful:
 
     # ./waf --no-system-hooks --destdir=/whatever
+
+Changelog
+---------
+
+See [CHANGELOG.md](./CHANGELOG.md).
