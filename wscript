@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 #
-# Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
+# Copyright 2014-2015 Jiří Janoušek <janousek.jiri@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met: 
@@ -183,7 +183,7 @@ def configure(ctx):
 	ctx.env.append_unique("LINKFLAGS", ["-Wl,--no-undefined", "-Wl,--as-needed"])
 	
 	# Check dependencies
-	ctx.env.DIORITE_SERIES = DIORITE_SERIES = "0.1"
+	ctx.env.DIORITE_SERIES = DIORITE_SERIES = "0.2"
 	ctx.check_dep('glib-2.0', 'GLIB', '2.40')
 	ctx.check_dep('gio-2.0', 'GIO', '2.40')
 	ctx.check_dep('gthread-2.0', 'GTHREAD', '2.40')
