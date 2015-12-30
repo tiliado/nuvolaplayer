@@ -94,6 +94,6 @@ public string get_welcome_screen_name()
 	return WELCOME_SCREEN_NAME;
 }
 
-public const string HELP_URL = "https://tiliado.github.io/nuvolaplayer/documentation/3.0/help.html";
+public const string HELP_URL = "https://tiliado.github.io/nuvolaplayer/documentation/3.1/help.html";
 
 } // namespace Nuvola

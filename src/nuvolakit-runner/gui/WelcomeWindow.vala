@@ -29,7 +29,7 @@ private const string WELCOME_TEXT = """
 <h1>%1$s</h1>
 <p>
   <b>Congratulations!</b> You have installed %1$s.
-  <a href="https://tiliado.github.io/nuvolaplayer/documentation/3.0/notes.html">Read release notes</a> to find out
+  <a href="https://tiliado.github.io/nuvolaplayer/documentation/3.1.html">Read release notes</a> to find out
   what is new.
 </p>
 <h2>Be connected</h2>
@@ -47,12 +47,12 @@ private const string WELCOME_TEXT = """
 </ul>
 
 <h2>Explore all features</h2>
-<p>We reccommend you to <a href="https://tiliado.github.io/nuvolaplayer/documentation/3.0/explore.html">explore all features</a> including</p>
+<p>We reccommend you to <a href="https://tiliado.github.io/nuvolaplayer/documentation/3.1/explore.html">explore all features</a> including</p>
 <ul>
-  <li><a href="https://tiliado.github.io/nuvolaplayer/documentation/3.0/explore.html#explore-unity">Unity integration</a></li>
-  <li><a href="https://tiliado.github.io/nuvolaplayer/documentation/3.0/explore.html#explore-gnome">GNOME integration</a></li>
-  <li><a href="https://tiliado.github.io/nuvolaplayer/documentation/3.0/explore.html#explore-common">Common features</a></li>
-  <li><a href="https://tiliado.github.io/nuvolaplayer/documentation/3.0/explore.html#explore-terminal">Command line controller</a></li>
+  <li><a href="https://tiliado.github.io/nuvolaplayer/documentation/3.1/explore.html#explore-unity">Unity integration</a></li>
+  <li><a href="https://tiliado.github.io/nuvolaplayer/documentation/3.1/explore.html#explore-gnome">GNOME integration</a></li>
+  <li><a href="https://tiliado.github.io/nuvolaplayer/documentation/3.1/explore.html#explore-common">Common features</a></li>
+  <li><a href="https://tiliado.github.io/nuvolaplayer/documentation/3.1/explore.html#explore-terminal">Command line controller</a></li>
 </ul>
 
 <h2>Get help</h2>

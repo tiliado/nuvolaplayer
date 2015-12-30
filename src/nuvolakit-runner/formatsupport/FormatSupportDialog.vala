@@ -163,7 +163,7 @@ public class FormatSupportDialog: Gtk.Dialog
 			? "No Flash plugins have been found."
 			: "Too many Flash plugins have been found, wrong version may have been used."));
 			if (format_support.n_flash_plugins == 0)
-				info_bar.add_button("Help", 0).clicked.connect(() => {app.show_uri("http://tiliado.github.io/nuvolaplayer/documentation/3.0/install.html");});
+				info_bar.add_button("Help", 0).clicked.connect(() => {app.show_uri("http://tiliado.github.io/nuvolaplayer/documentation/3.1/install.html");});
 			info_bar.show_all();
 			plugins_view.attach(info_bar, 0, 2, 2, 1);
 		}
@@ -182,7 +182,7 @@ public class FormatSupportDialog: Gtk.Dialog
 		gstreamer_switch.vexpand = flash_warning_switch.hexpand = false;
 		gstreamer_switch.show();
 		var help_button = new Gtk.Button.with_label("Help");
-		help_button.clicked.connect(() => {app.show_uri("http://tiliado.github.io/nuvolaplayer/documentation/3.0/install.html");});
+		help_button.clicked.connect(() => {app.show_uri("http://tiliado.github.io/nuvolaplayer/documentation/3.1/install.html");});
 		var mp3_view = new Mp3View(format_support, mp3_warning_switch, gstreamer_switch, help_button);
 		mp3_view.show();
 		notebook.append_page(mp3_view, new Gtk.Label("MP3 format"));
