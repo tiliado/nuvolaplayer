@@ -26,6 +26,12 @@ namespace Nuvola
 {
 
 private const string WELCOME_TEXT = """
+<h1>%1$s</h1>
+<p>
+  <b>Congratulations!</b> You have installed %1$s.
+  <a href="https://tiliado.github.io/nuvolaplayer/documentation/3.0/notes.html">Read release notes</a> to find out
+  what is new.
+</p>
 <h2>Be connected</h2>
 <p>Get informed about new features, new streaming services and bug fixes.</p>
 <ul>
@@ -93,8 +99,7 @@ public class WelcomeWindow : Diorite.ApplicationWindow
 		var buffer = new Diorite.RichTextBuffer();
 		try
 		{
-			buffer.load("<h1>%s</h1>\n".printf(get_welcome_screen_name()));
-			buffer.append(WELCOME_TEXT);
+			buffer.load(WELCOME_TEXT.printf(get_welcome_screen_name()));
 		}
 		catch (MarkupError e)
 		{
