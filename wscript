@@ -183,7 +183,7 @@ def configure(ctx):
 	ctx.env.append_unique("LINKFLAGS", ["-Wl,--no-undefined", "-Wl,--as-needed"])
 	
 	# Check dependencies
-	ctx.env.DIORITE_SERIES = DIORITE_SERIES = "0.2"
+	ctx.env.DIORITE_SERIES = DIORITE_SERIES = "0.3"
 	ctx.check_dep('glib-2.0', 'GLIB', '2.40')
 	ctx.check_dep('gio-2.0', 'GIO', '2.40')
 	ctx.check_dep('gthread-2.0', 'GTHREAD', '2.40')
