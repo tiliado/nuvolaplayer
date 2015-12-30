@@ -35,6 +35,7 @@ VERSION = "3.0.0+"
 UNIQUE_NAME="cz.fenryxo.NuvolaPlayer3"
 GENERIC_NAME = "Cloud Player"
 BLURB = "Cloud music integration for your Linux desktop"
+WELCOME_SCREEN_NAME = "Nuvola Player 3.0 Beta"
 
 import subprocess
 try:
@@ -232,6 +233,7 @@ def configure(ctx):
 	
 	ctx.define("NUVOLA_APPNAME", APPNAME)
 	ctx.define("NUVOLA_NAME", NAME)
+	ctx.define("NUVOLA_WELCOME_SCREEN_NAME", WELCOME_SCREEN_NAME)
 	ctx.define("NUVOLA_UNIQUE_NAME", UNIQUE_NAME)
 	ctx.define("NUVOLA_APP_ICON", APPNAME)
 	ctx.define("NUVOLA_VERSION", VERSION)

@@ -26,6 +26,7 @@ namespace Nuvola
 {
 private extern const string APPNAME;
 private extern const string NAME;
+private extern const string WELCOME_SCREEN_NAME;
 private extern const string UNIQUE_NAME;
 private extern const string APP_ICON;
 private extern const string VERSION;
@@ -86,6 +87,11 @@ public string get_libdir()
 public string get_app_runner_path()
 {
 	return get_libdir() + "/apprunner"; 
+}
+
+public string get_welcome_screen_name()
+{
+	return WELCOME_SCREEN_NAME;
 }
 
 public const string HELP_URL = "https://tiliado.github.io/nuvolaplayer/documentation/3.0/help.html";

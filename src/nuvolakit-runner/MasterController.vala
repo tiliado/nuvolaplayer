@@ -79,6 +79,7 @@ public class MasterController : Diorite.Application
 		
 		main_window.show_all();
 		main_window.present();
+		show_welcome_window();
 		release();
 	}
 	
@@ -92,6 +93,7 @@ public class MasterController : Diorite.Application
 		main_window.category = "AudioVideo";
 		main_window.show_all();
 		main_window.present();
+		show_welcome_window();
 		release();
 	}
 	
@@ -105,6 +107,7 @@ public class MasterController : Diorite.Application
 		main_window.category = null;
 		main_window.show_all();
 		main_window.present();
+		show_welcome_window();
 		release();
 	}
 	
@@ -191,6 +194,16 @@ public class MasterController : Diorite.Application
 		main_window = new WebAppListWindow(this, model);
 		main_window.delete_event.connect(on_main_window_delete_event);
 		main_window.view.item_activated.connect_after(on_list_item_activated);
+	}
+	
+	private void show_welcome_window()
+	{
+		if (config.get_string("nuvola.welcome_screen") != get_welcome_screen_name())
+		{
+			var welcome_window = new WelcomeWindow(this, storage);
+			welcome_window.present();
+			config.set_string("nuvola.welcome_screen", get_welcome_screen_name());
+		}
 	}
 	
 	public override int command_line(ApplicationCommandLine command_line)
@@ -471,6 +484,8 @@ public class MasterController : Diorite.Application
 			debug("App runner for '%s' is already running.", app_id);
 		else
 			app_runners_map[app_id] = runner;
+		
+		show_welcome_window();
 	}
 	
 	private void on_runner_exited(AppRunner runner)
