@@ -204,7 +204,11 @@ public class MPRISPlayer : GLib.Object
 			metadata.insert("mpris:artUrl", "file://" + player.artwork_file);
 		
 		if (metadata.size() > 0)
+		{
 			metadata.insert("mpris:trackid", new Variant.string("1"));
+			// Workaround for a bug eonpatapon/gnome-shell-extensions-mediaplayer#234
+			metadata.insert("xesam:genre", new Variant.array(VariantType.STRING, {}));
+		}
 		return metadata;
 	}
 	
