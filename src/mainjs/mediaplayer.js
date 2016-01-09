@@ -30,6 +30,11 @@ require("mediakeys");
 require("storage");
 require("browser");
 require("core");
+require("gettext");
+
+// Translations
+var _ = Nuvola.Translate.gettext;
+var C_ = Nuvola.Translate.pgettext;
 
 /**
  * @enum Base media player @link{Actions|actions}
@@ -82,6 +87,17 @@ var PlaybackState = {
      */
     PLAYING: 2,
 }
+
+// New key
+var RUN_IN_BACKGROUND = "player.run_in_background";
+// Deprecated key - for backward compatibility
+var BACKGROUND_PLAYBACK = "player.background_playback";
+
+var RUN_IN_BACKGROUND_OPTIONS = [
+    ["always", C_("Background playback", "Always")],
+    ["playing", C_("Background playback", "When song is playing")],
+    ["never", C_("Background playback", "Never")]
+];
 
 /**
  * Media player controller.
@@ -268,8 +284,6 @@ MediaPlayer.addExtraActions = function(actions)
         this._updateMenu();
 }
 
-MediaPlayer._BACKGROUND_PLAYBACK = "player.background_playback";
-
 MediaPlayer._onInitAppRunner = function(emitter)
 {
     Nuvola.launcher.setActions(["quit"]);
@@ -281,7 +295,12 @@ MediaPlayer._onInitAppRunner = function(emitter)
     Nuvola.actions.addAction("playback", "win", PlayerAction.NEXT_SONG, "Next song", null, "media-skip-forward", null);
     Nuvola.actions.addAction("playback", "win", PlayerAction.PLAYBACK_NOTIFICATION, "Show playback notification", null, null, null);
     this._notification.setActions([PlayerAction.PREV_SONG, PlayerAction.PLAY, PlayerAction.PAUSE, PlayerAction.NEXT_SONG]);
-    Nuvola.config.setDefault(this._BACKGROUND_PLAYBACK, true);
+    
+    // Take into account the old BACKGROUND_PLAYBACK value
+    Nuvola.config.setDefault(BACKGROUND_PLAYBACK, true);
+    var defaultOption = RUN_IN_BACKGROUND_OPTIONS[Nuvola.config.get(BACKGROUND_PLAYBACK) ? 1 : 2][0]
+    Nuvola.config.setDefault(RUN_IN_BACKGROUND, defaultOption);
+    
     this._updateMenu();
     Nuvola.core.connect("PreferencesForm", this);
 }
@@ -390,14 +409,23 @@ MediaPlayer._updateMenu = function()
 
 MediaPlayer._onQuitRequest = function(emitter, result)
 {
-    if (this._state === PlaybackState.PLAYING && Nuvola.config.get(this._BACKGROUND_PLAYBACK))
+    var option = Nuvola.config.get(RUN_IN_BACKGROUND);
+    if (option == RUN_IN_BACKGROUND_OPTIONS[0][0]
+    || option == RUN_IN_BACKGROUND_OPTIONS[1][0] && this._state === PlaybackState.PLAYING)
+    {
         result.approved = false;
+    }
 }
 
 MediaPlayer._onPreferencesForm = function(object, values, entries)
 {
-    values[this._BACKGROUND_PLAYBACK] = Nuvola.config.get(this._BACKGROUND_PLAYBACK);
-    entries.push(["bool", this._BACKGROUND_PLAYBACK, "Keep playing in background when window is closed"]);
+    values[RUN_IN_BACKGROUND] = Nuvola.config.get(RUN_IN_BACKGROUND);
+    entries.push(["label", _("Run in background when window is closed")]);
+    for (var i = 0; i < RUN_IN_BACKGROUND_OPTIONS.length; i++)
+    {
+        var option = RUN_IN_BACKGROUND_OPTIONS[i];
+        entries.push(["option", RUN_IN_BACKGROUND, option[0], option[1]]);
+    }
 }    
 
 MediaPlayer._onMediaKeyPressed = function(emitter, key)
