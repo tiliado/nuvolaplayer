@@ -124,6 +124,14 @@ This file contains several mandatory fields:
     This field is not required if you use custom function to handle home page request.
     See [Web apps with a variable home page URL](:apps/variable-home-page-url.html).
 
+`requirements`
+
+:   If your streaming service requires **Flash plugin** or **HTML5 Audio support** for playback
+    (very likely), you have to
+    [set a proper format requirement flag](https://github.com/tiliado/nuvolaplayer/issues/158#issuecomment-177193663).
+    Although Nuvola Player 3.0 currently doesn't check this flag and enables both Flash and HTML5 Audio by default,
+    this is going to be changed in the next stable release **Nuvola Player 3.2**.
+
 This file can include also optional fields:
 
 `window_width`, `window_height`
