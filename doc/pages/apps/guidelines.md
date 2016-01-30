@@ -11,7 +11,7 @@ Formal Rules
    preferably the same license as Nuvola Player (BSD 2-Clause "Simplified" or "FreeBSD" license).
    Full text of a license must be provided in file `LICENSE` or `LICENSE.txt`. If more than one
    license are used, add a distinguishing suffix, e.g. `LICENSE-BSD.txt`. You can look at
-   [README.md template](https://github.com/tiliado/nuvolaplayer/blob/master/web_apps/template/README.md)
+   [README.md template](https://github.com/tiliado/nuvola-app-template/blob/master/README.md)
    for inspiration.
 
 2. The field ``maintainer_link`` of ``metadata.json`` must contain URL of your
@@ -32,7 +32,7 @@ Formal Rules
 
 8. Your repository must contain file `CONTRIBUTING.md` with instructions for contributors.
    You can copy
-   [CONTRIBUTING.md template](https://github.com/tiliado/nuvolaplayer/blob/master/web_apps/template/CONTRIBUTING.md)
+   [CONTRIBUTING.md template](https://github.com/tiliado/nuvola-app-template/blob/master/CONTRIBUTING.md)
    and adjust it to your needs.
 
 License
@@ -73,7 +73,7 @@ own icons, the resulting icon set must consist of:
 All PNG icons must be build from source SVG icons via a Makefile rule. While the file
 `scalable.svg` can be used to build icon sizes 64-256, smaller icons will need their own fine-tuned
 source SVG icons: icons 16, 22 and 24 from a SVG image with base size 16 px and icons 32 and 48 from a SVG image
-with base size 32 px. See [template](https://github.com/tiliado/nuvolaplayer/blob/master/web_apps/template/)
+with base size 32 px. See [template](https://github.com/tiliado/nuvola-app-template/tree/master)
 for inspiration.
 
 !!! danger "Beware of copyright infringement"
