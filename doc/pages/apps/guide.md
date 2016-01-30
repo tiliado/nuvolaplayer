@@ -18,13 +18,12 @@ Prepare development environment
         :::sh
         mkdir -p ~/projects/nuvola-player
      
- 3. Create a copy of the test service shipped with Nuvola Player 3.
+  3. Download [a web app integration template](https://github.com/tiliado/nuvola-app-template).
     
         :::sh
         cd ~/projects/nuvola-player
-        cp -r /usr/share/nuvolaplayer3/web_apps/template ./happy-songs
-        # or
-        cp -r /usr/local/share/nuvolaplayer3/web_apps/template ./happy-songs
+        wget https://github.com/tiliado/nuvola-app-template/archive/master.tar.gz -O - | tar -xz
+        mv nuvola-app-template-master happy-songs
     
  4. Create new integration files and open them in your preferred plan-text editor (Gedit,
     for example).
