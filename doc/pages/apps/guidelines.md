@@ -86,6 +86,20 @@ for inspiration.
 Git & GitHub Guidelines
 =======================
 
+### Releases
+
+  * **Never increase version number** in `metadata.json` in regular commits nor in pull requests,
+    but only in special release commits with a commit message `Release X.Y` and git tag `X.Y`
+    (not `vX.Y` nor `release-X.Y`, just `X.Y`). Moreover, **you don't have to make release
+    commits at all**, just jump to the next step.
+  * Create a Github issue "Release X.Y" and assing it to @fenryxo when ready for a new release.
+    He will decide whether the release should be made or a few other changes should be made before next
+    release. He will also create a tagged release commit and build new packages for the Nuvola Player
+    Package Repository.
+  * Don't hesitate to release often. Packages of service integration script are lightweight
+    with a typical build time a few seconds thanks to [fpm](https://github.com/jordansissel/fpm).
+    Users will love you if you release a fix as soon as possible.
+
 ### Commit Messages
 
 Commit messages should follow this template:
@@ -214,13 +228,6 @@ Always **merge** pull requests **via command line**:
    keep entrance barrier for contributors as low as possible.
  * Finally, ``git push``.
  * *Optionally*, you can remove remote repository: `git remote remove gh-USER/BRANCH`
-
-### Releases
-
-  * Create a Github issue "Make release X.Y" and assing it to @fenryxo when ready for a new release, but don't increase version fields in metadata.
-  * Don't hesitate to release often. Packages of service integration script are lightweight
-    with a typical build time a few seconds thanks to [fpm](https://github.com/jordansissel/fpm).
-  * Users will love you if you release a fix as soon as possible.
 
 
 Coding Style

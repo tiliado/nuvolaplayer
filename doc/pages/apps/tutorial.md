@@ -93,8 +93,10 @@ This file contains several mandatory fields:
 
 `version_minor`
 
-:   A minor version of service integration, an integer >= 0. This field should
-    be increased when a new release is made.
+:   A minor version of service integration, an integer >= 0.  This field should
+    be increased only when a new release is made. Never increase version number
+    in regular commits nor pull requests, but only in release commits with 
+    a commit message "Release X.Y".
     
 `maintainer_name`
 
