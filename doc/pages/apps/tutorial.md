@@ -107,7 +107,11 @@ This file contains several mandatory fields:
 
 `api_major` and `api_minor`
 
-:   A required version of JavaScript API, currently ``3.0``.
+:   A required version of JavaScript API, currently ``3.0``. You should update API version only
+    if your script doesn't work with older API. For example, if Nuvola Player adds a new feature
+    into API 3.X that is so essential for your script that it cannot function properly without it,
+    you will increase API requirement to 3.X. However, all Nuvola Player versions with API less
+    then 3.1 won't be able to load your script any more.
 
 ``categories``
 
