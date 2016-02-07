@@ -46,6 +46,9 @@ public class MPRISApplication: GLib.Object
 	public string[] supported_uri_schemes {owned get{return {};}}
 	public string[] supported_mime_types{owned get{return {};}}
 	
+	/* Extra properties */
+	public int nuvola_version {get{return Nuvola.get_encoded_version();}}
+	
 	public void raise()
 	{
 		app.activate();
