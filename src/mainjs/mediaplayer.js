@@ -342,7 +342,7 @@ MediaPlayer._setActions = function()
 
 MediaPlayer._sendDevelInfo = function()
 {
-    var rating = (Number) this._track.rating;
+    var rating = 1 * this._track.rating;
     if (rating < 0)
         rating = 0.0;
     else if (rating > 1)
