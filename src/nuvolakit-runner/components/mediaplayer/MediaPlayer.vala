@@ -27,6 +27,7 @@ public class Nuvola.MediaPlayer: GLib.Object, Nuvola.MediaPlayerModel
 	public string? title {get; set; default = null;}
 	public string? artist {get; set; default = null;}
 	public string? album {get; set; default = null;}
+	public double rating {get; set; default = 0.0;}
 	public string? state {get; set; default = null;}
 	public string? artwork_location {get; set; default = null;}
 	public string? artwork_file {get; set; default = null;}
@@ -43,12 +44,14 @@ public class Nuvola.MediaPlayer: GLib.Object, Nuvola.MediaPlayerModel
 		this.actions = actions;
 	}
 	
-	protected void handle_set_track_info(string? title, string? artist, string? album, string? state, string? artwork_location,
-		string? artwork_file)
+	protected void handle_set_track_info(
+		string? title, string? artist, string? album, string? state, string? artwork_location, string? artwork_file,
+		double rating)
 	{
 		this.title = title;
 		this.artist = artist;
 		this.album = album;
+		this.rating = rating;
 		this.state = state;
 		this.artwork_location = artwork_location;
 		this.artwork_file = artwork_file;

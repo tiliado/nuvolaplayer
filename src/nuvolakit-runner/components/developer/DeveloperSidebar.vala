@@ -45,6 +45,7 @@ public class DeveloperSidebar: Gtk.Grid
 	private Gtk.Label? artist = null;
 	private Gtk.Label? album = null;
 	private Gtk.Label? state = null;
+	private Gtk.Label? rating = null;
 	private SList<Gtk.Widget> action_widgets = null;
 	private HashTable<string, Gtk.RadioButton>? radios = null;
 	private MediaPlayerModel player;
@@ -87,6 +88,12 @@ public class DeveloperSidebar: Gtk.Grid
 		state = new Gtk.Label(player.state);
 		state.halign = Gtk.Align.START;
 		attach_next_to(state, label, Gtk.PositionType.BOTTOM, 1, 1);
+		label = new HeaderLabel("Rating");
+		label.halign = Gtk.Align.START;
+		add(label);
+		rating = new Gtk.Label(player.rating >= 0.0 ? player.rating.to_string() : "(null)");
+		rating.halign = Gtk.Align.START;
+		attach_next_to(rating, label, Gtk.PositionType.BOTTOM, 1, 1);
 		set_actions(player.playback_actions);
 		show_all();
 		
@@ -105,7 +112,7 @@ public class DeveloperSidebar: Gtk.Grid
 		try
 		{
 			var icon_name = broken ? "dialog-error": "audio-x-generic";
-			var pixbuf = Gtk.IconTheme.get_default().load_icon(icon_name, 100, 0);
+			var pixbuf = Gtk.IconTheme.get_default().load_icon(icon_name, 80, 0);
 			artwork.set_from_pixbuf(pixbuf);
 		}
 		catch (GLib.Error e)
@@ -129,7 +136,7 @@ public class DeveloperSidebar: Gtk.Grid
 			{
 				try
 				{
-					var pixbuf = new Gdk.Pixbuf.from_file_at_scale(player.artwork_file, 100, 100, true);
+					var pixbuf = new Gdk.Pixbuf.from_file_at_scale(player.artwork_file, 80, 80, true);
 					artwork.set_from_pixbuf(pixbuf);
 				}
 				catch (GLib.Error e)
@@ -150,6 +157,9 @@ public class DeveloperSidebar: Gtk.Grid
 			break;
 		case "state":
 			state.label = player.state ?? "(null)";
+			break;
+		case "rating":
+			rating.label = player.rating >= 0.0 ? player.rating.to_string() : "(null)";
 			break;
 		case "playback-actions":
 			set_actions(player.playback_actions);

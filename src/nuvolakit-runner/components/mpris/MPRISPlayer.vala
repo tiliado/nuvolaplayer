@@ -125,6 +125,7 @@ public class MPRISPlayer : GLib.Object
 		case "artist":
 		case "album":
 		case "artwork-file":
+		case "rating":
 			var new_metadata = create_metadata();
 			if (new_metadata.size() == 0 && metadata.size() == 0)
 				return;
@@ -202,7 +203,9 @@ public class MPRISPlayer : GLib.Object
 			metadata.insert("xesam:title", player.title);
 		if (player.artwork_file != null)
 			metadata.insert("mpris:artUrl", "file://" + player.artwork_file);
-		
+		if (player.rating >= 0.0)
+			metadata.insert("xesam:userRating", player.rating);
+			
 		if (metadata.size() > 0)
 		{
 			metadata.insert("mpris:trackid", new Variant.string("1"));

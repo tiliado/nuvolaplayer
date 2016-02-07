@@ -236,7 +236,8 @@ WebApp.update = function()
         title: null,
         artist: null,
         album: null,
-        artLocation: null
+        artLocation: null,
+        rating: null
     }
     
     player.setTrack(track);
@@ -464,7 +465,8 @@ WebApp.update = function()
     ...
     
     var track = {
-        artLocation: null // always null
+        artLocation: null, // always null
+        rating: null // same
     }
     
     var idMap = {title: "track", artist: "artist", album: "album"}

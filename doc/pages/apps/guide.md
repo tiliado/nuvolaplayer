@@ -578,7 +578,8 @@ WebApp.update = function()
     ...
     
     var track = {
-        artLocation: null // always null
+        artLocation: null, // always null
+        rating: null // same
     }
     
     var idMap = {title: "track", artist: "artist", album: "album"}

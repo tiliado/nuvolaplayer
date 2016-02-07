@@ -15,7 +15,9 @@
 		<p>
 		<strong id="status"></strong>
 		<span id="timer"></span>
-		<span id="nowplaying"><i id="track"></i> by <i id="artist"></i> from <i id="album"></i></span>
+		<span id="nowplaying">
+			<i id="track"></i> by <i id="artist"></i> from <i id="album"></i> rated <i id="rating"></i>
+		</span>
 		</p>
 		<p>
 		<button id="pp" onclick="player.togglePlay();">Play</button>
@@ -24,7 +26,7 @@
 		</p>
 		<table>
 			<thead>
-				<tr><th>Id</th><th>Song</th><th>Artist</th><th>Album</th></tr>
+				<tr><th>Id</th><th>Song</th><th>Artist</th><th>Album</th><th>Rating</th></tr>
 			</thead>
 			<tbody id="playlist"></tbody>
 		</table>
@@ -90,10 +92,14 @@ Nuvola.makeElement = function(name, attributes, text)
 	return elm;
 }
 
+
+var RATING_TEXT = ["bad", "-", "good"];
+
 var Player = function()
 {
 	this.playlist = document.getElementById("playlist");
 	var self = this;
+	
 	for (var i = 0; i < Player.songs.length; i++)
 	{
 		var song = Player.songs[i];
@@ -102,6 +108,7 @@ var Player = function()
 		tr.appendChild(Nuvola.makeElement("td", null, song.name));
 		tr.appendChild(Nuvola.makeElement("td", null, song.artist));
 		tr.appendChild(Nuvola.makeElement("td", null, song.album));
+		tr.appendChild(Nuvola.makeElement("td", null, RATING_TEXT[song.rating + 1]));
 		tr.setAttribute("data-i", i);
 		tr.onclick = function()
 		{
@@ -121,6 +128,7 @@ var Player = function()
 		track: document.getElementById("track"),
 		artist: document.getElementById("artist"),
 		album: document.getElementById("album"),
+		rating: document.getElementById("rating")
 	}
 	
 	this.elm.prev.disabled = true;
@@ -136,52 +144,61 @@ Player.songs =
 	{
 		name: "Surrender",
 		artist: "Billy Talent",
-		album: "Billy Talent II"
+		album: "Billy Talent II",
+		rating: 1
 	},
 	{
 		name: "Holiday",
 		artist: "Green Day",
-		album: "American Idiot"
+		album: "American Idiot",
+		rating: -1
 	},
 	{
 		name: "Fallen Leaves",
 		artist: "Billy Talent",
-		album: "Billy Talent II"
+		album: "Billy Talent II",
+		rating: 0
 	},
 	{
 		name: "Boten Anna",
 		artist: "Basshunter",
-		album: "LOL"
+		album: "LOL",
+		rating: 1
 	},
 	{
 		name: "Set Your Monster Free",
 		artist: "Quiet Company",
-		album: "We Are All Where We Belong"
+		album: "We Are All Where We Belong",
+		rating: 1
 	},
 	{
 		name: "Come Home",
 		artist: "Morandi",
-		album: "Mindfields"
+		album: "Mindfields",
+		rating: -1
 	},
 	{
 		name: "Dancer in the Dark",
 		artist: "The Rasmus",
-		album: "Hide From the Sun"
+		album: "Hide From the Sun",
+		rating: -1
 	},
 	{
 		name: "Have You Ever",
 		artist: "The Offspring",
-		album: "Americana"
+		album: "Americana",
+		rating: 0
 	},
 	{
 		name: "Pushing Me Away",
 		artist: "Linkin Park",
-		album: "Hybrid Theory"
+		album: "Hybrid Theory",
+		rating: 0
 	}
 ];
 
 Player.statuses = ["Not playing", "Playing", "Paused"];
-
+	
 Player.prototype.setStatus = function(status)
 {
 	this.status = status;
@@ -207,6 +224,7 @@ Player.prototype.setPos = function(pos)
 		this.elm.track.innerText = track.name;
 		this.elm.artist.innerText = track.artist;
 		this.elm.album.innerText = track.album;
+		this.elm.rating.innerText = RATING_TEXT[track.rating + 1];
 		this.elm.nowplaying.style.display = "inline";
 	}
 	else

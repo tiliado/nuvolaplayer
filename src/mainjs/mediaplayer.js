@@ -132,6 +132,7 @@ MediaPlayer.$init = function()
  * @param String|null track.artist         track artist
  * @param String|null track.album          track album
  * @param String|null track.artLocation    URL of album/track artwork
+ * @param double|null track.rating         track rating from `0.0` to `1.0`. *This item is ignored prior API 3.1.*
  */
 MediaPlayer.setTrack = function(track)
 {
@@ -314,7 +315,8 @@ MediaPlayer._onInitWebWorker = function(emitter)
         "title": undefined,
         "artist": undefined,
         "album": undefined,
-        "artLocation": undefined
+        "artLocation": undefined,
+        "rating": undefined
     };
     this.setPlaybackState(PlaybackState.UNKNOWN);
     this._setActions();
@@ -340,10 +342,17 @@ MediaPlayer._setActions = function()
 
 MediaPlayer._sendDevelInfo = function()
 {
+    var rating = (Number) this._track.rating;
+    if (rating < 0)
+        rating = 0.0;
+    else if (rating > 1)
+        rating = 1;
+    
     var info = {
         "title": this._track.title || null,
         "artist": this._track.artist || null,
         "album": this._track.album || null,
+        "rating": rating,
         "artworkLocation": this._track.artLocation || null,
         "artworkFile": this._artworkFile || null,
         "playbackActions": this._baseActions.concat(this._extraActions),

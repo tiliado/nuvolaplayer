@@ -125,6 +125,25 @@ WebApp.update = function()
             track[key] = null;
         }
     }
+    
+    try
+    {
+        switch (document.getElementById("rating").innerText || null)
+        {
+        case "good":
+            track.rating = 1.0;
+            break;
+        case "bad":
+            track.rating = 0.2;
+            break;
+        default:
+            track.rating = 0.0;
+            break;
+        }
+    }
+    catch (e)
+    {
+    }
 
     player.setTrack(track);
     

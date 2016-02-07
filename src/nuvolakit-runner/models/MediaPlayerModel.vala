@@ -27,6 +27,7 @@ public interface Nuvola.MediaPlayerModel: GLib.Object
 	public abstract string? title {get; set; default = null;}
 	public abstract string? artist {get; set; default = null;}
 	public abstract string? album {get; set; default = null;}
+	public abstract double rating {get; set; default = 0.0;}
 	public abstract string? state {get; set; default = null;}
 	public abstract string? artwork_location {get; set; default = null;}
 	public abstract string? artwork_file {get; set; default = null;}
@@ -37,12 +38,16 @@ public interface Nuvola.MediaPlayerModel: GLib.Object
 	public abstract bool can_stop {get; set;}
 	public abstract SList<string> playback_actions {get; owned set;}
 	
-	public virtual signal void set_track_info(string? title, string? artist, string? album, string? state, string? artwork_location, string? artwork_file)
+	public virtual signal void set_track_info(
+		string? title, string? artist, string? album, string? state, string? artwork_location, string? artwork_file,
+		double rating)
 	{
-		handle_set_track_info(title, artist, album, state, artwork_location, artwork_file);
+		handle_set_track_info(title, artist, album, state, artwork_location, artwork_file, rating);
 	}
 	
-	protected abstract void handle_set_track_info(string? title, string? artist, string? album, string? state, string? artwork_location, string? artwork_file);
+	protected abstract void handle_set_track_info(
+		string? title, string? artist, string? album, string? state, string? artwork_location, string? artwork_file,
+		double rating);
 	
 	public abstract void play();
 	

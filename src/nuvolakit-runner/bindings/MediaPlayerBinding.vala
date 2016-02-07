@@ -50,7 +50,8 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 		var state = variant_dict_str(dict, "state");
 		var artwork_location = variant_dict_str(dict, "artworkLocation");
 		var artwork_file = variant_dict_str(dict, "artworkFile");
-		model.set_track_info(title, artist, album, state, artwork_location, artwork_file);
+		var rating = variant_dict_double(dict, "rating", 0.0);
+		model.set_track_info(title, artist, album, state, artwork_location, artwork_file, rating);
 		
 		SList<string> playback_actions = null;
 		var actions = Diorite.variant_to_strv(dict.lookup_value("playbackActions", null).get_maybe().get_variant());
