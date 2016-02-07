@@ -79,6 +79,14 @@ public int[] get_versions()
 	return {VERSION_MAJOR, VERSION_MINOR, VERSION_BUGFIX};
 }
 
+/**
+ * Returns versions encoded as integer, e.g. 301005 for 3.1.5.
+ */
+public int get_encoded_version()
+{
+	return VERSION_MAJOR * 100000 + VERSION_MINOR * 1000 + VERSION_BUGFIX;
+}
+
 public string get_libdir()
 {
 	return Environment.get_variable("NUVOLA_LIBDIR") ?? LIBDIR;
