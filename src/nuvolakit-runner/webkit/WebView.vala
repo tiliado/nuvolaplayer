@@ -30,6 +30,7 @@ public class WebView: WebKit.WebView
 {
 	public static const double ZOOM_DEFAULT = 1.0;
 	public static const double ZOOM_STEP = 1.2;
+	private SList<WebWindow> web_windows = null;
 	
 	public WebView()
 	{
@@ -41,6 +42,7 @@ public class WebView: WebKit.WebView
 		ws.enable_write_console_messages_to_stdout = true;
 		ws.enable_caret_browsing = true;  // accessibility
 		button_release_event.connect(on_button_released);
+		create.connect(on_web_view_create);
 	}
 	
 	/**
@@ -74,6 +76,22 @@ public class WebView: WebKit.WebView
 	public void zoom_reset()
 	{
 		zoom_level = ZOOM_DEFAULT;
+	}
+	
+	private Gtk.Widget on_web_view_create()
+	{
+		var web_view = new WebView();
+		var web_window = new WebWindow(web_view);
+		web_window.destroy.connect(on_web_window_destroy);
+		web_windows.prepend(web_window);
+		return web_view;
+	}
+	
+	private void on_web_window_destroy(Gtk.Widget window)
+	{
+		var web_window = window as WebWindow;
+		assert(web_window != null);
+		web_windows.remove(web_window);
 	}
 }
 

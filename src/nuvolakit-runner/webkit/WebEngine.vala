@@ -51,7 +51,6 @@ public class WebEngine : GLib.Object, JSExecutor
 	
 	private Config config;
 	private Diorite.KeyValueStorage session;
-	private SList<WebWindow> web_windows = null;
 	
 	public WebEngine(RunnerApplication runner_app, Diorite.Ipc.MessageServer server, WebAppMeta web_app,
 		WebAppStorage storage, Config config, string? proxy_uri)
@@ -86,7 +85,6 @@ public class WebEngine : GLib.Object, JSExecutor
 		web_view.notify["uri"].connect(on_uri_changed);
 		web_view.notify["zoom-level"].connect(on_zoom_level_changed);
 		web_view.decide_policy.connect(on_decide_policy);
-		web_view.create.connect(on_web_view_create);
 		web_view.script_dialog.connect(on_script_dialog);
 		set_up_ipc();
 	}
@@ -563,22 +561,6 @@ public class WebEngine : GLib.Object, JSExecutor
 		{
 			runner_app.show_error("Integration script error", "The web app integration caused an error: %s".printf(e.message));
 		}
-	}
-	
-	private Gtk.Widget on_web_view_create()
-	{
-		var web_view = new WebView();
-		var web_window = new WebWindow(web_view);
-		web_window.destroy.connect(on_web_window_destroy);
-		web_windows.prepend(web_window);
-		return web_view;
-	}
-	
-	private void on_web_window_destroy(Gtk.Widget window)
-	{
-		var web_window = window as WebWindow;
-		assert(web_window != null);
-		web_windows.remove(web_window);
 	}
 	
 	private void on_zoom_level_changed(GLib.Object o, ParamSpec p)
