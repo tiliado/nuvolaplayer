@@ -33,11 +33,13 @@ struct Args
 	static bool debug;
 	static bool verbose;
 	static bool version;
+	static string? app_id = null;
 	static string? apps_dir = null;
 	static string? log_file = null;
 	
 	public static const OptionEntry[] options =
 	{
+		{ "app-id", 'a', 0, OptionArg.STRING, ref app_id, "Web app to run, e.g. \"happy_songs\" for Happy Songs web app.", "ID" },
 		{ "apps-dir", 'A', 0, GLib.OptionArg.FILENAME, ref Args.apps_dir, "Search for web app integrations only in directory DIR and disable service management.", "DIR" },
 		{ "verbose", 'v', 0, OptionArg.NONE, ref Args.verbose, "Print informational messages", null },
 		{ "debug", 'D', 0, OptionArg.NONE, ref Args.debug, "Print debugging messages", null },
@@ -132,7 +134,11 @@ public int main(string[] args)
 	}
 	
 	var controller = new MasterController(storage, web_app_reg, (owned) exec_cmd, Args.debug);
-	var result = controller.run(args);
+	var controller_args = Args.app_id != null ? new string[]{args[0], "-a", Args.app_id} : new string[]{args[0]};
+	for (var i = 1; i < args.length; i++)
+		controller_args += args[i];
+	var result = controller.run(controller_args);
+	
 	if (controller.is_remote)
 	{
 		message("%s instance is already running and will be activated.", Nuvola.get_app_name());
