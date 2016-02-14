@@ -31,11 +31,11 @@ out = 'build'
 # Application name and version
 NAME="Nuvola Player 3"
 APPNAME = "nuvolaplayer3"
-VERSION = "3.0.0+stable"
+VERSION = "3.0.1+stable"
 UNIQUE_NAME="cz.fenryxo.NuvolaPlayer3"
 GENERIC_NAME = "Cloud Player"
 BLURB = "Cloud music integration for your Linux desktop"
-WELCOME_SCREEN_NAME = "Nuvola Player 3.0.0 Stable"
+WELCOME_SCREEN_NAME = "Nuvola Player 3.0.1 Stable"
 
 import subprocess
 try:
