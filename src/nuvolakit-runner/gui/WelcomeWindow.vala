@@ -28,10 +28,13 @@ namespace Nuvola
 private const string WELCOME_TEXT = """
 <h1>%1$s</h1>
 <p>
-  <b>Congratulations!</b> You have installed %1$s.
-  <a href="https://tiliado.github.io/nuvolaplayer/documentation/3.0/notes.html">Read release notes</a> to find out
-  what is new.
+  Congratulations! You have installed %1$s.
+  <a href="https://tiliado.github.io/nuvolaplayer/documentation/3.0/notes.html">Read release notes</a> to find out what
+  is new.  <b>Nuvola Player 3.0 is the current stable series.</b> New releases 3.0.x receive only bug fixes, but no new
+  features except for compatible service integrations. <b>Do you want something more fresh?</b> Check out
+  <a href="https://tiliado.github.io/nuvolaplayer/documentation/3.1.html">Nuvola Player 3.1 Rolling Releases</a>.
 </p>
+
 <h2>Be connected</h2>
 <p>Get informed about new features, new streaming services and bug fixes.</p>
 <ul>
