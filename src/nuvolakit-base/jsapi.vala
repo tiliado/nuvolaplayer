@@ -148,6 +148,7 @@ public class JSApi : GLib.Object
 		o_set_number(ctx, main_object, "VERSION_MINOR", (double)VERSION_MINOR);
 		o_set_number(ctx, main_object, "VERSION_BUGFIX", (double)VERSION_BUGFIX);
 		o_set_string(ctx, main_object, "VERSION_SUFFIX", VERSION_SUFFIX);
+		o_set_number(ctx, main_object, "VERSION", (double) Nuvola.get_encoded_version());
 		o_set_number(ctx, main_object, "WEBKITGTK_VERSION", (double) get_webkit_version());
 		o_set_number(ctx, main_object, "WEBKITGTK_MAJOR", (double) webkit_version[0]);
 		o_set_number(ctx, main_object, "WEBKITGTK_MINOR", (double) webkit_version[1]);
