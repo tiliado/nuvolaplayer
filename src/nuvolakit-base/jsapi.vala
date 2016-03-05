@@ -140,6 +140,7 @@ public class JSApi : GLib.Object
 		o_set_number(ctx, main_object, "VERSION_MINOR", (double)VERSION_MINOR);
 		o_set_number(ctx, main_object, "VERSION_BUGFIX", (double)VERSION_BUGFIX);
 		o_set_string(ctx, main_object, "VERSION_SUFFIX", VERSION_SUFFIX);
+		o_set_number(ctx, main_object, "VERSION", (double) Nuvola.get_encoded_version());
 		
 		env.main_object = main_object;
 		main_object.unprotect(ctx);
