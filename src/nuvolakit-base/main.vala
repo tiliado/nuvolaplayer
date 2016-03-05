@@ -80,11 +80,11 @@ public int[] get_versions()
 }
 
 /**
- * Returns versions encoded as integer, e.g. 301005 for 3.1.5.
+ * Returns versions encoded as integer, e.g. 30105 for 3.1.5.
  */
 public int get_encoded_version()
 {
-	return VERSION_MAJOR * 100000 + VERSION_MINOR * 1000 + VERSION_BUGFIX;
+	return VERSION_MAJOR * 10000 + VERSION_MINOR * 100 + VERSION_BUGFIX;
 }
 
 public string get_libdir()
