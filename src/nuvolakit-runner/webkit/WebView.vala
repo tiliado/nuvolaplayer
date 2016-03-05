@@ -41,6 +41,9 @@ public class WebView: WebKit.WebView
 		ws.enable_smooth_scrolling = true;
 		ws.enable_write_console_messages_to_stdout = true;
 		ws.enable_caret_browsing = true;  // accessibility
+		ws.enable_webaudio = true;
+		ws.enable_media_stream = true;
+		ws.enable_mediasource = true;
 		button_release_event.connect(on_button_released);
 		create.connect(on_web_view_create);
 	}
