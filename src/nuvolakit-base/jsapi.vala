@@ -87,7 +87,7 @@ public class JSApi : GLib.Object
 	 * Major version of the JavaScript API
 	 */
 	public static const int API_VERSION_MAJOR = 3;
-	public static const int API_VERSION_MINOR = 0;
+	public static const int API_VERSION_MINOR = 1;
 	
 	private static unowned JS.Class klass;
 	/**
