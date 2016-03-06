@@ -340,6 +340,8 @@ namespace WebKit {
 		public bool get_enable_site_specific_quirks ();
 		public bool get_enable_smooth_scrolling ();
 		public bool get_enable_tabs_to_links ();
+		public bool get_enable_media_stream ();
+		public bool get_enable_mediasource ();
 		public bool get_enable_webaudio ();
 		public bool get_enable_webgl ();
 		public bool get_enable_write_console_messages_to_stdout ();
@@ -386,6 +388,8 @@ namespace WebKit {
 		public void set_enable_smooth_scrolling (bool enabled);
 		public void set_enable_tabs_to_links (bool enabled);
 		public void set_enable_webaudio (bool enabled);
+		public void set_enable_media_stream (bool enabled);
+		public void set_enable_mediasource (bool enabled);
 		public void set_enable_webgl (bool enabled);
 		public void set_enable_write_console_messages_to_stdout (bool enabled);
 		public void set_enable_xss_auditor (bool enabled);
@@ -432,6 +436,8 @@ namespace WebKit {
 		public bool enable_smooth_scrolling { get; set construct; }
 		public bool enable_tabs_to_links { get; set construct; }
 		public bool enable_webaudio { get; set construct; }
+		public bool enable_media_stream { get; set construct; }
+		public bool enable_mediasource { get; set construct; }
 		public bool enable_webgl { get; set construct; }
 		public bool enable_write_console_messages_to_stdout { get; set construct; }
 		public bool enable_xss_auditor { get; set construct; }
