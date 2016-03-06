@@ -36,6 +36,7 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 		bind("setFlag", handle_set_flag);
 		bind("setTrackInfo", handle_set_track_info);
 		bind("getTrackInfo", handle_get_track_info);
+		model.set_rating.connect(on_set_rating);
 	}
 	
 	private Variant? handle_set_track_info(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
@@ -92,6 +93,7 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 		case "can-play":
 		case "can-pause":
 		case "can-stop":
+		case "can-rate":
 			handled = true;
 			GLib.Value value = GLib.Value(typeof(bool));
 			value.set_boolean(val);
@@ -102,5 +104,24 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 			break;
 		}
 		return new Variant.boolean(handled);
+	}
+	
+	private void on_set_rating(double rating)
+	{
+		if (!model.can_rate)
+		{
+			warning("Rating is not enabled");
+			return;
+		}
+		
+		try
+		{
+			var payload = new Variant("(sd)", "RatingSet", rating);
+			call_web_worker("Nuvola.mediaPlayer.emit", ref payload);
+		}
+		catch (GLib.Error e)
+		{
+			warning("Communication failed: %s", e.message);
+		}
 	}
 }

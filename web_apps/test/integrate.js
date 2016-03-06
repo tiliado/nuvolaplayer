@@ -89,6 +89,8 @@ WebApp._onPageReady = function()
 {
     // Connect handler for signal ActionActivated
     Nuvola.actions.connect("ActionActivated", this);
+    // Connect rating handler
+    player.connect("RatingSet", this);
 
     // Start update routine
     this.update();
@@ -169,6 +171,7 @@ WebApp.update = function()
     }
 
     player.setPlaybackState(state);
+    player.setCanRate(state !== PlaybackState.UNKNOWN);
     
     var enabled;
     try
@@ -234,6 +237,11 @@ WebApp._onActionActivated = function(emitter, name, param)
         Nuvola.clickOnElement(document.getElementById("next"));
         break;
     }
+}
+
+WebApp._onRatingSet = function(emitter, rating)
+{
+    alert("Rating: " + rating);
 }
 
 WebApp._onInitializationForm = function(emitter, values, entries)

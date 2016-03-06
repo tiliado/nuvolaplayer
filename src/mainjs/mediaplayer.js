@@ -23,6 +23,7 @@
  */
 
 require("prototype");
+require("signals");
 require("notification");
 require("launcher");
 require("actions");
@@ -102,19 +103,33 @@ var RUN_IN_BACKGROUND_OPTIONS = [
 /**
  * Media player controller.
  */
-var MediaPlayer = $prototype(null);
+var MediaPlayer = $prototype(null, SignalsMixin);
 
 /**
  * Initializes media player
  */
 MediaPlayer.$init = function()
 {
+    Nuvola.mediaPlayer = this;
+    
+    /**
+     * Emitted when a rating is set.
+     * 
+     * Note that rating has to be enabled first with a method @link{MediaPlayer.setCanRate}.
+     * 
+     * @since API 3.1
+     * 
+     * @param Number rating    Ratting from `0.0` to `1.0`.
+     */
+    this.addSignal("RatingSet");
+    
     this._state = null;
     this._artworkFile = null;
     this._canGoPrev = null;
     this._canGoNext = null;
     this._canPlay = null;
     this._canPause = null;
+    this._canRate = null;
     this._extraActions = [];
     this._artworkLoop = 0;
     this._baseActions = [PlayerAction.TOGGLE_PLAY, PlayerAction.PLAY, PlayerAction.PAUSE, PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG];
@@ -256,6 +271,25 @@ MediaPlayer.setCanPause = function(canPause)
         Nuvola._sendMessageAsync("Nuvola.MediaPlayer.setFlag", "can-stop", !!canPause);
         this._showNotification();
         this._sendDevelInfo();
+    }
+}
+
+/**
+ * Set whether it is possible to rate tracks
+ * 
+ * If rating is enabled, signal @link{MediaPlayer::RatingSet} is emitted. 
+ * If the argument is same as in the previous call, this method does nothing.
+ * 
+ * @since API 3.1
+ * 
+ * @param Boolean canRate    true if remote rating should be allowed
+ */
+MediaPlayer.setCanRate = function(canRate)
+{
+    if (this._canRate !== canRate)
+    {
+        this._canRate = canRate;
+        Nuvola._sendMessageAsync("Nuvola.MediaPlayer.setFlag", "can-rate", !!canRate);
     }
 }
 

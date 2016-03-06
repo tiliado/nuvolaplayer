@@ -36,6 +36,7 @@ public interface Nuvola.MediaPlayerModel: GLib.Object
 	public abstract bool can_play {get; set;}
 	public abstract bool can_pause {get; set;}
 	public abstract bool can_stop {get; set;}
+	public abstract bool can_rate {get; set;}
 	public abstract SList<string> playback_actions {get; owned set;}
 	
 	public virtual signal void set_track_info(
@@ -60,4 +61,6 @@ public interface Nuvola.MediaPlayerModel: GLib.Object
 	public abstract void prev_song();
 	
 	public abstract void next_song();
+	
+	public signal void set_rating(double rating);
 }

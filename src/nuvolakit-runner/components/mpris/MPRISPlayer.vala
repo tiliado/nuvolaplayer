@@ -71,6 +71,7 @@ public class MPRISPlayer : GLib.Object
 	public bool can_pause {get; private set; default = false;}
 	public bool can_seek {get; private set; default = false;}
 	public bool can_control {get{return true;}}
+	public bool nuvola_can_rate {get; private set; default = false;}
 	public HashTable<string, Variant> metadata {get; private set; default = null;}
 	
 	public signal void seeked(int64 position);
@@ -117,6 +118,11 @@ public class MPRISPlayer : GLib.Object
 	{
 	}
 	
+	public void nuvola_set_rating(double rating)
+	{
+		player.set_rating(rating);
+	}
+	
 	private void schedule_update(string param)
 	{
 		switch (param)
@@ -156,6 +162,11 @@ public class MPRISPlayer : GLib.Object
 			if (can_pause == player.can_pause)
 				return;
 			pending_update["CanPause"] = can_pause = player.can_pause;
+			break;
+		case "can-rate":
+			if (nuvola_can_rate == player.can_rate)
+				return;
+			pending_update["NuvolaCanRate"] = nuvola_can_rate = player.can_rate;
 			break;
 		default:
 			return;
