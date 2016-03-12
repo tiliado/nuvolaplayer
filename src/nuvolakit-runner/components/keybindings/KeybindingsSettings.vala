@@ -48,7 +48,8 @@ public class KeybindingsSettings : Gtk.Grid
 		this.global_keybindings = global_keybindings;
 		
 		vexpand = hexpand = true;
-		row_spacing = 18;
+		row_spacing = 5;
+		margin = 1;
 		
 		error_label = new Gtk.Label("");
 		error_label.set_line_wrap(true);
@@ -59,8 +60,14 @@ public class KeybindingsSettings : Gtk.Grid
 		info_bar.get_content_area().add(error_label);
 		info_bar.no_show_all = true;
 		attach(info_bar, 0, 0, 1, 1);
+		var info_text = "Double click a keyboard shortcut and then press a new one to change it or the backspace key to delete it.";
+		var info_label = new Gtk.Label(info_text);
+		info_label.margin = 10;
+		info_label.wrap = true;
+		info_label.show();
+		attach(info_label, 0, 1, 1, 1);
 		var scroll = new Gtk.ScrolledWindow(null, null);
-		attach(scroll, 0, 1, 1, 1);
+		attach(scroll, 0, 2, 1, 1);
 		scroll.show_all();
 		
 		model = new Gtk.ListStore(
