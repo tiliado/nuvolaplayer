@@ -88,6 +88,7 @@ public class JSApi : GLib.Object
 	 */
 	public static const int API_VERSION_MAJOR = 3;
 	public static const int API_VERSION_MINOR = 1;
+	public static const int API_VERSION = API_VERSION_MAJOR * 100 + API_VERSION_MINOR;
 	
 	private static unowned JS.Class klass;
 	/**
@@ -136,6 +137,7 @@ public class JSApi : GLib.Object
 		
 		o_set_number(ctx, main_object, "API_VERSION_MAJOR", (double)API_VERSION_MAJOR);
 		o_set_number(ctx, main_object, "API_VERSION_MINOR", (double)API_VERSION_MINOR);
+		o_set_number(ctx, main_object, "API_VERSION", (double) API_VERSION);
 		o_set_number(ctx, main_object, "VERSION_MAJOR", (double)VERSION_MAJOR);
 		o_set_number(ctx, main_object, "VERSION_MINOR", (double)VERSION_MINOR);
 		o_set_number(ctx, main_object, "VERSION_BUGFIX", (double)VERSION_BUGFIX);
