@@ -59,8 +59,6 @@ public class WebExtension: GLib.Object
 		{
 			error("Web Worker server error: %s", e.message);
 		}
-		
-		Idle.add(late_init_cb);
 	}
 	
 	private bool late_init_cb()
@@ -130,6 +128,7 @@ public class WebExtension: GLib.Object
 		if (!frame.is_main_frame())
 			return; // TODO: Add api not to ignore non-main frames
 		
+		debug("Window object cleared for '%s'", frame.get_uri());
 		wait_until_initialized();
 		init_frame(world, page, frame);
 	}
@@ -137,7 +136,7 @@ public class WebExtension: GLib.Object
 	private void init_frame(WebKit.ScriptWorld world, WebKit.WebPage page, WebKit.Frame frame)
 	{
 		unowned JS.GlobalContext context = (JS.GlobalContext) frame.get_javascript_context_for_script_world(world);
-		debug("Window object cleared: %s, %p, %p, %p", frame.get_uri(), frame, page, context);
+		debug("Init frame: %s, %p, %p, %p", frame.get_uri(), frame, page, context);
 		var bridge = new FrameBridge(frame, context);
 		bridges.insert(frame, bridge);
 		try
@@ -185,6 +184,7 @@ public class WebExtension: GLib.Object
 		if (initialized == InitState.DONE)
 			return;
 		
+		debug("Waiting until initialized");
 		Idle.add(late_init_cb);
 		var loop = new MainLoop();
 		var handler_id = notify["initialized"].connect_after((o, p) => {
