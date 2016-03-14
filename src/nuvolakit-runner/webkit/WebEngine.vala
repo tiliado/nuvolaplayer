@@ -61,6 +61,10 @@ public class WebEngine : GLib.Object, JSExecutor
 		this.web_app = web_app;
 		this.config = config;
 		
+		Environment.set_variable("WEBKITGTK_MAJOR", WebKit.get_major_version().to_string(), true);
+		Environment.set_variable("WEBKITGTK_MINOR", WebKit.get_minor_version().to_string(), true);
+		Environment.set_variable("WEBKITGTK_MICRO", WebKit.get_micro_version().to_string(), true);
+		
 		var webkit_extension_dir = Nuvola.get_libdir();
 		debug("Nuvola WebKit Extension directory: %s", webkit_extension_dir);
 		apply_network_proxy(proxy_uri);
@@ -122,7 +126,8 @@ public class WebEngine : GLib.Object, JSExecutor
 			return true;
 		
 		env = new JsRuntime();
-		api = new JSApi(runner_app.storage, web_app.data_dir, storage.config_dir, config, session);
+		uint[] webkit_version = {WebKit.get_major_version(), WebKit.get_minor_version(), WebKit.get_micro_version()};
+		api = new JSApi(runner_app.storage, web_app.data_dir, storage.config_dir, config, session, webkit_version);
 		api.send_message_async.connect(on_send_message_async);
 		api.send_message_sync.connect(on_send_message_sync);
 		try
