@@ -92,14 +92,19 @@ public class WebExtension: GLib.Object
 		}
 		
 		var storage = new Diorite.XdgStorage.for_project(Nuvola.get_app_id());
+		uint[] webkit_version = new uint[3];
+		webkit_version[0] = (uint) int.parse(Environment.get_variable("WEBKITGTK_MAJOR") ?? "0");
+		webkit_version[1] = (uint) int.parse(Environment.get_variable("WEBKITGTK_MINOR") ?? "0");
+		webkit_version[2] = (uint) int.parse(Environment.get_variable("WEBKITGTK_MICRO") ?? "0");
+
 		js_api = new JSApi(storage, data_dir, user_config_dir, new KeyValueProxy(runner, "config"),
-		new KeyValueProxy(runner, "session"));
+			new KeyValueProxy(runner, "session"), webkit_version);
 		js_api.send_message_async.connect(on_send_message_async);
 		js_api.send_message_sync.connect(on_send_message_sync);
 		
 		bare_env = new JsRuntime();
 		bare_api = new JSApi(storage, data_dir, user_config_dir, new KeyValueProxy(runner, "config"),
-			new KeyValueProxy(runner, "session"));
+			new KeyValueProxy(runner, "session"), webkit_version);
 		try
 		{
 			bare_api.inject(bare_env);
