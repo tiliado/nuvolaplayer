@@ -124,9 +124,15 @@ public class AboutDialog: Gtk.Dialog
 		label.selectable = true;
 		grid.attach(label, 1, 3, 1, 1);
 		grid.attach(new Gtk.Label("Copyright"), 0, 4, 1, 1);
-		label = new Gtk.Label(Markup.printf_escaped("© 2011-2015 <a href=\"%s\">%s</a>", "https://github.com/fenryxo", "Jiří Janoušek"));
+		label = new Gtk.Label(Markup.printf_escaped("© 2011-2016 <a href=\"%s\">%s</a>", "https://github.com/fenryxo", "Jiří Janoušek"));
 		label.use_markup = true;
 		grid.attach(label, 1, 4, 1, 1);
+		
+		label = new Gtk.Label("Web Engine: WebKitGTK %u.%u.%u".printf(
+			WebKit.get_major_version(), WebKit.get_minor_version(), WebKit.get_micro_version()));
+		label.selectable = true;
+		label.margin_top = 10;
+		grid.attach(label, 0, 5, 2, 1);
 		grid.show_all();
 		box.add(grid);
 	}
