@@ -43,8 +43,8 @@ public class MPRISPlayer : GLib.Object
 		pending_update = new HashTable<string, Variant>(str_hash, str_equal);
 		can_go_next = player.can_go_next;
 		can_go_previous = player.can_go_previous;
-		can_play = player.can_play;
-		can_pause = player.can_pause;
+		update_can_play();
+		update_can_pause();
 	}
 	
 	public string playback_status {get; private set;}
@@ -131,6 +131,10 @@ public class MPRISPlayer : GLib.Object
 			pending_update["Metadata"] = metadata = new_metadata;
 			break;
 		case "state":
+			if (update_can_play())
+				pending_update["CanPlay"] = can_play;
+			if (update_can_pause())
+				pending_update["CanPause"] = can_pause;
 			var status = map_playback_state();
 			if (playback_status == status)
 				return;
@@ -147,14 +151,14 @@ public class MPRISPlayer : GLib.Object
 			pending_update["CanGoPrevious"] = can_go_previous = player.can_go_previous;
 			break;
 		case "can-play":
-			if (can_play == player.can_play)
+			if (!update_can_play())
 				return;
-			pending_update["CanPlay"] = can_play = player.can_play;
+			pending_update["CanPlay"] = can_play;
 			break;
 		case "can-pause":
-			if (can_pause == player.can_pause)
+			if (!update_can_pause())
 				return;
-			pending_update["CanPause"] = can_pause = player.can_pause;
+			pending_update["CanPause"] = can_pause;
 			break;
 		default:
 			return;
@@ -206,6 +210,42 @@ public class MPRISPlayer : GLib.Object
 		if (metadata.size() > 0)
 			metadata.insert("mpris:trackid", new Variant.string("1"));
 		return metadata;
+	}
+	
+	/* 
+	 * CanPlay MPRIS flag has different meaning than Player.can_play flag in Nuvola Player!
+	 * 
+	 * MPRIS: Whether playback can be started using Play or PlayPause. Note that this is related to whether there
+	 * is a "current track": the value should not depend on whether the track is currently paused or playing. In fact,
+	 * if a track is currently playing (and CanControl is true), this should be true.
+	 */
+	private bool update_can_play()
+	{
+		var can_play = player.can_play || player.state != "unknown";
+		if (this.can_play != can_play)
+		{
+			this.can_play = can_play;
+			return true;
+		}
+		return false;
+	}
+	
+	/* 
+	 * CanPause MPRIS flag has different meaning than Player.can_pause flag in Nuvola Player!
+	 * 
+	 * MPRIS: Whether playback can be paused using Pause or PlayPause. Note that this is an intrinsic property of
+	 * the current track: its value should not depend on whether the track is currently paused or playing. In fact,
+	 * if playback is currently paused (and CanControl is true), this should be true. 
+	 */
+	private bool update_can_pause()
+	{
+		var can_pause = player.can_pause || player.state != "unknown";
+		if (this.can_pause != can_pause)
+		{
+			this.can_pause = can_pause;
+			return true;
+		}
+		return false;
 	}
 	
 	private string map_playback_state()
