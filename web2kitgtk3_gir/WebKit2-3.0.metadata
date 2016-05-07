@@ -1,3 +1,0 @@
-WebView.get_javascript_global_context skip
-JavascriptResult.get_global_context skip
-JavascriptResult.get_value  skip
