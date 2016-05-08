@@ -50,6 +50,7 @@ try:
 	from datetime import datetime
 	timestamp = datetime.utcfromtimestamp(int(timestamp))
 except Exception as e:
+	print("Failed to get git revision information: {}".format(e))
 	timestamp, short_id, long_id = None, "fuzzy", "fuzzy"
 
 REVISION_ID = str(long_id).strip()
@@ -130,6 +131,7 @@ def options(ctx):
 	ctx.add_option('--no-system-hooks', action='store_false', default=True, dest='system_hooks', help="Don't run system hooks after installation (ldconfig, icon cache update, ...")
 	ctx.add_option('--platform', default=_PLATFORM, help="Target platform")
 	ctx.add_option('--with-apps-alpha', action='store_true', default=False, dest='apps_alpha', help="Include Nuvola Apps Alpha launcher.")
+	ctx.add_option('--allow-fuzzy-build', action='store_true', default=False, dest='fuzzy', help="Allow building without valid git revision information and absolutely no support from upstream.")
 
 # Configure build process
 def configure(ctx):
@@ -138,12 +140,19 @@ def configure(ctx):
 		print("Unsupported platform %s. Please try to talk to devs to consider support of your platform." % sys.platform)
 		sys.exit(1)
 	
-	
+	ctx.env.fuzzy = ctx.options.fuzzy
 	ctx.msg("Version", VERSION, "GREEN")
 	if REVISION_ID != "fuzzy":
 		ctx.msg("Upstream revision", REVISION_ID, "GREEN")
 	else:
 		ctx.msg("Upstream revision", "unknown (unsupported build)", "RED")
+		if not ctx.env.fuzzy and VERSION_SUFFIX != "stable":
+			ctx.fatal(
+				"Failed to get valid git revision information. Make sure git is installed. "
+				"If it is, please talk to Nuvola Player devs to investigate this issue. "
+				"Alternatively, pass --allow-fuzzy-build configuration option, but don't "
+				"expect any support from upstream then.")
+	
 	ctx.define(PLATFORM, 1)
 	ctx.env.VALA_DEFINES = [PLATFORM]
 	ctx.msg('Target platform', PLATFORM, "GREEN")
