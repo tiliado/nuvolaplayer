@@ -37,14 +37,18 @@ GENERIC_NAME = "Cloud Player"
 BLURB = "Cloud music integration for your Linux desktop"
 WELCOME_SCREEN_NAME = "Nuvola Player 3.1 Rolling"
 
+import sys
+PY3 = sys.version_info > (3,)
 import subprocess
 try:
 	try:
 		# Read revision info from file revision-info created by ./waf dist
-		timestamp, short_id, long_id = open("upstream-revision", "r").read().split(" ", 2)
+		timestamp, short_id, long_id = open("upstream-revision", "rt").read().split(" ", 2)
 	except Exception as e:
 		# Read revision info from current branch
 		output = subprocess.Popen(["git", "log", "-n", "1", "--pretty=format:%ct %h %H"], stdout=subprocess.PIPE).communicate()[0]
+		if PY3:
+			output = output.decode("utf-8")
 		timestamp, short_id, long_id = output.split(" ", 2)
 	
 	from datetime import datetime
