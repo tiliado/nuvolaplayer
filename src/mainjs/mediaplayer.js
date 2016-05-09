@@ -279,6 +279,7 @@ MediaPlayer._onInitAppRunner = function(emitter)
     Nuvola.actions.addAction("playback", "win", PlayerAction.STOP, "Stop", null, "media-playback-stop", null);
     Nuvola.actions.addAction("playback", "win", PlayerAction.PREV_SONG, "Previous song", null, "media-skip-backward", null);
     Nuvola.actions.addAction("playback", "win", PlayerAction.NEXT_SONG, "Next song", null, "media-skip-forward", null);
+    // FIXME: remove action if notifications compoment is disabled
     Nuvola.actions.addAction("playback", "win", PlayerAction.PLAYBACK_NOTIFICATION, "Show playback notification", null, null, null);
     this._notification.setActions([PlayerAction.PREV_SONG, PlayerAction.PLAY, PlayerAction.PAUSE, PlayerAction.NEXT_SONG]);
     Nuvola.config.setDefault(this._BACKGROUND_PLAYBACK, true);
