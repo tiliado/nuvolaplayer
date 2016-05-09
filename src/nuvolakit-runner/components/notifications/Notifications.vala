@@ -115,7 +115,8 @@ public class Notification
 	{
 		try
 		{
-			notification.close();
+			if (notification != null)
+				notification.close();
 			return true;
 		}
 		catch (GLib.Error e)
@@ -154,7 +155,6 @@ public class Notifications : GLib.Object, NotificationsInterface, NotificationIn
 	private bool actions_supported = false;
 	private bool persistence_supported = false;
 	private bool icons_supported = false;
-	private Diorite.Action? action;
 	
 	public Notifications(RunnerApplication app, ActionsHelper actions_helper)
 	{
@@ -179,8 +179,6 @@ public class Notifications : GLib.Object, NotificationsInterface, NotificationIn
 	{
 		return_if_fail(running);
 		running = false;
-		app.actions.remove_action(action);
-		action = null;
 		notifications.foreach_remove((key, notification) =>
 		{
 			notification.close();
