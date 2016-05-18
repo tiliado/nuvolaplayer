@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2016 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -109,8 +109,7 @@ public class WebExtension: GLib.Object
 		{
 			bare_api.inject(bare_env);
 			bare_api.initialize(bare_env);
-			// TODO: differentiate from the JS environment in the runner process
-			var args = new Variant("(s)", "InitAppRunner");
+			var args = new Variant("(s)", "InitWebWorkerHelper");
 			bare_env.call_function("Nuvola.core.emit", ref args);
 		}
 		catch (GLib.Error e)
