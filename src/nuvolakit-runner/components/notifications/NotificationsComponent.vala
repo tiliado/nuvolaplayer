@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2016 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -42,17 +42,17 @@ public class NotificationsComponent: Component
 		app.config.bind_object_property("component.%s.".printf(id), this, "enabled").set_default(true).update_property();
 		enabled_set = true;
 		if (enabled)
-			activate();
+			load();
 	}
 	
-	protected override void activate()
+	protected override void load()
 	{
 		notifications = new Notifications(app, actions_helper);
 		notifications.start();
 		bindings.add_object(notifications);
 	}
 	
-	protected override void deactivate()
+	protected override void unload()
 	{
 		bindings.remove_object(notifications);
 		notifications.stop();

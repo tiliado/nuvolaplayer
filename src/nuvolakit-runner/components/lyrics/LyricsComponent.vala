@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2015-2016 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -39,10 +39,10 @@ public class LyricsComponent: Component
 		config.bind_object_property("component.%s.".printf(id), this, "enabled").set_default(true).update_property();
 		enabled_set = true;
 		if (enabled)
-			activate();
+			load();
 	}
 	
-	protected override void activate()
+	protected override void load()
 	{
 		SList<LyricsFetcher> fetchers = null;
 		fetchers.append(new LyricsFetcherCache(app.storage.get_cache_path("lyrics")));
@@ -52,7 +52,7 @@ public class LyricsComponent: Component
 		app.main_window.sidebar.add_page("lyricssidebar", _("Lyrics"), sidebar);
 	}
 	
-	protected override void deactivate()
+	protected override void unload()
 	{
 		app.main_window.sidebar.remove_page(sidebar);
 		sidebar = null;

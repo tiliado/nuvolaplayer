@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2016 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -44,16 +44,16 @@ public class TrayIconComponent: Component
 			.set_default(false).update_property();
 		enabled_set = true;
 		if (enabled)
-			activate();
+			load();
 	}
 	
-	protected override void activate()
+	protected override void load()
 	{
 		tray_icon = new TrayIcon(controller, bindings.get_model<LauncherModel>());
 		controller.main_window.can_destroy.connect(on_can_quit);
 	}
 	
-	protected override void deactivate()
+	protected override void unload()
 	{
 		controller.main_window.can_destroy.disconnect(on_can_quit);
 		tray_icon = null;

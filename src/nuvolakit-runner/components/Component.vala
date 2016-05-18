@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2016 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -47,9 +47,9 @@ public abstract class Component: GLib.Object
 		if (this.enabled != enabled)
 		{
 			if (enabled)
-				activate();
+				load();
 			else
-				deactivate();
+				unload();
 		}
 		
 		this.enabled = enabled;
@@ -60,9 +60,9 @@ public abstract class Component: GLib.Object
 		return null;
 	}
 	
-	protected abstract void activate();
+	protected abstract void load();
 	
-	protected abstract void deactivate();
+	protected abstract void unload();
 }
 
 } // namespace Nuvola
