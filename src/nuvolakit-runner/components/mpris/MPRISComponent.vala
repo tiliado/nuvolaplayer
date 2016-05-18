@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2016 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -39,16 +39,16 @@ public class MPRISComponent: Component
 		config.bind_object_property("component.mpris.", this, "enabled").set_default(true).update_property();
 		enabled_set = true;
 		if (enabled)
-			activate();
+			load();
 	}
 	
-	protected override void activate()
+	protected override void load()
 	{
 		mpris = new MPRISProvider(app, bindings.get_model<MediaPlayerModel>());
 		mpris.start();
 	}
 	
-	protected override void deactivate()
+	protected override void unload()
 	{
 		mpris.stop();
 		mpris = null;

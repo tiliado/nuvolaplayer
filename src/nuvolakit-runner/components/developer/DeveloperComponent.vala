@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2015-2016 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -39,16 +39,16 @@ public class DeveloperComponent: Component
 		config.bind_object_property("component.%s.".printf(id), this, "enabled").set_default(true).update_property();
 		enabled_set = true;
 		if (enabled)
-			activate();
+			load();
 	}
 	
-	protected override void activate()
+	protected override void load()
 	{
 		sidebar = new DeveloperSidebar(app, bindings.get_model<MediaPlayerModel>());
 		app.main_window.sidebar.add_page("developersidebar", _("Developer"), sidebar);
 	}
 	
-	protected override void deactivate()
+	protected override void unload()
 	{
 		app.main_window.sidebar.remove_page(sidebar);
 		sidebar = null;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2016 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -56,7 +56,7 @@ public class AudioScrobblerComponent: Component
 		config.bind_object_property("component.%s.".printf(id), this, "enabled").set_default(true).update_property();
 		enabled_set = true;
 		if (enabled)
-			activate();
+			load();
 	}
 	
 	public override Gtk.Widget? get_settings()
@@ -78,7 +78,7 @@ public class AudioScrobblerComponent: Component
 		return grid;
 	}
 	
-	protected override void activate()
+	protected override void load()
 	{
 		var scrobbler = new LastfmScrobbler(connection);
 		this.scrobbler = scrobbler;
@@ -95,7 +95,7 @@ public class AudioScrobblerComponent: Component
 		on_set_track_info(player.title, player.artist, player.album, player.state);
 	}
 	
-	protected override void deactivate()
+	protected override void unload()
 	{
 		scrobbler.notify.disconnect(on_scrobbler_notify);
 		scrobbler = null;
