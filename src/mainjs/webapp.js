@@ -50,6 +50,7 @@ WebApp.$init = function()
     Nuvola.core.connect("UriChanged", this);
     Nuvola.core.connect("InitAppRunner", this);
     Nuvola.core.connect("InitWebWorker", this);
+    Nuvola.core.connect("InitWebWorkerHelper", this);
 }
 
 /**
@@ -129,6 +130,14 @@ WebApp._onInitAppRunner = function(emitter)
  * ```
  */
 WebApp._onInitWebWorker = function(emitter)
+{
+}
+
+/**
+ * Signal handler for @link{Core::InitWebWorkerHelper}. Override this method to connect to
+ * @link{Core::ResourceRequest} signal.
+ */
+WebApp._onInitWebWorkerHelper = function(emitter)
 {
 }
 

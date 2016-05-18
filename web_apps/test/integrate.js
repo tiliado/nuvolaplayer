@@ -66,6 +66,11 @@ WebApp._onInitAppRunner = function(emitter)
     
     Nuvola.core.connect("InitializationForm", this);
     Nuvola.core.connect("PreferencesForm", this);
+}
+
+WebApp._onInitWebWorkerHelper = function(emitter)
+{
+    Nuvola.WebApp._onInitWebWorkerHelper.call(this, emitter);
     Nuvola.core.connect("ResourceRequest", this);
 }
 

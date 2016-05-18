@@ -54,9 +54,16 @@ Core.$init = function()
     /** 
      * @signal InitWebWorker     initialize web worker process hook
      * 
-     * This signal is emitted just before a web page is loaded in the main frame of the web view.
+     * This signal is emitted every time just before a web page is loaded in the main frame of the web view.
      */
     this.addSignal("InitWebWorker");
+    
+    /** 
+     * @signal InitWebWorkerHelper     initialize web worker helper hook
+     * 
+     * This signal is emitted only once just before a web page is loaded in the main frame of the web view.
+     */
+    this.addSignal("InitWebWorkerHelper");
     
     /**
      * Emitted on request for home page URL.
