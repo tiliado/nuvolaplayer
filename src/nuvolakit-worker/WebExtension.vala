@@ -36,6 +36,7 @@ public class WebExtension: GLib.Object
 	private JSApi js_api;
 	private JsRuntime bare_env;
 	private JSApi bare_api;
+	private bool window_object_not_yet_cleared = true;
 	
 	public InitState initialized {get; private set; default = InitState.NONE;}
 	
@@ -118,6 +119,11 @@ public class WebExtension: GLib.Object
 		}
 		
 		initialized = InitState.DONE;
+		
+		/* Workaround for the case when the window_object_cleared signal is not emitted. */
+		var page = extension.get_page(1);
+		if (page != null && window_object_not_yet_cleared)
+			on_window_object_cleared(WebKit.ScriptWorld.get_default(), page, page.get_main_frame());
 		return false;
 	}
 	
@@ -133,6 +139,7 @@ public class WebExtension: GLib.Object
 			return; // TODO: Add api not to ignore non-main frames
 		
 		debug("Window object cleared for '%s'", frame.get_uri());
+		window_object_not_yet_cleared = false;
 		wait_until_initialized();
 		init_frame(world, page, frame);
 	}
