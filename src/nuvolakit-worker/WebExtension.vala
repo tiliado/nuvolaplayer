@@ -119,11 +119,22 @@ public class WebExtension: GLib.Object
 		}
 		
 		initialized = InitState.DONE;
-		
+		Timeout.add(100, check_window_object_cleared);
+		return false;
+	}
+	
+	private bool check_window_object_cleared()
+	{
 		/* Workaround for the case when the window_object_cleared signal is not emitted. */
 		var page = extension.get_page(1);
 		if (page != null && window_object_not_yet_cleared)
+		{
+			var document = page.get_dom_document();
+			if (document == null || document.ready_state == "loading")
+				return true; // repeat
+			
 			on_window_object_cleared(WebKit.ScriptWorld.get_default(), page, page.get_main_frame());
+		}
 		return false;
 	}
 	
