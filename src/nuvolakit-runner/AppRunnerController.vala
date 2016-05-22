@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2016 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -442,6 +442,15 @@ public class AppRunnerController : RunnerApplication
 		components.prepend(new MPRISComponent(this, bindings, config));
 		components.prepend(new LyricsComponent(this, bindings, config));
 		components.prepend(new DeveloperComponent(this, bindings, config));
+		components.reverse();
+		
+		server.add_handler("Nuvola.Core.getComponentInfo", handle_get_component_info);
+		
+		foreach (var component in components)
+		{
+			debug("Component %s (%s) %s", component.id, component.name, component.enabled ? "enabled": "not enabled");
+			component.notify["enabled"].connect_after(on_component_enabled_changed);
+		}
 	}
 	
 	private async void show_donation_bar()
@@ -599,6 +608,31 @@ public class AppRunnerController : RunnerApplication
 		return false;
 	}
 	
+	private void on_component_enabled_changed(GLib.Object object, ParamSpec param)
+	{
+		var component = object as Component;
+		return_if_fail(component != null);
+		var signal_name = component.enabled ? "ComponentLoaded" : "ComponentUnloaded";
+		var payload = new Variant("(sss)", signal_name, component.id, component.name);
+		try
+		{
+			
+			web_engine.call_function("Nuvola.core.emit", ref payload);
+		}
+		catch (GLib.Error e)
+		{
+			warning("Communication with web engine failed: %s", e.message);
+		}
+		try
+		{
+			web_worker.call_function("Nuvola.core.emit", ref payload);
+		}
+		catch (GLib.Error e)
+		{
+			warning("Communication with web worker failed: %s", e.message);
+		}
+	}
+	
 	private Variant? handle_download_file_async(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
 	{
 		Diorite.Ipc.MessageServer.check_type_str(data, "(ssd)");
@@ -626,6 +660,32 @@ public class AppRunnerController : RunnerApplication
 		});
 		
 		return null;
+	}
+	
+	private Variant? handle_get_component_info(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	{
+		Diorite.Ipc.MessageServer.check_type_str(data, "(s)");
+		string? id = null;
+		data.get("(s)", &id);
+		return_val_if_fail(id != null && id[0] != '\0', null);
+		
+		foreach (var component in components)
+		{
+			if (id == component.id)
+			{
+				var builder = new VariantBuilder(new VariantType("a{smv}"));
+				builder.add("{smv}", "name", new Variant.string(component.name));
+				builder.add("{smv}", "found", new Variant.boolean(true));
+				builder.add("{smv}", "loaded", new Variant.boolean(component.enabled));
+				return builder.end();
+			}
+		}
+		
+		var builder = new VariantBuilder(new VariantType("a{smv}"));
+		builder.add("{smv}", "name", new Variant.string(""));
+		builder.add("{smv}", "found", new Variant.boolean(false));
+		builder.add("{smv}", "loaded", new Variant.boolean(false));
+		return builder.end();
 	}
 	
 	private void on_action_changed(Diorite.Action action, ParamSpec p)

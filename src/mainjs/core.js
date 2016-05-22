@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2016 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -168,6 +168,42 @@ Core.$init = function()
      *     for details
      */
     this.addSignal("PreferencesForm");
+    /**
+     * Emitted when a component has been loaded.
+     * 
+     * @param string name    the name of the component
+     */
+    this.addSignal("ComponentLoaded");
+    /**
+     * Emitted when a component has been unloaded.
+     * 
+     * @param string id      the id of the component
+     * @param string name    the name of the component
+     */
+    this.addSignal("ComponentUnloaded");
+}
+
+/**
+ * Returns information about a component
+ * 
+ * @param id ide of the component
+ * @return Object component info
+ */
+Core.getComponentInfo = function(id)
+{
+    return Nuvola._sendMessageSync("Nuvola.Core.getComponentInfo", id + "");
+}
+
+/**
+ * Returns whether a component is loaded
+ * 
+ * @param id    id of the component
+ * @return Boolean true if the component is loaded
+ */
+Core.isComponentLoaded = function(id)
+{
+    var info = this.getComponentInfo(id);
+    return info.loaded;
 }
 
 // export public items
