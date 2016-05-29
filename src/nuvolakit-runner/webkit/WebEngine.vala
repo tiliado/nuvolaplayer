@@ -48,6 +48,7 @@ public class WebEngine : GLib.Object, JSExecutor
 	private JSApi api;
 	private Diorite.Ipc.MessageServer server = null;
 	private bool initialized = false;
+	private bool web_worker_initialized = false;
 	
 	private Config config;
 	private Diorite.KeyValueStorage session;
@@ -85,12 +86,13 @@ public class WebEngine : GLib.Object, JSExecutor
 		web_view.zoom_level = config.get_double(ZOOM_LEVEL_CONF);
 		
 		session = new Diorite.KeyValueMap();
+		set_up_ipc();
 		
+		web_view.load_html("<html><body>Loading...</body></html>", WEB_ENGINE_LOADING_URI);
 		web_view.notify["uri"].connect(on_uri_changed);
 		web_view.notify["zoom-level"].connect(on_zoom_level_changed);
 		web_view.decide_policy.connect(on_decide_policy);
 		web_view.script_dialog.connect(on_script_dialog);
-		set_up_ipc();
 	}
 	
 	public static uint get_webkit_version()
@@ -166,8 +168,25 @@ public class WebEngine : GLib.Object, JSExecutor
 		return false;
 	}
 	
+	
+	private void wait_for_web_worker()
+	{
+		if (web_worker_initialized)
+			return;
+		var loop = new MainLoop();
+		Idle.add(() =>
+		{
+			if (web_worker_initialized)
+				loop.quit();
+			return !web_worker_initialized;
+		});
+		loop.run();
+	}
+	
 	public bool load()
 	{
+		wait_for_web_worker();
+		
 		if (!initialized)
 		{
 			if (!inject_api())
@@ -191,7 +210,6 @@ public class WebEngine : GLib.Object, JSExecutor
 		
 		if (check_init_form())
 			return true;
-		
 		return restore_session();
 	}
 	
@@ -337,6 +355,14 @@ public class WebEngine : GLib.Object, JSExecutor
 		server.add_handler("session_set_value", handle_session_set_value);
 		server.add_handler("session_set_default_value", handle_session_set_default_value);
 		server.add_handler("show_error", handle_show_error);
+		server.add_handler("web_worker_initialized", handle_web_worker_initialized);
+	}
+	
+	private Variant? handle_web_worker_initialized(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	{
+		Diorite.Ipc.MessageServer.check_type_str(data, null);
+		Idle.add(() => {web_worker_initialized = true; return false;});
+		return null;
 	}
 	
 	private Variant? handle_get_data_dir(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
