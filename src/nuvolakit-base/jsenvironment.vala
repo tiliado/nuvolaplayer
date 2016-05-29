@@ -26,6 +26,8 @@ using Nuvola.JSTools;
 
 namespace Nuvola
 {
+	
+public static const string WEB_ENGINE_LOADING_URI = "about:loading";
 
 public enum ValueType
 {

@@ -36,19 +36,18 @@ public class WebExtension: GLib.Object
 	private JSApi js_api;
 	private JsRuntime bare_env;
 	private JSApi bare_api;
-	private bool window_object_not_yet_cleared = true;
-	
-	public InitState initialized {get; private set; default = InitState.NONE;}
 	
 	public WebExtension(WebKit.WebExtension extension, Diorite.Ipc.MessageClient runner, Diorite.Ipc.MessageServer server)
 	{
 		this.extension = extension;
 		this.runner = runner;
 		this.server = server;
-		
 		WebKit.ScriptWorld.get_default().window_object_cleared.connect(on_window_object_cleared);
 		extension.page_created.connect(on_web_page_created);
-		
+	}
+	
+	private void init()
+	{
 		server.add_handler("call_function", handle_call_function);
 		server.add_handler("disable_gstreamer", handle_disable_gstreamer);
 		bridges = new HashTable<unowned WebKit.Frame, FrameBridge>(direct_hash, direct_equal);
@@ -60,24 +59,6 @@ public class WebExtension: GLib.Object
 		{
 			error("Web Worker server error: %s", e.message);
 		}
-	}
-	
-	private bool late_init_cb()
-	{
-		switch (initialized)
-		{
-		case InitState.DONE:
-		case InitState.PENDING:
-			return false;
-		}
-		
-		initialized = InitState.PENDING;
-		
-		/* 
-		 * For unknown reason, runner.wait_for_echo() in WebExtension constructor blocks window_object_cleared signal,
-		 * so it has been moved to the late init method.
-		 */
-		assert(runner.wait_for_echo(1000));
 		
 		Variant response;
 		try
@@ -118,24 +99,17 @@ public class WebExtension: GLib.Object
 			critical("Initialization error: %s", e.message);
 		}
 		
-		initialized = InitState.DONE;
-		Timeout.add(100, check_window_object_cleared);
-		return false;
-	}
-	
-	private bool check_window_object_cleared()
-	{
-		/* Workaround for the case when the window_object_cleared signal is not emitted. */
-		var page = extension.get_page(1);
-		if (page != null && window_object_not_yet_cleared)
-		{
-			var document = page.get_dom_document();
-			if (document == null || document.ready_state == "loading")
-				return true; // repeat
-			
-			on_window_object_cleared(WebKit.ScriptWorld.get_default(), page, page.get_main_frame());
-		}
-		return false;
+		Idle.add(() => {
+			try
+			{
+				runner.send_message("web_worker_initialized");
+			}
+			catch (Diorite.Ipc.MessageError e)
+			{
+				error("Runner client error: %s", e.message);
+			}
+			return false;
+		});
 	}
 	
 	private void on_window_object_cleared(WebKit.ScriptWorld world, WebKit.WebPage page, WebKit.Frame frame)
@@ -150,8 +124,9 @@ public class WebExtension: GLib.Object
 			return; // TODO: Add api not to ignore non-main frames
 		
 		debug("Window object cleared for '%s'", frame.get_uri());
-		window_object_not_yet_cleared = false;
-		wait_until_initialized();
+		if (frame.get_uri() == WEB_ENGINE_LOADING_URI)
+			return;
+		
 		init_frame(world, page, frame);
 	}
 	
@@ -201,22 +176,6 @@ public class WebExtension: GLib.Object
 		return Nuvola.Gstreamer.disable_gstreamer();
 	}
 	
-	public void wait_until_initialized()
-	{
-		if (initialized == InitState.DONE)
-			return;
-		
-		debug("Waiting until initialized");
-		Idle.add(late_init_cb);
-		var loop = new MainLoop();
-		var handler_id = notify["initialized"].connect_after((o, p) => {
-			if (initialized == InitState.DONE)
-				loop.quit();
-		});
-		loop.run();
-		disconnect(handler_id);
-	}
-	
 	private void show_error(string message)
 	{
 		try
@@ -257,17 +216,19 @@ public class WebExtension: GLib.Object
 	private void on_web_page_created(WebKit.WebExtension extension, WebKit.WebPage web_page)
 	{
 		debug("Page %u created for %s", (uint) web_page.get_id(), web_page.get_uri());
-		
 		if (web_page.get_id() != 1)
 			return;
 		
 		web_page.send_request.connect(on_send_request);
+		web_page.document_loaded.connect_after(on_document_loaded);
 	}
 	
 	private bool on_send_request(WebKit.URIRequest request, WebKit.URIResponse? redirected_response)
 	{
 		var approved = true;
 		var uri = request.uri;
+		if (uri == WEB_ENGINE_LOADING_URI)
+			return false;
 		resource_request(ref uri, ref approved);
 		request.uri = uri;
 		return !approved;
@@ -275,7 +236,6 @@ public class WebExtension: GLib.Object
 	
 	private void resource_request(ref string url, ref bool approved)
 	{
-		wait_until_initialized();
 		var builder = new VariantBuilder(new VariantType("a{smv}"));
 		builder.add("{smv}", "url", new Variant.string(url));
 		builder.add("{smv}", "approved", new Variant.boolean(true));
@@ -324,11 +284,30 @@ public class WebExtension: GLib.Object
 		}
 	}
 	
-	public enum InitState
+	private void on_document_loaded(WebKit.WebPage page)
 	{
-		NONE,
-		PENDING,
-		DONE;
+		debug("Document loaded %s", page.uri);
+		if (page.uri == WEB_ENGINE_LOADING_URI)
+		{
+			/*
+			 * For unknown reason, if the code of the init() method is executed directly in WebExtension constructor,
+			 * it blocks window_object_cleared and other signals.
+			 */
+
+			init();
+		}
+		else
+		{
+			var frame = page.get_main_frame();
+			/*
+			 * If a page doesn't contain any JavaScript, `window_object_cleared` is never called because no JavaScript
+			 * GlobalContext is created. Following line ensures GlobalContext is created if it hasn't been before.
+			 */
+			unowned JS.GlobalContext? context = (JS.GlobalContext) frame.get_javascript_context_for_script_world(
+				WebKit.ScriptWorld.get_default());
+			assert(context != null);
+			context = null;
+		}
 	}
 }
 
