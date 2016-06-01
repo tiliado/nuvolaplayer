@@ -41,6 +41,7 @@ public class WebAppMeta : GLib.Object
 	public int version_minor {get; construct;}
 	public int api_major {get; construct;}
 	public int api_minor {get; construct;}
+	public string? user_agent {get; construct set;}
 	public int window_width {get; construct;}
 	public int window_height {get; construct;}
 	public File? data_dir {get; private set; default = null;}

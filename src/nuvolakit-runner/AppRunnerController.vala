@@ -184,6 +184,7 @@ public class AppRunnerController : RunnerApplication
 		
 		load_extensions();
 		
+		web_engine.set_user_agent(web_app.user_agent);
 		if (!web_engine.load())
 			return;
 		main_window.grid.add(widget);

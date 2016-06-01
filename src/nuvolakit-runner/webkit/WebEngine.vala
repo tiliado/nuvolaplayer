@@ -302,6 +302,53 @@ public class WebEngine : GLib.Object, JSExecutor
 		web_view.zoom_reset();
 	}
 	
+	public void set_user_agent(string? user_agent)
+	{
+		string? agent = null;
+		string? browser = null;
+		string? version = null;	
+		if (user_agent != null)
+		{
+			agent = user_agent.strip();
+			if (agent[0] == '\0')
+				agent = null;
+		}
+		
+		if (agent != null)
+		{
+			var parts = agent.split_set(" \t", 2);
+			browser = parts[0];
+			if (browser != null)
+			{
+				browser = browser.strip();
+				if (browser[0] == '\0')
+					browser = null;
+			}
+			version = parts[1];
+			if (version != null)
+			{
+				version = version.strip();
+				if (version[0] == '\0')
+					version = null;
+			}
+		}
+		
+		switch (browser)
+		{
+		case "CHROME":
+			var s = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Safari/537.36";
+			agent = s.printf(version ?? "50.0.2661.94");
+			break;
+		case "FIREFOX":
+			var s = "Mozilla/5.0 (X11; Linux x86_64; rv:%1$s) Gecko/20100101 Firefox/%1$s";
+			agent = s.printf(version ?? "46.0");
+			break;
+		}
+		
+		unowned WebKit.Settings settings = web_view.get_settings();	
+		settings.user_agent = agent;
+		message("User agent set '%s'", settings.user_agent);
+	}
 	public void get_preferences(out Variant values, out Variant entries)
 	{
 		var args = new Variant("(s@a{sv}@av)", "PreferencesForm", new Variant.array(new VariantType("{sv}"), {}), new Variant.array(VariantType.VARIANT, {}));
