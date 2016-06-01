@@ -133,6 +133,10 @@ public class AboutDialog: Gtk.Dialog
 		label.selectable = true;
 		label.margin_top = 10;
 		grid.attach(label, 0, 5, 2, 1);
+		label = new Gtk.Label("Network Library: libsoup %u.%u.%u".printf(
+			Soup.get_major_version(), Soup.get_minor_version(), Soup.get_micro_version()));
+		label.selectable = true;
+		grid.attach(label, 0, 6, 2, 1);
 		grid.show_all();
 		box.add(grid);
 	}
