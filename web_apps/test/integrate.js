@@ -92,7 +92,8 @@ WebApp._onInitWebWorker = function(emitter)
 // Page is ready for magic
 WebApp._onPageReady = function()
 {
-    document.getElementsByTagName("h1")[0].innerText = Nuvola.format("WebKitGTK {1}", Nuvola.WEBKITGTK_VERSION);
+    document.getElementsByTagName("h1")[0].innerText = Nuvola.format(
+        "WebKitGTK {1}, libsoup {2}", Nuvola.WEBKITGTK_VERSION, Nuvola.LIBSOUP_VERSION);
     
     // Connect handler for signal ActionActivated
     Nuvola.actions.connect("ActionActivated", this);

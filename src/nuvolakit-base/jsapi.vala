@@ -105,9 +105,10 @@ public class JSApi : GLib.Object
 	private File config_dir;
 	private Diorite.KeyValueStorage[] key_value_storages;
 	private uint[] webkit_version;
+	private uint[] libsoup_version;
 	
 	public JSApi(Diorite.Storage storage, File data_dir, File config_dir, Diorite.KeyValueStorage config,
-	Diorite.KeyValueStorage session, uint[] webkit_version)
+	Diorite.KeyValueStorage session, uint[] webkit_version, uint[] libsoup_version)
 	{
 		this.storage = storage;
 		this.data_dir = data_dir;
@@ -115,6 +116,7 @@ public class JSApi : GLib.Object
 		this.key_value_storages = {config, session};
 		assert(webkit_version.length >= 3);
 		this.webkit_version = webkit_version;
+		this.libsoup_version = libsoup_version;
 	}
 	
 	public static bool is_supported(int api_major, int api_minor)
@@ -125,6 +127,11 @@ public class JSApi : GLib.Object
 	public uint get_webkit_version()
 	{
 		return webkit_version[0] * 10000 + webkit_version[1] * 100 + webkit_version[2];
+	}
+	
+	public uint get_libsoup_version()
+	{
+		return libsoup_version[0] * 10000 + libsoup_version[1] * 100 + libsoup_version[2];
 	}
 	
 	public signal void send_message_async(string name, Variant? data);
@@ -155,6 +162,10 @@ public class JSApi : GLib.Object
 		o_set_number(ctx, main_object, "WEBKITGTK_MAJOR", (double) webkit_version[0]);
 		o_set_number(ctx, main_object, "WEBKITGTK_MINOR", (double) webkit_version[1]);
 		o_set_number(ctx, main_object, "WEBKITGTK_MICRO", (double) webkit_version[2]);
+		o_set_number(ctx, main_object, "LIBSOUP_VERSION", (double) get_libsoup_version());
+		o_set_number(ctx, main_object, "LIBSOUP_MAJOR", (double) libsoup_version[0]);
+		o_set_number(ctx, main_object, "LIBSOUP_MINOR", (double) libsoup_version[1]);
+		o_set_number(ctx, main_object, "LIBSOUP_MICRO", (double) libsoup_version[2]);
 		
 		env.main_object = main_object;
 		main_object.unprotect(ctx);
