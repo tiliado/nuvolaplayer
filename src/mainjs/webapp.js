@@ -131,7 +131,6 @@ WebApp._onInitAppRunner = function(emitter)
  */
 WebApp._onInitWebWorker = function(emitter)
 {
-    this._unprefixWebkit(Nuvola.global);
 }
 
 /**
@@ -142,38 +141,6 @@ WebApp._onInitWebWorkerHelper = function(emitter)
 {
 }
 
-WebApp._unprefixWebkit = function(window)
-{
-    for (var name in window)
-    {
-        if (name.indexOf("webkit") === 0)
-        {
-            var unprefixed = name.substring(6);
-            if (window[unprefixed] === undefined)
-            {
-                Nuvola.log("Unprefix: {1} -> {2} | {3}", name, unprefixed, "" + window[name]);
-                window[unprefixed] = window[name];
-            }
-        }
-    }
-    
-    var unprefix = ["MediaSource", "AudioContext", "AudioPannerNode", "OfflineAudioContext", "URL"];
-    var size = unprefix.length;
-    for (var i = 0; i < size; i++)
-    {
-        var unprefixed = unprefix[i];
-        var prefixed = "webkit" + unprefixed;
-        if (!window[prefixed])
-        {
-            Nuvola.log("Missing hidden: {1} -> {2} | {3}", prefixed, unprefixed, "" + window[prefixed]);
-        }
-        else if (!window[unprefixed])
-        {
-            Nuvola.log("Unprefix hidden: {1} -> {2} | {3}", prefixed, unprefixed, "" + window[prefixed]);
-            window[unprefixed] = window[prefixed];
-        }
-    }
-}
 
 // export public fields
 Nuvola.WebApp = WebApp;
