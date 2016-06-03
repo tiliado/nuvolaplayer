@@ -335,7 +335,7 @@ public class JSApi : GLib.Object
 		
 		if (@async)
 		{
-			js_api.send_message_async(name, data);
+			Idle.add(() => {js_api.send_message_async(name, data); return false;});
 			return undefined;
 		}
 		
