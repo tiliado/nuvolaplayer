@@ -144,8 +144,6 @@ public class WebExtension: GLib.Object
 		{
 			js_api.inject(bridge);
 			js_api.integrate(bridge);
-			var args = new Variant("(s)", "InitWebWorker");
-			bridge.call_function("Nuvola.core.emit", ref args);
 		}
 		catch (GLib.Error e)
 		{
@@ -224,7 +222,7 @@ public class WebExtension: GLib.Object
 			return;
 		
 		web_page.send_request.connect(on_send_request);
-		web_page.document_loaded.connect_after(on_document_loaded);
+		web_page.document_loaded.connect(on_document_loaded);
 	}
 	
 	private bool on_send_request(WebKit.URIRequest request, WebKit.URIResponse? redirected_response)
@@ -297,7 +295,6 @@ public class WebExtension: GLib.Object
 			 * For unknown reason, if the code of the init() method is executed directly in WebExtension constructor,
 			 * it blocks window_object_cleared and other signals.
 			 */
-
 			init();
 		}
 		else
@@ -309,8 +306,23 @@ public class WebExtension: GLib.Object
 			 */
 			unowned JS.GlobalContext? context = (JS.GlobalContext) frame.get_javascript_context_for_script_world(
 				WebKit.ScriptWorld.get_default());
-			assert(context != null);
+			return_if_fail(context != null);
 			context = null;
+			/*
+			 * If InitWebWorker is called already in the window_object_cleared callback,
+			 * a local filesystem web page sometimes fails to load.
+			 */
+			var bridge = bridges[frame];
+			return_if_fail(bridge != null);
+			try
+			{
+				var args = new Variant("(s)", "InitWebWorker");
+				bridge.call_function("Nuvola.core.emit", ref args);
+			}
+			catch (GLib.Error e)
+			{
+				show_error("Failed to inject JavaScript API. %s".printf(e.message));
+			}
 		}
 	}
 }
