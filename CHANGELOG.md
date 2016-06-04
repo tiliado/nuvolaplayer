@@ -1,6 +1,26 @@
 Nuvola Player Changelog
 =======================
 
+Release 3.0.3 - June 4th, 2016
+---------------------------------
+
+This is a bug fix release addressing following issues:
+
+  * A wrong implementation of the CanPlay and CanPause flags of the Media Player Remote Interface Specification (MPRIS)
+    was fixed resolving issues with Unity Sound Indicator as a result. Issue: tiliado/nuvolaplayer#224
+  * Console warnings produced when notifications component were being disabled were fixed.
+    Issue: tiliado/nuvolaplayer#227
+  * Initialization of the Web Worker process is more robust. Blank incompletely loaded and improperly initialized
+    web pages should no longer occur.
+  * Notifications API is no longer called if it is disabled as it is obviously not functional and produces only console
+    warnings. Issue: tiliado/nuvolaplayer#227
+  * JavaScript API got new Nuvola.VERSION and Nuvola.API_VERSION constants for scripts to be able to detect whether
+    currently running instance is NP 3.0.3 or higher and it is possible to run code which caused improper Web Worker
+    initialization in older versions.
+  * A version of the LibSoup library is shown in `nuvolaplayer3 --version` and in the About dialog. In addition,
+    JavaScript API got Nuvola.LIBSOUP_VERSION, Nuvola.LIBSOUP_MAJOR, Nuvola.LIBSOUP_MINOR and LIBSOUP_MICRO constants
+    for script to detect not new enough versions and to recommend upgrading. Issue: tiliado/nuvola-app-spotify#13
+
 Release 3.0.2 - April 29, 2016
 ---------------------------------
 
