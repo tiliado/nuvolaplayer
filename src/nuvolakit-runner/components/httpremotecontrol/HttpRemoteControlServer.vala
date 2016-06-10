@@ -33,16 +33,19 @@ public class HttpRemoteControlServer: Soup.Server
 	private HashTable<string, AppRunner> app_runners;
     private unowned Queue<AppRunner> app_runners_order;
     private GenericSet<string> registered_runners;
+    private WebAppRegistry web_app_registry;
     private bool running = false;
 	
 	public HttpRemoteControlServer(
         MasterController app, Diorite.Ipc.MessageServer ipc_server,
-        HashTable<string, AppRunner> app_runners, Queue<AppRunner> app_runners_order)
+        HashTable<string, AppRunner> app_runners, Queue<AppRunner> app_runners_order,
+        WebAppRegistry web_app_registry)
 	{
 		this.app = app;
         this.ipc_server = ipc_server;
 		this.app_runners = app_runners;
 		this.app_runners_order = app_runners_order;
+        this.web_app_registry = web_app_registry;
         registered_runners = new GenericSet<string>(str_hash, str_equal);
         ipc_server.add_handler("HttpRemoteControl.register", handle_register);
         ipc_server.add_handler("HttpRemoteControl.unregister", handle_unregister);
@@ -105,21 +108,83 @@ public class HttpRemoteControlServer: Soup.Server
 	{
 		var self = server as HttpRemoteControlServer;
 		assert(self != null);
-		self.handle_request(msg, path, query, client);
+		self.handle_request(new HttpRemoteControlRequest(server, msg, path, query, client));
 	}
 	
-	protected void handle_request(Soup.Message msg, string path, GLib.HashTable? query, Soup.ClientContext client)
+	protected void handle_request(HttpRemoteControlRequest request)
     {
-        respond_not_found(msg, path, query, client);
+        var path = request.path;
+        if (path == "/+api/app")
+        {
+            request.respond_json(200, list_apps());
+            return;
+        }
+        if (path.has_prefix("/+api/app/"))
+        {
+            var app_path = path.substring(10);
+            var slash_pos = app_path.index_of_char('/');
+            if (slash_pos == -1)
+            {
+                var data = get_app_info(app_path);
+                if (data != null)
+                    request.respond_json(200, data);
+                else
+                    request.respond_not_found();
+                return;
+            }
+            if (slash_pos > 0)
+            {
+                var app_id = app_path.substring(0, slash_pos);
+                app_path = app_path.substring(slash_pos + 1);
+                
+                if (!(app_id in registered_runners))
+                    request.respond_not_found();
+                else
+                    message("App-specific request %s: %s", app_id, app_path);
+            }
+        }
+        request.respond_not_found();
     }
     
-	protected void respond_not_found(Soup.Message msg, string path, GLib.HashTable? query, Soup.ClientContext client)
+    private Json.Node? list_apps()
     {
-		msg.set_response(
-            "text/html", Soup.MemoryUse.COPY,
-            "<html><head><title>404</title></head><body><h1>404</h1><p>%s</p></body></html>".printf(
-                msg.uri.to_string(false)).data);
-		msg.status_code = 404;
+        var builder = new Json.Builder();
+        builder.begin_object().set_member_name("apps").begin_array();
+        var all_apps = web_app_registry.list_web_apps();
+        var keys = all_apps.get_keys();
+        keys.sort(string.collate);
+        foreach (var app_id in keys)
+        {
+            var app = all_apps[app_id];
+            builder.begin_object();
+            builder.set_member_name("id").add_string_value(app_id);
+            builder.set_member_name("name").add_string_value(app.name);
+            builder.set_member_name("version").add_string_value("%u.%u".printf(app.version_major, app.version_minor));
+            builder.set_member_name("maintainer").add_string_value(app.maintainer_name);
+            builder.set_member_name("running").add_boolean_value(app_id in app_runners);
+            builder.set_member_name("registered").add_boolean_value(app_id in registered_runners);
+            builder.end_object();
+        }
+        builder.end_array().end_object();
+        return builder.get_root();
+    }
+    
+    protected Json.Node? get_app_info(string app_id)
+    {
+		var app = web_app_registry.get_app_meta(app_id);
+        if (app == null)
+            return null;
+        
+        var builder = new Json.Builder();
+        builder.begin_object();
+        builder.set_member_name("id").add_string_value(app_id);
+        builder.set_member_name("name").add_string_value(app.name);
+        builder.set_member_name("version").add_string_value("%u.%u".printf(app.version_major, app.version_minor));
+        builder.set_member_name("maintainer").add_string_value(app.maintainer_name);
+        builder.set_member_name("running").add_boolean_value(app_id in app_runners);
+        builder.set_member_name("registered").add_boolean_value(app_id in registered_runners);
+        builder.end_object();
+        return builder.get_root();
 	}
     
     private Variant? handle_register(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError

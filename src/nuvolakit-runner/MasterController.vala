@@ -166,7 +166,7 @@ public class MasterController : Diorite.Application
 		media_keys = new MediaKeysServer(new MediaKeys(this.app_id, key_grabber), server, app_runners);
 		
 		#if EXPERIMENTAL
-		http_remote_control = new HttpRemoteControlServer(this, server, app_runners_map, app_runners);
+		http_remote_control = new HttpRemoteControlServer(this, server, app_runners_map, app_runners, web_app_reg);
 		#endif
 		init_state = InitState.CORE;
 	}
