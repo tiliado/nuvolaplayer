@@ -225,6 +225,9 @@ def configure(ctx):
 		ctx.check_dep('dbusmenu-glib-0.4', 'DBUSMENU', '0.4')
 		ctx.vala_def("UNITY")
 	
+	if VERSION_SUFFIX != "stable":
+		ctx.vala_def("EXPERIMENTAL")
+	
 	ctx.env.with_apps_alpha = ctx.options.apps_alpha
 	
 	ctx.define("NUVOLA_APPNAME", APPNAME)
