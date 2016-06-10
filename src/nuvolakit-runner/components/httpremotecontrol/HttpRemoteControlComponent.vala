@@ -29,13 +29,15 @@ namespace Nuvola
 public class HttpRemoteControlComponent: Component
 {
 	private Bindings bindings;
-	private Diorite.Application app;
+	private RunnerApplication app;
+	private Diorite.Ipc.MessageClient ipc_master;
 	
-	public HttpRemoteControlComponent(Diorite.Application app, Bindings bindings, Diorite.KeyValueStorage config)
+	public HttpRemoteControlComponent(RunnerApplication app, Bindings bindings, Diorite.KeyValueStorage config, Diorite.Ipc.MessageClient ipc_master)
 	{
 		base("httpremotecontrol", "Remote control over HTTP", "Remote media player HTTP interface for control over network.");
 		this.bindings = bindings;
 		this.app = app;
+		this.ipc_master = ipc_master;
 		config.bind_object_property("component.httpremotecontrol.", this, "enabled").set_default(false).update_property();
 		enabled_set = true;
 		if (enabled)
@@ -44,10 +46,25 @@ public class HttpRemoteControlComponent: Component
 	
 	protected override void load()
 	{
+		register(true);
 	}
 	
 	protected override void unload()
 	{
+		register(false);
+	}
+	
+	private void register(bool register)
+	{
+		var method = "HttpRemoteControl." + (register ? "register" : "unregister");
+		try
+		{
+			ipc_master.send_message(method, new Variant.string(app.web_app.id)); 
+		}
+		catch (Diorite.Ipc.MessageError e)
+		{
+			warning("Remote call %s failed: %s", method, e.message);
+		}
 	}
 }
 
