@@ -37,54 +37,48 @@ public class ActionsKeyBinderServer : GLib.Object
 		this.keybinder = keybinder;
 		this.app_runners = app_runners;
 		keybinder.action_activated.connect(on_action_activated);
-		server.add_handler("ActionsKeyBinder.getKeybinding", handle_get_keybinding);
-		server.add_handler("ActionsKeyBinder.setKeybinding", handle_set_keybinding);
-		server.add_handler("ActionsKeyBinder.bind", handle_bind);
-		server.add_handler("ActionsKeyBinder.unbind", handle_unbind);
-		server.add_handler("ActionsKeyBinder.isAvailable", handle_is_available);
-		server.add_handler("ActionsKeyBinder.getAction", handle_get_action);
+		server.add_handler("ActionsKeyBinder.getKeybinding", "s", handle_get_keybinding);
+		server.add_handler("ActionsKeyBinder.setKeybinding", "(sms)", handle_set_keybinding);
+		server.add_handler("ActionsKeyBinder.bind", "s", handle_bind);
+		server.add_handler("ActionsKeyBinder.unbind", "s", handle_unbind);
+		server.add_handler("ActionsKeyBinder.isAvailable", "s", handle_is_available);
+		server.add_handler("ActionsKeyBinder.getAction", "s", handle_get_action);
 	}
 	
-	private Variant? handle_get_keybinding(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_get_keybinding(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "s");
 		var action = data.get_string();
 		return new Variant("ms", keybinder.get_keybinding(action));
 	}
 	
-	private Variant? handle_set_keybinding(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_set_keybinding(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(sms)");
 		string? action = null;
 		string? keybinding = null;
 		data.get("(sms)", &action, &keybinding);
 		return new Variant.boolean(keybinder.set_keybinding(action, keybinding));
 	}
 	
-	private Variant? handle_bind(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_bind(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "s");
 		var action = data.get_string();
 		return new Variant.boolean(keybinder.bind(action));
 	}
 	
-	private Variant? handle_unbind(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_unbind(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "s");
 		var action = data.get_string();
 		return new Variant.boolean(keybinder.unbind(action));
 	}
 	
-	private Variant? handle_get_action(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_get_action(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "s");
 		var keybinding = data.get_string();
 		return new Variant("ms", keybinder.get_action(keybinding));
 	}
 	
-	private Variant? handle_is_available(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_is_available(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "s");
 		var keybinding = data.get_string();
 		return new Variant.boolean(keybinder.is_available(keybinding));
 	}
@@ -109,7 +103,7 @@ public class ActionsKeyBinderServer : GLib.Object
 					break;
 				}
 			}
-			catch (Diorite.Ipc.MessageError e)
+			catch (Diorite.MessageError e)
 			{
 				warning("Communication with app runner %s for action %s failed. %s", app_runner.app_id, name, e.message);
 			}

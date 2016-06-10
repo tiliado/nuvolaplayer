@@ -132,7 +132,7 @@ public int main(string[] args)
 				return quit(2, "Error: Failed to connect to %s master instance.\n", Nuvola.get_app_name());
 			
 			var response = master.send_message("get_top_runner");
-			Diorite.Ipc.MessageServer.check_type_str(response, "ms");
+			Diorite.MessageListener.check_type_string(response, "ms");
 			response.get("ms", out Args.app);
 			
 			if (Args.app == null || Args.app == "")
@@ -140,7 +140,7 @@ public int main(string[] args)
 			
 			message("Using '%s' as web app id.", Args.app);
 		}
-		catch (Diorite.Ipc.MessageError e)
+		catch (Diorite.MessageError e)
 		{
 			return quit(2, "Error: Communication with %s master instance failed: %s\n", Nuvola.get_app_name(), e.message);
 		}
@@ -179,7 +179,7 @@ public int main(string[] args)
 			return quit(1, "Error: Unknown command '%s'.\n", command);
 		}
 	}
-	catch (Diorite.Ipc.MessageError e)
+	catch (Diorite.MessageError e)
 	{
 		return quit(2, "Error: Communication with %s instance failed: %s\n", Nuvola.get_app_name(), e.message);
 	}
@@ -194,7 +194,7 @@ class Control
 		this.conn = conn;
 	}
 	
-	public int list_actions() throws Diorite.Ipc.MessageError
+	public int list_actions() throws Diorite.MessageError
 	{
 		var response = conn.send_message("Nuvola.Actions.listGroups");
 		stdout.printf("Available actions\n\nFormat: NAME (is enabled?) - label\n");
@@ -237,7 +237,7 @@ class Control
 		return 0;
 	}
 	
-	public int activate_action(string name, string? parameter_str) throws Diorite.Ipc.MessageError
+	public int activate_action(string name, string? parameter_str) throws Diorite.MessageError
 	{
 		Variant parameter;
 		try
@@ -268,7 +268,7 @@ class Control
 		return 0;
 	}
 	
-	public int action_state(string name) throws Diorite.Ipc.MessageError
+	public int action_state(string name) throws Diorite.MessageError
 	{
 		var response = conn.send_message("Nuvola.Actions.getState", new Variant("(s)", name));
 		if (response != null)
@@ -276,7 +276,7 @@ class Control
 		return 0;
 	}
 	
-	public int track_info(string? key=null) throws Diorite.Ipc.MessageError
+	public int track_info(string? key=null) throws Diorite.MessageError
 	{
 		var response = conn.send_message("Nuvola.MediaPlayer.getTrackInfo");
 		var title = Diorite.variant_dict_str(response, "title");

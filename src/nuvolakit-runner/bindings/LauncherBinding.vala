@@ -31,43 +31,39 @@ public class Nuvola.LauncherBinding: ModelBinding<LauncherModel>
 	
 	protected override void bind_methods()
 	{
-		bind("setTooltip", handle_set_tooltip);
-		bind("setActions", handle_set_actions);
-		bind("addAction", handle_add_action);
-		bind("removeAction", handle_remove_action);
-		bind("removeActions", handle_remove_actions);
+		bind("setTooltip", "(s)", handle_set_tooltip);
+		bind("setActions", "(av)", handle_set_actions);
+		bind("addAction", "(s)", handle_add_action);
+		bind("removeAction", "(s)", handle_remove_action);
+		bind("removeActions", null, handle_remove_actions);
 	}
 	
-	private Variant? handle_set_tooltip(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_set_tooltip(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(s)");
 		string text;
 		data.get("(s)", out text);
 		model.tooltip = text;
 		return null;
 	}
 	
-	private Variant? handle_add_action(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_add_action(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(s)");
 		string name;
 		data.get("(s)", out name);
 		model.add_action(name);
 		return null;
 	}
 	
-	private Variant? handle_remove_action(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_remove_action(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(s)");
 		string name;
 		data.get("(s)", out name);
 		model.remove_action(name);
 		return null;
 	}
 	
-	private Variant? handle_set_actions(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_set_actions(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(av)");
 		VariantIter iter = null;
 		data.get("(av)", &iter);
 		SList<string> actions = null;
@@ -79,9 +75,8 @@ public class Nuvola.LauncherBinding: ModelBinding<LauncherModel>
 		return null;
 	}
 	
-	private Variant? handle_remove_actions(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_remove_actions(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, null);
 		model.remove_actions();
 		return null;
 	}

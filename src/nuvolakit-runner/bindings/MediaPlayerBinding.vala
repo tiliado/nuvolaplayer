@@ -33,16 +33,15 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 	
 	protected override void bind_methods()
 	{
-		bind("setFlag", handle_set_flag);
-		bind("setTrackInfo", handle_set_track_info);
-		bind("getTrackInfo", handle_get_track_info);
+		bind("setFlag", "(sb)", handle_set_flag);
+		bind("setTrackInfo", "(@a{smv})", handle_set_track_info);
+		bind("getTrackInfo", null, handle_get_track_info);
 		model.set_rating.connect(on_set_rating);
 	}
 	
-	private Variant? handle_set_track_info(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_set_track_info(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
 		check_not_empty();
-		Diorite.Ipc.MessageServer.check_type_str(data, "(@a{smv})");
 		Variant dict;
 		data.get("(@a{smv})", out dict);
 		var title = variant_dict_str(dict, "title");
@@ -64,10 +63,9 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 		return new Variant.boolean(true);
 	}
 	
-	private Variant? handle_get_track_info(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_get_track_info(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
 		check_not_empty();
-		Diorite.Ipc.MessageServer.check_type_str(data, null);
 		var builder = new VariantBuilder(new VariantType("a{sms}"));
 		builder.add("{sms}", "title", model.title);
 		builder.add("{sms}", "artist", model.artist);
@@ -78,10 +76,9 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 		return builder.end();
 	}
 	
-	private Variant? handle_set_flag(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_set_flag(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
 		check_not_empty();
-		Diorite.Ipc.MessageServer.check_type_str(data, "(sb)");
 		bool handled = false;
 		string name;
 		bool val;

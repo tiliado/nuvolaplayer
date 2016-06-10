@@ -97,10 +97,10 @@ public class AppRunner : GLib.Object
 		return true;
 	}
 	
-	public Variant? send_message(string name, Variant? params) throws Diorite.Ipc.MessageError
+	public Variant? send_message(string name, Variant? params) throws Diorite.MessageError
 	{
 		if (client == null)
-			throw new Diorite.Ipc.MessageError.IOERROR("No connected to app runner '%s'.", app_id);
+			throw new Diorite.MessageError.IOERROR("No connected to app runner '%s'.", app_id);
 		
 		return client.send_message(name, params);
 	}

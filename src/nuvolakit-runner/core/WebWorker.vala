@@ -61,7 +61,7 @@ public class RemoteWebWorker: GLib.Object, JSExecutor, WebWorker
 	public Variant? send_message(string name, Variant? params) throws GLib.Error
 	{
 		if (!ready && !(ready = client.wait_for_echo(2000)))
-			throw new Diorite.Ipc.MessageError.NOT_READY("Web worker process is not ready yet");
+			throw new Diorite.MessageError.NOT_READY("Web worker process is not ready yet");
 		
 		return client.send_message(name, params);
 	}

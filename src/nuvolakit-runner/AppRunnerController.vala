@@ -293,7 +293,7 @@ public class AppRunnerController : RunnerApplication
 		try
 		{
 			server = new Diorite.Ipc.MessageServer(server_name);
-			server.add_handler("Nuvola.Browser.downloadFileAsync", handle_download_file_async);
+			server.add_handler("Nuvola.Browser.downloadFileAsync", "(ssd)", handle_download_file_async);
 			server.start_service();
 		}
 		catch (Diorite.IOError e)
@@ -311,7 +311,7 @@ public class AppRunnerController : RunnerApplication
 			var response = master.send_message("runner_started", new Variant("(ss)", web_app.id, server_name));
 			assert(response.equal(new Variant.boolean(true)));
 		}
-		catch (Diorite.Ipc.MessageError e)
+		catch (Diorite.MessageError e)
 		{
 			error("Communication with master process failed: %s", e.message);
 		}
@@ -445,7 +445,7 @@ public class AppRunnerController : RunnerApplication
 		components.prepend(new DeveloperComponent(this, bindings, config));
 		components.reverse();
 		
-		server.add_handler("Nuvola.Core.getComponentInfo", handle_get_component_info);
+		server.add_handler("Nuvola.Core.getComponentInfo", "(s)", handle_get_component_info);
 		
 		foreach (var component in components)
 		{
@@ -576,7 +576,7 @@ public class AppRunnerController : RunnerApplication
 			var response = master.send_message("runner_activated", new Variant.string(web_app.id));
 			warn_if_fail(response.equal(new Variant.boolean(true)));
 		}
-		catch (Diorite.Ipc.MessageError e)
+		catch (Diorite.MessageError e)
 		{
 			critical("Communication with master process failed: %s", e.message);
 		}
@@ -634,9 +634,8 @@ public class AppRunnerController : RunnerApplication
 		}
 	}
 	
-	private Variant? handle_download_file_async(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_download_file_async(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(ssd)");
 		string? uri = null;
 		string? basename = null;
 		double cb_id = 0.0;
@@ -663,9 +662,8 @@ public class AppRunnerController : RunnerApplication
 		return null;
 	}
 	
-	private Variant? handle_get_component_info(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_get_component_info(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(s)");
 		string? id = null;
 		data.get("(s)", &id);
 		return_val_if_fail(id != null && id[0] != '\0', null);
@@ -700,7 +698,7 @@ public class AppRunnerController : RunnerApplication
 		}
 		catch (GLib.Error e)
 		{
-			if (e is Diorite.Ipc.MessageError.NOT_READY)
+			if (e is Diorite.MessageError.NOT_READY)
 				debug("Communication failed: %s", e.message);
 			else
 				warning("Communication failed: %s", e.message);

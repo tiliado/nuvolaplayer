@@ -48,8 +48,8 @@ public class WebExtension: GLib.Object
 	
 	private void init()
 	{
-		server.add_handler("call_function", handle_call_function);
-		server.add_handler("disable_gstreamer", handle_disable_gstreamer);
+		server.add_handler("call_function", "(smv)", handle_call_function);
+		server.add_handler("disable_gstreamer", null, handle_disable_gstreamer);
 		bridges = new HashTable<unowned WebKit.Frame, FrameBridge>(direct_hash, direct_equal);
 		try
 		{
@@ -68,7 +68,7 @@ public class WebExtension: GLib.Object
 			response = runner.send_message("get_user_config_dir");
 			user_config_dir = File.new_for_path(response.get_string());
 		}
-		catch (Diorite.Ipc.MessageError e)
+		catch (Diorite.MessageError e)
 		{
 			error("Runner client error: %s", e.message);
 		}
@@ -108,7 +108,7 @@ public class WebExtension: GLib.Object
 			{
 				runner.send_message("web_worker_initialized");
 			}
-			catch (Diorite.Ipc.MessageError e)
+			catch (Diorite.MessageError e)
 			{
 				error("Runner client error: %s", e.message);
 			}
@@ -151,9 +151,8 @@ public class WebExtension: GLib.Object
 		}
 	}
 	
-	private Variant? handle_call_function(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_call_function(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(smv)");
 		string name = null;
 		Variant? params = null;
 		data.get("(smv)", &name, &params);
@@ -172,9 +171,8 @@ public class WebExtension: GLib.Object
 		return params;
 	}
 	
-	private Variant? handle_disable_gstreamer(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_disable_gstreamer(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, null);
 		return Nuvola.Gstreamer.disable_gstreamer();
 	}
 	
@@ -184,7 +182,7 @@ public class WebExtension: GLib.Object
 		{
 			runner.send_message("show_error", new Variant.string(message));
 		}
-		catch (Diorite.Ipc.MessageError e)
+		catch (Diorite.MessageError e)
 		{
 			critical("Failed to send error message '%s'. %s", message, e.message);
 		}
@@ -196,7 +194,7 @@ public class WebExtension: GLib.Object
 		{
 			runner.send_message(name, data);
 		}
-		catch (Diorite.Ipc.MessageError e)
+		catch (Diorite.MessageError e)
 		{
 			critical("Failed to send message '%s'. %s", name, e.message);
 		}
@@ -208,7 +206,7 @@ public class WebExtension: GLib.Object
 		{
 			result = runner.send_message(name, data);
 		}
-		catch (Diorite.Ipc.MessageError e)
+		catch (Diorite.MessageError e)
 		{
 			critical("Failed to send message '%s'. %s", name, e.message);
 			result = null;

@@ -35,7 +35,7 @@ public class MediaKeysClient : GLib.Object, MediaKeysInterface
 	{
 		this.conn = conn;
 		this.app_id = app_id;
-		server.add_handler("Nuvola.MediaKeys.mediaKeyPressed", handle_media_key_pressed);
+		server.add_handler("Nuvola.MediaKeys.mediaKeyPressed", "s", handle_media_key_pressed);
 	}
 	
 	public void manage()
@@ -47,10 +47,10 @@ public class MediaKeysClient : GLib.Object, MediaKeysInterface
 		try
 		{
 			var data = conn.send_message(METHOD, new Variant.string(app_id)); 
-			Diorite.Ipc.MessageServer.check_type_str(data, "b");
+			Diorite.MessageListener.check_type_string(data, "b");
 			managed = data.get_boolean();
 		}
-		catch (Diorite.Ipc.MessageError e)
+		catch (Diorite.MessageError e)
 		{
 			warning("Remote call %s failed: %s", METHOD, e.message);
 		}
@@ -65,18 +65,17 @@ public class MediaKeysClient : GLib.Object, MediaKeysInterface
 		try
 		{
 			var data = conn.send_message(METHOD, new Variant.string(app_id)); 
-			Diorite.Ipc.MessageServer.check_type_str(data, "b");
+			Diorite.MessageListener.check_type_string(data, "b");
 			managed = !data.get_boolean();
 		}
-		catch (Diorite.Ipc.MessageError e)
+		catch (Diorite.MessageError e)
 		{
 			warning("Remote call %s failed: %s", METHOD, e.message);
 		}
 	}
 	
-	private Variant? handle_media_key_pressed(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_media_key_pressed(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "s");
 		var key = data.get_string();
 		media_key_pressed(key);
 		return new Variant.boolean(true);

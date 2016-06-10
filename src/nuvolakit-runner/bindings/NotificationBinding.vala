@@ -31,16 +31,15 @@ public class Nuvola.NotificationBinding: ObjectBinding<NotificationInterface>
 	
 	protected override void bind_methods()
 	{
-		bind("update", handle_update);
-		bind("setActions", handle_set_actions);
-		bind("removeActions", handle_remove_actions);
-		bind("show", handle_show);
+		bind("update", "(sssssbs)", handle_update);
+		bind("setActions", "(sav)", handle_set_actions);
+		bind("removeActions", "(s)", handle_remove_actions);
+		bind("show", "(sb)", handle_show);
 	}
 	
-	private Variant? handle_update(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_update(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
 		check_not_empty();
-		Diorite.Ipc.MessageServer.check_type_str(data, "(sssssbs)");
 		string name = null;
 		string title = null;
 		string message = null;
@@ -57,10 +56,9 @@ public class Nuvola.NotificationBinding: ObjectBinding<NotificationInterface>
 		return null;
 	}
 	
-	private Variant? handle_set_actions(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_set_actions(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
 		check_not_empty();
-		Diorite.Ipc.MessageServer.check_type_str(data, "(sav)");
 		
 		string name = null;
 		int i = 0;
@@ -78,10 +76,9 @@ public class Nuvola.NotificationBinding: ObjectBinding<NotificationInterface>
 		return null;
 	}
 	
-	private Variant? handle_remove_actions(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_remove_actions(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
 		check_not_empty();
-		Diorite.Ipc.MessageServer.check_type_str(data, "(s)");
 		string name = null;
 		data.get("(s)", &name);
 		
@@ -92,10 +89,9 @@ public class Nuvola.NotificationBinding: ObjectBinding<NotificationInterface>
 		return null;
 	}
 	
-	private Variant? handle_show(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_show(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
 		check_not_empty();
-		Diorite.Ipc.MessageServer.check_type_str(data, "(sb)");
 		string name = null;
 		bool force = false;
 		data.get("(sb)", &name, &force);

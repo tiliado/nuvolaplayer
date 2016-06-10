@@ -31,15 +31,15 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 	
 	protected override void bind_methods()
 	{
-		bind("addAction", handle_add_action);
-		bind("addRadioAction", handle_add_radio_action);
-		bind("isEnabled", handle_is_action_enabled);
-		bind("setEnabled", handle_action_set_enabled);
-		bind("getState", handle_action_get_state);
-		bind("setState", handle_action_set_state);
-		bind("activate", handle_action_activate);
-		bind("listGroups", handle_list_groups);
-		bind("listGroupActions", handle_list_group_actions);
+		bind("addAction", "(sssssss@*)", handle_add_action);
+		bind("addRadioAction", "(sss@*av)", handle_add_radio_action);
+		bind("isEnabled", "(s)", handle_is_action_enabled);
+		bind("setEnabled", "(sb)", handle_action_set_enabled);
+		bind("getState", "(s)", handle_action_get_state);
+		bind("setState", "(s@*)", handle_action_set_state);
+		bind("activate", "(s@*)", handle_action_activate);
+		bind("listGroups", null, handle_list_groups);
+		bind("listGroupActions", "(s)", handle_list_group_actions);
 	}
 	
 	protected override void object_added(ActionsInterface object)
@@ -52,10 +52,9 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 		object.custom_action_activated.disconnect(on_custom_action_activated);
 	}
 	
-	private Variant? handle_add_action(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_add_action(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
 		check_not_empty();
-		Diorite.Ipc.MessageServer.check_type_str(data, "(sssssss@*)");
 		
 		string group = null;
 		string scope = null;
@@ -87,10 +86,9 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 		return null;
 	}
 	
-	private Variant? handle_add_radio_action(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_add_radio_action(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
 		check_not_empty();
-		Diorite.Ipc.MessageServer.check_type_str(data, "(sss@*av)");
 		
 		string group = null;
 		string scope = null;
@@ -130,16 +128,15 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 		return null;
 	}
 	
-	private Variant? handle_is_action_enabled(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_is_action_enabled(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
 		check_not_empty();
-		Diorite.Ipc.MessageServer.check_type_str(data, "(s)");
 		
 		string? action_name = null;
 		data.get("(s)", &action_name);
 		
 		if (action_name == null)
-			throw new Diorite.Ipc.MessageError.INVALID_ARGUMENTS("Action name must not be null");
+			throw new Diorite.MessageError.INVALID_ARGUMENTS("Action name must not be null");
 		
 		bool enabled = false;
 		foreach (var object in objects)
@@ -149,16 +146,15 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 		return new Variant.boolean(enabled);
 	}
 	
-	private Variant? handle_action_set_enabled(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_action_set_enabled(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
 		check_not_empty();
-		Diorite.Ipc.MessageServer.check_type_str(data, "(sb)");
 		string? action_name = null;
 		bool enabled = false;
 		data.get("(sb)", ref action_name, ref enabled);
 		
 		if (action_name == null)
-			throw new Diorite.Ipc.MessageError.INVALID_ARGUMENTS("Action name must not be null");
+			throw new Diorite.MessageError.INVALID_ARGUMENTS("Action name must not be null");
 		
 		foreach (var object in objects)
 			if (object.set_enabled(action_name, enabled))
@@ -167,15 +163,14 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 		return null;
 	}
 	
-	private Variant? handle_action_get_state(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_action_get_state(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
 		check_not_empty();
-		Diorite.Ipc.MessageServer.check_type_str(data, "(s)");
 		string? action_name = null;
 		data.get("(s)", &action_name);
 		
 		if (action_name == null)
-			throw new Diorite.Ipc.MessageError.INVALID_ARGUMENTS("Action name must not be null");
+			throw new Diorite.MessageError.INVALID_ARGUMENTS("Action name must not be null");
 		
 		Variant? state = null;
 		foreach (var object in objects)
@@ -185,16 +180,15 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 		return state;
 	}
 	
-	private Variant? handle_action_set_state(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_action_set_state(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
 		check_not_empty();
-		Diorite.Ipc.MessageServer.check_type_str(data, "(s@*)");
 		string? action_name = null;
 		Variant? state = null;
 		data.get("(s@*)", &action_name, &state);
 		
 		if (action_name == null)
-			throw new Diorite.Ipc.MessageError.INVALID_ARGUMENTS("Action name must not be null");
+			throw new Diorite.MessageError.INVALID_ARGUMENTS("Action name must not be null");
 		
 		foreach (var object in objects)
 			if (object.set_state(action_name, state))
@@ -203,17 +197,16 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 		return null;
 	}
 	
-	private Variant? handle_action_activate(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_action_activate(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
 		check_not_empty();
-		Diorite.Ipc.MessageServer.check_type_str(data, "(s@*)");
 		
 		string? action_name = null;
 		Variant? parameter = null;
 		data.get("(s@*)", &action_name, &parameter);
 		
 		if (action_name == null)
-			throw new Diorite.Ipc.MessageError.INVALID_ARGUMENTS("Action name must not be null");
+			throw new Diorite.MessageError.INVALID_ARGUMENTS("Action name must not be null");
 		
 		bool handled = false;
 		foreach (var object in objects)
@@ -223,10 +216,9 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 		return new Variant.boolean(handled);
 	}
 	
-	private Variant? handle_list_groups(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_list_groups(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
 		check_not_empty();
-		Diorite.Ipc.MessageServer.check_type_str(data, null);
 		var groups_set = new GenericSet<string>(str_hash, str_equal);
 		foreach (var object in objects)
 		{
@@ -246,14 +238,13 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 		return builder.end();
 	}
 	
-	private Variant? handle_list_group_actions(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_list_group_actions(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
 		check_not_empty();
-		Diorite.Ipc.MessageServer.check_type_str(data, "(s)");
 		string? group_name = null;
 		data.get("(s)", &group_name);
 		if (group_name == null)
-			throw new Diorite.Ipc.MessageError.INVALID_ARGUMENTS("Group name must not be null");
+			throw new Diorite.MessageError.INVALID_ARGUMENTS("Group name must not be null");
 		
 		var builder = new VariantBuilder(new VariantType("aa{sv}"));
 		foreach (var object in objects)

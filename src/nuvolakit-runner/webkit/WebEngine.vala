@@ -396,48 +396,44 @@ public class WebEngine : GLib.Object, JSExecutor
 	private void set_up_ipc()
 	{
 		assert(server != null);
-		server.add_handler("get_data_dir", handle_get_data_dir);
-		server.add_handler("get_user_config_dir", handle_get_user_config_dir);
-		server.add_handler("config_has_key", handle_config_has_key);
-		server.add_handler("config_get_value", handle_config_get_value);
-		server.add_handler("config_set_value", handle_config_set_value);
-		server.add_handler("config_set_default_value", handle_config_set_default_value);
-		server.add_handler("session_has_key", handle_session_has_key);
-		server.add_handler("session_get_value", handle_session_get_value);
-		server.add_handler("session_set_value", handle_session_set_value);
-		server.add_handler("session_set_default_value", handle_session_set_default_value);
-		server.add_handler("show_error", handle_show_error);
-		server.add_handler("web_worker_initialized", handle_web_worker_initialized);
+		server.add_handler("web_worker_initialized", null, handle_web_worker_initialized);
+		server.add_handler("get_data_dir", null, handle_get_data_dir);
+		server.add_handler("get_user_config_dir", null, handle_get_user_config_dir);
+		server.add_handler("session_has_key", "s", handle_session_has_key);
+		server.add_handler("session_get_value", "s", handle_session_get_value);
+		server.add_handler("session_set_value", "(smv)", handle_session_set_value);
+		server.add_handler("session_set_default_value", "(smv)", handle_session_set_default_value);
+		server.add_handler("config_has_key", "s", handle_config_has_key);
+		server.add_handler("config_get_value", "s", handle_config_get_value);
+		server.add_handler("config_set_value", "(smv)", handle_config_set_value);
+		server.add_handler("config_set_default_value", "(smv)", handle_config_set_default_value);
+		server.add_handler("show_error", "s", handle_show_error);
+		
 	}
 	
-	private Variant? handle_web_worker_initialized(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_web_worker_initialized(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, null);
 		Idle.add(() => {web_worker_initialized = true; return false;});
 		return null;
 	}
 	
-	private Variant? handle_get_data_dir(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_get_data_dir(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, null);
 		return new Variant.string(web_app.data_dir.get_path());
 	}
 	
-	private Variant? handle_get_user_config_dir(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_get_user_config_dir(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, null);
 		return new Variant.string(storage.config_dir.get_path());
 	}
 	
-	private Variant? handle_session_has_key(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_session_has_key(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "s");
 		return new Variant.boolean(session.has_key(data.get_string()));
 	}
 	
-	private Variant? handle_session_get_value(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_session_get_value(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "s");
 		var response = session.get_value(data.get_string());
 		if (response == null)
 			response = new Variant("mv", null);
@@ -445,9 +441,8 @@ public class WebEngine : GLib.Object, JSExecutor
 		return response;
 	}
 	
-	private Variant? handle_session_set_value(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_session_set_value(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(smv)");
 		string? key = null;
 		Variant? value = null;
 		data.get("(smv)", &key, &value);
@@ -455,9 +450,8 @@ public class WebEngine : GLib.Object, JSExecutor
 		return null;
 	}
 	
-	private Variant? handle_session_set_default_value(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_session_set_default_value(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(smv)");
 		string? key = null;
 		Variant? value = null;
 		data.get("(smv)", &key, &value);
@@ -465,15 +459,13 @@ public class WebEngine : GLib.Object, JSExecutor
 		return null;
 	}
 	
-	private Variant? handle_config_has_key(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_config_has_key(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "s");
 		return new Variant.boolean(config.has_key(data.get_string()));
 	}
 	
-	private Variant? handle_config_get_value(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_config_get_value(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "s");
 		var response = config.get_value(data.get_string());
 		if (response == null)
 			response = new Variant("mv", null);
@@ -481,9 +473,8 @@ public class WebEngine : GLib.Object, JSExecutor
 		return response;
 	}
 	
-	private Variant? handle_config_set_value(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_config_set_value(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(smv)");
 		string? key = null;
 		Variant? value = null;
 		data.get("(smv)", &key, &value);
@@ -491,9 +482,8 @@ public class WebEngine : GLib.Object, JSExecutor
 		return null;
 	}
 	
-	private Variant? handle_config_set_default_value(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_config_set_default_value(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(smv)");
 		string? key = null;
 		Variant? value = null;
 		data.get("(smv)", &key, &value);
@@ -501,9 +491,8 @@ public class WebEngine : GLib.Object, JSExecutor
 		return null;
 	}
 	
-	private Variant? handle_show_error(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_show_error(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "s");
 		runner_app.show_error("Integration error", data.get_string());
 		return null;
 	}
@@ -514,7 +503,7 @@ public class WebEngine : GLib.Object, JSExecutor
 		{
 			server.send_local_message(name, data);
 		}
-		catch (Diorite.Ipc.MessageError e)
+		catch (Diorite.MessageError e)
 		{
 			critical("Failed to send message '%s'. %s", name, e.message);
 		}
@@ -526,7 +515,7 @@ public class WebEngine : GLib.Object, JSExecutor
 		{
 			result = server.send_local_message(name, data);
 		}
-		catch (Diorite.Ipc.MessageError e)
+		catch (Diorite.MessageError e)
 		{
 			critical("Failed to send message '%s'. %s", name, e.message);
 			result = null;

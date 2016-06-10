@@ -39,13 +39,12 @@ public class MediaKeysServer: GLib.Object
 		this.app_runners = app_runners;
 		clients = new GenericSet<string>(str_hash, str_equal);
 		media_keys.media_key_pressed.connect(on_media_key_pressed);
-		server.add_handler("Nuvola.MediaKeys.manage", handle_manage);
-		server.add_handler("Nuvola.MediaKeys.unmanage", handle_unmanage);
+		server.add_handler("Nuvola.MediaKeys.manage", "s", handle_manage);
+		server.add_handler("Nuvola.MediaKeys.unmanage", "s", handle_unmanage);
 	}
 	
-	private Variant? handle_manage(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_manage(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "s");
 		var app_id = data.get_string();
 		
 		if (app_id in clients)
@@ -58,9 +57,8 @@ public class MediaKeysServer: GLib.Object
 		return new Variant.boolean(true);
 	}
 	
-	private Variant? handle_unmanage(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_unmanage(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "s");
 		var app_id = data.get_string();
 		
 		if (!(app_id in clients))
@@ -91,7 +89,7 @@ public class MediaKeysServer: GLib.Object
 							response == null ? "null" : response.print(true));
 					}
 				}
-				catch (Diorite.Ipc.MessageError e)
+				catch (Diorite.MessageError e)
 				{
 					warning("Communication with app runner %s for action %s failed. %s", app_id, key, e.message);
 				}

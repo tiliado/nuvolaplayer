@@ -31,13 +31,12 @@ public class Nuvola.MenuBarBinding: ObjectBinding<MenuBarInterface>
 	
 	protected override void bind_methods()
 	{
-		bind("setMenu", handle_menubar_set_menu);
+		bind("setMenu", "(ssav)", handle_menubar_set_menu);
 	}
 	
-	private Variant? handle_menubar_set_menu(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_menubar_set_menu(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
 		check_not_empty();
-		Diorite.Ipc.MessageServer.check_type_str(data, "(ssav)");
 		string? id = null;
 		string? label = null;
 		int i = 0;

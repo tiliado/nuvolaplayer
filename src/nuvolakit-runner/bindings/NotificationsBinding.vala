@@ -31,14 +31,13 @@ public class Nuvola.NotificationsBinding: ObjectBinding<NotificationsInterface>
 	
 	protected override void bind_methods()
 	{
-		bind("showNotification", handle_show_notification);
-		bind("isPersistenceSupported", handle_is_persistence_supported);
+		bind("showNotification", "(ssssbs)", handle_show_notification);
+		bind("isPersistenceSupported", null, handle_is_persistence_supported);
 	}
 	
-	private Variant? handle_show_notification(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_show_notification(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
 		check_not_empty();
-		Diorite.Ipc.MessageServer.check_type_str(data, "(ssssbs)");
 		string summary = null;
 		string body = null;
 		string icon_name = null;
@@ -54,10 +53,9 @@ public class Nuvola.NotificationsBinding: ObjectBinding<NotificationsInterface>
 		return null;
 	}
 	
-	private Variant? handle_is_persistence_supported(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_is_persistence_supported(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
 		check_not_empty();
-		Diorite.Ipc.MessageServer.check_type_str(data, null);
 		bool supported = false;
 		foreach (var object in objects)
 			if (object.is_persistence_supported(ref supported))

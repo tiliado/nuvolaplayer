@@ -32,7 +32,7 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder
 	public class ActionsKeyBinderClient(Diorite.Ipc.MessageServer server, Diorite.Ipc.MessageClient conn)
 	{
 		this.conn = conn;
-		server.add_handler("ActionsKeyBinder.actionActivated", handle_action_activated);
+		server.add_handler("ActionsKeyBinder.actionActivated", "s", handle_action_activated);
 	}
 	
 	public string? get_keybinding(string action)
@@ -41,12 +41,12 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder
 		try
 		{
 			var data = conn.send_message(METHOD, new Variant.string(action)); 
-			Diorite.Ipc.MessageServer.check_type_str(data, "ms");
+			Diorite.MessageListener.check_type_string(data, "ms");
 			string? keybinding = null;
 			data.get("ms", &keybinding);
 			return keybinding;
 		}
-		catch (Diorite.Ipc.MessageError e)
+		catch (Diorite.MessageError e)
 		{
 			warning("Remote call %s failed: %s", METHOD, e.message);
 			return null;
@@ -59,10 +59,10 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder
 		try
 		{
 			var data = conn.send_message(METHOD, new Variant("(sms)", action, keybinding)); 
-			Diorite.Ipc.MessageServer.check_type_str(data, "b");
+			Diorite.MessageListener.check_type_string(data, "b");
 			return data.get_boolean();
 		}
-		catch (Diorite.Ipc.MessageError e)
+		catch (Diorite.MessageError e)
 		{
 			warning("Remote call %s failed: %s", METHOD, e.message);
 			return false;
@@ -75,10 +75,10 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder
 		try
 		{
 			var data = conn.send_message(METHOD, new Variant.string(action)); 
-			Diorite.Ipc.MessageServer.check_type_str(data, "b");
+			Diorite.MessageListener.check_type_string(data, "b");
 			return data.get_boolean();
 		}
-		catch (Diorite.Ipc.MessageError e)
+		catch (Diorite.MessageError e)
 		{
 			warning("Remote call %s failed: %s", METHOD, e.message);
 			return false;
@@ -91,10 +91,10 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder
 		try
 		{
 			var data = conn.send_message(METHOD, new Variant.string(action)); 
-			Diorite.Ipc.MessageServer.check_type_str(data, "b");
+			Diorite.MessageListener.check_type_string(data, "b");
 			return data.get_boolean();
 		}
-		catch (Diorite.Ipc.MessageError e)
+		catch (Diorite.MessageError e)
 		{
 			warning("Remote call %s failed: %s", METHOD, e.message);
 			return false;
@@ -107,12 +107,12 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder
 		try
 		{
 			var data = conn.send_message(METHOD, new Variant.string(keybinding)); 
-			Diorite.Ipc.MessageServer.check_type_str(data, "ms");
+			Diorite.MessageListener.check_type_string(data, "ms");
 			string? action = null;
 			data.get("ms", &action);
 			return action;
 		}
-		catch (Diorite.Ipc.MessageError e)
+		catch (Diorite.MessageError e)
 		{
 			warning("Remote call %s failed: %s", METHOD, e.message);
 			return null;
@@ -125,19 +125,18 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder
 		try
 		{
 			var data = conn.send_message(METHOD, new Variant.string(keybinding)); 
-			Diorite.Ipc.MessageServer.check_type_str(data, "b");
+			Diorite.MessageListener.check_type_string(data, "b");
 			return data.get_boolean();
 		}
-		catch (Diorite.Ipc.MessageError e)
+		catch (Diorite.MessageError e)
 		{
 			warning("Remote call %s failed: %s", METHOD, e.message);
 			return false;
 		}
 	}
 	
-	private Variant? handle_action_activated(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_action_activated(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "s");
 		var action = data.get_string();
 		var handled = false;
 		action_activated(action, ref handled);

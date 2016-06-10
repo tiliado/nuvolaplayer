@@ -53,16 +53,16 @@ public abstract class Nuvola.Binding<ObjectType>: GLib.Object
 		active = false;
 	}
 	
-	protected void check_not_empty() throws Diorite.Ipc.MessageError
+	protected void check_not_empty() throws Diorite.MessageError
 	{
 		if (!active)
-			throw new Diorite.Ipc.MessageError.UNSUPPORTED("Binding %s has no registered components.", name);
+			throw new Diorite.MessageError.UNSUPPORTED("Binding %s has no registered components.", name);
 	}
 	
-	protected void bind(string method, owned Diorite.Ipc.MessageHandler handler)
+	protected void bind(string method, string? type_str, owned Diorite.MessageHandler handler)
 	{
 		var full_name = "%s.%s".printf(name, method);
-		server.add_handler(full_name, (owned) handler);
+		server.add_handler(full_name, type_str, (owned) handler);
 		handlers.prepend(full_name);
 	}
 	

@@ -132,9 +132,9 @@ public class MasterController : Diorite.Application
 		try
 		{
 			server = new Diorite.Ipc.MessageServer(server_name);
-			server.add_handler("runner_started", handle_runner_started);
-			server.add_handler("runner_activated", handle_runner_activated);
-			server.add_handler("get_top_runner", handle_get_top_runner);
+			server.add_handler("runner_started", "(ss)", handle_runner_started);
+			server.add_handler("runner_activated", "s", handle_runner_activated);
+			server.add_handler("get_top_runner", null, handle_get_top_runner);
 			server.start_service();
 		}
 		catch (Diorite.IOError e)
@@ -270,9 +270,8 @@ public class MasterController : Diorite.Application
 		return 0;
 	}
 	
-	private Variant? handle_runner_started(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_runner_started(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "(ss)");
 		string? app_id = null;
 		string? server_name = null;
 		data.get("(ss)", ref app_id, ref server_name);
@@ -282,15 +281,14 @@ public class MasterController : Diorite.Application
 		return_val_if_fail(runner != null, null);
 		
 		if (!runner.connect_server(server_name))
-			throw new Diorite.Ipc.MessageError.REMOTE_ERROR("Failed to connect runner '%s': ", app_id);
+			throw new Diorite.MessageError.REMOTE_ERROR("Failed to connect runner '%s': ", app_id);
 		
 		debug("Connected to runner server for '%s'.", app_id);
 		return new Variant.boolean(true);
 	}
 	
-	private Variant? handle_runner_activated(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_runner_activated(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "s");
 		var app_id = data.get_string();
 		return_val_if_fail(app_id != null, null);
 		
@@ -304,9 +302,8 @@ public class MasterController : Diorite.Application
 		return new Variant.boolean(true);
 	}
 	
-	private Variant? handle_get_top_runner(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+	private Variant? handle_get_top_runner(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, null);
 		var runner = app_runners.peek_head();
 		return new Variant("ms", runner == null ? null : runner.app_id);
 	}
