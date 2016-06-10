@@ -23,16 +23,16 @@
  */
 
 #if EXPERIMENTAL
-namespace Nuvola
+namespace Nuvola.HttpRemoteControl
 {
 
-public class HttpRemoteControlComponent: Component
+public class Component: Nuvola.Component
 {
 	private Bindings bindings;
 	private RunnerApplication app;
 	private Diorite.Ipc.MessageClient ipc_master;
 	
-	public HttpRemoteControlComponent(RunnerApplication app, Bindings bindings, Diorite.KeyValueStorage config, Diorite.Ipc.MessageClient ipc_master)
+	public Component(RunnerApplication app, Bindings bindings, Diorite.KeyValueStorage config, Diorite.Ipc.MessageClient ipc_master)
 	{
 		base("httpremotecontrol", "Remote control over HTTP", "Remote media player HTTP interface for control over network.");
 		this.bindings = bindings;
@@ -68,5 +68,5 @@ public class HttpRemoteControlComponent: Component
 	}
 }
 
-} // namespace Nuvola
+} // namespace Nuvola.HttpRemoteControl
 #endif

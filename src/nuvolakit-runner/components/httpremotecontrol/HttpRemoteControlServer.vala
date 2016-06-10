@@ -23,10 +23,10 @@
  */
 
 #if EXPERIMENTAL
-namespace Nuvola
+namespace Nuvola.HttpRemoteControl
 {
 
-public class HttpRemoteControlServer: Soup.Server
+public class Server: Soup.Server
 {
 	Diorite.Ipc.MessageServer ipc_server;
     private MasterController app;
@@ -36,7 +36,7 @@ public class HttpRemoteControlServer: Soup.Server
     private WebAppRegistry web_app_registry;
     private bool running = false;
 	
-	public HttpRemoteControlServer(
+	public Server(
         MasterController app, Diorite.Ipc.MessageServer ipc_server,
         HashTable<string, AppRunner> app_runners, Queue<AppRunner> app_runners_order,
         WebAppRegistry web_app_registry)
@@ -106,12 +106,12 @@ public class HttpRemoteControlServer: Soup.Server
 	private static void default_handler(
         Soup.Server server, Soup.Message msg, string path, GLib.HashTable? query, Soup.ClientContext client)
 	{
-		var self = server as HttpRemoteControlServer;
+		var self = server as Server;
 		assert(self != null);
-		self.handle_request(new HttpRemoteControlRequest(server, msg, path, query, client));
+		self.handle_request(new Request(server, msg, path, query, client));
 	}
 	
-	protected void handle_request(HttpRemoteControlRequest request)
+	protected void handle_request(Request request)
     {
         var path = request.path;
         if (path == "/+api/app")
@@ -204,6 +204,6 @@ public class HttpRemoteControlServer: Soup.Server
 	}
 }
 
-} // namespace Nuvola
+} // namespace Nuvola.HttpRemoteControl
 #endif
 

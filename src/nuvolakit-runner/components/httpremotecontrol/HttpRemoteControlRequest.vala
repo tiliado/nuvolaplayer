@@ -23,10 +23,10 @@
  */
 
 #if EXPERIMENTAL
-namespace Nuvola
+namespace Nuvola.HttpRemoteControl
 {
 
-public class HttpRemoteControlRequest
+public class Request
 {
     public Soup.Server server;
     public Soup.Message msg;
@@ -34,7 +34,7 @@ public class HttpRemoteControlRequest
     public GLib.HashTable? query;
     public Soup.ClientContext client;
     
-    public HttpRemoteControlRequest(
+    public Request(
         Soup.Server server, Soup.Message msg, string path, GLib.HashTable? query, Soup.ClientContext client)
     {
         this.server = server;
@@ -65,5 +65,5 @@ public class HttpRemoteControlRequest
 	}
 }
 
-} // namespace Nuvola
+} // namespace Nuvola.HttpRemoteControl
 #endif
