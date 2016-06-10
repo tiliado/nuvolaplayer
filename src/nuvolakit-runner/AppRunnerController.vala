@@ -440,6 +440,9 @@ public class AppRunnerController : RunnerApplication
 		bindings.add_object(menu_bar);
 		components.prepend(new AudioScrobblerComponent(this, bindings, master_config, config, connection.session));
 		components.prepend(new MPRISComponent(this, bindings, config));
+		#if EXPERIMENTAL
+		components.prepend(new HttpRemoteControlComponent(this, bindings, config));
+		#endif
 		components.prepend(new LyricsComponent(this, bindings, config));
 		components.prepend(new DeveloperComponent(this, bindings, config));
 		components.reverse();
