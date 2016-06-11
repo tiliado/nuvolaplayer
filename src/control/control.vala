@@ -82,7 +82,7 @@ const string DESCRIPTION = """Commands:
   track-info [KEY]
    - prints track information
    - KEY can be 'all' (default), 'title', 'artist', 'album', 'state',
-     'artwork_location' or 'artwork_file'
+     'artwork_location', 'artwork_file' or 'rating'.
 """;
 
 public int main(string[] args)
@@ -285,6 +285,7 @@ class Control
 		var state = Diorite.variant_dict_str(response, "state");
 		var artwork_location = Diorite.variant_dict_str(response, "artworkLocation");
 		var artwork_file = Diorite.variant_dict_str(response, "artworkFile");
+		var rating = Diorite.variant_dict_double(response, "rating", 0.0);
 		
 		if (key == null || key == "all")
 		{
@@ -300,6 +301,8 @@ class Control
 				stdout.printf("Artwork location: %s\n", artwork_location);
 			if (artwork_file != null )
 				stdout.printf("Artwork file: %s\n", artwork_file);
+			if (rating != 0.0 )
+				stdout.printf("Rating: %s\n", rating.to_string());
 		}
 		else
 		{
@@ -328,6 +331,10 @@ class Control
 			case "artwork_file":
 				if (artwork_file != null)
 					stdout.printf("%s\n", artwork_file);
+				break;
+			case "rating":
+				if (rating != 0.0 )
+					stdout.printf("Rating: %s\n", rating.to_string());
 				break;
 			default:
 				return quit(3, "Unknown key '%s'.\n", key);

@@ -66,13 +66,14 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 	private Variant? handle_get_track_info(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
 		check_not_empty();
-		var builder = new VariantBuilder(new VariantType("a{sms}"));
-		builder.add("{sms}", "title", model.title);
-		builder.add("{sms}", "artist", model.artist);
-		builder.add("{sms}", "album", model.album);
-		builder.add("{sms}", "state", model.state);
-		builder.add("{sms}", "artworkLocation", model.artwork_location);
-		builder.add("{sms}", "artworkFile", model.artwork_file);
+		var builder = new VariantBuilder(new VariantType("a{smv}"));
+		builder.add("{smv}", "title", Drt.new_variant_string_or_null(model.title));
+		builder.add("{smv}", "artist", Drt.new_variant_string_or_null(model.artist));
+		builder.add("{smv}", "album", Drt.new_variant_string_or_null(model.album));
+		builder.add("{smv}", "state", Drt.new_variant_string_or_null(model.state));
+		builder.add("{smv}", "artworkLocation", Drt.new_variant_string_or_null(model.artwork_location));
+		builder.add("{smv}", "artworkFile", Drt.new_variant_string_or_null(model.artwork_file));
+		builder.add("{smv}", "rating", new Variant.double(model.rating));
 		return builder.end();
 	}
 	
