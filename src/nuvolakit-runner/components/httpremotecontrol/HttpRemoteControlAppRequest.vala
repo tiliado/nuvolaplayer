@@ -30,24 +30,24 @@ public class AppRequest
 {
     public string app_path;
     public string method;
-    public string uri;
-    private string? body_base64;
-    private uint8[]? body_bytes;
+    public Soup.URI uri;
+    public Soup.Buffer? body;
+
    
-    public AppRequest(string app_path, string method, string uri, uint8[]? body_bytes)
+    public AppRequest(string app_path, string method, Soup.URI uri, Soup.Buffer? body)
     {
         this.app_path = app_path;
         this.method = method;
         this.uri = uri;
-		this.body_bytes = body_bytes;
+		this.body = body;
     }
     
     public AppRequest.from_request_context(string app_path, RequestContext request)
     {
 		var msg = request.msg;
 		this(
-		    app_path, msg.method, msg.uri.to_string(false),
-		    msg.request_body == null ? null : msg.request_body.flatten().data);
+		    app_path, msg.method, msg.uri,
+		    msg.request_body == null ? null : msg.request_body.flatten());
     }
     
     public AppRequest.from_variant(Variant variant)
@@ -59,26 +59,7 @@ public class AppRequest
 		dict.lookup("app_path", "s", &app_path);
 		dict.lookup("method", "s", &method);
 		dict.lookup("uri", "s", &uri);
-		this(app_path, method, uri, null);
-		if (!dict.lookup("body", "s", &this.body_base64))
-		    this.body_base64 = null;
-    }
-    
-    public uint8[]? get_body()
-    {
-		if (body_bytes == null && body_base64 != null)
-		{
-			body_bytes = Base64.decode(body_base64);
-			body_base64 = null;
-		}
-		return body_bytes;
-    }
-    
-    public string? get_base64_body()
-    {
-		if (body_bytes != null && body_base64 == null)
-		    return Base64.encode(body_bytes);
-		return body_base64 = null;
+		this(app_path, method, new Soup.URI(uri), null);
     }
     
     public Variant to_variant()
@@ -87,10 +68,7 @@ public class AppRequest
 		builder.add("{sv}", "type", new Variant.string("AppRequest"));
 		builder.add("{sv}", "app_path", new Variant.string(app_path));
 		builder.add("{sv}", "method", new Variant.string(method));
-		builder.add("{sv}", "uri", new Variant.string(uri));
-		var body = get_base64_body();
-		if (body != null)
-		    builder.add("{sv}", "body", new Variant.bytestring(body));
+		builder.add("{sv}", "uri", new Variant.string(uri.to_string(false)));
 		return builder.end();
     }
     

@@ -145,11 +145,18 @@ public class Server: Soup.Server
                 {
                     var app_request = new AppRequest.from_request_context(app_path, request);
                     message("App-specific request %s: %s => %s", app_id, app_path, app_request.to_string());
-                    var data = send_app_request(app_id, app_request);
-                    if (data == null)
-                        request.respond_not_found();
-                    else
-                        request.respond_json(200, data);
+                    try
+                    {
+						var data = send_app_request(app_id, app_request);
+						request.respond_json(200, data);
+					}
+					catch (Diorite.MessageError e)
+					{
+						var builder = new VariantBuilder(new VariantType("a{sv}"));
+						builder.add("{sv}", "error", new Variant.int32(e.code));
+						builder.add("{sv}", "message", new Variant.string(e.message));
+						request.respond_json(400, Json.gvariant_serialize(builder.end()));
+					}
                     return;
                 }
             }
@@ -157,20 +164,72 @@ public class Server: Soup.Server
         request.respond_not_found();
     }
     
-    private Json.Node? send_app_request(string app_id, AppRequest app_request)
+    private Json.Node send_app_request(string app_id, AppRequest app_request) throws Diorite.MessageError
     {
         var app = app_runners[app_id];
         var flags = app_request.method == "POST" ? "rw" : "r";
-        var method = "/nuvola/%s::%s,,".printf(app_request.app_path, flags);  
-		try
-		{
-			return Json.gvariant_serialize(app.send_message(method, app_request.to_variant())); 
+        var method = "/nuvola/%s::%s,dict,".printf(app_request.app_path, flags);
+        unowned string? form_data = app_request.method == "POST" ? (string) app_request.body.data : app_request.uri.query;
+        var builder = new VariantBuilder(new VariantType("a{smv}"));
+        if (form_data != null)
+        {
+			var query_params = Soup.Form.decode(form_data);
+			var iter = HashTableIter<string, string>(query_params);
+			unowned string key;
+			unowned string value;
+			while (iter.next(out key, out value))
+			{
+				string param_key = key;
+				Variant? param_value = null;
+				if (value == null)
+				{
+					param_value = null;
+				}
+				else
+				{
+					var parts = key.split(":", 2);
+					if (parts.length <= 2)
+					{
+						param_value = new Variant.string(value.dup());
+					}
+					else
+					{
+						param_key = parts[1];
+						switch (parts[0])
+						{
+						case "d":
+						case "double":
+							double d;
+							if (double.try_parse(value, out d))
+								param_value = new Variant.double(d);
+							break;
+						case "b":
+						case "bool":
+						case "boolean":
+							bool b;
+							if (bool.try_parse(value, out b))
+								param_value = new Variant.boolean(b);
+							break;
+						case "s":
+						case "str":
+						case "string":
+						default:
+							param_value = new Variant.string(value.dup());
+							break;
+						}
+					}
+				}
+				builder.add("{smv}", param_key, param_value);
+			}
 		}
-		catch (Diorite.MessageError e)
+		var response = app.send_message(method, builder.end());
+		if (response == null || !response.get_type().is_subtype_of(VariantType.DICTIONARY))
 		{
-			warning("Remote call %s failed: %s", method, e.message);
+			builder = new VariantBuilder(new VariantType("a{smv}"));
+			builder.add("{smv}", "result", response);
+			return Json.gvariant_serialize(builder.end());
 		}
-        return null;
+		return Json.gvariant_serialize(response);
     }
     
     private Json.Node? list_apps()
