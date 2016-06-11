@@ -33,6 +33,11 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 	
 	protected override void bind_methods()
 	{
+		bind2("get-flag", Drt.ApiFlags.READABLE,
+			"Returns boolean state of a particular flag or null if no such flag has been found.",
+			handle_get_flag, {
+			new Drt.StringParam("name", true, false, null, "Flag name, e.g. can-go-next, can-go-previous, can-play, can-pause, can-stop, can-rate"),
+		});
 		bind2("set-flag", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE, null, handle_set_flag, {
 			new Drt.StringParam("name", true, false),
 			new Drt.BoolParam("state", true),
@@ -48,7 +53,8 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 			new Drt.DoubleParam("rating", false, 0.0),
 			new Drt.StringArrayParam("playbackActions", false),
 		});
-		bind2("track-info", Drt.ApiFlags.READABLE, null, handle_get_track_info, null);
+		bind2("track-info", Drt.ApiFlags.READABLE, "Returns information about currently playing track.",
+			handle_get_track_info, null);
 		model.set_rating.connect(on_set_rating);
 	}
 	
@@ -111,6 +117,27 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 			break;
 		}
 		return new Variant.boolean(handled);
+	}
+	
+	private Variant? handle_get_flag(Drt.ApiParams? params) throws Diorite.MessageError
+	{
+		check_not_empty();
+		var name = params.pop_string();
+		switch (name)
+		{
+		case "can-go-next":
+		case "can-go-previous":
+		case "can-play":
+		case "can-pause":
+		case "can-stop":
+		case "can-rate":
+			GLib.Value value = GLib.Value(typeof(bool));
+			model.@get_property(name, ref value);
+			return new Variant.boolean(value.get_boolean());
+		default:
+			critical("Unknown flag '%s'", name);
+			return new Variant("mv", null);
+		}
 	}
 	
 	private void on_set_rating(double rating)
