@@ -108,10 +108,10 @@ public class Server: Soup.Server
 	{
 		var self = server as Server;
 		assert(self != null);
-		self.handle_request(new Request(server, msg, path, query, client));
+		self.handle_request(new RequestContext(server, msg, path, query, client));
 	}
 	
-	protected void handle_request(Request request)
+	protected void handle_request(RequestContext request)
     {
         var path = request.path;
         if (path == "/+api/app")
@@ -138,12 +138,39 @@ public class Server: Soup.Server
                 app_path = app_path.substring(slash_pos + 1);
                 
                 if (!(app_id in registered_runners))
+                {
                     request.respond_not_found();
+                }
                 else
-                    message("App-specific request %s: %s", app_id, app_path);
+                {
+                    var app_request = new AppRequest.from_request_context(app_path, request);
+                    message("App-specific request %s: %s => %s", app_id, app_path, app_request.to_string());
+                    var data = send_app_request(app_id, app_request);
+                    if (data == null)
+                        request.respond_not_found();
+                    else
+                        request.respond_json(200, data);
+                    return;
+                }
             }
         }
         request.respond_not_found();
+    }
+    
+    private Json.Node? send_app_request(string app_id, AppRequest app_request)
+    {
+        var app = app_runners[app_id];
+        var flags = app_request.method == "POST" ? "rw" : "r";
+        var method = "/nuvola/%s::%s,,".printf(app_request.app_path, flags);  
+		try
+		{
+			return Json.gvariant_serialize(app.send_message(method, app_request.to_variant())); 
+		}
+		catch (Diorite.MessageError e)
+		{
+			warning("Remote call %s failed: %s", method, e.message);
+		}
+        return null;
     }
     
     private Json.Node? list_apps()

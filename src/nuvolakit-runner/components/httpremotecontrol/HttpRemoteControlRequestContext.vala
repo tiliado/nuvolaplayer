@@ -26,41 +26,41 @@
 namespace Nuvola.HttpRemoteControl
 {
 
-public class Request
+public class RequestContext
 {
-    public Soup.Server server;
-    public Soup.Message msg;
-    public string path;
-    public GLib.HashTable? query;
-    public Soup.ClientContext client;
-    
-    public Request(
-        Soup.Server server, Soup.Message msg, string path, GLib.HashTable? query, Soup.ClientContext client)
-    {
-        this.server = server;
-        this.msg = msg;
-        this.path = path;
-        this.query = query;
-        this.client = client;
-    }
-    
-    public void respond_json(int status_code, Json.Node json)
-    {
+	public Soup.Server server;
+	public Soup.Message msg;
+	public string path;
+	public GLib.HashTable? query;
+	public Soup.ClientContext client;
+	
+	public RequestContext(
+		Soup.Server server, Soup.Message msg, string path, GLib.HashTable? query, Soup.ClientContext client)
+	{
+		this.server = server;
+		this.msg = msg;
+		this.path = path;
+		this.query = query;
+		this.client = client;
+	}
+	
+	public void respond_json(int status_code, Json.Node json)
+	{
 		var generator = new Json.Generator();
-        generator.pretty = true;
-        generator.indent = 4;
-        generator.set_root(json);
-        var data = generator.to_data(null);
-        msg.set_response("text/plain; charset=utf-8", Soup.MemoryUse.COPY, data.data);
+		generator.pretty = true;
+		generator.indent = 4;
+		generator.set_root(json);
+		var data = generator.to_data(null);
+		msg.set_response("text/plain; charset=utf-8", Soup.MemoryUse.COPY, data.data);
 		msg.status_code = status_code;
 	}
-    
+	
 	public void respond_not_found()
-    {
+	{
 		msg.set_response(
-            "text/html", Soup.MemoryUse.COPY,
-            "<html><head><title>404</title></head><body><h1>404</h1><p>%s</p></body></html>".printf(
-               msg.uri.to_string(false)).data);
+			"text/html", Soup.MemoryUse.COPY,
+			"<html><head><title>404</title></head><body><h1>404</h1><p>%s</p></body></html>".printf(
+			   msg.uri.to_string(false)).data);
 		msg.status_code = 404;
 	}
 }
