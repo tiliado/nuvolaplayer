@@ -278,7 +278,7 @@ class Control
 	
 	public int track_info(string? key=null) throws Diorite.MessageError
 	{
-		var response = conn.send_message("Nuvola.MediaPlayer.getTrackInfo");
+		var response = conn.send_message("/nuvola/mediaplayer/track-info::r,,");
 		var title = Diorite.variant_dict_str(response, "title");
 		var artist = Diorite.variant_dict_str(response, "artist");
 		var album = Diorite.variant_dict_str(response, "album");

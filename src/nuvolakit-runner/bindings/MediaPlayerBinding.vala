@@ -33,37 +33,47 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 	
 	protected override void bind_methods()
 	{
-		bind("setFlag", "(sb)", handle_set_flag);
-		bind("setTrackInfo", "(@a{smv})", handle_set_track_info);
-		bind("getTrackInfo", null, handle_get_track_info);
+		bind2("set-flag", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE, null, handle_set_flag, {
+			new Drt.StringParam("name", true, false),
+			new Drt.BoolParam("state", true),
+
+		});
+		bind2("set-track-info", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE, null, handle_set_track_info, {
+			new Drt.StringParam("title", false, true),
+			new Drt.StringParam("artist", false, true),
+			new Drt.StringParam("album", false, true),
+			new Drt.StringParam("state", false, true),
+			new Drt.StringParam("artworkLocation", false, true),
+			new Drt.StringParam("artworkFile", false, true),
+			new Drt.DoubleParam("rating", false, 0.0),
+			new Drt.StringArrayParam("playbackActions", false),
+		});
+		bind2("track-info", Drt.ApiFlags.READABLE, null, handle_get_track_info, null);
 		model.set_rating.connect(on_set_rating);
 	}
 	
-	private Variant? handle_set_track_info(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_set_track_info(Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
-		Variant dict;
-		data.get("(@a{smv})", out dict);
-		var title = variant_dict_str(dict, "title");
-		var artist = variant_dict_str(dict, "artist");
-		var album = variant_dict_str(dict, "album");
-		var state = variant_dict_str(dict, "state");
-		var artwork_location = variant_dict_str(dict, "artworkLocation");
-		var artwork_file = variant_dict_str(dict, "artworkFile");
-		var rating = variant_dict_double(dict, "rating", 0.0);
+		var title = params.pop_string();
+		var artist = params.pop_string();
+		var album = params.pop_string();
+		var state = params.pop_string();
+		var artwork_location = params.pop_string();
+		var artwork_file = params.pop_string();
+		var rating = params.pop_double();
 		model.set_track_info(title, artist, album, state, artwork_location, artwork_file, rating);
 		
 		SList<string> playback_actions = null;
-		var actions = Diorite.variant_to_strv(dict.lookup_value("playbackActions", null).get_maybe().get_variant());
+		var actions = params.pop_strv();
 		foreach (var action in actions)
 			playback_actions.prepend(action);
-		
 		playback_actions.reverse();
 		model.playback_actions = (owned) playback_actions;
 		return new Variant.boolean(true);
 	}
 	
-	private Variant? handle_get_track_info(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_get_track_info(Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
 		var builder = new VariantBuilder(new VariantType("a{smv}"));
@@ -77,13 +87,12 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 		return builder.end();
 	}
 	
-	private Variant? handle_set_flag(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_set_flag(Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
+		var name = params.pop_string();
+		var state = params.pop_bool();
 		bool handled = false;
-		string name;
-		bool val;
-		data.get("(sb)", out name, out val);
 		switch (name)
 		{
 		case "can-go-next":
@@ -94,7 +103,7 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 		case "can-rate":
 			handled = true;
 			GLib.Value value = GLib.Value(typeof(bool));
-			value.set_boolean(val);
+			value.set_boolean(state);
 			model.@set_property(name, value);
 			break;
 		default:

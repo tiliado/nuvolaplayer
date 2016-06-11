@@ -197,6 +197,11 @@ MediaPlayer.setPlaybackState = function(state)
     }
 }
 
+MediaPlayer._setFlag = function(name, state)
+{
+    Nuvola._sendMessageAsync("/nuvola/mediaplayer/set-flag::pw,tuple", name, state);
+}
+
 /**
  * Set whether it is possible to go to the next track
  * 
@@ -210,7 +215,7 @@ MediaPlayer.setCanGoNext = function(canGoNext)
     {
         this._canGoNext = canGoNext;
         Nuvola.actions.setEnabled(PlayerAction.NEXT_SONG, !!canGoNext);
-        Nuvola._sendMessageAsync("Nuvola.MediaPlayer.setFlag", "can-go-next", !!canGoNext);
+        this._setFlag("can-go-next", !!canGoNext);
         this._showNotification();
         this._sendDevelInfo();
     }
@@ -229,7 +234,7 @@ MediaPlayer.setCanGoPrev = function(canGoPrev)
     {
         this._canGoPrev = canGoPrev;
         Nuvola.actions.setEnabled(PlayerAction.PREV_SONG, !!canGoPrev);
-        Nuvola._sendMessageAsync("Nuvola.MediaPlayer.setFlag", "can-go-previous", !!canGoPrev);
+        this._setFlag("can-go-previous", !!canGoPrev);
         this._showNotification();
         this._sendDevelInfo();
     }
@@ -249,7 +254,7 @@ MediaPlayer.setCanPlay = function(canPlay)
         this._canPlay = canPlay;
         Nuvola.actions.setEnabled(PlayerAction.PLAY, !!canPlay);
         Nuvola.actions.setEnabled(PlayerAction.TOGGLE_PLAY, !!(this._canPlay || this._canPause));
-        Nuvola._sendMessageAsync("Nuvola.MediaPlayer.setFlag", "can-play", !!canPlay);
+        this._setFlag("can-play", !!canPlay);
         this._showNotification();
         this._sendDevelInfo();
     }
@@ -270,8 +275,8 @@ MediaPlayer.setCanPause = function(canPause)
         Nuvola.actions.setEnabled(PlayerAction.PAUSE, !!canPause);
         Nuvola.actions.setEnabled(PlayerAction.STOP, !!canPause);
         Nuvola.actions.setEnabled(PlayerAction.TOGGLE_PLAY, !!(this._canPlay || this._canPause));
-        Nuvola._sendMessageAsync("Nuvola.MediaPlayer.setFlag", "can-pause", !!canPause);
-        Nuvola._sendMessageAsync("Nuvola.MediaPlayer.setFlag", "can-stop", !!canPause);
+        this._setFlag("can-pause", !!canPause);
+        this._setFlag("can-stop", !!canPause);
         this._showNotification();
         this._sendDevelInfo();
     }
@@ -292,7 +297,7 @@ MediaPlayer.setCanRate = function(canRate)
     if (this._canRate !== canRate)
     {
         this._canRate = canRate;
-        Nuvola._sendMessageAsync("Nuvola.MediaPlayer.setFlag", "can-rate", !!canRate);
+        this._setFlag("can-rate", !!canRate);
     }
 }
 
@@ -405,7 +410,7 @@ MediaPlayer._sendDevelInfo = function()
         "playbackActions": this._baseActions.concat(this._extraActions),
         "state": ["unknown", "paused", "playing"][this._state],
     };
-    Nuvola._sendMessageAsync("Nuvola.MediaPlayer.setTrackInfo", info);
+    Nuvola._sendMessageAsync("/nuvola/mediaplayer/set-track-info::pw,dict", info);
 }
 
 MediaPlayer._onArtworkDownloaded = function(res, changed)
