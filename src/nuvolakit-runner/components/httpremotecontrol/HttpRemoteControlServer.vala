@@ -47,8 +47,8 @@ public class Server: Soup.Server
 		this.app_runners_order = app_runners_order;
         this.web_app_registry = web_app_registry;
         registered_runners = new GenericSet<string>(str_hash, str_equal);
-        ipc_server.add_handler("HttpRemoteControl.register", handle_register);
-        ipc_server.add_handler("HttpRemoteControl.unregister", handle_unregister);
+        ipc_server.add_handler("HttpRemoteControl.register", "s", handle_register);
+        ipc_server.add_handler("HttpRemoteControl.unregister", "s", handle_unregister);
         app.runner_exited.connect(on_runner_exited);
 	}
     
@@ -103,7 +103,7 @@ public class Server: Soup.Server
         unregister_app(runner.app_id);
     }
     
-	private static void default_handler(
+    private static void default_handler(
         Soup.Server server, Soup.Message msg, string path, GLib.HashTable? query, Soup.ClientContext client)
 	{
 		var self = server as Server;
@@ -187,16 +187,14 @@ public class Server: Soup.Server
         return builder.get_root();
 	}
     
-    private Variant? handle_register(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+    private Variant? handle_register(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "s");
 		register_app(data.get_string());
 		return null;
 	}
     
-    private Variant? handle_unregister(Diorite.Ipc.MessageServer server, Variant? data) throws Diorite.Ipc.MessageError
+    private Variant? handle_unregister(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
-		Diorite.Ipc.MessageServer.check_type_str(data, "s");
 		var app_id = data.get_string();
         if (!unregister_app(app_id))
             warning("App %s hasn't been registered yet!", app_id);
