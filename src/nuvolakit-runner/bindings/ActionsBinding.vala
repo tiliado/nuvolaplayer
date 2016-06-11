@@ -24,7 +24,7 @@
 
 public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 {
-	public ActionsBinding(Diorite.Ipc.MessageServer server, WebWorker web_worker)
+	public ActionsBinding(Drt.ApiRouter server, WebWorker web_worker)
 	{
 		base(server, web_worker, "Nuvola.Actions");
 	}

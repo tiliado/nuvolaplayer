@@ -104,16 +104,18 @@ public class JSApi : GLib.Object
 	private File data_dir;
 	private File config_dir;
 	private Diorite.KeyValueStorage[] key_value_storages;
+	private string? api_token;
 	private uint[] webkit_version;
 	private uint[] libsoup_version;
 	
 	public JSApi(Diorite.Storage storage, File data_dir, File config_dir, Diorite.KeyValueStorage config,
-	Diorite.KeyValueStorage session, uint[] webkit_version, uint[] libsoup_version)
+	Diorite.KeyValueStorage session, string? api_token, uint[] webkit_version, uint[] libsoup_version)
 	{
 		this.storage = storage;
 		this.data_dir = data_dir;
 		this.config_dir = config_dir;
 		this.key_value_storages = {config, session};
+		this.api_token = api_token;
 		assert(webkit_version.length >= 3);
 		this.webkit_version = webkit_version;
 		this.libsoup_version = libsoup_version;
@@ -313,6 +315,9 @@ public class JSApi : GLib.Object
 			exception = create_exception(ctx, "JSApi is null");
 			return undefined;
 		}
+		
+		if (name[0] == '/')
+			name += "," + (js_api.api_token ?? "");
 		
 		Variant? data = null;
 		if (args.length > 1)

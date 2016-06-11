@@ -36,6 +36,7 @@ public class WebExtension: GLib.Object
 	private JSApi js_api;
 	private JsRuntime bare_env;
 	private JSApi bare_api;
+	private string? api_token = null;
 	
 	public WebExtension(WebKit.WebExtension extension, Diorite.Ipc.MessageClient runner, Diorite.Ipc.MessageServer server)
 	{
@@ -82,15 +83,18 @@ public class WebExtension: GLib.Object
 		libsoup_version[0] = (uint) int.parse(Environment.get_variable("LIBSOUP_MAJOR") ?? "0");
 		libsoup_version[1] = (uint) int.parse(Environment.get_variable("LIBSOUP_MINOR") ?? "0");
 		libsoup_version[2] = (uint) int.parse(Environment.get_variable("LIBSOUP_MICRO") ?? "0");
+		
+		api_token = Environment.get_variable("NUVOLA_API_ROUTER_TOKEN");
+		Environment.set_variable("NUVOLA_API_ROUTER_TOKEN", "*", true);
 
 		js_api = new JSApi(storage, data_dir, user_config_dir, new KeyValueProxy(runner, "config"),
-			new KeyValueProxy(runner, "session"), webkit_version, libsoup_version);
+			new KeyValueProxy(runner, "session"), api_token, webkit_version, libsoup_version);
 		js_api.send_message_async.connect(on_send_message_async);
 		js_api.send_message_sync.connect(on_send_message_sync);
 		
 		bare_env = new JsRuntime();
 		bare_api = new JSApi(storage, data_dir, user_config_dir, new KeyValueProxy(runner, "config"),
-			new KeyValueProxy(runner, "session"), webkit_version, libsoup_version);
+			new KeyValueProxy(runner, "session"), api_token, webkit_version, libsoup_version);
 		try
 		{
 			bare_api.inject(bare_env);

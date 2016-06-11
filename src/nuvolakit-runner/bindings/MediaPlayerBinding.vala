@@ -26,7 +26,7 @@ using Diorite;
 
 public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 {
-	public MediaPlayerBinding(Diorite.Ipc.MessageServer server, WebWorker web_worker, MediaPlayerModel model)
+	public MediaPlayerBinding(Drt.ApiRouter server, WebWorker web_worker, MediaPlayerModel model)
 	{
 		base(server, web_worker, "Nuvola.MediaPlayer", model);
 	}

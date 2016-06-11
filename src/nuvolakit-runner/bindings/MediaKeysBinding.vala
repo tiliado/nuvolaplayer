@@ -24,7 +24,7 @@
 
 public class Nuvola.MediaKeysBinding: ObjectBinding<MediaKeysInterface>
 {
-	public MediaKeysBinding(Diorite.Ipc.MessageServer server, WebWorker web_worker)
+	public MediaKeysBinding(Drt.ApiRouter server, WebWorker web_worker)
 	{
 		base(server, web_worker, "Nuvola.MediaKey");
 	}

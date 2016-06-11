@@ -24,7 +24,7 @@
 
 public class Nuvola.MenuBarBinding: ObjectBinding<MenuBarInterface>
 {
-	public MenuBarBinding(Diorite.Ipc.MessageServer server, WebWorker web_worker)
+	public MenuBarBinding(Drt.ApiRouter server, WebWorker web_worker)
 	{
 		base(server, web_worker, "Nuvola.MenuBar");
 	}

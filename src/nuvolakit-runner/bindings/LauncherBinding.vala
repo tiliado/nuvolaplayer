@@ -24,7 +24,7 @@
 
 public class Nuvola.LauncherBinding: ModelBinding<LauncherModel>
 {
-	public LauncherBinding(Diorite.Ipc.MessageServer server, WebWorker web_worker, LauncherModel? model=null)
+	public LauncherBinding(Drt.ApiRouter server, WebWorker web_worker, LauncherModel? model=null)
 	{
 		base(server, web_worker, "Nuvola.Launcher", model ?? new LauncherModel());
 	}

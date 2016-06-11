@@ -112,7 +112,7 @@ public class AppRunnerController : RunnerApplication
 	public WebEngine web_engine {get; private set;}
 	public Diorite.KeyValueStorage master_config {get; private set;}
 	public Bindings bindings {get; private set;}
-	public Diorite.Ipc.MessageServer server {get; private set; default=null;}
+	public Drt.ApiRouter server {get; private set; default=null;}
 	public ActionsHelper actions_helper {get; private set; default = null;}
 	private GlobalKeybindings global_keybindings;
 	private static const int MINIMAL_REMEMBERED_WINDOW_SIZE = 300;
@@ -292,7 +292,7 @@ public class AppRunnerController : RunnerApplication
 		Environment.set_variable("NUVOLA_IPC_UI_RUNNER", server_name, true);
 		try
 		{
-			server = new Diorite.Ipc.MessageServer(server_name);
+			server = new Drt.ApiRouter(server_name);
 			server.add_handler("Nuvola.Browser.downloadFileAsync", "(ssd)", handle_download_file_async);
 			server.start_service();
 		}

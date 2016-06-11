@@ -24,7 +24,7 @@
 
 public class Nuvola.NotificationsBinding: ObjectBinding<NotificationsInterface>
 {
-	public NotificationsBinding(Diorite.Ipc.MessageServer server, WebWorker web_worker)
+	public NotificationsBinding(Drt.ApiRouter server, WebWorker web_worker)
 	{
 		base(server, web_worker, "Nuvola.Notifications");
 	}
