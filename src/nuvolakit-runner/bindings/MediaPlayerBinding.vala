@@ -113,7 +113,7 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 			model.@set_property(name, value);
 			break;
 		default:
-			critical("Unknown flag '%s'", name);
+			warning("Unknown flag '%s'", name);
 			break;
 		}
 		return new Variant.boolean(handled);
@@ -135,8 +135,8 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 			model.@get_property(name, ref value);
 			return new Variant.boolean(value.get_boolean());
 		default:
-			critical("Unknown flag '%s'", name);
-			return new Variant("mv", null);
+			warning("Unknown flag '%s'", name);
+			return null;
 		}
 	}
 	
