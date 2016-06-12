@@ -264,23 +264,16 @@ public class Server: Soup.Server
     
     private Json.Node to_json(Variant? data)
     {
-		var builder = new Json.Builder();
-		if (data == null)
+		Variant? result = data;
+		if (data == null || !data.get_type().is_subtype_of(VariantType.DICTIONARY))
 		{
-			builder.begin_object().set_member_name("result").add_null_value().end_object();
-			return builder.get_root();
+			var builder = new VariantBuilder(new VariantType("a{smv}"));
+			if (data != null)
+				g_variant_ref(data); // FIXME: How to avoid this hack
+			builder.add("{smv}", "result", data);
+			result = builder.end();
 		}
-		
-		var node = Json.gvariant_serialize(data);
-		if (node != null && node.get_node_type() == Json.NodeType.OBJECT && !node.is_null() && node.get_object() != null)
-			return node;
-			
-		builder.begin_object().set_member_name("result");
-		if (node == null || node.is_null())
-			builder.add_null_value();
-		else
-			builder.add_value(node);
-		return builder.end_object().get_root();
+		return Json.gvariant_serialize(result);
 	}
     
     private Json.Node? list_apps()
@@ -340,5 +333,8 @@ public class Server: Soup.Server
 }
 
 } // namespace Nuvola.HttpRemoteControl
+
+// FIXME
+private extern Variant* g_variant_ref(Variant* variant);
 #endif
 
