@@ -180,44 +180,48 @@ public class Server: Soup.Server
 			unowned string value;
 			while (iter.next(out key, out value))
 			{
-				string param_key = key;
+				string param_type;
+				string param_key;
 				Variant? param_value = null;
+				var parts = key.split(":", 2);
+				if (parts.length < 2)
+				{
+					param_type = "s";
+					param_key = key;
+				}
+				else
+				{
+					param_type = parts[0];
+					param_key = parts[1];
+				}
+					
 				if (value == null)
 				{
 					param_value = null;
 				}
 				else
 				{
-					var parts = key.split(":", 2);
-					if (parts.length <= 2)
+					switch (param_type)
 					{
+					case "d":
+					case "double":
+						double d;
+						if (double.try_parse(value, out d))
+							param_value = new Variant.double(d);
+						break;
+					case "b":
+					case "bool":
+					case "boolean":
+						bool b;
+						if (bool.try_parse(value, out b))
+							param_value = new Variant.boolean(b);
+						break;
+					case "s":
+					case "str":
+					case "string":
+					default:
 						param_value = new Variant.string(value.dup());
-					}
-					else
-					{
-						param_key = parts[1];
-						switch (parts[0])
-						{
-						case "d":
-						case "double":
-							double d;
-							if (double.try_parse(value, out d))
-								param_value = new Variant.double(d);
-							break;
-						case "b":
-						case "bool":
-						case "boolean":
-							bool b;
-							if (bool.try_parse(value, out b))
-								param_value = new Variant.boolean(b);
-							break;
-						case "s":
-						case "str":
-						case "string":
-						default:
-							param_value = new Variant.string(value.dup());
-							break;
-						}
+						break;
 					}
 				}
 				builder.add("{smv}", param_key, param_value);
