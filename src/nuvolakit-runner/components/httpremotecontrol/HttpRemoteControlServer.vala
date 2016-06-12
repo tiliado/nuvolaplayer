@@ -150,7 +150,7 @@ public class Server: Soup.Server
 						var data = send_app_request(app_id, app_request);
 						request.respond_json(200, data);
 					}
-					catch (Diorite.MessageError e)
+					catch (GLib.Error e)
 					{
 						var builder = new VariantBuilder(new VariantType("a{sv}"));
 						builder.add("{sv}", "error", new Variant.int32(e.code));
@@ -164,7 +164,7 @@ public class Server: Soup.Server
         request.respond_not_found();
     }
     
-    private Json.Node send_app_request(string app_id, AppRequest app_request) throws Diorite.MessageError
+    private Json.Node send_app_request(string app_id, AppRequest app_request) throws GLib.Error
     {
         var app = app_runners[app_id];
         var flags = app_request.method == "POST" ? "rw" : "r";

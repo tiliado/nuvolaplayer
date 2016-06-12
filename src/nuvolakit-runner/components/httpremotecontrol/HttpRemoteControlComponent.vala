@@ -61,7 +61,7 @@ public class Component: Nuvola.Component
 		{
 			ipc_master.send_message(method, new Variant.string(app.web_app.id)); 
 		}
-		catch (Diorite.MessageError e)
+		catch (GLib.Error e)
 		{
 			warning("Remote call %s failed: %s", method, e.message);
 		}
