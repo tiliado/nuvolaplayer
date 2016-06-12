@@ -166,7 +166,12 @@ public class MasterController : Diorite.Application
 		media_keys = new MediaKeysServer(new MediaKeys(this.app_id, key_grabber), server, app_runners);
 		
 		#if EXPERIMENTAL
-		http_remote_control = new HttpRemoteControl.Server(this, server, app_runners_map, app_runners, web_app_reg);
+		var www_root_dirname = "www";
+		File[] www_roots = {storage.user_data_dir.get_child(www_root_dirname)};
+		foreach (var data_dir in storage.data_dirs)
+			www_roots += data_dir.get_child(www_root_dirname);
+		http_remote_control = new HttpRemoteControl.Server(
+			this, server, app_runners_map, app_runners, web_app_reg, www_roots);
 		#endif
 		init_state = InitState.CORE;
 	}

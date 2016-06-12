@@ -35,17 +35,19 @@ public class Server: Soup.Server
     private GenericSet<string> registered_runners;
     private WebAppRegistry web_app_registry;
     private bool running = false;
+    private File[] www_roots;
 	
 	public Server(
         MasterController app, Diorite.Ipc.MessageServer ipc_server,
         HashTable<string, AppRunner> app_runners, Queue<AppRunner> app_runners_order,
-        WebAppRegistry web_app_registry)
+        WebAppRegistry web_app_registry, File[] www_roots)
 	{
 		this.app = app;
         this.ipc_server = ipc_server;
 		this.app_runners = app_runners;
 		this.app_runners_order = app_runners_order;
         this.web_app_registry = web_app_registry;
+        this.www_roots = www_roots;
         registered_runners = new GenericSet<string>(str_hash, str_equal);
         ipc_server.add_handler("HttpRemoteControl.register", "s", handle_register);
         ipc_server.add_handler("HttpRemoteControl.unregister", "s", handle_unregister);
@@ -158,12 +160,42 @@ public class Server: Soup.Server
 						builder.add("{sv}", "quark", new Variant.string(e.domain.to_string()));
 						request.respond_json(400, Json.gvariant_serialize(builder.end()));
 					}
-                    return;
                 }
+                return;
             }
         }
-        request.respond_not_found();
+        serve_static(request);
     }
+    
+    private void serve_static(RequestContext request)
+    {
+		
+		var path = request.path == "/" ? "index" : request.path.substring(1);
+		if (path.has_suffix("/"))
+			path += "index";
+		
+		var file = find_static_file(path);
+		if (file == null)
+		{
+			request.respond_not_found();
+			return;
+		}
+		request.serve_file(file);
+	}
+	
+	private File? find_static_file(string path)
+	{
+		foreach (var www_root in www_roots)
+		{
+			var file = www_root.get_child(path);
+			if (file.query_file_type(0) == FileType.REGULAR)
+				return file;
+			file = www_root.get_child(path + ".html");
+			if (file.query_file_type(0) == FileType.REGULAR)
+				return file;
+		}
+		return null;
+	}
     
     private Json.Node send_app_request(string app_id, AppRequest app_request) throws GLib.Error
     {

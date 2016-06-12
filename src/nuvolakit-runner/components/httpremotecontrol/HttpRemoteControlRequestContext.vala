@@ -63,6 +63,39 @@ public class RequestContext
 			   msg.uri.to_string(false)).data);
 		msg.status_code = 404;
 	}
+	
+	public void serve_file(File file)
+	{
+		string? mime_type = null;
+		try
+		{
+			var content_type = file.query_info(FileAttribute.STANDARD_CONTENT_TYPE, 0).get_content_type();
+			mime_type = ContentType.get_mime_type(content_type);
+		}
+		catch (GLib.Error e)
+		{
+			mime_type = null;
+		}
+		
+		if (mime_type == null)
+			mime_type = "application/octet-stream";
+		else if (mime_type == "text/plain")
+			mime_type += "; charset=utf8";
+		try
+		{
+			uint8[] data;
+			file.load_contents(null, out data, null);
+			msg.response_headers.replace("Content-Type", mime_type);
+			msg.response_body.append_take((owned) data);
+			msg.status_code = 200;
+		}
+		catch (GLib.Error e)
+		{
+			warning("Failed to load file '%s': %s", file.get_path(), e.message);
+			respond_not_found();
+			return;
+		}
+	}
 }
 
 } // namespace Nuvola.HttpRemoteControl
