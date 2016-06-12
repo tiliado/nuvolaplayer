@@ -220,22 +220,36 @@ public class Server: Soup.Server
 					case "str":
 					case "string":
 					default:
-						param_value = new Variant.string(value.dup());
+						param_value = new Variant.string(value);
 						break;
 					}
 				}
 				builder.add("{smv}", param_key, param_value);
 			}
 		}
-		var response = app.send_message(method, builder.end());
-		if (response == null || !response.get_type().is_subtype_of(VariantType.DICTIONARY))
-		{
-			builder = new VariantBuilder(new VariantType("a{smv}"));
-			builder.add("{smv}", "result", response);
-			return Json.gvariant_serialize(builder.end());
-		}
-		return Json.gvariant_serialize(response);
+		return to_json(app.send_message(method, builder.end()));
     }
+    
+    private Json.Node to_json(Variant? data)
+    {
+		var builder = new Json.Builder();
+		if (data == null)
+		{
+			builder.begin_object().set_member_name("result").add_null_value().end_object();
+			return builder.get_root();
+		}
+		
+		var node = Json.gvariant_serialize(data);
+		if (node != null && node.get_node_type() == Json.NodeType.OBJECT && !node.is_null() && node.get_object() != null)
+			return node;
+			
+		builder.begin_object().set_member_name("result");
+		if (node == null || node.is_null())
+			builder.add_null_value();
+		else
+			builder.add_value(node);
+		return builder.end_object().get_root();
+	}
     
     private Json.Node? list_apps()
     {
