@@ -69,7 +69,7 @@ public class WebExtension: GLib.Object
 			response = runner.send_message("get_user_config_dir");
 			user_config_dir = File.new_for_path(response.get_string());
 		}
-		catch (Diorite.MessageError e)
+		catch (GLib.Error e)
 		{
 			error("Runner client error: %s", e.message);
 		}
@@ -112,7 +112,7 @@ public class WebExtension: GLib.Object
 			{
 				runner.send_message("web_worker_initialized");
 			}
-			catch (Diorite.MessageError e)
+			catch (GLib.Error e)
 			{
 				error("Runner client error: %s", e.message);
 			}
@@ -186,7 +186,7 @@ public class WebExtension: GLib.Object
 		{
 			runner.send_message("show_error", new Variant.string(message));
 		}
-		catch (Diorite.MessageError e)
+		catch (GLib.Error e)
 		{
 			critical("Failed to send error message '%s'. %s", message, e.message);
 		}
@@ -198,7 +198,7 @@ public class WebExtension: GLib.Object
 		{
 			runner.send_message(name, data);
 		}
-		catch (Diorite.MessageError e)
+		catch (GLib.Error e)
 		{
 			critical("Failed to send message '%s'. %s", name, e.message);
 		}
@@ -210,7 +210,7 @@ public class WebExtension: GLib.Object
 		{
 			result = runner.send_message(name, data);
 		}
-		catch (Diorite.MessageError e)
+		catch (GLib.Error e)
 		{
 			critical("Failed to send message '%s'. %s", name, e.message);
 			result = null;

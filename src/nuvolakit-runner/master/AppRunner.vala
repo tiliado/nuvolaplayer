@@ -97,7 +97,7 @@ public class AppRunner : GLib.Object
 		return true;
 	}
 	
-	public Variant? send_message(string name, Variant? params) throws Diorite.MessageError
+	public Variant? send_message(string name, Variant? params) throws GLib.Error
 	{
 		if (client == null)
 			throw new Diorite.MessageError.IOERROR("No connected to app runner '%s'.", app_id);

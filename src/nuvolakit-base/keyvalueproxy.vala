@@ -47,7 +47,7 @@ public class KeyValueProxy: GLib.Object, Diorite.KeyValueStorage
 				return response.get_boolean();
 			critical("Invalid response to KeyValueProxy.has_key: %s", response.print(false));
 		}
-		catch (Diorite.MessageError e)
+		catch (GLib.Error e)
 		{
 			critical("Master client error: %s", e.message);
 		}
@@ -61,7 +61,7 @@ public class KeyValueProxy: GLib.Object, Diorite.KeyValueStorage
 			var response = client.send_message(prefix + "_get_value", new Variant.string(key));
 			return response;
 		}
-		catch (Diorite.MessageError e)
+		catch (GLib.Error e)
 		{
 			critical("Master client error: %s", e.message);
 			return null;
@@ -74,7 +74,7 @@ public class KeyValueProxy: GLib.Object, Diorite.KeyValueStorage
 		{
 			client.send_message(prefix + "_set_value", new Variant("(smv)", key, value));
 		}
-		catch (Diorite.MessageError e)
+		catch (GLib.Error e)
 		{
 			critical("Master client error: %s", e.message);
 		}
@@ -86,7 +86,7 @@ public class KeyValueProxy: GLib.Object, Diorite.KeyValueStorage
 		{
 			client.send_message(prefix + "_set_default_value", new Variant("(smv)", key, value));
 		}
-		catch (Diorite.MessageError e)
+		catch (GLib.Error e)
 		{
 			critical("Master client error: %s", e.message);
 		}

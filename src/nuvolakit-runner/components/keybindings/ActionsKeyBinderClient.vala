@@ -46,7 +46,7 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder
 			data.get("ms", &keybinding);
 			return keybinding;
 		}
-		catch (Diorite.MessageError e)
+		catch (GLib.Error e)
 		{
 			warning("Remote call %s failed: %s", METHOD, e.message);
 			return null;
@@ -62,7 +62,7 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder
 			Diorite.MessageListener.check_type_string(data, "b");
 			return data.get_boolean();
 		}
-		catch (Diorite.MessageError e)
+		catch (GLib.Error e)
 		{
 			warning("Remote call %s failed: %s", METHOD, e.message);
 			return false;
@@ -78,7 +78,7 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder
 			Diorite.MessageListener.check_type_string(data, "b");
 			return data.get_boolean();
 		}
-		catch (Diorite.MessageError e)
+		catch (GLib.Error e)
 		{
 			warning("Remote call %s failed: %s", METHOD, e.message);
 			return false;
@@ -94,7 +94,7 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder
 			Diorite.MessageListener.check_type_string(data, "b");
 			return data.get_boolean();
 		}
-		catch (Diorite.MessageError e)
+		catch (GLib.Error e)
 		{
 			warning("Remote call %s failed: %s", METHOD, e.message);
 			return false;
@@ -112,7 +112,7 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder
 			data.get("ms", &action);
 			return action;
 		}
-		catch (Diorite.MessageError e)
+		catch (GLib.Error e)
 		{
 			warning("Remote call %s failed: %s", METHOD, e.message);
 			return null;
@@ -128,7 +128,7 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder
 			Diorite.MessageListener.check_type_string(data, "b");
 			return data.get_boolean();
 		}
-		catch (Diorite.MessageError e)
+		catch (GLib.Error e)
 		{
 			warning("Remote call %s failed: %s", METHOD, e.message);
 			return false;

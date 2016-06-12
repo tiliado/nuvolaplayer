@@ -311,7 +311,7 @@ public class AppRunnerController : RunnerApplication
 			var response = master.send_message("runner_started", new Variant("(ss)", web_app.id, server_name));
 			assert(response.equal(new Variant.boolean(true)));
 		}
-		catch (Diorite.MessageError e)
+		catch (GLib.Error e)
 		{
 			error("Communication with master process failed: %s", e.message);
 		}
@@ -576,7 +576,7 @@ public class AppRunnerController : RunnerApplication
 			var response = master.send_message("runner_activated", new Variant.string(web_app.id));
 			warn_if_fail(response.equal(new Variant.boolean(true)));
 		}
-		catch (Diorite.MessageError e)
+		catch (GLib.Error e)
 		{
 			critical("Communication with master process failed: %s", e.message);
 		}

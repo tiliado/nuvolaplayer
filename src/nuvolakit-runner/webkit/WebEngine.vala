@@ -504,7 +504,7 @@ public class WebEngine : GLib.Object, JSExecutor
 		{
 			server.send_local_message(name, data);
 		}
-		catch (Diorite.MessageError e)
+		catch (GLib.Error e)
 		{
 			critical("Failed to send message '%s'. %s", name, e.message);
 		}
@@ -516,7 +516,7 @@ public class WebEngine : GLib.Object, JSExecutor
 		{
 			result = server.send_local_message(name, data);
 		}
-		catch (Diorite.MessageError e)
+		catch (GLib.Error e)
 		{
 			critical("Failed to send message '%s'. %s", name, e.message);
 			result = null;

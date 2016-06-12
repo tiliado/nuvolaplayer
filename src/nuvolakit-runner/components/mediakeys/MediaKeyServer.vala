@@ -89,7 +89,7 @@ public class MediaKeysServer: GLib.Object
 							response == null ? "null" : response.print(true));
 					}
 				}
-				catch (Diorite.MessageError e)
+				catch (GLib.Error e)
 				{
 					warning("Communication with app runner %s for action %s failed. %s", app_id, key, e.message);
 				}

@@ -50,7 +50,7 @@ public class MediaKeysClient : GLib.Object, MediaKeysInterface
 			Diorite.MessageListener.check_type_string(data, "b");
 			managed = data.get_boolean();
 		}
-		catch (Diorite.MessageError e)
+		catch (GLib.Error e)
 		{
 			warning("Remote call %s failed: %s", METHOD, e.message);
 		}
@@ -68,7 +68,7 @@ public class MediaKeysClient : GLib.Object, MediaKeysInterface
 			Diorite.MessageListener.check_type_string(data, "b");
 			managed = !data.get_boolean();
 		}
-		catch (Diorite.MessageError e)
+		catch (GLib.Error e)
 		{
 			warning("Remote call %s failed: %s", METHOD, e.message);
 		}

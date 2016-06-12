@@ -140,7 +140,7 @@ public int main(string[] args)
 			
 			message("Using '%s' as web app id.", Args.app);
 		}
-		catch (Diorite.MessageError e)
+		catch (GLib.Error e)
 		{
 			return quit(2, "Error: Communication with %s master instance failed: %s\n", Nuvola.get_app_name(), e.message);
 		}
@@ -179,7 +179,7 @@ public int main(string[] args)
 			return quit(1, "Error: Unknown command '%s'.\n", command);
 		}
 	}
-	catch (Diorite.MessageError e)
+	catch (GLib.Error e)
 	{
 		return quit(2, "Error: Communication with %s instance failed: %s\n", Nuvola.get_app_name(), e.message);
 	}
@@ -194,7 +194,7 @@ class Control
 		this.conn = conn;
 	}
 	
-	public int list_actions() throws Diorite.MessageError
+	public int list_actions() throws GLib.Error
 	{
 		var response = conn.send_message("Nuvola.Actions.listGroups");
 		stdout.printf("Available actions\n\nFormat: NAME (is enabled?) - label\n");
@@ -237,7 +237,7 @@ class Control
 		return 0;
 	}
 	
-	public int activate_action(string name, string? parameter_str) throws Diorite.MessageError
+	public int activate_action(string name, string? parameter_str) throws GLib.Error
 	{
 		Variant parameter;
 		try
@@ -268,7 +268,7 @@ class Control
 		return 0;
 	}
 	
-	public int action_state(string name) throws Diorite.MessageError
+	public int action_state(string name) throws GLib.Error
 	{
 		var response = conn.send_message("Nuvola.Actions.getState", new Variant("(s)", name));
 		if (response != null)
@@ -276,7 +276,7 @@ class Control
 		return 0;
 	}
 	
-	public int track_info(string? key=null) throws Diorite.MessageError
+	public int track_info(string? key=null) throws GLib.Error
 	{
 		var response = conn.send_message("/nuvola/mediaplayer/track-info::r,,");
 		var title = Diorite.variant_dict_str(response, "title");
