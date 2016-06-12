@@ -41,7 +41,7 @@ var HttpRequest = function(method, url, params)
         for (var key in params)
         {
             if (params.hasOwnProperty(key))
-                pairs.append(encodeURIComponent(key) + "=" + encodeURIComponent(params[key]));
+                pairs.push(encodeURIComponent(key) + "=" + encodeURIComponent(params[key]));
         }
         payload = pairs.length > 0 ? pairs.join("&") : null;
     }
@@ -60,9 +60,9 @@ HttpRequest.prototype.send = function()
 {
     this.request = new XMLHttpRequest();
     this.request.onreadystatechange = this._onreadystatechange.bind(this);
+    this.request.open(this.method, this.url);
     if (this.method == "POST" && this.payload)
         this.request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    this.request.open(this.method, this.url);
     this.request.send(this.payload);
 }
 
@@ -79,7 +79,6 @@ HttpRequest.prototype._onreadystatechange = function()
 
 HttpRequest.prototype.json = function()
 {
-    console.log(this.request.responseText);
     return JSON.parse(this.request.responseText);
 }
 
@@ -105,6 +104,11 @@ Nuvola.onload = function()
 {
     this.appId = "test"; 
     setInterval(this.update.bind(this), 500);
+    $id("play-pause").onclick = function()
+    {
+        var r = new HttpRequest("post", "/+api/app/" + Nuvola.appId + "/actions/activate", {name: "toggle-play"});
+        r.send();
+    };
 }
 
 Nuvola.update = function()
@@ -113,12 +117,24 @@ Nuvola.update = function()
     var request = new HttpRequest("get", "/+api/app/" + appId + "/mediaplayer/track-info", null);
     request.onsuccess = function(request)
     {
-        var data = request.json();
+        var data;
+        try
+        {
+            data = request.json();
+        }
+        catch (e)
+        {
+            this.onerror(request);
+            return;
+        }
+        
         $id("app-name").innerText = appId;
         $id("track-title").innerText = data.title || "unknown";
         $id("track-album").innerText = data.album || "unknown";
         $id("track-artist").innerText = data.artist || "unknown";
         $id("playback-state").innerText = data.state || "unknown";
+        $id("play-pause").innerText = data.state === "playing" ? "pause" : "play";
+        
         if (!data.state || data.state == "unknown")
         {
             $id("track-rating").innerText = "unknown";
@@ -136,7 +152,6 @@ Nuvola.update = function()
     };
     request.onerror = function(request)
     {
-        var data = request.json();
         $id("app-name").innerText = "Error";
     }
     request.send();
