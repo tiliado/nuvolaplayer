@@ -155,6 +155,7 @@ public class Server: Soup.Server
 						var builder = new VariantBuilder(new VariantType("a{sv}"));
 						builder.add("{sv}", "error", new Variant.int32(e.code));
 						builder.add("{sv}", "message", new Variant.string(e.message));
+						builder.add("{sv}", "quark", new Variant.string(e.domain.to_string()));
 						request.respond_json(400, Json.gvariant_serialize(builder.end()));
 					}
                     return;
