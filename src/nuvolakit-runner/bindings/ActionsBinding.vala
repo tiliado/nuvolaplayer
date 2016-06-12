@@ -33,11 +33,21 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 	{
 		bind("addAction", "(sssssss@*)", handle_add_action);
 		bind("addRadioAction", "(sss@*av)", handle_add_radio_action);
-		bind("isEnabled", "(s)", handle_is_action_enabled);
+		bind2("is-enabled", Drt.ApiFlags.READABLE,
+			"Returns true if action is enabled,",
+			handle_is_action_enabled, {
+			new Drt.StringParam("name", true, false, null, "Action name"),
+		});
 		bind("setEnabled", "(sb)", handle_action_set_enabled);
 		bind("getState", "(s)", handle_action_get_state);
 		bind("setState", "(s@*)", handle_action_set_state);
-		bind("activate", "(s@*)", handle_action_activate);
+		bind2("activate", Drt.ApiFlags.WRITABLE,
+			"Activates action",
+			handle_action_activate, {
+			new Drt.StringParam("name", true, false, null, "Action name"),
+			new Drt.VariantParam("parameter", false, true, null, "Action parameter"),
+		});
+		
 		bind("listGroups", null, handle_list_groups);
 		bind("listGroupActions", "(s)", handle_list_group_actions);
 	}
@@ -128,16 +138,10 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 		return null;
 	}
 	
-	private Variant? handle_is_action_enabled(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_is_action_enabled(Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
-		
-		string? action_name = null;
-		data.get("(s)", &action_name);
-		
-		if (action_name == null)
-			throw new Diorite.MessageError.INVALID_ARGUMENTS("Action name must not be null");
-		
+		string action_name = params.pop_string();
 		bool enabled = false;
 		foreach (var object in objects)
 			if (object.is_enabled(action_name, ref enabled))
@@ -197,17 +201,11 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 		return null;
 	}
 	
-	private Variant? handle_action_activate(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_action_activate(Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
-		
-		string? action_name = null;
-		Variant? parameter = null;
-		data.get("(s@*)", &action_name, &parameter);
-		
-		if (action_name == null)
-			throw new Diorite.MessageError.INVALID_ARGUMENTS("Action name must not be null");
-		
+		string action_name = params.pop_string();
+		Variant? parameter = params.pop_variant();
 		bool handled = false;
 		foreach (var object in objects)
 			if (handled = object.activate(action_name, parameter))

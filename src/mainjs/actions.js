@@ -165,7 +165,7 @@ Actions._onActionActivated = function(arg1, action)
  */
 Actions.isEnabled = function(name)
 {
-    return Nuvola._sendMessageSync("Nuvola.Actions.isEnabled", name);
+    return Nuvola._sendMessageSync("/nuvola/actions/is-enabled::r,,", name);
 }
 
 /**
@@ -291,7 +291,7 @@ Actions.updateStates = function(states)
  */
 Actions.activate = function(name, parameter)
 {
-    Nuvola._sendMessageAsync("Nuvola.Actions.activate", name, parameter == null ? null : parameter);
+    Nuvola._sendMessageAsync("/nuvola/actions/activate::w,,", name, parameter == null ? null : parameter);
 }
 
 /**
