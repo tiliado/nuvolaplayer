@@ -395,7 +395,7 @@ MediaPlayer._setActions = function()
 MediaPlayer._sendDevelInfo = function()
 {
     var rating = 1 * this._track.rating;
-    if (rating < 0)
+    if (rating < 0 || isNaN(rating))
         rating = 0.0;
     else if (rating > 1)
         rating = 1;
