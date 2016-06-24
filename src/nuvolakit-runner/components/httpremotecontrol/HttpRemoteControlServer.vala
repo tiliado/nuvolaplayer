@@ -164,6 +164,23 @@ public class Server: Soup.Server
 				return;
 			}
 		}
+		else if (path.has_prefix("/+api/"))
+		{
+			try
+			{
+				var data = send_local_request(path.substring(6), request);
+				request.respond_json(200, data);
+			}
+			catch (GLib.Error e)
+			{
+				var builder = new VariantBuilder(new VariantType("a{sv}"));
+				builder.add("{sv}", "error", new Variant.int32(e.code));
+				builder.add("{sv}", "message", new Variant.string(e.message));
+				builder.add("{sv}", "quark", new Variant.string(e.domain.to_string()));
+				request.respond_json(400, Json.gvariant_serialize(builder.end()));
+			}
+			return;
+		}
 		serve_static(request);
 	}
 	
@@ -260,6 +277,73 @@ public class Server: Soup.Server
 			}
 		}
 		return to_json(app.send_message(method, builder.end()));
+	}
+	
+	private Json.Node send_local_request(string path, RequestContext request) throws GLib.Error
+	{
+		message("Local request: '%s'", path);
+		var msg = request.msg;
+		var body = msg.request_body.flatten();
+		var flags = msg.method == "POST" ? "rw" : "r";
+		var method = "/nuvola/%s::%s,dict,".printf(path, flags);
+		unowned string? form_data = msg.method == "POST" ? (string) body.data : msg.uri.query;
+		var builder = new VariantBuilder(new VariantType("a{smv}"));
+		if (form_data != null)
+		{
+			var query_params = Soup.Form.decode(form_data);
+			var iter = HashTableIter<string, string>(query_params);
+			unowned string key;
+			unowned string value;
+			while (iter.next(out key, out value))
+			{
+				string param_type;
+				string param_key;
+				Variant? param_value = null;
+				var parts = key.split(":", 2);
+				if (parts.length < 2)
+				{
+					param_type = "s";
+					param_key = key;
+				}
+				else
+				{
+					param_type = parts[0];
+					param_key = parts[1];
+				}
+					
+				if (value == null)
+				{
+					param_value = null;
+				}
+				else
+				{
+					switch (param_type)
+					{
+					case "d":
+					case "double":
+						double d;
+						if (double.try_parse(value, out d))
+							param_value = new Variant.double(d);
+						break;
+					case "b":
+					case "bool":
+					case "boolean":
+						bool b;
+						if (bool.try_parse(value, out b))
+							param_value = new Variant.boolean(b);
+						break;
+					case "s":
+					case "str":
+					case "string":
+					default:
+						param_value = new Variant.string(value);
+						break;
+					}
+				}
+				builder.add("{smv}", param_key, param_value);
+			}
+		}
+		return to_json(bus.send_local_message(method, builder.end()));
 	}
 	
 	private Json.Node to_json(Variant? data)
