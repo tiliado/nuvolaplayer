@@ -28,7 +28,7 @@ namespace Nuvola.HttpRemoteControl
 
 public class Server: Soup.Server
 {
-	Drt.MessageBus bus;
+	private MasterBus bus;
 	private MasterController app;
 	private HashTable<string, AppRunner> app_runners;
 	private unowned Queue<AppRunner> app_runners_order;
@@ -38,7 +38,7 @@ public class Server: Soup.Server
 	private File[] www_roots;
 	
 	public Server(
-		MasterController app, Drt.MessageBus bus,
+		MasterController app, MasterBus bus,
 		HashTable<string, AppRunner> app_runners, Queue<AppRunner> app_runners_order,
 		WebAppRegistry web_app_registry, File[] www_roots)
 	{
