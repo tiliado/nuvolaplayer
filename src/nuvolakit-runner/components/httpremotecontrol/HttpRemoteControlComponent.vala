@@ -30,14 +30,14 @@ public class Component: Nuvola.Component
 {
 	private Bindings bindings;
 	private RunnerApplication app;
-	private Diorite.Ipc.MessageClient ipc_master;
+	private ApiBus bus;
 	
-	public Component(RunnerApplication app, Bindings bindings, Diorite.KeyValueStorage config, Diorite.Ipc.MessageClient ipc_master)
+	public Component(RunnerApplication app, Bindings bindings, Diorite.KeyValueStorage config, ApiBus bus)
 	{
 		base("httpremotecontrol", "Remote control over HTTP", "Remote media player HTTP interface for control over network.");
 		this.bindings = bindings;
 		this.app = app;
-		this.ipc_master = ipc_master;
+		this.bus = bus;
 		config.bind_object_property("component.httpremotecontrol.", this, "enabled").set_default(false).update_property();
 		enabled_set = true;
 		if (enabled)
@@ -59,7 +59,7 @@ public class Component: Nuvola.Component
 		var method = "HttpRemoteControl." + (register ? "register" : "unregister");
 		try
 		{
-			ipc_master.send_message(method, new Variant.string(app.web_app.id)); 
+			bus.master.send_message(method, new Variant.string(app.web_app.id)); 
 		}
 		catch (GLib.Error e)
 		{

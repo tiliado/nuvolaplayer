@@ -28,85 +28,85 @@ namespace Nuvola.HttpRemoteControl
 
 public class Server: Soup.Server
 {
-	Diorite.Ipc.MessageServer ipc_server;
-    private MasterController app;
+	Drt.MessageBus bus;
+	private MasterController app;
 	private HashTable<string, AppRunner> app_runners;
-    private unowned Queue<AppRunner> app_runners_order;
-    private GenericSet<string> registered_runners;
-    private WebAppRegistry web_app_registry;
-    private bool running = false;
-    private File[] www_roots;
+	private unowned Queue<AppRunner> app_runners_order;
+	private GenericSet<string> registered_runners;
+	private WebAppRegistry web_app_registry;
+	private bool running = false;
+	private File[] www_roots;
 	
 	public Server(
-        MasterController app, Diorite.Ipc.MessageServer ipc_server,
-        HashTable<string, AppRunner> app_runners, Queue<AppRunner> app_runners_order,
-        WebAppRegistry web_app_registry, File[] www_roots)
+		MasterController app, Drt.MessageBus bus,
+		HashTable<string, AppRunner> app_runners, Queue<AppRunner> app_runners_order,
+		WebAppRegistry web_app_registry, File[] www_roots)
 	{
 		this.app = app;
-        this.ipc_server = ipc_server;
+		this.bus = bus;
 		this.app_runners = app_runners;
 		this.app_runners_order = app_runners_order;
-        this.web_app_registry = web_app_registry;
-        this.www_roots = www_roots;
-        registered_runners = new GenericSet<string>(str_hash, str_equal);
-        ipc_server.add_handler("HttpRemoteControl.register", "s", handle_register);
-        ipc_server.add_handler("HttpRemoteControl.unregister", "s", handle_unregister);
-        app.runner_exited.connect(on_runner_exited);
+		this.web_app_registry = web_app_registry;
+		this.www_roots = www_roots;
+		registered_runners = new GenericSet<string>(str_hash, str_equal);
+		bus.router.add_handler("HttpRemoteControl.register", "s", handle_register);
+		bus.router.add_handler("HttpRemoteControl.unregister", "s", handle_unregister);
+		app.runner_exited.connect(on_runner_exited);
 	}
-    
-    ~HttpRemoteControlServer()
-    {
-        app.runner_exited.disconnect(on_runner_exited);
-    }
+	
+	~HttpRemoteControlServer()
+	{
+		app.runner_exited.disconnect(on_runner_exited);
+	}
 	
 	public void start()
 	{
 		var port = 8089;
-        message("Start HttpRemoteControlServer at port %d", port);
+		message("Start HttpRemoteControlServer at port %d", port);
 		add_handler("/", default_handler);
-        try
-        {
-            listen_all(port, 0);
-            running = true;
-        }
-        catch (GLib.Error e)
-        {
-            critical("Cannot start HttpRemoteControlServer at port %d: %s", port, e.message);
-        }
+		try
+		{
+			listen_all(port, 0);
+			running = true;
+		}
+		catch (GLib.Error e)
+		{
+			critical("Cannot start HttpRemoteControlServer at port %d: %s", port, e.message);
+		}
 	}
 	
 	public void stop()
 	{
 		message("Stop HttpRemoteControlServer");
-        disconnect();
+		disconnect();
 		remove_handler("/");
-        running = false;
+		running = false;
 	}
-    
-    private void register_app(string app_id)
-    {
-        message("HttpRemoteControlServer: Register app id: %s", app_id);
-        registered_runners.add(app_id);
-        if (!running)
-            start();
-    }
-    
-    private bool unregister_app(string app_id)
-    {
-        message("HttpRemoteControlServer: unregister app id: %s", app_id);
-        var result = registered_runners.remove(app_id);
-        if (running && registered_runners.length == 0)
-            stop();
-        return result;
-    }
 	
-    private void on_runner_exited(AppRunner runner)
-    {
-        unregister_app(runner.app_id);
-    }
-    
-    private static void default_handler(
-        Soup.Server server, Soup.Message msg, string path, GLib.HashTable? query, Soup.ClientContext client)
+	private void register_app(string app_id)
+	{
+		message("HttpRemoteControlServer: Register app id: %s", app_id);
+		registered_runners.add(app_id);
+		if (!running)
+			start();
+	}
+	
+	private bool unregister_app(string app_id)
+	{
+		message("HttpRemoteControlServer: unregister app id: %s", app_id);
+		var result = registered_runners.remove(app_id);
+		if (running && registered_runners.length == 0)
+			stop();
+		return result;
+	}
+	
+	private void on_runner_exited(AppRunner runner)
+	{
+		unregister_app(runner.app_id);
+	}
+	
+	private static void default_handler(
+		Soup.Server server, Soup.Message msg, string path, GLib.HashTable? query, Soup.ClientContext client)
 	{
 		var self = server as Server;
 		assert(self != null);
@@ -114,41 +114,41 @@ public class Server: Soup.Server
 	}
 	
 	protected void handle_request(RequestContext request)
-    {
-        var path = request.path;
-        if (path == "/+api/app")
-        {
-            request.respond_json(200, list_apps());
-            return;
-        }
-        if (path.has_prefix("/+api/app/"))
-        {
-            var app_path = path.substring(10);
-            var slash_pos = app_path.index_of_char('/');
-            if (slash_pos == -1)
-            {
-                var data = get_app_info(app_path);
-                if (data != null)
-                    request.respond_json(200, data);
-                else
-                    request.respond_not_found();
-                return;
-            }
-            if (slash_pos > 0)
-            {
-                var app_id = app_path.substring(0, slash_pos);
-                app_path = app_path.substring(slash_pos + 1);
-                
-                if (!(app_id in registered_runners))
-                {
-                    request.respond_not_found();
-                }
-                else
-                {
-                    var app_request = new AppRequest.from_request_context(app_path, request);
-                    message("App-specific request %s: %s => %s", app_id, app_path, app_request.to_string());
-                    try
-                    {
+	{
+		var path = request.path;
+		if (path == "/+api/app")
+		{
+			request.respond_json(200, list_apps());
+			return;
+		}
+		if (path.has_prefix("/+api/app/"))
+		{
+			var app_path = path.substring(10);
+			var slash_pos = app_path.index_of_char('/');
+			if (slash_pos == -1)
+			{
+				var data = get_app_info(app_path);
+				if (data != null)
+					request.respond_json(200, data);
+				else
+					request.respond_not_found();
+				return;
+			}
+			if (slash_pos > 0)
+			{
+				var app_id = app_path.substring(0, slash_pos);
+				app_path = app_path.substring(slash_pos + 1);
+				
+				if (!(app_id in registered_runners))
+				{
+					request.respond_not_found();
+				}
+				else
+				{
+					var app_request = new AppRequest.from_request_context(app_path, request);
+					message("App-specific request %s: %s => %s", app_id, app_path, app_request.to_string());
+					try
+					{
 						var data = send_app_request(app_id, app_request);
 						request.respond_json(200, data);
 					}
@@ -160,15 +160,15 @@ public class Server: Soup.Server
 						builder.add("{sv}", "quark", new Variant.string(e.domain.to_string()));
 						request.respond_json(400, Json.gvariant_serialize(builder.end()));
 					}
-                }
-                return;
-            }
-        }
-        serve_static(request);
-    }
-    
-    private void serve_static(RequestContext request)
-    {
+				}
+				return;
+			}
+		}
+		serve_static(request);
+	}
+	
+	private void serve_static(RequestContext request)
+	{
 		
 		var path = request.path == "/" ? "index" : request.path.substring(1);
 		if (path.has_suffix("/"))
@@ -196,16 +196,16 @@ public class Server: Soup.Server
 		}
 		return null;
 	}
-    
-    private Json.Node send_app_request(string app_id, AppRequest app_request) throws GLib.Error
-    {
-        var app = app_runners[app_id];
-        var flags = app_request.method == "POST" ? "rw" : "r";
-        var method = "/nuvola/%s::%s,dict,".printf(app_request.app_path, flags);
-        unowned string? form_data = app_request.method == "POST" ? (string) app_request.body.data : app_request.uri.query;
-        var builder = new VariantBuilder(new VariantType("a{smv}"));
-        if (form_data != null)
-        {
+	
+	private Json.Node send_app_request(string app_id, AppRequest app_request) throws GLib.Error
+	{
+		var app = app_runners[app_id];
+		var flags = app_request.method == "POST" ? "rw" : "r";
+		var method = "/nuvola/%s::%s,dict,".printf(app_request.app_path, flags);
+		unowned string? form_data = app_request.method == "POST" ? (string) app_request.body.data : app_request.uri.query;
+		var builder = new VariantBuilder(new VariantType("a{smv}"));
+		if (form_data != null)
+		{
 			var query_params = Soup.Form.decode(form_data);
 			var iter = HashTableIter<string, string>(query_params);
 			unowned string key;
@@ -260,10 +260,10 @@ public class Server: Soup.Server
 			}
 		}
 		return to_json(app.send_message(method, builder.end()));
-    }
-    
-    private Json.Node to_json(Variant? data)
-    {
+	}
+	
+	private Json.Node to_json(Variant? data)
+	{
 		Variant? result = data;
 		if (data == null || !data.get_type().is_subtype_of(VariantType.DICTIONARY))
 		{
@@ -275,59 +275,59 @@ public class Server: Soup.Server
 		}
 		return Json.gvariant_serialize(result);
 	}
-    
-    private Json.Node? list_apps()
-    {
-        var builder = new Json.Builder();
-        builder.begin_object().set_member_name("apps").begin_array();
-        var all_apps = web_app_registry.list_web_apps();
-        var keys = all_apps.get_keys();
-        keys.sort(string.collate);
-        foreach (var app_id in keys)
-        {
-            var app = all_apps[app_id];
-            builder.begin_object();
-            builder.set_member_name("id").add_string_value(app_id);
-            builder.set_member_name("name").add_string_value(app.name);
-            builder.set_member_name("version").add_string_value("%u.%u".printf(app.version_major, app.version_minor));
-            builder.set_member_name("maintainer").add_string_value(app.maintainer_name);
-            builder.set_member_name("running").add_boolean_value(app_id in app_runners);
-            builder.set_member_name("registered").add_boolean_value(app_id in registered_runners);
-            builder.end_object();
-        }
-        builder.end_array().end_object();
-        return builder.get_root();
-    }
-    
-    protected Json.Node? get_app_info(string app_id)
-    {
-		var app = web_app_registry.get_app_meta(app_id);
-        if (app == null)
-            return null;
-        
-        var builder = new Json.Builder();
-        builder.begin_object();
-        builder.set_member_name("id").add_string_value(app_id);
-        builder.set_member_name("name").add_string_value(app.name);
-        builder.set_member_name("version").add_string_value("%u.%u".printf(app.version_major, app.version_minor));
-        builder.set_member_name("maintainer").add_string_value(app.maintainer_name);
-        builder.set_member_name("running").add_boolean_value(app_id in app_runners);
-        builder.set_member_name("registered").add_boolean_value(app_id in registered_runners);
-        builder.end_object();
-        return builder.get_root();
+	
+	private Json.Node? list_apps()
+	{
+		var builder = new Json.Builder();
+		builder.begin_object().set_member_name("apps").begin_array();
+		var all_apps = web_app_registry.list_web_apps();
+		var keys = all_apps.get_keys();
+		keys.sort(string.collate);
+		foreach (var app_id in keys)
+		{
+			var app = all_apps[app_id];
+			builder.begin_object();
+			builder.set_member_name("id").add_string_value(app_id);
+			builder.set_member_name("name").add_string_value(app.name);
+			builder.set_member_name("version").add_string_value("%u.%u".printf(app.version_major, app.version_minor));
+			builder.set_member_name("maintainer").add_string_value(app.maintainer_name);
+			builder.set_member_name("running").add_boolean_value(app_id in app_runners);
+			builder.set_member_name("registered").add_boolean_value(app_id in registered_runners);
+			builder.end_object();
+		}
+		builder.end_array().end_object();
+		return builder.get_root();
 	}
-    
-    private Variant? handle_register(GLib.Object source, Variant? data) throws Diorite.MessageError
+	
+	protected Json.Node? get_app_info(string app_id)
+	{
+		var app = web_app_registry.get_app_meta(app_id);
+		if (app == null)
+			return null;
+		
+		var builder = new Json.Builder();
+		builder.begin_object();
+		builder.set_member_name("id").add_string_value(app_id);
+		builder.set_member_name("name").add_string_value(app.name);
+		builder.set_member_name("version").add_string_value("%u.%u".printf(app.version_major, app.version_minor));
+		builder.set_member_name("maintainer").add_string_value(app.maintainer_name);
+		builder.set_member_name("running").add_boolean_value(app_id in app_runners);
+		builder.set_member_name("registered").add_boolean_value(app_id in registered_runners);
+		builder.end_object();
+		return builder.get_root();
+	}
+	
+	private Variant? handle_register(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
 		register_app(data.get_string());
 		return null;
 	}
-    
-    private Variant? handle_unregister(GLib.Object source, Variant? data) throws Diorite.MessageError
+	
+	private Variant? handle_unregister(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
 		var app_id = data.get_string();
-        if (!unregister_app(app_id))
-            warning("App %s hasn't been registered yet!", app_id);
+		if (!unregister_app(app_id))
+			warning("App %s hasn't been registered yet!", app_id);
 		return null;
 	}
 }
