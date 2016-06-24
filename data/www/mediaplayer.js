@@ -103,11 +103,12 @@ var Nuvola = {};
 Nuvola.onload = function()
 {
     this.appId = "test"; 
-    setInterval(this.update.bind(this), 500);
+    this.update();
     $id("play-pause").onclick = function()
     {
         var r = new HttpRequest("post", "/+api/app/" + Nuvola.appId + "/actions/activate", {name: "toggle-play"});
         r.send();
+        setTimeout(Nuvola.update.bind(Nuvola), 1000);
     };
 }
 
