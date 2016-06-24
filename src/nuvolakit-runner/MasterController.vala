@@ -48,7 +48,7 @@ public class MasterController : Diorite.Application
 	private string[] exec_cmd;
 	private Queue<AppRunner> app_runners = null;
 	private HashTable<string, AppRunner> app_runners_map = null;
-	private Drt.MessageBus server = null;
+	private MasterBus server = null;
 	private Config config = null;
 	private Diorite.KeyValueStorageServer storage_server = null;
 	private ActionsKeyBinderServer actions_key_binder = null;
@@ -131,7 +131,7 @@ public class MasterController : Diorite.Application
 		Environment.set_variable("NUVOLA_IPC_MASTER", server_name, true);
 		try
 		{
-			server = new Drt.MessageBus(server_name, null);
+			server = new MasterBus(server_name);
 			server.add_handler("runner_started", "(ss)", handle_runner_started);
 			server.add_handler("runner_activated", "s", handle_runner_activated);
 			server.add_handler("get_top_runner", null, handle_get_top_runner);
