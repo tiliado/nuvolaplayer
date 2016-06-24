@@ -103,6 +103,7 @@ var Nuvola = {};
 Nuvola.onload = function()
 {
     this.appId = "test"; 
+    this.appInfo = null;
     this.update();
     $id("play-pause").onclick = function()
     {
@@ -114,8 +115,65 @@ Nuvola.onload = function()
 
 Nuvola.update = function()
 {
-    var appId = this.appId;
-    var request = new HttpRequest("get", "/+api/app/" + appId + "/mediaplayer/track-info", null);
+    this.updateAppId();
+}
+
+Nuvola.updateAppId = function()
+{
+    var self = this;
+    var request = new HttpRequest("get", "/+api/core/get_top_runner", null);
+    request.onsuccess = function(request)
+    {
+        var data;
+        try
+        {
+            data = request.json();
+        }
+        catch (e)
+        {
+            this.onerror(request);
+            return;
+        }
+        self.appId = data.result;
+        self.updateAppInfo();
+    };
+    request.onerror = function(request)
+    {
+        $id("app-name").innerText = "Error";
+    }
+    request.send();
+}
+
+Nuvola.updateAppInfo = function()
+{
+    var self = this;
+    var request = new HttpRequest("get", "/+api/app/" + this.appId, null);
+    request.onsuccess = function(request)
+    {
+        var data;
+        try
+        {
+            data = request.json();
+        }
+        catch (e)
+        {
+            this.onerror(request);
+            return;
+        }
+        self.appInfo = data;
+        self.updateTrackInfo();
+    };
+    request.onerror = function(request)
+    {
+        $id("app-name").innerText = "Error";
+    }
+    request.send();
+}
+
+Nuvola.updateTrackInfo = function()
+{
+    var self = this;
+    var request = new HttpRequest("get", "/+api/app/" + this.appId + "/mediaplayer/track-info", null);
     request.onsuccess = function(request)
     {
         var data;
@@ -129,7 +187,7 @@ Nuvola.update = function()
             return;
         }
         
-        $id("app-name").innerText = appId;
+        $id("app-name").innerText = self.appInfo ? self.appInfo.name : self.appId;
         $id("track-title").innerText = data.title || "unknown";
         $id("track-album").innerText = data.album || "unknown";
         $id("track-artist").innerText = data.artist || "unknown";
