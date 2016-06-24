@@ -129,7 +129,7 @@ public int main(string[] args)
 		{
 			var master = new Drt.MessageChannel.from_name(1, build_master_ipc_id(), null, 500);
 			
-			var response = master.send_message("get_top_runner");
+			var response = master.send_message("/nuvola/core/get_top_runner::r,,");
 			Diorite.MessageListener.check_type_string(response, "ms");
 			response.get("ms", out Args.app);
 			

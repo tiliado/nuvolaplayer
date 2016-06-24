@@ -134,7 +134,7 @@ public class MasterController : Diorite.Application
 			server = new MasterBus(server_name);
 			server.add_handler("runner_started", "(ss)", handle_runner_started);
 			server.add_handler("runner_activated", "s", handle_runner_activated);
-			server.add_handler("get_top_runner", null, handle_get_top_runner);
+			server.api.add_method("/nuvola/core/get_top_runner", Drt.ApiFlags.READABLE, null, handle_get_top_runner,  null);
 			server.start();
 		}
 		catch (Diorite.IOError e)
@@ -303,7 +303,7 @@ public class MasterController : Diorite.Application
 		return new Variant.boolean(true);
 	}
 	
-	private Variant? handle_get_top_runner(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_get_top_runner(Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		var runner = app_runners.peek_head();
 		return new Variant("ms", runner == null ? null : runner.app_id);
