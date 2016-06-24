@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2016 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -45,33 +45,25 @@ public interface WebWorker: GLib.Object, JSExecutor
 
 public class RemoteWebWorker: GLib.Object, JSExecutor, WebWorker
 {
-	private bool ready = false;
-	private Diorite.Ipc.MessageClient client;
+	private ApiBus abus;
 	
-	public RemoteWebWorker(string name, uint timeout)
+	public RemoteWebWorker(ApiBus abus)
 	{
-		client = new Diorite.Ipc.MessageClient(name, timeout);
-	}
-	
-	public RemoteWebWorker.with_client(Diorite.Ipc.MessageClient client)
-	{
-		this.client = client;
+		this.abus = abus;
 	}
 	
 	public Variant? send_message(string name, Variant? params) throws GLib.Error
 	{
-		if (!ready && !(ready = client.wait_for_echo(2000)))
+		if (abus.web_worker == null)
 			throw new Diorite.MessageError.NOT_READY("Web worker process is not ready yet");
 		
-		return client.send_message(name, params);
+		return abus.web_worker.send_message(name, params);
 	}
 	
 	public void call_function(string name, ref Variant? params) throws GLib.Error
 	{
 		var data = new Variant("(smv)", name, params);
-//~ 		debug("Payload before: %s", params == null ? "null" : params.print(true));
 		params = send_message("call_function", data);
-//~ 		debug("Payload after: %s", params == null ? "null" : params.print(true));
 	}
 }
 

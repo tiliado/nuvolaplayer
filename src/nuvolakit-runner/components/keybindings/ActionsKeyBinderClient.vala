@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2016 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -27,12 +27,12 @@ namespace Nuvola
 
 public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder
 {
-	private Diorite.Ipc.MessageClient conn;
+	private Drt.MessageChannel conn;
 	
-	public class ActionsKeyBinderClient(Diorite.Ipc.MessageServer server, Diorite.Ipc.MessageClient conn)
+	public class ActionsKeyBinderClient(Drt.MessageChannel conn)
 	{
 		this.conn = conn;
-		server.add_handler("ActionsKeyBinder.actionActivated", "s", handle_action_activated);
+		conn.add_handler("ActionsKeyBinder.actionActivated", "s", handle_action_activated);
 	}
 	
 	public string? get_keybinding(string action)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2016 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -28,13 +28,13 @@ namespace Nuvola
 public class KeyValueProxy: GLib.Object, Diorite.KeyValueStorage
 {
 	public Diorite.SingleList<Diorite.PropertyBinding> property_bindings {get; protected set;}
-	private Diorite.Ipc.MessageClient client;
+	private Drt.MessageChannel channel;
 	private string prefix;
 	
-	public KeyValueProxy(Diorite.Ipc.MessageClient client, string prefix)
+	public KeyValueProxy(Drt.MessageChannel channel, string prefix)
 	{
 		property_bindings = new Diorite.SingleList<Diorite.PropertyBinding>();
-		this.client = client;
+		this.channel = channel;
 		this.prefix = prefix;
 	}
 	
@@ -42,7 +42,7 @@ public class KeyValueProxy: GLib.Object, Diorite.KeyValueStorage
 	{
 		try
 		{
-			var response = client.send_message(prefix + "_has_key", new Variant.string(key));
+			var response = channel.send_message(prefix + "_has_key", new Variant.string(key));
 			if (response.is_of_type(VariantType.BOOLEAN))
 				return response.get_boolean();
 			critical("Invalid response to KeyValueProxy.has_key: %s", response.print(false));
@@ -58,7 +58,7 @@ public class KeyValueProxy: GLib.Object, Diorite.KeyValueStorage
 	{
 		try
 		{
-			var response = client.send_message(prefix + "_get_value", new Variant.string(key));
+			var response = channel.send_message(prefix + "_get_value", new Variant.string(key));
 			return response;
 		}
 		catch (GLib.Error e)
@@ -72,7 +72,7 @@ public class KeyValueProxy: GLib.Object, Diorite.KeyValueStorage
 	{
 		try
 		{
-			client.send_message(prefix + "_set_value", new Variant("(smv)", key, value));
+			channel.send_message(prefix + "_set_value", new Variant("(smv)", key, value));
 		}
 		catch (GLib.Error e)
 		{
@@ -84,7 +84,7 @@ public class KeyValueProxy: GLib.Object, Diorite.KeyValueStorage
 	{
 		try
 		{
-			client.send_message(prefix + "_set_default_value", new Variant("(smv)", key, value));
+			channel.send_message(prefix + "_set_default_value", new Variant("(smv)", key, value));
 		}
 		catch (GLib.Error e)
 		{

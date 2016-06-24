@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2016 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -41,19 +41,20 @@ public class WebEngine : GLib.Object, JSExecutor
 		get {return web_view.get_settings().enable_plugins;}
 		set {web_view.get_settings().enable_plugins = value;}
 	}
+	public bool web_worker_initialized {get; private set; default = false;}
 	
 	private RunnerApplication runner_app;
 	private WebView web_view;
 	private JsEnvironment? env = null;
 	private JSApi api;
-	private Drt.ApiRouter server = null;
+	private ApiBus server = null;
 	private bool initialized = false;
-	private bool web_worker_initialized = false;
+	
 	
 	private Config config;
 	private Diorite.KeyValueStorage session;
 	
-	public WebEngine(RunnerApplication runner_app, Drt.ApiRouter server, WebAppMeta web_app,
+	public WebEngine(RunnerApplication runner_app, ApiBus server, WebAppMeta web_app,
 		WebAppStorage storage, Config config, string? proxy_uri)
 	{
 		this.server = server;
@@ -62,7 +63,7 @@ public class WebEngine : GLib.Object, JSExecutor
 		this.web_app = web_app;
 		this.config = config;
 		
-		Environment.set_variable("NUVOLA_API_ROUTER_TOKEN", server.token, true);
+		Environment.set_variable("NUVOLA_API_ROUTER_TOKEN", server.api.token, true);
 		Environment.set_variable("WEBKITGTK_MAJOR", WebKit.get_major_version().to_string(), true);
 		Environment.set_variable("WEBKITGTK_MINOR", WebKit.get_minor_version().to_string(), true);
 		Environment.set_variable("WEBKITGTK_MICRO", WebKit.get_micro_version().to_string(), true);
@@ -135,7 +136,7 @@ public class WebEngine : GLib.Object, JSExecutor
 		uint[] webkit_version = {WebKit.get_major_version(), WebKit.get_minor_version(), WebKit.get_micro_version()};
 		uint[] libsoup_version = {Soup.get_major_version(), Soup.get_minor_version(), Soup.get_micro_version()};
 		api = new JSApi(
-			runner_app.storage, web_app.data_dir, storage.config_dir, config, session, server.token, webkit_version, libsoup_version);
+			runner_app.storage, web_app.data_dir, storage.config_dir, config, session, server.api.token, webkit_version, libsoup_version);
 		api.send_message_async.connect(on_send_message_async);
 		api.send_message_sync.connect(on_send_message_sync);
 		try
@@ -174,19 +175,15 @@ public class WebEngine : GLib.Object, JSExecutor
 		return false;
 	}
 	
-	
-	private void wait_for_web_worker()
+		private void wait_for_web_worker()
 	{
+		message("Wait for web worker");
 		if (web_worker_initialized)
 			return;
 		var loop = new MainLoop();
-		Idle.add(() =>
-		{
-			if (web_worker_initialized)
-				loop.quit();
-			return !web_worker_initialized;
-		});
+		var handler_id = notify["web-worker-initialized"].connect_after((o, p) => {loop.quit();});
 		loop.run();
+		disconnect(handler_id);
 	}
 	
 	public bool load()
@@ -414,6 +411,9 @@ public class WebEngine : GLib.Object, JSExecutor
 	
 	private Variant? handle_web_worker_initialized(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
+		var channel = source as Drt.MessageChannel;
+		return_val_if_fail(channel != null, null);
+		server.connect_web_worker(channel);
 		Idle.add(() => {web_worker_initialized = true; return false;});
 		return null;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2016 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -127,9 +127,7 @@ public int main(string[] args)
 	{
 		try
 		{
-			var master = new Diorite.Ipc.MessageClient(build_master_ipc_id(), 500);
-			if (!master.wait_for_echo(500))
-				return quit(2, "Error: Failed to connect to %s master instance.\n", Nuvola.get_app_name());
+			var master = new Drt.MessageChannel.from_name(1, build_master_ipc_id(), null, 500);
 			
 			var response = master.send_message("get_top_runner");
 			Diorite.MessageListener.check_type_string(response, "ms");
@@ -149,9 +147,16 @@ public int main(string[] args)
 	if (Args.command.length < 1)
 		return quit(1, "Error: No command specified. Type `%s --help` for help.\n", args[0]);
 	
-	var client = new Diorite.Ipc.MessageClient(build_ui_runner_ipc_id(Args.app), 500);
-	if (!client.wait_for_echo(500))
-		return quit(2, "Error: Failed to connect to %s instance for %s.\n", Nuvola.get_app_name(), Args.app);
+	Drt.MessageChannel client;
+	try
+	{
+		client = new Drt.MessageChannel.from_name(2, build_ui_runner_ipc_id(Args.app), null, 500);
+	}
+	catch (GLib.Error e)
+	{
+		return quit(2, "Error: Failed to connect to %s instance for %s. %s\n", Nuvola.get_app_name(), Args.app, e.message);
+	}
+		
 	
 	var command = Args.command[0];
 	var control = new Control(client);
@@ -187,9 +192,9 @@ public int main(string[] args)
 
 class Control
 {
-	private Diorite.Ipc.MessageClient conn;
+	private Drt.MessageChannel conn;
 	
-	public Control(Diorite.Ipc.MessageClient conn)
+	public Control(Drt.MessageChannel conn)
 	{
 		this.conn = conn;
 	}

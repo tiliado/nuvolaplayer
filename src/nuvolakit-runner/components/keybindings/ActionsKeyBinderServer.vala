@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2016 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -27,11 +27,11 @@ namespace Nuvola
 
 public class ActionsKeyBinderServer : GLib.Object
 {
-	private Diorite.Ipc.MessageServer server;
+	private Drt.MessageBus server;
 	private ActionsKeyBinder keybinder;
 	private unowned Queue<AppRunner> app_runners;
 	
-	public class ActionsKeyBinderServer(Diorite.Ipc.MessageServer server, ActionsKeyBinder keybinder, Queue<AppRunner> app_runners)
+	public class ActionsKeyBinderServer(Drt.MessageBus server, ActionsKeyBinder keybinder, Queue<AppRunner> app_runners)
 	{
 		this.server = server;
 		this.keybinder = keybinder;

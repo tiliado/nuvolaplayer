@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2016 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -29,13 +29,13 @@ public class MediaKeysClient : GLib.Object, MediaKeysInterface
 {
 	public bool managed {get; protected set; default=false;}
 	private string app_id;
-	private Diorite.Ipc.MessageClient conn;
+	private Drt.MessageChannel conn;
 	
-	public class MediaKeysClient(string app_id, Diorite.Ipc.MessageServer server, Diorite.Ipc.MessageClient conn)
+	public class MediaKeysClient(string app_id, Drt.MessageChannel conn)
 	{
 		this.conn = conn;
 		this.app_id = app_id;
-		server.add_handler("Nuvola.MediaKeys.mediaKeyPressed", "s", handle_media_key_pressed);
+		conn.add_handler("Nuvola.MediaKeys.mediaKeyPressed", "s", handle_media_key_pressed);
 	}
 	
 	public void manage()

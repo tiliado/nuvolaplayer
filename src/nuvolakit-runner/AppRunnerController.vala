@@ -112,14 +112,13 @@ public class AppRunnerController : RunnerApplication
 	public WebEngine web_engine {get; private set;}
 	public Diorite.KeyValueStorage master_config {get; private set;}
 	public Bindings bindings {get; private set;}
-	public Drt.ApiRouter server {get; private set; default=null;}
+	public ApiBus server {get; private set; default=null;}
 	public ActionsHelper actions_helper {get; private set; default = null;}
 	private GlobalKeybindings global_keybindings;
 	private static const int MINIMAL_REMEMBERED_WINDOW_SIZE = 300;
 	private uint configure_event_cb_id = 0;
 	private MenuBar menu_bar;
 	private Diorite.Form? init_form = null;
-	private Diorite.Ipc.MessageClient master = null;
 	private FormatSupportCheck format_support = null;
 	private Tiliado.Account tiliado_account = null;
 	private Diorite.SingleList<Component> components = null;
@@ -179,7 +178,7 @@ public class AppRunnerController : RunnerApplication
 		menu_bar.update();
 		menu_bar.set_menus(this);
 		
-		var gakb = new ActionsKeyBinderClient(server, master);
+		var gakb = new ActionsKeyBinderClient(server.master);
 		global_keybindings = new GlobalKeybindings(gakb, actions);
 		
 		load_extensions();
@@ -288,13 +287,17 @@ public class AppRunnerController : RunnerApplication
 	{
 		assert(server == null);
 		
-		var server_name = build_ui_runner_ipc_id(web_app.id);
-		Environment.set_variable("NUVOLA_IPC_UI_RUNNER", server_name, true);
 		try
 		{
-			server = new Drt.ApiRouter(server_name);
+			var bus_name = build_ui_runner_ipc_id(web_app.id);
+			Environment.set_variable("NUVOLA_IPC_UI_RUNNER", bus_name, true);
+			server = new ApiBus(bus_name);
 			server.add_handler("Nuvola.Browser.downloadFileAsync", "(ssd)", handle_download_file_async);
-			server.start_service();
+			server.start();
+			
+			bus_name = Environment.get_variable("NUVOLA_IPC_MASTER");
+			assert(bus_name != null);
+			server.connect_master(bus_name);
 		}
 		catch (Diorite.IOError e)
 		{
@@ -302,13 +305,9 @@ public class AppRunnerController : RunnerApplication
 			quit();
 		}
 		
-		var master_name = Environment.get_variable("NUVOLA_IPC_MASTER");
-		assert(master_name != null);
-		master = new Diorite.Ipc.MessageClient(master_name, 5000);
-		assert(master.wait_for_echo(1000));
 		try
 		{
-			var response = master.send_message("runner_started", new Variant("(ss)", web_app.id, server_name));
+			var response = server.master.send_message("runner_started", new Variant("(ss)", web_app.id, "<undefined>"));
 			assert(response.equal(new Variant.boolean(true)));
 		}
 		catch (GLib.Error e)
@@ -316,11 +315,9 @@ public class AppRunnerController : RunnerApplication
 			error("Communication with master process failed: %s", e.message);
 		}
 		
-		var storage_client = new Diorite.KeyValueStorageClient(master, server);
+		var storage_client = new Diorite.KeyValueStorageClient(server.master);
 		master_config = storage_client.get_proxy("master.config", 5000);
-		var client_name = build_web_worker_ipc_id(web_app.id);
-		Environment.set_variable("NUVOLA_IPC_WEB_WORKER", client_name, true);
-		web_worker = new RemoteWebWorker(client_name, 5000);
+		web_worker = new RemoteWebWorker(server);
 	}
 	
 	private void do_quit()
@@ -418,14 +415,15 @@ public class AppRunnerController : RunnerApplication
 	
 	private void load_extensions()
 	{	
+		var api = server.api;
 		bindings = new Bindings();
-		bindings.add_binding(new ActionsBinding(server, web_worker));
-		bindings.add_binding(new NotificationsBinding(server, web_worker));
-		bindings.add_binding(new NotificationBinding(server, web_worker));
-		bindings.add_binding(new LauncherBinding(server, web_worker));
-		bindings.add_binding(new MediaKeysBinding(server, web_worker));
-		bindings.add_binding(new MenuBarBinding(server, web_worker));
-		bindings.add_binding(new MediaPlayerBinding(server, web_worker, new MediaPlayer(actions)));
+		bindings.add_binding(new ActionsBinding(api, web_worker));
+		bindings.add_binding(new NotificationsBinding(api, web_worker));
+		bindings.add_binding(new NotificationBinding(api, web_worker));
+		bindings.add_binding(new LauncherBinding(api, web_worker));
+		bindings.add_binding(new MediaKeysBinding(api, web_worker));
+		bindings.add_binding(new MenuBarBinding(api, web_worker));
+		bindings.add_binding(new MediaPlayerBinding(api, web_worker, new MediaPlayer(actions)));
 		bindings.add_object(actions_helper);
 		
 		components = new Diorite.SingleList<Component>();
@@ -435,7 +433,7 @@ public class AppRunnerController : RunnerApplication
 		#endif
 		components.prepend(new NotificationsComponent(this, bindings, actions_helper));
 		// TODO: MediaKeysComponent
-		var media_keys = new MediaKeysClient(web_app.id, server, master);
+		var media_keys = new MediaKeysClient(web_app.id, server.master);
 		media_keys.manage();
 		bindings.add_object(media_keys);
 		bindings.add_object(menu_bar);
@@ -573,7 +571,7 @@ public class AppRunnerController : RunnerApplication
 		
 		try
 		{
-			var response = master.send_message("runner_activated", new Variant.string(web_app.id));
+			var response = server.master.send_message("runner_activated", new Variant.string(web_app.id));
 			warn_if_fail(response.equal(new Variant.boolean(true)));
 		}
 		catch (GLib.Error e)

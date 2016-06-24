@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2016 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -25,43 +25,28 @@
 namespace Nuvola
 {
 
-public WebExtension extension;
+public class ApiBus: Drt.MessageBus
+{
+    public Drt.MessageChannel? master {get; private set; default = null;}
+    public Drt.MessageChannel? web_worker {get; private set; default = null;}
+    public Drt.ApiRouter api {get{return (Drt.ApiRouter) router;}}
+    
+    public ApiBus(string bus_name, Drt.ApiRouter? router=null)
+    {
+        base(bus_name, router ?? new Drt.ApiRouter());
+    }
+    
+    public Drt.MessageChannel? connect_master(string bus_name) throws Diorite.IOError
+    {
+		return_val_if_fail(master == null, null);
+        master = connect_channel(bus_name, 5000);
+        return master;
+    }
+    
+    public void connect_web_worker(Drt.MessageChannel channel)
+    {
+        web_worker = channel;
+    }
+}
 
 } // namespace Nuvola
-
-public void webkit_web_extension_initialize(WebKit.WebExtension extension)
-{
-	Diorite.Logger.init(stderr, GLib.LogLevelFlags.LEVEL_DEBUG, "Worker");
-	
-	var debug_sleep = Environment.get_variable("NUVOLA_WEB_WORKER_SLEEP");
-	if (debug_sleep != null)
-	{
-		var seconds = int.parse(debug_sleep);
-		if (seconds > 0)
-		{
-			warning("WebWorker is going to sleep for %d seconds.", seconds);
-			#if LINUX
-			warning("Run `gdb -p %d` to debug it with gdb.", (int) Posix.getpid());
-			#endif
-			GLib.Thread.usleep(seconds * 1000000);
-			warning("WebWorker is awake.");
-		}
-		else
-		{
-			warning("Invalid NUVOLA_WEB_WORKER_SLEEP variable: %s", debug_sleep);
-		}
-	}
-	
-	if (Environment.get_variable("NUVOLA_TEST_ABORT") == "worker")
-		error("Web Worker abort requested.");
-		
-	try
-	{
-		var channel = new Drt.MessageChannel.from_name(0, Environment.get_variable("NUVOLA_IPC_UI_RUNNER"), null, 5000);
-		Nuvola.extension = new Nuvola.WebExtension(extension, channel); 
-	}
-	catch (GLib.Error e)
-	{
-		error("Failed to connect to app runner. %s", e.message);
-	}
-}

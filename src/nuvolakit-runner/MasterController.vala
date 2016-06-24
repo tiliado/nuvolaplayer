@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2016 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -48,7 +48,7 @@ public class MasterController : Diorite.Application
 	private string[] exec_cmd;
 	private Queue<AppRunner> app_runners = null;
 	private HashTable<string, AppRunner> app_runners_map = null;
-	private Diorite.Ipc.MessageServer server = null;
+	private Drt.MessageBus server = null;
 	private Config config = null;
 	private Diorite.KeyValueStorageServer storage_server = null;
 	private ActionsKeyBinderServer actions_key_binder = null;
@@ -131,11 +131,11 @@ public class MasterController : Diorite.Application
 		Environment.set_variable("NUVOLA_IPC_MASTER", server_name, true);
 		try
 		{
-			server = new Diorite.Ipc.MessageServer(server_name);
+			server = new Drt.MessageBus(server_name, null);
 			server.add_handler("runner_started", "(ss)", handle_runner_started);
 			server.add_handler("runner_activated", "s", handle_runner_activated);
 			server.add_handler("get_top_runner", null, handle_get_top_runner);
-			server.start_service();
+			server.start();
 		}
 		catch (Diorite.IOError e)
 		{
@@ -280,9 +280,10 @@ public class MasterController : Diorite.Application
 		var runner = app_runners_map[app_id];
 		return_val_if_fail(runner != null, null);
 		
-		if (!runner.connect_server(server_name))
-			throw new Diorite.MessageError.REMOTE_ERROR("Failed to connect runner '%s': ", app_id);
-		
+		var channel = source as Drt.MessageChannel;
+		if (channel == null)
+			throw new Diorite.MessageError.REMOTE_ERROR("Failed to connect runner '%s'. %s ", app_id, source.get_type().name());
+		runner.connect_channel(channel);
 		debug("Connected to runner server for '%s'.", app_id);
 		return new Variant.boolean(true);
 	}

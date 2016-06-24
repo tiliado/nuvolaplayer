@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2016 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -29,10 +29,9 @@ public class AppRunner : GLib.Object
 {
 	private static bool gdb = false;
 	public string app_id {get; private set;}
-	public bool connected {get{ return client != null;}}
+	public bool connected {get{ return channel != null;}}
 	public bool running {get; private set; default = false;}
-	private Diorite.Ipc.MessageClient? client = null;
-	private uint check_server_connected_id = 0;
+	private Drt.MessageChannel channel = null;
 	private GLib.Subprocess process;
 	
 	static construct
@@ -47,7 +46,6 @@ public class AppRunner : GLib.Object
 		running = true;
 		log_stderr.begin(on_log_stderr_done);
 		process.wait_async.begin(null, on_wait_async_done);
-		check_server_connected_id = Timeout.add_seconds(gdb ? 600 : 30, check_server_connected_cb);
 	}
 	
 	private async void log_stderr()
@@ -82,38 +80,17 @@ public class AppRunner : GLib.Object
 	 */
 	public signal void exited();
 	
-	public bool connect_server(string server_name)
+	public void connect_channel(Drt.MessageChannel channel)
 	{
-		if (client != null)
-			return false;
-		
-		if (check_server_connected_id != 0)
-		{
-			Source.remove(check_server_connected_id);
-			check_server_connected_id = 0;
-		}
-		
-		client = new Diorite.Ipc.MessageClient(server_name, 5000);
-		return true;
+		this.channel = channel;
 	}
 	
 	public Variant? send_message(string name, Variant? params) throws GLib.Error
 	{
-		if (client == null)
+		if (channel == null)
 			throw new Diorite.MessageError.IOERROR("No connected to app runner '%s'.", app_id);
 		
-		return client.send_message(name, params);
-	}
-	
-	private bool check_server_connected_cb()
-	{
-		check_server_connected_id = 0;
-		warning("Connection has not been se up in time for app runner '%s'.", app_id);
-		
-		if (running)
-			process.force_exit();
-		
-		return false;
+		return channel.send_message(name, params);
 	}
 	
 	private void on_wait_async_done(GLib.Object? o, AsyncResult res)

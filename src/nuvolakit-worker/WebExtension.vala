@@ -28,8 +28,7 @@ namespace Nuvola
 public class WebExtension: GLib.Object
 {
 	private WebKit.WebExtension extension;
-	private Diorite.Ipc.MessageClient runner;
-	private Diorite.Ipc.MessageServer server;
+	private Drt.MessageChannel channel;
 	private HashTable<unowned WebKit.Frame, FrameBridge> bridges;
 	private File data_dir;
 	private File user_config_dir;
@@ -38,35 +37,26 @@ public class WebExtension: GLib.Object
 	private JSApi bare_api;
 	private string? api_token = null;
 	
-	public WebExtension(WebKit.WebExtension extension, Diorite.Ipc.MessageClient runner, Diorite.Ipc.MessageServer server)
+	public WebExtension(WebKit.WebExtension extension, Drt.MessageChannel channel)
 	{
 		this.extension = extension;
-		this.runner = runner;
-		this.server = server;
+		this.channel = channel;
 		WebKit.ScriptWorld.get_default().window_object_cleared.connect(on_window_object_cleared);
 		extension.page_created.connect(on_web_page_created);
 	}
 	
 	private void init()
 	{
-		server.add_handler("call_function", "(smv)", handle_call_function);
-		server.add_handler("disable_gstreamer", null, handle_disable_gstreamer);
+		channel.add_handler("call_function", "(smv)", handle_call_function);
+		channel.add_handler("disable_gstreamer", null, handle_disable_gstreamer);
 		bridges = new HashTable<unowned WebKit.Frame, FrameBridge>(direct_hash, direct_equal);
-		try
-		{
-			server.start_service();
-		}
-		catch (Diorite.IOError e)
-		{
-			error("Web Worker server error: %s", e.message);
-		}
 		
 		Variant response;
 		try
 		{
-			response = runner.send_message("get_data_dir");
+			response = channel.send_message("get_data_dir");
 			data_dir = File.new_for_path(response.get_string());
-			response = runner.send_message("get_user_config_dir");
+			response = channel.send_message("get_user_config_dir");
 			user_config_dir = File.new_for_path(response.get_string());
 		}
 		catch (GLib.Error e)
@@ -87,14 +77,14 @@ public class WebExtension: GLib.Object
 		api_token = Environment.get_variable("NUVOLA_API_ROUTER_TOKEN");
 		Environment.set_variable("NUVOLA_API_ROUTER_TOKEN", "*", true);
 
-		js_api = new JSApi(storage, data_dir, user_config_dir, new KeyValueProxy(runner, "config"),
-			new KeyValueProxy(runner, "session"), api_token, webkit_version, libsoup_version);
+		js_api = new JSApi(storage, data_dir, user_config_dir, new KeyValueProxy(channel, "config"),
+			new KeyValueProxy(channel, "session"), api_token, webkit_version, libsoup_version);
 		js_api.send_message_async.connect(on_send_message_async);
 		js_api.send_message_sync.connect(on_send_message_sync);
 		
 		bare_env = new JsRuntime();
-		bare_api = new JSApi(storage, data_dir, user_config_dir, new KeyValueProxy(runner, "config"),
-			new KeyValueProxy(runner, "session"), api_token, webkit_version, libsoup_version);
+		bare_api = new JSApi(storage, data_dir, user_config_dir, new KeyValueProxy(channel, "config"),
+			new KeyValueProxy(channel, "session"), api_token, webkit_version, libsoup_version);
 		try
 		{
 			bare_api.inject(bare_env);
@@ -110,7 +100,7 @@ public class WebExtension: GLib.Object
 		Idle.add(() => {
 			try
 			{
-				runner.send_message("web_worker_initialized");
+				channel.send_message("web_worker_initialized");
 			}
 			catch (GLib.Error e)
 			{
@@ -184,7 +174,7 @@ public class WebExtension: GLib.Object
 	{
 		try
 		{
-			runner.send_message("show_error", new Variant.string(message));
+			channel.send_message("show_error", new Variant.string(message));
 		}
 		catch (GLib.Error e)
 		{
@@ -196,7 +186,7 @@ public class WebExtension: GLib.Object
 	{
 		try
 		{
-			runner.send_message(name, data);
+			channel.send_message(name, data);
 		}
 		catch (GLib.Error e)
 		{
@@ -208,7 +198,7 @@ public class WebExtension: GLib.Object
 	{
 		try
 		{
-			result = runner.send_message(name, data);
+			result = channel.send_message(name, data);
 		}
 		catch (GLib.Error e)
 		{

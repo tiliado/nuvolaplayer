@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2011-2016 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -28,11 +28,11 @@ namespace Nuvola
 public class MediaKeysServer: GLib.Object
 {
 	private MediaKeysInterface media_keys;
-	private Diorite.Ipc.MessageServer server;
+	private Drt.MessageBus server;
 	private unowned Queue<AppRunner> app_runners;
 	private GenericSet<string> clients;
 	
-	public MediaKeysServer(MediaKeysInterface media_keys, Diorite.Ipc.MessageServer server, Queue<AppRunner> app_runners)
+	public MediaKeysServer(MediaKeysInterface media_keys, Drt.MessageBus server, Queue<AppRunner> app_runners)
 	{
 		this.media_keys = media_keys;
 		this.server = server;
