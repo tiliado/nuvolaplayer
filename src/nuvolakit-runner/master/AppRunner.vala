@@ -31,6 +31,7 @@ public class AppRunner : GLib.Object
 	public string app_id {get; private set;}
 	public bool connected {get{ return channel != null;}}
 	public bool running {get; private set; default = false;}
+	private GenericSet<string> capatibilities;
 	private Drt.MessageChannel channel = null;
 	private GLib.Subprocess process;
 	
@@ -42,12 +43,33 @@ public class AppRunner : GLib.Object
 	public AppRunner(string app_id, string[] argv) throws GLib.Error
 	{
 		this.app_id = app_id;
+		this.capatibilities = new GenericSet<string>(str_hash, str_equal);
 		process = new GLib.Subprocess.newv(argv, GLib.SubprocessFlags.STDIN_INHERIT|GLib.SubprocessFlags.STDERR_PIPE);
 		running = true;
 		log_stderr.begin(on_log_stderr_done);
 		process.wait_async.begin(null, on_wait_async_done);
 	}
 	
+	public List<unowned string> get_capatibilities()
+	{
+		return capatibilities.get_values();
+	}
+	
+	public bool has_capatibility(string capatibility)
+	{
+		return capatibilities.contains(capatibility.down());
+	}
+	
+	public void add_capatibility(string capatibility)
+	{
+		capatibilities.add(capatibility.down());
+	}
+	
+	public bool remove_capatibility(string capatibility)
+	{
+		return capatibilities.remove(capatibility.down());
+	}
+
 	private async void log_stderr()
 	{
 		while (running)
