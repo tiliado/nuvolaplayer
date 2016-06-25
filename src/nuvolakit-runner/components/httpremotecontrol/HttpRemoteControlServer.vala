@@ -26,6 +26,8 @@
 namespace Nuvola.HttpRemoteControl
 {
 
+public const string CAPABILITY_NAME = "httpjson";
+
 public class Server: Soup.Server
 {
 	private MasterBus bus;
@@ -87,6 +89,8 @@ public class Server: Soup.Server
 	{
 		message("HttpRemoteControlServer: Register app id: %s", app_id);
 		registered_runners.add(app_id);
+		var app = app_runners[app_id];
+		app.add_capatibility(CAPABILITY_NAME);
 		if (!running)
 			start();
 	}
@@ -94,6 +98,9 @@ public class Server: Soup.Server
 	private bool unregister_app(string app_id)
 	{
 		message("HttpRemoteControlServer: unregister app id: %s", app_id);
+		var app = app_runners[app_id];
+		if (app != null)
+			app.remove_capatibility(CAPABILITY_NAME);
 		var result = registered_runners.remove(app_id);
 		if (running && registered_runners.length == 0)
 			stop();
