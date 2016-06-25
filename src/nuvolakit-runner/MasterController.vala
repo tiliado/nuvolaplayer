@@ -134,7 +134,15 @@ public class MasterController : Diorite.Application
 			server = new MasterBus(server_name);
 			server.add_handler("runner_started", "(ss)", handle_runner_started);
 			server.add_handler("runner_activated", "s", handle_runner_activated);
-			server.api.add_method("/nuvola/core/get_top_runner", Drt.ApiFlags.READABLE, null, handle_get_top_runner,  null);
+			server.api.add_method("/nuvola/core/get_top_runner", Drt.ApiFlags.READABLE, null, handle_get_top_runner, null);
+			server.api.add_method("/nuvola/core/list_apps", Drt.ApiFlags.READABLE,
+				"Returns information about all installed web apps.",
+				handle_list_apps,  null);
+			server.api.add_method("/nuvola/core/get_app_info", Drt.ApiFlags.READABLE,
+				"Returns information about a web app",
+				handle_get_app_info, {
+				new Drt.StringParam("id", true, false, null, "Application id"),
+				});
 			server.start();
 		}
 		catch (Diorite.IOError e)
@@ -307,6 +315,61 @@ public class MasterController : Diorite.Application
 	{
 		var runner = app_runners.peek_head();
 		return new Variant("ms", runner == null ? null : runner.app_id);
+	}
+	
+	private Variant? handle_list_apps(Drt.ApiParams? params) throws Diorite.MessageError
+	{
+		var builder = new VariantBuilder(new VariantType("aa{sv}"));
+		var dict_type = new VariantType("a{sv}");
+		var all_apps = web_app_reg.list_web_apps();
+		var keys = all_apps.get_keys();
+		keys.sort(string.collate);
+		foreach (var app_id in keys)
+		{
+			var app = all_apps[app_id];
+			builder.open(dict_type);
+			builder.add("{sv}", "id", new Variant.string(app_id));
+			builder.add("{sv}", "name", new Variant.string(app.name));
+			builder.add("{sv}", "version", new Variant.string("%u.%u".printf(app.version_major, app.version_minor)));
+			builder.add("{sv}", "maintainer", new Variant.string(app.maintainer_name));
+			var app_runner = app_runners_map[app_id];
+			builder.add("{sv}", "running", new Variant.boolean(app_runner != null));
+			var capatibilities_array = new VariantBuilder(new VariantType("as"));
+			if (app_runner != null)
+			{
+				var capatibilities = app_runner.get_capatibilities();
+				foreach (var capability in capatibilities)
+					capatibilities_array.add("s", capability);
+			}
+			builder.add("{sv}", "capabilities", capatibilities_array.end());
+			builder.close();
+		}
+		return builder.end();
+	}
+	
+	private Variant? handle_get_app_info(Drt.ApiParams? params) throws Diorite.MessageError
+	{
+		var app_id = params.pop_string();
+		var app = web_app_reg.get_app_meta(app_id);
+		if (app == null)
+			return null;
+			
+		var builder = new VariantBuilder(new VariantType("a{sv}"));
+		builder.add("{sv}", "id", new Variant.string(app_id));
+		builder.add("{sv}", "name", new Variant.string(app.name));
+		builder.add("{sv}", "version", new Variant.string("%u.%u".printf(app.version_major, app.version_minor)));
+		builder.add("{sv}", "maintainer", new Variant.string(app.maintainer_name));
+		var app_runner = app_runners_map[app_id];
+		builder.add("{sv}", "running", new Variant.boolean(app_runner != null));
+		var capatibilities_array = new VariantBuilder(new VariantType("as"));
+		if (app_runner != null)
+		{
+			var capatibilities = app_runner.get_capatibilities();
+			foreach (var capability in capatibilities)
+				capatibilities_array.add("s", capability);
+		}
+		builder.add("{sv}", "capabilities", capatibilities_array.end());
+		return builder.end();
 	}
 	
 	private bool on_main_window_delete_event(Gdk.EventAny event)
