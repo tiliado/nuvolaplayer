@@ -147,7 +147,7 @@ Nuvola.updateAppId = function()
 Nuvola.updateAppInfo = function()
 {
     var self = this;
-    var request = new HttpRequest("get", "/+api/app/" + this.appId, null);
+    var request = new HttpRequest("get", "/+api/core/get_app_info", {"id": this.appId});
     request.onsuccess = function(request)
     {
         var data;
