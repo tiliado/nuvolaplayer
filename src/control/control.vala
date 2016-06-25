@@ -186,8 +186,7 @@ public int main(string[] args)
 			try
 			{
 				var master = new Drt.MessageChannel.from_name(1, build_master_ipc_id(), null, 500);
-				return call_api_method(master, Args.command[1]);
-			
+				return call_api_method(master, Args.command, 1);
 			}
 			catch (GLib.Error e)
 			{
@@ -198,8 +197,7 @@ public int main(string[] args)
 				return quit(1, "Error: No API method specified.\n");
 			try
 			{
-				return call_api_method(client, Args.command[1]);
-			
+				return call_api_method(client, Args.command, 1);
 			}
 			catch (GLib.Error e)
 			{
@@ -215,9 +213,9 @@ public int main(string[] args)
 	}
 }
 
-private int call_api_method(Drt.MessageChannel connection, string path) throws GLib.Error
+private int call_api_method(Drt.MessageChannel connection, string[] args, int offset) throws GLib.Error
 {
-	var response = connection.send_message(path + "::rw,,");
+	var response = connection.send_message(args[offset] + "::rw,dict,", args_to_params(args, offset + 1));
 	if (response != null)
 	{
 		var node = Json.gvariant_serialize(response);
@@ -230,6 +228,68 @@ private int call_api_method(Drt.MessageChannel connection, string path) throws G
 	return 0;
 }
 
+private Variant? args_to_params(string[]? args, int offset)
+{
+	if (args == null || offset >= args.length)
+		return null;
+	
+	var builder = new VariantBuilder(new VariantType("a{smv}"));
+	for (var i = offset; i < args.length; i++)
+	{
+		var arg = args[i];
+		var arg_parts = arg.split("=", 2);
+		unowned string? key = arg_parts[0];
+		unowned string? value = arg_parts.length == 2 ? arg_parts[1] : null;
+		
+		string param_type;
+		string param_key;
+		Variant? param_value = null;
+		var parts = key.split(":", 2);
+		if (parts.length < 2)
+		{
+			param_type = "s";
+			param_key = key;
+		}
+		else
+		{
+			param_type = parts[0];
+			param_key = parts[1];
+		}
+			
+		if (value == null)
+		{
+			param_value = null;
+		}
+		else
+		{
+			switch (param_type)
+			{
+			case "d":
+			case "double":
+				double d;
+				if (double.try_parse(value, out d))
+					param_value = new Variant.double(d);
+				break;
+			case "b":
+			case "bool":
+			case "boolean":
+				bool b;
+				if (bool.try_parse(value, out b))
+					param_value = new Variant.boolean(b);
+				break;
+			case "s":
+			case "str":
+			case "string":
+			default:
+				param_value = new Variant.string(value);
+				break;
+			}
+		}
+		builder.add("{smv}", param_key, param_value);
+	}
+	return builder.end();
+}
+	
 class Control
 {
 	private Drt.MessageChannel conn;
