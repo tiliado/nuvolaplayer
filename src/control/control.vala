@@ -180,6 +180,31 @@ public int main(string[] args)
 			if (Args.command.length > 2)
 				return quit(1, "Error: Too many arguments.\n");
 			return control.track_info(Args.command.length == 2 ? Args.command[1] : null);
+		case "api-master":
+			if (Args.command.length < 2)
+				return quit(1, "Error: No API method specified.\n");
+			try
+			{
+				var master = new Drt.MessageChannel.from_name(1, build_master_ipc_id(), null, 500);
+				return call_api_method(master, Args.command[1]);
+			
+			}
+			catch (GLib.Error e)
+			{
+				return quit(2, "Error: Communication with %s master instance failed: %s\n", Nuvola.get_app_name(), e.message);
+			}
+		case "api-app":
+			if (Args.command.length < 2)
+				return quit(1, "Error: No API method specified.\n");
+			try
+			{
+				return call_api_method(client, Args.command[1]);
+			
+			}
+			catch (GLib.Error e)
+			{
+				return quit(2, "Error: Communication with %s instance for %s failed. %s\n", Nuvola.get_app_name(), Args.app, e.message);
+			}
 		default:
 			return quit(1, "Error: Unknown command '%s'.\n", command);
 		}
@@ -188,6 +213,21 @@ public int main(string[] args)
 	{
 		return quit(2, "Error: Communication with %s instance failed: %s\n", Nuvola.get_app_name(), e.message);
 	}
+}
+
+private int call_api_method(Drt.MessageChannel connection, string path) throws GLib.Error
+{
+	var response = connection.send_message(path + "::rw,,");
+	if (response != null)
+	{
+		var node = Json.gvariant_serialize(response);
+		var generator = new Json.Generator();
+		generator.pretty = true;
+		generator.set_root(node);
+		var data = generator.to_data(null);
+		stdout.printf("%s\n", data);
+	}
+	return 0;
 }
 
 class Control
