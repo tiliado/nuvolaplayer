@@ -387,11 +387,13 @@ def build(ctx):
 		target = 'share/%s/js/main.js' % APPNAME,
 		install_path = '${PREFIX}/share/%s/js' % APPNAME
 	)
-	ctx(features = "subst",
-		source = ctx.path.find_node("data/js/flash_detect.js"),
-		target = 'share/%s/js/flash_detect.js' % APPNAME,
-		install_path = '${PREFIX}/share/%s/js' % APPNAME
-	)
+	for node in ctx.path.ant_glob("data/js/*.js"):
+		ctx(
+			rule = 'cp -v ${SRC} ${TGT}',
+			source = "data/js/%s" % node,
+			target = 'share/%s/js/%s' % (APPNAME, node),
+			install_path = '${PREFIX}/share/%s/js' % APPNAME
+		)
 	ctx(features = "subst",
 		source = ctx.path.find_node("data/audio/audiotest.mp3"),
 		target = 'share/%s/audio/audiotest.mp3' % APPNAME,

@@ -46,6 +46,22 @@ document.write("<p>" + (FlashDetect.installed
 </html>
 """;
 
+const string HTML5_AUDIO_DETECT_HTML = """<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<title>Audio Support &#8226; Nuvola Player</title>
+	<style>
+		body {background-color: White; color: Black;}
+		table, td, th {border: 1px solid #EEE; border-collapse: collapse;}
+		td, th {padding: 5px 10px;}
+	</style>
+	<script src="./audio.js"></script>
+</head>
+<body id="main"></body>
+</html>
+""";
+
 public class FormatSupportDialog: Gtk.Dialog
 {
 	public Diorite.Application app {get; construct;}
@@ -111,7 +127,7 @@ public class FormatSupportDialog: Gtk.Dialog
 		{
 			frame = new Gtk.Frame ("<b>Active Flash plugin</b>");
 			(frame.label_widget as Gtk.Label).use_markup = true;
-			var web_view = new WebKit.WebView();
+			var web_view = new WebView();
 			frame.add(web_view);
 			web_view.set_size_request(-1, 50);
 			web_view.show();
@@ -183,7 +199,8 @@ public class FormatSupportDialog: Gtk.Dialog
 		gstreamer_switch.show();
 		var help_button = new Gtk.Button.with_label("Help");
 		help_button.clicked.connect(() => {app.show_uri("http://tiliado.github.io/nuvolaplayer/documentation/3.1/install.html");});
-		var mp3_view = new Mp3View(format_support, mp3_warning_switch, gstreamer_switch, help_button);
+		var audio_detect_script = storage.get_data_file("js/audio.js");
+		var mp3_view = new Mp3View(format_support, mp3_warning_switch, gstreamer_switch, help_button, audio_detect_script);
 		mp3_view.show();
 		notebook.append_page(mp3_view, new Gtk.Label("MP3 format"));
 		notebook.show();
@@ -211,7 +228,8 @@ public class FormatSupportDialog: Gtk.Dialog
 		private Gtk.Button help_button;
 		
 		public Mp3View(
-			FormatSupport format_support, Gtk.Switch warning_switch, Gtk.Switch gstreamer_switch, Gtk.Button help_button)
+			FormatSupport format_support, Gtk.Switch warning_switch, Gtk.Switch gstreamer_switch, Gtk.Button help_button,
+			File? audio_detect_script)
 		{
 			GLib.Object(orientation: Gtk.Orientation.VERTICAL);
 			this.format_support = format_support;
@@ -252,6 +270,19 @@ public class FormatSupportDialog: Gtk.Dialog
 			result_label.show();
 			button.show();
 			scroll.show_all();
+			
+			if (audio_detect_script != null)
+			{
+				var frame = new Gtk.Frame ("<b>HTML5 Audio Support Status</b>");
+				(frame.label_widget as Gtk.Label).use_markup = true;
+				var web_view = new WebView();
+				frame.add(web_view);
+				web_view.set_size_request(-1, 300);
+				web_view.show();
+				web_view.load_html(HTML5_AUDIO_DETECT_HTML, audio_detect_script.get_uri() + ".html"); 
+				attach(frame, 0, 4, 3, 1);
+				frame.show();
+			}
 		}
 		
 		private void update_result_text(bool result)
