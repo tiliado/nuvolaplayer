@@ -111,6 +111,8 @@ public class MasterController : Diorite.Application
 		release();
 	}
 	
+	public signal void runner_exited(AppRunner runner);
+	
 	private void init_core()
 	{
 		if (init_state >= InitState.CORE)
@@ -559,6 +561,7 @@ public class MasterController : Diorite.Application
 		if (app_runners_map[runner.app_id] == runner)
 			app_runners_map.remove(runner.app_id);
 		
+		runner_exited(runner);
 		release();
 	}
 	
