@@ -89,6 +89,7 @@ public abstract class RunnerApplication: Diorite.Application
 	public Config config {get; protected set; default = null;}
 	public Connection connection {get; protected set;}
 	public WebAppWindow? main_window {get; protected set; default = null;}
+	public WebAppMeta web_app {get; protected set;}
 	
 	public RunnerApplication(string web_app_id, string web_app_name, Diorite.Storage storage)
 	{
@@ -106,7 +107,6 @@ public abstract class RunnerApplication: Diorite.Application
 
 public class AppRunnerController : RunnerApplication
 {
-	public WebAppMeta web_app {get; private set;}
 	public WebAppStorage app_storage {get; private set;}
 	private WebWorker web_worker;
 	public WebEngine web_engine {get; private set;}
