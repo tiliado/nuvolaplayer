@@ -62,12 +62,16 @@ public class WebAppMeta : GLib.Object
 		string metadata;
 		try
 		{
-			metadata = Diorite.System.read_file(metadata_file);
+			metadata = Diorite.System.read_file(metadata_file).strip();
 		}
 		catch (GLib.Error e)
 		{
 			throw new WebAppError.LOADING_FAILED("Cannot read '%s'. %s", metadata_file.get_path(), e.message);
 		}
+		
+		// Prevents a critical warning from Json.gobject_from_data
+		if (metadata == null || metadata[0] != '{')
+			throw new WebAppError.INVALID_METADATA("Invalid metadata file '%s'. Opening object literal not found.", metadata_file.get_path());
 		
 		WebAppMeta? meta;
 		try
