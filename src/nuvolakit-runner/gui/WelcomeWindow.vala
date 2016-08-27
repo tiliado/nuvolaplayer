@@ -118,7 +118,7 @@ public class WelcomeWindow : Diorite.ApplicationWindow
 		scroll.vexpand = true;
 		scroll.hexpand = true;
 		grid.attach(scroll, 0, 0, 1, 1);
-		web_view = new WebView();
+		web_view = new WebView(WebEngine.get_web_context());
 		web_view.load_uri(PATRONS_BOX_URI);
 		web_view.margin = 18;
 		web_view.decide_policy.connect(on_decide_policy);

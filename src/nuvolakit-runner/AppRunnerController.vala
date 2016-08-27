@@ -165,6 +165,7 @@ public class AppRunnerController : RunnerApplication
 		show_warning.connect(on_show_warning);
 		
 		connection = new Connection(new Soup.Session(), app_storage.cache_dir.get_child("conn"), config);
+		WebEngine.init_web_context(app_storage);
 		web_engine = new WebEngine(this, server, web_app, app_storage, config, connection.proxy_uri);
 		web_engine.init_form.connect(on_init_form);
 		web_engine.notify.connect_after(on_web_engine_notify);

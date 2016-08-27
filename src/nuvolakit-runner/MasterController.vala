@@ -210,6 +210,8 @@ public class MasterController : Diorite.Application
 	{
 		if (config.get_string("nuvola.welcome_screen") != get_welcome_screen_name())
 		{
+			var app_storage = new WebAppStorage(storage.user_config_dir, storage.user_data_dir, storage.user_cache_dir);
+			WebEngine.init_web_context(app_storage);
 			var welcome_window = new WelcomeWindow(this, storage);
 			welcome_window.present();
 			config.set_string("nuvola.welcome_screen", get_welcome_screen_name());

@@ -32,8 +32,9 @@ public class WebView: WebKit.WebView
 	public static const double ZOOM_STEP = 1.2;
 	private SList<WebWindow> web_windows = null;
 	
-	public WebView()
+	public WebView(WebKit.WebContext context)
 	{
+		GLib.Object(web_context: context);
 		unowned WebKit.Settings ws = get_settings();
 		ws.enable_developer_extras = true;
 		ws.enable_java = false;
@@ -83,7 +84,7 @@ public class WebView: WebKit.WebView
 	
 	private Gtk.Widget on_web_view_create()
 	{
-		var web_view = new WebView();
+		var web_view = new WebView(web_context);
 		var web_window = new WebWindow(web_view);
 		web_window.destroy.connect(on_web_window_destroy);
 		web_windows.prepend(web_window);

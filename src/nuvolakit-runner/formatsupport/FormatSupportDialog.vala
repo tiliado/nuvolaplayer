@@ -127,7 +127,7 @@ public class FormatSupportDialog: Gtk.Dialog
 		{
 			frame = new Gtk.Frame ("<b>Active Flash plugin</b>");
 			(frame.label_widget as Gtk.Label).use_markup = true;
-			var web_view = new WebView();
+			var web_view = new WebView(WebEngine.get_web_context());
 			frame.add(web_view);
 			web_view.set_size_request(-1, 50);
 			web_view.show();
@@ -275,7 +275,7 @@ public class FormatSupportDialog: Gtk.Dialog
 			{
 				var frame = new Gtk.Frame ("<b>HTML5 Audio Support Status</b>");
 				(frame.label_widget as Gtk.Label).use_markup = true;
-				var web_view = new WebView();
+				var web_view = new WebView(WebEngine.get_web_context());
 				frame.add(web_view);
 				web_view.set_size_request(-1, 300);
 				web_view.show();

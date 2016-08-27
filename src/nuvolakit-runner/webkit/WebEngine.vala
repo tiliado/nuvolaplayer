@@ -49,10 +49,10 @@ public class WebEngine : GLib.Object, JSExecutor
 	private JSApi api;
 	private ApiBus server = null;
 	private bool initialized = false;
-	
-	
 	private Config config;
 	private Diorite.KeyValueStorage session;
+	
+	private static WebKit.WebContext? default_context = null;
 	
 	public WebEngine(RunnerApplication runner_app, ApiBus server, WebAppMeta web_app,
 		WebAppStorage storage, Config config, string? proxy_uri)
@@ -70,23 +70,13 @@ public class WebEngine : GLib.Object, JSExecutor
 		Environment.set_variable("LIBSOUP_MAJOR", Soup.get_major_version().to_string(), true);
 		Environment.set_variable("LIBSOUP_MINOR", Soup.get_minor_version().to_string(), true);
 		Environment.set_variable("LIBSOUP_MICRO", Soup.get_micro_version().to_string(), true);
+		apply_network_proxy(proxy_uri);	
 		
+		var web_context = get_web_context();
 		var webkit_extension_dir = Nuvola.get_libdir();
 		debug("Nuvola WebKit Extension directory: %s", webkit_extension_dir);
-		apply_network_proxy(proxy_uri);
-		
-		var wc = WebKit.WebContext.get_default();
-		wc.set_web_extensions_directory(webkit_extension_dir);
-		wc.set_favicon_database_directory(storage.data_dir.get_child("favicons").get_path());
-		wc.set_disk_cache_directory(storage.cache_dir.get_child("webcache").get_path());
-		if (WebEngine.check_webkit_version(20800))
-			wc.set_property("local-storage-directory", storage.data_dir.get_child("local_storage").get_path());
-		
-		var cm = wc.get_cookie_manager();
-		cm.set_persistent_storage(storage.data_dir.get_child("cookies.dat").get_path(),
-			WebKit.CookiePersistentStorage.SQLITE);
-		
-		web_view = new WebView();
+		web_context.set_web_extensions_directory(webkit_extension_dir);
+		web_view = new WebView(web_context);
 		config.set_default_value(ZOOM_LEVEL_CONF, 1.0);
 		web_view.zoom_level = config.get_double(ZOOM_LEVEL_CONF);
 		
@@ -98,6 +88,39 @@ public class WebEngine : GLib.Object, JSExecutor
 		web_view.notify["zoom-level"].connect(on_zoom_level_changed);
 		web_view.decide_policy.connect(on_decide_policy);
 		web_view.script_dialog.connect(on_script_dialog);
+	}
+	
+	public static bool init_web_context(WebAppStorage storage)
+	{
+		if (default_context != null)
+			return false;
+		
+		WebKit.WebContext wc;
+		if (WebEngine.check_webkit_version(20800))
+		{
+			wc = (WebKit.WebContext) GLib.Object.@new(typeof(WebKit.WebContext),
+				"local-storage-directory", storage.data_dir.get_child("local_storage").get_path());
+		}
+		else 
+		{
+			wc = new WebKit.WebContext();
+		}
+				
+		wc.set_favicon_database_directory(storage.data_dir.get_child("favicons").get_path());
+		wc.set_disk_cache_directory(storage.cache_dir.get_child("webcache").get_path());
+		var cm = wc.get_cookie_manager();
+		cm.set_persistent_storage(storage.data_dir.get_child("cookies.dat").get_path(),
+			WebKit.CookiePersistentStorage.SQLITE);
+		
+		default_context = wc;
+		return true;
+	}
+	
+	public static WebKit.WebContext get_web_context()
+	{
+		if (default_context == null)
+			critical("Default context hasn't been set up yet. Call WebEngine.set_up_web_context().");
+		return default_context;
 	}
 	
 	public static uint get_webkit_version()
