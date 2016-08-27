@@ -668,7 +668,7 @@ def build(ctx):
         target = NUVOLAKIT_RUNNER,
         gir = "NuvolaRunner-1.0",
         source_dir = 'src/nuvolakit-runner',
-        packages = packages + ' webkit2gtk-4.0 javascriptcoregtk-4.0 gstreamer-1.0 libsecret-1 dri2 libdrm libarchive',
+        packages = packages + ' webkit2gtk-4.0 javascriptcoregtk-4.0 gstreamer-1.0 libsecret-1 dri2 libdrm libarchive prctl',
         uselib =  uselib + ' JSCORE WEBKIT GST SECRET DRI2 DRM LIBARCHIVE',
         use = [NUVOLAKIT_BASE, ENGINEIO],
         lib = ['m'],

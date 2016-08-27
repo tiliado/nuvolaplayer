@@ -49,6 +49,12 @@ public int run_web_app_with_dbus_handshake(File web_app_dir, string[] argv) thro
      */
     Environment.set_variable("GDK_BACKEND", "x11", true);
 
+    /*
+     * Make sure WebKit Processes don't lose this process as their parent.
+     * As a result, we can identify these sub-processes and apply PulseAudio tweaks.
+     */
+    prctl(PR_SET_CHILD_SUBREAPER, (ulong) Posix.getpid(), 0, 0, 0);
+
     // Init GTK early to have be able to use Gtk.IconTheme stuff
     string[] empty_argv = {};
     unowned string[] unowned_empty_argv = empty_argv;
