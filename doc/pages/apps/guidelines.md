@@ -12,7 +12,8 @@ Formal Rules
    Full text of a license must be provided in file `LICENSE` or `LICENSE.txt`. If more than one
    license are used, add a distinguishing suffix, e.g. `LICENSE-BSD.txt`. You can look at
    [README.md template](https://github.com/tiliado/nuvola-app-template/blob/master/README.md)
-   for inspiration.
+   for inspiration. In addition, the `metadata.json` file must contain a list of licenses in the
+   `license` field, e.g. `"license": "2-Clause BSD, CC-BY-3.0"`.
 
 2. The field ``maintainer_link`` of ``metadata.json`` must contain URL of your
    [Github profile][github]. (You will be subscribed to bug reports related to your service
@@ -50,6 +51,8 @@ to the popular open-source licenses with strong communities:
   * [GNU Library or "Lesser" General Public License (LGPL)](http://opensource.org/licenses/lgpl-license)
   * [MIT license](http://opensource.org/licenses/MIT)
   * [Mozilla Public License 2.0](http://opensource.org/licenses/MPL-2.0)
+
+You must specify the license in `README.md` and in the `licence` field of `metadata.json`.
 
 Artwork
 =======

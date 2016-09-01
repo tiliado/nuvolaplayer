@@ -95,7 +95,8 @@ Let's look at the example:
         "api_major": 3,
         "api_minor": 0,
         "categories": "AudioVideo;Audio;",
-        "home_url": "nuvola://home.html"
+        "home_url": "nuvola://home.html",
+        "license": "2-Clause BSD, CC-BY-3.0"
     }
 
 This file contains several **mandatory fields**:
@@ -154,6 +155,10 @@ This file contains several **mandatory fields**:
     
     This field is not required if you use custom function to handle home page request.
     See [Web apps with a variable home page URL](:apps/variable-home-page-url.html).
+
+`license`
+
+:   List of licenses that apply to your script, e.g. `"2-Clause BSD, CC-BY-3.0"`.
 
 `requirements`
 
