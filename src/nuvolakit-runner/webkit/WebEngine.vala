@@ -76,6 +76,9 @@ public class WebEngine : GLib.Object, JSExecutor
 		var webkit_extension_dir = Nuvola.get_libdir();
 		debug("Nuvola WebKit Extension directory: %s", webkit_extension_dir);
 		web_context.set_web_extensions_directory(webkit_extension_dir);
+		if (web_app.allow_insecure_content)
+			web_context.get_security_manager().register_uri_scheme_as_secure("http");
+		
 		web_view = new WebView(web_context);
 		config.set_default_value(ZOOM_LEVEL_CONF, 1.0);
 		web_view.zoom_level = config.get_double(ZOOM_LEVEL_CONF);

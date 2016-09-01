@@ -174,6 +174,14 @@ This file can include also optional fields:
 
 : Suggested window width or height in pixels.
 
+
+`allow_insecure_content` (since Nuvola Player 3.1)
+
+:   Whether the page served over the secure HTTPS protocol depends on insecure content served over the HTTP protocol.
+    As a rule of thumb, set `allow_insecure_content` to `true` if you see console warnings similar to that of Pocket Casts:
+    `Runner: **CONSOLE WARN [blocked]** The page at https://play.pocketcasts.com/web **was not allowed** to display
+    insecure content from http://media.scpr.org/.` The default value is `false`.
+
 !!! danger "Extra rules for metadata.json"
     If you want to have your integration script maintained and distributed as a part of the Nuvola
     Player project, you have to follow rules in [Service Integrations Guidelines](:apps/guidelines.html).
