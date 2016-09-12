@@ -40,6 +40,7 @@ WELCOME_SCREEN_NAME = "Nuvola Player 3.1 Rolling"
 TARGET_GLIB = "2.42"
 MIN_GLIB = "2.42.1"
 MIN_GTK = "3.14.5"
+MIN_WEBKIT = "2.6.2"
 
 import sys
 PY3 = sys.version_info > (3,)
@@ -213,14 +214,9 @@ def configure(ctx):
 	ctx.check_dep('libarchive', 'LIBARCHIVE', '3.1')
 	ctx.check_dep('libnotify', 'NOTIFY', '0.7')
 	ctx.check_dep("gstreamer-1.0", 'GST', "1.0")
-	
-	
-	ctx.env.WEBKIT = 'webkit2gtk-4.0'
-	ctx.env.WEBKITEXT = 'webkit2gtk-web-extension-4.0'
-	ctx.env.JSCORE = 'javascriptcoregtk-4.0'
-	ctx.check_dep(ctx.env.WEBKIT, 'WEBKIT', '2.6.2')
-	ctx.check_dep(ctx.env.WEBKITEXT, 'WEBKITEXT', '2.6.2')
-	ctx.check_dep(ctx.env.JSCORE, 'JSCORE', '2.6.2')
+	ctx.check_dep('webkit2gtk-4.0', 'WEBKIT', MIN_WEBKIT)
+	ctx.check_dep('webkit2gtk-web-extension-4.0', 'WEBKITEXT', MIN_WEBKIT)
+	ctx.check_dep('javascriptcoregtk-4.0', 'JSCORE', MIN_WEBKIT)
 		
 	
 	ctx.env.with_unity = ctx.options.unity
@@ -268,7 +264,7 @@ def build(ctx):
 	NUVOLAKIT_WORKER = APPNAME + "-worker"
 	
 	packages = 'dioritegtk-{0} dioriteglib-{0} '.format(ctx.env.DIORITE_SERIES)
-	packages += ctx.env.JSCORE + ' libnotify libarchive gtk+-3.0 gdk-3.0 gdk-x11-3.0 x11 posix json-glib-1.0 glib-2.0 gio-2.0'
+	packages += 'javascriptcoregtk-4.0 libnotify libarchive gtk+-3.0 gdk-3.0 gdk-x11-3.0 x11 posix json-glib-1.0 glib-2.0 gio-2.0'
 	uselib = 'NOTIFY JSCORE LIBARCHIVE DIORITEGTK DIORITEGLIB GTK+ GDK GDKX11 XLIB JSON-GLIB GLIB GTHREAD GIO'
 	
 	if ctx.env.with_unity:
@@ -293,7 +289,7 @@ def build(ctx):
 			+ ctx.path.ant_glob('src/nuvolakit-runner/*/*.vala')
 			+ ctx.path.ant_glob('src/nuvolakit-runner/*/*/*.vala')
 			),
-		packages = " ".join((ctx.env.WEBKIT, ctx.env.JSCORE, 'gstreamer-1.0')),
+		packages = 'webkit2gtk-4.0 javascriptcoregtk-4.0 gstreamer-1.0',
 		uselib =  'JSCORE WEBKIT GST',
 		use = [NUVOLAKIT_BASE],
 		lib = ['m'],
@@ -343,7 +339,7 @@ def build(ctx):
 	ctx(features = "c cshlib",
 		target = NUVOLAKIT_WORKER,
 		source = ctx.path.ant_glob('src/nuvolakit-worker/*.vala'),
-		packages = "dioriteglib-{0} {1} {2}".format(ctx.env.DIORITE_SERIES, ctx.env.WEBKITEXT, ctx.env.JSCORE),
+		packages = "dioriteglib-{0} {1} {2}".format(ctx.env.DIORITE_SERIES, 'webkit2gtk-web-extension-4.0', 'javascriptcoregtk-4.0'),
 		uselib = "DIORITEGLIB DIORITEGTK WEBKIT JSCORE",
 		use = [NUVOLAKIT_BASE],
 		vala_defines = vala_defines,
