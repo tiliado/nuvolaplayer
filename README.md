@@ -61,10 +61,10 @@ Build and Install
     or [Python 3](http://python.org) >= 3.4 (not well tested)
   * [Vala](https://wiki.gnome.org/Projects/Vala) >= 0.26.1
   * [Diorite library](https://github.com/tiliado/diorite) 0.3.x
-  * [glib-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.40
-  * [gio-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.40
-  * [gobject-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.40
-  * [gthread-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.40
+  * [glib-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.42.1
+  * [gio-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.42.1
+  * [gobject-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.42.1
+  * [gthread-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.42.1
   * [gtk+-3.0](http://www.gtk.org/) >= 3.10
   * [gdk-3.0](http://www.gtk.org/) >= 3.10
   * [gdk-x11-3.0](http://www.gtk.org/) >= 3.10

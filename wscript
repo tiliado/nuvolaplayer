@@ -37,6 +37,9 @@ GENERIC_NAME = "Cloud Player"
 BLURB = "Cloud music integration for your Linux desktop"
 WELCOME_SCREEN_NAME = "Nuvola Player 3.1 Rolling"
 
+TARGET_GLIB = "2.42"
+MIN_GLIB = "2.42.1"
+
 import sys
 PY3 = sys.version_info > (3,)
 import subprocess
@@ -196,9 +199,9 @@ def configure(ctx):
 	
 	# Check dependencies
 	ctx.env.DIORITE_SERIES = DIORITE_SERIES = "0.3"
-	ctx.check_dep('glib-2.0', 'GLIB', '2.40')
-	ctx.check_dep('gio-2.0', 'GIO', '2.40')
-	ctx.check_dep('gthread-2.0', 'GTHREAD', '2.40')
+	ctx.check_dep('glib-2.0', 'GLIB', MIN_GLIB)
+	ctx.check_dep('gio-2.0', 'GIO', MIN_GLIB)
+	ctx.check_dep('gthread-2.0', 'GTHREAD', MIN_GLIB)
 	ctx.check_dep('gtk+-3.0', 'GTK+', '3.10')
 	ctx.check_dep('gdk-3.0', 'GDK', '3.10')
 	ctx.check_dep('gdk-x11-3.0', 'GDKX11', '3.10')
@@ -279,7 +282,7 @@ def build(ctx):
 		vala_defines = vala_defines,
 		defines = ['G_LOG_DOMAIN="Nuvola"'],
 		vapi_dirs = ['vapi'],
-		vala_target_glib = "2.32",
+		vala_target_glib = TARGET_GLIB,
 	)
 	
 	ctx(features = "c cshlib",
@@ -296,7 +299,7 @@ def build(ctx):
 		vala_defines = vala_defines,
 		defines = ['G_LOG_DOMAIN="Nuvola"'],
 		vapi_dirs = ['vapi'],
-		vala_target_glib = "2.32",
+		vala_target_glib = TARGET_GLIB,
 	)
 	
 	ctx.program(
@@ -308,7 +311,7 @@ def build(ctx):
 		vala_defines = vala_defines,
 		defines = ['G_LOG_DOMAIN="Nuvola"'],
 		vapi_dirs = ['vapi'],
-		vala_target_glib = "2.32",
+		vala_target_glib = TARGET_GLIB,
 	)
 	
 	ctx.program(
@@ -320,7 +323,7 @@ def build(ctx):
 		vala_defines = vala_defines,
 		defines = ['G_LOG_DOMAIN="Nuvola"'],
 		vapi_dirs = ['vapi'],
-		vala_target_glib = "2.32",
+		vala_target_glib = TARGET_GLIB,
 		install_path = ctx.env.NUVOLA_LIBDIR,
 	)
 	
@@ -333,7 +336,7 @@ def build(ctx):
 		vala_defines = vala_defines,
 		defines = ['G_LOG_DOMAIN="Nuvola"'],
 		vapi_dirs = ['vapi'],
-		vala_target_glib = "2.32",
+		vala_target_glib = TARGET_GLIB,
 	)
 	
 	ctx(features = "c cshlib",
@@ -345,7 +348,7 @@ def build(ctx):
 		vala_defines = vala_defines,
 		cflags = ['-DG_LOG_DOMAIN="Nuvola"'],
 		vapi_dirs = ['vapi'],
-		vala_target_glib = "2.32",
+		vala_target_glib = TARGET_GLIB,
 		install_path = ctx.env.NUVOLA_LIBDIR,
 	)
 	
