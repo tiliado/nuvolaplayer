@@ -163,7 +163,7 @@ def configure(ctx):
 	ctx.msg('Install prefix', ctx.options.prefix, "GREEN")
 	
 	ctx.load('compiler_c vala')
-	ctx.check_vala(min_version=(0,22,1))
+	ctx.check_vala(min_version=(0, 26, 1))
 	# Don't be quiet
 	ctx.env.VALAFLAGS.remove("--quiet")
 	ctx.env.append_value("VALAFLAGS", "-v")

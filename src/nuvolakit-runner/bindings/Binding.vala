@@ -101,10 +101,7 @@ public abstract class Nuvola.ObjectBinding<ObjectType>: Binding<ObjectType>
 	
 	public bool add(GLib.Object object)
 	{
-		/* Valac 0.22: cannot use "is" operator with generics
-		 * if (!(object is ObjectType))
-		 */
-		if (!object.get_type().is_a(typeof(ObjectType)))
+		if (!(object is ObjectType))
 			return false;
 		
 		objects.prepend(object);
@@ -119,10 +116,7 @@ public abstract class Nuvola.ObjectBinding<ObjectType>: Binding<ObjectType>
 	
 	public bool remove(GLib.Object object)
 	{
-		/* Valac 0.22: cannot use "is" operator with generics
-		 * if (!(object is ObjectType))
-		 */
-		if (!object.get_type().is_a(typeof(ObjectType)))
+		if (!(object is ObjectType))
 			return false;
 		
 		objects.remove((ObjectType) object);

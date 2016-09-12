@@ -59,7 +59,7 @@ Build and Install
 
   * [Python 2](http://python.org) >= 2.7 (recommended)
     or [Python 3](http://python.org) >= 3.4 (not well tested)
-  * [Vala](https://wiki.gnome.org/Projects/Vala) >= 0.22.1
+  * [Vala](https://wiki.gnome.org/Projects/Vala) >= 0.26.1
   * [Diorite library](https://github.com/tiliado/diorite) 0.3.x
   * [glib-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.40
   * [gio-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.40

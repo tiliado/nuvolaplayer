@@ -130,14 +130,13 @@ public class JsEnvironment: GLib.Object, JSExecutor
 			throw new JSError.WRONG_TYPE("'%s' is not a function.'", name);
 		
 //~ 		debug("Args before: %s", args.print(true));
-		// TODO [Vala 0.26] (unowned JS.Value)[] params;
-		void*[] params;
+		(unowned JS.Value)[] params;
 		var size = 0;
 		if (args != null)
 		{
 			assert(args.is_container()); // FIXME
 			size = (int) args.n_children();
-			params = new void*[size];
+			params = new (unowned JS.Value)[size];
 			int i = 0;
 			foreach (var item in args)
 				params[i++] = value_from_variant(ctx, item);
@@ -148,7 +147,7 @@ public class JsEnvironment: GLib.Object, JSExecutor
 		}
 		
 		JS.Value? exception;
-		func.call_as_function(ctx, object, (JS.Value[]) params,  out exception);
+		func.call_as_function(ctx, object, params,  out exception);
 		if (exception != null)
 			throw new JSError.FUNC_FAILED("Function '%s' failed. %s", name, exception_to_string(ctx, exception) ?? "(null)");
 		
