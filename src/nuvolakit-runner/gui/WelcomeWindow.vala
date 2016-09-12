@@ -79,12 +79,14 @@ public class WelcomeWindow : Diorite.ApplicationWindow
 	private Gtk.Grid grid;
 	private Diorite.Application app;
 	private WebView web_view;
+	private Diorite.RichTextView welcome_text;
+	private Gtk.ScrolledWindow scroll;
 	
 	public WelcomeWindow(Diorite.Application app, Diorite.Storage storage)
 	{
 		base(app, true);
 		title = "Welcome to Nuvola Player";
-		set_default_size(1000, 600);
+		set_default_size(1000, 800);
 		try
 		{
 			icon = Gtk.IconTheme.get_default().load_icon(app.icon, 48, 0);
@@ -111,34 +113,98 @@ public class WelcomeWindow : Diorite.ApplicationWindow
 			return;
 		}
 		
-		var welcome_text = new Diorite.RichTextView(buffer);
+		welcome_text = new Diorite.RichTextView(buffer);
 		welcome_text.link_opener = show_uri;
 		welcome_text.margin = 18;
-		var box = new Gtk.EventBox();
-		box.override_background_color(Gtk.StateFlags.NORMAL, {1.0, 1.0, 1.0, 1.0});
-		var scroll = new Gtk.ScrolledWindow(null, null);
-		scroll.add(welcome_text);
-		scroll.vexpand = true;
-		scroll.hexpand = true;
-		grid.attach(scroll, 0, 0, 1, 1);
+		welcome_text.vexpand = welcome_text.hexpand = true;
+		welcome_text.motion_notify_event.connect(on_motion_notify);
+		grid.attach(welcome_text, 0, 0, 1, 1);
+		
 		web_view = new WebView();
+		web_view.add_events(Gdk.EventMask.SCROLL_MASK);
+		web_view.motion_notify_event.connect(on_motion_notify);
+		web_view.scroll_event.connect(on_scroll_event);
+		web_view.load_changed.connect(on_load_changed);
 		web_view.load_uri(PATRONS_BOX_URI);
 		web_view.margin = 18;
 		web_view.decide_policy.connect(on_decide_policy);
-		box = new Gtk.EventBox();
 		web_view.hexpand = false;
 		web_view.vexpand = true;
 		web_view.set_size_request(275, -1);
 		grid.attach(web_view, 1, 0, 1, 1);
+		
 		var button = new Gtk.Button.with_label("Close");
 		button.clicked.connect(() => {destroy();});
 		button.margin = 10;
 		button.margin_right = 18;
-		grid.attach(button, 1, 1, 1, 1);
+		button.margin_top = 0;
 		button.vexpand = button.hexpand = false;
 		button.halign = Gtk.Align.END;
-		top_grid.add(grid);
+		grid.attach(button, 1, 1, 1, 1);
+		
+		scroll = new Gtk.ScrolledWindow(null, null);
+		scroll.add(grid);
+		scroll.vexpand = true;
+		scroll.hexpand = true;
+		top_grid.add(scroll);
 		top_grid.show_all();
+	}
+	
+	private bool on_scroll_event(Gdk.EventScroll event)
+	{
+		/* Propagate the scroll event to the ScrolledWindow. */
+		scroll.scroll_event(event);
+		return true;
+	}
+	
+	private bool on_motion_notify(Gtk.Widget widget, Gdk.EventMotion event)
+	{
+		if (!widget.has_focus)
+		{
+			/* The focus grab is necessary for a WebView in a ScrolledWindow as it jumps on click otherwise.
+			 * Since the scroll position moves to top on focus grab, it's necessary to restore the original
+			 * position after that. */
+			var adjustment = scroll.get_vadjustment();
+			var position = adjustment.value;
+			widget.grab_focus();
+			adjustment.value = position;
+		}
+		return false;
+	}
+	
+	private void on_load_changed(WebKit.WebView view, WebKit.LoadEvent event)
+	{
+		if (event == WebKit.LoadEvent.FINISHED)
+			set_web_view_height();
+	}
+	
+	private bool set_web_view_height()
+	{
+		/* A hack to get the document height. */
+		web_view.run_javascript.begin("""
+			var bodyElm = document.body, htmlElm = document.documentElement;
+			document.title = Math.max(
+				bodyElm.scrollHeight, bodyElm.offsetHeight, 
+                htmlElm.clientHeight, htmlElm.scrollHeight, htmlElm.offsetHeight);
+			""", null, on_height_retrieved);
+		return true;
+	}
+	
+	private void on_height_retrieved(GLib.Object? o, AsyncResult result)
+	{
+		try
+		{
+			web_view.run_javascript.end(result);
+			var page_height = int.parse(web_view.title);
+			int width; int height;
+			web_view.get_size_request(out width, out height);
+			if (height < page_height && page_height > 100)
+				web_view.set_size_request(width, page_height);
+		}
+		catch (GLib.Error e)
+		{
+			debug("JavaScript error: %s", e.message);
+		}
 	}
 	
 	private void show_uri(string uri)
