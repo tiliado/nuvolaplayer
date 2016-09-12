@@ -159,7 +159,7 @@ MediaPlayer.setTrack = function(track)
     if (!changed.length)
         return;
     
-    this._track = track;
+    this._track = Object.assign({}, track);
     
     if (!track.artLocation)
         this._artworkFile = null;
