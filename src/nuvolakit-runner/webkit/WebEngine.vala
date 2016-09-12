@@ -551,18 +551,22 @@ public class WebEngine : GLib.Object, JSExecutor
 	
 	private bool decide_navigation_policy(bool new_window, WebKit.NavigationPolicyDecision decision)
 	{
-		var uri = decision.request.uri;
+		var action = decision.navigation_action;
+		var uri = action.get_request().uri;
 		if (!uri.has_prefix("http://") && !uri.has_prefix("https://"))
 			return false;
 		
 		var new_window_override = new_window;
 		var result = navigation_request(uri, ref new_window_override);
-		var type = decision.navigation_type;
-		debug("Navigation, %s window: uri = %s, result = %s, frame = %s, type = %s",
-			new_window_override ? "new" : "current", uri, result.to_string(), decision.frame_name, type.to_string());
+		
+		var type = action.get_navigation_type();
+		var user_gesture = action.is_user_gesture();
+		debug("Navigation, %s window: uri = %s, result = %s, frame = %s, type = %s, user gesture %s",
+			new_window_override ? "new" : "current", uri, result.to_string(), decision.frame_name, type.to_string(),
+			user_gesture.to_string());
 		
 		// We care only about user clicks
-		if (type != WebKit.NavigationType.LINK_CLICKED)
+		if (type != WebKit.NavigationType.LINK_CLICKED || user_gesture)
 			return false;
 		
 		if (result)

@@ -211,7 +211,7 @@ public class WelcomeWindow : Diorite.ApplicationWindow
 	
 	private bool decide_navigation_policy(bool new_window, WebKit.NavigationPolicyDecision decision)
 	{
-		var uri = decision.request.uri;
+		var uri = decision.navigation_action.get_request().uri;
 		if (!uri.has_prefix("http://") && !uri.has_prefix("https://") || uri == PATRONS_BOX_URI)
 			return false;
 		
