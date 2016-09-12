@@ -65,9 +65,9 @@ Build and Install
   * [gio-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.42.1
   * [gobject-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.42.1
   * [gthread-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.42.1
-  * [gtk+-3.0](http://www.gtk.org/) >= 3.10
-  * [gdk-3.0](http://www.gtk.org/) >= 3.10
-  * [gdk-x11-3.0](http://www.gtk.org/) >= 3.10
+  * [gtk+-3.0](http://www.gtk.org/) >= 3.14.5
+  * [gdk-3.0](http://www.gtk.org/) >= 3.14.5
+  * [gdk-x11-3.0](http://www.gtk.org/) >= 3.14.5
   * [x11](http://www.x.org/wiki/) >= 0.5
   * [json-glib-1.0](https://wiki.gnome.org/Projects/JsonGlib) >= 0.7
   * [libarchive](http://www.libarchive.org/) >= 3.1

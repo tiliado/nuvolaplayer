@@ -39,6 +39,7 @@ WELCOME_SCREEN_NAME = "Nuvola Player 3.1 Rolling"
 
 TARGET_GLIB = "2.42"
 MIN_GLIB = "2.42.1"
+MIN_GTK = "3.14.5"
 
 import sys
 PY3 = sys.version_info > (3,)
@@ -202,9 +203,9 @@ def configure(ctx):
 	ctx.check_dep('glib-2.0', 'GLIB', MIN_GLIB)
 	ctx.check_dep('gio-2.0', 'GIO', MIN_GLIB)
 	ctx.check_dep('gthread-2.0', 'GTHREAD', MIN_GLIB)
-	ctx.check_dep('gtk+-3.0', 'GTK+', '3.10')
-	ctx.check_dep('gdk-3.0', 'GDK', '3.10')
-	ctx.check_dep('gdk-x11-3.0', 'GDKX11', '3.10')
+	ctx.check_dep('gtk+-3.0', 'GTK+', MIN_GTK)
+	ctx.check_dep('gdk-3.0', 'GDK', MIN_GTK)
+	ctx.check_dep('gdk-x11-3.0', 'GDKX11', MIN_GTK)
 	ctx.check_dep('x11', 'XLIB', '0.5')
 	ctx.check_dep('dioriteglib-' + DIORITE_SERIES, 'DIORITEGLIB', DIORITE_SERIES)
 	ctx.check_dep('dioritegtk-' + DIORITE_SERIES, 'DIORITEGTK', DIORITE_SERIES)
