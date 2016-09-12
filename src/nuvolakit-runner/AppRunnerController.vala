@@ -298,13 +298,6 @@ public class AppRunnerController : RunnerApplication
 			web_worker_data["WEB_APP_ID"] = web_app.id;
 			web_worker_data["RUNNER_BUS_NAME"] = bus_name;
 			ipc_bus = new IpcBus(bus_name);
-			ipc_bus.router.add_method("/nuvola/browser/download-file-async", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
-				"Download file.",
-				handle_download_file_async, {
-				new Drt.StringParam("uri", true, false, null, "File to download."),
-				new Drt.StringParam("basename", true, false, null, "Basename of the file."),
-				new Drt.DoubleParam("callback-id", true, null, "Callback id.")
-			});
 			ipc_bus.start();
 			
 			bus_name = Environment.get_variable("NUVOLA_IPC_MASTER");
@@ -651,30 +644,6 @@ public class AppRunnerController : RunnerApplication
 		{
 			warning("Communication with web worker failed: %s", e.message);
 		}
-	}
-	
-	private Variant? handle_download_file_async(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
-	{
-		var uri = params.pop_string();
-		var basename = params.pop_string();
-		var cb_id = params.pop_double();
-		var file = connection.cache_dir.get_child(basename);
-		connection.download_file.begin(uri, file, (obj, res) =>
-		{
-			Soup.Message msg = null;
-			var result = connection.download_file.end(res, out msg);
-			try
-			{
-				var payload = new Variant(
-					"(dbusss)", cb_id, result, msg.status_code, msg.reason_phrase, file.get_path(), file.get_uri());
-				web_worker.call_function("Nuvola.browser._downloadDone", ref payload);
-			}
-			catch (GLib.Error e)
-			{
-				warning("Communication failed: %s", e.message);
-			}
-		});
-		return null;
 	}
 	
 	private Variant? handle_get_component_info(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError

@@ -48,6 +48,7 @@ public class WebEngine : GLib.Object, JSExecutor
 	private JsEnvironment? env = null;
 	private JSApi api;
 	private IpcBus ipc_bus = null;
+	private WebWorker web_worker;
 	private bool initialized = false;
 	private Config config;
 	private Diorite.KeyValueStorage session;
@@ -62,6 +63,7 @@ public class WebEngine : GLib.Object, JSExecutor
 		this.storage = storage;
 		this.web_app = web_app;
 		this.config = config;
+		this.web_worker = new RemoteWebWorker(ipc_bus);
 		
 		worker_data["NUVOLA_API_ROUTER_TOKEN"] = ipc_bus.router.hex_token;
 		worker_data["WEBKITGTK_MAJOR"] = WebKit.get_major_version();
@@ -82,6 +84,8 @@ public class WebEngine : GLib.Object, JSExecutor
 		
 		if (web_app.allow_insecure_content)
 			web_context.get_security_manager().register_uri_scheme_as_secure("http");
+		
+		web_context.download_started.connect(on_download_started);
 		
 		web_view = new WebView(web_context);
 		config.set_default_value(ZOOM_LEVEL_CONF, 1.0);
@@ -484,6 +488,13 @@ public class WebEngine : GLib.Object, JSExecutor
 			handle_show_error, {
 			new Drt.StringParam("text", true, false, null, "Error message.")
 		});
+		router.add_method("/nuvola/browser/download-file-async", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+				"Download file.",
+				handle_download_file_async, {
+				new Drt.StringParam("uri", true, false, null, "File to download."),
+				new Drt.StringParam("basename", true, false, null, "Basename of the file."),
+				new Drt.DoubleParam("callback-id", true, null, "Callback id.")
+			});
 	}
 	
 	private Variant? handle_web_worker_initialized(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
@@ -611,6 +622,85 @@ public class WebEngine : GLib.Object, JSExecutor
 		}
 	}
 	
+	private Variant? handle_download_file_async(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	{
+		var uri = params.pop_string();
+		var basename = params.pop_string();
+		var cb_id = params.pop_double();
+
+		var dir = storage.cache_dir.get_child("api-downloads");
+		try
+		{
+			dir.make_directory_with_parents();
+		}
+		catch (GLib.Error e)
+		{
+		}
+		var file = dir.get_child(basename);
+		try
+		{
+			file.@delete();
+		}
+		catch (GLib.Error e)
+		{
+		}
+		var download = get_web_context().download_uri(uri);
+		download.set_destination(file.get_uri());
+		ulong[] handler_ids = new ulong[2];
+		
+		handler_ids[0] = download.finished.connect((d) => {
+			try
+			{
+				var payload = new Variant(
+					"(dbusss)", cb_id, true, d.get_response().status_code, d.get_response().status_code.to_string(), file.get_path(), file.get_uri());
+				web_worker.call_function("Nuvola.browser._downloadDone", ref payload);
+			}
+			catch (GLib.Error e)
+			{
+				warning("Communication failed: %s", e.message);
+			}
+			download.disconnect(handler_ids[0]);
+			download.disconnect(handler_ids[1]);
+			
+		});
+		
+		handler_ids[1] = download.failed.connect((d, err) => {
+			WebKit.DownloadError e = (WebKit.DownloadError) err;
+			if (e is WebKit.DownloadError.DESTINATION)
+			    warning("Download failed because of destination: %s", e.message);
+			else
+			    warning("Download failed: %s", e.message);
+			try
+			{
+				var payload = new Variant(
+					"(dbusss)", cb_id, false, d.get_response().status_code, d.get_response().status_code.to_string(), "", "");
+				web_worker.call_function("Nuvola.browser._downloadDone", ref payload);
+			}
+			catch (GLib.Error e)
+			{
+				warning("Communication failed: %s", e.message);
+			}
+			download.disconnect(handler_ids[0]);
+			download.disconnect(handler_ids[1]);
+		});
+		
+		return null;
+	}
+	
+	private void on_download_started(WebKit.Download download)
+	{
+		download.decide_destination.connect(on_download_decide_destination);
+	}
+	
+	private bool on_download_decide_destination(WebKit.Download download, string filename)
+	{
+	
+		if (download.destination == null)
+			download.cancel();
+		download.decide_destination.disconnect(on_download_decide_destination);
+		return true;
+    }
+    
 	private bool decide_navigation_policy(bool new_window, WebKit.NavigationPolicyDecision decision)
 	{
 		var action = decision.navigation_action;
