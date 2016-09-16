@@ -227,6 +227,13 @@ def configure(ctx):
 	
 	if VERSION_SUFFIX != "stable":
 		ctx.vala_def("EXPERIMENTAL")
+		
+	# Define HAVE_WEBKIT_X_YY Vala compiler definitions
+	webkit_version = tuple(int(i) for i in ctx.check_cfg(modversion='webkit2gtk-4.0').split(".")[0:2])
+	version = (2, 6)
+	while version <= webkit_version:
+		ctx.vala_def("HAVE_WEBKIT_%d_%d" % version)
+		version = (version[0], version[1] + 2)
 	
 	ctx.env.with_apps_alpha = ctx.options.apps_alpha
 	
