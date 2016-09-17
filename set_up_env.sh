@@ -1,6 +1,5 @@
 export NUVOLA_WEB_APPS_DIR="web_apps"
-export DIORITE_LOG_IPC_SERVER="yes"
-export DIORITE_LOG_MESSAGE_SERVER="yes"
+export DIORITE_LOG_MESSAGE_CHANNEL="yes"
 export LD_LIBRARY_PATH="build"
 
 if [ -e /etc/fedora-release ]; then
