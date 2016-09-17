@@ -433,10 +433,8 @@ public class AppRunnerController : RunnerApplication
 		components.prepend(new UnityLauncherComponent(this, bindings, config));
 		#endif
 		components.prepend(new NotificationsComponent(this, bindings, actions_helper));
-		// TODO: MediaKeysComponent
-		var media_keys = new MediaKeysClient(web_app.id, server.master);
-		media_keys.manage();
-		bindings.add_object(media_keys);
+		components.prepend(new MediaKeysComponent(this, bindings, config, server.master, web_app.id));
+		
 		bindings.add_object(menu_bar);
 		components.prepend(new AudioScrobblerComponent(this, bindings, master_config, config, connection.session));
 		components.prepend(new MPRISComponent(this, bindings, config));
