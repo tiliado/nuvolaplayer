@@ -1,6 +1,22 @@
 Nuvola Player Changelog
 =======================
 
+Release 3.0.4 - September 17th, 2016
+------------------------------------
+
+This is a bug fix release addressing following issues:
+
+  * A crash under Wayland session was fixed (GDK_BACKEND set to x11).
+    Issue: tiliado/nuvolaplayer#181
+  * The accelerated compositing mode is disabled with WebKitGTK < 2.13.4 due to a WebKitGTK+ bug
+    that may crash systems with certain graphic cards.
+    Upstream: https://bugs.webkit.org/show_bug.cgi?id=126122
+    Issue: tiliado/nuvolaplayer#245
+  * A non-functional local-storage-directory setting was removed as it produced a console warning.
+  * The design of the Welcome screen was improved.
+  * It is possible to disable media keys in the Preferences dialog.
+    Issue: tiliado/nuvolaplayer#237
+
 Release 3.0.3 - June 4th, 2016
 ---------------------------------
 
