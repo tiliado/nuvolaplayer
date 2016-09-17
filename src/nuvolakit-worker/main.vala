@@ -29,7 +29,7 @@ public WebExtension extension;
 
 } // namespace Nuvola
 
-public void webkit_web_extension_initialize(WebKit.WebExtension extension)
+public void webkit_web_extension_initialize_with_user_data(WebKit.WebExtension extension, Variant data)
 {
 	Diorite.Logger.init(stderr, GLib.LogLevelFlags.LEVEL_DEBUG, "Worker");
 	
@@ -55,10 +55,11 @@ public void webkit_web_extension_initialize(WebKit.WebExtension extension)
 	if (Environment.get_variable("NUVOLA_TEST_ABORT") == "worker")
 		error("Web Worker abort requested.");
 		
+	var worker_data = Diorite.variant_to_hashtable(data);
 	try
 	{
-		var channel = new Drt.MessageChannel.from_name(0, Environment.get_variable("NUVOLA_IPC_UI_RUNNER"), null, 5000);
-		Nuvola.extension = new Nuvola.WebExtension(extension, channel); 
+		var channel = new Drt.MessageChannel.from_name(0, worker_data["RUNNER_BUS_NAME"].dup_string(), null, 5000);
+		Nuvola.extension = new Nuvola.WebExtension(extension, channel, worker_data); 
 	}
 	catch (GLib.Error e)
 	{

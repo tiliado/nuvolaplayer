@@ -36,11 +36,13 @@ public class WebExtension: GLib.Object
 	private JsRuntime bare_env;
 	private JSApi bare_api;
 	private string? api_token = null;
+	private HashTable<string, Variant>? worker_data;
 	
-	public WebExtension(WebKit.WebExtension extension, Drt.MessageChannel channel)
+	public WebExtension(WebKit.WebExtension extension, Drt.MessageChannel channel, HashTable<string, Variant> worker_data)
 	{
 		this.extension = extension;
 		this.channel = channel;
+		this.worker_data = worker_data;
 		WebKit.ScriptWorld.get_default().window_object_cleared.connect(on_window_object_cleared);
 		extension.page_created.connect(on_web_page_created);
 	}
@@ -63,20 +65,20 @@ public class WebExtension: GLib.Object
 		{
 			error("Runner client error: %s", e.message);
 		}
-		
 		var storage = new Diorite.XdgStorage.for_project(Nuvola.get_app_id());
-		uint[] webkit_version = new uint[3];
-		webkit_version[0] = (uint) int.parse(Environment.get_variable("WEBKITGTK_MAJOR") ?? "0");
-		webkit_version[1] = (uint) int.parse(Environment.get_variable("WEBKITGTK_MINOR") ?? "0");
-		webkit_version[2] = (uint) int.parse(Environment.get_variable("WEBKITGTK_MICRO") ?? "0");
-		uint[] libsoup_version = new uint[3];
-		libsoup_version[0] = (uint) int.parse(Environment.get_variable("LIBSOUP_MAJOR") ?? "0");
-		libsoup_version[1] = (uint) int.parse(Environment.get_variable("LIBSOUP_MINOR") ?? "0");
-		libsoup_version[2] = (uint) int.parse(Environment.get_variable("LIBSOUP_MICRO") ?? "0");
 		
-		api_token = Environment.get_variable("NUVOLA_API_ROUTER_TOKEN");
-		Environment.set_variable("NUVOLA_API_ROUTER_TOKEN", "*", true);
-
+		/* Use worker_data and free it. */
+		uint[] webkit_version = new uint[3];
+		webkit_version[0] = worker_data["WEBKITGTK_MAJOR"].get_uint32();
+		webkit_version[1] = worker_data["WEBKITGTK_MINOR"].get_uint32();
+		webkit_version[2] = worker_data["WEBKITGTK_MICRO"].get_uint32();
+		uint[] libsoup_version = new uint[3];
+		libsoup_version[0] = worker_data["LIBSOUP_MAJOR"].get_uint32();
+		libsoup_version[1] = worker_data["LIBSOUP_MINOR"].get_uint32();
+		libsoup_version[2] = worker_data["LIBSOUP_MICRO"].get_uint32();
+		api_token = worker_data["NUVOLA_API_ROUTER_TOKEN"].get_string();
+		worker_data = null;
+		
 		js_api = new JSApi(storage, data_dir, user_config_dir, new KeyValueProxy(channel, "config"),
 			new KeyValueProxy(channel, "session"), api_token, webkit_version, libsoup_version);
 		js_api.send_message_async.connect(on_send_message_async);

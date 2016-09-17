@@ -142,7 +142,8 @@ public class AppRunnerController : RunnerApplication
 		/* Disable GStreamer plugin helper because it is shown too often and quite annoying.  */
 		Environment.set_variable("GST_INSTALL_PLUGINS_HELPER", "/bin/true", true);
 		
-		set_up_communication(); // Now we have WebWorker
+		var web_worker_data = new HashTable<string, Variant>(str_hash, str_equal);
+		set_up_communication(web_worker_data); // Now we have WebWorker
 		
 		var gtk_settings = Gtk.Settings.get_default();
 		var default_config = new HashTable<string, Variant>(str_hash, str_equal);
@@ -166,7 +167,7 @@ public class AppRunnerController : RunnerApplication
 		
 		connection = new Connection(new Soup.Session(), app_storage.cache_dir.get_child("conn"), config);
 		WebEngine.init_web_context(app_storage);
-		web_engine = new WebEngine(this, server, web_app, app_storage, config, connection.proxy_uri);
+		web_engine = new WebEngine(this, server, web_app, app_storage, config, connection.proxy_uri, web_worker_data);
 		web_engine.init_form.connect(on_init_form);
 		web_engine.notify.connect_after(on_web_engine_notify);
 		web_engine.show_alert_dialog.connect(on_show_alert_dialog);
@@ -284,14 +285,15 @@ public class AppRunnerController : RunnerApplication
 		actions.add_actions(actions_spec);
 	}
 	
-	private void set_up_communication()
+	private void set_up_communication(HashTable<string, Variant> web_worker_data)
 	{
 		assert(server == null);
 		
 		try
 		{
 			var bus_name = build_ui_runner_ipc_id(web_app.id);
-			Environment.set_variable("NUVOLA_IPC_UI_RUNNER", bus_name, true);
+			web_worker_data["WEB_APP_ID"] = web_app.id;
+			web_worker_data["RUNNER_BUS_NAME"] = bus_name;
 			server = new ApiBus(bus_name);
 			server.add_handler("Nuvola.Browser.downloadFileAsync", "(ssd)", handle_download_file_async);
 			server.start();

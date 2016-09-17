@@ -55,7 +55,7 @@ public class WebEngine : GLib.Object, JSExecutor
 	private static WebKit.WebContext? default_context = null;
 	
 	public WebEngine(RunnerApplication runner_app, ApiBus server, WebAppMeta web_app,
-		WebAppStorage storage, Config config, string? proxy_uri)
+		WebAppStorage storage, Config config, string? proxy_uri, HashTable<string, Variant> worker_data)
 	{
 		this.server = server;
 		this.runner_app = runner_app;
@@ -63,19 +63,23 @@ public class WebEngine : GLib.Object, JSExecutor
 		this.web_app = web_app;
 		this.config = config;
 		
-		Environment.set_variable("NUVOLA_API_ROUTER_TOKEN", server.api.token, true);
-		Environment.set_variable("WEBKITGTK_MAJOR", WebKit.get_major_version().to_string(), true);
-		Environment.set_variable("WEBKITGTK_MINOR", WebKit.get_minor_version().to_string(), true);
-		Environment.set_variable("WEBKITGTK_MICRO", WebKit.get_micro_version().to_string(), true);
-		Environment.set_variable("LIBSOUP_MAJOR", Soup.get_major_version().to_string(), true);
-		Environment.set_variable("LIBSOUP_MINOR", Soup.get_minor_version().to_string(), true);
-		Environment.set_variable("LIBSOUP_MICRO", Soup.get_micro_version().to_string(), true);
+		worker_data["NUVOLA_API_ROUTER_TOKEN"] = server.api.token;
+		worker_data["WEBKITGTK_MAJOR"] = WebKit.get_major_version();
+		worker_data["WEBKITGTK_MINOR"] = WebKit.get_minor_version();
+		worker_data["WEBKITGTK_MICRO"] = WebKit.get_micro_version();
+		worker_data["LIBSOUP_MAJOR"] = Soup.get_major_version();
+		worker_data["LIBSOUP_MINOR"] = Soup.get_minor_version();
+		worker_data["LIBSOUP_MICRO"] = Soup.get_micro_version();
 		apply_network_proxy(proxy_uri);	
 		
 		var web_context = get_web_context();
 		var webkit_extension_dir = Nuvola.get_libdir();
 		debug("Nuvola WebKit Extension directory: %s", webkit_extension_dir);
 		web_context.set_web_extensions_directory(webkit_extension_dir);
+		var web_extension_data = Diorite.variant_from_hashtable(worker_data);
+		debug("Nuvola WebKit Extension data: %s", web_extension_data.print(true));
+		web_context.set_web_extensions_initialization_user_data(web_extension_data);
+		
 		if (web_app.allow_insecure_content)
 			web_context.get_security_manager().register_uri_scheme_as_secure("http");
 		
