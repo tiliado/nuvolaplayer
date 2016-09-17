@@ -56,7 +56,7 @@ public class Tiliado.User
 	
 	public string to_string()
 	{
-		return "%s (%s)".printf(name, username);
+		return id == 0 ? "null" : "%s (%s, %d)".printf(name, username, id);
 	}
 }
 
@@ -120,6 +120,10 @@ public class Tiliado.Api: GLib.Object
 			throw new ApiError.UNKNOWN_ERROR("Unexpected error: %u %s", message.status_code, message.reason_phrase);
 		
 		var response = (string) message.response_body.flatten().data;
+		response = response.strip();
+		if (response == null || response[0] == '\0')
+			throw new ApiError.JSON_PARSE_ERROR("Response is empty.");
+		
 		var parser = new Json.Parser();
 		try
 		{
@@ -188,6 +192,10 @@ public class Tiliado.Api: GLib.Object
 			throw new ApiError.UNKNOWN_ERROR("Unexpected error: %u %s", message.status_code, message.reason_phrase);
 		
 		var response = (string) message.response_body.flatten().data;
+		response = response.strip();
+		if (response == null || response[0] == '\0')
+			throw new ApiError.JSON_PARSE_ERROR("Response is empty.");
+		
 		var parser = new Json.Parser();
 		try
 		{
