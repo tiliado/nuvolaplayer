@@ -46,6 +46,7 @@ public class MediaKeys: GLib.Object, MediaKeysInterface
 		keymap["XF86AudioStop"] = "Stop";
 		keymap["XF86AudioPrev"] = "Previous";
 		keymap["XF86AudioNext"] = "Next";
+		/* Uncomment this to test without multimedia keyboard */
 //~ 		keymap["<Shift><Super>t"] = "Play";
 //~ 		keymap["<Shift><Super>n"] = "Next";
 	}
@@ -73,6 +74,7 @@ public class MediaKeys: GLib.Object, MediaKeysInterface
 		if (gnome_media_keys == null)
 		{
 			ungrab_media_keys();
+			managed = false;
 			return;
 		}
 		
@@ -107,6 +109,8 @@ public class MediaKeys: GLib.Object, MediaKeysInterface
 	
 	private bool grab_gnome_media_keys()
 	{
+		/* Uncomment this to test multimedia keys grabbing */
+//~ 		return false;
 		try
 		{
 			gnome_media_keys = Bus.get_proxy_sync(BusType.SESSION,
