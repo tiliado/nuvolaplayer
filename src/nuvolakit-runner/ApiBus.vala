@@ -25,14 +25,12 @@
 namespace Nuvola
 {
 
-public class ApiBus: Drt.ApiBus
+public class IpcBus: Drt.ApiBus
 {
-    // FIXME: deprecated, replacement -> this.router
-    public Drt.ApiRouter api {get{return (Drt.ApiRouter) router;}}
     public Drt.ApiChannel? master {get; private set; default = null;}
     public Drt.MessageChannel? web_worker {get; private set; default = null;}
     
-    public ApiBus(string bus_name, Drt.ApiRouter? router=null)
+    public IpcBus(string bus_name, Drt.ApiRouter? router=null)
     {
         base(bus_name, router ?? new Drt.ApiRouter());
     }

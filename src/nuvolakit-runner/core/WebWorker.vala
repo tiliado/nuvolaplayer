@@ -45,19 +45,19 @@ public interface WebWorker: GLib.Object, JSExecutor
 
 public class RemoteWebWorker: GLib.Object, JSExecutor, WebWorker
 {
-	private ApiBus abus;
+	private IpcBus ipc_bus;
 	
-	public RemoteWebWorker(ApiBus abus)
+	public RemoteWebWorker(IpcBus ipc_bus)
 	{
-		this.abus = abus;
+		this.ipc_bus = ipc_bus;
 	}
 	
 	public Variant? send_message(string name, Variant? params) throws GLib.Error
 	{
-		if (abus.web_worker == null)
+		if (ipc_bus.web_worker == null)
 			throw new Diorite.MessageError.NOT_READY("Web worker process is not ready yet");
 		
-		return abus.web_worker.send_message(name, params);
+		return ipc_bus.web_worker.send_message(name, params);
 	}
 	
 	public void call_function(string name, ref Variant? params) throws GLib.Error

@@ -47,23 +47,23 @@ public class WebEngine : GLib.Object, JSExecutor
 	private WebView web_view;
 	private JsEnvironment? env = null;
 	private JSApi api;
-	private ApiBus server = null;
+	private IpcBus ipc_bus = null;
 	private bool initialized = false;
 	private Config config;
 	private Diorite.KeyValueStorage session;
 	
 	private static WebKit.WebContext? default_context = null;
 	
-	public WebEngine(RunnerApplication runner_app, ApiBus server, WebAppMeta web_app,
+	public WebEngine(RunnerApplication runner_app, IpcBus ipc_bus, WebAppMeta web_app,
 		WebAppStorage storage, Config config, string? proxy_uri, HashTable<string, Variant> worker_data)
 	{
-		this.server = server;
+		this.ipc_bus = ipc_bus;
 		this.runner_app = runner_app;
 		this.storage = storage;
 		this.web_app = web_app;
 		this.config = config;
 		
-		worker_data["NUVOLA_API_ROUTER_TOKEN"] = server.api.token;
+		worker_data["NUVOLA_API_ROUTER_TOKEN"] = ipc_bus.router.token;
 		worker_data["WEBKITGTK_MAJOR"] = WebKit.get_major_version();
 		worker_data["WEBKITGTK_MINOR"] = WebKit.get_minor_version();
 		worker_data["WEBKITGTK_MICRO"] = WebKit.get_micro_version();
@@ -162,7 +162,7 @@ public class WebEngine : GLib.Object, JSExecutor
 		uint[] webkit_version = {WebKit.get_major_version(), WebKit.get_minor_version(), WebKit.get_micro_version()};
 		uint[] libsoup_version = {Soup.get_major_version(), Soup.get_minor_version(), Soup.get_micro_version()};
 		api = new JSApi(
-			runner_app.storage, web_app.data_dir, storage.config_dir, config, session, server.api.token, webkit_version, libsoup_version);
+			runner_app.storage, web_app.data_dir, storage.config_dir, config, session, ipc_bus.router.token, webkit_version, libsoup_version);
 		api.send_message_async.connect(on_send_message_async);
 		api.send_message_sync.connect(on_send_message_sync);
 		try
@@ -419,19 +419,19 @@ public class WebEngine : GLib.Object, JSExecutor
 	
 	private void set_up_ipc()
 	{
-		assert(server != null);
-		server.add_handler("web_worker_initialized", null, handle_web_worker_initialized);
-		server.add_handler("get_data_dir", null, handle_get_data_dir);
-		server.add_handler("get_user_config_dir", null, handle_get_user_config_dir);
-		server.add_handler("session_has_key", "s", handle_session_has_key);
-		server.add_handler("session_get_value", "s", handle_session_get_value);
-		server.add_handler("session_set_value", "(smv)", handle_session_set_value);
-		server.add_handler("session_set_default_value", "(smv)", handle_session_set_default_value);
-		server.add_handler("config_has_key", "s", handle_config_has_key);
-		server.add_handler("config_get_value", "s", handle_config_get_value);
-		server.add_handler("config_set_value", "(smv)", handle_config_set_value);
-		server.add_handler("config_set_default_value", "(smv)", handle_config_set_default_value);
-		server.add_handler("show_error", "s", handle_show_error);
+		assert(ipc_bus != null);
+		ipc_bus.add_handler("web_worker_initialized", null, handle_web_worker_initialized);
+		ipc_bus.add_handler("get_data_dir", null, handle_get_data_dir);
+		ipc_bus.add_handler("get_user_config_dir", null, handle_get_user_config_dir);
+		ipc_bus.add_handler("session_has_key", "s", handle_session_has_key);
+		ipc_bus.add_handler("session_get_value", "s", handle_session_get_value);
+		ipc_bus.add_handler("session_set_value", "(smv)", handle_session_set_value);
+		ipc_bus.add_handler("session_set_default_value", "(smv)", handle_session_set_default_value);
+		ipc_bus.add_handler("config_has_key", "s", handle_config_has_key);
+		ipc_bus.add_handler("config_get_value", "s", handle_config_get_value);
+		ipc_bus.add_handler("config_set_value", "(smv)", handle_config_set_value);
+		ipc_bus.add_handler("config_set_default_value", "(smv)", handle_config_set_default_value);
+		ipc_bus.add_handler("show_error", "s", handle_show_error);
 		
 	}
 	
@@ -439,7 +439,7 @@ public class WebEngine : GLib.Object, JSExecutor
 	{
 		var channel = source as Drt.MessageChannel;
 		return_val_if_fail(channel != null, null);
-		server.connect_web_worker(channel);
+		ipc_bus.connect_web_worker(channel);
 		Idle.add(() => {web_worker_initialized = true; return false;});
 		return null;
 	}
@@ -528,7 +528,7 @@ public class WebEngine : GLib.Object, JSExecutor
 	{
 		try
 		{
-			server.send_local_message(name, data);
+			ipc_bus.send_local_message(name, data);
 		}
 		catch (GLib.Error e)
 		{
@@ -540,7 +540,7 @@ public class WebEngine : GLib.Object, JSExecutor
 	{
 		try
 		{
-			result = server.send_local_message(name, data);
+			result = ipc_bus.send_local_message(name, data);
 		}
 		catch (GLib.Error e)
 		{
