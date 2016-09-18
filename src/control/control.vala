@@ -127,9 +127,9 @@ public int main(string[] args)
 	{
 		try
 		{
-			var master = new Drt.MessageChannel.from_name(1, build_master_ipc_id(), null, 500);
+			var master = new Drt.ApiChannel.from_name(1, build_master_ipc_id(), null, 500);
 			
-			var response = master.send_message("/nuvola/core/get_top_runner::r,,");
+			var response = master.call_sync("/nuvola/core/get_top_runner", null);
 			Diorite.MessageListener.check_type_string(response, "ms");
 			response.get("ms", out Args.app);
 			
@@ -147,10 +147,10 @@ public int main(string[] args)
 	if (Args.command.length < 1)
 		return quit(1, "Error: No command specified. Type `%s --help` for help.\n", args[0]);
 	
-	Drt.MessageChannel client;
+	Drt.ApiChannel client;
 	try
 	{
-		client = new Drt.MessageChannel.from_name(2, build_ui_runner_ipc_id(Args.app), null, 500);
+		client = new Drt.ApiChannel.from_name(2, build_ui_runner_ipc_id(Args.app), null, 500);
 	}
 	catch (GLib.Error e)
 	{
@@ -185,7 +185,7 @@ public int main(string[] args)
 				return quit(1, "Error: No API method specified.\n");
 			try
 			{
-				var master = new Drt.MessageChannel.from_name(1, build_master_ipc_id(), null, 500);
+				var master = new Drt.ApiChannel.from_name(1, build_master_ipc_id(), null, 500);
 				return call_api_method(master, Args.command, 1);
 			}
 			catch (GLib.Error e)
@@ -213,9 +213,9 @@ public int main(string[] args)
 	}
 }
 
-private int call_api_method(Drt.MessageChannel connection, string[] args, int offset) throws GLib.Error
+private int call_api_method(Drt.ApiChannel connection, string[] args, int offset) throws GLib.Error
 {
-	var response = connection.send_message(args[offset] + "::rw,dict,", args_to_params(args, offset + 1));
+	var response = connection.call_with_dict_sync(args[offset], args_to_params(args, offset + 1));
 	if (response != null)
 	{
 		var node = Json.gvariant_serialize(response);
@@ -292,9 +292,9 @@ private Variant? args_to_params(string[]? args, int offset)
 	
 class Control
 {
-	private Drt.MessageChannel conn;
+	private Drt.ApiChannel conn;
 	
-	public Control(Drt.MessageChannel conn)
+	public Control(Drt.ApiChannel conn)
 	{
 		this.conn = conn;
 	}
@@ -360,7 +360,7 @@ class Control
 				parameter_str, e.message);
 		}
 		
-		var response = conn.send_message("Nuvola.Actions.activate",
+		var response = conn.call_sync("/nuvola/actions/activate",
 			new Variant.tuple({new Variant.string(name), parameter}));
 		bool handled = false;
 		if (!Diorite.variant_bool(response, ref handled))
