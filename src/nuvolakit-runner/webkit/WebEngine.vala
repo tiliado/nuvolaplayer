@@ -63,7 +63,7 @@ public class WebEngine : GLib.Object, JSExecutor
 		this.web_app = web_app;
 		this.config = config;
 		
-		worker_data["NUVOLA_API_ROUTER_TOKEN"] = ipc_bus.router.token;
+		worker_data["NUVOLA_API_ROUTER_TOKEN"] = ipc_bus.router.hex_token;
 		worker_data["WEBKITGTK_MAJOR"] = WebKit.get_major_version();
 		worker_data["WEBKITGTK_MINOR"] = WebKit.get_minor_version();
 		worker_data["WEBKITGTK_MICRO"] = WebKit.get_micro_version();
@@ -162,7 +162,7 @@ public class WebEngine : GLib.Object, JSExecutor
 		uint[] webkit_version = {WebKit.get_major_version(), WebKit.get_minor_version(), WebKit.get_micro_version()};
 		uint[] libsoup_version = {Soup.get_major_version(), Soup.get_minor_version(), Soup.get_micro_version()};
 		api = new JSApi(
-			runner_app.storage, web_app.data_dir, storage.config_dir, config, session, ipc_bus.router.token, webkit_version, libsoup_version);
+			runner_app.storage, web_app.data_dir, storage.config_dir, config, session, webkit_version, libsoup_version);
 		api.send_message_async.connect(on_send_message_async);
 		api.send_message_sync.connect(on_send_message_sync);
 		try

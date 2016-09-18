@@ -104,18 +104,16 @@ public class JSApi : GLib.Object
 	private File data_dir;
 	private File config_dir;
 	private Diorite.KeyValueStorage[] key_value_storages;
-	private string? api_token;
 	private uint[] webkit_version;
 	private uint[] libsoup_version;
 	
 	public JSApi(Diorite.Storage storage, File data_dir, File config_dir, Diorite.KeyValueStorage config,
-	Diorite.KeyValueStorage session, string? api_token, uint[] webkit_version, uint[] libsoup_version)
+	Diorite.KeyValueStorage session, uint[] webkit_version, uint[] libsoup_version)
 	{
 		this.storage = storage;
 		this.data_dir = data_dir;
 		this.config_dir = config_dir;
 		this.key_value_storages = {config, session};
-		this.api_token = api_token;
 		assert(webkit_version.length >= 3);
 		this.webkit_version = webkit_version;
 		this.libsoup_version = libsoup_version;
@@ -136,8 +134,15 @@ public class JSApi : GLib.Object
 		return libsoup_version[0] * 10000 + libsoup_version[1] * 100 + libsoup_version[2];
 	}
 	
+	[Deprecated (replacement="call_ipc_method_void")]
 	public signal void send_message_async(string name, Variant? data);
+	[Deprecated (replacement="call_ipc_method_with_result")]
 	public signal void send_message_sync(string name, Variant? data, ref Variant? result);
+	
+	public signal void call_ipc_method_async(string name, Variant? data);
+	public signal void call_ipc_method_sync(string name, Variant? data, ref Variant? result);
+	public signal void call_ipc_method_with_dict_async(string name, Variant? data);
+	public signal void call_ipc_method_with_dict_sync(string name, Variant? data, ref Variant? result);
 	
 	/**
 	 * Creates the main object and injects it to the JavaScript context
@@ -244,6 +249,10 @@ public class JSApi : GLib.Object
 	{
 		{"_sendMessageAsync", send_message_async_func, 0},
 		{"_sendMessageSync", send_message_sync_func, 0},
+		{"_callIpcMethodAsync", call_ipc_method_async_func, 0},
+		{"_callIpcMethodSync", call_ipc_method_sync_func, 0},
+		{"_callIpcMethodWithDictAsync", call_ipc_method_with_dict_async_func, 0},
+		{"_callIpcMethodWithDictSync", call_ipc_method_with_dict_sync_func, 0},
 		{"_keyValueStorageHasKey", key_value_storage_has_key_func, 0},
 		{"_keyValueStorageGetValue", key_value_storage_get_value_func, 0},
 		{"_keyValueStorageSetValue", key_value_storage_set_value_func, 0},
@@ -284,15 +293,34 @@ public class JSApi : GLib.Object
 	
 	static unowned JS.Value send_message_async_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)
 	{
-		return send_message_func(ctx, function, self, args, out exception, true);
+		return call_ipc_method_func(ctx, function, self, args, out exception, true, 3);
 	}
 	
 	static unowned JS.Value send_message_sync_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)
 	{
-		return send_message_func(ctx, function, self, args, out exception, false);
+		return call_ipc_method_func(ctx, function, self, args, out exception, false, 3);
 	}
 	
-	static unowned JS.Value send_message_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception, bool @async)
+	static unowned JS.Value call_ipc_method_async_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)
+	{
+		return call_ipc_method_func(ctx, function, self, args, out exception, true, 0);
+	}
+	
+	static unowned JS.Value call_ipc_method_sync_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)
+	{
+		return call_ipc_method_func(ctx, function, self, args, out exception, false, 0);
+	}
+	static unowned JS.Value call_ipc_method_with_dict_async_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)
+	{
+		return call_ipc_method_func(ctx, function, self, args, out exception, true, 1);
+	}
+	
+	static unowned JS.Value call_ipc_method_with_dict_sync_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)
+	{
+		return call_ipc_method_func(ctx, function, self, args, out exception, false, 1);
+	}
+	
+	static unowned JS.Value call_ipc_method_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception, bool @async, int type)
 	{
 		unowned JS.Value undefined = JS.Value.undefined(ctx);
 		exception = null;
@@ -316,9 +344,6 @@ public class JSApi : GLib.Object
 			return undefined;
 		}
 		
-		if (name[0] == '/')
-			name += "," + (js_api.api_token ?? "");
-		
 		Variant? data = null;
 		if (args.length > 1)
 		{
@@ -340,12 +365,34 @@ public class JSApi : GLib.Object
 		
 		if (@async)
 		{
-			Idle.add(() => {js_api.send_message_async(name, data); return false;});
+			switch (type)
+			{
+			case 0:
+				Idle.add(() => {js_api.call_ipc_method_async(name, data); return false;});
+				break;
+			case 1:
+				Idle.add(() => {js_api.call_ipc_method_with_dict_async(name, data); return false;});
+				break;
+			default:
+				Idle.add(() => {js_api.send_message_async(name, data); return false;});
+				break;
+			}
 			return undefined;
 		}
 		
 		Variant? result = null;
-		js_api.send_message_sync(name, data, ref result);
+		switch (type)
+		{
+		case 0:
+			js_api.call_ipc_method_sync(name, data, ref result);
+			break;
+		case 1:
+			js_api.call_ipc_method_with_dict_sync(name, data, ref result);
+			break;
+		default:
+			js_api.send_message_sync(name, data, ref result);
+			break;
+		}
 		
 		try
 		{

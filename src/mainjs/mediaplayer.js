@@ -199,7 +199,7 @@ MediaPlayer.setPlaybackState = function(state)
 
 MediaPlayer._setFlag = function(name, state)
 {
-    Nuvola._sendMessageAsync("/nuvola/mediaplayer/set-flag::pw,tuple", name, state);
+    Nuvola._callIpcMethodAsync("/nuvola/mediaplayer/set-flag", name, state);
 }
 
 /**
@@ -410,7 +410,7 @@ MediaPlayer._sendDevelInfo = function()
         "playbackActions": this._baseActions.concat(this._extraActions),
         "state": ["unknown", "paused", "playing"][this._state],
     };
-    Nuvola._sendMessageAsync("/nuvola/mediaplayer/set-track-info::pw,dict", info);
+    Nuvola._callIpcMethodWithDictAsync("/nuvola/mediaplayer/set-track-info", info);
 }
 
 MediaPlayer._onArtworkDownloaded = function(res, changed)

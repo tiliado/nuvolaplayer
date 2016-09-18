@@ -28,7 +28,7 @@ namespace Nuvola
 public class WebExtension: GLib.Object
 {
 	private WebKit.WebExtension extension;
-	private Drt.MessageChannel channel;
+	private Drt.ApiChannel channel;
 	private HashTable<unowned WebKit.Frame, FrameBridge> bridges;
 	private File data_dir;
 	private File user_config_dir;
@@ -38,7 +38,7 @@ public class WebExtension: GLib.Object
 	private string? api_token = null;
 	private HashTable<string, Variant>? worker_data;
 	
-	public WebExtension(WebKit.WebExtension extension, Drt.MessageChannel channel, HashTable<string, Variant> worker_data)
+	public WebExtension(WebKit.WebExtension extension, Drt.ApiChannel channel, HashTable<string, Variant> worker_data)
 	{
 		this.extension = extension;
 		this.channel = channel;
@@ -80,13 +80,17 @@ public class WebExtension: GLib.Object
 		worker_data = null;
 		
 		js_api = new JSApi(storage, data_dir, user_config_dir, new KeyValueProxy(channel, "config"),
-			new KeyValueProxy(channel, "session"), api_token, webkit_version, libsoup_version);
+			new KeyValueProxy(channel, "session"), webkit_version, libsoup_version);
 		js_api.send_message_async.connect(on_send_message_async);
 		js_api.send_message_sync.connect(on_send_message_sync);
+		js_api.call_ipc_method_async.connect(on_call_ipc_method_async);
+		js_api.call_ipc_method_sync.connect(on_call_ipc_method_sync);
+		js_api.call_ipc_method_with_dict_async.connect(on_call_ipc_method_with_dict_async);
+		js_api.call_ipc_method_with_dict_sync.connect(on_call_ipc_method_with_dict_sync);
 		
 		bare_env = new JsRuntime();
 		bare_api = new JSApi(storage, data_dir, user_config_dir, new KeyValueProxy(channel, "config"),
-			new KeyValueProxy(channel, "session"), api_token, webkit_version, libsoup_version);
+			new KeyValueProxy(channel, "session"), webkit_version, libsoup_version);
 		try
 		{
 			bare_api.inject(bare_env);
@@ -181,6 +185,62 @@ public class WebExtension: GLib.Object
 		catch (GLib.Error e)
 		{
 			critical("Failed to send error message '%s'. %s", message, e.message);
+		}
+	}
+	
+	private void on_call_ipc_method_async(string name, Variant? data)
+	{
+		channel.call.begin(name, data, (o, res) =>
+		{
+			try
+			{
+				channel.call.end(res);
+			}
+			catch (GLib.Error e)
+			{
+				critical("Failed to send message '%s'. %s", name, e.message);
+			}
+		});
+	}
+	
+	private void on_call_ipc_method_sync(string name, Variant? data, ref Variant? result)
+	{
+		try
+		{
+			result = channel.call_sync(name, data);
+		}
+		catch (GLib.Error e)
+		{
+			critical("Failed to send message '%s'. %s", name, e.message);
+			result = null;
+		}
+	}
+	
+	private void on_call_ipc_method_with_dict_async(string name, Variant? data)
+	{
+		channel.call_with_dict.begin(name, data, (o, res) =>
+		{
+			try
+			{
+				channel.call.end(res);
+			}
+			catch (GLib.Error e)
+			{
+				critical("Failed to send message '%s'. %s", name, e.message);
+			}
+		});
+	}
+	
+	private void on_call_ipc_method_with_dict_sync(string name, Variant? data, ref Variant? result)
+	{
+		try
+		{
+			result = channel.call_with_dict_sync(name, data);
+		}
+		catch (GLib.Error e)
+		{
+			critical("Failed to send message '%s'. %s", name, e.message);
+			result = null;
 		}
 	}
 	
