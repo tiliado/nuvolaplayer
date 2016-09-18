@@ -90,6 +90,8 @@ public abstract class RunnerApplication: Diorite.Application
 	public Connection connection {get; protected set;}
 	public WebAppWindow? main_window {get; protected set; default = null;}
 	public WebAppMeta web_app {get; protected set;}
+	public WebAppStorage app_storage {get; protected set;}
+
 	
 	public RunnerApplication(string web_app_id, string web_app_name, Diorite.Storage storage)
 	{
@@ -107,7 +109,6 @@ public abstract class RunnerApplication: Diorite.Application
 
 public class AppRunnerController : RunnerApplication
 {
-	public WebAppStorage app_storage {get; private set;}
 	private WebWorker web_worker;
 	public WebEngine web_engine {get; private set;}
 	public Diorite.KeyValueStorage master_config {get; private set;}
@@ -440,6 +441,9 @@ public class AppRunnerController : RunnerApplication
 		bindings.add_object(menu_bar);
 		components.prepend(new AudioScrobblerComponent(this, bindings, master_config, config, connection.session));
 		components.prepend(new MPRISComponent(this, bindings, config));
+		#if EXPERIMENTAL
+		components.prepend(new HttpRemoteControl.Component(this, bindings, config, ipc_bus));
+		#endif
 		components.prepend(new LyricsComponent(this, bindings, config));
 		components.prepend(new DeveloperComponent(this, bindings, config));
 		components.reverse();

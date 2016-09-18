@@ -11,6 +11,18 @@ prompt_prefix='\[\033[1;33m\]Nuvola\[\033[00m\]'
 [[ "$PS1" = "$prompt_prefix"* ]] || export PS1="$prompt_prefix $PS1"
 unset prompt_prefix
 
+mk_symlinks()
+{
+    build_datadir="./build/share/nuvolaplayer3"
+    mkdir -p "$build_datadir"
+    datadirs="www"
+    for datadir in $datadirs; do
+	if [ ! -e "${build_datadir}/${datadir}" ]; then
+	    ln -sv "../../../data/$datadir" "$build_datadir"
+	fi
+    done 
+}
+
 rebuild()
 {
 	./waf distclean configure build "$@"
@@ -18,6 +30,7 @@ rebuild()
 
 run()
 {
+	mk_symlinks
 	./waf -v && XDG_DATA_DIRS=build/share:/usr/share:/usr/local/share \
 	NUVOLA_LIBDIR=build build/nuvolaplayer3 -D "$@"
 
@@ -31,12 +44,14 @@ ctl()
 
 debug()
 {
+	mk_symlinks
 	./waf -v && XDG_DATA_DIRS=build/share:/usr/share:/usr/local/share \
 	NUVOLA_LIBDIR=build gdb --args build/nuvolaplayer3 -D "$@"
 }
 
 debug_criticals()
 {
+	mk_symlinks
 	./waf -v && XDG_DATA_DIRS=build/share:/usr/share:/usr/local/share \
 	NUVOLA_LIBDIR=build G_DEBUG=fatal-criticals \
 	gdb  --args build/nuvolaplayer3 -D "$@"
@@ -44,12 +59,14 @@ debug_criticals()
 
 debug_app_runner()
 {
+	mk_symlinks
 	./waf -v && XDG_DATA_DIRS=build/share:/usr/share:/usr/local/share \
 	NUVOLA_LIBDIR=build NUVOLA_APP_RUNNER_GDB_SERVER='localhost:9090' build/nuvolaplayer3 -D "$@"
 }
 
 debug_app_runner_criticals()
 {
+	mk_symlinks
 	./waf -v && XDG_DATA_DIRS=build/share:/usr/share:/usr/local/share \
 	NUVOLA_LIBDIR=build G_DEBUG=fatal-criticals NUVOLA_APP_RUNNER_GDB_SERVER='localhost:9090' \
 	build/nuvolaplayer3 -D "$@"
@@ -57,18 +74,21 @@ debug_app_runner_criticals()
 
 debug_app_runner_join()
 {
+	mk_symlinks
 	echo Wait for App Runner process to start, then type "'target remote localhost:9090'" and "'continue'"
 	libtool --mode=execute gdb build/apprunner
 }
 
 debug_web_worker()
 {
+	mk_symlinks
 	./waf -v && XDG_DATA_DIRS=build/share:/usr/share:/usr/local/share \
 	NUVOLA_LIBDIR=build NUVOLA_WEB_WORKER_SLEEP=30 build/nuvolaplayer3 -D "$@"
 }
 
 debug_web_worker_criticals()
 {
+	mk_symlinks
 	./waf -v && XDG_DATA_DIRS=build/share:/usr/share:/usr/local/share \
 	NUVOLA_LIBDIR=build G_DEBUG=fatal-criticals NUVOLA_WEB_WORKER_SLEEP=30 \
 	build/nuvolaplayer3 -D "$@"

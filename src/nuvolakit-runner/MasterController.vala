@@ -53,6 +53,9 @@ public class MasterController : Diorite.Application
 	private Diorite.KeyValueStorageServer storage_server = null;
 	private ActionsKeyBinderServer actions_key_binder = null;
 	private MediaKeysServer media_keys = null;
+	#if EXPERIMENTAL
+	private HttpRemoteControl.Server http_remote_control = null;
+	#endif
 	private InitState init_state = InitState.NONE;
 	private bool debuging;
 	
@@ -161,6 +164,15 @@ public class MasterController : Diorite.Application
 		var key_binder = new GlobalActionsKeyBinder(key_grabber, config);
 		actions_key_binder = new ActionsKeyBinderServer(server, key_binder, app_runners);
 		media_keys = new MediaKeysServer(new MediaKeys(this.app_id, key_grabber), server, app_runners);
+		
+		#if EXPERIMENTAL
+		var www_root_dirname = "www";
+		File[] www_roots = {storage.user_data_dir.get_child(www_root_dirname)};
+		foreach (var data_dir in storage.data_dirs)
+			www_roots += data_dir.get_child(www_root_dirname);
+		http_remote_control = new HttpRemoteControl.Server(
+			this, server, app_runners_map, app_runners, web_app_reg, www_roots);
+		#endif
 		init_state = InitState.CORE;
 	}
 	

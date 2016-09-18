@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2016 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -22,48 +22,52 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
+#if EXPERIMENTAL
+namespace Nuvola.HttpRemoteControl
 {
 
-/**
- * Component classes represent a particular component/feature.
- */
-public abstract class Component: GLib.Object
+public class Component: Nuvola.Component
 {
-	public string id {get; construct;}
-	public string name {get; construct;}
-	public string description {get; construct;}
-	public bool hidden {get; protected set; default = false;}
-	public bool enabled {get; protected set; default = false;}
-	public bool enabled_set {get; protected set; default = false;}
-	public bool has_settings {get; protected set; default = false;}
+	private Bindings bindings;
+	private RunnerApplication app;
+	private IpcBus ipc_bus;
 	
-	public Component(string id, string name, string description)
+	public Component(RunnerApplication app, Bindings bindings, Diorite.KeyValueStorage config, IpcBus ipc_bus)
 	{
-		GLib.Object(id: id, name: name, description: description);
+		base("httpremotecontrol", "Remote control over HTTP", "Remote media player HTTP interface for control over network.");
+		this.hidden = true;
+		this.bindings = bindings;
+		this.app = app;
+		this.ipc_bus = ipc_bus;
+		config.bind_object_property("component.httpremotecontrol.", this, "enabled").set_default(false).update_property();
+		enabled_set = true;
+		if (enabled)
+			load();
 	}
 	
-	public virtual void toggle(bool enabled)
+	protected override void load()
 	{
-		if (this.enabled != enabled)
+		register(true);
+	}
+	
+	protected override void unload()
+	{
+		register(false);
+	}
+	
+	private void register(bool register)
+	{
+		var method = "HttpRemoteControl." + (register ? "register" : "unregister");
+		try
 		{
-			if (enabled)
-				load();
-			else
-				unload();
+			ipc_bus.master.send_message(method, new Variant.string(app.web_app.id)); 
 		}
-		
-		this.enabled = enabled;
+		catch (GLib.Error e)
+		{
+			warning("Remote call %s failed: %s", method, e.message);
+		}
 	}
-	
-	public virtual Gtk.Widget? get_settings()
-	{
-		return null;
-	}
-	
-	protected abstract void load();
-	
-	protected abstract void unload();
 }
 
-} // namespace Nuvola
+} // namespace Nuvola.HttpRemoteControl
+#endif

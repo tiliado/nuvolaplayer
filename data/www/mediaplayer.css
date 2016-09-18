@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2016 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -22,48 +22,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
-
-/**
- * Component classes represent a particular component/feature.
- */
-public abstract class Component: GLib.Object
-{
-	public string id {get; construct;}
-	public string name {get; construct;}
-	public string description {get; construct;}
-	public bool hidden {get; protected set; default = false;}
-	public bool enabled {get; protected set; default = false;}
-	public bool enabled_set {get; protected set; default = false;}
-	public bool has_settings {get; protected set; default = false;}
-	
-	public Component(string id, string name, string description)
-	{
-		GLib.Object(id: id, name: name, description: description);
-	}
-	
-	public virtual void toggle(bool enabled)
-	{
-		if (this.enabled != enabled)
-		{
-			if (enabled)
-				load();
-			else
-				unload();
-		}
-		
-		this.enabled = enabled;
-	}
-	
-	public virtual Gtk.Widget? get_settings()
-	{
-		return null;
-	}
-	
-	protected abstract void load();
-	
-	protected abstract void unload();
+img#album-art {
+    display: none;
 }
-
-} // namespace Nuvola
