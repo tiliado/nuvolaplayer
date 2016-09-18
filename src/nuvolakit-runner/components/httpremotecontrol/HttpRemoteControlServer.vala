@@ -56,7 +56,7 @@ public class Server: Soup.Server
 		app.runner_exited.connect(on_runner_exited);
 	}
 	
-	~HttpRemoteControlServer()
+	~Server()
 	{
 		app.runner_exited.disconnect(on_runner_exited);
 	}
