@@ -383,6 +383,8 @@ def build(ctx):
 	
 	web_apps = ctx.path.find_dir("web_apps")
 	ctx.install_files('${PREFIX}/share/' + APPNAME, web_apps.ant_glob('**'), cwd=web_apps.parent, relative_trick=True)
+	www = ctx.path.find_dir("data/www")
+	ctx.install_files('${PREFIX}/share/' + APPNAME, www.ant_glob('**'), cwd=www.parent, relative_trick=True)
 	
 	app_icons = ctx.path.find_node("data/icons")
 	for size in (16, 22, 24, 32, 48, 64):
