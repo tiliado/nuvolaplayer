@@ -33,6 +33,7 @@ public abstract class Component: GLib.Object
 	public string id {get; construct;}
 	public string name {get; construct;}
 	public string description {get; construct;}
+	public bool hidden {get; protected set; default = false;}
 	public bool enabled {get; protected set; default = false;}
 	public bool enabled_set {get; protected set; default = false;}
 	public bool has_settings {get; protected set; default = false;}

@@ -55,6 +55,8 @@ public class ComponentsManager: Gtk.Stack
 		var row = 0;
 		foreach (var component in components)
 		{
+			if (component.hidden && !component.enabled)
+				continue;
 			if (row > 0)
 			{
 				var separator = new Gtk.Separator(Gtk.Orientation.HORIZONTAL);
