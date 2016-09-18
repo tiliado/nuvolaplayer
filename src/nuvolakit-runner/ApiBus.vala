@@ -25,18 +25,19 @@
 namespace Nuvola
 {
 
-public class ApiBus: Drt.MessageBus
+public class ApiBus: Drt.ApiBus
 {
-    public Drt.MessageChannel? master {get; private set; default = null;}
-    public Drt.MessageChannel? web_worker {get; private set; default = null;}
+    // FIXME: deprecated, replacement -> this.router
     public Drt.ApiRouter api {get{return (Drt.ApiRouter) router;}}
+    public Drt.ApiChannel? master {get; private set; default = null;}
+    public Drt.MessageChannel? web_worker {get; private set; default = null;}
     
     public ApiBus(string bus_name, Drt.ApiRouter? router=null)
     {
         base(bus_name, router ?? new Drt.ApiRouter());
     }
     
-    public Drt.MessageChannel? connect_master(string bus_name) throws Diorite.IOError
+    public Drt.ApiChannel? connect_master(string bus_name) throws Diorite.IOError
     {
 		return_val_if_fail(master == null, null);
         master = connect_channel(bus_name, 5000);
