@@ -442,7 +442,7 @@ public class AppRunnerController : RunnerApplication
 		components.prepend(new AudioScrobblerComponent(this, bindings, master_config, config, connection.session));
 		components.prepend(new MPRISComponent(this, bindings, config));
 		#if EXPERIMENTAL
-		components.prepend(new HttpRemoteControl.Component(this, bindings, config, server));
+		components.prepend(new HttpRemoteControl.Component(this, bindings, config, ipc_bus));
 		#endif
 		components.prepend(new LyricsComponent(this, bindings, config));
 		components.prepend(new DeveloperComponent(this, bindings, config));
