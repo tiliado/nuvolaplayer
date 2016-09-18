@@ -165,7 +165,7 @@ Actions._onActionActivated = function(arg1, action)
  */
 Actions.isEnabled = function(name)
 {
-    return Nuvola._sendMessageSync("/nuvola/actions/is-enabled::r,,", name);
+    return Nuvola._callIpcMethodSync("/nuvola/actions/is-enabled", name);
 }
 
 /**
@@ -291,7 +291,7 @@ Actions.updateStates = function(states)
  */
 Actions.activate = function(name, parameter)
 {
-    Nuvola._sendMessageAsync("/nuvola/actions/activate::w,,", name, parameter == null ? null : parameter);
+    Nuvola._callIpcMethodAsync("/nuvola/actions/activate", name, parameter == null ? null : parameter);
 }
 
 /**
