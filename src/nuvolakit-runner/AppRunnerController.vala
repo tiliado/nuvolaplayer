@@ -296,7 +296,13 @@ public class AppRunnerController : RunnerApplication
 			web_worker_data["WEB_APP_ID"] = web_app.id;
 			web_worker_data["RUNNER_BUS_NAME"] = bus_name;
 			ipc_bus = new IpcBus(bus_name);
-			ipc_bus.add_handler("Nuvola.Browser.downloadFileAsync", "(ssd)", handle_download_file_async);
+			ipc_bus.router.add_method("/nuvola/browser/download-file-async", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+				"Download file.",
+				handle_download_file_async, {
+				new Drt.StringParam("uri", true, false, null, "File to download."),
+				new Drt.StringParam("basename", true, false, null, "Basename of the file."),
+				new Drt.DoubleParam("callback-id", true, null, "Callback id.")
+			});
 			ipc_bus.start();
 			
 			bus_name = Environment.get_variable("NUVOLA_IPC_MASTER");
@@ -448,7 +454,11 @@ public class AppRunnerController : RunnerApplication
 		components.prepend(new DeveloperComponent(this, bindings, config));
 		components.reverse();
 		
-		ipc_bus.add_handler("Nuvola.Core.getComponentInfo", "(s)", handle_get_component_info);
+		ipc_bus.router.add_method("/nuvola/core/get-component-info", Drt.ApiFlags.READABLE,
+			"Get info about component.",
+			handle_get_component_info, {
+			new Drt.StringParam("name", true, false, null, "Component name.")
+			});
 		
 		foreach (var component in components)
 		{
@@ -637,14 +647,11 @@ public class AppRunnerController : RunnerApplication
 		}
 	}
 	
-	private Variant? handle_download_file_async(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_download_file_async(Drt.ApiParams? params) throws Diorite.MessageError
 	{
-		string? uri = null;
-		string? basename = null;
-		double cb_id = 0.0;
-		data.get("(ssd)", &uri, &basename, &cb_id);
-		return_val_if_fail(uri != null, null);
-		return_val_if_fail(basename != null, null);
+		var uri = params.pop_string();
+		var basename = params.pop_string();
+		var cb_id = params.pop_double();
 		var file = connection.cache_dir.get_child(basename);
 		connection.download_file.begin(uri, file, (obj, res) =>
 		{
@@ -661,16 +668,12 @@ public class AppRunnerController : RunnerApplication
 				warning("Communication failed: %s", e.message);
 			}
 		});
-		
 		return null;
 	}
 	
-	private Variant? handle_get_component_info(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_get_component_info(Drt.ApiParams? params) throws Diorite.MessageError
 	{
-		string? id = null;
-		data.get("(s)", &id);
-		return_val_if_fail(id != null && id[0] != '\0', null);
-		
+		var id = params.pop_string();
 		foreach (var component in components)
 		{
 			if (id == component.id)
@@ -682,7 +685,6 @@ public class AppRunnerController : RunnerApplication
 				return builder.end();
 			}
 		}
-		
 		var builder = new VariantBuilder(new VariantType("a{smv}"));
 		builder.add("{smv}", "name", new Variant.string(""));
 		builder.add("{smv}", "found", new Variant.boolean(false));

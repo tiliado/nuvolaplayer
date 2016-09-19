@@ -228,7 +228,7 @@ Core._unprefixWebkit = function(window)
  */
 Core.getComponentInfo = function(id)
 {
-    return Nuvola._sendMessageSync("Nuvola.Core.getComponentInfo", id + "");
+    return Nuvola._callIpcMethodSync("/nuvola/core/get-component-info", id + "");
 }
 
 /**
