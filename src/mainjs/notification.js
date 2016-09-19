@@ -59,7 +59,7 @@ Notification.update = function(title, text, iconName, iconPath, resident)
     else
         this.resident = !!resident;
     
-    Nuvola._sendMessageAsync("Nuvola.Notification.update",
+    Nuvola._callIpcMethodAsync("/nuvola/notification/update",
         this.name, title, text, iconName || "", iconPath || "", !!resident, this.category);
 }
 
@@ -70,7 +70,7 @@ Notification.update = function(title, text, iconName, iconPath, resident)
  */
 Notification.setActions = function(actions)
 {
-    Nuvola._sendMessageAsync("Nuvola.Notification.setActions", this.name, actions);
+    Nuvola._callIpcMethodAsync("/nuvola/notification/set-actions", this.name, actions);
 }
 
 /**
@@ -78,7 +78,7 @@ Notification.setActions = function(actions)
  */
 Notification.removeActions = function()
 {
-    Nuvola._sendMessageAsync("Nuvola.Notification.removeActions", this.name);
+    Nuvola._callIpcMethodAsync("/nuvola/notification/remove-actions", this.name);
 }
 
 /**
@@ -88,7 +88,7 @@ Notification.removeActions = function()
  */
 Notification.show = function(force)
 {
-    Nuvola._sendMessageAsync("Nuvola.Notification.show", this.name, !!force);
+    Nuvola._callIpcMethodAsync("/nuvola/notification/show", this.name, !!force);
 }
 
 /**
@@ -115,7 +115,7 @@ Notifications.getNamedNotification = function(name, resident, category)
  */
 Notifications.isPersistenceSupported = function()
 {
-    return Nuvola._sendMessageSync("Nuvola.Notifications.isPersistenceSupported");
+    return Nuvola._callIpcMethodSync("/nuvola/notifications/is-persistence-supported");
 }
 
 /**
@@ -130,7 +130,7 @@ Notifications.isPersistenceSupported = function()
  */
 Notifications.showNotification = function(title, text, iconName, iconPath, force, category)
 {
-    Nuvola._sendMessageAsync("Nuvola.Notifications.showNotification", title, text || "", iconName || "", iconPath || "", !!force, category || "");
+    Nuvola._callIpcMethodAsync("/nuvola/notifications/show-notification", title, text || "", iconName || "", iconPath || "", !!force, category || "");
 }
 
 // export public items

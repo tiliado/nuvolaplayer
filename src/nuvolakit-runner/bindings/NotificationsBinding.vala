@@ -24,43 +24,50 @@
 
 public class Nuvola.NotificationsBinding: ObjectBinding<NotificationsInterface>
 {
-	public NotificationsBinding(Drt.ApiRouter server, WebWorker web_worker)
+	public NotificationsBinding(Drt.ApiRouter router, WebWorker web_worker)
 	{
-		base(server, web_worker, "Nuvola.Notifications");
+		base(router, web_worker, "Nuvola.Notifications");
 	}
 	
 	protected override void bind_methods()
 	{
-		bind("showNotification", "(ssssbs)", handle_show_notification);
-		bind("isPersistenceSupported", null, handle_is_persistence_supported);
+		bind2("show-notification", Drt.ApiFlags.WRITABLE,
+			"Show notification.",
+			handle_show_notification, {
+			new Drt.StringParam("title", true, false, null, "Notification title."),
+			new Drt.StringParam("message", true, false, null, "Notification message."),
+			new Drt.StringParam("icon-name", false, true, null, "Notification icon name."),
+			new Drt.StringParam("icon-path", false, true, null, "Notification icon path."),
+			new Drt.BoolParam("force", false, false, "Make sure the notification is shown."),
+			new Drt.StringParam("category", true, false, null, "Notification category.")
+		});
+		bind2("is-persistence-supported", Drt.ApiFlags.READABLE,
+			"returns true if persistence is supported.",
+			handle_is_persistence_supported, null);
 	}
 	
-	private Variant? handle_show_notification(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_show_notification(Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
-		string summary = null;
-		string body = null;
-		string icon_name = null;
-		string icon_path = null;
-		bool force = false;
-		string? category = null;
-		data.get("(ssssbs)", &summary, &body, &icon_name, &icon_path, &force, &category);
-		
+		var title = params.pop_string();
+		var message = params.pop_string();
+		var icon_name = params.pop_string();
+		var icon_path = params.pop_string();
+		var force = params.pop_bool();
+		var category = params.pop_string();
 		foreach (var object in objects)
-			if (object.show_anonymous(summary, body, icon_name, icon_path, force, category))
+			if (object.show_anonymous(title, message, icon_name, icon_path, force, category))
 				break;
-		
 		return null;
 	}
 	
-	private Variant? handle_is_persistence_supported(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_is_persistence_supported(Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
 		bool supported = false;
 		foreach (var object in objects)
 			if (object.is_persistence_supported(ref supported))
 				break;
-		
 		return new Variant.boolean(supported);
 	}
 }

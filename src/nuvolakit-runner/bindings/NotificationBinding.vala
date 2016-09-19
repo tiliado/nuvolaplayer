@@ -24,82 +24,88 @@
 
 public class Nuvola.NotificationBinding: ObjectBinding<NotificationInterface>
 {
-	public NotificationBinding(Drt.ApiRouter server, WebWorker web_worker)
+	public NotificationBinding(Drt.ApiRouter router, WebWorker web_worker)
 	{
-		base(server, web_worker, "Nuvola.Notification");
+		base(router, web_worker, "Nuvola.Notification");
 	}
 	
 	protected override void bind_methods()
 	{
-		bind("update", "(sssssbs)", handle_update);
-		bind("setActions", "(sav)", handle_set_actions);
-		bind("removeActions", "(s)", handle_remove_actions);
-		bind("show", "(sb)", handle_show);
+		bind2("update", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+			"Update notification.",
+			handle_update, {
+			new Drt.StringParam("name", true, false, null, "Notification name."),
+			new Drt.StringParam("title", true, false, null, "Notification title."),
+			new Drt.StringParam("message", true, false, null, "Notification message."),
+			new Drt.StringParam("icon-name", false, true, null, "Notification icon name."),
+			new Drt.StringParam("icon-path", false, true, null, "Notification icon path."),
+			new Drt.BoolParam("resident", false, false, "Whether the notification is resident."),
+			new Drt.StringParam("category", false, true, null, "Notification category."),
+		});
+		bind2("set-actions", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+			"Set notification actions.",
+			handle_set_actions, {
+			new Drt.StringParam("name", true, false, null, "Notification name."),
+			new Drt.StringArrayParam("actions", true, null, "Notification actions.")
+		});
+		bind2("remove-actions", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+			"Remove notification actions.",
+			handle_remove_actions, {
+			new Drt.StringParam("name", true, false, null, "Notification name.")
+		});
+		bind2("show", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+			"Show notification.",
+			handle_show, {
+			new Drt.StringParam("name", true, false, null, "Notification name."),
+			new Drt.BoolParam("force", false, false, "Make sure the notification is shown.")
+		});
 	}
 	
-	private Variant? handle_update(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_update(Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
-		string name = null;
-		string title = null;
-		string message = null;
-		string icon_name = null;
-		string icon_path = null;
-		bool resident = false;
-		string? category = null;
-		data.get("(sssssbs)", &name, &title, &message, &icon_name, &icon_path, &resident, &category);
-		
+		var name = params.pop_string();
+		var title = params.pop_string();
+		var message = params.pop_string();
+		var icon_name = params.pop_string();
+		var icon_path = params.pop_string();
+		var resident = params.pop_bool();
+		var category = params.pop_string();
 		foreach (var object in objects)
 			if (object.update(name, title, message, icon_name, icon_path, resident, category))
 				break;
-		
 		return null;
 	}
 	
-	private Variant? handle_set_actions(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_set_actions(Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
-		
-		string name = null;
-		int i = 0;
-		VariantIter iter = null;
-		data.get("(sav)", &name, &iter);
-		string[] actions = new string[iter.n_children()];
-		Variant item = null;
-		while (iter.next("v", &item))
-			actions[i++] = item.get_string();
-		
+		var name = params.pop_string();
+		var actions = params.pop_strv();
 		foreach (var object in objects)
 			if (object.set_actions(name, (owned) actions))
 				break;
-		
 		return null;
 	}
 	
-	private Variant? handle_remove_actions(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_remove_actions(Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
-		string name = null;
-		data.get("(s)", &name);
-		
+		var name = params.pop_string();
 		foreach (var object in objects)
 			if (object.remove_actions(name))
 				break;
-		
 		return null;
 	}
 	
-	private Variant? handle_show(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_show(Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
-		string name = null;
-		bool force = false;
-		data.get("(sb)", &name, &force);
-		
+		var name = params.pop_string();
+		var force = params.pop_bool();
 		foreach (var object in objects)
 			if (object.show(name, force))
 				break;
-		
 		return null;
 	}
 }
