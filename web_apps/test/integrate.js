@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2016 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -52,6 +52,21 @@ var COUNTRY_VARIANTS = [
     ["com", C_("Amazon variant", "United States")]
 ];
 
+// define rating options - 5 states with state id 0-5 representing 0-5 stars
+var ratingOptions = [
+    // stateId, label, mnemo_label, icon, keybinding
+    [0, "Rating: 0 stars", null, null, null, null],
+    [1, "Rating: 1 star", null, null, null, null],
+    [2, "Rating: 2 stars", null, null, null, null],
+    [3, "Rating: 3 stars", null, null, null, null],
+    [4, "Rating: 4 stars", null, null, null, null],
+    [5, "Rating: 5 stars", null, null, null, null]
+];
+
+// Add new radio action named ``rating`` with initial state ``3`` (3 stars)
+var ACTION_RATING = "rating";
+Nuvola.actions.addRadioAction("playback", "win", ACTION_RATING, 3, ratingOptions);
+
 // Create new WebApp prototype
 var WebApp = Nuvola.$WebApp();
 
@@ -92,6 +107,11 @@ WebApp._onInitWebWorker = function(emitter)
 // Page is ready for magic
 WebApp._onPageReady = function()
 {
+    var actions = [];
+    for (var i=0; i <= 5; i++)
+        actions.push(ACTION_RATING + "::" + i);
+    player.addExtraActions(actions);
+    
     document.getElementsByTagName("h1")[0].innerText = Nuvola.format(
         "WebKitGTK {1}, libsoup {2}", Nuvola.WEBKITGTK_VERSION, Nuvola.LIBSOUP_VERSION);
     

@@ -301,14 +301,14 @@ class Control
 	
 	public int list_actions() throws GLib.Error
 	{
-		var response = conn.send_message("Nuvola.Actions.listGroups");
+		var response = conn.call_sync("/nuvola/actions/list-groups", null);
 		stdout.printf("Available actions\n\nFormat: NAME (is enabled?) - label\n");
 		var iter = response.iterator();
 		string group_name = null;
 		while (iter.next("s", out group_name))
 		{
 			stdout.printf("\nGroup: %s\n\n", group_name);
-			var actions = conn.send_message("Nuvola.Actions.listGroupActions", new Variant("(s)", group_name));
+			var actions = conn.call_sync("/nuvola/actions/list-group-actions", new Variant("(s)", group_name));
 			Variant action = null;
 			var actions_iter = actions.iterator();
 			while (actions_iter.next("@*", out action))
@@ -375,7 +375,7 @@ class Control
 	
 	public int action_state(string name) throws GLib.Error
 	{
-		var response = conn.send_message("Nuvola.Actions.getState", new Variant("(s)", name));
+		var response = conn.call_sync("/nuvola/actions/get-state", new Variant("(s)", name));
 		if (response != null)
 			stdout.printf("%s\n", response.print(false));
 		return 0;

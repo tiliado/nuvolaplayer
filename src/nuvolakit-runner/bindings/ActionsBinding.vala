@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2016 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -22,34 +22,77 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * ActionBinding provides IPC API binding for actions to be avalable for other processes.
+ * The obvious example is the Nuvola Player Controller (nuvolaplayer3ctl) using the actions
+ * to control playback (e.g. play, pause, skip to the next song, etc.).
+ */
 public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 {
-	public ActionsBinding(Drt.ApiRouter server, WebWorker web_worker)
+	public ActionsBinding(Drt.ApiRouter router, WebWorker web_worker)
 	{
-		base(server, web_worker, "Nuvola.Actions");
+		base(router, web_worker, "Nuvola.Actions");
 	}
 	
 	protected override void bind_methods()
 	{
-		bind("addAction", "(sssssss@*)", handle_add_action);
-		bind("addRadioAction", "(sss@*av)", handle_add_radio_action);
+		bind2("add-action", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+			"Add a new action.",
+			handle_add_action, {
+			new Drt.StringParam("group", true, false, null, "Action group"),
+			new Drt.StringParam("scope", true, false, null, "Action scope, use `win` for window-specific actions (preferred) or `app` for app-specific actions."),
+			new Drt.StringParam("name", true, false, null, "Action name, should be in `dash-separated-lower-case`, e.g. `toggle-play`."),
+			new Drt.StringParam("label", false, true, null, "Action label shown in user interface, e.g. `Play`."),
+			new Drt.StringParam("mnemo_label", false, true, null, "Action label shown in user interface with keyboard navigation using Alt key and letter prefixed with underscore, e.g. Alt+p for `_Play`."),
+			new Drt.StringParam("icon", false, true, null, "Icon name for action."),
+			new Drt.StringParam("keybinding", false, true, null, "in-app keyboard shortcut, e.g. `<ctrl>P`."),
+			new Drt.VariantParam("state", false, true, null, "Action state - `null` for simple actions, `true/false` for toggle actions (on/off).")
+		});
+		bind2("add-radio-action", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+			"Add a new action.",
+			handle_add_radio_action, {
+			new Drt.StringParam("group", true, false, null, "Action group"),
+			new Drt.StringParam("scope", true, false, null, "Action scope, use `win` for window-specific actions (preferred) or `app` for app-specific actions."),
+			new Drt.StringParam("name", true, false, null, "Action name, should be in `dash-separated-lower-case`, e.g. `toggle-play`."),
+			new Drt.VariantParam("state", true, false, null, "Initial state of the action. Must be one of states specified in the `options` array."),
+			new Drt.VarArrayParam("options", true, false, null, "Array of options definition in form [`stateId`, `label`, `mnemo_label`, `icon`, `keybinding`]. The `stateId` is unique identifier (Number or String), other parameters are described in `add-action` method."),
+		});
 		bind2("is-enabled", Drt.ApiFlags.READABLE,
-			"Returns true if action is enabled,",
+			"Returns true if action is enabled.",
 			handle_is_action_enabled, {
 			new Drt.StringParam("name", true, false, null, "Action name"),
 		});
-		bind("setEnabled", "(sb)", handle_action_set_enabled);
-		bind("getState", "(s)", handle_action_get_state);
-		bind("setState", "(s@*)", handle_action_set_state);
+		bind2("set-enabled", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+			"Sets whether action is enabled.",
+			handle_action_set_enabled, {
+			new Drt.StringParam("name", true, false, null, "Action name"),
+			new Drt.BoolParam("enabled", true, null, "Enabled state")
+		});
+		bind2("get-state", Drt.ApiFlags.READABLE,
+			"Returns state of the action.",
+			handle_action_get_state, {
+			new Drt.StringParam("name", true, false, null, "Action name")
+		});
+		bind2("set-state", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+			"Set state of the action.",
+			handle_action_set_state, {
+			new Drt.StringParam("name", true, false, null, "Action name"),
+			new Drt.VariantParam("state", false, true, null, "Action state")
+		});
 		bind2("activate", Drt.ApiFlags.WRITABLE,
 			"Activates action",
 			handle_action_activate, {
 			new Drt.StringParam("name", true, false, null, "Action name"),
 			new Drt.VariantParam("parameter", false, true, null, "Action parameter"),
 		});
-		
-		bind("listGroups", null, handle_list_groups);
-		bind("listGroupActions", "(s)", handle_list_group_actions);
+		bind2("list-groups", Drt.ApiFlags.READABLE,
+			"Lists action groups.",
+			handle_list_groups, null);
+		bind2("list-group-actions", Drt.ApiFlags.READABLE,
+			"Returns actions of the given group.",
+			handle_list_group_actions, {
+			new Drt.StringParam("name", true, false, null, "Group name")
+		});
 	}
 	
 	protected override void object_added(ActionsInterface object)
@@ -62,57 +105,38 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 		object.custom_action_activated.disconnect(on_custom_action_activated);
 	}
 	
-	private Variant? handle_add_action(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_add_action(Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
-		
-		string group = null;
-		string scope = null;
-		string action_name = null;
-		string? label = null;
-		string? mnemo_label = null;
-		string? icon = null;
-		string? keybinding = null;
-		Variant? state = null;
-		
-		data.get("(sssssss@*)", &group, &scope, &action_name, &label, &mnemo_label, &icon, &keybinding, &state);
-		
-		if (label == "")
-			label = null;
-		if (mnemo_label == "")
-			mnemo_label = null;
-		if (icon == "")
-			icon = null;
-		if (keybinding == "")
-			keybinding = null;
-		
+		var group = params.pop_string();
+		var scope = params.pop_string();
+		var action_name = params.pop_string();
+		var label = params.pop_string();
+		var mnemo_label = params.pop_string();
+		var icon = params.pop_string();
+		var keybinding = params.pop_string();
+		var state = params.pop_variant();
 		if (state != null && state.get_type_string() == "mv")
 			state = null;
-		
 		foreach (var object in objects)
 			if (object.add_action(group, scope, action_name, label, mnemo_label, icon, keybinding, state))
 				break;
-		
 		return null;
 	}
 	
-	private Variant? handle_add_radio_action(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_add_radio_action(Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
-		
-		string group = null;
-		string scope = null;
-		string action_name = null;
+		var group = params.pop_string();
+		var scope = params.pop_string();
+		var action_name = params.pop_string();
+		var state = params.pop_variant();
+		var options_iter = params.pop_variant_array();
 		string? label = null;
 		string? mnemo_label = null;
 		string? icon = null;
 		string? keybinding = null;
-		Variant? state = null;
 		Variant? parameter = null;
-		VariantIter? options_iter = null;
-		
-		data.get("(sss@*av)", &group, &scope, &action_name, &state, &options_iter);
-		
 		Diorite.RadioOption[] options = new Diorite.RadioOption[options_iter.n_children()];
 		var i = 0;
 		Variant? array = null;
@@ -130,11 +154,9 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 			keybinding = value.is_of_type(VariantType.STRING) ? value.get_string() : null;
 			options[i++] = new Diorite.RadioOption(parameter, label, mnemo_label, icon, keybinding);
 		}
-		
 		foreach (var object in objects)
 			if (object.add_radio_action(group, scope, action_name, state, options))
 				break;
-		
 		return null;
 	}
 	
@@ -146,58 +168,39 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 		foreach (var object in objects)
 			if (object.is_enabled(action_name, ref enabled))
 				break;
-		
 		return new Variant.boolean(enabled);
 	}
 	
-	private Variant? handle_action_set_enabled(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_action_set_enabled(Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
-		string? action_name = null;
-		bool enabled = false;
-		data.get("(sb)", ref action_name, ref enabled);
-		
-		if (action_name == null)
-			throw new Diorite.MessageError.INVALID_ARGUMENTS("Action name must not be null");
-		
+		var action_name = params.pop_string();
+		var enabled = params.pop_bool();
 		foreach (var object in objects)
 			if (object.set_enabled(action_name, enabled))
 				break;
-		
 		return null;
 	}
 	
-	private Variant? handle_action_get_state(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_action_get_state(Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
-		string? action_name = null;
-		data.get("(s)", &action_name);
-		
-		if (action_name == null)
-			throw new Diorite.MessageError.INVALID_ARGUMENTS("Action name must not be null");
-		
+		var action_name = params.pop_string();
 		Variant? state = null;
 		foreach (var object in objects)
 			if (object.get_state(action_name, ref state))
 				break;
-		
 		return state;
 	}
 	
-	private Variant? handle_action_set_state(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_action_set_state(Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
-		string? action_name = null;
-		Variant? state = null;
-		data.get("(s@*)", &action_name, &state);
-		
-		if (action_name == null)
-			throw new Diorite.MessageError.INVALID_ARGUMENTS("Action name must not be null");
-		
+		var action_name = params.pop_string();
+		var state = params.pop_variant();
 		foreach (var object in objects)
 			if (object.set_state(action_name, state))
 				break;
-		
 		return null;
 	}
 	
@@ -214,7 +217,7 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 		return new Variant.boolean(handled);
 	}
 	
-	private Variant? handle_list_groups(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_list_groups(Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
 		var groups_set = new GenericSet<string>(str_hash, str_equal);
@@ -232,18 +235,13 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 		var groups = groups_set.get_values();
 		foreach (var name in groups)
 			builder.add_value(new Variant.string(name));
-			
 		return builder.end();
 	}
 	
-	private Variant? handle_list_group_actions(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_list_group_actions(Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
-		string? group_name = null;
-		data.get("(s)", &group_name);
-		if (group_name == null)
-			throw new Diorite.MessageError.INVALID_ARGUMENTS("Group name must not be null");
-		
+		var group_name = params.pop_string();
 		var builder = new VariantBuilder(new VariantType("aa{sv}"));
 		foreach (var object in objects)
 		{
@@ -270,11 +268,9 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 				}
 				builder.close();
 			}
-			
 			if (done)
 				break;
 		}
-		
 		return builder.end();
 	}
 	
