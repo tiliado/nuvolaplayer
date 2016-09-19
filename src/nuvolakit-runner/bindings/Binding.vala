@@ -64,14 +64,7 @@ public abstract class Nuvola.Binding<ObjectType>: GLib.Object
 			throw new Diorite.MessageError.UNSUPPORTED("Binding %s has no registered components.", name);
 	}
 	
-	protected void bind(string method, string? type_str, owned Diorite.MessageHandler handler)
-	{
-		var full_name = "%s.%s".printf(name, method);
-		server.add_handler(full_name, type_str, (owned) handler);
-		handlers.prepend(full_name);
-	}
-	
-	protected void bind2(string method, Drt.ApiFlags flags, string? description, owned Drt.ApiHandler handler, Drt.ApiParam[]? params)
+	protected void bind(string method, Drt.ApiFlags flags, string? description, owned Drt.ApiHandler handler, Drt.ApiParam[]? params)
 	{
 		var path = "/%s.%s".printf(name, method).down().replace(".", "/");
 		server.add_method(path, flags, description, (owned) handler, params);

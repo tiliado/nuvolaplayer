@@ -31,27 +31,27 @@ public class Nuvola.LauncherBinding: ModelBinding<LauncherModel>
 	
 	protected override void bind_methods()
 	{
-		bind2("set-tooltip", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		bind("set-tooltip", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
 			"Set launcher tooltip.",
 			handle_set_tooltip, {
 			new Drt.StringParam("text", true, false, null, "Tooltip text.")
 		});
-		bind2("set-actions", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		bind("set-actions", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
 			"Set launcher actions.",
 			handle_set_actions, {
 			new Drt.StringArrayParam("actions", true, null, "Action name.")
 		});
-		bind2("add-action", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		bind("add-action", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
 			"Add launcher action.",
 			handle_add_action, {
 			new Drt.StringParam("name", true, false, null, "Action name.")
 		});
-		bind2("remove-action", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		bind("remove-action", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
 			"Remove launcher action.",
 			handle_remove_action, {
 			new Drt.StringParam("name", true, false, null, "Action name.")
 		});
-		bind2("remove-actions", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		bind("remove-actions", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
 			"Remove all launcher actions.",
 			handle_remove_actions, null);
 	}

@@ -31,7 +31,7 @@ public class Nuvola.NotificationBinding: ObjectBinding<NotificationInterface>
 	
 	protected override void bind_methods()
 	{
-		bind2("update", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		bind("update", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
 			"Update notification.",
 			handle_update, {
 			new Drt.StringParam("name", true, false, null, "Notification name."),
@@ -42,18 +42,18 @@ public class Nuvola.NotificationBinding: ObjectBinding<NotificationInterface>
 			new Drt.BoolParam("resident", false, false, "Whether the notification is resident."),
 			new Drt.StringParam("category", false, true, null, "Notification category."),
 		});
-		bind2("set-actions", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		bind("set-actions", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
 			"Set notification actions.",
 			handle_set_actions, {
 			new Drt.StringParam("name", true, false, null, "Notification name."),
 			new Drt.StringArrayParam("actions", true, null, "Notification actions.")
 		});
-		bind2("remove-actions", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		bind("remove-actions", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
 			"Remove notification actions.",
 			handle_remove_actions, {
 			new Drt.StringParam("name", true, false, null, "Notification name.")
 		});
-		bind2("show", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		bind("show", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
 			"Show notification.",
 			handle_show, {
 			new Drt.StringParam("name", true, false, null, "Notification name."),

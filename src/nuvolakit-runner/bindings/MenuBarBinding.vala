@@ -31,7 +31,7 @@ public class Nuvola.MenuBarBinding: ObjectBinding<MenuBarInterface>
 	
 	protected override void bind_methods()
 	{
-		bind2("set-menu", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		bind("set-menu", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
 			"Set menu entries.",
 			handle_menubar_set_menu, {
 			new Drt.StringParam("text", true, false, null, "Menu id."),

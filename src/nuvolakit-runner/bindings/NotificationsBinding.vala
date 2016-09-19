@@ -31,7 +31,7 @@ public class Nuvola.NotificationsBinding: ObjectBinding<NotificationsInterface>
 	
 	protected override void bind_methods()
 	{
-		bind2("show-notification", Drt.ApiFlags.WRITABLE,
+		bind("show-notification", Drt.ApiFlags.WRITABLE,
 			"Show notification.",
 			handle_show_notification, {
 			new Drt.StringParam("title", true, false, null, "Notification title."),
@@ -41,7 +41,7 @@ public class Nuvola.NotificationsBinding: ObjectBinding<NotificationsInterface>
 			new Drt.BoolParam("force", false, false, "Make sure the notification is shown."),
 			new Drt.StringParam("category", true, false, null, "Notification category.")
 		});
-		bind2("is-persistence-supported", Drt.ApiFlags.READABLE,
+		bind("is-persistence-supported", Drt.ApiFlags.READABLE,
 			"returns true if persistence is supported.",
 			handle_is_persistence_supported, null);
 	}

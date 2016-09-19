@@ -33,17 +33,17 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 	
 	protected override void bind_methods()
 	{
-		bind2("get-flag", Drt.ApiFlags.READABLE,
+		bind("get-flag", Drt.ApiFlags.READABLE,
 			"Returns boolean state of a particular flag or null if no such flag has been found.",
 			handle_get_flag, {
 			new Drt.StringParam("name", true, false, null, "Flag name, e.g. can-go-next, can-go-previous, can-play, can-pause, can-stop, can-rate"),
 		});
-		bind2("set-flag", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE, null, handle_set_flag, {
+		bind("set-flag", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE, null, handle_set_flag, {
 			new Drt.StringParam("name", true, false),
 			new Drt.BoolParam("state", true),
 
 		});
-		bind2("set-track-info", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE, null, handle_set_track_info, {
+		bind("set-track-info", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE, null, handle_set_track_info, {
 			new Drt.StringParam("title", false, true),
 			new Drt.StringParam("artist", false, true),
 			new Drt.StringParam("album", false, true),
@@ -53,7 +53,7 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 			new Drt.DoubleParam("rating", false, 0.0),
 			new Drt.StringArrayParam("playbackActions", false),
 		});
-		bind2("track-info", Drt.ApiFlags.READABLE, "Returns information about currently playing track.",
+		bind("track-info", Drt.ApiFlags.READABLE, "Returns information about currently playing track.",
 			handle_get_track_info, null);
 		model.set_rating.connect(on_set_rating);
 	}

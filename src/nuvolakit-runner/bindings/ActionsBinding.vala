@@ -36,7 +36,7 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 	
 	protected override void bind_methods()
 	{
-		bind2("add-action", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		bind("add-action", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
 			"Add a new action.",
 			handle_add_action, {
 			new Drt.StringParam("group", true, false, null, "Action group"),
@@ -48,7 +48,7 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 			new Drt.StringParam("keybinding", false, true, null, "in-app keyboard shortcut, e.g. `<ctrl>P`."),
 			new Drt.VariantParam("state", false, true, null, "Action state - `null` for simple actions, `true/false` for toggle actions (on/off).")
 		});
-		bind2("add-radio-action", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		bind("add-radio-action", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
 			"Add a new action.",
 			handle_add_radio_action, {
 			new Drt.StringParam("group", true, false, null, "Action group"),
@@ -57,38 +57,38 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 			new Drt.VariantParam("state", true, false, null, "Initial state of the action. Must be one of states specified in the `options` array."),
 			new Drt.VarArrayParam("options", true, false, null, "Array of options definition in form [`stateId`, `label`, `mnemo_label`, `icon`, `keybinding`]. The `stateId` is unique identifier (Number or String), other parameters are described in `add-action` method."),
 		});
-		bind2("is-enabled", Drt.ApiFlags.READABLE,
+		bind("is-enabled", Drt.ApiFlags.READABLE,
 			"Returns true if action is enabled.",
 			handle_is_action_enabled, {
 			new Drt.StringParam("name", true, false, null, "Action name"),
 		});
-		bind2("set-enabled", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		bind("set-enabled", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
 			"Sets whether action is enabled.",
 			handle_action_set_enabled, {
 			new Drt.StringParam("name", true, false, null, "Action name"),
 			new Drt.BoolParam("enabled", true, null, "Enabled state")
 		});
-		bind2("get-state", Drt.ApiFlags.READABLE,
+		bind("get-state", Drt.ApiFlags.READABLE,
 			"Returns state of the action.",
 			handle_action_get_state, {
 			new Drt.StringParam("name", true, false, null, "Action name")
 		});
-		bind2("set-state", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		bind("set-state", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
 			"Set state of the action.",
 			handle_action_set_state, {
 			new Drt.StringParam("name", true, false, null, "Action name"),
 			new Drt.VariantParam("state", false, true, null, "Action state")
 		});
-		bind2("activate", Drt.ApiFlags.WRITABLE,
+		bind("activate", Drt.ApiFlags.WRITABLE,
 			"Activates action",
 			handle_action_activate, {
 			new Drt.StringParam("name", true, false, null, "Action name"),
 			new Drt.VariantParam("parameter", false, true, null, "Action parameter"),
 		});
-		bind2("list-groups", Drt.ApiFlags.READABLE,
+		bind("list-groups", Drt.ApiFlags.READABLE,
 			"Lists action groups.",
 			handle_list_groups, null);
-		bind2("list-group-actions", Drt.ApiFlags.READABLE,
+		bind("list-group-actions", Drt.ApiFlags.READABLE,
 			"Returns actions of the given group.",
 			handle_list_group_actions, {
 			new Drt.StringParam("name", true, false, null, "Group name")
