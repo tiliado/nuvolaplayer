@@ -24,34 +24,31 @@
 
 public class Nuvola.MenuBarBinding: ObjectBinding<MenuBarInterface>
 {
-	public MenuBarBinding(Drt.ApiRouter server, WebWorker web_worker)
+	public MenuBarBinding(Drt.ApiRouter router, WebWorker web_worker)
 	{
-		base(server, web_worker, "Nuvola.MenuBar");
+		base(router, web_worker, "Nuvola.MenuBar");
 	}
 	
 	protected override void bind_methods()
 	{
-		bind("setMenu", "(ssav)", handle_menubar_set_menu);
+		bind2("set-menu", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+			"Set menu entries.",
+			handle_menubar_set_menu, {
+			new Drt.StringParam("text", true, false, null, "Menu id."),
+			new Drt.StringParam("label", true, false, null, "Menu label."),
+			new Drt.StringArrayParam("actions", true, null, "Menu actions.")
+		});
 	}
 	
-	private Variant? handle_menubar_set_menu(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_menubar_set_menu(Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
-		string? id = null;
-		string? label = null;
-		int i = 0;
-		VariantIter iter = null;
-		data.get("(ssav)", &id, &label, &iter);
-		return_val_if_fail(id != null && label != null && iter != null, null);
-		string[] actions = new string[iter.n_children()];
-		Variant item = null;
-		while (iter.next("v", &item))
-			actions[i++] = item.get_string();
-		
+		var id = params.pop_string();
+		var label = params.pop_string();
+		var actions = params.pop_strv();
 		foreach (var object in objects)
 			if (object.set_menu(id, label, actions))
 				break;
-		
 		return null;
 	}
 }
