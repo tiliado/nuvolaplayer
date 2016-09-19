@@ -37,9 +37,10 @@ public class HeaderLabel: Gtk.Label
 	}
 }
 
-public class DeveloperSidebar: Gtk.Grid
+public class DeveloperSidebar: Gtk.ScrolledWindow
 {
 	private Diorite.ActionsRegistry? actions_reg;
+	private Gtk.Grid grid;
 	private Gtk.Image? artwork = null;
 	private Gtk.Label? song = null; 
 	private Gtk.Label? artist = null;
@@ -52,49 +53,52 @@ public class DeveloperSidebar: Gtk.Grid
 	
 	public DeveloperSidebar(RunnerApplication app, MediaPlayerModel player)
 	{
+		vexpand = true;
 		actions_reg = app.actions;
 		this.player = player;
-		
 		radios = new HashTable<string, Gtk.RadioButton>(str_hash, str_equal);
-		orientation = Gtk.Orientation.VERTICAL;
-		
+		grid = new Gtk.Grid();
+		grid.orientation = Gtk.Orientation.VERTICAL;
+		grid.hexpand = grid.vexpand = true;
 		artwork = new Gtk.Image();
 		clear_artwork(false);
-		add(artwork);
+		grid.add(artwork);
 		var label = new HeaderLabel("Song");
 		label.halign = Gtk.Align.START;
-		attach_next_to(label, artwork, Gtk.PositionType.BOTTOM, 1, 1);
+		grid.attach_next_to(label, artwork, Gtk.PositionType.BOTTOM, 1, 1);
 		song = new Gtk.Label(player.title ?? "(null)");
 		song.set_line_wrap(true);
 		song.halign = Gtk.Align.START;
-		attach_next_to(song, label, Gtk.PositionType.BOTTOM, 1, 1);
+		grid.attach_next_to(song, label, Gtk.PositionType.BOTTOM, 1, 1);
 		label = new HeaderLabel("Artist");
 		label.halign = Gtk.Align.START;
-		add(label);
+		grid.add(label);
 		artist = new Gtk.Label(player.artist ?? "(null)");
 		artist.set_line_wrap(true);
 		artist.halign = Gtk.Align.START;
-		attach_next_to(artist, label, Gtk.PositionType.BOTTOM, 1, 1);
+		grid.attach_next_to(artist, label, Gtk.PositionType.BOTTOM, 1, 1);
 		label = new HeaderLabel("Album");
 		label.halign = Gtk.Align.START;
-		add(label);
+		grid.add(label);
 		album = new Gtk.Label(player.album);
 		album.set_line_wrap(true);
 		album.halign = Gtk.Align.START;
-		attach_next_to(album, label, Gtk.PositionType.BOTTOM, 1, 1);
+		grid.attach_next_to(album, label, Gtk.PositionType.BOTTOM, 1, 1);
 		label = new HeaderLabel("Playback state");
 		label.halign = Gtk.Align.START;
-		add(label);
+		grid.add(label);
 		state = new Gtk.Label(player.state);
 		state.halign = Gtk.Align.START;
-		attach_next_to(state, label, Gtk.PositionType.BOTTOM, 1, 1);
+		grid.attach_next_to(state, label, Gtk.PositionType.BOTTOM, 1, 1);
 		label = new HeaderLabel("Rating");
 		label.halign = Gtk.Align.START;
-		add(label);
+		grid.add(label);
 		rating = new Gtk.Label(player.rating >= 0.0 ? player.rating.to_string() : "(null)");
 		rating.halign = Gtk.Align.START;
-		attach_next_to(rating, label, Gtk.PositionType.BOTTOM, 1, 1);
+		grid.attach_next_to(rating, label, Gtk.PositionType.BOTTOM, 1, 1);
 		set_actions(player.playback_actions);
+		
+		add(grid);
 		show_all();
 		
 		player.notify.connect_after(on_player_notify);
@@ -184,7 +188,7 @@ public class DeveloperSidebar: Gtk.Grid
 			label.halign = Gtk.Align.START;
 			label.show();
 			action_widgets.prepend(label);
-			add(label);
+			grid.add(label);
 			
 			foreach (var full_name in playback_actions)
 				add_action(full_name);
@@ -218,7 +222,7 @@ public class DeveloperSidebar: Gtk.Grid
 				button.margin = 2;
 				button.show();
 				action_widgets.prepend(button);
-				add(button);
+				grid.add(button);
 			}
 			else if (action is Diorite.ToggleAction)
 			{
@@ -228,7 +232,7 @@ public class DeveloperSidebar: Gtk.Grid
 				button.margin = 2;
 				button.show();
 				action_widgets.prepend(button);
-				add(button);
+				grid.add(button);
 			}
 			else if (action is Diorite.RadioAction)
 			{
@@ -242,7 +246,7 @@ public class DeveloperSidebar: Gtk.Grid
 				button.margin = 2;
 				button.show();
 				action_widgets.prepend(button);
-				add(button);
+				grid.add(button);
 				button.set_active(action.state.equal(target_value));
 				button.set_data<string>("full-name", full_name);
 				button.clicked.connect_after(on_radio_clicked);
@@ -281,7 +285,7 @@ public class DeveloperSidebar: Gtk.Grid
 	
 	private void unset_button(Gtk.Widget widget)
 	{
-		remove(widget);
+		grid.remove(widget);
 		var radio = widget as Gtk.RadioButton;
 		if (radio != null)
 		{
