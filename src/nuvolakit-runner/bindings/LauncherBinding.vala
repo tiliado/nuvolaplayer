@@ -24,58 +24,63 @@
 
 public class Nuvola.LauncherBinding: ModelBinding<LauncherModel>
 {
-	public LauncherBinding(Drt.ApiRouter server, WebWorker web_worker, LauncherModel? model=null)
+	public LauncherBinding(Drt.ApiRouter router, WebWorker web_worker, LauncherModel? model=null)
 	{
-		base(server, web_worker, "Nuvola.Launcher", model ?? new LauncherModel());
+		base(router, web_worker, "Nuvola.Launcher", model ?? new LauncherModel());
 	}
 	
 	protected override void bind_methods()
 	{
-		bind("setTooltip", "(s)", handle_set_tooltip);
-		bind("setActions", "(av)", handle_set_actions);
-		bind("addAction", "(s)", handle_add_action);
-		bind("removeAction", "(s)", handle_remove_action);
-		bind("removeActions", null, handle_remove_actions);
+		bind2("set-tooltip", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+			"Set launcher tooltip.",
+			handle_set_tooltip, {
+			new Drt.StringParam("text", true, false, null, "Tooltip text.")
+		});
+		bind2("set-actions", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+			"Set launcher actions.",
+			handle_set_actions, {
+			new Drt.StringArrayParam("actions", true, null, "Action name.")
+		});
+		bind2("add-action", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+			"Add launcher action.",
+			handle_add_action, {
+			new Drt.StringParam("name", true, false, null, "Action name.")
+		});
+		bind2("remove-action", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+			"Remove launcher action.",
+			handle_remove_action, {
+			new Drt.StringParam("name", true, false, null, "Action name.")
+		});
+		bind2("remove-actions", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+			"Remove all launcher actions.",
+			handle_remove_actions, null);
 	}
 	
-	private Variant? handle_set_tooltip(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_set_tooltip(Drt.ApiParams? params) throws Diorite.MessageError
 	{
-		string text;
-		data.get("(s)", out text);
-		model.tooltip = text;
+		model.tooltip = params.pop_string();
 		return null;
 	}
 	
-	private Variant? handle_add_action(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_add_action(Drt.ApiParams? params) throws Diorite.MessageError
 	{
-		string name;
-		data.get("(s)", out name);
-		model.add_action(name);
+		model.add_action(params.pop_string());
 		return null;
 	}
 	
-	private Variant? handle_remove_action(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_remove_action(Drt.ApiParams? params) throws Diorite.MessageError
 	{
-		string name;
-		data.get("(s)", out name);
-		model.remove_action(name);
+		model.remove_action(params.pop_string());
 		return null;
 	}
 	
-	private Variant? handle_set_actions(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_set_actions(Drt.ApiParams? params) throws Diorite.MessageError
 	{
-		VariantIter iter = null;
-		data.get("(av)", &iter);
-		SList<string> actions = null;
-		Variant item = null;
-		while (iter.next("v", &item))
-			actions.prepend(item.get_string());
-		actions.reverse();
-		model.actions = (owned) actions;
+		model.actions = params.pop_str_list();
 		return null;
 	}
 	
-	private Variant? handle_remove_actions(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_remove_actions(Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		model.remove_actions();
 		return null;
