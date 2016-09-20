@@ -540,7 +540,7 @@ public class MasterController : Diorite.Application
 		debug("Launch app runner for '%s': %s", app_id, string.joinv(" ", argv));
 		try
 		{
-			runner = new AppRunner(app_id, argv);
+			runner = new AppRunner(app_id, argv, server.router.hex_token);
 		}
 		catch (GLib.Error e)
 		{

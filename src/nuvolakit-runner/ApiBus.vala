@@ -35,10 +35,11 @@ public class IpcBus: Drt.ApiBus
         base(bus_name, router ?? new Drt.ApiRouter());
     }
     
-    public Drt.ApiChannel? connect_master(string bus_name) throws Diorite.IOError
+    public Drt.ApiChannel? connect_master(string bus_name, string? api_token) throws Diorite.IOError
     {
 		return_val_if_fail(master == null, null);
         master = connect_channel(bus_name, 5000);
+        master.api_token = api_token;
         return master;
     }
     

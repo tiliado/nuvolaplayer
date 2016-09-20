@@ -123,12 +123,14 @@ public class AppRunnerController : RunnerApplication
 	private FormatSupportCheck format_support = null;
 	private Tiliado.Account tiliado_account = null;
 	private Diorite.SingleList<Component> components = null;
+	private string? api_token = null;
 	
-	public AppRunnerController(Diorite.Storage storage, WebAppMeta web_app, WebAppStorage app_storage)
+	public AppRunnerController(Diorite.Storage storage, WebAppMeta web_app, WebAppStorage app_storage, string? api_token)
 	{
 		base(web_app.id, web_app.name, storage);
 		this.app_storage = app_storage;
 		this.web_app = web_app;
+		this.api_token = api_token;
 	}
 	
 	public override void activate()
@@ -307,7 +309,7 @@ public class AppRunnerController : RunnerApplication
 			
 			bus_name = Environment.get_variable("NUVOLA_IPC_MASTER");
 			assert(bus_name != null);
-			ipc_bus.connect_master(bus_name);
+			ipc_bus.connect_master(bus_name, api_token);
 		}
 		catch (Diorite.IOError e)
 		{

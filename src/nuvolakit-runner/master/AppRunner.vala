@@ -40,13 +40,14 @@ public class AppRunner : GLib.Object
 		gdb = Environment.get_variable("NUVOLA_APP_RUNNER_GDB_SERVER") != null;
 	}
 	
-	public AppRunner(string app_id, string[] argv) throws GLib.Error
+	public AppRunner(string app_id, string[] argv, string api_token) throws GLib.Error
 	{
 		this.app_id = app_id;
 		this.capatibilities = new GenericSet<string>(str_hash, str_equal);
-		process = new GLib.Subprocess.newv(argv, GLib.SubprocessFlags.STDIN_INHERIT|GLib.SubprocessFlags.STDERR_PIPE);
+		process = new GLib.Subprocess.newv(argv, GLib.SubprocessFlags.STDIN_PIPE|GLib.SubprocessFlags.STDERR_PIPE);
 		running = true;
 		log_stderr.begin(on_log_stderr_done);
+		pass_api_token.begin(api_token, pass_api_token_done);
 		process.wait_async.begin(null, on_wait_async_done);
 	}
 	
@@ -95,6 +96,25 @@ public class AppRunner : GLib.Object
 	private void on_log_stderr_done(GLib.Object? o, AsyncResult res)
 	{
 		log_stderr.end(res);
+	}
+	
+	private async void pass_api_token(string api_token)
+	{
+		try
+		{
+			var stdin = process.get_stdin_pipe();
+			yield stdin.write_async(api_token.data);
+			yield stdin.write_async({'\n'});
+		}
+		catch (GLib.Error e)
+		{
+			warning("Subprocess stdin pipe error: %s", e.message);
+		}
+	}
+	
+	private void pass_api_token_done(GLib.Object? o, AsyncResult res)
+	{
+		pass_api_token.end(res);
 	}
 	
 	/**

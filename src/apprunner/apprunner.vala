@@ -112,7 +112,9 @@ public int main(string[] args)
 		/* Sleep a second to give GNOME Shell a chance to register desktop file */
 		if (!desktop_file_existed)
 			Thread.usleep(1000*1000);
-		var controller = new AppRunnerController(storage, web_app, app_storage);
+		
+		var api_token = stdin.read_line();
+		var controller = new AppRunnerController(storage, web_app, app_storage, api_token);
 		return controller.run(args);
 	}
 	catch (WebAppError e)
