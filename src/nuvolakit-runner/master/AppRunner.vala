@@ -32,7 +32,7 @@ public class AppRunner : GLib.Object
 	public bool connected {get{ return channel != null;}}
 	public bool running {get; private set; default = false;}
 	private GenericSet<string> capatibilities;
-	private Drt.MessageChannel channel = null;
+	private Drt.ApiChannel channel = null;
 	private GLib.Subprocess process;
 	
 	static construct
@@ -102,17 +102,26 @@ public class AppRunner : GLib.Object
 	 */
 	public signal void exited();
 	
-	public void connect_channel(Drt.MessageChannel channel)
+	public void connect_channel(Drt.ApiChannel channel)
 	{
 		this.channel = channel;
 	}
 	
+	[Deprecated (replacement="this.call_sync")]
 	public Variant? send_message(string name, Variant? params) throws GLib.Error
 	{
 		if (channel == null)
 			throw new Diorite.MessageError.IOERROR("No connected to app runner '%s'.", app_id);
 		
 		return channel.send_message(name, params);
+	}
+	
+	public Variant? call_sync(string name, Variant? params) throws GLib.Error
+	{
+		if (channel == null)
+			throw new Diorite.MessageError.IOERROR("No connected to app runner '%s'.", app_id);
+		
+		return channel.call_sync(name, params);
 	}
 	
 	private void on_wait_async_done(GLib.Object? o, AsyncResult res)

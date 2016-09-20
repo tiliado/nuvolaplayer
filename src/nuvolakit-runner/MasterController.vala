@@ -304,7 +304,7 @@ public class MasterController : Diorite.Application
 		var runner = app_runners_map[app_id];
 		return_val_if_fail(runner != null, null);
 		
-		var channel = source as Drt.MessageChannel;
+		var channel = source as Drt.ApiChannel;
 		if (channel == null)
 			throw new Diorite.MessageError.REMOTE_ERROR("Failed to connect runner '%s'. %s ", app_id, source.get_type().name());
 		runner.connect_channel(channel);
