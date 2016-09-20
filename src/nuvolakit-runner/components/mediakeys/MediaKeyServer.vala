@@ -28,19 +28,19 @@ namespace Nuvola
 public class MediaKeysServer: GLib.Object
 {
 	private MediaKeysInterface media_keys;
-	private Drt.MessageBus server;
+	private Drt.ApiBus ipc_bus;
 	private unowned Queue<AppRunner> app_runners;
 	private GenericSet<string> clients;
 	
-	public MediaKeysServer(MediaKeysInterface media_keys, Drt.MessageBus server, Queue<AppRunner> app_runners)
+	public MediaKeysServer(MediaKeysInterface media_keys, Drt.ApiBus ipc_bus, Queue<AppRunner> app_runners)
 	{
 		this.media_keys = media_keys;
-		this.server = server;
+		this.ipc_bus = ipc_bus;
 		this.app_runners = app_runners;
 		clients = new GenericSet<string>(str_hash, str_equal);
 		media_keys.media_key_pressed.connect(on_media_key_pressed);
-		server.add_handler("Nuvola.MediaKeys.manage", "s", handle_manage);
-		server.add_handler("Nuvola.MediaKeys.unmanage", "s", handle_unmanage);
+		ipc_bus.add_handler("Nuvola.MediaKeys.manage", "s", handle_manage);
+		ipc_bus.add_handler("Nuvola.MediaKeys.unmanage", "s", handle_unmanage);
 	}
 	
 	private Variant? handle_manage(GLib.Object source, Variant? data) throws Diorite.MessageError

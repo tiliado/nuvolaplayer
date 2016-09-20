@@ -25,7 +25,7 @@
 namespace Nuvola
 {
 
-public class MasterBus: Drt.MessageBus
+public class MasterBus: Drt.ApiBus
 {
     public Drt.ApiRouter api {get{return (Drt.ApiRouter) router;}}
     

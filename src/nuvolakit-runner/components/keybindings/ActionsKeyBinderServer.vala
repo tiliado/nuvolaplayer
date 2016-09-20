@@ -27,22 +27,22 @@ namespace Nuvola
 
 public class ActionsKeyBinderServer : GLib.Object
 {
-	private Drt.MessageBus server;
+	private Drt.ApiBus ipc_bus;
 	private ActionsKeyBinder keybinder;
 	private unowned Queue<AppRunner> app_runners;
 	
-	public class ActionsKeyBinderServer(Drt.MessageBus server, ActionsKeyBinder keybinder, Queue<AppRunner> app_runners)
+	public class ActionsKeyBinderServer(Drt.ApiBus ipc_bus, ActionsKeyBinder keybinder, Queue<AppRunner> app_runners)
 	{
-		this.server = server;
+		this.ipc_bus = ipc_bus;
 		this.keybinder = keybinder;
 		this.app_runners = app_runners;
 		keybinder.action_activated.connect(on_action_activated);
-		server.add_handler("ActionsKeyBinder.getKeybinding", "s", handle_get_keybinding);
-		server.add_handler("ActionsKeyBinder.setKeybinding", "(sms)", handle_set_keybinding);
-		server.add_handler("ActionsKeyBinder.bind", "s", handle_bind);
-		server.add_handler("ActionsKeyBinder.unbind", "s", handle_unbind);
-		server.add_handler("ActionsKeyBinder.isAvailable", "s", handle_is_available);
-		server.add_handler("ActionsKeyBinder.getAction", "s", handle_get_action);
+		ipc_bus.add_handler("ActionsKeyBinder.getKeybinding", "s", handle_get_keybinding);
+		ipc_bus.add_handler("ActionsKeyBinder.setKeybinding", "(sms)", handle_set_keybinding);
+		ipc_bus.add_handler("ActionsKeyBinder.bind", "s", handle_bind);
+		ipc_bus.add_handler("ActionsKeyBinder.unbind", "s", handle_unbind);
+		ipc_bus.add_handler("ActionsKeyBinder.isAvailable", "s", handle_is_available);
+		ipc_bus.add_handler("ActionsKeyBinder.getAction", "s", handle_get_action);
 	}
 	
 	private Variant? handle_get_keybinding(GLib.Object source, Variant? data) throws Diorite.MessageError
