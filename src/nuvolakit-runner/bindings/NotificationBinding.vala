@@ -61,7 +61,7 @@ public class Nuvola.NotificationBinding: ObjectBinding<NotificationInterface>
 		});
 	}
 	
-	private Variant? handle_update(Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_update(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
 		var name = params.pop_string();
@@ -77,7 +77,7 @@ public class Nuvola.NotificationBinding: ObjectBinding<NotificationInterface>
 		return null;
 	}
 	
-	private Variant? handle_set_actions(Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_set_actions(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
 		var name = params.pop_string();
@@ -88,7 +88,7 @@ public class Nuvola.NotificationBinding: ObjectBinding<NotificationInterface>
 		return null;
 	}
 	
-	private Variant? handle_remove_actions(Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_remove_actions(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
 		var name = params.pop_string();
@@ -98,7 +98,7 @@ public class Nuvola.NotificationBinding: ObjectBinding<NotificationInterface>
 		return null;
 	}
 	
-	private Variant? handle_show(Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_show(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
 		var name = params.pop_string();

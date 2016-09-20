@@ -647,7 +647,7 @@ public class AppRunnerController : RunnerApplication
 		}
 	}
 	
-	private Variant? handle_download_file_async(Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_download_file_async(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		var uri = params.pop_string();
 		var basename = params.pop_string();
@@ -671,7 +671,7 @@ public class AppRunnerController : RunnerApplication
 		return null;
 	}
 	
-	private Variant? handle_get_component_info(Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_get_component_info(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		var id = params.pop_string();
 		foreach (var component in components)

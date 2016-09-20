@@ -327,13 +327,13 @@ public class MasterController : Diorite.Application
 		return new Variant.boolean(true);
 	}
 	
-	private Variant? handle_get_top_runner(Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_get_top_runner(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		var runner = app_runners.peek_head();
 		return new Variant("ms", runner == null ? null : runner.app_id);
 	}
 	
-	private Variant? handle_list_apps(Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_list_apps(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		var builder = new VariantBuilder(new VariantType("aa{sv}"));
 		var dict_type = new VariantType("a{sv}");
@@ -363,7 +363,7 @@ public class MasterController : Diorite.Application
 		return builder.end();
 	}
 	
-	private Variant? handle_get_app_info(Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_get_app_info(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		var app_id = params.pop_string();
 		var app = web_app_reg.get_app_meta(app_id);

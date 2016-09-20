@@ -105,7 +105,7 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 		object.custom_action_activated.disconnect(on_custom_action_activated);
 	}
 	
-	private Variant? handle_add_action(Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_add_action(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
 		var group = params.pop_string();
@@ -124,7 +124,7 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 		return null;
 	}
 	
-	private Variant? handle_add_radio_action(Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_add_radio_action(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
 		var group = params.pop_string();
@@ -160,7 +160,7 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 		return null;
 	}
 	
-	private Variant? handle_is_action_enabled(Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_is_action_enabled(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
 		string action_name = params.pop_string();
@@ -171,7 +171,7 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 		return new Variant.boolean(enabled);
 	}
 	
-	private Variant? handle_action_set_enabled(Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_action_set_enabled(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
 		var action_name = params.pop_string();
@@ -182,7 +182,7 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 		return null;
 	}
 	
-	private Variant? handle_action_get_state(Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_action_get_state(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
 		var action_name = params.pop_string();
@@ -193,7 +193,7 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 		return state;
 	}
 	
-	private Variant? handle_action_set_state(Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_action_set_state(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
 		var action_name = params.pop_string();
@@ -204,7 +204,7 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 		return null;
 	}
 	
-	private Variant? handle_action_activate(Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_action_activate(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
 		string action_name = params.pop_string();
@@ -217,7 +217,7 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 		return new Variant.boolean(handled);
 	}
 	
-	private Variant? handle_list_groups(Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_list_groups(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
 		var groups_set = new GenericSet<string>(str_hash, str_equal);
@@ -238,7 +238,7 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 		return builder.end();
 	}
 	
-	private Variant? handle_list_group_actions(Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_list_group_actions(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
 		var group_name = params.pop_string();

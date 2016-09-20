@@ -58,7 +58,7 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 		model.set_rating.connect(on_set_rating);
 	}
 	
-	private Variant? handle_set_track_info(Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_set_track_info(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
 		var title = params.pop_string();
@@ -79,7 +79,7 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 		return new Variant.boolean(true);
 	}
 	
-	private Variant? handle_get_track_info(Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_get_track_info(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
 		var builder = new VariantBuilder(new VariantType("a{smv}"));
@@ -93,7 +93,7 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 		return builder.end();
 	}
 	
-	private Variant? handle_set_flag(Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_set_flag(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
 		var name = params.pop_string();
@@ -119,7 +119,7 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 		return new Variant.boolean(handled);
 	}
 	
-	private Variant? handle_get_flag(Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_get_flag(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
 		var name = params.pop_string();
