@@ -30,10 +30,10 @@ public class MediaKeysComponent: Component
 	private Bindings bindings;
 	private Diorite.Application app;
 	private MediaKeysClient? media_keys = null;
-	private Drt.MessageChannel conn;
+	private Drt.ApiChannel conn;
 	private string web_app_id;
 	
-	public MediaKeysComponent(Diorite.Application app, Bindings bindings, Diorite.KeyValueStorage config, Drt.MessageChannel conn, string web_app_id)
+	public MediaKeysComponent(Diorite.Application app, Bindings bindings, Diorite.KeyValueStorage config, Drt.ApiChannel conn, string web_app_id)
 	{
 		base("mediakeys", "Media keys", "Handles multimedia keys of your keyboard.");
 		this.bindings = bindings;

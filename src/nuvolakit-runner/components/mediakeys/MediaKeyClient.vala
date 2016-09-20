@@ -29,13 +29,16 @@ public class MediaKeysClient : GLib.Object, MediaKeysInterface
 {
 	public bool managed {get; protected set; default=false;}
 	private string app_id;
-	private Drt.MessageChannel conn;
+	private Drt.ApiChannel conn;
 	
-	public class MediaKeysClient(string app_id, Drt.MessageChannel conn)
+	public class MediaKeysClient(string app_id, Drt.ApiChannel conn)
 	{
 		this.conn = conn;
 		this.app_id = app_id;
-		conn.add_handler("Nuvola.MediaKeys.mediaKeyPressed", "s", handle_media_key_pressed);
+		conn.api_router.add_method("/nuvola/mediakeys/media-key-pressed", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+			null, handle_media_key_pressed, {
+			new Drt.StringParam("key", true, false)
+		});
 	}
 	
 	public void manage()
@@ -43,10 +46,10 @@ public class MediaKeysClient : GLib.Object, MediaKeysInterface
 		if (managed)
 			return;
 		
-		const string METHOD = "Nuvola.MediaKeys.manage";
+		const string METHOD = "/nuvola/mediakeys/manage";
 		try
 		{
-			var data = conn.send_message(METHOD, new Variant.string(app_id)); 
+			var data = conn.call_sync(METHOD, new Variant.string(app_id)); 
 			Diorite.MessageListener.check_type_string(data, "b");
 			managed = data.get_boolean();
 		}
@@ -61,10 +64,10 @@ public class MediaKeysClient : GLib.Object, MediaKeysInterface
 		if (!managed)
 			return;
 		
-		const string METHOD = "Nuvola.MediaKeys.unmanage";
+		const string METHOD = "/nuvola/mediakeys/unmanage";
 		try
 		{
-			var data = conn.send_message(METHOD, new Variant.string(app_id)); 
+			var data = conn.call_sync(METHOD, new Variant.string(app_id)); 
 			Diorite.MessageListener.check_type_string(data, "b");
 			managed = !data.get_boolean();
 		}
@@ -74,9 +77,9 @@ public class MediaKeysClient : GLib.Object, MediaKeysInterface
 		}
 	}
 	
-	private Variant? handle_media_key_pressed(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_media_key_pressed(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
-		var key = data.get_string();
+		var key = params.pop_string();
 		media_key_pressed(key);
 		return new Variant.boolean(true);
 	}

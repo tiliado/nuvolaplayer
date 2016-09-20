@@ -39,13 +39,19 @@ public class MediaKeysServer: GLib.Object
 		this.app_runners = app_runners;
 		clients = new GenericSet<string>(str_hash, str_equal);
 		media_keys.media_key_pressed.connect(on_media_key_pressed);
-		ipc_bus.add_handler("Nuvola.MediaKeys.manage", "s", handle_manage);
-		ipc_bus.add_handler("Nuvola.MediaKeys.unmanage", "s", handle_unmanage);
+		ipc_bus.router.add_method("/nuvola/mediakeys/manage", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+			null, handle_manage, {
+			new Drt.StringParam("id", true, false)
+		});
+		ipc_bus.router.add_method("/nuvola/mediakeysl/unmanage", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+			null, handle_unmanage, {
+			new Drt.StringParam("id", true, false)
+		});
 	}
 	
-	private Variant? handle_manage(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_manage(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
-		var app_id = data.get_string();
+		var app_id = params.pop_string();
 		
 		if (app_id in clients)
 			return new Variant.boolean(false);
@@ -57,9 +63,9 @@ public class MediaKeysServer: GLib.Object
 		return new Variant.boolean(true);
 	}
 	
-	private Variant? handle_unmanage(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_unmanage(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
-		var app_id = data.get_string();
+		var app_id = params.pop_string();
 		
 		if (!(app_id in clients))
 			return new Variant.boolean(false);
@@ -82,10 +88,10 @@ public class MediaKeysServer: GLib.Object
 			{
 				try
 				{
-					var response = app_runner.send_message("Nuvola.MediaKeys.mediaKeyPressed", new Variant.string(key));
+					var response = app_runner.call_sync("/nuvola/mediakeys/media-key-pressed", new Variant.string(key));
 					if (!Diorite.variant_bool(response, ref handled))
 					{
-						warning("Nuvola.MediaKeys.mediaKeyPressed got invalid response from %s instance %s: %s\n", Nuvola.get_app_name(), app_id,
+						warning("/nuvola/mediakeys/media-key-pressed got invalid response from %s instance %s: %s\n", Nuvola.get_app_name(), app_id,
 							response == null ? "null" : response.print(true));
 					}
 				}
