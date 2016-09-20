@@ -28,7 +28,7 @@ namespace Nuvola
 public class IpcBus: Drt.ApiBus
 {
     public Drt.ApiChannel? master {get; private set; default = null;}
-    public Drt.MessageChannel? web_worker {get; private set; default = null;}
+    public Drt.ApiChannel? web_worker {get; private set; default = null;}
     
     public IpcBus(string bus_name, Drt.ApiRouter? router=null)
     {
@@ -42,7 +42,7 @@ public class IpcBus: Drt.ApiBus
         return master;
     }
     
-    public void connect_web_worker(Drt.MessageChannel channel)
+    public void connect_web_worker(Drt.ApiChannel channel)
     {
         web_worker = channel;
     }

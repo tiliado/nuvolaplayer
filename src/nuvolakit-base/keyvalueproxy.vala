@@ -28,10 +28,10 @@ namespace Nuvola
 public class KeyValueProxy: GLib.Object, Diorite.KeyValueStorage
 {
 	public Diorite.SingleList<Diorite.PropertyBinding> property_bindings {get; protected set;}
-	private Drt.MessageChannel channel;
+	private Drt.ApiChannel channel;
 	private string prefix;
 	
-	public KeyValueProxy(Drt.MessageChannel channel, string prefix)
+	public KeyValueProxy(Drt.ApiChannel channel, string prefix)
 	{
 		property_bindings = new Diorite.SingleList<Diorite.PropertyBinding>();
 		this.channel = channel;
@@ -42,7 +42,7 @@ public class KeyValueProxy: GLib.Object, Diorite.KeyValueStorage
 	{
 		try
 		{
-			var response = channel.send_message(prefix + "_has_key", new Variant.string(key));
+			var response = channel.call_sync("/nuvola/core/" + prefix + "-has-key", new Variant.string(key));
 			if (response.is_of_type(VariantType.BOOLEAN))
 				return response.get_boolean();
 			critical("Invalid response to KeyValueProxy.has_key: %s", response.print(false));
@@ -58,7 +58,7 @@ public class KeyValueProxy: GLib.Object, Diorite.KeyValueStorage
 	{
 		try
 		{
-			var response = channel.send_message(prefix + "_get_value", new Variant.string(key));
+			var response = channel.call_sync("/nuvola/core/"+ prefix + "-get-value", new Variant.string(key));
 			return response;
 		}
 		catch (GLib.Error e)
@@ -72,7 +72,7 @@ public class KeyValueProxy: GLib.Object, Diorite.KeyValueStorage
 	{
 		try
 		{
-			channel.send_message(prefix + "_set_value", new Variant("(smv)", key, value));
+			channel.call_sync("/nuvola/core/" + prefix + "-set-value", new Variant("(smv)", key, value));
 		}
 		catch (GLib.Error e)
 		{
@@ -84,7 +84,7 @@ public class KeyValueProxy: GLib.Object, Diorite.KeyValueStorage
 	{
 		try
 		{
-			channel.send_message(prefix + "_set_default_value", new Variant("(smv)", key, value));
+			channel.call_sync("/nuvola/core/" + prefix + "-set-default-value", new Variant("(smv)", key, value));
 		}
 		catch (GLib.Error e)
 		{

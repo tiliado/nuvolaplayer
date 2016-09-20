@@ -56,9 +56,9 @@ public class WebExtension: GLib.Object
 		Variant response;
 		try
 		{
-			response = channel.send_message("get_data_dir");
+			response = channel.call_sync("/nuvola/core/get-data-dir", null);
 			data_dir = File.new_for_path(response.get_string());
-			response = channel.send_message("get_user_config_dir");
+			response = channel.call_sync("/nuvola/core/get-user-config-dir", null);
 			user_config_dir = File.new_for_path(response.get_string());
 		}
 		catch (GLib.Error e)
@@ -106,7 +106,7 @@ public class WebExtension: GLib.Object
 		Idle.add(() => {
 			try
 			{
-				channel.send_message("web_worker_initialized");
+				channel.call_sync("/nuvola/core/web-worker-initialized", null);
 			}
 			catch (GLib.Error e)
 			{
@@ -180,7 +180,7 @@ public class WebExtension: GLib.Object
 	{
 		try
 		{
-			channel.send_message("show_error", new Variant.string(message));
+			channel.call_sync("/nuvola/core/show-error", new Variant.string(message));
 		}
 		catch (GLib.Error e)
 		{

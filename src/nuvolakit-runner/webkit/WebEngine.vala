@@ -424,107 +424,139 @@ public class WebEngine : GLib.Object, JSExecutor
 	private void set_up_ipc()
 	{
 		assert(ipc_bus != null);
-		ipc_bus.add_handler("web_worker_initialized", null, handle_web_worker_initialized);
-		ipc_bus.add_handler("get_data_dir", null, handle_get_data_dir);
-		ipc_bus.add_handler("get_user_config_dir", null, handle_get_user_config_dir);
-		ipc_bus.add_handler("session_has_key", "s", handle_session_has_key);
-		ipc_bus.add_handler("session_get_value", "s", handle_session_get_value);
-		ipc_bus.add_handler("session_set_value", "(smv)", handle_session_set_value);
-		ipc_bus.add_handler("session_set_default_value", "(smv)", handle_session_set_default_value);
-		ipc_bus.add_handler("config_has_key", "s", handle_config_has_key);
-		ipc_bus.add_handler("config_get_value", "s", handle_config_get_value);
-		ipc_bus.add_handler("config_set_value", "(smv)", handle_config_set_value);
-		ipc_bus.add_handler("config_set_default_value", "(smv)", handle_config_set_default_value);
-		ipc_bus.add_handler("show_error", "s", handle_show_error);
-		
+		var router = ipc_bus.router;
+		router.add_method("/nuvola/core/web-worker-initialized", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+			"Notify that the web worker has been initialized.",
+			handle_web_worker_initialized, null);
+		router.add_method("/nuvola/core/get-data-dir", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.READABLE,
+			"Return data directory.",
+			handle_get_data_dir, null);
+		router.add_method("/nuvola/core/get-user-config-dir", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.READABLE,
+			"Return user config directory.",
+			handle_get_user_config_dir, null);
+		router.add_method("/nuvola/core/session-has-key", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.READABLE,
+			"Whether the session has a given key.",
+			handle_session_has_key, {
+			new Drt.StringParam("key", true, false, null, "Session key.")
+		});
+		router.add_method("/nuvola/core/session-get-value", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.READABLE,
+			"Get session value for the given key.",
+			handle_session_get_value, {
+			new Drt.StringParam("key", true, false, null, "Session key.")
+		});
+		router.add_method("/nuvola/core/session-set-value", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+			"Set session value for the given key.",
+			handle_session_set_value, {
+			new Drt.StringParam("key", true, false, null, "Session key."),
+			new Drt.VariantParam("value", true, true, null, "Session value.")
+		});
+		router.add_method("/nuvola/core/session-set-default-value", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+			"Set default session value for the given key.",
+			handle_session_set_default_value, {
+			new Drt.StringParam("key", true, false, null, "Session key."),
+			new Drt.VariantParam("value", true, true, null, "Session value.")
+		});
+		router.add_method("/nuvola/core/config-has-key", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.READABLE,
+			"Whether the config has a given key.",
+			handle_config_has_key, {
+			new Drt.StringParam("key", true, false, null, "Config key.")
+		});
+		router.add_method("/nuvola/core/config-get-value", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.READABLE,
+			"Get config value for the given key.",
+			handle_config_get_value, {
+			new Drt.StringParam("key", true, false, null, "Config key.")
+		});
+		router.add_method("/nuvola/core/config-set-value", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+			"Set config value for the given key.",
+			handle_config_set_value, {
+			new Drt.StringParam("key", true, false, null, "Config key."),
+			new Drt.VariantParam("value", true, true, null, "Config value.")
+		});
+		router.add_method("/nuvola/core/config-set-default-value", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+			"Set default config value for the given key.",
+			handle_config_set_default_value, {
+			new Drt.StringParam("key", true, false, null, "Config key."),
+			new Drt.VariantParam("value", true, true, null, "Config value.")
+		});
+		router.add_method("/nuvola/core/show-error", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+			"Show error message.",
+			handle_show_error, {
+			new Drt.StringParam("text", true, false, null, "Error message.")
+		});
 	}
 	
-	private Variant? handle_web_worker_initialized(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_web_worker_initialized(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
-		var channel = source as Drt.MessageChannel;
+		var channel = source as Drt.ApiChannel;
 		return_val_if_fail(channel != null, null);
 		ipc_bus.connect_web_worker(channel);
 		Idle.add(() => {web_worker_initialized = true; return false;});
 		return null;
 	}
 	
-	private Variant? handle_get_data_dir(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_get_data_dir(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		return new Variant.string(web_app.data_dir.get_path());
 	}
 	
-	private Variant? handle_get_user_config_dir(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_get_user_config_dir(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		return new Variant.string(storage.config_dir.get_path());
 	}
 	
-	private Variant? handle_session_has_key(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_session_has_key(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
-		return new Variant.boolean(session.has_key(data.get_string()));
+		return new Variant.boolean(session.has_key(params.pop_string()));
 	}
 	
-	private Variant? handle_session_get_value(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_session_get_value(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
-		var response = session.get_value(data.get_string());
+		var response = session.get_value(params.pop_string());
 		if (response == null)
 			response = new Variant("mv", null);
-		
 		return response;
 	}
 	
-	private Variant? handle_session_set_value(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_session_set_value(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
-		string? key = null;
-		Variant? value = null;
-		data.get("(smv)", &key, &value);
-		session.set_value(key, value);
+		session.set_value(params.pop_string(), params.pop_variant());
 		return null;
 	}
 	
-	private Variant? handle_session_set_default_value(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_session_set_default_value(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
-		string? key = null;
-		Variant? value = null;
-		data.get("(smv)", &key, &value);
-		session.set_default_value(key, value);
+		session.set_default_value(params.pop_string(), params.pop_variant());
 		return null;
 	}
 	
-	private Variant? handle_config_has_key(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_config_has_key(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
-		return new Variant.boolean(config.has_key(data.get_string()));
+		return new Variant.boolean(config.has_key(params.pop_string()));
 	}
 	
-	private Variant? handle_config_get_value(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_config_get_value(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
-		var response = config.get_value(data.get_string());
+		var response = config.get_value(params.pop_string());
 		if (response == null)
 			response = new Variant("mv", null);
-		
 		return response;
 	}
 	
-	private Variant? handle_config_set_value(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_config_set_value(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
-		string? key = null;
-		Variant? value = null;
-		data.get("(smv)", &key, &value);
-		config.set_value(key, value);
+		config.set_value(params.pop_string(), params.pop_variant());
 		return null;
 	}
 	
-	private Variant? handle_config_set_default_value(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_config_set_default_value(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
-		string? key = null;
-		Variant? value = null;
-		data.get("(smv)", &key, &value);
-		config.set_default_value(key, value);
+		config.set_default_value(params.pop_string(), params.pop_variant());
 		return null;
 	}
 	
-	private Variant? handle_show_error(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_show_error(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
-		runner_app.show_error("Integration error", data.get_string());
+		runner_app.show_error("Integration error", params.pop_string());
 		return null;
 	}
 	
