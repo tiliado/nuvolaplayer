@@ -51,8 +51,14 @@ public class Server: Soup.Server
 		this.web_app_registry = web_app_registry;
 		this.www_roots = www_roots;
 		registered_runners = new GenericSet<string>(str_hash, str_equal);
-		bus.router.add_handler("HttpRemoteControl.register", "s", handle_register);
-		bus.router.add_handler("HttpRemoteControl.unregister", "s", handle_unregister);
+		bus.router.add_method("/nuvola/httpremotecontrol/register", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+			null, handle_register, {
+			new Drt.StringParam("id", true, false)
+		});
+		bus.router.add_method("/nuvola/httpremotecontrol/unregister", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+			null, handle_unregister, {
+			new Drt.StringParam("id", true, false)
+		});
 		app.runner_exited.connect(on_runner_exited);
 	}
 	
@@ -272,15 +278,15 @@ public class Server: Soup.Server
 		return builder.get_root();
 	}
 	
-	private Variant? handle_register(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_register(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
-		register_app(data.get_string());
+		register_app(params.pop_string());
 		return null;
 	}
 	
-	private Variant? handle_unregister(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_unregister(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
-		var app_id = data.get_string();
+		var app_id = params.pop_string();
 		if (!unregister_app(app_id))
 			warning("App %s hasn't been registered yet!", app_id);
 		return null;
