@@ -60,7 +60,7 @@ public class Component: Nuvola.Component
 		var method = "/nuvola/httpremotecontrol/" + (register ? "register" : "unregister");
 		try
 		{
-			ipc_bus.master.call_sync(method, new Variant.string(app.web_app.id)); 
+			ipc_bus.master.call_sync(method, new Variant("(s)", app.web_app.id)); 
 		}
 		catch (GLib.Error e)
 		{
