@@ -28,13 +28,13 @@ namespace Nuvola
 
 public interface WebWorker: GLib.Object, JSExecutor
 {
-	public abstract Variant? send_message(string name, Variant? params) throws GLib.Error;
+	public abstract Variant? call_sync(string name, Variant? params) throws GLib.Error;
 	
 	public void disable_gstreamer()
 	{
 		try
 		{
-			send_message("disable_gstreamer", null);
+			call_sync("/nuvola/webworker/disable-gstreamer", null);
 		}
 		catch (GLib.Error e)
 		{
@@ -52,18 +52,18 @@ public class RemoteWebWorker: GLib.Object, JSExecutor, WebWorker
 		this.ipc_bus = ipc_bus;
 	}
 	
-	public Variant? send_message(string name, Variant? params) throws GLib.Error
+	public Variant? call_sync(string name, Variant? params) throws GLib.Error
 	{
 		if (ipc_bus.web_worker == null)
 			throw new Diorite.MessageError.NOT_READY("Web worker process is not ready yet");
 		
-		return ipc_bus.web_worker.send_message(name, params);
+		return ipc_bus.web_worker.call_sync(name, params);
 	}
 	
 	public void call_function(string name, ref Variant? params) throws GLib.Error
 	{
 		var data = new Variant("(smv)", name, params);
-		params = send_message("call_function", data);
+		params = call_sync("/nuvola/webworker/call-function", data);
 	}
 }
 

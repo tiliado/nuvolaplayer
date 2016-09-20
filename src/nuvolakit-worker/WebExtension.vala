@@ -49,8 +49,16 @@ public class WebExtension: GLib.Object
 	
 	private void init()
 	{
-		channel.add_handler("call_function", "(smv)", handle_call_function);
-		channel.add_handler("disable_gstreamer", null, handle_disable_gstreamer);
+		var router = channel.api_router;
+		router.add_method("/nuvola/webworker/call-function", Drt.ApiFlags.WRITABLE,
+			"Call JavaScript function.",
+			handle_call_function, {
+			new Drt.StringParam("name", true, false, null, "Function name."),
+			new Drt.VariantParam("params", true, true, null, "Function parameters.")
+		});
+		router.add_method("/nuvola/webworker/disable-gstreamer", Drt.ApiFlags.WRITABLE,
+			"Disable GStreamer",
+			handle_disable_gstreamer, null);
 		bridges = new HashTable<unowned WebKit.Frame, FrameBridge>(direct_hash, direct_equal);
 		
 		Variant response;
@@ -151,27 +159,26 @@ public class WebExtension: GLib.Object
 		}
 	}
 	
-	private Variant? handle_call_function(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_call_function(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
-		string name = null;
-		Variant? params = null;
-		data.get("(smv)", &name, &params);
+		var name = params.pop_string();
+		var func_params = params.pop_variant();
 		var envs = bridges.get_values();
 		foreach (var env in envs)
 		{
 			try
 			{
-				env.call_function(name, ref params);
+				env.call_function(name, ref func_params);
 			}
 			catch (GLib.Error e)
 			{
 				show_error("Error during call of %s: %s".printf(name, e.message));
 			}
 		}
-		return params;
+		return func_params;
 	}
 	
-	private Variant? handle_disable_gstreamer(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_disable_gstreamer(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		return Nuvola.Gstreamer.disable_gstreamer();
 	}
