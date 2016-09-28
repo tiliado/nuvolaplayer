@@ -49,7 +49,7 @@ public class MediaKeysClient : GLib.Object, MediaKeysInterface
 		const string METHOD = "/nuvola/mediakeys/manage";
 		try
 		{
-			var data = conn.call_sync(METHOD, new Variant.string(app_id)); 
+			var data = conn.call_sync(METHOD, new Variant("(s)", app_id)); 
 			Diorite.MessageListener.check_type_string(data, "b");
 			managed = data.get_boolean();
 		}
