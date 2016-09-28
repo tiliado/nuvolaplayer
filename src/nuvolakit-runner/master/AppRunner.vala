@@ -144,6 +144,22 @@ public class AppRunner : GLib.Object
 		return channel.call_sync(name, params);
 	}
 	
+	public async Variant? call_with_dict(string name, Variant? params) throws GLib.Error
+	{
+		if (channel == null)
+			throw new Diorite.MessageError.IOERROR("No connected to app runner '%s'.", app_id);
+		
+		return yield channel.call_with_dict(name, params);
+	}
+	
+	public async Variant? call_full(string method, bool allow_private, string flags, string params_format, Variant? params) throws GLib.Error
+	{
+		if (channel == null)
+			throw new Diorite.MessageError.IOERROR("No connected to app runner '%s'.", app_id);
+		
+		return yield channel.call_full(method, allow_private, flags, params_format, params);
+	}
+	
 	private void on_wait_async_done(GLib.Object? o, AsyncResult res)
 	{
 		try
