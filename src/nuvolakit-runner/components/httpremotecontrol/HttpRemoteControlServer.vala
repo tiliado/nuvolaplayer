@@ -26,7 +26,7 @@
 namespace Nuvola.HttpRemoteControl
 {
 
-public const string CAPABILITY_NAME = "httpjson";
+public const string CAPABILITY_NAME = "httpcontrol";
 
 public class Server: Soup.Server
 {
@@ -38,6 +38,7 @@ public class Server: Soup.Server
 	private WebAppRegistry web_app_registry;
 	private bool running = false;
 	private File[] www_roots;
+	private Channel eio_channel;
 	
 	public Server(
 		MasterController app, MasterBus bus,
@@ -60,6 +61,8 @@ public class Server: Soup.Server
 			new Drt.StringParam("id", true, false)
 		});
 		app.runner_exited.connect(on_runner_exited);
+		var eio_server = new Engineio.Server(this, "/nuvola.io/");
+		eio_channel = new Channel(eio_server, this);
 	}
 	
 	~Server()
@@ -124,6 +127,39 @@ public class Server: Soup.Server
 		var self = server as Server;
 		assert(self != null);
 		self.handle_request(new RequestContext(server, msg, path, query, client));
+	}
+	
+	public async Variant? handle_eio_request(string path, Variant? params) throws GLib.Error
+	{
+		if (path.has_prefix("/app/"))
+		{
+			var app_path = path.substring(5);
+			string app_id;
+			var slash_pos = app_path.index_of_char('/');
+			if (slash_pos <= 0)
+			{
+				app_id = app_path;
+				app_path = "";
+			}
+			else
+			{
+				app_id = app_path.substring(0, slash_pos);
+				app_path = app_path.substring(slash_pos);
+			}
+			if (!(app_id in registered_runners))
+			{
+				throw new ChannelError.APP_NOT_FOUND("App with id '%s' doesn't exist or HTTP interface is not enabled.", app_id);
+			}
+			
+			var app = app_runners[app_id];
+			return yield app.call_full("/nuvola" + app_path, false, "rw", "dict", params);
+		}
+		if (path.has_prefix("/master/"))
+		{
+			var master_path = path.substring(7);
+			return bus.call_local_sync_full("/nuvola" + master_path, false, "rw", "dict", params);
+		}
+		throw new ChannelError.INVALID_REQUEST("Request '%s' is invalid.", path);
 	}
 	
 	protected void handle_request(RequestContext request)

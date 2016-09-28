@@ -30,85 +30,31 @@ var $class = document.getElementsByClassName.bind(document);
 var $1 = document.querySelector.bind(document);
 var $all = document.querySelectorAll.bind(document);
 
-var HttpRequest = function(method, url, params)
-{
-    method = method.toUpperCase();
-    this.payload = null;
-    var payload = null;
-    if (params)
-    {
-        var pairs = [];
-        for (var key in params)
-        {
-            if (params.hasOwnProperty(key))
-                pairs.push(encodeURIComponent(key) + "=" + encodeURIComponent(params[key]));
-        }
-        payload = pairs.length > 0 ? pairs.join("&") : null;
-    }
-    
-    if (method == "GET" && payload)
-        url += "?" + payload;
-    
-    if (method == "POST" && payload)
-        this.payload = payload;
-   
-    this.method = method
-    this.url = url;
-}
-
-HttpRequest.prototype.send = function()
-{
-    this.request = new XMLHttpRequest();
-    this.request.onreadystatechange = this._onreadystatechange.bind(this);
-    this.request.open(this.method, this.url);
-    if (this.method == "POST" && this.payload)
-        this.request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    this.request.send(this.payload);
-}
-
-HttpRequest.prototype._onreadystatechange = function()
-{
-    if (this.request.readyState === XMLHttpRequest.DONE)
-    {
-        if (this.request.status === 200)
-            this.onsuccess(this);
-        else
-            this.onerror(this);
-    }
-}
-
-HttpRequest.prototype.json = function()
-{
-    return JSON.parse(this.request.responseText);
-}
-
-HttpRequest.prototype.text = function()
-{
-    return this.request.responseText;
-}
-
-HttpRequest.prototype.onsuccess = function(request)
-{
-    console.log("HTTP Request successful");
-}
-
-HttpRequest.prototype.onerror = function(request)
-{
-    console.log("HTTP Request failed");
-}
-
-
 var Nuvola = {};
 
 Nuvola.onload = function()
 {
     this.appId = "test"; 
     this.appInfo = null;
-    this.update();
+    this.socket = eio('ws://' + location.host, {path: "/nuvola.io"});
+	this.channel = new Nuvolaio.Channel(this.socket);
+	var self = this;
+	this.socket.on('open', function()
+	{
+		console.log("Socket opened");
+		self.update();
+	});
+    this.socket.on('message', function(data)
+    {
+		console.log("Message received: " + data); 
+	});
+    this.socket.on('close', function()
+    {
+		console.log("Connection closed");
+	});
     $id("play-pause").onclick = function()
     {
-        var r = new HttpRequest("post", "/+api/app/" + Nuvola.appId + "/actions/activate", {name: "toggle-play"});
-        r.send();
+        Nuvola.channel.send("/app/" + Nuvola.appId + "/actions/activate", {name: "toggle-play"});
         setTimeout(Nuvola.update.bind(Nuvola), 1000);
     };
 }
@@ -121,69 +67,49 @@ Nuvola.update = function()
 Nuvola.updateAppId = function()
 {
     var self = this;
-    var request = new HttpRequest("get", "/+api/core/get_top_runner", null);
-    request.onsuccess = function(request)
+    self.channel.send("/master/core/get_top_runner", null, function(response)
     {
-        var data;
         try
         {
-            data = request.json();
+            self.appId = response.finish().result;
+            self.updateAppInfo();
         }
         catch (e)
         {
-            this.onerror(request);
-            return;
+            $id("app-name").innerText = "Error";
         }
-        self.appId = data.result;
-        self.updateAppInfo();
-    };
-    request.onerror = function(request)
-    {
-        $id("app-name").innerText = "Error";
-    }
-    request.send();
+    });
 }
 
 Nuvola.updateAppInfo = function()
 {
     var self = this;
-    var request = new HttpRequest("get", "/+api/core/get_app_info", {"id": this.appId});
-    request.onsuccess = function(request)
+    self.channel.send("/master/core/get_app_info", {"id": this.appId}, function(response)
     {
-        var data;
         try
         {
-            data = request.json();
+            self.appInfo = response.finish();
+            self.updateTrackInfo();
         }
         catch (e)
         {
-            this.onerror(request);
-            return;
+            $id("app-name").innerText = "Error";
         }
-        self.appInfo = data;
-        self.updateTrackInfo();
-    };
-    request.onerror = function(request)
-    {
-        $id("app-name").innerText = "Error";
-    }
-    request.send();
+    });
 }
 
 Nuvola.updateTrackInfo = function()
 {
     var self = this;
-    var request = new HttpRequest("get", "/+api/app/" + this.appId + "/mediaplayer/track-info", null);
-    request.onsuccess = function(request)
+    self.channel.send("/app/" + this.appId + "/mediaplayer/track-info", null, function(response)
     {
-        var data;
         try
         {
-            data = request.json();
+            var data = response.finish();
         }
         catch (e)
         {
-            this.onerror(request);
+            $id("app-name").innerText = "Error";
             return;
         }
         
@@ -208,12 +134,8 @@ Nuvola.updateTrackInfo = function()
             stars += "☆";
             $id("track-rating").innerText = stars;
         }
-    };
-    request.onerror = function(request)
-    {
-        $id("app-name").innerText = "Error";
-    }
-    request.send();
+    });
+	return;
 }
 
 window.onload = Nuvola.onload.bind(Nuvola);

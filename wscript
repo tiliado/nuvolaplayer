@@ -313,11 +313,11 @@ def build(ctx):
 			),
 		packages = 'webkit2gtk-4.0 javascriptcoregtk-4.0 gstreamer-1.0',
 		uselib =  'JSCORE WEBKIT GST',
-		use = [NUVOLAKIT_BASE],
+		use = [NUVOLAKIT_BASE, ENGINEIO],
 		lib = ['m'],
 		vala_defines = vala_defines,
 		defines = ['G_LOG_DOMAIN="Nuvola"'],
-		vapi_dirs = ['vapi'],
+		vapi_dirs = ['vapi', 'engineio-soup/vapi'],
 		vala_target_glib = TARGET_GLIB,
 	)
 	
@@ -329,7 +329,7 @@ def build(ctx):
 		use = [NUVOLAKIT_BASE, NUVOLAKIT_RUNNER],
 		vala_defines = vala_defines,
 		defines = ['G_LOG_DOMAIN="Nuvola"'],
-		vapi_dirs = ['vapi'],
+		vapi_dirs = ['vapi', 'engineio-soup/vapi'],
 		vala_target_glib = TARGET_GLIB,
 	)
 	
@@ -341,7 +341,7 @@ def build(ctx):
 		use = [NUVOLAKIT_BASE, NUVOLAKIT_RUNNER],
 		vala_defines = vala_defines,
 		defines = ['G_LOG_DOMAIN="Nuvola"'],
-		vapi_dirs = ['vapi'],
+		vapi_dirs = ['vapi', 'engineio-soup/vapi'],
 		vala_target_glib = TARGET_GLIB,
 		install_path = ctx.env.NUVOLA_LIBDIR,
 	)
@@ -354,7 +354,7 @@ def build(ctx):
 		use = [NUVOLAKIT_BASE, NUVOLAKIT_RUNNER],
 		vala_defines = vala_defines,
 		defines = ['G_LOG_DOMAIN="Nuvola"'],
-		vapi_dirs = ['vapi'],
+		vapi_dirs = ['vapi', 'engineio-soup/vapi'],
 		vala_target_glib = TARGET_GLIB,
 	)
 	
