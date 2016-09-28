@@ -217,6 +217,9 @@ def configure(ctx):
 	ctx.check_dep('webkit2gtk-4.0', 'WEBKIT', MIN_WEBKIT)
 	ctx.check_dep('webkit2gtk-web-extension-4.0', 'WEBKITEXT', MIN_WEBKIT)
 	ctx.check_dep('javascriptcoregtk-4.0', 'JSCORE', MIN_WEBKIT)
+	
+	ctx.check_dep('uuid', 'UUID', '0') # Engine.io
+	ctx.check_dep('libsoup-2.4', 'SOUP', '0') # Engine.io
 		
 	
 	ctx.env.with_unity = ctx.options.unity
@@ -266,6 +269,7 @@ def build(ctx):
 	
 	APP_RUNNER = "apprunner"
 	CONTROL = APPNAME + "ctl"
+	ENGINEIO = "engineio"
 	NUVOLAKIT_RUNNER = APPNAME + "-runner"
 	NUVOLAKIT_BASE = APPNAME + "-base"
 	NUVOLAKIT_WORKER = APPNAME + "-worker"
@@ -277,6 +281,17 @@ def build(ctx):
 	if ctx.env.with_unity:
 		packages += " unity Dbusmenu-0.4"
 		uselib += " UNITY DBUSMENU"
+	
+	
+	ctx(features = "c cshlib",
+		target = ENGINEIO,
+		source = ctx.path.ant_glob('engineio-soup/src/*.vala'),
+		packages = 'uuid libsoup-2.4 json-glib-1.0', 
+		uselib = 'UUID SOUP JSON-GLIB',
+		defines = ['G_LOG_DOMAIN="Engineio"'],
+		vapi_dirs = ['engineio-soup/vapi'],
+		vala_target_glib = TARGET_GLIB,
+	)
 	
 	ctx(features = "c cshlib",
 		target = NUVOLAKIT_BASE,
