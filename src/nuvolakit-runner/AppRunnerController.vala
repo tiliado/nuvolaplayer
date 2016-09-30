@@ -319,7 +319,7 @@ public class AppRunnerController : RunnerApplication
 		
 		try
 		{
-			var response = ipc_bus.master.send_message("runner_started", new Variant("(ss)", web_app.id, "<undefined>"));
+			var response = ipc_bus.master.send_message("runner_started", new Variant("(ss)", web_app.id, ipc_bus.router.hex_token));
 			assert(response.equal(new Variant.boolean(true)));
 		}
 		catch (GLib.Error e)

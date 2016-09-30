@@ -297,9 +297,9 @@ public class MasterController : Diorite.Application
 	private Variant? handle_runner_started(GLib.Object source, Variant? data) throws Diorite.MessageError
 	{
 		string? app_id = null;
-		string? server_name = null;
-		data.get("(ss)", ref app_id, ref server_name);
-		return_val_if_fail(app_id != null && server_name != null, null);
+		string? api_token = null;
+		data.get("(ss)", ref app_id, ref api_token);
+		return_val_if_fail(app_id != null && api_token != null, null);
 		
 		var runner = app_runners_map[app_id];
 		return_val_if_fail(runner != null, null);
@@ -307,6 +307,7 @@ public class MasterController : Diorite.Application
 		var channel = source as Drt.ApiChannel;
 		if (channel == null)
 			throw new Diorite.MessageError.REMOTE_ERROR("Failed to connect runner '%s'. %s ", app_id, source.get_type().name());
+		channel.api_token = api_token;
 		runner.connect_channel(channel);
 		debug("Connected to runner server for '%s'.", app_id);
 		return new Variant.boolean(true);
