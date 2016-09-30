@@ -30,6 +30,7 @@ namespace Nuvola
  */
 public class MediaKeys: GLib.Object, MediaKeysInterface
 {
+	private static bool debug_keys = false;
 	public bool managed {get; protected set; default=false;}
 	private string app_id;
 	private XKeyGrabber key_grabber;
@@ -46,9 +47,17 @@ public class MediaKeys: GLib.Object, MediaKeysInterface
 		keymap["XF86AudioStop"] = "Stop";
 		keymap["XF86AudioPrev"] = "Previous";
 		keymap["XF86AudioNext"] = "Next";
-		/* Uncomment this to test without multimedia keyboard */
-//~ 		keymap["<Shift><Super>t"] = "Play";
-//~ 		keymap["<Shift><Super>n"] = "Next";
+		
+		if (debug_keys)
+		{
+			keymap["<Shift><Super>t"] = "Play";
+			keymap["<Shift><Super>n"] = "Next";
+		}
+	}
+	
+	static construct
+	{
+		debug_keys = Environment.get_variable("NUVOLA_DEBUG_MEDIAKEYS") == "true";
 	}
 	
 	~MediaKeys()
@@ -109,8 +118,8 @@ public class MediaKeys: GLib.Object, MediaKeysInterface
 	
 	private bool grab_gnome_media_keys()
 	{
-		/* Uncomment this to test multimedia keys grabbing */
-//~ 		return false;
+		if (debug_keys)
+			return false;
 		try
 		{
 			gnome_media_keys = Bus.get_proxy_sync(BusType.SESSION,
