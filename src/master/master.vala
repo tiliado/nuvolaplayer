@@ -75,6 +75,7 @@ public int main(string[] args)
 	{
 		stdout.printf("%s %s\n", Nuvola.get_app_name(), Nuvola.get_version());
 		stdout.printf("Revision %s\n", Nuvola.get_revision());
+		stdout.printf("Diorite %s\n", Drt.get_version());
 		stdout.printf("WebKitGTK %u.%u.%u\n", WebKit.get_major_version(), WebKit.get_minor_version(), WebKit.get_micro_version());
 		stdout.printf("libsoup %u.%u.%u\n", Soup.get_major_version(), Soup.get_minor_version(), Soup.get_micro_version());
 		return 0;
