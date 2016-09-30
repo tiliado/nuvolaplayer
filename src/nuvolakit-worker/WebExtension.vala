@@ -187,7 +187,7 @@ public class WebExtension: GLib.Object
 	{
 		try
 		{
-			channel.call_sync("/nuvola/core/show-error", new Variant.string(message));
+			channel.call_sync("/nuvola/core/show-error", new Variant("(s)", message));
 		}
 		catch (GLib.Error e)
 		{

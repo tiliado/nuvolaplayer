@@ -88,7 +88,7 @@ public class MediaKeysServer: GLib.Object
 			{
 				try
 				{
-					var response = app_runner.call_sync("/nuvola/mediakeys/media-key-pressed", new Variant.string(key));
+					var response = app_runner.call_sync("/nuvola/mediakeys/media-key-pressed", new Variant("(s)", key));
 					if (!Diorite.variant_bool(response, ref handled))
 					{
 						warning("/nuvola/mediakeys/media-key-pressed got invalid response from %s instance %s: %s\n", Nuvola.get_app_name(), app_id,

@@ -42,7 +42,7 @@ public class KeyValueProxy: GLib.Object, Diorite.KeyValueStorage
 	{
 		try
 		{
-			var response = channel.call_sync("/nuvola/core/" + prefix + "-has-key", new Variant.string(key));
+			var response = channel.call_sync("/nuvola/core/" + prefix + "-has-key", new Variant("(s)", key));
 			if (response.is_of_type(VariantType.BOOLEAN))
 				return response.get_boolean();
 			critical("Invalid response to KeyValueProxy.has_key: %s", response.print(false));
@@ -58,7 +58,7 @@ public class KeyValueProxy: GLib.Object, Diorite.KeyValueStorage
 	{
 		try
 		{
-			var response = channel.call_sync("/nuvola/core/"+ prefix + "-get-value", new Variant.string(key));
+			var response = channel.call_sync("/nuvola/core/"+ prefix + "-get-value", new Variant("(s)", key));
 			return response;
 		}
 		catch (GLib.Error e)
