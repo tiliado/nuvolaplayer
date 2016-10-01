@@ -203,6 +203,7 @@ public class Socket : GLib.Object
 		if (discard)
 			transport.discard();
 		transport.closed.connect(on_transport_force_closed);
+		transport.close(null);
 	}
 	
 	private void on_transport_force_closed(Transport transport)

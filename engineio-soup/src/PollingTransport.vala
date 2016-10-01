@@ -106,6 +106,12 @@ public abstract class PollingTransport: Transport
 	{
 		msg.finished.disconnect(on_poll_request_finished);
 		writable = false;
+		if (writable == true)
+		{
+			writable = false;
+			discarded = true;
+			close_transport(null);
+		}
 		this.poll_request = null;
 		this.poll_response = null;
 	}

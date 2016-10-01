@@ -26,9 +26,11 @@ using Diorite;
 
 public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 {
-	public MediaPlayerBinding(Drt.ApiRouter server, WebWorker web_worker, MediaPlayerModel model)
+	private const string TRACK_INFO_CHANGED = "track-info-changed";
+	
+	public MediaPlayerBinding(Drt.ApiRouter router, WebWorker web_worker, MediaPlayerModel model)
 	{
-		base(server, web_worker, "Nuvola.MediaPlayer", model);
+		base(router, web_worker, "Nuvola.MediaPlayer", model);
 	}
 	
 	protected override void bind_methods()
@@ -55,6 +57,8 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 		});
 		bind("track-info", Drt.ApiFlags.READABLE, "Returns information about currently playing track.",
 			handle_get_track_info, null);
+		add_notification(TRACK_INFO_CHANGED, Drt.ApiFlags.WRITABLE|Drt.ApiFlags.SUBSCRIBE,
+			"Sends a notification when track info is changed.");
 		model.set_rating.connect(on_set_rating);
 	}
 	
@@ -76,6 +80,8 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 			playback_actions.prepend(action);
 		playback_actions.reverse();
 		model.playback_actions = (owned) playback_actions;
+		
+		emit(TRACK_INFO_CHANGED);		
 		return new Variant.boolean(true);
 	}
 	

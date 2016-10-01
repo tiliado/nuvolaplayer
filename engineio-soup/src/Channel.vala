@@ -55,7 +55,8 @@ public class Channel: GLib.Object
 		switch (type)
 		{
 			case MessageType.REQUEST:
-				handle_request.begin(socket, id, method, data, (o, res) => {handle_request.end(res);});
+			case MessageType.SUBSCRIBE:
+				handle_request.begin(socket, type, id, method, data, (o, res) => {handle_request.end(res);});
 				break;
 			default:
 				warning("Other message types unsupported: %s", type.to_string());
@@ -63,7 +64,7 @@ public class Channel: GLib.Object
 		}
 	}
 	
-	protected virtual async void handle_request(Engineio.Socket socket, int id, string method, Json.Node? node)
+	protected virtual async void handle_request(Engineio.Socket socket, MessageType type, int id, string method, Json.Node? node)
 	{
 		Idle.add(handle_request.callback);
 		yield;

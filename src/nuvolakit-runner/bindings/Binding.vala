@@ -30,15 +30,15 @@ public abstract class Nuvola.Binding<ObjectType>: GLib.Object
 	public static const bool CONTINUE = false;
 	public string name {get; construct;}
 	public bool active {get; protected set; default = false;}
-	protected Drt.ApiRouter server;
+	protected Drt.ApiRouter router;
 	protected WebWorker web_worker;
 	private SList<string> handlers = null;
 	
-	public Binding(Drt.ApiRouter server, WebWorker web_worker, string name)
+	public Binding(Drt.ApiRouter router, WebWorker web_worker, string name)
 	{
 		GLib.Object(name: name);
 		this.web_worker = web_worker;
-		this.server = server;
+		this.router = router;
 	}
 	
 	protected virtual void bind_methods()
@@ -50,9 +50,9 @@ public abstract class Nuvola.Binding<ObjectType>: GLib.Object
 		foreach (var handler in handlers)
 		{
 			if (handler[0] == '/')
-				server.remove_method(handler);
+				router.remove_method(handler);
 			else
-				server.remove_handler(handler);
+				router.remove_handler(handler);
 		}
 		handlers = null;
 		active = false;
@@ -67,8 +67,26 @@ public abstract class Nuvola.Binding<ObjectType>: GLib.Object
 	protected void bind(string method, Drt.ApiFlags flags, string? description, owned Drt.ApiHandler handler, Drt.ApiParam[]? params)
 	{
 		var path = "/%s.%s".printf(name, method).down().replace(".", "/");
-		server.add_method(path, flags, description, (owned) handler, params);
+		router.add_method(path, flags, description, (owned) handler, params);
 		handlers.prepend(path);
+	}
+	
+	protected void add_notification(string method, Drt.ApiFlags flags, string? description)
+	{
+		var path = "/%s.%s".printf(name, method).down().replace(".", "/");
+		router.add_notification(path, flags, description);
+		handlers.prepend(path);
+	}
+	
+	protected void emit(string notification, string? detail=null, Variant? data=null)
+	{
+		emit_full.begin(notification, detail, data, (o, res) => { emit_full.end(res); });
+	}
+	
+	protected async bool emit_full(string notification, string? detail=null, Variant? data=null)
+	{
+		var path = "/%s.%s".printf(name, notification).down().replace(".", "/");
+		return yield router.emit(path, detail, data);
 	}
 	
 	protected void call_web_worker(string func_name, ref Variant? params) throws GLib.Error
@@ -86,9 +104,9 @@ public abstract class Nuvola.ObjectBinding<ObjectType>: Binding<ObjectType>
 {
 	protected Diorite.SingleList<ObjectType> objects;
 	
-	public ObjectBinding(Drt.ApiRouter server, WebWorker web_worker, string name)
+	public ObjectBinding(Drt.ApiRouter router, WebWorker web_worker, string name)
 	{
-		base(server, web_worker, name);
+		base(router, web_worker, name);
 		objects = new Diorite.SingleList<ObjectType>();
 	}
 	
@@ -139,9 +157,9 @@ public abstract class Nuvola.ModelBinding<ModelType>: Binding<ModelType>
 {
 	public ModelType model {get; private set;}
 	
-	public ModelBinding(Drt.ApiRouter server, WebWorker web_worker, string name, ModelType model)
+	public ModelBinding(Drt.ApiRouter router, WebWorker web_worker, string name, ModelType model)
 	{
-		base(server, web_worker, name);
+		base(router, web_worker, name);
 		this.model = model;
 		bind_methods();
 		active = true;

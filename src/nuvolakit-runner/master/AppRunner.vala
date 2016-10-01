@@ -51,6 +51,8 @@ public class AppRunner : GLib.Object
 		process.wait_async.begin(null, on_wait_async_done);
 	}
 	
+	public signal void notification(string path, string? detail, Variant? data);
+	
 	public List<unowned string> get_capatibilities()
 	{
 		return capatibilities.get_values();
@@ -125,6 +127,7 @@ public class AppRunner : GLib.Object
 	public void connect_channel(Drt.ApiChannel channel)
 	{
 		this.channel = channel;
+		channel.api_router.notification.connect(on_notification);
 	}
 	
 	[Deprecated (replacement="this.call_sync")]
@@ -172,6 +175,11 @@ public class AppRunner : GLib.Object
 		}
 		running = false;
 		exited();
+	}
+	
+	private void on_notification(string path, string? detail, Variant? data)
+	{
+		notification(path, detail, data);
 	}
 }
 

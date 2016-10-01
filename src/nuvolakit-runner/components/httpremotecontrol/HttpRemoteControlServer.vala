@@ -39,6 +39,7 @@ public class Server: Soup.Server
 	private bool running = false;
 	private File[] www_roots;
 	private Channel eio_channel;
+	private HashTable<string, Diorite.SingleList<Subscription>> subscribers;
 	
 	public Server(
 		MasterController app, MasterBus bus,
@@ -52,6 +53,7 @@ public class Server: Soup.Server
 		this.web_app_registry = web_app_registry;
 		this.www_roots = www_roots;
 		registered_runners = new GenericSet<string>(str_hash, str_equal);
+		subscribers = new HashTable<string, Diorite.SingleList<Subscription>>(str_hash, str_equal);
 		bus.router.add_method("/nuvola/httpremotecontrol/register", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
 			null, handle_register, {
 			new Drt.StringParam("id", true, false)
@@ -100,6 +102,7 @@ public class Server: Soup.Server
 		registered_runners.add(app_id);
 		var app = app_runners[app_id];
 		app.add_capatibility(CAPABILITY_NAME);
+		app.notification.connect(on_app_notification);
 		if (!running)
 			start();
 	}
@@ -109,7 +112,10 @@ public class Server: Soup.Server
 		message("HttpRemoteControlServer: unregister app id: %s", app_id);
 		var app = app_runners[app_id];
 		if (app != null)
+		{
 			app.remove_capatibility(CAPABILITY_NAME);
+			app.notification.disconnect(on_app_notification);
+		}
 		var result = registered_runners.remove(app_id);
 		if (running && registered_runners.length == 0)
 			stop();
@@ -129,7 +135,7 @@ public class Server: Soup.Server
 		self.handle_request(new RequestContext(server, msg, path, query, client));
 	}
 	
-	public async Variant? handle_eio_request(string path, Variant? params) throws GLib.Error
+	public async Variant? handle_eio_request(Engineio.Socket socket, Engineio.MessageType type, string path, Variant? params) throws GLib.Error
 	{
 		if (path.has_prefix("/app/"))
 		{
@@ -149,6 +155,16 @@ public class Server: Soup.Server
 			if (!(app_id in registered_runners))
 			{
 				throw new ChannelError.APP_NOT_FOUND("App with id '%s' doesn't exist or HTTP interface is not enabled.", app_id);
+			}
+			
+			if (type == Engineio.MessageType.SUBSCRIBE)
+			{
+				bool subscribe = true;
+				string? detail = null;
+				var abs_path = "/app/%s/nuvola%s".printf(app_id, path);
+				Drt.ApiNotification.parse_dict_params(abs_path, params, out subscribe, out detail);
+				yield this.subscribe(app_id, app_path, subscribe, detail, socket);
+				return null;
 			}
 			
 			var app = app_runners[app_id];
@@ -227,6 +243,43 @@ public class Server: Soup.Server
 			return;
 		}
 		serve_static(request);
+	}
+	
+	public async void subscribe(string app_id, string path, bool subscribe, string? detail, Engineio.Socket socket) throws GLib.Error
+	{
+		var abs_path = "/app/%s/nuvola%s".printf(app_id, path);
+		var subscribers = this.subscribers[abs_path];
+		if (subscribers == null)
+		{
+			subscribers = new Diorite.SingleList<Subscription>(Subscription.equals);
+			this.subscribers[abs_path] = subscribers;
+		}
+		
+		bool call_app_runer = false;
+		var subscription = new Subscription(this, socket, app_id, path, detail);
+		if (subscribe)
+		{
+			call_app_runer = subscribers.length == 0;
+			subscribers.append(subscription);
+			socket.closed.connect(subscription.unsubscribe);
+		}
+		else
+		{
+			subscribers.remove(subscription);
+			socket.closed.disconnect(subscription.unsubscribe);
+			call_app_runer = subscribers.length == 0;
+		}
+		if (call_app_runer)
+		{
+			var app = app_runners[app_id];
+			if (app == null)
+				throw new ChannelError.APP_NOT_FOUND("App with id '%s' doesn't exist or HTTP interface is not enabled.", app_id);
+			
+			var builder = new VariantBuilder(new VariantType("a{smv}"));
+			builder.add("{smv}", "subscribe", new Variant.boolean(subscribe));
+			builder.add("{smv}", "detail", detail != null ? new Variant.string(detail) : null);
+			yield app.call_full("/nuvola" + path, false, "rws", "dict", builder.end());
+		}
 	}
 	
 	private void serve_static(RequestContext request)
@@ -326,6 +379,59 @@ public class Server: Soup.Server
 		if (!unregister_app(app_id))
 			warning("App %s hasn't been registered yet!", app_id);
 		return null;
+	}
+	
+	private void on_app_notification(AppRunner app, string path, string? detail, Variant? data)
+	{
+		var full_path = "/app/" + app.app_id + path;
+		var subscribers = this.subscribers[full_path];
+		if (subscribers == null)
+		{
+			warning("No subscriber for %s!", full_path);
+			return;
+		}
+		var path_without_nuvola = "/app/" + app.app_id + path.substring(7);
+		foreach (var subscriber in subscribers)
+			eio_channel.send_notification(subscriber.socket, path_without_nuvola, data);
+	}
+	
+	private class Subscription
+	{
+		public Server server;
+		public Engineio.Socket socket;
+		public string app_id;
+		public string app_path;
+		public string? detail;
+		
+		public Subscription(Server server, Engineio.Socket socket, string app_id, string app_path, string? detail)
+		{
+			assert(socket != null);
+			this.server = server;
+			this.socket = socket;
+			this.app_id = app_id;
+			this.app_path = app_path;
+			this.detail = detail;
+		}
+		
+		public void unsubscribe()
+		{
+			server.subscribe.begin(app_id, app_path, false, detail, socket, (o, res) =>
+			{
+				try
+				{
+					server.subscribe.end(res);
+				}
+				catch (GLib.Error e)
+				{
+					warning("Failed to unsubscribe a closed socket: %s %s", app_id, app_path);
+				}
+			});
+		}
+		
+		public bool equals(Subscription other)
+		{
+			return this == other || this.socket == other.socket && this.app_id == other.app_id && this.app_path == other.app_path;
+		}
 	}
 }
 

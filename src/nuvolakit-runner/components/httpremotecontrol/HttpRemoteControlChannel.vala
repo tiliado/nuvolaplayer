@@ -43,7 +43,7 @@ public class Channel: Engineio.Channel
         this.http_server = http_server;
     }
     
-    protected override async void handle_request(Engineio.Socket socket, int id, string method, Json.Node? node)
+    protected override async void handle_request(Engineio.Socket socket, Engineio.MessageType type, int id, string method, Json.Node? node)
 	{
 		Variant? params = null;
         string status;
@@ -62,7 +62,7 @@ public class Channel: Engineio.Channel
                 }
             }
             
-            var variant_result = yield http_server.handle_eio_request(method, params);
+            var variant_result = yield http_server.handle_eio_request(socket, type, method, params);
             if (variant_result == null || !variant_result.get_type().is_subtype_of(VariantType.DICTIONARY))
             {
                 var builder = new VariantBuilder(new VariantType("a{smv}"));
@@ -90,6 +90,25 @@ public class Channel: Engineio.Channel
 		var msg = Engineio.serialize_message(Engineio.MessageType.RESPONSE, id, status, result);
 		socket.send_message(msg);
 	}
+    
+    public void send_notification(Engineio.Socket socket, string path, Variant? data)
+    {
+        Json.Node? result = null;
+        if (data == null || !data.get_type().is_subtype_of(VariantType.DICTIONARY))
+        {
+            var builder = new VariantBuilder(new VariantType("a{smv}"));
+            if (data != null)
+                g_variant_ref(data); // FIXME: How to avoid this hack
+            builder.add("{smv}", "result", data);
+            result = Json.gvariant_serialize(builder.end());
+        }
+        else
+        {
+            result = Json.gvariant_serialize(data);
+        }
+        var msg = Engineio.serialize_message(Engineio.MessageType.NOTIFICATION, 0, path, result);
+		socket.send_message(msg);
+    }
 }
 } // namespace Nuvola.HttpRemoteControl
 #endif

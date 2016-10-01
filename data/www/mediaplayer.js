@@ -55,7 +55,6 @@ Nuvola.onload = function()
     $id("play-pause").onclick = function()
     {
         Nuvola.channel.send("/app/" + Nuvola.appId + "/actions/activate", {name: "toggle-play"});
-        setTimeout(Nuvola.update.bind(Nuvola), 1000);
     };
 }
 
@@ -76,6 +75,7 @@ Nuvola.updateAppId = function()
         }
         catch (e)
         {
+            console.log(e);
             $id("app-name").innerText = "Error";
         }
     });
@@ -84,6 +84,10 @@ Nuvola.updateAppId = function()
 Nuvola.updateAppInfo = function()
 {
     var self = this;
+    self.channel.on("/app/" + this.appId + "/mediaplayer/track-info-changed", function(name, data)
+    {
+        self.updateTrackInfo();
+    });
     self.channel.send("/master/core/get_app_info", {"id": this.appId}, function(response)
     {
         try
@@ -93,6 +97,7 @@ Nuvola.updateAppInfo = function()
         }
         catch (e)
         {
+            console.log(e);
             $id("app-name").innerText = "Error";
         }
     });
@@ -109,6 +114,7 @@ Nuvola.updateTrackInfo = function()
         }
         catch (e)
         {
+            console.log(e);
             $id("app-name").innerText = "Error";
             return;
         }

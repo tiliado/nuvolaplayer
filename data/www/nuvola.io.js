@@ -92,6 +92,7 @@ Nuvolaio.Channel = function(socket)
 	this.socket = socket;
 	this.lastMessageId = 0;
 	this.outgoingRequests = {};
+	this.subscribers = {};
 	socket.on('message', this._onDataReceived.bind(this));
 }
 
@@ -113,11 +114,38 @@ Nuvolaio.Channel.prototype._getNextMessageId = function()
 
 Nuvolaio.Channel.prototype.send = function(name, data, callback)
 {
+	this._write(Nuvolaio.MessageType.REQUEST, name, data, callback);
+}
+
+Nuvolaio.Channel.prototype.subscribe = function(name, callback)
+{
+	this._write(Nuvolaio.MessageType.SUBSCRIBE, name, {subscribe: true}, callback);
+}
+
+Nuvolaio.Channel.prototype.unsubscribe = function(name, callback)
+{
+	this._write(Nuvolaio.MessageType.SUBSCRIBE, name, {subscribe: false}, callback);
+}
+
+Nuvolaio.Channel.prototype.on = function(name, callback)
+{
+	var callbacks = this.subscribers[name];
+	if (!callbacks)
+	{
+		callbacks = [];
+		this.subscribers[name] = callbacks;
+		this.subscribe(name, null);
+	}
+	callbacks.push(callback);
+}
+
+Nuvolaio.Channel.prototype._write = function(msg_type, name, data, callback)
+{
 	var id = this._getNextMessageId();
-	var msg = Nuvolaio.serializeMessage(Nuvolaio.MessageType.REQUEST, id, name, data === undefined ? null : data);
+	var msg = Nuvolaio.serializeMessage(msg_type, id, name, data === undefined ? null : data);
 	this.outgoingRequests[id] = {
 		id: id,
-		type: Nuvolaio.MessageType.REQUEST,
+		type: msg_type,
 		callback: callback
 	};
 	this.socket.send(msg);
@@ -141,14 +169,13 @@ Nuvolaio.Channel.prototype._onDataReceived = function(data)
 		console.log("Request received");
 		break;
 	case Nuvolaio.MessageType.RESPONSE:
-		console.log("Response received");
 		this._handleResponse(msg);
 		break;
 	case Nuvolaio.MessageType.SUBSCRIBE:
 		console.log("Subscribe received");
 		break;
 	case Nuvolaio.MessageType.NOTIFICATION:
-		console.log("Notification received");
+		this._handleNotification(msg);
 		break;
 	}
 }
@@ -178,6 +205,14 @@ Nuvolaio.Channel.prototype._handleResponse = function(msg)
 			console.log("No callback for request resulted in error: " + JSON.stringify(msg.data));
 		}
 	}
+}
+
+Nuvolaio.Channel.prototype._handleNotification = function(msg)
+{
+	var callbacks = this.subscribers[msg.method];
+	if (callbacks)
+		for (var i = 0; i < callbacks.length; i++)
+			callbacks[i](msg.method, msg.data);
 }
 
 Nuvolaio.Channel.Result = function(status, data)
