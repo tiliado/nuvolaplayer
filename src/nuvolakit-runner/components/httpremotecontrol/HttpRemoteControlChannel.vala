@@ -58,7 +58,7 @@ public class Channel: Engineio.Channel
                 }
                 catch (GLib.Error e)
                 {
-                    throw new ChannelError.PARSE_ERROR("Failed to parse JSON params: %s", e.message);
+                    throw new ChannelError.PARSE_ERROR("Failed to parse JSON params: %s. Ensure you have passed an object/mapping/dictionary.", e.message);
                 }
             }
             
