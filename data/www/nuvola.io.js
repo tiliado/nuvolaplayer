@@ -124,6 +124,7 @@ Nuvolaio.Channel.prototype.subscribe = function(name, callback)
 
 Nuvolaio.Channel.prototype.unsubscribe = function(name, callback)
 {
+	delete this.subscribers[name];
 	this._write(Nuvolaio.MessageType.SUBSCRIBE, name, {subscribe: false}, callback);
 }
 
