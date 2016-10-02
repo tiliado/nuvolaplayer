@@ -32,6 +32,7 @@ public class Server: Soup.Server
 {
 	private const string APP_REGISTERED = "/nuvola/httpremotecontrol/app-registered";
 	private const string APP_UNREGISTERED = "/nuvola/httpremotecontrol/app-unregistered";
+	public uint service_port {get; set; default = 8089;}
 	private MasterBus bus;
 	private MasterController app;
 	private HashTable<string, AppRunner> app_runners;
@@ -42,6 +43,8 @@ public class Server: Soup.Server
 	private File[] www_roots;
 	private Channel eio_channel;
 	private HashTable<string, Diorite.SingleList<Subscription>> subscribers;
+	private NM.Client? nm = null;
+	private Diorite.SingleList<Address> addresses;
 	
 	public Server(
 		MasterController app, MasterBus bus,
@@ -54,6 +57,7 @@ public class Server: Soup.Server
 		this.app_runners_order = app_runners_order;
 		this.web_app_registry = web_app_registry;
 		this.www_roots = www_roots;
+		addresses = new Diorite.SingleList<Address>(Address.equals);
 		registered_runners = new GenericSet<string>(str_hash, str_equal);
 		subscribers = new HashTable<string, Diorite.SingleList<Subscription>>(str_hash, str_equal);
 		bus.router.add_method("/nuvola/httpremotecontrol/register", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
@@ -70,6 +74,8 @@ public class Server: Soup.Server
 		bus.router.notification.connect(on_master_notification);
 		var eio_server = new Engineio.Server(this, "/nuvola.io/");
 		eio_channel = new Channel(eio_server, this);
+		NM.Client.new_async.begin(null, on_nm_client_created);
+		notify["port"].connect_after(on_port_changed);
 	}
 	
 	~Server()
@@ -80,17 +86,34 @@ public class Server: Soup.Server
 	
 	public void start()
 	{
-		var port = 8089;
-		message("Start HttpRemoteControlServer at port %d", port);
-		add_handler("/", default_handler);
-		try
+		if (running)
+			return;
+		
+		foreach (var addr in addresses)
 		{
-			listen_all(port, 0);
-			running = true;
+			if (!addr.enabled)
+				continue;
+			try
+			{
+				message("Start HttpRemoteControlServer at %s:%u", addr.address, service_port);
+				listen(new InetSocketAddress.from_string(addr.address, service_port), 0);
+				running = true;
+			}
+			catch (GLib.Error e)
+			{
+				critical("Cannot start HttpRemoteControlServer at %s:%u: %s", addr.address, service_port, e.message);
+			}
 		}
-		catch (GLib.Error e)
+		if (running)
+			add_handler("/", default_handler);
+	}
+	
+	public void restart()
+	{
+		if (running)
 		{
-			critical("Cannot start HttpRemoteControlServer at port %d: %s", port, e.message);
+			stop();
+			start();
 		}
 	}
 	
@@ -100,6 +123,31 @@ public class Server: Soup.Server
 		disconnect();
 		remove_handler("/");
 		running = false;
+	}
+	
+	public void refresh_addresses()
+	{
+		if (nm == null)
+			return;
+		
+		this.addresses.clear();
+		this.addresses.append(new Address("127.0.0.1", "Local host", true));
+		var connections = nm.get_active_connections();
+		foreach (var conn in connections.data)
+		{
+			unowned SList<NM.IP4Address> addresses = conn.ip4_config.get_addresses();
+			foreach (unowned NM.IP4Address addr in addresses)
+			{
+				var ip4 = addr.get_address();
+				var addr_str = "%u.%u.%u.%u".printf(
+					(ip4 & 0xFF),
+					(ip4 >> 8) & 0xFF,
+					(ip4 >> 16) & 0xFF,
+					(ip4 >> 24) & 0xFF);
+				this.addresses.append(new Address(addr_str, conn.get_id(), !false));
+			}
+		}
+		restart();
 	}
 	
 	private void register_app(string app_id)
@@ -435,6 +483,43 @@ public class Server: Soup.Server
 		var path_without_nuvola = "/app/" + app.app_id + path.substring(7);
 		foreach (var subscriber in subscribers)
 			eio_channel.send_notification(subscriber.socket, path_without_nuvola, data);
+	}
+	
+	private void on_nm_client_created(GLib.Object? o, AsyncResult res)
+	{
+		try
+		{
+			nm = NM.Client.new_async.end(res);
+			refresh_addresses();
+		}
+		catch (GLib.Error e)
+		{
+			warning("Failed to create NM client: %s", e.message);
+		}
+	}
+	
+	private void on_port_changed(GLib.Object o, ParamSpec p)
+	{
+		restart();
+	}
+	
+	private class Address
+	{
+		public string address;
+		public string name;
+		public bool enabled;
+		
+		public Address(string address, string name, bool enabled=false)
+		{
+			this.address = address;
+			this.name = name;
+			this.enabled = enabled;
+		}
+		
+		public bool equals(Address other)
+		{
+			return this.address == other.address;
+		}
 	}
 	
 	private class Subscription: GLib.Object
