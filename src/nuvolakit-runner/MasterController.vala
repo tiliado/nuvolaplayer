@@ -42,6 +42,9 @@ public string build_master_ipc_id()
 
 public class MasterController : Diorite.Application
 {
+	private const string APP_STARTED = "/nuvola/core/app-started";
+	private const string APP_EXITED = "/nuvola/core/app-exited";
+	
 	public WebAppListWindow? main_window {get; private set; default = null;}
 	public Diorite.Storage storage {get; private set; default = null;}
 	public WebAppRegistry web_app_reg {get; private set; default = null;}
@@ -148,6 +151,10 @@ public class MasterController : Diorite.Application
 				handle_get_app_info, {
 				new Drt.StringParam("id", true, false, null, "Application id"),
 				});
+			server.api.add_notification(APP_STARTED, Drt.ApiFlags.WRITABLE|Drt.ApiFlags.SUBSCRIBE,
+				"Emitted when a new app is launched.");
+			server.api.add_notification(APP_EXITED, Drt.ApiFlags.WRITABLE|Drt.ApiFlags.SUBSCRIBE,
+				"Emitted when a app has exited.");
 			server.start();
 		}
 		catch (Diorite.IOError e)
@@ -310,6 +317,7 @@ public class MasterController : Diorite.Application
 		channel.api_token = api_token;
 		runner.connect_channel(channel);
 		debug("Connected to runner server for '%s'.", app_id);
+		server.api.emit(APP_STARTED, app_id, app_id);
 		return new Variant.boolean(true);
 	}
 	
@@ -576,6 +584,7 @@ public class MasterController : Diorite.Application
 		if (app_runners_map[runner.app_id] == runner)
 			app_runners_map.remove(runner.app_id);
 		
+		server.api.emit(APP_EXITED, runner.app_id, runner.app_id);
 		runner_exited(runner);
 		release();
 	}
