@@ -29,20 +29,36 @@ var $id = document.getElementById.bind(document);
 var $class = document.getElementsByClassName.bind(document);
 var $1 = document.querySelector.bind(document);
 var $all = document.querySelectorAll.bind(document);
+var $mkelm = function (tag, attrs, text)
+{
+	var elm = document.createElement(tag);
+	if (attrs)
+		for (var name in attrs)
+			if (attrs.hasOwnProperty(name))
+				elm.setAttribute(name, attrs[name]);
+	if (text !== null && text !== undefined)
+		 $addText(elm, text);
+	return elm;
+}
+var $addText = function(elm, text)
+{
+	elm.appendChild(document.createTextNode("" + text));
+	return elm;
+}
 
 var Nuvola = {};
 
 Nuvola.onload = function()
 {
-    this.appId = "test"; 
-    this.appInfo = null;
+    this.allApps = {};
+    this.appId = null;
     this.socket = eio('ws://' + location.host, {path: "/nuvola.io"});
 	this.channel = new Nuvolaio.Channel(this.socket);
 	var self = this;
 	this.socket.on('open', function()
 	{
 		console.log("Socket opened");
-		self.update();
+		self.start();
 	});
     this.socket.on('message', function(data)
     {
@@ -58,20 +74,27 @@ Nuvola.onload = function()
     };
 }
 
-Nuvola.update = function()
+Nuvola.start = function()
 {
-    this.updateAppId();
+    this.updateAllApps();
 }
 
-Nuvola.updateAppId = function()
+Nuvola.updateAllApps = function()
 {
     var self = this;
-    self.channel.send("/master/core/get_top_runner", null, function(response)
+    self.channel.on("/master/core/app-started", Nuvola._onAppAppeared.bind(self));
+    self.channel.on("/master/httpremotecontrol/app-registered", Nuvola._onAppAppeared.bind(self));
+    self.channel.on("/master/core/app-exited", Nuvola._onAppGone.bind(self));
+    self.channel.on("/master/httpremotecontrol/app-unregistered", Nuvola._onAppGone.bind(self));
+    self.channel.send("/master/core/list_apps", null, function(response)
     {
         try
         {
-            self.appId = response.finish().result;
-            self.updateAppInfo();
+            self.allApps = {};
+            var apps = response.finish().result;
+            for (var i = 0; i < apps.length; i++)
+				self.allApps[apps[i].id] = apps[i];
+            self.updateAppsList();
         }
         catch (e)
         {
@@ -81,26 +104,72 @@ Nuvola.updateAppId = function()
     });
 }
 
-Nuvola.updateAppInfo = function()
+Nuvola._onAppGone = function(notification, data)
 {
+	var app = data.result;
+	delete this.allApps[app];
+	this.updateAppsList();
+	this.channel.unsubscribePrefix("/app/" + app + "/");
+}
+
+Nuvola._onAppAppeared = function(notification, data)
+{
+	var self = this;
+	var app = data.result;
+	var app = data.result;
+	self.channel.send("/master/core/get_app_info", {id: app}, function(response)
+	{
+		self.allApps[app] = response.finish();
+		self.updateAppsList();
+	});
+}
+
+Nuvola.updateAppsList = function()
+{
+	var list = $id("app-list");
+	list.onchange = function(){};
+	while (list.firstChild)
+		list.removeChild(list.firstChild);
+	
+	var selected = null;
+	for (var id in this.allApps)
+	{
+		if (this.allApps.hasOwnProperty(id))
+		{
+			var app = this.allApps[id];
+			if (app.capabilities.indexOf("httpcontrol") === -1)
+				continue;
+			if (!selected)
+				selected = id;
+			var option = $mkelm("option", {value: app.id}, app.name);
+			if (id === this.appId)
+			{
+				selected = id;
+				option.selected = true;
+			}
+			list.appendChild(option);
+		}
+	}
+	var self = this;
+	list.onchange = function()
+	{
+		self.updateAppInfo(this.value);
+	};
+	this.updateAppInfo(selected);
+}
+
+Nuvola.updateAppInfo = function(selected)
+{
+    if (this.appId)
+		this.channel.unsubscribePrefix("/app/" + this.appId + "/");
+    
+    this.appId = selected;
     var self = this;
     self.channel.on("/app/" + this.appId + "/mediaplayer/track-info-changed", function(name, data)
     {
         self.updateTrackInfo();
     });
-    self.channel.send("/master/core/get_app_info", {"id": this.appId}, function(response)
-    {
-        try
-        {
-            self.appInfo = response.finish();
-            self.updateTrackInfo();
-        }
-        catch (e)
-        {
-            console.log(e);
-            $id("app-name").innerText = "Error";
-        }
-    });
+    self.updateTrackInfo();
 }
 
 Nuvola.updateTrackInfo = function()
@@ -119,7 +188,7 @@ Nuvola.updateTrackInfo = function()
             return;
         }
         
-        $id("app-name").innerText = self.appInfo ? self.appInfo.name : self.appId;
+        $id("app-name").innerText = self.allApps[self.appId].name;
         $id("track-title").innerText = data.title || "unknown";
         $id("track-album").innerText = data.album || "unknown";
         $id("track-artist").innerText = data.artist || "unknown";
@@ -141,7 +210,6 @@ Nuvola.updateTrackInfo = function()
             $id("track-rating").innerText = stars;
         }
     });
-	return;
 }
 
 window.onload = Nuvola.onload.bind(Nuvola);
