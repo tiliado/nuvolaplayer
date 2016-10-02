@@ -177,9 +177,10 @@ public class AppRunner : GLib.Object
 		exited();
 	}
 	
-	private void on_notification(string path, string? detail, Variant? data)
+	private void on_notification(Drt.ApiRouter router, GLib.Object source, string path, string? detail, Variant? data)
 	{
-		notification(path, detail, data);
+		if (source == channel)
+			notification(path, detail, data);
 	}
 }
 

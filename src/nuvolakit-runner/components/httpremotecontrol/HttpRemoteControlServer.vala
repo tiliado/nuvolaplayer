@@ -63,6 +63,7 @@ public class Server: Soup.Server
 			new Drt.StringParam("id", true, false)
 		});
 		app.runner_exited.connect(on_runner_exited);
+		bus.router.notification.connect(on_master_notification);
 		var eio_server = new Engineio.Server(this, "/nuvola.io/");
 		eio_channel = new Channel(eio_server, this);
 	}
@@ -70,6 +71,7 @@ public class Server: Soup.Server
 	~Server()
 	{
 		app.runner_exited.disconnect(on_runner_exited);
+		bus.router.notification.disconnect(on_master_notification);
 	}
 	
 	public void start()
@@ -173,6 +175,16 @@ public class Server: Soup.Server
 		if (path.has_prefix("/master/"))
 		{
 			var master_path = path.substring(7);
+			if (type == Engineio.MessageType.SUBSCRIBE)
+			{
+				bool subscribe = true;
+				string? detail = null;
+				var abs_path = "/master/nuvola%s".printf(master_path);
+				Drt.ApiNotification.parse_dict_params(abs_path, params, out subscribe, out detail);
+				yield this.subscribe(null, master_path, subscribe, detail, socket);
+				return null;
+			}
+			
 			return bus.call_local_sync_full("/nuvola" + master_path, false, "rw", "dict", params);
 		}
 		throw new ChannelError.INVALID_REQUEST("Request '%s' is invalid.", path);
@@ -245,9 +257,9 @@ public class Server: Soup.Server
 		serve_static(request);
 	}
 	
-	public async void subscribe(string app_id, string path, bool subscribe, string? detail, Engineio.Socket socket) throws GLib.Error
+	public async void subscribe(string? app_id, string path, bool subscribe, string? detail, Engineio.Socket socket) throws GLib.Error
 	{
-		var abs_path = "/app/%s/nuvola%s".printf(app_id, path);
+		var abs_path = app_id != null ? "/app/%s/nuvola%s".printf(app_id, path) : "/master/nuvola%s".printf(path);
 		var subscribers = this.subscribers[abs_path];
 		if (subscribers == null)
 		{
@@ -255,30 +267,38 @@ public class Server: Soup.Server
 			this.subscribers[abs_path] = subscribers;
 		}
 		
-		bool call_app_runer = false;
+		bool call_to_subscribe = false;
 		var subscription = new Subscription(this, socket, app_id, path, detail);
 		if (subscribe)
 		{
-			call_app_runer = subscribers.length == 0;
+			call_to_subscribe = subscribers.length == 0;
 			subscribers.append(subscription);
 			socket.closed.connect(subscription.unsubscribe);
 		}
 		else
 		{
-			subscribers.remove(subscription);
 			socket.closed.disconnect(subscription.unsubscribe);
-			call_app_runer = subscribers.length == 0;
+			subscribers.remove(subscription);
+			call_to_subscribe = subscribers.length == 0;
 		}
-		if (call_app_runer)
+		if (call_to_subscribe)
 		{
-			var app = app_runners[app_id];
-			if (app == null)
-				throw new ChannelError.APP_NOT_FOUND("App with id '%s' doesn't exist or HTTP interface is not enabled.", app_id);
-			
 			var builder = new VariantBuilder(new VariantType("a{smv}"));
 			builder.add("{smv}", "subscribe", new Variant.boolean(subscribe));
 			builder.add("{smv}", "detail", detail != null ? new Variant.string(detail) : null);
-			yield app.call_full("/nuvola" + path, false, "rws", "dict", builder.end());
+			var params = builder.end();
+			if (app_id != null)
+			{
+				var app = app_runners[app_id];
+				if (app == null)
+					throw new ChannelError.APP_NOT_FOUND("App with id '%s' doesn't exist or HTTP interface is not enabled.", app_id);
+				
+				yield app.call_full("/nuvola" + path, false, "rws", "dict", params);
+			}
+			else
+			{
+				bus.call_local_sync_full("/nuvola" + path, false, "rws", "dict", params);
+			}
 		}
 	}
 	
@@ -381,6 +401,22 @@ public class Server: Soup.Server
 		return null;
 	}
 	
+	private void on_master_notification(Drt.ApiRouter router, GLib.Object conn, string path, string? detail, Variant? data)
+	{
+		if (conn != bus)
+			return;
+		var full_path = "/master" + path;
+		var subscribers = this.subscribers[full_path];
+		if (subscribers == null)
+		{
+			warning("No subscriber for %s!", full_path);
+			return;
+		}
+		var path_without_nuvola = "/master" + path.substring(7);
+		foreach (var subscriber in subscribers)
+				eio_channel.send_notification(subscriber.socket, path_without_nuvola, data);
+	}
+	
 	private void on_app_notification(AppRunner app, string path, string? detail, Variant? data)
 	{
 		var full_path = "/app/" + app.app_id + path;
@@ -395,42 +431,46 @@ public class Server: Soup.Server
 			eio_channel.send_notification(subscriber.socket, path_without_nuvola, data);
 	}
 	
-	private class Subscription
+	private class Subscription: GLib.Object
 	{
 		public Server server;
 		public Engineio.Socket socket;
-		public string app_id;
-		public string app_path;
+		public string? app_id;
+		public string path;
 		public string? detail;
 		
-		public Subscription(Server server, Engineio.Socket socket, string app_id, string app_path, string? detail)
+		public Subscription(Server server, Engineio.Socket socket, string? app_id, string path, string? detail)
 		{
 			assert(socket != null);
 			this.server = server;
 			this.socket = socket;
 			this.app_id = app_id;
-			this.app_path = app_path;
+			this.path = path;
 			this.detail = detail;
 		}
 		
 		public void unsubscribe()
 		{
-			server.subscribe.begin(app_id, app_path, false, detail, socket, (o, res) =>
+			this.ref(); // Keep alive for a while	
+			server.subscribe.begin(app_id, path, false, detail, socket, on_unsubscribe_done);
+		}
+		
+		private void on_unsubscribe_done(GLib.Object? o, AsyncResult res)
+		{
+			try
 			{
-				try
-				{
-					server.subscribe.end(res);
-				}
-				catch (GLib.Error e)
-				{
-					warning("Failed to unsubscribe a closed socket: %s %s", app_id, app_path);
-				}
-			});
+				this.unref(); // free
+				server.subscribe.end(res);
+			}
+			catch (GLib.Error e)
+			{
+				warning("Failed to unsubscribe a closed socket: %s %s", app_id, path);
+			}
 		}
 		
 		public bool equals(Subscription other)
 		{
-			return this == other || this.socket == other.socket && this.app_id == other.app_id && this.app_path == other.app_path;
+			return this == other || this.socket == other.socket && this.app_id == other.app_id && this.path == other.path;
 		}
 	}
 }
