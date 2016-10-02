@@ -30,6 +30,8 @@ public const string CAPABILITY_NAME = "httpcontrol";
 
 public class Server: Soup.Server
 {
+	private const string APP_REGISTERED = "/nuvola/httpremotecontrol/app-registered";
+	private const string APP_UNREGISTERED = "/nuvola/httpremotecontrol/app-unregistered";
 	private MasterBus bus;
 	private MasterController app;
 	private HashTable<string, AppRunner> app_runners;
@@ -62,6 +64,8 @@ public class Server: Soup.Server
 			null, handle_unregister, {
 			new Drt.StringParam("id", true, false)
 		});
+		bus.router.add_notification(APP_REGISTERED, Drt.ApiFlags.SUBSCRIBE|Drt.ApiFlags.WRITABLE, null);
+		bus.router.add_notification(APP_UNREGISTERED, Drt.ApiFlags.SUBSCRIBE|Drt.ApiFlags.WRITABLE, null);
 		app.runner_exited.connect(on_runner_exited);
 		bus.router.notification.connect(on_master_notification);
 		var eio_server = new Engineio.Server(this, "/nuvola.io/");
@@ -107,6 +111,7 @@ public class Server: Soup.Server
 		app.notification.connect(on_app_notification);
 		if (!running)
 			start();
+		bus.router.emit(APP_REGISTERED, app_id, app_id);
 	}
 	
 	private bool unregister_app(string app_id)
@@ -119,6 +124,7 @@ public class Server: Soup.Server
 			app.notification.disconnect(on_app_notification);
 		}
 		var result = registered_runners.remove(app_id);
+		bus.router.emit(APP_UNREGISTERED, app_id, app_id);
 		if (running && registered_runners.length == 0)
 			stop();
 		return result;
