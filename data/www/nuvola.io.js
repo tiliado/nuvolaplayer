@@ -128,6 +128,13 @@ Nuvolaio.Channel.prototype.unsubscribe = function(name, callback)
 	this._write(Nuvolaio.MessageType.SUBSCRIBE, name, {subscribe: false}, callback);
 }
 
+Nuvolaio.Channel.prototype.unsubscribePrefix = function(prefix, callback)
+{
+	for (var name in this.subscribers)
+		if (this.subscribers.hasOwnProperty(name) && name.indexOf(prefix) === 0)
+			this.unsubscribe(name, null);
+}
+
 Nuvolaio.Channel.prototype.on = function(name, callback)
 {
 	var callbacks = this.subscribers[name];
