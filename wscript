@@ -365,7 +365,7 @@ def build(ctx):
 		target = NUVOLAKIT_WORKER,
 		source = ctx.path.ant_glob('src/nuvolakit-worker/*.vala'),
 		packages = "dioriteglib-{0} {1} {2}".format(ctx.env.DIORITE_SERIES, 'webkit2gtk-web-extension-4.0', 'javascriptcoregtk-4.0'),
-		uselib = "DIORITEGLIB DIORITEGTK WEBKIT JSCORE",
+		uselib = "DIORITEGLIB DIORITEGTK WEBKITEXT JSCORE",
 		use = [NUVOLAKIT_BASE],
 		vala_defines = vala_defines,
 		cflags = ['-DG_LOG_DOMAIN="Nuvola"'],
