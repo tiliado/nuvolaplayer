@@ -31,7 +31,7 @@ public class MasterBus: Drt.ApiBus
     
     public MasterBus(string bus_name, Drt.ApiRouter? router=null)
     {
-        base(bus_name, router ?? new Drt.ApiRouter());
+        base(bus_name, router ?? new Drt.ApiRouter(), 10000);
     }
 }
 

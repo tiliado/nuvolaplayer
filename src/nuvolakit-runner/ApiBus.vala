@@ -32,7 +32,7 @@ public class IpcBus: Drt.ApiBus
     
     public IpcBus(string bus_name, Drt.ApiRouter? router=null)
     {
-        base(bus_name, router ?? new Drt.ApiRouter());
+        base(bus_name, router ?? new Drt.ApiRouter(), 5000);
     }
     
     public Drt.ApiChannel? connect_master(string bus_name, string? api_token) throws Diorite.IOError
