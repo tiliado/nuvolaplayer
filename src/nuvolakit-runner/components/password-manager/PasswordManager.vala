@@ -95,7 +95,7 @@ public class PasswordManager
 		try
 		{
 			yield Secret.password_store(
-				secret_schema, Secret.COLLECTION_DEFAULT, "Password for '%s' at %s".printf(username, hostname),
+				secret_schema, Secret.COLLECTION_DEFAULT, "Nuvola Player password for '%s' at %s".printf(username, hostname),
 				password, cancellable, SCHEMA_APP_ID, app_id,  SCHEMA_HOSTNAME, hostname, SCHEMA_USERNAME, username);
 		}
 		catch (GLib.Error e)
