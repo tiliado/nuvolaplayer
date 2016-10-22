@@ -34,8 +34,9 @@ public class PasswordManager
 	private string app_id;
 	private Secret.Schema secret_schema;
 	private HashTable<string, Diorite.SingleList<LoginCredentials>>? passwords = null;
+	private WebEngine web_engine;
 	
-	public PasswordManager(string app_id)
+	public PasswordManager(WebEngine web_engine, string app_id)
 	{
 		this.app_id = app_id;
 		secret_schema = new Secret.Schema(
@@ -43,12 +44,21 @@ public class PasswordManager
 			SCHEMA_APP_ID, Secret.SchemaAttributeType.STRING,
 			SCHEMA_HOSTNAME, Secret.SchemaAttributeType.STRING,
 			SCHEMA_USERNAME, Secret.SchemaAttributeType.STRING);
+		this.web_engine = web_engine;
+		#if HAVE_WEBKIT_2_8
+		web_engine.context_menu.connect(on_context_menu);
+		#endif
 	}
 	
 	~PasswordManager()
 	{
 		debug("~PasswordManager");
+		#if HAVE_WEBKIT_2_8
+		web_engine.context_menu.disconnect(on_context_menu);
+		#endif
 	}
+	
+	public signal void prefill_username(int username_index);
 	
 	public HashTable<string, Diorite.SingleList<LoginCredentials>>? get_passwords()
 	{
@@ -103,6 +113,38 @@ public class PasswordManager
 			warning("Failed to store password for '%s' at %s. %s".printf(username, hostname, e.message));
 		}
 	}
+	
+	#if HAVE_WEBKIT_2_8
+	private void on_context_menu(WebKit.ContextMenu menu, Gdk.Event event, WebKit.HitTestResult hit_test_result)
+	{
+		var data = menu.get_user_data();
+		if (data != null && data.is_of_type(new VariantType("(sas)")))
+		{
+			string name = null;
+			VariantIter iter = null;
+			data.get("(sas)", out name, out iter);
+			if (name == "prefill-password")
+			{
+				var usernames = new WebKit.ContextMenu();
+				string username = null;
+				var i = 0;
+				while (iter.next("s", out username))
+				{
+					var action = new Gtk.Action("prefill-password-%d".printf(i++), username, null, null);
+					action.activate.connect(on_prefill_menu_item_activated);
+					usernames.append(new WebKit.ContextMenuItem(action));
+				}
+				menu.append(new WebKit.ContextMenuItem.with_submenu("Prefill a password", usernames));
+				
+			}
+		}
+	}
+	
+	private void on_prefill_menu_item_activated(Gtk.Action action)
+	{
+		prefill_username(int.parse(action.name.substring(17)));
+	}
+	#endif
 }
 
 } // namespace Nuvola

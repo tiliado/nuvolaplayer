@@ -30,11 +30,13 @@ public class PasswordManagerBinding : ModelBinding<PasswordManager>
 	public PasswordManagerBinding(Drt.ApiRouter router, WebWorker web_worker, PasswordManager model)
 	{
 		base(router, web_worker, "Nuvola.PasswordManager", model);
+		model.prefill_username.connect(on_prefil_username);
 	}
 	
 	~PasswordManagerBinding()
 	{
 		debug("~PasswordManagerBinding");
+		model.prefill_username.disconnect(on_prefil_username);
 	}
 	
 	protected override void bind_methods()
@@ -71,6 +73,11 @@ public class PasswordManagerBinding : ModelBinding<PasswordManager>
 					builder.add("(sss)", hostname, item.username, item.password);
 		}
 		return builder.end();
+	}
+	
+	private void on_prefil_username(int index)
+	{
+		web_worker.call_sync("/nuvola/passwordmanager/prefill-username", new Variant("(i)", index));
 	}
 }
 

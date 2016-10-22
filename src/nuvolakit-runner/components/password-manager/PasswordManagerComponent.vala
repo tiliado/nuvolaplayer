@@ -32,13 +32,15 @@ public class PasswordManagerComponent: Component
 	private string web_app_id;
 	private PasswordManager? manager = null;
 	private PasswordManagerBinding? binding = null;
+	private WebEngine engine;
 	
-	public PasswordManagerComponent(Diorite.KeyValueStorage config, IpcBus ipc_bus, WebWorker web_worker, string web_app_id)
+	public PasswordManagerComponent(Diorite.KeyValueStorage config, IpcBus ipc_bus, WebWorker web_worker, string web_app_id, WebEngine engine)
 	{
 		base("passwordmanager", "Password Manager (Experimental)", "Stores passwords from login forms in a keyring.");
 		this.ipc_bus = ipc_bus;
 		this.web_worker = web_worker;
 		this.web_app_id = web_app_id;
+		this.engine = engine;
 		config.bind_object_property("component.passwordmanager.", this, "enabled").set_default(false).update_property();
 		enabled_set = true;
 		if (enabled)
@@ -47,7 +49,7 @@ public class PasswordManagerComponent: Component
 	
 	protected override void load()
 	{
-		manager = new PasswordManager(web_app_id);
+		manager = new PasswordManager(engine, web_app_id);
 		binding = new PasswordManagerBinding(ipc_bus.router, web_worker, manager);
 		manager.fetch_passwords.begin(on_passwords_fetched);
 	}

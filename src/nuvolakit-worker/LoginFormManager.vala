@@ -34,6 +34,7 @@ public class LoginFormManager: GLib.Object
 	private WebKit.WebPage page = null;
 	private uint look_up_forms_source_id = 0;
 	private Drt.ApiChannel channel;
+	private unowned LoginForm context_menu_form = null;
 	
 	public LoginFormManager(Drt.ApiChannel channel)
 	{
@@ -41,11 +42,17 @@ public class LoginFormManager: GLib.Object
 		login_forms = new Diorite.SingleList<LoginForm>();
 		this.channel = channel;
 		request_passwords();
+		channel.api_router.add_method("/nuvola/passwordmanager/prefill-username", Drt.ApiFlags.WRITABLE,
+			"Prefill username.",
+			handle_prefill_username, {
+				new Drt.IntParam("index", true, null, "Username index.")
+		});
 	}
 	
 	~LoginFormManager()
 	{
 		debug("~LoginFormManager");
+		channel.api_router.remove_method("/nuvola/passwordmanager/prefill-username");
 	}
 	
 	private void request_passwords()
@@ -194,6 +201,33 @@ public class LoginFormManager: GLib.Object
 			look_up_forms_source_id = Timeout.add_seconds(5, look_up_forms_cb);
 	}
 	
+	#if HAVE_WEBKIT_2_8
+	public bool manage_context_menu(WebKit.ContextMenu menu, WebKit.DOM.Node? node)
+	{
+		if (node != null && node is HTMLInputElement)
+		{
+			foreach (var form in login_forms)
+			{
+				if (form.username == node || form.password == node)
+				{
+					context_menu_form = form;
+					var entries = get_credentials(form.uri.host, null);
+					if (entries != null)
+					{
+						var builder = new VariantBuilder(new VariantType("as"));
+						foreach (var entry in entries)
+							builder.add_value(entry.username);
+						menu.set_user_data(new Variant("(sas)", "prefill-password", builder));
+						return true;
+					}
+					break;
+				}
+			}
+		}
+		return false;
+	}
+	#endif
+	
 	private bool look_up_forms()
 	{
 		var document = page.get_dom_document();
@@ -234,6 +268,26 @@ public class LoginFormManager: GLib.Object
 	{
 		debug("Username changed %s %s", hostname, username);
 		prefill(form);
+	}
+	
+	private Variant? handle_prefill_username(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	{
+		if (context_menu_form != null)
+		{
+			var index = params.pop_int();
+			var entries = get_credentials(context_menu_form.uri.host, null);
+			if (entries != null)
+			{
+				unowned LoginCredentials credentials = entries.nth_data((uint) index);
+				if (credentials != null)
+				{
+					context_menu_form.username.value = credentials.username;
+					context_menu_form.password.value = credentials.password;
+				}
+			}
+			context_menu_form = null;
+		}
+		return null;
 	}
 	
 	public static bool find_login_form_entries(WebKit.DOM.HTMLFormElement form,

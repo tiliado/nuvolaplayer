@@ -449,7 +449,7 @@ public class AppRunnerController : RunnerApplication
 		bindings.add_object(menu_bar);
 		
 		#if EXPERIMENTAL
-		components.prepend(new PasswordManagerComponent(config, ipc_bus, web_worker, web_app.id));
+		components.prepend(new PasswordManagerComponent(config, ipc_bus, web_worker, web_app.id, web_engine));
 		#endif
 		components.prepend(new AudioScrobblerComponent(this, bindings, master_config, config, connection.session));
 		components.prepend(new MPRISComponent(this, bindings, config));

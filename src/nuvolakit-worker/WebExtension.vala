@@ -315,6 +315,9 @@ public class WebExtension: GLib.Object
 		
 		web_page.send_request.connect(on_send_request);
 		web_page.document_loaded.connect(on_document_loaded);
+		#if HAVE_WEBKIT_2_8
+		web_page.context_menu.connect(on_context_menu);
+		#endif
 	}
 	
 	private bool on_send_request(WebKit.URIRequest request, WebKit.URIResponse? redirected_response)
@@ -421,6 +424,15 @@ public class WebExtension: GLib.Object
 				login_form_manager.manage_forms(page);
 		}
 	}
+	
+	#if HAVE_WEBKIT_2_8
+	private bool on_context_menu(WebKit.ContextMenu menu, WebKit.WebHitTestResult hit_test)
+	{
+		if (login_form_manager != null)
+			return login_form_manager.manage_context_menu(menu, hit_test.node);
+		return false;
+	}
+	#endif
 }
 
 } // namespace Nuvola

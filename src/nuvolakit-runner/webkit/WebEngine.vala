@@ -95,7 +95,10 @@ public class WebEngine : GLib.Object, JSExecutor
 		web_view.notify["zoom-level"].connect(on_zoom_level_changed);
 		web_view.decide_policy.connect(on_decide_policy);
 		web_view.script_dialog.connect(on_script_dialog);
+		web_view.context_menu.connect(on_context_menu);
 	}
+	
+	public signal void context_menu(WebKit.ContextMenu menu, Gdk.Event event, WebKit.HitTestResult hit_test_result);
 	
 	public static bool init_web_context(WebAppStorage storage)
 	{
@@ -763,6 +766,12 @@ public class WebEngine : GLib.Object, JSExecutor
 		if (dialog.get_dialog_type() == WebKit.ScriptDialogType.ALERT)
 			show_alert_dialog(ref handled, dialog.get_message());
 		return handled;
+	}
+	
+	private bool on_context_menu(WebKit.ContextMenu menu, Gdk.Event event, WebKit.HitTestResult hit_test_result)
+	{
+		context_menu(menu, event, hit_test_result);
+		return false;
 	}
 }
 

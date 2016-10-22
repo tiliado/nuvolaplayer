@@ -58,6 +58,8 @@ namespace WebKit {
 		public void remove_all ();
 		[CCode (has_construct_function = false)]
 		public ContextMenu.with_items (GLib.List<WebKit.ContextMenuItem> items);
+		[Version (since = "2.8")]
+		public unowned GLib.Variant get_user_data ();
 	}
 	[CCode (cheader_filename = "webkit2/webkit2.h", type_id = "webkit_context_menu_item_get_type ()")]
 	public class ContextMenuItem : GLib.InitiallyUnowned {
