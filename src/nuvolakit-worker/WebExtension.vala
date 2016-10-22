@@ -34,9 +34,11 @@ public class WebExtension: GLib.Object
 	private File user_config_dir;
 	private JSApi js_api;
 	private JsRuntime bare_env;
-	private JSApi bare_api;
+	private JSApi bare_api = null;
 	private string? api_token = null;
 	private HashTable<string, Variant>? worker_data;
+	private LoginFormManager login_form_manager = null;
+	private unowned WebKit.WebPage page = null;
 	
 	public WebExtension(WebKit.WebExtension extension, Drt.ApiChannel channel, HashTable<string, Variant> worker_data)
 	{
@@ -59,6 +61,10 @@ public class WebExtension: GLib.Object
 		router.add_method("/nuvola/webworker/disable-gstreamer", Drt.ApiFlags.WRITABLE,
 			"Disable GStreamer",
 			handle_disable_gstreamer, null);
+		router.add_method("/nuvola/password-manager/enable", Drt.ApiFlags.WRITABLE,
+			"Enable Password Manager", handle_enable_password_manager, null);
+		router.add_method("/nuvola/password-manager/disable", Drt.ApiFlags.WRITABLE,
+			"Disable Password Manager", handle_disable_password_manager, null);
 		bridges = new HashTable<unowned WebKit.Frame, FrameBridge>(direct_hash, direct_equal);
 		
 		Variant response;
@@ -181,6 +187,31 @@ public class WebExtension: GLib.Object
 	private Variant? handle_disable_gstreamer(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		return Nuvola.Gstreamer.disable_gstreamer();
+	}
+	
+	private Variant? handle_enable_password_manager(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	{
+		Idle.add(enable_password_manager_cb);
+		return null;
+	}
+	
+	private bool enable_password_manager_cb()
+	{
+		if (login_form_manager == null)
+			login_form_manager = new LoginFormManager(channel);
+		if (page != null)
+			login_form_manager.manage_forms(page);
+		return false;
+	}
+	
+	private Variant? handle_disable_password_manager(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	{
+		if (login_form_manager != null)
+		{
+			login_form_manager.clear_forms();
+			login_form_manager = null;
+		}
+		return null;
 	}
 	
 	private void show_error(string message)
@@ -360,6 +391,7 @@ public class WebExtension: GLib.Object
 		}
 		else
 		{
+			this.page = page;
 			var frame = page.get_main_frame();
 			/*
 			 * If a page doesn't contain any JavaScript, `window_object_cleared` is never called because no JavaScript
@@ -384,6 +416,9 @@ public class WebExtension: GLib.Object
 			{
 				show_error("Failed to inject JavaScript API. %s".printf(e.message));
 			}
+			
+			if (login_form_manager != null)
+				login_form_manager.manage_forms(page);
 		}
 	}
 }

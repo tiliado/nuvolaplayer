@@ -447,6 +447,10 @@ public class AppRunnerController : RunnerApplication
 		components.prepend(new MediaKeysComponent(this, bindings, config, ipc_bus.master, web_app.id));
 		
 		bindings.add_object(menu_bar);
+		
+		#if EXPERIMENTAL
+		components.prepend(new PasswordManagerComponent(config, ipc_bus, web_worker, web_app.id));
+		#endif
 		components.prepend(new AudioScrobblerComponent(this, bindings, master_config, config, connection.session));
 		components.prepend(new MPRISComponent(this, bindings, config));
 		#if EXPERIMENTAL

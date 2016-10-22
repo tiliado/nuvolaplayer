@@ -213,6 +213,7 @@ def configure(ctx):
 	ctx.check_dep('json-glib-1.0', 'JSON-GLIB', '0.7')
 	ctx.check_dep('libarchive', 'LIBARCHIVE', '3.1')
 	ctx.check_dep('libnotify', 'NOTIFY', '0.7')
+	ctx.check_dep('libsecret-1', 'SECRET', '0.16')
 	ctx.check_dep("gstreamer-1.0", 'GST', "1.0")
 	ctx.check_dep('webkit2gtk-4.0', 'WEBKIT', MIN_WEBKIT)
 	ctx.check_dep('webkit2gtk-web-extension-4.0', 'WEBKITEXT', MIN_WEBKIT)
@@ -314,8 +315,8 @@ def build(ctx):
 			+ ctx.path.ant_glob('src/nuvolakit-runner/*/*.vala')
 			+ ctx.path.ant_glob('src/nuvolakit-runner/*/*/*.vala')
 			),
-		packages = 'webkit2gtk-4.0 javascriptcoregtk-4.0 gstreamer-1.0 libnm-util libnm-glib',
-		uselib =  'JSCORE WEBKIT GST LIBNM-UTIL LIBNM',
+		packages = 'webkit2gtk-4.0 javascriptcoregtk-4.0 gstreamer-1.0 libnm-util libnm-glib libsecret-1',
+		uselib =  'JSCORE WEBKIT GST LIBNM-UTIL LIBNM SECRET',
 		use = [NUVOLAKIT_BASE, ENGINEIO],
 		lib = ['m'],
 		vala_defines = vala_defines,
