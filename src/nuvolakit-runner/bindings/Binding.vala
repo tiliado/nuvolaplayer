@@ -45,6 +45,12 @@ public abstract class Nuvola.Binding<ObjectType>: GLib.Object
 	{
 	}
 	
+	public override void dispose()
+	{
+		unbind_methods();
+		base.dispose();
+	}
+	
 	protected void unbind_methods()
 	{
 		foreach (var handler in handlers)
