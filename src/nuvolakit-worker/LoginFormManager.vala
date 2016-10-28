@@ -156,7 +156,7 @@ public class LoginFormManager: GLib.Object
 	public void add(LoginForm form)
 	{
 		form.subscribe();
-		prefill(form);
+		prefill(form, true);
 		form.new_credentials.connect(on_new_credentials_from_form);
 		form.username_changed.connect(on_form_username_changed);
 		login_forms.prepend(form);
@@ -173,7 +173,7 @@ public class LoginFormManager: GLib.Object
 		login_forms = new Diorite.SingleList<LoginForm>();
 	}
 	
-	public bool prefill(LoginForm form)
+	public bool prefill(LoginForm form, bool force=false)
 	{
 		var username = form.username.value;
 		if (username == "")
@@ -181,8 +181,7 @@ public class LoginFormManager: GLib.Object
 		var entries = get_credentials(form.uri.host, username);
 		if (entries != null)
 		{
-			form.username.value = entries.data.username;
-			form.password.value = entries.data.password;
+			form.fill(entries.data.username, entries.data.password, force);
 			return true;
 		}
 		return false;
@@ -280,10 +279,7 @@ public class LoginFormManager: GLib.Object
 			{
 				unowned LoginCredentials credentials = entries.nth_data((uint) index);
 				if (credentials != null)
-				{
-					context_menu_form.username.value = credentials.username;
-					context_menu_form.password.value = credentials.password;
-				}
+					context_menu_form.fill(credentials.username, credentials.password, true);
 			}
 			context_menu_form = null;
 		}

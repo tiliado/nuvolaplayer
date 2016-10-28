@@ -66,6 +66,15 @@ public class LoginForm: GLib.Object
 			username.remove_event_listener("blur", LoginForm.on_username_changed, false);
 	}
 	
+	public void fill(string? username, string? password, bool force)
+	{
+		var active_element = form.owner_document.active_element;
+		if (this.username != null && username != null && username[0] != '\0' && (force || this.username != active_element))
+			this.username.value = username;
+		if (this.password != null && password != null && password[0] != '\0' && (force || this.password != active_element))
+			this.password.value = password;
+	}
+	
 	private void on_form_submitted(EventTarget target, Event event)
 	{
 		HTMLInputElement username; HTMLInputElement password;
