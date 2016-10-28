@@ -86,13 +86,8 @@ public abstract class Nuvola.Binding<ObjectType>: GLib.Object
 	
 	protected void emit(string notification, string? detail=null, Variant? data=null)
 	{
-		emit_full.begin(notification, detail, data, (o, res) => { emit_full.end(res); });
-	}
-	
-	protected async bool emit_full(string notification, string? detail=null, Variant? data=null)
-	{
 		var path = "/%s.%s".printf(name, notification).down().replace(".", "/");
-		return yield router.emit(path, detail, data);
+		router.emit(path, detail, data);
 	}
 	
 	protected void call_web_worker(string func_name, ref Variant? params) throws GLib.Error
