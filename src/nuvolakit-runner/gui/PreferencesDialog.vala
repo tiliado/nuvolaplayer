@@ -54,7 +54,7 @@ public class PreferencesDialog : Gtk.Dialog
 			warning("Unable to load application icon.");
 		}
 		
-		set_default_size(600, 500);
+		set_default_size(650, 500);
 		
 		if (parent != null)
 			set_transient_for(parent);
