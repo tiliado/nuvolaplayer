@@ -33,6 +33,7 @@ public class LoginFormManager: GLib.Object
 	private Diorite.SingleList<LoginForm> login_forms;
 	private WebKit.WebPage page = null;
 	private uint look_up_forms_source_id = 0;
+	private uint look_up_forms_attempts = 0;
 	private Drt.ApiChannel channel;
 	private unowned LoginForm context_menu_form = null;
 	
@@ -194,8 +195,9 @@ public class LoginFormManager: GLib.Object
 			look_up_forms_source_id = 0;
 		}
 		clear_forms();
+		look_up_forms_attempts = 0;
 		if (!look_up_forms())
-			look_up_forms_source_id = Timeout.add_seconds(5, look_up_forms_cb);
+			look_up_forms_source_id = Timeout.add_seconds(2, look_up_forms_cb);
 	}
 	
 	#if HAVE_WEBKIT_2_8
@@ -248,12 +250,13 @@ public class LoginFormManager: GLib.Object
 				form_found = true;
 			}
 		}
+		warning("Form found %s", form_found.to_string());
 		return form_found;
 	}
 	
 	private bool look_up_forms_cb()
 	{
-		return !look_up_forms();
+		return !(look_up_forms() || ++look_up_forms_attempts >= 30);
 	}
 	
 	private void on_new_credentials_from_form(LoginForm form, string hostname, string username, string password)
