@@ -242,9 +242,10 @@ public class LoginFormManager: GLib.Object
 			assert(form != null);
 			HTMLInputElement? username;
 			HTMLInputElement? password;
-			if (find_login_form_entries(form, out username, out password))
+			HTMLElement? submit;
+			if (find_login_form_entries(form, out username, out password, out submit))
 			{
-				var login_form = new LoginForm(page, form, username, password);
+				var login_form = new LoginForm(page, form, username, password, submit);
 				add(login_form);
 				form_found = true;
 			}
@@ -287,7 +288,8 @@ public class LoginFormManager: GLib.Object
 	}
 	
 	public static bool find_login_form_entries(WebKit.DOM.HTMLFormElement form,
-		out WebKit.DOM.HTMLInputElement username, out WebKit.DOM.HTMLInputElement password)
+		out WebKit.DOM.HTMLInputElement username, out WebKit.DOM.HTMLInputElement password,
+		out WebKit.DOM.HTMLElement? submit)
 	{
 		username = null;
 		password = null;
@@ -295,11 +297,17 @@ public class LoginFormManager: GLib.Object
 		var n_inputs = inputs.length;
 		WebKit.DOM.HTMLInputElement? username_node = null;
 		WebKit.DOM.HTMLInputElement? password_node = null;
+		WebKit.DOM.HTMLElement? submit_node = null;
 		for (var i = 0; i < n_inputs; i++)
 		{
 			var input = inputs.item(i) as WebKit.DOM.HTMLInputElement;
 			if (input == null)
+			{
+				var button = inputs.item(i) as WebKit.DOM.HTMLButtonElement;
+				if (button.type == "submit")
+					submit_node = button;
 				continue;
+			}
 			var input_type = input.type;
 			if (input_type == "text" || input_type == "tel" || input_type == "email")
 			{
@@ -313,12 +321,17 @@ public class LoginFormManager: GLib.Object
 					return false;
 				password_node = input;
 			}
+			else if (input_type == "submit")
+			{
+				submit_node = input;
+			}
 		}
 		
 		if (username_node != null && password_node != null)
 		{
 			username = username_node;
 			password = password_node;
+			submit = submit_node;
 			return true;
 		}
 		return false;
