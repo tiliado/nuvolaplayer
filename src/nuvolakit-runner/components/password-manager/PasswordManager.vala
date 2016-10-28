@@ -134,8 +134,7 @@ public class PasswordManager
 					action.activate.connect(on_prefill_menu_item_activated);
 					usernames.append(new WebKit.ContextMenuItem(action));
 				}
-				menu.append(new WebKit.ContextMenuItem.with_submenu("Prefill a password", usernames));
-				
+				menu.append(new WebKit.ContextMenuItem.with_submenu("Fill Password", usernames));
 			}
 		}
 	}
