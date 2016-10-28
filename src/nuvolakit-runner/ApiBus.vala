@@ -25,6 +25,8 @@
 namespace Nuvola
 {
 
+const int IPC_TIMEOUT = 60000;
+
 public class IpcBus: Drt.ApiBus
 {
     public Drt.ApiChannel? master {get; private set; default = null;}
@@ -32,13 +34,13 @@ public class IpcBus: Drt.ApiBus
     
     public IpcBus(string bus_name, Drt.ApiRouter? router=null)
     {
-        base(bus_name, router ?? new Drt.ApiRouter(), 5000);
+        base(bus_name, router ?? new Drt.ApiRouter(), IPC_TIMEOUT);
     }
     
     public Drt.ApiChannel? connect_master(string bus_name, string? api_token) throws Diorite.IOError
     {
 		return_val_if_fail(master == null, null);
-        master = connect_channel(bus_name, 5000);
+        master = connect_channel(bus_name, IPC_TIMEOUT);
         master.api_token = api_token;
         return master;
     }
