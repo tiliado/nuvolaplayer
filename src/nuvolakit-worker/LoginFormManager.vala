@@ -175,9 +175,7 @@ public class LoginFormManager: GLib.Object
 	
 	public bool prefill(LoginForm form, bool force=false)
 	{
-		var username = form.username.value;
-		if (username == "")
-			username = null;
+		var username = form.username != null ? form.username.value : "";
 		var entries = get_credentials(form.uri.host, username);
 		if (entries != null)
 		{
@@ -288,11 +286,12 @@ public class LoginFormManager: GLib.Object
 	}
 	
 	public static bool find_login_form_entries(WebKit.DOM.HTMLFormElement form,
-		out WebKit.DOM.HTMLInputElement username, out WebKit.DOM.HTMLInputElement password,
+		out WebKit.DOM.HTMLInputElement? username, out WebKit.DOM.HTMLInputElement password,
 		out WebKit.DOM.HTMLElement? submit)
 	{
 		username = null;
 		password = null;
+		submit = null;
 		var inputs = form.elements;
 		var n_inputs = inputs.length;
 		WebKit.DOM.HTMLInputElement? username_node = null;
@@ -327,7 +326,7 @@ public class LoginFormManager: GLib.Object
 			}
 		}
 		
-		if (username_node != null && password_node != null)
+		if (password_node != null)
 		{
 			username = username_node;
 			password = password_node;
