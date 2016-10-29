@@ -36,6 +36,7 @@ public class Component: Nuvola.Component
 	{
 		base("httpremotecontrol", "Remote control over HTTP", "Remote media player HTTP interface for control over network.");
 		this.hidden = true;
+		this.has_settings = true;
 		this.bindings = bindings;
 		this.app = app;
 		this.ipc_bus = ipc_bus;
@@ -43,6 +44,11 @@ public class Component: Nuvola.Component
 		enabled_set = true;
 		if (enabled)
 			load();
+	}
+	
+	public override Gtk.Widget? get_settings()
+	{		
+		return new Settings(ipc_bus);
 	}
 	
 	protected override void load()
@@ -65,6 +71,109 @@ public class Component: Nuvola.Component
 		catch (GLib.Error e)
 		{
 			warning("Remote call %s failed: %s", method, e.message);
+		}
+	}
+	
+	private class Settings : Gtk.Grid
+	{
+		private IpcBus ipc_bus;
+		
+		public Settings(IpcBus ipc_bus)
+		{
+			GLib.Object(row_spacing: 5, column_spacing: 10, hexpand: true, halign: Gtk.Align.CENTER);
+			this.ipc_bus = ipc_bus;
+			load.begin((o, res) => {load.end(res);});			
+		}
+		
+		private async void load()
+		{
+			try
+			{
+				var addresses = yield ipc_bus.master.call("/nuvola/httpremotecontrol/get-addresses", null);
+				var port = Diorite.variant_to_uint(yield ipc_bus.master.call("/nuvola/httpremotecontrol/get-port", null));
+				return_if_fail(addresses != null);
+				var iter = addresses.iterator();
+				string? address; string? name; bool enabled;
+				int line = 0;
+				var label = new Gtk.Label("<b>Security Warning</b>");
+				label.use_markup = true;
+				label.hexpand = true;
+				label.margin = 10;
+				attach(label, 0, line, 3, 1);
+				label = new Gtk.Label("All network communication is unencrypted and there is no authorization/password. Enable trustworthy network interfaces only (e.g. home network). <a href=\"https://github.com/tiliado/nuvolaplayer/issues/268\">Encrypted communication is planned</a>.");
+				label.wrap = true;
+				label.use_markup = true;
+				label.hexpand = true;
+				attach(label, 0, ++line, 3, 1);
+				label = new Gtk.Label("<b>Network Interfaces</b>");
+				label.use_markup = true;
+				label.margin = 10;
+				label.hexpand = true;
+				attach(label, 0, ++line, 3, 1);
+				label = new Gtk.Label("Specify a port and addresses Nuvola Player will be listening on.");
+				label.wrap = true;
+				label.use_markup = true;
+				label.hexpand = true;
+				attach(label, 0, ++line, 3, 1);
+				label = new Gtk.Label("Port");
+				label.use_markup = true;
+				label.hexpand = true;
+				attach(label, 1, ++line, 1, 1);
+				var spin = new Gtk.SpinButton.with_range (1, 65535, 1);
+				spin.value = port;
+				spin.hexpand = false;
+				spin.halign = Gtk.Align.CENTER;
+				spin.notify["value"].connect_after(on_spin_value_changed);
+				attach(spin, 2, line, 1, 1);
+				while (iter.next("(ssb)", out address, out name, out enabled))
+				{
+					line++;
+					label = new Gtk.Label(name);
+					label.hexpand = true;
+					attach(label, 1, line, 1, 1);
+					label = new Gtk.Label(address);
+					label.selectable = true;
+					label.hexpand = true;
+					attach(label, 2, line, 1, 1);
+					var toggle = new Gtk.Switch();
+					toggle.set_data<string>("address", (owned) address);
+					toggle.notify["active"].connect_after(on_switch_switched);
+					toggle.active = enabled;
+					attach(toggle, 0, line, 1, 1);
+				}
+				show_all();
+			}
+			catch (GLib.Error e)
+			{
+				warning("Failed to get addresses. %s", e.message);
+			}
+		}
+		
+		private void on_switch_switched(GLib.Object o, ParamSpec p)
+		{
+			var toggle = o as Gtk.Switch;
+			unowned string address = o.get_data<string>("address");
+			try
+			{
+				ipc_bus.master.call("/nuvola/httpremotecontrol/set-address-enabled", new Variant("(sb)", address, toggle.active));
+			}
+			catch (GLib.Error e)
+			{
+				warning("Failed to set address enabled. %s", e.message);
+			}
+		}
+		
+		private void on_spin_value_changed(GLib.Object o, ParamSpec p)
+		{
+			var spin = o as Gtk.SpinButton;
+			try
+			{
+				ipc_bus.master.call("/nuvola/httpremotecontrol/set-port", new Variant("(i)", spin.get_value_as_int()));
+			}
+			catch (GLib.Error e)
+			{
+				warning("Failed to set address enabled. %s", e.message);
+			}
 		}
 	}
 }

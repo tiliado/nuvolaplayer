@@ -30,9 +30,15 @@ public const string CAPABILITY_NAME = "httpcontrol";
 
 public class Server: Soup.Server
 {
+	public static string mk_address_enabled_key(string address)
+	{
+		return "components.httpcontrol.addresses.%s.enabled".printf(address.replace(".", "_"));
+	}
+	
+	private const string PORT_KEY = "components.httpcontrol.port";
 	private const string APP_REGISTERED = "/nuvola/httpremotecontrol/app-registered";
 	private const string APP_UNREGISTERED = "/nuvola/httpremotecontrol/app-unregistered";
-	public uint service_port {get; set; default = 8089;}
+	public uint service_port {get; set;}
 	private MasterBus bus;
 	private MasterController app;
 	private HashTable<string, AppRunner> app_runners;
@@ -57,6 +63,8 @@ public class Server: Soup.Server
 		this.app_runners_order = app_runners_order;
 		this.web_app_registry = web_app_registry;
 		this.www_roots = www_roots;
+		app.config.set_default_value(PORT_KEY, new Variant.int64(8089));
+		service_port = (int) app.config.get_int64(PORT_KEY);
 		addresses = new Diorite.SingleList<Address>(Address.equals);
 		registered_runners = new GenericSet<string>(str_hash, str_equal);
 		subscribers = new HashTable<string, Diorite.SingleList<Subscription>>(str_hash, str_equal);
@@ -67,6 +75,19 @@ public class Server: Soup.Server
 		bus.router.add_method("/nuvola/httpremotecontrol/unregister", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
 			null, handle_unregister, {
 			new Drt.StringParam("id", true, false)
+		});
+		bus.router.add_method("/nuvola/httpremotecontrol/get-addresses", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.READABLE,
+			null, handle_get_addresses, null);
+		bus.router.add_method("/nuvola/httpremotecontrol/set-address-enabled", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+			null, handle_set_address_enabled, {
+			new Drt.StringParam("address", true, false),
+			new Drt.BoolParam("enabled", true, false),
+		});
+		bus.router.add_method("/nuvola/httpremotecontrol/get-port", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.READABLE,
+			null, handle_get_port, null);
+		bus.router.add_method("/nuvola/httpremotecontrol/set-port", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+			null, handle_set_port, {
+			new Drt.IntParam("port", true, false),
 		});
 		bus.router.add_notification(APP_REGISTERED, Drt.ApiFlags.SUBSCRIBE|Drt.ApiFlags.WRITABLE, null);
 		bus.router.add_notification(APP_UNREGISTERED, Drt.ApiFlags.SUBSCRIBE|Drt.ApiFlags.WRITABLE, null);
@@ -115,6 +136,10 @@ public class Server: Soup.Server
 			stop();
 			start();
 		}
+		else if (registered_runners.length > 0)
+		{
+			start();
+		}
 	}
 	
 	public void stop()
@@ -131,7 +156,10 @@ public class Server: Soup.Server
 			return;
 		
 		this.addresses.clear();
-		this.addresses.append(new Address("127.0.0.1", "Local host", true));
+		var config = app.config;
+		var addr_str = "127.0.0.1";
+		var key = mk_address_enabled_key(addr_str);
+		this.addresses.append(new Address(addr_str, "Localhost", config.has_key(key) ? config.get_bool(key) : true));
 		var connections = nm.get_active_connections();
 		if (connections != null)
 		{
@@ -143,12 +171,14 @@ public class Server: Soup.Server
 				foreach (unowned NM.IP4Address addr in addresses)
 				{
 					var ip4 = addr.get_address();
-					var addr_str = "%u.%u.%u.%u".printf(
+					addr_str = "%u.%u.%u.%u".printf(
 						(ip4 & 0xFF),
 						(ip4 >> 8) & 0xFF,
 						(ip4 >> 16) & 0xFF,
 						(ip4 >> 24) & 0xFF);
-					this.addresses.append(new Address(addr_str, conn.get_id(), !false));
+					key = mk_address_enabled_key(addr_str);
+					var enabled = config.has_key(key) ? config.get_bool(key) : false;
+					this.addresses.append(new Address(addr_str, conn.get_id(), enabled));
 				}
 			}
 		}
@@ -457,6 +487,51 @@ public class Server: Soup.Server
 		var app_id = params.pop_string();
 		if (!unregister_app(app_id))
 			warning("App %s hasn't been registered yet!", app_id);
+		return null;
+	}
+	
+	private Variant? handle_get_addresses(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	{
+		var builder = new VariantBuilder(new VariantType("a(ssb)"));
+		foreach (var addr in addresses)
+			builder.add("(ssb)", addr.address, addr.name, addr.enabled);
+		return builder.end();
+	}
+	
+	private Variant? handle_set_address_enabled(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	{
+		var address = params.pop_string();
+		var enabled = params.pop_bool();
+		foreach (var addr in this.addresses)
+		{
+			if (addr.address == address)
+			{
+				if (addr.enabled != enabled)
+				{
+					addr.enabled = enabled;
+					Idle.add(() => {restart(); return false;});
+				}
+				app.config.set_bool(mk_address_enabled_key(address), enabled);
+				break;
+			}
+		}
+		return null;
+	}
+	
+	private Variant? handle_get_port(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	{
+		return service_port;
+	}
+	
+	private Variant? handle_set_port(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	{
+		var port = params.pop_int();
+		if (port != service_port)
+		{
+			service_port = port;
+			Idle.add(() => {restart(); return false;});
+			app.config.set_int64(PORT_KEY, port);
+		}
 		return null;
 	}
 	

@@ -48,11 +48,12 @@ public class MasterController : Diorite.Application
 	public WebAppListWindow? main_window {get; private set; default = null;}
 	public Diorite.Storage storage {get; private set; default = null;}
 	public WebAppRegistry web_app_reg {get; private set; default = null;}
+	public Config config {get; private set; default = null;}
 	private string[] exec_cmd;
 	private Queue<AppRunner> app_runners = null;
 	private HashTable<string, AppRunner> app_runners_map = null;
 	private MasterBus server = null;
-	private Config config = null;
+	
 	private Diorite.KeyValueStorageServer storage_server = null;
 	private ActionsKeyBinderServer actions_key_binder = null;
 	private MediaKeysServer media_keys = null;
