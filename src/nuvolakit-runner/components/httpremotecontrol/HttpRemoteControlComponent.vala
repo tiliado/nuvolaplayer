@@ -34,8 +34,8 @@ public class Component: Nuvola.Component
 	
 	public Component(RunnerApplication app, Bindings bindings, Diorite.KeyValueStorage config, IpcBus ipc_bus)
 	{
-		base("httpremotecontrol", "Remote control over HTTP", "Remote media player HTTP interface for control over network.");
-		this.hidden = true;
+		base("httpremotecontrol", "Remote control over HTTP (experimental)", "Remote media player HTTP interface for control over network.");
+		this.hidden = false;
 		this.has_settings = true;
 		this.bindings = bindings;
 		this.app = app;
