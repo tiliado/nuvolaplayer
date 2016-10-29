@@ -72,6 +72,14 @@ Nuvola.onload = function()
     {
         Nuvola.channel.send("/app/" + Nuvola.appId + "/actions/activate", {name: "toggle-play"});
     };
+    $id("go-prev").onclick = function()
+    {
+        Nuvola.channel.send("/app/" + Nuvola.appId + "/actions/activate", {name: "prev-song"});
+    };
+    $id("go-next").onclick = function()
+    {
+        Nuvola.channel.send("/app/" + Nuvola.appId + "/actions/activate", {name: "next-song"});
+    };
 }
 
 Nuvola.start = function()
@@ -99,7 +107,7 @@ Nuvola.updateAllApps = function()
         catch (e)
         {
             console.log(e);
-            $id("app-name").innerText = "Error";
+            $id("error").innerText = "Error";
         }
     });
 }
@@ -184,20 +192,19 @@ Nuvola.updateTrackInfo = function()
         catch (e)
         {
             console.log(e);
-            $id("app-name").innerText = "Error";
+            $id("error").innerText = "Error";
             return;
         }
-        
-        $id("app-name").innerText = self.allApps[self.appId].name;
-        $id("track-title").innerText = data.title || "unknown";
-        $id("track-album").innerText = data.album || "unknown";
-        $id("track-artist").innerText = data.artist || "unknown";
+        $id("error").innerText = "";
+        $id("track-title").innerText = data.title || "unknown track";
+	$id("track-album").innerText = data.album ? "from " +  data.album : "";
+        $id("track-artist").innerText = data.artist ? "by " +  data.artist : "";
         $id("playback-state").innerText = data.state || "unknown";
-        $id("play-pause").innerText = data.state === "playing" ? "pause" : "play";
+        $id("play-pause").innerText = data.state === "playing" ? "Pause" : "Play";
         
         if (!data.state || data.state == "unknown")
         {
-            $id("track-rating").innerText = "unknown";
+            $id("track-rating").innerText = "";
         }
         else
         {

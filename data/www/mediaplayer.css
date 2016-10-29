@@ -22,6 +22,61 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-img#album-art {
+body, html
+{
+    margin: 0px; padding: 0px; color: #eee; background-color: black;
+}
+body
+{
+    font-size: 120%;
+}
+h1
+{
+    font-size: 140%; text-align: center; margin-top: 0px;
+}
+img#album-art
+{
     display: none;
+}
+select
+{
+    padding: 10px; width: 90%; font-size: 120%; margin: 5px;
+}
+.center
+{
+    margin: 5px auto; text-align: center;
+}
+#error
+{
+    color: #FF99AB;
+}
+#content
+{
+    margin: 1em auto;
+    width: 400px;
+    padding: 20px;
+}
+
+#buttons button
+{
+    text-align: center;
+    padding: 10px 10px;
+    width: 30%;
+    font-size: 120%;
+    
+}
+#track-title
+{
+    display: block;
+    font-size: 250%;
+}
+#track-artist, #track-album
+{
+    display: block;
+    font-size: 140%;
+    padding: 5px;
+}
+#track-rating
+{
+ font-size: 300%;
 }
