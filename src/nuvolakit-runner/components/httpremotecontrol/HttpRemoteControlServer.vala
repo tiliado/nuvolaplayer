@@ -133,18 +133,23 @@ public class Server: Soup.Server
 		this.addresses.clear();
 		this.addresses.append(new Address("127.0.0.1", "Local host", true));
 		var connections = nm.get_active_connections();
-		foreach (var conn in connections.data)
+		if (connections != null)
 		{
-			unowned SList<NM.IP4Address> addresses = conn.ip4_config.get_addresses();
-			foreach (unowned NM.IP4Address addr in addresses)
+			foreach (var conn in connections.data)
 			{
-				var ip4 = addr.get_address();
-				var addr_str = "%u.%u.%u.%u".printf(
-					(ip4 & 0xFF),
-					(ip4 >> 8) & 0xFF,
-					(ip4 >> 16) & 0xFF,
-					(ip4 >> 24) & 0xFF);
-				this.addresses.append(new Address(addr_str, conn.get_id(), !false));
+				if (conn.ip4_config == null)
+					continue;
+				unowned SList<NM.IP4Address> addresses = conn.ip4_config.get_addresses();
+				foreach (unowned NM.IP4Address addr in addresses)
+				{
+					var ip4 = addr.get_address();
+					var addr_str = "%u.%u.%u.%u".printf(
+						(ip4 & 0xFF),
+						(ip4 >> 8) & 0xFF,
+						(ip4 >> 16) & 0xFF,
+						(ip4 >> 24) & 0xFF);
+					this.addresses.append(new Address(addr_str, conn.get_id(), !false));
+				}
 			}
 		}
 		restart();
