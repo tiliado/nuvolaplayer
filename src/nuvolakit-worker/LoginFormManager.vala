@@ -250,7 +250,6 @@ public class LoginFormManager: GLib.Object
 				form_found = true;
 			}
 		}
-		warning("Form found %s", form_found.to_string());
 		return form_found;
 	}
 	
