@@ -141,8 +141,17 @@ public class MasterController : Diorite.Application
 		try
 		{
 			server = new MasterBus(server_name);
-			server.add_handler("runner_started", "(ss)", handle_runner_started);
-			server.add_handler("runner_activated", "s", handle_runner_activated);
+			server.api.add_method("/nuvola/core/runner-started", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+				null,
+				handle_runner_started, {
+				new Drt.StringParam("id", true, false, null, "Application id"),
+				new Drt.StringParam("token", true, false, null, "Application token"),
+				});
+			server.api.add_method("/nuvola/core/runner-activated", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+				null,
+				handle_runner_activated, {
+				new Drt.StringParam("id", true, false, null, "Application id"),
+				});
 			server.api.add_method("/nuvola/core/get_top_runner", Drt.ApiFlags.READABLE, null, handle_get_top_runner, null);
 			server.api.add_method("/nuvola/core/list_apps", Drt.ApiFlags.READABLE,
 				"Returns information about all installed web apps.",
@@ -302,13 +311,10 @@ public class MasterController : Diorite.Application
 		return 0;
 	}
 	
-	private Variant? handle_runner_started(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_runner_started(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
-		string? app_id = null;
-		string? api_token = null;
-		data.get("(ss)", ref app_id, ref api_token);
-		return_val_if_fail(app_id != null && api_token != null, null);
-		
+		var app_id = params.pop_string();
+		var api_token = params.pop_string();
 		var runner = app_runners_map[app_id];
 		return_val_if_fail(runner != null, null);
 		
@@ -322,11 +328,9 @@ public class MasterController : Diorite.Application
 		return new Variant.boolean(true);
 	}
 	
-	private Variant? handle_runner_activated(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_runner_activated(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
-		var app_id = data.get_string();
-		return_val_if_fail(app_id != null, null);
-		
+		var app_id = params.pop_string();
 		var runner = app_runners_map[app_id];
 		return_val_if_fail(runner != null, null);
 		
