@@ -328,7 +328,7 @@ public class AppRunnerController : RunnerApplication
 		}
 		
 		var storage_client = new Diorite.KeyValueStorageClient(ipc_bus.master);
-		master_config = storage_client.get_proxy("master.config", 5000);
+		master_config = storage_client.get_proxy("master.config");
 		web_worker = new RemoteWebWorker(ipc_bus);
 	}
 	

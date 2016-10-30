@@ -174,7 +174,7 @@ public class MasterController : Diorite.Application
 			return;
 		}
 		
-		storage_server = new Diorite.KeyValueStorageServer(server);
+		storage_server = new Diorite.KeyValueStorageServer(server.api);
 		storage_server.add_provider("master.config", config);
 		
 		var key_grabber = new XKeyGrabber();
