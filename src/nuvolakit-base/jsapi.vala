@@ -134,11 +134,6 @@ public class JSApi : GLib.Object
 		return libsoup_version[0] * 10000 + libsoup_version[1] * 100 + libsoup_version[2];
 	}
 	
-	[Deprecated (replacement="call_ipc_method_void")]
-	public signal void send_message_async(string name, Variant? data);
-	[Deprecated (replacement="call_ipc_method_with_result")]
-	public signal void send_message_sync(string name, Variant? data, ref Variant? result);
-	
 	public signal void call_ipc_method_async(string name, Variant? data);
 	public signal void call_ipc_method_sync(string name, Variant? data, ref Variant? result);
 	public signal void call_ipc_method_with_dict_async(string name, Variant? data);
@@ -247,8 +242,6 @@ public class JSApi : GLib.Object
 	 */
 	private static const JS.StaticFunction[] static_functions =
 	{
-		{"_sendMessageAsync", send_message_async_func, 0},
-		{"_sendMessageSync", send_message_sync_func, 0},
 		{"_callIpcMethodAsync", call_ipc_method_async_func, 0},
 		{"_callIpcMethodSync", call_ipc_method_sync_func, 0},
 		{"_callIpcMethodWithDictAsync", call_ipc_method_with_dict_async_func, 0},
@@ -289,16 +282,6 @@ public class JSApi : GLib.Object
 		};
 		klass = JS.create_class(class_def);
 		klass.retain();
-	}
-	
-	static unowned JS.Value send_message_async_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)
-	{
-		return call_ipc_method_func(ctx, function, self, args, out exception, true, 3);
-	}
-	
-	static unowned JS.Value send_message_sync_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)
-	{
-		return call_ipc_method_func(ctx, function, self, args, out exception, false, 3);
 	}
 	
 	static unowned JS.Value call_ipc_method_async_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)
@@ -373,9 +356,6 @@ public class JSApi : GLib.Object
 			case 1:
 				Idle.add(() => {js_api.call_ipc_method_with_dict_async(name, data); return false;});
 				break;
-			default:
-				Idle.add(() => {js_api.send_message_async(name, data); return false;});
-				break;
 			}
 			return undefined;
 		}
@@ -388,9 +368,6 @@ public class JSApi : GLib.Object
 			break;
 		case 1:
 			js_api.call_ipc_method_with_dict_sync(name, data, ref result);
-			break;
-		default:
-			js_api.send_message_sync(name, data, ref result);
 			break;
 		}
 		

@@ -166,8 +166,6 @@ public class WebEngine : GLib.Object, JSExecutor
 		uint[] libsoup_version = {Soup.get_major_version(), Soup.get_minor_version(), Soup.get_micro_version()};
 		api = new JSApi(
 			runner_app.storage, web_app.data_dir, storage.config_dir, config, session, webkit_version, libsoup_version);
-		api.send_message_async.connect(on_send_message_async);
-		api.send_message_sync.connect(on_send_message_sync);
 		api.call_ipc_method_async.connect(on_call_ipc_method_async);
 		api.call_ipc_method_sync.connect(on_call_ipc_method_sync);
 		api.call_ipc_method_with_dict_async.connect(on_call_ipc_method_with_dict_async);
@@ -561,31 +559,6 @@ public class WebEngine : GLib.Object, JSExecutor
 	{
 		runner_app.show_error("Integration error", params.pop_string());
 		return null;
-	}
-	
-	private void on_send_message_async(string name, Variant? data)
-	{
-		try
-		{
-			ipc_bus.send_local_message(name, data);
-		}
-		catch (GLib.Error e)
-		{
-			critical("Failed to send message '%s'. %s", name, e.message);
-		}
-	}
-	
-	private void on_send_message_sync(string name, Variant? data, ref Variant? result)
-	{
-		try
-		{
-			result = ipc_bus.send_local_message(name, data);
-		}
-		catch (GLib.Error e)
-		{
-			critical("Failed to send message '%s'. %s", name, e.message);
-			result = null;
-		}
 	}
 	
 	private void on_call_ipc_method_async(string name, Variant? data)

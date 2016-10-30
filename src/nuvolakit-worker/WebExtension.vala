@@ -95,8 +95,6 @@ public class WebExtension: GLib.Object
 		
 		js_api = new JSApi(storage, data_dir, user_config_dir, new KeyValueProxy(channel, "config"),
 			new KeyValueProxy(channel, "session"), webkit_version, libsoup_version);
-		js_api.send_message_async.connect(on_send_message_async);
-		js_api.send_message_sync.connect(on_send_message_sync);
 		js_api.call_ipc_method_async.connect(on_call_ipc_method_async);
 		js_api.call_ipc_method_sync.connect(on_call_ipc_method_sync);
 		js_api.call_ipc_method_with_dict_async.connect(on_call_ipc_method_with_dict_async);
@@ -274,31 +272,6 @@ public class WebExtension: GLib.Object
 		try
 		{
 			result = channel.call_with_dict_sync(name, data);
-		}
-		catch (GLib.Error e)
-		{
-			critical("Failed to send message '%s'. %s", name, e.message);
-			result = null;
-		}
-	}
-	
-	private void on_send_message_async(string name, Variant? data)
-	{
-		try
-		{
-			channel.send_message(name, data);
-		}
-		catch (GLib.Error e)
-		{
-			critical("Failed to send message '%s'. %s", name, e.message);
-		}
-	}
-	
-	private void on_send_message_sync(string name, Variant? data, ref Variant? result)
-	{
-		try
-		{
-			result = channel.send_message(name, data);
 		}
 		catch (GLib.Error e)
 		{
