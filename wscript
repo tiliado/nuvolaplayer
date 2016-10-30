@@ -31,7 +31,7 @@ out = 'build'
 # Application name and version
 NAME="Nuvola Player R"
 APPNAME = "nuvolaplayer3"
-VERSION = "3.1.0+"
+VERSION = "3.1.1+"
 UNIQUE_NAME="cz.fenryxo.NuvolaPlayer3"
 GENERIC_NAME = "Cloud Player"
 BLURB = "Cloud music integration for your Linux desktop"
@@ -201,6 +201,7 @@ def configure(ctx):
 	
 	# Check dependencies
 	ctx.env.DIORITE_SERIES = DIORITE_SERIES = "0.3"
+	DIORITE_BUGFIX = "1"
 	ctx.check_dep('glib-2.0', 'GLIB', MIN_GLIB)
 	ctx.check_dep('gio-2.0', 'GIO', MIN_GLIB)
 	ctx.check_dep('gthread-2.0', 'GTHREAD', MIN_GLIB)
@@ -208,8 +209,8 @@ def configure(ctx):
 	ctx.check_dep('gdk-3.0', 'GDK', MIN_GTK)
 	ctx.check_dep('gdk-x11-3.0', 'GDKX11', MIN_GTK)
 	ctx.check_dep('x11', 'XLIB', '0.5')
-	ctx.check_dep('dioriteglib-' + DIORITE_SERIES, 'DIORITEGLIB', DIORITE_SERIES)
-	ctx.check_dep('dioritegtk-' + DIORITE_SERIES, 'DIORITEGTK', DIORITE_SERIES)
+	ctx.check_dep('dioriteglib-' + DIORITE_SERIES, 'DIORITEGLIB', DIORITE_SERIES + "." + DIORITE_BUGFIX)
+	ctx.check_dep('dioritegtk-' + DIORITE_SERIES, 'DIORITEGTK', DIORITE_SERIES + "." + DIORITE_BUGFIX)
 	ctx.check_dep('json-glib-1.0', 'JSON-GLIB', '0.7')
 	ctx.check_dep('libarchive', 'LIBARCHIVE', '3.1')
 	ctx.check_dep('libnotify', 'NOTIFY', '0.7')
