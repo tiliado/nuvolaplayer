@@ -321,7 +321,7 @@ class Control
 	
 	public int track_info(string? key=null) throws GLib.Error
 	{
-		var response = conn.send_message("/nuvola/mediaplayer/track-info::r,,");
+		var response = conn.call_sync("/nuvola/mediaplayer/track-info", null);
 		var title = Diorite.variant_dict_str(response, "title");
 		var artist = Diorite.variant_dict_str(response, "artist");
 		var album = Diorite.variant_dict_str(response, "album");
