@@ -27,20 +27,23 @@ namespace Nuvola
 
 public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder
 {
-	private Drt.MessageChannel conn;
+	private Drt.ApiChannel conn;
 	
-	public class ActionsKeyBinderClient(Drt.MessageChannel conn)
+	public class ActionsKeyBinderClient(Drt.ApiChannel conn)
 	{
 		this.conn = conn;
-		conn.add_handler("ActionsKeyBinder.actionActivated", "s", handle_action_activated);
+		conn.api_router.add_method("/nuvola/actionkeybinder/action-activated", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+			null, handle_action_activated, {
+			new Drt.StringParam("action", true, false)
+		});
 	}
 	
 	public string? get_keybinding(string action)
 	{
-		const string METHOD = "ActionsKeyBinder.getKeybinding";
+		const string METHOD = "/nuvola/actionkeybinder/get-keybinding";
 		try
 		{
-			var data = conn.send_message(METHOD, new Variant.string(action)); 
+			var data = conn.call_sync(METHOD, new Variant("(s)", action)); 
 			Diorite.MessageListener.check_type_string(data, "ms");
 			string? keybinding = null;
 			data.get("ms", &keybinding);
@@ -55,10 +58,10 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder
 	
 	public bool set_keybinding(string action, string? keybinding)
 	{
-		const string METHOD = "ActionsKeyBinder.setKeybinding";
+		const string METHOD = "/nuvola/actionkeybinder/set-keybinding";
 		try
 		{
-			var data = conn.send_message(METHOD, new Variant("(sms)", action, keybinding)); 
+			var data = conn.call_sync(METHOD, new Variant("(sms)", action, keybinding)); 
 			Diorite.MessageListener.check_type_string(data, "b");
 			return data.get_boolean();
 		}
@@ -71,10 +74,10 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder
 	
 	public bool bind(string action)
 	{
-		const string METHOD = "ActionsKeyBinder.bind";
+		const string METHOD = "/nuvola/actionkeybinder/bind";
 		try
 		{
-			var data = conn.send_message(METHOD, new Variant.string(action)); 
+			var data = conn.call_sync(METHOD, new Variant("(s)", action)); 
 			Diorite.MessageListener.check_type_string(data, "b");
 			return data.get_boolean();
 		}
@@ -87,10 +90,10 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder
 	
 	public bool unbind(string action)
 	{
-		const string METHOD = "ActionsKeyBinder.unbind";
+		const string METHOD = "/nuvola/actionkeybinder/unbind";
 		try
 		{
-			var data = conn.send_message(METHOD, new Variant.string(action)); 
+			var data = conn.call_sync(METHOD, new Variant("(s)", action)); 
 			Diorite.MessageListener.check_type_string(data, "b");
 			return data.get_boolean();
 		}
@@ -103,10 +106,10 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder
 	
 	public string? get_action(string keybinding)
 	{
-		const string METHOD = "ActionsKeyBinder.getAction";
+		const string METHOD = "/nuvola/actionkeybinder/get-action";
 		try
 		{
-			var data = conn.send_message(METHOD, new Variant.string(keybinding)); 
+			var data = conn.call_sync(METHOD, new Variant("(s)", keybinding)); 
 			Diorite.MessageListener.check_type_string(data, "ms");
 			string? action = null;
 			data.get("ms", &action);
@@ -121,10 +124,10 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder
 	
 	public bool is_available(string keybinding)
 	{
-		const string METHOD = "ActionsKeyBinder.isAvailable";
+		const string METHOD = "/nuvola/actionkeybinder/is-available";
 		try
 		{
-			var data = conn.send_message(METHOD, new Variant.string(keybinding)); 
+			var data = conn.call_sync(METHOD, new Variant("(s)", keybinding)); 
 			Diorite.MessageListener.check_type_string(data, "b");
 			return data.get_boolean();
 		}
@@ -135,9 +138,9 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder
 		}
 	}
 	
-	private Variant? handle_action_activated(GLib.Object source, Variant? data) throws Diorite.MessageError
+	private Variant? handle_action_activated(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
-		var action = data.get_string();
+		var action = params.pop_string();
 		var handled = false;
 		action_activated(action, ref handled);
 		return new Variant.boolean(handled);
