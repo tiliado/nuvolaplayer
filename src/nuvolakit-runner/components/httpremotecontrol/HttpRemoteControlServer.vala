@@ -425,9 +425,9 @@ public class Server: Soup.Server
 	{
 		var app = app_runners[app_id];
 		var flags = app_request.method == "POST" ? "rw" : "r";
-		var method = "/nuvola/%s::%s,dict,".printf(app_request.app_path, flags);
+		var method = "/nuvola/" + app_request.app_path;
 		unowned string? form_data = app_request.method == "POST" ? (string) app_request.body.data : app_request.uri.query;
-		return to_json(app.send_message(method, serialize_params(form_data)));
+		return to_json(app.call_full_sync(method, false, flags, "dict", serialize_params(form_data)));
 	}
 	
 	private Json.Node send_local_request(string path, RequestContext request) throws GLib.Error

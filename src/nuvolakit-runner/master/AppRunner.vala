@@ -130,15 +130,6 @@ public class AppRunner : GLib.Object
 		channel.api_router.notification.connect(on_notification);
 	}
 	
-	[Deprecated (replacement="this.call_sync")]
-	public Variant? send_message(string name, Variant? params) throws GLib.Error
-	{
-		if (channel == null)
-			throw new Diorite.MessageError.IOERROR("No connected to app runner '%s'.", app_id);
-		
-		return channel.send_message(name, params);
-	}
-	
 	public Variant? call_sync(string name, Variant? params) throws GLib.Error
 	{
 		if (channel == null)
@@ -161,6 +152,14 @@ public class AppRunner : GLib.Object
 			throw new Diorite.MessageError.IOERROR("No connected to app runner '%s'.", app_id);
 		
 		return yield channel.call_full(method, allow_private, flags, params_format, params);
+	}
+	
+	public Variant? call_full_sync(string method, bool allow_private, string flags, string params_format, Variant? params) throws GLib.Error
+	{
+		if (channel == null)
+			throw new Diorite.MessageError.IOERROR("No connected to app runner '%s'.", app_id);
+		
+		return channel.call_full_sync(method, allow_private, flags, params_format, params);
 	}
 	
 	private void on_wait_async_done(GLib.Object? o, AsyncResult res)
