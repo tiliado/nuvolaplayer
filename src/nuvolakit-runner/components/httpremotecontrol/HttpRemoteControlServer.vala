@@ -435,9 +435,9 @@ public class Server: Soup.Server
 		var msg = request.msg;
 		var body = msg.request_body.flatten();
 		var flags = msg.method == "POST" ? "rw" : "r";
-		var method = "/nuvola/%s::%s,dict,".printf(path, flags);
+		var method = "/nuvola/" + path;
 		unowned string? form_data = msg.method == "POST" ? (string) body.data : msg.uri.query;
-		return to_json(bus.send_local_message(method, serialize_params(form_data)));
+		return to_json(bus.call_local_sync_full(method, false, flags, "dict", serialize_params(form_data)));
 	}
 	
 	private Variant? serialize_params(string? form_data)
