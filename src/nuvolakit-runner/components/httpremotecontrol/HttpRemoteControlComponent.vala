@@ -48,7 +48,7 @@ public class Component: Nuvola.Component
 	
 	public override Gtk.Widget? get_settings()
 	{		
-		return new Settings(ipc_bus);
+		return new Settings(app, ipc_bus);
 	}
 	
 	protected override void load()
@@ -77,10 +77,13 @@ public class Component: Nuvola.Component
 	private class Settings : Gtk.Grid
 	{
 		private IpcBus ipc_bus;
+		private RunnerApplication app;
+		private uint port = 0;
 		
-		public Settings(IpcBus ipc_bus)
+		public Settings(RunnerApplication app, IpcBus ipc_bus)
 		{
 			GLib.Object(row_spacing: 5, column_spacing: 10, hexpand: true, halign: Gtk.Align.CENTER);
+			this.app = app;
 			this.ipc_bus = ipc_bus;
 			load.begin((o, res) => {load.end(res);});			
 		}
@@ -90,7 +93,7 @@ public class Component: Nuvola.Component
 			try
 			{
 				var addresses = yield ipc_bus.master.call("/nuvola/httpremotecontrol/get-addresses", null);
-				var port = Diorite.variant_to_uint(yield ipc_bus.master.call("/nuvola/httpremotecontrol/get-port", null));
+				port = Diorite.variant_to_uint(yield ipc_bus.master.call("/nuvola/httpremotecontrol/get-port", null));
 				return_if_fail(addresses != null);
 				var iter = addresses.iterator();
 				string? address; string? name; bool enabled;
@@ -99,22 +102,22 @@ public class Component: Nuvola.Component
 				label.use_markup = true;
 				label.hexpand = true;
 				label.margin = 10;
-				attach(label, 0, line, 3, 1);
+				attach(label, 0, line, 4, 1);
 				label = new Gtk.Label("All network communication is unencrypted and there is no authorization/password. Enable trustworthy network interfaces only (e.g. home network). <a href=\"https://github.com/tiliado/nuvolaplayer/issues/268\">Encrypted communication is planned</a>.");
 				label.wrap = true;
 				label.use_markup = true;
 				label.hexpand = true;
-				attach(label, 0, ++line, 3, 1);
+				attach(label, 0, ++line, 4, 1);
 				label = new Gtk.Label("<b>Network Interfaces</b>");
 				label.use_markup = true;
 				label.margin = 10;
 				label.hexpand = true;
-				attach(label, 0, ++line, 3, 1);
+				attach(label, 0, ++line, 4, 1);
 				label = new Gtk.Label("Specify a port and addresses Nuvola Player will be listening on.");
 				label.wrap = true;
 				label.use_markup = true;
 				label.hexpand = true;
-				attach(label, 0, ++line, 3, 1);
+				attach(label, 0, ++line, 4, 1);
 				label = new Gtk.Label("Port");
 				label.use_markup = true;
 				label.hexpand = true;
@@ -136,10 +139,16 @@ public class Component: Nuvola.Component
 					label.hexpand = true;
 					attach(label, 2, line, 1, 1);
 					var toggle = new Gtk.Switch();
-					toggle.set_data<string>("address", (owned) address);
+					toggle.set_data<string>("address", address);
 					toggle.notify["active"].connect_after(on_switch_switched);
 					toggle.active = enabled;
 					attach(toggle, 0, line, 1, 1);
+					var button = new Gtk.Button.from_icon_name("go-home-symbolic", Gtk.IconSize.BUTTON);
+					button.vexpand = button.hexpand = false;
+					button.halign = button.valign = Gtk.Align.CENTER;
+					button.set_data<string>("address", address);
+					button.clicked.connect(on_home_button_clicked);
+					attach(button, 3, line, 1, 1);
 				}
 				show_all();
 			}
@@ -155,7 +164,7 @@ public class Component: Nuvola.Component
 			unowned string address = o.get_data<string>("address");
 			try
 			{
-				ipc_bus.master.call("/nuvola/httpremotecontrol/set-address-enabled", new Variant("(sb)", address, toggle.active));
+				ipc_bus.master.call_sync("/nuvola/httpremotecontrol/set-address-enabled", new Variant("(sb)", address, toggle.active));
 			}
 			catch (GLib.Error e)
 			{
@@ -166,14 +175,21 @@ public class Component: Nuvola.Component
 		private void on_spin_value_changed(GLib.Object o, ParamSpec p)
 		{
 			var spin = o as Gtk.SpinButton;
+			port = (uint) spin.get_value_as_int();
 			try
 			{
-				ipc_bus.master.call("/nuvola/httpremotecontrol/set-port", new Variant("(i)", spin.get_value_as_int()));
+				ipc_bus.master.call_sync("/nuvola/httpremotecontrol/set-port", new Variant("(i)", spin.get_value_as_int()));
 			}
 			catch (GLib.Error e)
 			{
 				warning("Failed to set address enabled. %s", e.message);
 			}
+		}
+		
+		private void on_home_button_clicked(Gtk.Button button)
+		{
+			unowned string address = button.get_data<string>("address");
+			app.show_uri("http://%s:%u/mediaplayer".printf(address, port));
 		}
 	}
 }
