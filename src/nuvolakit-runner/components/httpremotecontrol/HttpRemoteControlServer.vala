@@ -48,9 +48,9 @@ public class Server: Soup.Server
 	private bool running = false;
 	private File[] www_roots;
 	private Channel eio_channel;
-	private HashTable<string, Diorite.SingleList<Subscription>> subscribers;
+	private HashTable<string, Drt.Lst<Subscription>> subscribers;
 	private NM.Client? nm = null;
-	private Diorite.SingleList<Address> addresses;
+	private Drt.Lst<Address> addresses;
 	
 	public Server(
 		MasterController app, MasterBus bus,
@@ -65,9 +65,9 @@ public class Server: Soup.Server
 		this.www_roots = www_roots;
 		app.config.set_default_value(PORT_KEY, new Variant.int64(8089));
 		service_port = (int) app.config.get_int64(PORT_KEY);
-		addresses = new Diorite.SingleList<Address>(Address.equals);
+		addresses = new Drt.Lst<Address>(Address.equals);
 		registered_runners = new GenericSet<string>(str_hash, str_equal);
-		subscribers = new HashTable<string, Diorite.SingleList<Subscription>>(str_hash, str_equal);
+		subscribers = new HashTable<string, Drt.Lst<Subscription>>(str_hash, str_equal);
 		bus.router.add_method("/nuvola/httpremotecontrol/register", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
 			null, handle_register, {
 			new Drt.StringParam("id", true, false)
@@ -352,7 +352,7 @@ public class Server: Soup.Server
 		var subscribers = this.subscribers[abs_path];
 		if (subscribers == null)
 		{
-			subscribers = new Diorite.SingleList<Subscription>(Subscription.equals);
+			subscribers = new Drt.Lst<Subscription>(Subscription.equals);
 			this.subscribers[abs_path] = subscribers;
 		}
 		

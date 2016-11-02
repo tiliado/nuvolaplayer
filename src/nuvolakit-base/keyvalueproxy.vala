@@ -27,13 +27,13 @@ namespace Nuvola
 
 public class KeyValueProxy: GLib.Object, Diorite.KeyValueStorage
 {
-	public Diorite.SingleList<Diorite.PropertyBinding> property_bindings {get; protected set;}
+	public Drt.Lst<Diorite.PropertyBinding> property_bindings {get; protected set;}
 	private Drt.ApiChannel channel;
 	private string prefix;
 	
 	public KeyValueProxy(Drt.ApiChannel channel, string prefix)
 	{
-		property_bindings = new Diorite.SingleList<Diorite.PropertyBinding>();
+		property_bindings = new Drt.Lst<Diorite.PropertyBinding>();
 		this.channel = channel;
 		this.prefix = prefix;
 	}

@@ -33,7 +33,7 @@ public class PasswordManager
 	private const string SCHEMA_USERNAME = "username";
 	private string app_id;
 	private Secret.Schema secret_schema;
-	private HashTable<string, Diorite.SingleList<LoginCredentials>>? passwords = null;
+	private HashTable<string, Drt.Lst<LoginCredentials>>? passwords = null;
 	private WebEngine web_engine;
 	
 	public PasswordManager(WebEngine web_engine, string app_id)
@@ -60,7 +60,7 @@ public class PasswordManager
 	
 	public signal void prefill_username(int username_index);
 	
-	public HashTable<string, Diorite.SingleList<LoginCredentials>>? get_passwords()
+	public HashTable<string, Drt.Lst<LoginCredentials>>? get_passwords()
 	{
 		return passwords;
 	}
@@ -73,7 +73,7 @@ public class PasswordManager
 		attributes[SCHEMA_APP_ID] = app_id;
 		var flags = Secret.SearchFlags.ALL|Secret.SearchFlags.UNLOCK|Secret.SearchFlags.LOAD_SECRETS;
 		var items = yield collection.search(secret_schema, attributes, flags, null);
-		var credentials = new HashTable<string, Diorite.SingleList<LoginCredentials>>(str_hash, str_equal);
+		var credentials = new HashTable<string, Drt.Lst<LoginCredentials>>(str_hash, str_equal);
 		foreach (var item in items)
 		{
 			attributes = item.get_attributes();
@@ -83,7 +83,7 @@ public class PasswordManager
 			var entries = credentials[hostname];
 			if (entries == null)
 			{
-				entries = new Diorite.SingleList<LoginCredentials>(LoginCredentials.username_equals);
+				entries = new Drt.Lst<LoginCredentials>(LoginCredentials.username_equals);
 				entries.prepend(new LoginCredentials(username, password));
 				credentials[hostname] = entries;
 			}

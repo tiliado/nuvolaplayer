@@ -65,9 +65,9 @@ public class PasswordManagerBinding : ModelBinding<PasswordManager>
 		var passwords = model.get_passwords();
 		if (passwords != null)
 		{
-			var iter = HashTableIter<string, Diorite.SingleList<LoginCredentials>>(passwords);
+			var iter = HashTableIter<string, Drt.Lst<LoginCredentials>>(passwords);
 			string hostname = null;
-			Diorite.SingleList<LoginCredentials> credentials = null;
+			Drt.Lst<LoginCredentials> credentials = null;
 			while (iter.next(out hostname, out credentials))
 				foreach (var item in credentials)
 					builder.add("(sss)", hostname, item.username, item.password);

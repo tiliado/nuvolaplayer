@@ -27,12 +27,12 @@ namespace Nuvola
 
 public class ComponentsManager: Gtk.Stack
 {
-	public Diorite.SingleList<Component> components {get; construct;}
+	public Drt.Lst<Component> components {get; construct;}
 	private SList<Row> rows = null;
 	private Gtk.Grid grid;
 	private Settings? component_settings = null;
 
-	public ComponentsManager(Diorite.SingleList<Component> components)
+	public ComponentsManager(Drt.Lst<Component> components)
 	{
 		GLib.Object(components: components, transition_type: Gtk.StackTransitionType.SLIDE_LEFT_RIGHT);
 		grid = new Gtk.Grid();

@@ -122,7 +122,7 @@ public class AppRunnerController : RunnerApplication
 	private Diorite.Form? init_form = null;
 	private FormatSupportCheck format_support = null;
 	private Tiliado.Account tiliado_account = null;
-	private Diorite.SingleList<Component> components = null;
+	private Drt.Lst<Component> components = null;
 	private string? api_token = null;
 	
 	public AppRunnerController(Diorite.Storage storage, WebAppMeta web_app, WebAppStorage app_storage, string? api_token)
@@ -438,7 +438,7 @@ public class AppRunnerController : RunnerApplication
 		bindings.add_binding(new MediaPlayerBinding(router, web_worker, new MediaPlayer(actions)));
 		bindings.add_object(actions_helper);
 		
-		components = new Diorite.SingleList<Component>();
+		components = new Drt.Lst<Component>();
 		components.prepend(new TrayIconComponent(this, bindings, config));
 		#if UNITY
 		components.prepend(new UnityLauncherComponent(this, bindings, config));

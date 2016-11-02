@@ -29,8 +29,8 @@ namespace Nuvola
 
 public class LoginFormManager: GLib.Object
 {
-	private HashTable<string, Diorite.SingleList<LoginCredentials>> credentials = null;
-	private Diorite.SingleList<LoginForm> login_forms;
+	private HashTable<string, Drt.Lst<LoginCredentials>> credentials = null;
+	private Drt.Lst<LoginForm> login_forms;
 	private WebKit.WebPage page = null;
 	private uint look_up_forms_source_id = 0;
 	private uint look_up_forms_attempts = 0;
@@ -39,8 +39,8 @@ public class LoginFormManager: GLib.Object
 	
 	public LoginFormManager(Drt.ApiChannel channel)
 	{
-		credentials = new HashTable<string, Diorite.SingleList<LoginCredentials>>(str_hash, str_equal);
-		login_forms = new Diorite.SingleList<LoginForm>();
+		credentials = new HashTable<string, Drt.Lst<LoginCredentials>>(str_hash, str_equal);
+		login_forms = new Drt.Lst<LoginForm>();
 		this.channel = channel;
 		request_passwords();
 		channel.api_router.add_method("/nuvola/passwordmanager/prefill-username", Drt.ApiFlags.WRITABLE,
@@ -89,7 +89,7 @@ public class LoginFormManager: GLib.Object
 		var entries = credentials[hostname];
 		if (entries == null)
 		{
-			entries = new Diorite.SingleList<LoginCredentials>(LoginCredentials.username_equals);
+			entries = new Drt.Lst<LoginCredentials>(LoginCredentials.username_equals);
 			entries.prepend(new LoginCredentials(username, password));
 			credentials[hostname] = entries;
 		}
@@ -171,7 +171,7 @@ public class LoginFormManager: GLib.Object
 			form.username_changed.disconnect(on_form_username_changed);
 			form.unsubscribe();
 		}
-		login_forms = new Diorite.SingleList<LoginForm>();
+		login_forms = new Drt.Lst<LoginForm>();
 	}
 	
 	public bool prefill(LoginForm form, bool force=false)

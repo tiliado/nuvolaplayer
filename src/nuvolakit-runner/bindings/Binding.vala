@@ -103,12 +103,12 @@ public abstract class Nuvola.Binding<ObjectType>: GLib.Object
 
 public abstract class Nuvola.ObjectBinding<ObjectType>: Binding<ObjectType>
 {
-	protected Diorite.SingleList<ObjectType> objects;
+	protected Drt.Lst<ObjectType> objects;
 	
 	public ObjectBinding(Drt.ApiRouter router, WebWorker web_worker, string name)
 	{
 		base(router, web_worker, name);
-		objects = new Diorite.SingleList<ObjectType>();
+		objects = new Drt.Lst<ObjectType>();
 	}
 	
 	public bool add(GLib.Object object)
