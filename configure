@@ -5,7 +5,7 @@
 
 import sys, os, subprocess
 
-waf = ["./waf", "distclean", "configure"]
+waf = ["python3", "./waf", "distclean", "configure"]
 prefix="/usr/local"
 
 for arg in sys.argv[1:]:
@@ -27,9 +27,9 @@ subprocess.check_call(waf)
 makefile = """
 DESTDIR ?= %s
 all:
-	./waf build -v
+	python3 ./waf build -v
 install:
-	./waf install --no-system-hooks --destdir="$(DESTDIR)"
+	python3 ./waf install --no-system-hooks --destdir="$(DESTDIR)"
 .NOTPARALLEL:
 """ % prefix
 
