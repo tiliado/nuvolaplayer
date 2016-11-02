@@ -25,13 +25,13 @@ print(waf)
 subprocess.check_call(waf)
 
 makefile = """
-DESTDIR ?= %s
+DESTDIR ?= /
 all:
 	python3 ./waf build -v
 install:
 	python3 ./waf install --no-system-hooks --destdir="$(DESTDIR)"
 .NOTPARALLEL:
-""" % prefix
+"""
 
 with open("Makefile", "wt") as f:
 	f.write(makefile)
