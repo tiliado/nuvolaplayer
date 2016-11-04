@@ -75,7 +75,6 @@ Build and Install
   * [javascriptcoregtk-4.0](http://webkitgtk.org/) >= 2.6.2
   * [libnotify](https://git.gnome.org/browse/libnotify/) >= 0.7
   * libuuid
-  * libnm-glib & libnm-util >= 0.9.10
   * libsecret-1 >= 0.16
   * optional unity >= 3.0
   * optional dbusmenu-glib-0.4 >= 0.4

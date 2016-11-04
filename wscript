@@ -220,9 +220,6 @@ def configure(ctx):
 	ctx.check_dep('webkit2gtk-web-extension-4.0', 'WEBKITEXT', MIN_WEBKIT)
 	ctx.check_dep('javascriptcoregtk-4.0', 'JSCORE', MIN_WEBKIT)
 	
-	ctx.check_dep('libnm-glib', 'LIBNM', "0.9.10") # HttpRemoteControl
-	ctx.check_dep('libnm-util', 'LIBNM-UTIL', "0.9.10") # HttpRemoteControl
-	
 	ctx.check_dep('uuid', 'UUID', '0') # Engine.io
 	ctx.check_dep('libsoup-2.4', 'SOUP', '0') # Engine.io
 		
@@ -316,8 +313,8 @@ def build(ctx):
 			+ ctx.path.ant_glob('src/nuvolakit-runner/*/*.vala')
 			+ ctx.path.ant_glob('src/nuvolakit-runner/*/*/*.vala')
 			),
-		packages = 'webkit2gtk-4.0 javascriptcoregtk-4.0 gstreamer-1.0 libnm-util libnm-glib libsecret-1',
-		uselib =  'JSCORE WEBKIT GST LIBNM-UTIL LIBNM SECRET',
+		packages = 'webkit2gtk-4.0 javascriptcoregtk-4.0 gstreamer-1.0 libsecret-1',
+		uselib =  'JSCORE WEBKIT GST SECRET',
 		use = [NUVOLAKIT_BASE, ENGINEIO],
 		lib = ['m'],
 		vala_defines = vala_defines,

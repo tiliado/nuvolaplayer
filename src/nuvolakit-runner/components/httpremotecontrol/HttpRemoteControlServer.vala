@@ -49,7 +49,7 @@ public class Server: Soup.Server
 	private File[] www_roots;
 	private Channel eio_channel;
 	private HashTable<string, Drt.Lst<Subscription>> subscribers;
-	private NM.Client? nm = null;
+	private Nm.NetworkManager? nm = null;
 	private Drt.Lst<Address> addresses;
 	
 	public Server(
@@ -95,7 +95,7 @@ public class Server: Soup.Server
 		bus.router.notification.connect(on_master_notification);
 		var eio_server = new Engineio.Server(this, "/nuvola.io/");
 		eio_channel = new Channel(eio_server, this);
-		NM.Client.new_async.begin(null, on_nm_client_created);
+		Nm.get_client.begin(null, on_nm_client_created);
 		notify["port"].connect_after(on_port_changed);
 	}
 	
@@ -163,14 +163,16 @@ public class Server: Soup.Server
 		var connections = nm.get_active_connections();
 		if (connections != null)
 		{
-			foreach (var conn in connections.data)
+			foreach (var conn in connections)
 			{
-				if (conn.ip4_config == null)
+				var ip4_config =  conn.get_ip4_config();
+				if (ip4_config == null)
 					continue;
-				unowned SList<NM.IP4Address> addresses = conn.ip4_config.get_addresses();
-				foreach (unowned NM.IP4Address addr in addresses)
+				var addresses = ip4_config.get_addresses();
+				if (addresses == null)
+					continue;
+				foreach (var ip4 in addresses)
 				{
-					var ip4 = addr.get_address();
 					addr_str = "%u.%u.%u.%u".printf(
 						(ip4 & 0xFF),
 						(ip4 >> 8) & 0xFF,
@@ -178,7 +180,7 @@ public class Server: Soup.Server
 						(ip4 >> 24) & 0xFF);
 					key = mk_address_enabled_key(addr_str);
 					var enabled = config.has_key(key) ? config.get_bool(key) : false;
-					this.addresses.append(new Address(addr_str, conn.get_id(), enabled));
+					this.addresses.append(new Address(addr_str, conn.id, enabled));
 				}
 			}
 		}
@@ -569,7 +571,7 @@ public class Server: Soup.Server
 	{
 		try
 		{
-			nm = NM.Client.new_async.end(res);
+			nm = Nm.get_client.end(res);
 			refresh_addresses();
 		}
 		catch (GLib.Error e)
