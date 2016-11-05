@@ -280,7 +280,7 @@ public class MasterController : Diorite.Application
 		}
 		catch (OptionError e)
 		{
-			command_line.print("option parsing failed: %s\n", e.message);
+			command_line.printerr("option parsing failed: %s\n", e.message);
 			return 1;
 		}
 		
@@ -296,7 +296,7 @@ public class MasterController : Diorite.Application
 		
 		if (_args.length > (nuvola_apps ? 2 : 1))
 		{
-			stderr.printf("Too many arguments.\n");
+			command_line.printerr("%s", "Too many arguments.\n");
 			return 1;
 		}
 		
