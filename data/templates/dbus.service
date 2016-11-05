@@ -1,0 +1,3 @@
+[D-BUS Service]
+Name=@NAME@
+Exec=@EXEC@

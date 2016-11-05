@@ -383,6 +383,13 @@ def build(ctx):
 		EXEC = APPNAME,
 		GENERIC_NAME=GENERIC_NAME,
 	)
+	ctx(features = 'subst',
+		source = 'data/templates/dbus.service',
+		target = "share/dbus-1/services/%s.service" % UNIQUE_NAME,
+		install_path = '${PREFIX}/share/dbus-1/services',
+		NAME = UNIQUE_NAME,
+		EXEC = '%s/bin/nuvolaplayer3 --gapplication-service' % ctx.env.PREFIX
+	)
 	
 	if ctx.env.with_apps_alpha:
 		ctx(features = 'subst',
