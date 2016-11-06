@@ -46,6 +46,7 @@ public class WebAppMeta : GLib.Object
 	public File? data_dir {get; private set; default = null;}
 	public bool removable {get; set; default = false;}
 	public bool hidden {get; set; default = false;}	
+	public bool has_desktop_launcher {get; set; default = false;}
 	private List<IconInfo?> icons = null;
 	private bool icons_set = false;
 	

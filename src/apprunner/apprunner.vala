@@ -101,8 +101,12 @@ public int main(string[] args)
 	{
 		var app_dir = File.new_for_path(Args.app_dir);
 		var web_app = WebAppMeta.load_from_dir(app_dir);
-		var desktop_file_existed = write_desktop_file_sync(web_app);
+		var desktop_file_existed = true;
 		web_app.removable = false;
+		if (web_app.has_desktop_launcher)
+			delete_desktop_file_sync(web_app);
+		else
+			desktop_file_existed = write_desktop_file_sync(web_app);
 		var storage = new Diorite.XdgStorage.for_project(Nuvola.get_app_id());
 		var app_storage = new WebAppStorage(
 		  storage.user_config_dir.get_child(WEB_APP_DATA_DIR).get_child(web_app.id),
