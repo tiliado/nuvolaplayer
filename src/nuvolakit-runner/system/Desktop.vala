@@ -31,7 +31,7 @@ public async void create_desktop_files(WebAppRegistry web_app_reg, bool create_h
 	yield;
 	var web_apps = web_app_reg.list_web_apps();
 	foreach (var web_app in web_apps.get_values())
-		if (create_hidden || !web_app.hidden)
+		if ((create_hidden || !web_app.hidden) && !web_app.has_desktop_launcher)
 			yield write_desktop_file(web_app);
 }
 	
@@ -117,6 +117,19 @@ public KeyFile create_desktop_file(WebAppMeta web_app)
 public async void delete_desktop_file(WebAppMeta web_app) throws GLib.Error
 {
 	yield get_desktop_file(web_app).delete_async();
+}
+
+public void delete_desktop_file_sync(WebAppMeta web_app)
+{
+	try
+	{
+		get_desktop_file(web_app).delete();
+	}
+	catch (GLib.Error e)
+	{
+		if (e.code != 1)
+			warning("Failed to delete desktop file. %s", e.message);
+	}
 }
 
 public string get_desktop_file_name(string web_app_id)

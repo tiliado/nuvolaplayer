@@ -48,6 +48,7 @@ public class WebAppMeta : GLib.Object
 	public bool removable {get; set; default = false;}
 	public bool hidden {get; set; default = false;}	
 	public bool allow_insecure_content {get; set; default = false;}
+	public bool has_desktop_launcher {get; set; default = false;}
 	private List<IconInfo?> icons = null;
 	private bool icons_set = false;
 	
