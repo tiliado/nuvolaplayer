@@ -58,7 +58,7 @@ namespace Actions
 
 public static string build_camel_id(string web_app_id)
 {
-	var buffer = new StringBuilder("cz.fenryxo.NuvolaApp");
+	var buffer = new StringBuilder("eu.tiliado.NuvolaApp");
 	foreach (var part in web_app_id.split("_"))
 	{
 		buffer.append_c(part[0].toupper());
