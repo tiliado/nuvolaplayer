@@ -103,33 +103,46 @@ public class WebAppRegistry: GLib.Object
 	public HashTable<string, WebAppMeta> list_web_apps(string? filter_id=null)
 	{
 		HashTable<string,  WebAppMeta> result = new HashTable<string, WebAppMeta>(str_hash, str_equal);
-		FileInfo file_info;
-		WebAppMeta? app;
-		WebAppMeta? tmp_app;
-		string id;
-		
-		if (user_storage.query_exists())
+		find_apps(user_storage, filter_id, result);
+		foreach (var dir in system_storage)
+			find_apps(dir, filter_id, result);
+		return result;
+	}
+	
+	private void find_apps(File directory, string? filter_id, HashTable<string,  WebAppMeta> result)
+	{
+		if (directory.query_exists())
 		{
 			try
 			{
-				var enumerator = user_storage.enumerate_children(FileAttribute.STANDARD_NAME, 0);
+				FileInfo file_info;
+				var enumerator = directory.enumerate_children(FileAttribute.STANDARD_NAME, 0);
 				while ((file_info = enumerator.next_file()) != null)
 				{
 					string dirname = file_info.get_name();
-					var app_dir = user_storage.get_child(dirname);
+					var app_dir = directory.get_child(dirname);
 					if (app_dir.query_file_type(0) != FileType.DIRECTORY)
 						continue;
 					
 					try
 					{
-						app = WebAppMeta.load_from_dir(app_dir);
-						app.removable = allow_management;
-						id = app.id;
+						var app = WebAppMeta.load_from_dir(app_dir);
+						app.removable = false;
+						var id = app.id;
 						debug("Found web app %s at %s, version %u.%u",
 						app.name, app_dir.get_path(), app.version_major, app.version_minor);
 						
 						if (filter_id == null || filter_id == id)
-							result[id] = app;
+						{
+							unowned WebAppMeta? prev_app = result[id];
+							// Insert new value, if web app has not been added yet,
+							// or override previous web app integration, if
+							// the new one has greater version.
+							if(prev_app == null
+							|| app.version_major > prev_app.version_major
+							|| app.version_major == prev_app.version_major && app.version_minor > prev_app.version_minor)
+								result[id] = app;
+						}
 					}
 					catch (WebAppError e)
 					{
@@ -142,55 +155,6 @@ public class WebAppRegistry: GLib.Object
 				warning("Filesystem error: %s", e.message);
 			}
 		}
-		
-		foreach (var dir in system_storage)
-		{
-			try
-			{
-				var enumerator = dir.enumerate_children(FileAttribute.STANDARD_NAME, 0);
-				while ((file_info = enumerator.next_file()) != null)
-				{
-					string dirname = file_info.get_name();
-					var app_dir = dir.get_child(dirname);
-					if (app_dir.query_file_type(0) != FileType.DIRECTORY)
-						continue;
-					
-					try
-					{
-						app = WebAppMeta.load_from_dir(app_dir);
-						app.removable = false;
-					}
-					catch(WebAppError e)
-					{
-						warning("Unable to load web app from %s: %s", app_dir.get_path(), e.message);
-						continue;
-					}
-					
-					debug("Found web app %s at %s, version %u.%u",
-					app.name, app_dir.get_path(), app.version_major, app.version_minor);
-					
-					id = app.id;
-					if (filter_id == null || filter_id == id)
-					{
-						tmp_app = result[id];
-						
-						// Insert new value, if web app has not been added yet,
-						// or override previous web app integration, if
-						// the new one has greater version.
-						if(tmp_app == null
-						|| app.version_major > tmp_app.version_major
-						|| app.version_major == tmp_app.version_major && app.version_minor > tmp_app.version_minor)
-							result[id] = app;
-					}
-				}
-			}
-			catch (GLib.Error e)
-			{
-				warning("Filesystem error: %s", e.message);
-			}
-		}
-		
-		return result;
 	}
 	
 	/**
