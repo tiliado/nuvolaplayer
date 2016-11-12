@@ -75,14 +75,21 @@ public class FormatSupport: GLib.Object
 		
 		var wc = WebKit.WebContext.get_default();
 		var plugins = yield wc.get_plugins(null);
+		var paths = new GenericSet<string>(str_hash, str_equal);
 		uint n_flash_plugins = 0;
 		foreach (var plugin in plugins)
 		{
 			var name = plugin.get_name();
 			var is_flash = name.down().strip() == "shockwave flash";
+			var file = yield Diorite.System.resolve_symlink(File.new_for_path(plugin.get_path()), null);
+			var path = file.get_path();
 			web_plugins.append({name, plugin.get_path(), plugin.get_description(), true, is_flash});
-			if (is_flash)
-				n_flash_plugins++;
+			if (!(path in paths))
+			{
+				paths.add(path);
+				if (is_flash)
+					n_flash_plugins++;
+			}
 		}
 		this.n_flash_plugins = n_flash_plugins;
 	}
