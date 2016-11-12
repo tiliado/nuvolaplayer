@@ -74,18 +74,10 @@ public class AboutDialog: Gtk.Dialog
 			grid.show_all();
 			box.add(grid);
 			
-			grid = new Gtk.Grid();
-			var separator = new Gtk.Separator(Gtk.Orientation.HORIZONTAL);
-			separator.hexpand = true;
-			grid.add(separator);
 			label = new Gtk.Label("Powered by");
 			label.margin = 10;
-			grid.add(label);
-			separator = new Gtk.Separator(Gtk.Orientation.HORIZONTAL);
-			separator.hexpand = true;
-			grid.add(separator);
-			grid.show_all();
-			box.add(grid);
+			label.show();
+			box.add(label);
 		}
 		
 		grid = new Gtk.Grid();
