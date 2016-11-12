@@ -12,14 +12,18 @@ for arg in sys.argv[1:]:
 	try:
 		name, value = arg.split("=", 1)
 	except ValueError:
-		continue
-	if name == "--libdir":
+		name, value = arg, None
+	if arg.startswith("!-"):
+		waf.append(arg[1:])
+	elif name == "--libdir":
 		waf.append(arg)
 	elif name == "--prefix":
 		waf.append(arg)
 		prefix = value
 	elif name in ("CFLAGS", "CXXFLAGS"):
 		os.environ[name] = value
+	else:
+		print("Warning: Unknown argument: ", arg)
 
 print(waf)
 subprocess.check_call(waf)
