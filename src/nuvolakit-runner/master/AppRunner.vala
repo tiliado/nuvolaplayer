@@ -34,6 +34,7 @@ public class AppRunner : GLib.Object
 	private Diorite.Ipc.MessageClient? client = null;
 	private uint check_server_connected_id = 0;
 	private GLib.Subprocess process;
+	private string? stderr_last_line = null;
 	
 	static construct
 	{
@@ -59,10 +60,25 @@ public class AppRunner : GLib.Object
 			{
 				yield process.get_stderr_pipe().read_async(buffer);
 				unowned string str = (string) buffer;
-				if (str.has_prefix("Worker:") || str.has_prefix("Runner:"))
-					Diorite.Logger.puts(str);
-				else
-					Diorite.Logger.printf("Runner: %s", str);
+				var lines = str.split("\n");
+				var size = lines.length;
+				if (size == 1)
+				{
+					if (stderr_last_line != null && stderr_last_line[0] != '\0')
+						stderr_last_line = stderr_last_line + lines[0];
+					else
+						stderr_last_line = lines[0];
+				}
+				else if (size > 1)
+				{
+					if (stderr_last_line != null && stderr_last_line[0] != '\0')
+						stderr_print_line(stderr_last_line + lines[0]);
+					else
+						stderr_print_line(lines[0]);
+					for (var i = 1; i < size - 1; i++)
+						stderr_print_line(lines[i]);
+					stderr_last_line = lines[size - 1];
+				}
 			}
 			catch (GLib.Error e)
 			{
@@ -70,6 +86,15 @@ public class AppRunner : GLib.Object
 				break;
 			}
 		}
+	}
+	
+	private void stderr_print_line(string line)
+	{
+		if (line.has_prefix("Worker:") || line.has_prefix("Runner:"))
+			Diorite.Logger.puts(line);
+		else
+			Diorite.Logger.printf("Runner: %s", line);
+		Diorite.Logger.puts("\n");
 	}
 	
 	private void on_log_stderr_done(GLib.Object? o, AsyncResult res)
