@@ -79,6 +79,7 @@ elif VERSION_SUFFIX == "":
 VERSIONS = tuple(int(i) for i in VERSIONS.split("."))
 
 import sys
+import os
 from waflib.Configure import conf
 from waflib.Errors import ConfigurationError
 from waflib.Context import WAFVERSION
@@ -141,9 +142,16 @@ def options(ctx):
 	ctx.add_option('--platform', default=_PLATFORM, help="Target platform")
 	ctx.add_option('--with-apps-alpha', action='store_true', default=False, dest='apps_alpha', help="Include Nuvola Apps Alpha launcher.")
 	ctx.add_option('--allow-fuzzy-build', action='store_true', default=False, dest='fuzzy', help="Allow building without valid git revision information and absolutely no support from upstream.")
+	ctx.add_option('--snapcraft', action='store_true', default=False, dest='snapcraft', help="Apply workarounds for Snapcraft with given name.")
 
 # Configure build process
 def configure(ctx):
+	if ctx.options.snapcraft:
+		ctx.env.SNAPCRAFT = SNAPCRAFT = os.environ["SNAPCRAFT_STAGE"]
+		ctx.msg('Snapcraft stage', SNAPCRAFT, "GREEN")
+		ctx.env.append_unique('CFLAGS', '-I%s/usr/include/diorite-1.0' % SNAPCRAFT)
+	else:
+		ctx.env.SNAPCRAFT = None
 	ctx.env.PLATFORM = PLATFORM = ctx.options.platform.upper()
 	if PLATFORM not in (LINUX,):
 		print("Unsupported platform %s. Please try to talk to devs to consider support of your platform." % sys.platform)
@@ -280,6 +288,12 @@ def build(ctx):
 	packages += 'javascriptcoregtk-4.0 libnotify libarchive gtk+-3.0 gdk-3.0 gdk-x11-3.0 x11 posix json-glib-1.0 glib-2.0 gio-2.0'
 	uselib = 'NOTIFY JSCORE LIBARCHIVE DIORITEGTK DIORITEGLIB GTK+ GDK GDKX11 XLIB JSON-GLIB GLIB GTHREAD GIO'
 	
+	vapi_dirs = ['vapi', 'engineio-soup/vapi']
+	if ctx.env.SNAPCRAFT:
+		vapi_dirs.append(os.path.relpath(ctx.env.SNAPCRAFT + "/usr/share/vala/vapi"))
+	print(vapi_dirs)
+	for dir in vapi_dirs:
+		print(os.listdir(dir))
 	if ctx.env.with_unity:
 		packages += " unity Dbusmenu-0.4"
 		uselib += " UNITY DBUSMENU"
@@ -302,7 +316,7 @@ def build(ctx):
 		uselib = uselib + " GST",
 		vala_defines = vala_defines,
 		defines = ['G_LOG_DOMAIN="Nuvola"'],
-		vapi_dirs = ['vapi'],
+		vapi_dirs = vapi_dirs,
 		vala_target_glib = TARGET_GLIB,
 	)
 	
@@ -319,7 +333,7 @@ def build(ctx):
 		lib = ['m'],
 		vala_defines = vala_defines,
 		defines = ['G_LOG_DOMAIN="Nuvola"'],
-		vapi_dirs = ['vapi', 'engineio-soup/vapi'],
+		vapi_dirs = vapi_dirs,
 		vala_target_glib = TARGET_GLIB,
 	)
 	
@@ -331,7 +345,7 @@ def build(ctx):
 		use = [NUVOLAKIT_BASE, NUVOLAKIT_RUNNER],
 		vala_defines = vala_defines,
 		defines = ['G_LOG_DOMAIN="Nuvola"'],
-		vapi_dirs = ['vapi', 'engineio-soup/vapi'],
+		vapi_dirs = vapi_dirs,
 		vala_target_glib = TARGET_GLIB,
 	)
 	
@@ -343,7 +357,7 @@ def build(ctx):
 		use = [NUVOLAKIT_BASE, NUVOLAKIT_RUNNER],
 		vala_defines = vala_defines,
 		defines = ['G_LOG_DOMAIN="Nuvola"'],
-		vapi_dirs = ['vapi', 'engineio-soup/vapi'],
+		vapi_dirs = vapi_dirs,
 		vala_target_glib = TARGET_GLIB,
 		install_path = ctx.env.NUVOLA_LIBDIR,
 	)
@@ -356,7 +370,7 @@ def build(ctx):
 		use = [NUVOLAKIT_BASE, NUVOLAKIT_RUNNER],
 		vala_defines = vala_defines,
 		defines = ['G_LOG_DOMAIN="Nuvola"'],
-		vapi_dirs = ['vapi', 'engineio-soup/vapi'],
+		vapi_dirs = vapi_dirs,
 		vala_target_glib = TARGET_GLIB,
 	)
 	
@@ -368,7 +382,7 @@ def build(ctx):
 		use = [NUVOLAKIT_BASE],
 		vala_defines = vala_defines,
 		cflags = ['-DG_LOG_DOMAIN="Nuvola"'],
-		vapi_dirs = ['vapi'],
+		vapi_dirs = vapi_dirs,
 		vala_target_glib = TARGET_GLIB,
 		install_path = ctx.env.NUVOLA_LIBDIR,
 	)

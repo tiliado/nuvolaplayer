@@ -31,7 +31,7 @@ subprocess.check_call(waf)
 makefile = """
 DESTDIR ?= /
 all:
-	python3 ./waf build -v
+	python3 ./waf build -vv
 install:
 	python3 ./waf install --no-system-hooks --destdir="$(DESTDIR)"
 .NOTPARALLEL:
