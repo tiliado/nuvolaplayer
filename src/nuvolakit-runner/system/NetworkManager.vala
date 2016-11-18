@@ -88,6 +88,16 @@ public interface Ip4Config : GLib.Object
 	{
 		uint[] result = {};
 		var addresses = (this as DBusProxy).get_cached_property("Addresses");
+		if (addresses == null)
+			return null;
+		if (!addresses.is_of_type(new VariantType("aau")))
+		{
+			warning(
+				"Wrong type of the org.freedesktop.NetworkManager.IP4Config.Addresses property: %s. %s",
+				addresses.get_type_string(), addresses.print(true));
+			return null;
+		}
+		
 		var iter = addresses.iterator();
 		VariantIter iter2 = null;
 		while(iter.next ("au", out iter2))
