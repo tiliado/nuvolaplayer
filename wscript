@@ -146,12 +146,6 @@ def options(ctx):
 
 # Configure build process
 def configure(ctx):
-	if ctx.options.snapcraft:
-		ctx.env.SNAPCRAFT = SNAPCRAFT = os.environ["SNAPCRAFT_STAGE"]
-		ctx.msg('Snapcraft stage', SNAPCRAFT, "GREEN")
-		ctx.env.append_unique('CFLAGS', '-I%s/usr/include/diorite-1.0' % SNAPCRAFT)
-	else:
-		ctx.env.SNAPCRAFT = None
 	ctx.env.PLATFORM = PLATFORM = ctx.options.platform.upper()
 	if PLATFORM not in (LINUX,):
 		print("Unsupported platform %s. Please try to talk to devs to consider support of your platform." % sys.platform)
@@ -207,6 +201,15 @@ def configure(ctx):
 	# Anti-underlinking and anti-overlinking linker flags.
 	ctx.env.append_unique("LINKFLAGS", ["-Wl,--no-undefined", "-Wl,--as-needed"])
 	
+	# Snapcraft hacks
+	if ctx.options.snapcraft:
+		ctx.env.SNAPCRAFT = SNAPCRAFT = os.environ["SNAPCRAFT_STAGE"]
+		ctx.msg('Snapcraft stage', SNAPCRAFT, "GREEN")
+		ctx.env.append_unique('CFLAGS', '-I%s/usr/include/diorite-1.0' % SNAPCRAFT)
+		ctx.vala_def("SNAPCRAFT")
+	else:
+		ctx.env.SNAPCRAFT = None
+		
 	# Check dependencies
 	ctx.env.DIORITE_SERIES = DIORITE_SERIES = "0.3"
 	DIORITE_BUGFIX = "1"
