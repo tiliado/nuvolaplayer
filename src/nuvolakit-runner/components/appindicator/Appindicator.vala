@@ -33,6 +33,7 @@ public class Appindicator: GLib.Object
 	private LauncherModel model;
 	private Gtk.Menu? menu = null;
 	private AppIndicator.Indicator? indicator = null;
+	private HashTable<string, Gtk.RadioMenuItem?> radio_groups = null;
 	
 	public Appindicator(AppRunnerController controller, LauncherModel model)
 	{
@@ -63,6 +64,8 @@ public class Appindicator: GLib.Object
 		indicator = null;
 		model.notify.disconnect(on_model_changed);
 		menu = null;
+		if (radio_groups != null)
+			clean_radio_groups();
 	}
 	
 	private void create_menu()
@@ -74,9 +77,13 @@ public class Appindicator: GLib.Object
 				var item = child as Gtk.MenuItem;
 				if (item != null)
 					item.activate.disconnect(on_menu_item_activated);
-				});
+			});
 		}
 		
+		if (radio_groups == null)
+			radio_groups = new HashTable<string, Gtk.RadioMenuItem?>(str_hash, str_equal);
+		else
+			clean_radio_groups();
 		menu = new Gtk.Menu();
 		add_menu_item_for_action("activate");
 		foreach (unowned string name in model.actions)
@@ -85,41 +92,104 @@ public class Appindicator: GLib.Object
 		indicator.set_menu(menu);
 	}
 	
-	private void add_menu_item_for_action(string name)
+	private void add_menu_item_for_action(string full_name)
 	{
 		Diorite.Action action = null;
 		string? detailed_name = null;
 		Diorite.RadioOption? option = null;
-		if (!actions.find_and_parse_action(name, out detailed_name, out action, out option))
+		if (!actions.find_and_parse_action(full_name, out detailed_name, out action, out option))
 		{
-			warning("Action %s not found", name);
+			warning("Action %s not found", full_name);
 			return;
 		}
 		Gtk.MenuItem item;
-		if (action is Diorite.SimpleAction)
+		var radio_action = action as Diorite.RadioAction;
+		if (radio_action != null)
+		{
+			var radio_group = radio_groups[action.name];
+			var radio_item = new Gtk.RadioMenuItem.with_label_from_widget(radio_group, option.label);
+			if (radio_group == null)
+			{
+				radio_groups[action.name] = radio_item;
+				action.notify["state"].connect_after(on_radio_action_state_changed);
+			}
+			radio_item.active = action.state != null && action.state.equal(option.parameter);
+			item = radio_item;
+			item.set_data<Variant?>("diorite_action_param", option.parameter);
+		}
+		else if (action is Diorite.SimpleAction)
 		{
 			item = new Gtk.MenuItem.with_label(action.label);
+			item.set_data<Variant?>("diorite_action_param", null);
 		}
 		else
 		{
 			item = null;
-			warning("%s %s is not supported yet.", action.get_type().name(), name);
+			warning("%s %s is not supported yet.", action.get_type().name(), full_name);
 			return;
 		}
 		
-		item.set_data<string>("diorite_action", name);
+		item.set_data<Diorite.Action?>("diorite_action", action);
 		item.activate.connect(on_menu_item_activated);
 		item.show();
 		menu.add(item);
 	}
 	
+	private void clean_radio_groups()
+	{
+		var iter = HashTableIter<string, Gtk.RadioMenuItem>(radio_groups);
+		Gtk.RadioMenuItem item = null;
+		while (iter.next(null, out item))
+		{
+			var action = item.get_data<Diorite.Action?>("diorite_action");
+			action.notify["state"].disconnect(on_radio_action_state_changed);
+			iter.remove();
+		}
+	}
+	
 	private void on_menu_item_activated(Gtk.MenuItem item)
 	{
-		var name = item.get_data<string>("diorite_action");
-		return_if_fail(name != null);
-		var action = actions.get_action(name);
-		return_if_fail(action != null);
-		action.activate(null);
+		var action = item.get_data<Diorite.Action?>("diorite_action");
+		if (action != null)
+		{
+			var parameter = item.get_data<Variant?>("diorite_action_param");
+			var radio_action = action as Diorite.RadioAction;
+			if (radio_action == null || !radio_action.state.equal(parameter))
+				action.activate(parameter);
+		}
+	}
+	
+	private void on_radio_action_state_changed(GLib.Object emitter, ParamSpec p)
+	{
+		var action = emitter as Diorite.RadioAction;
+		var state = action.state;
+		unowned SList<Gtk.RadioMenuItem> radios = radio_groups[action.name].get_group();
+		
+		/* Remove action from the currently active radio item to prevent it from emitting "activated" signal.*/
+		Gtk.RadioMenuItem? prev_active_radio = null;
+		foreach (var radio in radios)
+		{
+			if (radio.active)
+			{
+				prev_active_radio = radio;
+				prev_active_radio.set_data<Diorite.Action?>("diorite_action", null);
+				break;
+			}
+		}
+		
+		/* Mark the new active radio */
+		foreach (var radio in radios)
+		{
+			if (state.equal(radio.get_data<Variant?>("diorite_action_param")))
+			{
+				radio.active = true;
+				break;
+			}
+		}
+		
+		/* Restore action to the previously active radio */
+		if (prev_active_radio != null)
+			prev_active_radio.set_data<Diorite.Action?>("diorite_action", action);
 	}
 }
 
