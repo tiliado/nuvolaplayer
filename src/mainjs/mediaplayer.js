@@ -325,7 +325,10 @@ MediaPlayer.addExtraActions = function(actions)
     }
     
     if (update)
+    {
         this._updateMenu();
+        this._setActions();
+    }
 }
 
 MediaPlayer._onInitAppRunner = function(emitter)
