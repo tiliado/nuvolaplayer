@@ -250,6 +250,7 @@ WebApp.update = function()
     }
     player.setCanPause(enabled);
     
+    Nuvola.actions.updateEnabledFlag(ACTION_RATING, true);
     // Schedule the next update
     setTimeout(this.update.bind(this), 500);
 }
@@ -270,6 +271,9 @@ WebApp._onActionActivated = function(emitter, name, param)
         break;
     case PlayerAction.NEXT_SONG:
         Nuvola.clickOnElement(document.getElementById("next"));
+        break;
+    case ACTION_RATING:
+        Nuvola.actions.updateState(ACTION_RATING, param);
         break;
     }
 }
