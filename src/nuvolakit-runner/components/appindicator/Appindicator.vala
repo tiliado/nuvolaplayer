@@ -76,7 +76,12 @@ public class Appindicator: GLib.Object
 			{
 				var item = child as Gtk.MenuItem;
 				if (item != null)
+				{
 					item.activate.disconnect(on_menu_item_activated);
+					var toggle_action =  item.get_data<Diorite.Action?>("diorite_action") as Diorite.ToggleAction;
+					if (toggle_action != null)
+						toggle_action.notify["state"].disconnect(on_toggle_action_state_changed);
+				}
 			});
 		}
 		
@@ -104,6 +109,7 @@ public class Appindicator: GLib.Object
 		}
 		Gtk.MenuItem item;
 		var radio_action = action as Diorite.RadioAction;
+		var toggle_action = action as Diorite.ToggleAction;
 		if (radio_action != null)
 		{
 			var radio_group = radio_groups[action.name];
@@ -116,6 +122,14 @@ public class Appindicator: GLib.Object
 			radio_item.active = action.state != null && action.state.equal(option.parameter);
 			item = radio_item;
 			item.set_data<Variant?>("diorite_action_param", option.parameter);
+		}
+		else if (toggle_action != null)
+		{
+			var check_item = new Gtk.CheckMenuItem.with_label(action.label);
+			check_item.active = action.state.get_boolean();
+			item = check_item;
+			item.set_data<Variant?>("diorite_action_param", null);
+			action.notify["state"].connect_after(on_toggle_action_state_changed);
 		}
 		else if (action is Diorite.SimpleAction)
 		{
@@ -154,8 +168,15 @@ public class Appindicator: GLib.Object
 		{
 			var parameter = item.get_data<Variant?>("diorite_action_param");
 			var radio_action = action as Diorite.RadioAction;
+			var toggle_action = action as Diorite.ToggleAction;
 			if (radio_action == null || !radio_action.state.equal(parameter))
 				action.activate(parameter);
+			if (toggle_action != null)
+			{
+				item.set_data<Diorite.Action?>("diorite_action", null);
+				((Gtk.CheckMenuItem) item).active = action.state.get_boolean();
+				item.set_data<Diorite.Action?>("diorite_action", action);
+			}
 		}
 	}
 	
@@ -190,6 +211,23 @@ public class Appindicator: GLib.Object
 		/* Restore action to the previously active radio */
 		if (prev_active_radio != null)
 			prev_active_radio.set_data<Diorite.Action?>("diorite_action", action);
+	}
+	
+	private void on_toggle_action_state_changed(GLib.Object emitter, ParamSpec p)
+	{
+		var action = emitter as Diorite.ToggleAction;
+		var children = menu.get_children();
+		foreach (var widget in children)
+		{
+			var toggle_item = widget as Gtk.CheckMenuItem;
+			if (toggle_item != null && toggle_item.get_data<Diorite.Action?>("diorite_action") == action)
+			{
+				toggle_item.set_data<Diorite.Action?>("diorite_action", null);
+				toggle_item.active = action.state.get_boolean();
+				toggle_item.set_data<Diorite.Action?>("diorite_action", action);
+				break;
+			}
+		}
 	}
 }
 
