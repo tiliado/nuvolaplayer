@@ -80,14 +80,6 @@ More independent services
   * Each service gets a desktop launcher and can be launched directly from applications menu (XFCE)
     or applications overview (Unity, GNOME 3).
 
-Packages for Fedora and openSuse
---------------------------------
-
-Nuvola Player 2 provides official packages only for Debian and Ubuntu. Nuvola Player 3 will also
-provide packages for Fedora and openSUSE (before the first beta release at the latest). It will be
-also evaluated whether it is necessary to provide official packages for Arch Linux depending on
-a quality of a maintenance of community packages in AUR.
-
 Modern codebase
 ---------------
 

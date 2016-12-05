@@ -2,13 +2,6 @@ Title: Nuvola Player Development
 URL:
 save_as: index.html
 
-!!! danger "**Work in progress**"
-    **Nuvola Player 3 is a new code-base written from scratch** and the current development stage can be
-    described as "early alpha and everything in progress", so please be patient and
-    [ask questions](https://groups.google.com/d/forum/nuvola-player-devel). You might also be
-    interested in information about
-    [advantages of Nuvola Player 3 over Nuvola Player 2]({filename}nuvola_player_3_advantages.md).
-
 Development forum
 =================
 

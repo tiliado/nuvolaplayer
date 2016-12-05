@@ -6,57 +6,58 @@ This tutorial briefly describes creation of **a new service integration for Nuvo
 scratch**. The goal is to write an integration script for *fake Happy Songs  service* shipped with
 Nuvola Player and to prepare you to create your own service integration.
 I'm looking forward to a code review ;-)
-There is also more detailed [Service Integrations Guide](:apps/guide.html) that provides
-insight to the NuvolaKit core. 
 
 Prepare development environment
 ===============================
 
- 1. Install Nuvola Player 3
- 2. Create a project directory `~/projects/nuvola-player` (or any other name, but don't forget to
+ 1. Install Nuvola Player 3.
+ 2. Install [Nuvola SDK](https://github.com/tiliado/nuvolasdk).
+    
+        sudo pip3 install -U nuvolasdk
+
+ 3. Create a project directory `~/projects/nuvola-player` (or any other name, but don't forget to
     adjust paths in this tutorial).
     
-        :::sh
         mkdir -p ~/projects/nuvola-player
      
- 3. Download [a web app integration template](https://github.com/tiliado/nuvola-app-template).
+ 4. Create a new project with "nuvola://home.html" as a home URL.
+    
+        $ cd ~/projects/nuvola-player
+        $ nuvolasdk new-project --name "Happy Songs" --url "nuvola://home.html"
+        ...
+        Finished!
+        
+        ./nuvola-app-happy-songs
+        total 52
+        drwxr-sr-x 1 fenryxo fenryxo   244 Dec  4 18:39 .
+        drwxr-xr-x 1 fenryxo fenryxo    44 Dec  4 18:39 ..
+        -rw-r--r-- 1 fenryxo fenryxo   103 Dec  4 18:39 CHANGELOG.md
+        -rwxr-xr-x 1 fenryxo fenryxo    65 Dec  4 18:39 configure
+        -rw-r--r-- 1 fenryxo fenryxo  3649 Dec  4 18:39 CONTRIBUTING.md
+        drwxr-sr-x 1 fenryxo fenryxo   144 Dec  4 18:39 .git
+        -rw-r--r-- 1 fenryxo fenryxo    91 Dec  4 18:39 .gitignore
+        -rw-r--r-- 1 fenryxo fenryxo  2701 Dec  4 18:39 integrate.js
+        -rw-r--r-- 1 fenryxo fenryxo  1246 Dec  3 18:57 LICENSE-BSD.txt
+        -rw-r--r-- 1 fenryxo fenryxo 18424 Dec  3 18:57 LICENSE-CC-BY.txt
+        -rw-r--r-- 1 fenryxo fenryxo   541 Dec  4 18:39 metadata.in.json
+        -rw-r--r-- 1 fenryxo fenryxo  1079 Dec  4 18:39 README.md
+        drwxr-sr-x 1 fenryxo fenryxo    60 Dec  3 18:57 src
+    
+ 5. Copy a dumb example of a streaming website.
     
         :::sh
-        cd ~/projects/nuvola-player
-        wget https://github.com/tiliado/nuvola-app-template/archive/master.tar.gz -O - | tar -xz
-        mv nuvola-app-template-master happy-songs
-    
- 4. Create new integration files and open them in your preferred plan-text editor (Gedit,
-    for example).
-    
-        :::sh
-        cd ~/projects/nuvola-player/happy-songs
-        touch metadata.json integrate.js
-        gedit metadata.json integrate.js >/dev/null 2>&1 &
+        cd ~/projects/nuvola-player/nuvola-app-happy-songs
+        cp "$(nuvolasdk data-dir)/examples/home.html" .
 
- 5. Initialize a new [Git][git] repository for your service integration.
-    
-    You can skip this step if you don't know [Git version control system][git]. However, if you
-    would like to have your service integration maintained as a part of the Nuvola Player project
-    and available in the Nuvola Player repository, you will increase maintenance burden of the
-    project, because somebody ([*me*][me]) will have to create Git repository from tar.gz archive of your
-    service integration anyway.
-    
-    If you are not familiar with the [Git version control system][git],
-    you can check [Git tutorial](https://try.github.io/levels/1/challenges/1)
-    and [Pro Git Book](http://git-scm.com/book).
-    
-        :::sh
-        cd ~/projects/nuvola-player/happy-songs
-        git init .
-        git add metadata.json integrate.js
-        git commit -m "Initial commit"
+ 6. If you are not familiar with the [Git version control system][git],
+    check [Git tutorial](https://try.github.io/levels/1/challenges/1)
+    or [Pro Git Book](http://git-scm.com/book).
 
-Create metadata file
-====================
+Metadata file
+=============
 
 **Metadata file contains basic information about your service integrations.** It uses
-[JSON format](http://en.wikipedia.org/wiki/JSON) and it's called ``metadata.json``.
+[JSON format](http://en.wikipedia.org/wiki/JSON) and it's called ``metadata.in.json``.
 Let's look at the example:
 
     :::json
@@ -71,8 +72,14 @@ Let's look at the example:
         "api_minor": 0,
         "categories": "AudioVideo;Audio;",
         "home_url": "nuvola://home.html",
-        "license": "2-Clause BSD, CC-BY-3.0"
-    }
+        "license": "2-Clause BSD, CC-BY-3.0",
+        "build": {
+            "icons": [
+                "src/icon.svg SCALABLE 64 128 256", 
+                "src/icon-xs.svg 16 22 24", 
+                "src/icon-sm.svg 32 48"
+                ]
+        }
 
 This file contains several mandatory fields:
 
@@ -124,7 +131,7 @@ This file contains several mandatory fields:
 
 `home_url`
 
-:   Home page of your service. The template contains fake service home page `home.html`, which
+:   Home page of your service. The dump example of a streaming website contains file `home.html`, which
     has a special address `nuvola://home.html`. You will use a real homepage later in your own
     service integration (e.g. `https://play.google.com/music/` for Google Play Music).
     
@@ -143,6 +150,11 @@ This file contains several mandatory fields:
     Although Nuvola Player 3.0 currently doesn't check this flag and enables both Flash and HTML5 Audio by default,
     this is going to be changed in the next stable release **Nuvola Player 3.2**.
 
+`build`
+
+:   Instructions for the build system of Nuvola SDK. It contains a list of `icons` and their sizes to generate and
+    an optional list of `extra_data` containing filenames to include during installation.
+
 This file can include also optional fields:
 
 `window_width`, `window_height`
@@ -156,24 +168,16 @@ This file can include also optional fields:
     `Runner: **CONSOLE WARN [blocked]** The page at https://play.pocketcasts.com/web **was not allowed** to display
     insecure content from http://media.scpr.org/.` The default value is `false`.
 
-!!! danger "Extra rules for metadata.json"
+!!! danger "Extra rules for metadata.in.json"
     If you want to have your integration script maintained and distributed as a part of the Nuvola
     Player project, you have to follow rules in [Service Integrations Guidelines](:apps/guidelines.html).
 
-!!! info "If you use Git, commit changes"
-    Type into terminal following commands (adjust if necessary):
-    
-        :::sh
-        cd ~/projects/nuvola-player/happy-songs
-        git add metadata.json
-        git commit -m "Add initial metadata for service"
-
-Create integration script
-=========================
+Integration script
+==================
 
 **The integration script is the fundamental part of the service integration.** It's written in
 JavaScript and called ``integrate.js``. This script is called once at start-up of the web app to
-perform initialization of the main process (covered in [the guide](:apps/guide.html)) and again
+perform initialization of the main process and again
 in the web page rendering process every-time a web page is loaded in the web view. Let's look at the
 next sample integration script that doesn't actually do much, but will be used as a base for further
 modifications.
@@ -181,7 +185,7 @@ modifications.
 ```
 #!js
 /*
- * Copyright 2015 Your name <your e-mail>
+ * Copyright 2017 Your name <your e-mail>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -318,24 +322,56 @@ Line 84
 
 :   Convenience method to create and register new instance of your web app integration.
 
-!!! info "If you use Git, commit changes"
-    Type into terminal following commands (adjust if necessary):
+App Runner and Web Worker
+=========================
+
+Nuvola Player uses two processes for each service (web app):
+
+  * **App Runner process** that manages user interface, desktop integration components and
+    a life-cycle of the WebKitGtk WebView. On start-up, Nuvola Player executes once the integration
+    script in the App Runner process to perform initialization of the web app. Note that the script
+    is executed in a **bare JavaScript environment**, which means there are no `window`, `document`
+    or other common object provided by a web browser engine. Therefore, make sure you don't use any of these
+    objects in your top-level code.
     
-        :::sh
-        cd ~/projects/nuvola-player/happy-songs
-        git add integrate.js
-        git commit -m "Add skeleton of integration script"
+    In **the previous example**, there is not any handler for the
+    [Nuvola.Core::InitAppRunner signal](apiref>Nuvola.Core::InitAppRunner).
+    It usually is used only for extra features such as
+    [Web apps with a variable home page URL]({filename}apps/variable-home-page-url.md),
+    [Initialization and Preferences Forms]({filename}apps/initialization-and-preferences-forms.md)
+    or [Custom Actions]({filename}apps/custom-actions.md).
+    
+ 
+  * **Web Worker process** is created by WebKitGtk WebView and it's the place where the web
+    interface of a web app lives, i.e. where the website is loaded. Nuvola Player executes the
+    integration script in the Web Worker process everytime a web page is loaded in it to integrate
+    the web page. The script is executed in a complete WebKit JavaScript environment with all bells
+    and whistles.
 
-Launch Nuvola Player
-====================
+Check, Build and Run Your Script
+================================
 
-Run Nuvola Player 3 from terminal with following command and you will see a list with only one
+First of all, make sure you have [installed all dependencies](https://github.com/tiliado/nuvolasdk#build-a-project-using-nuvola-sdk).
+Then run `nuvolasdk check-project` to check there are no common errors.
+
+```
+$ nuvolasdk check-project
+Checking the project...
+No errors have been found.
+```
+
+Finally, execute following commands:
+
+  * `./configure` to generate `Makefile` and `metadata.json` from `metadata.in.json`
+  * `make all` to build the project
+
+After the project have been built, you can run Nuvola Player 3 from terminal with following command and you will see a list with only one
 service Happy Songs, because we told Nuvola Player to load service integrations only from directory
 `~/projects/nuvola-player`.
     
     $ nuvolaplayer3 -D -A ~/projects/nuvola-player
     ...
-    [Master:DEBUG    Nuvola] WebAppRegistry.vala:128: Found web app Happy Songs at /home/fenryxo/projects/nuvola-player/happy-songs, version 1.0
+    [Master:DEBUG    Nuvola] WebAppRegistry.vala:128: Found web app Happy Songs at /home/fenryxo/projects/nuvola-player/nuvola-app-happy-songs, version 1.0
     ...
 
 
@@ -345,7 +381,7 @@ service Happy Songs, because we told Nuvola Player to load service integrations 
     that must be closed. Otherwise, the `-A` parameter is ignored.
     
     
-        [Master:INFO     Nuvola] master.vala:135: Nuvola Player 3 Beta instance is already running
+        [Master:INFO     Nuvola] master.vala:135: Nuvola Player 3 instance is already running
         and will be activated.
         [Master:WARNING  Nuvola] master.vala:137: Some command line parameters (-D, -v, -A, -L) are
         ignored because they apply only to a new instance. You might want to close all Nuvola Player
@@ -503,14 +539,6 @@ WebApp.update = function()
 
 ![Track details](:images/guide/track_details.png)
 
-!!! info "If you use Git, commit changes"
-    Type into terminal following commands (adjust if necessary):
-    
-        :::sh
-        cd ~/projects/nuvola-player/happy-songs
-        git add integrate.js
-        git commit -m "Extract metadata and playback state"
-
 Player Actions
 ==============
 
@@ -621,32 +649,44 @@ WebApp._onActionActivated = function(emitter, name, param)
 !!! danger "Always test playback actions"
     You should click action buttons in the developer's sidebar to be sure they are working as expected.
 
-!!! info "If you use Git, commit changes"
-    Type into terminal following commands (adjust if necessary):
-    
-        :::sh
-        cd ~/projects/nuvola-player/happy-songs
-        git add integrate.js
-        git commit -m "Add player actions handling"
-
 !!! info "Custom actions"
     Service integrations can also create [custom Actions](:apps/custom-actions.html) like thumbs
     up/down or star rating.
 
-What to do next
-===============
+Push your work upstream
+=======================
 
 If you would like to have your service integration **maintained as a part of Nuvola
-Player project** and distributed in Nuvola Player repository, you have to follow
-[Service Integration Guidelines](:apps/guidelines.html). Once you have **finished your
-service integration**, the next step is to [distribute](:apps/distribute.html) it.
+Player project** and distributed in Nuvola Player repository, follow these steps:
+
+  * Make sure your script follows the [Service Integration Guidelines](:apps/guidelines.html).
+  * Make sure your ``integrate.js`` contain proper copyright information 
+    "Copyright 2014 Your name &lt;your e-mail&gt;".
+  * The test service used in tutorial and guide contains 2-Clause BSD license. If you have severe
+    reasons to choose a different license, update license text in both ``integrate.js`` and
+    ``LICENSE`` files.
+  *  Create an empty remote repository named "nuvola-app-{app-id}" on GitHub.
+     See [GitHub For Beginners: Don't Get Scared, Get Started][A1] for help.
+  * Push content of your local repository to the remote repository.
+    
+        :::sh
+        git remote add origin git@github.com:fenryxo/nuvola-app-test.git
+        git push -u origin master
+
+  * Create new issue in your repository titled "Push to Nuvola Player project"
+  * Create new issue at [Nuvola Player repository](https://github.com/tiliado/nuvolaplayer/issues/new)
+    with subject "Code review: You Service Name integration" and post a link the the issue created
+    above.
+ 
+[A1]: http://readwrite.com/2013/09/30/understanding-github-a-journey-for-beginners-part-1
+[A2]: http://readwrite.com/2013/10/02/github-for-beginners-part-2
+
+What to do next
+===============
 
 Supposing you have followed this tutorial, you have enough knowledge to create your own service
 integration. You are encouraged to take a look at articles in advanced section to spice up your work:
 
-  * [Full Service Integration Guide](:apps/guide.html): This guide describes creation of a new service
-    integration for Nuvola Player 3 from scratch in a much detail, provides **insight to the Nuvola
-    Player Core** and explain some design decisions.
   * [URL Filtering (URL Sandbox)](:apps/url-filtering.html):
     Decide which urls are opened in a default web browser instead of Nuvola Player.
   * [Configuration and session storage](:apps/configuration-and-session-storage.html):

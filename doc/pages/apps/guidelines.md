@@ -6,35 +6,43 @@ and distributed in the Nuvola Player repository**, following rules apply.
 Formal Rules
 ============
 
-1. Copyright and license of all files must be clearly documented in `README.md`. All files must
+ 1. Copyright and license of all files must be clearly documented in `README.md`. All files must
    have license approved by [the Open Source Initiative](http://opensource.org/licenses),
    preferably the same license as Nuvola Player (BSD 2-Clause "Simplified" or "FreeBSD" license).
    Full text of a license must be provided in file `LICENSE` or `LICENSE.txt`. If more than one
    license are used, add a distinguishing suffix, e.g. `LICENSE-BSD.txt`. You can look at
-   [README.md template](https://github.com/tiliado/nuvola-app-template/blob/master/README.md)
+   [README.md template](https://raw.githubusercontent.com/tiliado/nuvolasdk/master/nuvolasdk/data/template/README.md)
    for inspiration. In addition, the `metadata.json` file must contain a list of licenses in the
    `license` field, e.g. `"license": "2-Clause BSD, CC-BY-3.0"`.
 
-2. The field ``maintainer_link`` of ``metadata.json`` must contain URL of your
+ 2. The field ``maintainer_link`` of ``metadata.json`` must contain URL of your
    [Github profile][github]. (You will be subscribed to bug reports related to your service
    integrations).
 
-3. You must provide contact e-mail in `README.md`, e.g. inside Copyright section.
+ 3. You must provide contact e-mail in `README.md`, e.g. inside Copyright section.
 
-4. You must use a consistent coding style of ``integrate.json``, preferably the coding style of
-   Nuvola Player.
+ 4. You must use a consistent coding style of ``integrate.json``, preferably the coding style of
+    Nuvola Player.
 
-5. You must use [strict JavaScript mode][JS_STRICT] and [self-executing anonymous function][JS_SEAF].
-   (See [tutorial](:apps/tutorial.html).)
+ 5. You must use [strict JavaScript mode][JS_STRICT] and [self-executing anonymous function][JS_SEAF].
+    (See [tutorial](:apps/tutorial.html).)
 
-6. You have to use Nuvola Player JavaScript API >= 3.0.
+ 6. You have to use Nuvola Player JavaScript API >= 3.0.
 
-7. You have to [mark translatable strings](:apps/translations.html) in ``integrate.js``.
+ 7. You have to [mark translatable strings](:apps/translations.html) in ``integrate.js``.
 
-8. Your repository must contain file `CONTRIBUTING.md` with instructions for contributors.
-   You can copy
-   [CONTRIBUTING.md template](https://github.com/tiliado/nuvola-app-template/blob/master/CONTRIBUTING.md)
-   and adjust it to your needs.
+ 8. Your repository must contain file `CONTRIBUTING.md` with instructions for contributors.
+    You can copy
+    [CONTRIBUTING.md template](https://raw.githubusercontent.com/tiliado/nuvolasdk/master/nuvolasdk/data/template/CONTRIBUTING.md)
+    and adjust it to your needs.
+
+ 9. You have to create a `CHANGELOG.md` file with a limited subset of Markdown syntax (headings, links, bullet points).
+    [Example with an unreleased initial release](https://raw.githubusercontent.com/tiliado/nuvolasdk/master/nuvolasdk/data/template/CHANGELOG.md).
+    [Example with a few released releases](https://raw.githubusercontent.com/tiliado/nuvola-app-siriusxm/0d8432f18f6164b19b58b5b68b1ca4f3d260179d/CHANGELOG.md).
+
+10. You should test your script in Nuvola Player 3.0 first. When you are finished, feel free to submit your script
+    for a code review. You will then receive a Tiliado developer account to test you script with Nuvola Player 3.1.
+    (Access to Nuvola Player 3.1 is restricted to Tiliado developers and Nuvola Patrons.)
 
 License
 ======= 

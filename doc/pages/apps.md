@@ -18,36 +18,20 @@ increase maintenance burden of the project.
 Documentation
 =============
 
-If you have experiences with **Nuvola Player 2 service integrations** read
-[porting to Nuvola Player 3]({filename}apps/porting.md) guide, otherwise go through *the Basic
-section*. 
-
-Helpful
--------
- 
- * [Porting from Nuvola Player 2 to Nuvola Player 3]({filename}apps/porting.md)
- * [NuvolaKit 3.0 JavaScript API reference](apps/api_reference.html)
- * [Advantages of Nuvola Player 3]({filename}nuvola_player_3_advantages.md)
-  
 Basic
 -----
 
- 1. [Service Integration Tutorial]({filename}apps/tutorial.md): This guide briefly describes
+  * [Service Integration Tutorial]({filename}apps/tutorial.md): This guide briefly describes
     creation of a new service integration for Nuvola Player 3 from scratch. Then you should be ready
     to create your service integration.
- 2. [Service Integration Guidelines]({filename}apps/guidelines.md): These rules apply if you would
+  * [Service Integration Guidelines]({filename}apps/guidelines.md): These rules apply if you would
     like to have your service integration maintained as a part of the Nuvola Player project and
     distributed in the Nuvola Player repository.
- 3. [Distribute Service Integration]({filename}apps/distribute.md): You have a brand new functional
-    service integration on your disk. This guide describe various ways how to distribute your work
-    for other users to use it.
+  * [NuvolaKit 3.0 JavaScript API reference](apps/api_reference.html).
 
 Advanced
 --------
 
-  * [Full Service Integration Guide]({filename}apps/guide.md): This guide describes creation of a new service
-    integration for Nuvola Player 3 from scratch in a much detail, provides **insight to the Nuvola
-    Player Core** and explain some design decisions.
   * [URL Filtering (URL Sandbox)]({filename}apps/url-filtering.md):
     Decide which urls are opened in a default web browser instead of Nuvola Player.
   * [Configuration and session storage]({filename}apps/configuration-and-session-storage.md):
