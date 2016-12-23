@@ -143,6 +143,9 @@ def options(ctx):
 	ctx.add_option('--with-apps-alpha', action='store_true', default=False, dest='apps_alpha', help="Include Nuvola Apps Alpha launcher.")
 	ctx.add_option('--allow-fuzzy-build', action='store_true', default=False, dest='fuzzy', help="Allow building without valid git revision information and absolutely no support from upstream.")
 	ctx.add_option('--snapcraft', action='store_true', default=False, dest='snapcraft', help="Apply workarounds for Snapcraft with given name.")
+	ctx.add_option('--tiliado-oauth2-server', type=str, default="https://tiliado.eu", help="Tiliado OAuth2 server to access Tiliado services.")
+	ctx.add_option('--tiliado-oauth2-client-id', type=str, default="", help="Tiliado OAuth2 client id to access Tiliado services.")
+	ctx.add_option('--tiliado-oauth2-client-secret', type=str, default="", help="Tiliado OAuth2 client secret to access Tiliado services.")
 
 # Configure build process
 def configure(ctx):
@@ -233,6 +236,7 @@ def configure(ctx):
 	
 	ctx.check_dep('uuid', 'UUID', '0') # Engine.io
 	ctx.check_dep('libsoup-2.4', 'SOUP', '0') # Engine.io
+	ctx.check_dep('rest-0.7', 'REST', '0.7.92')
 		
 	
 	ctx.env.with_unity = ctx.options.unity
@@ -266,6 +270,9 @@ def configure(ctx):
 	ctx.define("NUVOLA_VERSION_SUFFIX", VERSION_SUFFIX)
 	ctx.define("GETTEXT_PACKAGE", "nuvolaplayer3")
 	ctx.env.NUVOLA_LIBDIR = "%s/%s" % (ctx.env.LIBDIR, APPNAME)
+	ctx.define("NUVOLA_TILIADO_OAUTH2_SERVER", ctx.options.tiliado_oauth2_server)
+	ctx.define("NUVOLA_TILIADO_OAUTH2_CLIENT_ID", ctx.options.tiliado_oauth2_client_id)
+	ctx.define("NUVOLA_TILIADO_OAUTH2_CLIENT_SECRET", ctx.options.tiliado_oauth2_client_secret)
 	ctx.define("NUVOLA_LIBDIR", ctx.env.NUVOLA_LIBDIR)
 	
 
@@ -288,8 +295,8 @@ def build(ctx):
 	NUVOLAKIT_WORKER = APPNAME + "-worker"
 	
 	packages = 'dioritegtk-{0} dioriteglib-{0} '.format(ctx.env.DIORITE_SERIES)
-	packages += 'javascriptcoregtk-4.0 libnotify libarchive gtk+-3.0 gdk-3.0 gdk-x11-3.0 x11 posix json-glib-1.0 glib-2.0 gio-2.0'
-	uselib = 'NOTIFY JSCORE LIBARCHIVE DIORITEGTK DIORITEGLIB GTK+ GDK GDKX11 XLIB JSON-GLIB GLIB GTHREAD GIO'
+	packages += 'javascriptcoregtk-4.0 libnotify libarchive gtk+-3.0 gdk-3.0 gdk-x11-3.0 x11 posix json-glib-1.0 glib-2.0 gio-2.0 rest-0.7'
+	uselib = 'NOTIFY JSCORE LIBARCHIVE DIORITEGTK DIORITEGLIB GTK+ GDK GDKX11 XLIB JSON-GLIB GLIB GTHREAD GIO REST'
 	
 	vapi_dirs = ['vapi', 'engineio-soup/vapi']
 	if ctx.env.SNAPCRAFT:

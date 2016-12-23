@@ -44,6 +44,13 @@ public class MasterController : Diorite.Application
 {
 	private const string APP_STARTED = "/nuvola/core/app-started";
 	private const string APP_EXITED = "/nuvola/core/app-exited";
+	private const string TILIADO_ACCOUNT_TOKEN_TYPE = "tiliado.account2.token_type";
+	private const string TILIADO_ACCOUNT_ACCESS_TOKEN = "tiliado.account2.access_token";
+	private const string TILIADO_ACCOUNT_REFRESH_TOKEN = "tiliado.account2.refresh_token";
+	private const string TILIADO_ACCOUNT_SCOPE = "tiliado.account2.scope";
+	private const string TILIADO_ACCOUNT_MEMBERSHIP = "tiliado.account2.membership";
+	private const string TILIADO_ACCOUNT_USER = "tiliado.account2.user";
+	private const string TILIADO_ACCOUNT_EXPIRES = "tiliado.account2.expires";
 	
 	public WebAppListWindow? main_window {get; private set; default = null;}
 	public Diorite.Storage storage {get; private set; default = null;}
@@ -57,6 +64,9 @@ public class MasterController : Diorite.Application
 	private Diorite.KeyValueStorageServer storage_server = null;
 	private ActionsKeyBinderServer actions_key_binder = null;
 	private MediaKeysServer media_keys = null;
+	private TiliadoApi2? tiliado = null;
+	private TiliadoAccountWidget? tiliado_widget = null;
+	private string? start_app_after_activation = null;
 	#if EXPERIMENTAL
 	private HttpRemoteControl.Server http_remote_control = null;
 	#endif
@@ -135,6 +145,8 @@ public class MasterController : Diorite.Application
 		app_runners_map = new HashTable<string, AppRunner>(str_hash, str_equal);
 		var default_config = new HashTable<string, Variant>(str_hash, str_equal);
 		config = new Config(storage.user_config_dir.get_child("master").get_child("config.json"), default_config);
+		
+		init_tiliado_account();
 		
 		var server_name = build_master_ipc_id();
 		Environment.set_variable("NUVOLA_IPC_MASTER", server_name, true);
@@ -233,6 +245,19 @@ public class MasterController : Diorite.Application
 		main_window = new WebAppListWindow(this, model);
 		main_window.delete_event.connect(on_main_window_delete_event);
 		main_window.view.item_activated.connect_after(on_list_item_activated);
+		if (tiliado != null)
+		{
+			string? user_name = null;
+			int membership = -1;
+			if (new DateTime.now_utc().to_unix() <= config.get_int64(TILIADO_ACCOUNT_EXPIRES))
+			{
+				user_name = config.get_string(TILIADO_ACCOUNT_USER);
+				membership = (int) config.get_int64(TILIADO_ACCOUNT_MEMBERSHIP);
+			}
+			tiliado_widget = new TiliadoAccountWidget(tiliado, this, Gtk.Orientation.HORIZONTAL, user_name, membership);
+			main_window.top_grid.insert_row(1);
+			main_window.top_grid.attach(tiliado_widget, 0, 1, 1, 1);
+		}
 	}
 	
 	private void show_welcome_window()
@@ -497,10 +522,16 @@ public class MasterController : Diorite.Application
 	{
 		if (main_window.selected_web_app == null)
 			return;
-		
-		main_window.hide();
-		start_app(main_window.selected_web_app);
-		do_quit();
+		if (is_tiliado_account_valid())
+		{
+			main_window.hide();
+			start_app(main_window.selected_web_app);
+			do_quit();
+		}
+		else
+		{
+			start_app_after_activation = main_window.selected_web_app;
+		}
 	}
 	
 	private void do_create_launchers()
@@ -527,6 +558,13 @@ public class MasterController : Diorite.Application
 	
 	private void start_app(string app_id)
 	{
+		if (!is_tiliado_account_valid())
+		{
+			start_app_after_activation = app_id;
+			activate_nuvola_player();
+			return;
+		}
+		
 		hold();
 		
 		var app_meta = web_app_reg.get_app_meta(app_id);
@@ -592,6 +630,84 @@ public class MasterController : Diorite.Application
 		server.api.emit(APP_EXITED, runner.app_id, runner.app_id);
 		runner_exited(runner);
 		release();
+	}
+	
+	private void init_tiliado_account()	
+	{
+		if (TILIADO_OAUTH2_CLIENT_ID != null && TILIADO_OAUTH2_CLIENT_ID[0] != '\0')
+		{
+			Oauth2Token token = null;
+			if (config.has_key(TILIADO_ACCOUNT_ACCESS_TOKEN))
+				token = new Oauth2Token(
+					config.get_string(TILIADO_ACCOUNT_ACCESS_TOKEN),
+					config.get_string(TILIADO_ACCOUNT_REFRESH_TOKEN),
+					config.get_string(TILIADO_ACCOUNT_TOKEN_TYPE),
+					config.get_string(TILIADO_ACCOUNT_SCOPE));
+			tiliado = new TiliadoApi2(TILIADO_OAUTH2_CLIENT_ID, TILIADO_OAUTH2_CLIENT_SECRET, TILIADO_OAUTH2_API_ENDPOINT, TILIADO_OAUTH2_TOKEN_ENDPOINT, token);
+			tiliado.notify["token"].connect_after(on_tiliado_api_token_changed);
+			tiliado.notify["user"].connect_after(on_tiliado_api_user_changed);
+		}
+	}
+	
+	public bool is_tiliado_account_valid()
+	{
+		
+		var expired = new DateTime.now_utc().to_unix() > config.get_int64(TILIADO_ACCOUNT_EXPIRES);
+		if (tiliado != null)
+			return !expired && config.get_int64(TILIADO_ACCOUNT_MEMBERSHIP) >= 3;
+		else
+			return true; // Legacy builds
+	}
+	
+	private void on_tiliado_api_token_changed(GLib.Object o, ParamSpec p)
+	{
+		var token = tiliado.token;
+		if (token != null)
+		{
+			config.set_value(TILIADO_ACCOUNT_TOKEN_TYPE, token.token_type);
+			config.set_value(TILIADO_ACCOUNT_ACCESS_TOKEN, token.access_token);
+			config.set_value(TILIADO_ACCOUNT_REFRESH_TOKEN, token.refresh_token);
+			config.set_value(TILIADO_ACCOUNT_SCOPE, token.scope);
+		}
+		else
+		{
+			config.unset(TILIADO_ACCOUNT_TOKEN_TYPE);
+			config.unset(TILIADO_ACCOUNT_ACCESS_TOKEN);
+			config.unset(TILIADO_ACCOUNT_REFRESH_TOKEN);
+			config.unset(TILIADO_ACCOUNT_SCOPE);
+			config.unset(TILIADO_ACCOUNT_USER);
+			config.unset(TILIADO_ACCOUNT_MEMBERSHIP);
+			config.unset(TILIADO_ACCOUNT_EXPIRES);
+		}
+	}
+	
+	private void on_tiliado_api_user_changed(GLib.Object o, ParamSpec p)
+	{
+		var user = tiliado.user;
+		if (user != null)
+		{
+			var expires = new DateTime.now_utc().add_weeks(2).to_unix();
+			config.set_string(TILIADO_ACCOUNT_USER, user.name);
+			config.set_int64(TILIADO_ACCOUNT_MEMBERSHIP, (int64) user.membership);
+			config.set_int64(TILIADO_ACCOUNT_EXPIRES, expires);
+			if (start_app_after_activation != null && is_tiliado_account_valid())
+			{
+				if (main_window != null)
+				{
+					main_window.hide();
+					do_quit();
+				}
+				start_app(start_app_after_activation);
+				start_app_after_activation = null;
+			}
+		}
+		else
+		{
+			config.unset(TILIADO_ACCOUNT_USER);
+			config.unset(TILIADO_ACCOUNT_MEMBERSHIP);
+			config.unset(TILIADO_ACCOUNT_EXPIRES);
+			
+		}
 	}
 	
 	private enum InitState
