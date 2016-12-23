@@ -121,7 +121,6 @@ public class AppRunnerController : RunnerApplication
 	private MenuBar menu_bar;
 	private Diorite.Form? init_form = null;
 	private FormatSupportCheck format_support = null;
-	private Tiliado.Account tiliado_account = null;
 	private Drt.Lst<Component> components = null;
 	private string? api_token = null;
 	
@@ -226,37 +225,12 @@ public class AppRunnerController : RunnerApplication
 		main_window.sidebar.notify["visible"].connect_after(on_sidebar_visibility_changed);
 		main_window.sidebar.page_changed.connect(on_sidebar_page_changed);
 		main_window.create_menu_button({Actions.ZOOM_IN, Actions.ZOOM_OUT, Actions.ZOOM_RESET, "|", Actions.TOGGLE_SIDEBAR});
-		toggle_donate_button(false);
+		main_window.create_toolbar({Actions.GO_BACK, Actions.GO_FORWARD, Actions.GO_RELOAD, Actions.GO_HOME});
 		
 		format_support = new FormatSupportCheck(
 			new FormatSupport(storage.get_data_file("audio/audiotest.mp3").get_path()), this, storage, config,
 			web_worker, web_engine);
 		format_support.check();
-		
-		tiliado_account = new Tiliado.Account(connection.session, master_config, "https://tiliado.eu", "nuvolaplayer");
-		tiliado_account.refresh.begin((o, res) => {
-			try
-			{
-				tiliado_account.refresh.end(res);
-				message("Logged in as %s", tiliado_account.tiliado.current_user.to_string());
-			}
-			catch (Tiliado.ApiError e)
-			{
-				warning("Api Error: %s", e.message);
-			}
-			
-			if (!tiliado_account.is_patron)
-			{
-				toggle_donate_button(true);
-				Timeout.add_seconds(2 * 60 * 60, () => {
-					if (!tiliado_account.is_patron)
-						show_donation_bar.begin();
-					return false;
-				});
-			}
-			
-			tiliado_account.notify["is-patron"].connect_after(on_is_patron_changed);
-		});
 	}
 	
 	private void do_format_support()
@@ -274,7 +248,6 @@ public class AppRunnerController : RunnerApplication
 		ah.simple_action("main", "app", Actions.FORMAT_SUPPORT, "Format Support", "_Format support", null, null, do_format_support),
 		ah.simple_action("main", "app", Actions.ABOUT, "About", "_About", null, null, do_about),
 		ah.simple_action("main", "app", Actions.HELP, "Help", "_Help", null, "F1", do_help),
-		ah.simple_action("main", "app", Actions.DONATE, "Donate", null, "emblem-favorite", null, do_donate),
 		ah.simple_action("main", "app", Actions.PREFERENCES, "Preferences", "_Preferences", null, null, do_preferences),
 		ah.toggle_action("main", "win", Actions.TOGGLE_SIDEBAR, "Show sidebar", "Show _sidebar", null, null, do_toggle_sidebar, config.get_value(ConfigKey.WINDOW_SIDEBAR_VISIBLE)),
 		ah.simple_action("go", "app", Actions.GO_HOME, "Home", "_Home", "go-home", "<alt>Home", web_engine.go_home),
@@ -381,12 +354,6 @@ public class AppRunnerController : RunnerApplication
 		dialog.add_tab("Keyboard shortcuts", new KeybindingsSettings(actions, config, global_keybindings.keybinder));
 		dialog.add_tab("Network", new NetworkSettings(connection));
 		dialog.add_tab("Components", new ComponentsManager(components));
-		var account_form = new Tiliado.AccountForm(tiliado_account);
-		account_form.valign = account_form.halign = Gtk.Align.CENTER;
-		var scroll = new Gtk.ScrolledWindow(null, null);
-		scroll.add(account_form);
-		scroll.show_all();
-		dialog.add_tab("Tiliado Account", scroll);
 		var response = dialog.run();
 		if (response == Gtk.ResponseType.OK)
 		{
@@ -464,76 +431,6 @@ public class AppRunnerController : RunnerApplication
 			debug("Component %s (%s) %s", component.id, component.name, component.enabled ? "enabled": "not enabled");
 			component.notify["enabled"].connect_after(on_component_enabled_changed);
 		}
-	}
-	
-	private async void show_donation_bar()
-	{
-		try
-		{
-			var reached = yield tiliado_account.tiliado.is_fundraiser_goal_reached(
-				tiliado_account.project_id);
-			if (!reached)
-			{
-				var versions = Nuvola.get_versions();
-				var text = yield tiliado_account.tiliado.get_donation_text(
-					tiliado_account.project_id, versions[0], versions[1], versions[2]);
-				if (text != null && text != "" && text != "null")
-				{
-					var info_bar = new Gtk.InfoBar();
-					info_bar.message_type = Gtk.MessageType.INFO;
-					var label = new Gtk.Label(text);
-					label.use_markup = true;
-					label.set_line_wrap(true);
-					label.show();
-					info_bar.get_content_area().add(label);
-					info_bar.show_close_button = true;
-					info_bar.response.connect(on_donation_bar_response);
-					info_bar.add_button("Donate", Gtk.ResponseType.ACCEPT);
-					info_bar.show();
-					main_window.info_bars.add(info_bar);
-				}
-				else
-				{
-					toggle_donate_button(true);
-				}
-			}
-		}
-		catch (Tiliado.ApiError e)
-		{
-			toggle_donate_button(true);
-			warning("Tiliado API error: %s", e.message);
-		}
-	}
-	
-	private void toggle_donate_button(bool visible)
-	{
-		if (visible)
-			main_window.create_toolbar({Actions.GO_BACK, Actions.GO_FORWARD, Actions.GO_RELOAD, Actions.GO_HOME, " ", Actions.DONATE});
-		else
-			main_window.create_toolbar({Actions.GO_BACK, Actions.GO_FORWARD, Actions.GO_RELOAD, Actions.GO_HOME});
-		
-	}
-	
-	private void on_is_patron_changed(GLib.Object? o, ParamSpec p)
-	{
-		toggle_donate_button(!tiliado_account.is_patron);
-	}
-	
-	private void on_donation_bar_response(Gtk.InfoBar bar, int response_id)
-	{
-		if (response_id == Gtk.ResponseType.ACCEPT)
-			do_donate();
-		else
-			toggle_donate_button(true);
-		
-		var parent = bar.get_parent() as Gtk.Container;
-		if (parent != null)
-			parent.remove(bar);
-	}
-	
-	private void do_donate()
-	{
-		show_uri("%s/%s/funding/".printf(tiliado_account.server, tiliado_account.project_id));
 	}
 	
 	private void on_fatal_error(string title, string message)
