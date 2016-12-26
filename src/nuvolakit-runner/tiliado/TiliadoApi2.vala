@@ -59,19 +59,19 @@ public class TiliadoApi2 : Oauth2Client
 		var project = yield get_project(project_id);
 		unowned int[] user_groups = user.groups;
 		unowned int[] patron_groups = project.patron_groups;
-		uint membership = 0;
+		int membership = 0;
 		for (var i = 0;  i < user.groups.length; i++)
 		{
 			for (var j = 0; j < project.patron_groups.length; j++)
 			{
 				if (user_groups[i] == patron_groups[j])
 				{
-					membership = 3;
-					break;
+					var group = yield get_group(user_groups[i]);
+					membership = int.max(membership, group.membership_rank);
 				}
 			}
 		}
-		user.membership = membership;
+		user.membership = (uint) membership;
 	}
 	
 	public async Project get_project(string id) throws Oauth2Error
@@ -84,6 +84,18 @@ public class TiliadoApi2 : Oauth2Client
 			reader.get_string_member_or("id", id),
 			reader.get_string_member_or("name", id),
 			(owned) groups);
+	}
+	
+	public async Group get_group(int id) throws Oauth2Error
+	{
+		var reader = yield call("auth/groups/%d".printf(id));
+		int[] groups;
+		if (!reader.intv_member("patron_groups", out groups))
+			groups = {};
+		return new Group(
+			reader.get_int_member_or("id", id),
+			reader.get_string_member_or("name", id.to_string()),
+			reader.get_int_member_or("membership_rank", 0));
 	}
 	
 	public class User
@@ -133,6 +145,25 @@ public class TiliadoApi2 : Oauth2Client
 		public string to_string()
 		{
 			return "%s (%s)".printf(name, id);
+		}
+	}
+	
+	public class Group
+	{
+		public int id {get; private set;}
+		public string name {get; private set;}
+		public int membership_rank {get; private set;}
+		
+		public Group(int id, string name, int membership_rank)
+		{
+			this.id = id;
+			this.name = name;
+			this.membership_rank = membership_rank;
+		}
+		
+		public string to_string()
+		{
+			return "%d:%s".printf(id, name);
 		}
 	}
 }
