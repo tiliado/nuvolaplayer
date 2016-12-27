@@ -123,7 +123,7 @@ public class WebExtension: GLib.Object
 		}
 		
 		Idle.add(() => {
-			channel.call("/nuvola/core/web-worker-initialized", null, (o, res) =>
+			channel.call.begin("/nuvola/core/web-worker-initialized", null, (o, res) =>
 			{
 				try
 				{
