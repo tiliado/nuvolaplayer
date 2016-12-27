@@ -88,7 +88,7 @@ public int main(string[] args)
 	
 	Diorite.Logger.init(log != null ? log : stderr, Args.debug ? GLib.LogLevelFlags.LEVEL_DEBUG
 	  : (Args.verbose ? GLib.LogLevelFlags.LEVEL_INFO: GLib.LogLevelFlags.LEVEL_WARNING),
-	  "Runner");
+	  true, "Runner");
 	
 	if (Environment.get_variable("NUVOLA_TEST_ABORT") == "runner")
 		error("App runner abort requested.");

@@ -95,7 +95,7 @@ public int main(string[] args)
 	}
 	
 	Diorite.Logger.init(log != null ? log : stderr, Args.debug ? GLib.LogLevelFlags.LEVEL_DEBUG
-	 : (Args.verbose ? GLib.LogLevelFlags.LEVEL_INFO: GLib.LogLevelFlags.LEVEL_WARNING),
+	 : (Args.verbose ? GLib.LogLevelFlags.LEVEL_INFO: GLib.LogLevelFlags.LEVEL_WARNING), true,
 	 "Master");
 	
 	/* Disable compositing mode in WebKitGTK < 2.13.4 as some websites may crash system with it:

@@ -31,7 +31,7 @@ public WebExtension extension;
 
 public void webkit_web_extension_initialize_with_user_data(WebKit.WebExtension extension, Variant data)
 {
-	Diorite.Logger.init(stderr, GLib.LogLevelFlags.LEVEL_DEBUG, "Worker");
+	Diorite.Logger.init(stderr, GLib.LogLevelFlags.LEVEL_DEBUG, true, "Worker");
 	
 	var debug_sleep = Environment.get_variable("NUVOLA_WEB_WORKER_SLEEP");
 	if (debug_sleep != null)

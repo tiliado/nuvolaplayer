@@ -121,7 +121,7 @@ public int main(string[] args)
 	
 	Diorite.Logger.init(log != null ? log : stderr, Args.debug ? GLib.LogLevelFlags.LEVEL_DEBUG
 	  : (Args.verbose ? GLib.LogLevelFlags.LEVEL_INFO: GLib.LogLevelFlags.LEVEL_WARNING),
-	  "Control");
+	  true, "Control");
 	
 	if (Args.app == null)
 	{
