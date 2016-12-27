@@ -45,12 +45,19 @@ public class WebExtension: GLib.Object
 		this.extension = extension;
 		this.channel = channel;
 		this.worker_data = worker_data;
-		WebKit.ScriptWorld.get_default().window_object_cleared.connect(on_window_object_cleared);
 		extension.page_created.connect(on_web_page_created);
+		WebKit.ScriptWorld.get_default().window_object_cleared.connect(on_window_object_cleared);
 	}
 	
 	private void init()
 	{
+		ainit.begin((o, res) => {ainit.end(res);});
+	}
+	
+	private async void ainit()
+	{
+		Idle.add(ainit.callback); 
+		yield;
 		var router = channel.api_router;
 		router.add_method("/nuvola/webworker/call-function", Drt.ApiFlags.WRITABLE,
 			"Call JavaScript function.",
@@ -70,9 +77,9 @@ public class WebExtension: GLib.Object
 		Variant response;
 		try
 		{
-			response = channel.call_sync("/nuvola/core/get-data-dir", null);
+			response = yield channel.call("/nuvola/core/get-data-dir", null);
 			data_dir = File.new_for_path(response.get_string());
-			response = channel.call_sync("/nuvola/core/get-user-config-dir", null);
+			response = yield channel.call("/nuvola/core/get-user-config-dir", null);
 			user_config_dir = File.new_for_path(response.get_string());
 		}
 		catch (GLib.Error e)
@@ -116,14 +123,17 @@ public class WebExtension: GLib.Object
 		}
 		
 		Idle.add(() => {
-			try
+			channel.call("/nuvola/core/web-worker-initialized", null, (o, res) =>
 			{
-				channel.call_sync("/nuvola/core/web-worker-initialized", null);
-			}
-			catch (GLib.Error e)
-			{
-				error("Runner client error: %s", e.message);
-			}
+				try
+				{
+					channel.call.end(res);
+				}
+				catch (GLib.Error e)
+				{
+					error("Runner client error: %s", e.message);
+				}
+			});
 			return false;
 		});
 	}
