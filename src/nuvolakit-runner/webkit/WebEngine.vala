@@ -34,6 +34,7 @@ public class WebEngine : GLib.Object, JSExecutor
 	public Gtk.Widget widget {get {return web_view;}}
 	public WebAppMeta web_app {get; private set;}
 	public WebAppStorage storage {get; private set;}
+	public bool ready {get; private set; default = false;}
 	public bool can_go_back {get; private set; default = false;}
 	public bool can_go_forward {get; private set; default = false;}
 	public bool web_plugins
@@ -41,19 +42,58 @@ public class WebEngine : GLib.Object, JSExecutor
 		get {return web_view.get_settings().enable_plugins;}
 		set {web_view.get_settings().enable_plugins = value;}
 	}
-	public bool web_worker_initialized {get; private set; default = false;}
 	
 	private RunnerApplication runner_app;
 	private WebView web_view;
 	private JsEnvironment? env = null;
 	private JSApi api;
 	private IpcBus ipc_bus = null;
-	private WebWorker web_worker;
-	private bool initialized = false;
+	public WebWorker web_worker {get; private set;}
+	
 	private Config config;
 	private Diorite.KeyValueStorage session;
 	
 	private static WebKit.WebContext? default_context = null;
+	
+	public static bool init_web_context(WebAppStorage storage)
+	{
+		if (default_context != null)
+			return false;
+		
+		WebKit.WebContext wc;
+		#if HAVE_WEBKIT_2_8
+			wc = (WebKit.WebContext) GLib.Object.@new(typeof(WebKit.WebContext),
+				"local-storage-directory", storage.data_dir.get_child("local_storage").get_path());
+		#else
+			wc = WebKit.WebContext.get_default();
+		#endif
+		wc.set_favicon_database_directory(storage.data_dir.get_child("favicons").get_path());
+		wc.set_disk_cache_directory(storage.cache_dir.get_child("webcache").get_path());
+		var cm = wc.get_cookie_manager();
+		cm.set_persistent_storage(storage.data_dir.get_child("cookies.dat").get_path(),
+			WebKit.CookiePersistentStorage.SQLITE);
+		
+		default_context = wc;
+		return true;
+	}
+	
+	public static WebKit.WebContext? get_web_context()
+	{
+		if (default_context == null)
+			critical("Default context hasn't been set up yet. Call WebEngine.set_up_web_context().");
+		return default_context;
+	}
+	
+	public static uint get_webkit_version()
+	{
+		return WebKit.get_major_version() * 10000 + WebKit.get_minor_version() * 100 + WebKit.get_micro_version(); 
+	}
+	
+	public static bool check_webkit_version(uint min, uint max=0)
+	{
+		var version = get_webkit_version();
+ 		return version >= min && (max == 0 || version < max);
+	}
 	
 	public WebEngine(RunnerApplication runner_app, IpcBus ipc_bus, WebAppMeta web_app,
 		WebAppStorage storage, Config config, string? proxy_uri, HashTable<string, Variant> worker_data)
@@ -92,53 +132,122 @@ public class WebEngine : GLib.Object, JSExecutor
 		web_view.zoom_level = config.get_double(ZOOM_LEVEL_CONF);
 		
 		session = new Diorite.KeyValueMap();
-		set_up_ipc();
-		
-		web_view.load_html("<html><body>Loading...</body></html>", WEB_ENGINE_LOADING_URI);
-		web_view.notify["uri"].connect(on_uri_changed);
-		web_view.notify["zoom-level"].connect(on_zoom_level_changed);
-		web_view.decide_policy.connect(on_decide_policy);
-		web_view.script_dialog.connect(on_script_dialog);
-		web_view.context_menu.connect(on_context_menu);
+		register_ipc_handlers();
 	}
+	
+	public signal void init_finished();
+	public signal void web_worker_ready();
+	public signal void app_runner_ready();
+	public signal void init_form(HashTable<string, Variant> values, Variant entries);
 	
 	public signal void context_menu(WebKit.ContextMenu menu, Gdk.Event event, WebKit.HitTestResult hit_test_result);
 	
-	public static bool init_web_context(WebAppStorage storage)
-	{
-		if (default_context != null)
-			return false;
-		
-		WebKit.WebContext wc;
-		#if HAVE_WEBKIT_2_8
-			wc = (WebKit.WebContext) GLib.Object.@new(typeof(WebKit.WebContext),
-				"local-storage-directory", storage.data_dir.get_child("local_storage").get_path());
-		#else
-			wc = WebKit.WebContext.get_default();
-		#endif
-		wc.set_favicon_database_directory(storage.data_dir.get_child("favicons").get_path());
-		wc.set_disk_cache_directory(storage.cache_dir.get_child("webcache").get_path());
-		var cm = wc.get_cookie_manager();
-		cm.set_persistent_storage(storage.data_dir.get_child("cookies.dat").get_path(),
-			WebKit.CookiePersistentStorage.SQLITE);
-		
-		default_context = wc;
-		return true;
-	}
-	
-	public static WebKit.WebContext get_web_context()
-	{
-		if (default_context == null)
-			critical("Default context hasn't been set up yet. Call WebEngine.set_up_web_context().");
-		return default_context;
-	}
-	
-	public static uint get_webkit_version()
-	{
-		return WebKit.get_major_version() * 10000 + WebKit.get_minor_version() * 100 + WebKit.get_micro_version(); 
-	}
-	
 	public signal void show_alert_dialog(ref bool handled, string message);
+	
+	public void init()
+	{
+		web_view.load_html("<html><body>A web app will be loaded shortly...</body></html>", WEB_ENGINE_LOADING_URI);
+	}
+	
+	public void init_app_runner()
+	{
+		if (!ready)
+		{
+			web_view.notify["uri"].connect(on_uri_changed);
+			web_view.notify["zoom-level"].connect(on_zoom_level_changed);
+			web_view.decide_policy.connect(on_decide_policy);
+			web_view.script_dialog.connect(on_script_dialog);
+			web_view.context_menu.connect(on_context_menu);
+		
+			env = new JsRuntime();
+			uint[] webkit_version = {WebKit.get_major_version(), WebKit.get_minor_version(), WebKit.get_micro_version()};
+			uint[] libsoup_version = {Soup.get_major_version(), Soup.get_minor_version(), Soup.get_micro_version()};
+			api = new JSApi(
+				runner_app.storage, web_app.data_dir, storage.config_dir, config, session, webkit_version, libsoup_version);
+			api.call_ipc_method_async.connect(on_call_ipc_method_async);
+			api.call_ipc_method_sync.connect(on_call_ipc_method_sync);
+			api.call_ipc_method_with_dict_async.connect(on_call_ipc_method_with_dict_async);
+			api.call_ipc_method_with_dict_sync.connect(on_call_ipc_method_with_dict_sync);
+			try
+			{
+				api.inject(env);
+				api.initialize(env);
+			}
+			catch (JSError e)
+			{
+				runner_app.fatal_error("Initialization error", e.message);
+			}
+			try
+			{
+				var args = new Variant("(s)", "InitAppRunner");
+				env.call_function("Nuvola.core.emit", ref args);
+			}
+			catch (GLib.Error e)
+			{
+				runner_app.fatal_error("Initialization error",
+					"%s failed to initialize app runner. Initialization exited with error:\n\n%s".printf(
+					runner_app.app_name, e.message));
+			}
+			debug("App Runner Initialized");
+			ready = true;
+		}
+		if (!request_init_form())
+		{
+			debug("App Runner Ready");
+			app_runner_ready();
+		}
+	}
+	
+	private bool web_worker_initialized_cb()
+	{
+		if (!web_worker.ready)
+		{
+			web_worker.ready = true;
+			debug("Init finished");
+			init_finished();
+		}
+		debug("Web Worker Ready");
+		web_worker_ready();
+		return false;
+	}
+	
+	public void load_app()
+	{
+		try
+		{
+			var url = env.send_data_request_string("LastPageRequest", "url");
+			if (url != null)
+			{
+				if (load_uri(url))
+					return;
+				runner_app.show_error("Invalid page URL", "The web app integration script has not provided a valid page URL '%s'.".printf(url));
+			}
+		}
+		catch (GLib.Error e)
+		{
+			runner_app.show_error("Initialization error", "%s failed to retrieve a last visited page from previous session. Initialization exited with error:\n\n%s".printf(runner_app.app_name, e.message));
+		}
+		
+		go_home();
+	}
+	
+	public void go_home()
+	{
+		try
+		{
+			var url = env.send_data_request_string("HomePageRequest", "url");
+			if (url == null)
+				runner_app.fatal_error("Invalid home page URL", "The web app integration script has provided an empty home page URL.");
+			else if (!load_uri(url))
+			{
+				runner_app.fatal_error("Invalid home page URL", "The web app integration script has not provided a valid home page URL '%s'.".printf(url));
+			}
+		}
+		catch (GLib.Error e)
+		{
+			runner_app.fatal_error("Initialization error", "%s failed to retrieve a home page of  a web app. Initialization exited with error:\n\n%s".printf(runner_app.app_name, e.message));
+		}
+	}
 	
 	private void apply_network_proxy(string? proxy_uri)
 	{
@@ -151,42 +260,7 @@ public class WebEngine : GLib.Object, JSExecutor
 			Environment.set_variable("https_proxy", proxy_uri, true);
 		}
 	}
-	
-	public static bool check_webkit_version(uint min, uint max=0)
-	{
-		var version = get_webkit_version();
- 		return version >= min && (max == 0 || version < max);
-	}
-	
-	public signal void init_form(HashTable<string, Variant> values, Variant entries);
-	
-	private bool inject_api()
-	{
-		if (env != null)
-			return true;
 		
-		env = new JsRuntime();
-		uint[] webkit_version = {WebKit.get_major_version(), WebKit.get_minor_version(), WebKit.get_micro_version()};
-		uint[] libsoup_version = {Soup.get_major_version(), Soup.get_minor_version(), Soup.get_micro_version()};
-		api = new JSApi(
-			runner_app.storage, web_app.data_dir, storage.config_dir, config, session, webkit_version, libsoup_version);
-		api.call_ipc_method_async.connect(on_call_ipc_method_async);
-		api.call_ipc_method_sync.connect(on_call_ipc_method_sync);
-		api.call_ipc_method_with_dict_async.connect(on_call_ipc_method_with_dict_async);
-		api.call_ipc_method_with_dict_sync.connect(on_call_ipc_method_with_dict_sync);
-		try
-		{
-			api.inject(env);
-			api.initialize(env);
-		}
-		catch (JSError e)
-		{
-			runner_app.fatal_error("Initialization error", e.message);
-			return false;
-		}
-		return true;
-	}
-	
 	private bool load_uri(string uri)
 	{
 		if (uri.has_prefix("http://") || uri.has_prefix("https://"))
@@ -210,100 +284,7 @@ public class WebEngine : GLib.Object, JSExecutor
 		return false;
 	}
 	
-		private void wait_for_web_worker()
-	{
-		message("Wait for web worker");
-		if (web_worker_initialized)
-			return;
-		var loop = new MainLoop();
-		var handler_id = notify["web-worker-initialized"].connect_after((o, p) => {loop.quit();});
-		loop.run();
-		disconnect(handler_id);
-	}
 	
-	public bool load()
-	{
-		wait_for_web_worker();
-		
-		if (!initialized)
-		{
-			if (!inject_api())
-				return false;
-			
-			var args = new Variant("(s)", "InitAppRunner");
-			try
-			{
-				env.call_function("Nuvola.core.emit", ref args);
-			}
-			catch (GLib.Error e)
-			{
-				runner_app.fatal_error("Initialization error",
-					"%s failed to initialize app runner. Initialization exited with error:\n\n%s".printf(
-					runner_app.app_name, e.message));
-				return false;
-			}
-			
-			initialized = true;
-		}
-		
-		if (check_init_form())
-			return true;
-		return restore_session();
-	}
-	
-	private bool restore_session()
-	{
-		var result = false;
-		try
-		{
-			var url = env.send_data_request_string("LastPageRequest", "url");
-			if (url == null)
-				return try_go_home();
-			
-			result = load_uri(url);
-			if (!result)
-				runner_app.show_error("Invalid page URL", "The web app integration script has not provided a valid page URL '%s'.".printf(url));
-		}
-		catch (GLib.Error e)
-		{
-			runner_app.show_error("Initialization error", "%s failed to retrieve a last visited page from previous session. Initialization exited with error:\n\n%s".printf(runner_app.app_name, e.message));
-		}
-		
-		if (!result)
-			return try_go_home();
-		return true;
-	}
-	
-	public void go_home()
-	{
-		try_go_home();
-	}
-	
-	public bool try_go_home()
-	{
-		try
-		{
-			var url = env.send_data_request_string("HomePageRequest", "url");
-			if (url == null)
-			{
-				runner_app.fatal_error("Invalid home page URL", "The web app integration script has provided an empty home page URL.");
-				return false;
-			}
-			
-			if (!load_uri(url))
-			{
-				runner_app.fatal_error("Invalid home page URL", "The web app integration script has not provided a valid home page URL '%s'.".printf(url));
-				return false;
-			}
-		}
-		catch (GLib.Error e)
-		{
-			runner_app.fatal_error("Initialization error", "%s failed to retrieve a home page of  a web app. Initialization exited with error:\n\n%s".printf(runner_app.app_name, e.message));
-			return false;
-		}
-		
-		return true;
-	}
 	
 	public void go_back()
 	{
@@ -401,7 +382,7 @@ public class WebEngine : GLib.Object, JSExecutor
 		env.call_function(name, ref params);
 	}
 	
-	private bool check_init_form()
+	private bool request_init_form()
 	{
 		Variant values;
 		Variant entries;
@@ -420,13 +401,14 @@ public class WebEngine : GLib.Object, JSExecutor
 		var values_hashtable = Diorite.variant_to_hashtable(values);
 		if (values_hashtable.size() > 0)
 		{
+			debug("Init form requested");
 			init_form(values_hashtable, entries);
 			return true;
 		}
 		return false;
 	}
 	
-	private void set_up_ipc()
+	private void register_ipc_handlers()
 	{
 		assert(ipc_bus != null);
 		var router = ipc_bus.router;
@@ -502,9 +484,11 @@ public class WebEngine : GLib.Object, JSExecutor
 		var channel = source as Drt.ApiChannel;
 		return_val_if_fail(channel != null, null);
 		ipc_bus.connect_web_worker(channel);
-		Idle.add(() => {web_worker_initialized = true; return false;});
+		Idle.add(web_worker_initialized_cb);
 		return null;
 	}
+	
+	
 	
 	private Variant? handle_get_data_dir(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{

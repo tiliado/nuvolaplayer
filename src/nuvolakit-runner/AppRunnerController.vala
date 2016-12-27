@@ -108,8 +108,7 @@ public abstract class RunnerApplication: Diorite.Application
 }
 
 public class AppRunnerController : RunnerApplication
-{
-	private WebWorker web_worker;
+{	
 	public WebEngine web_engine {get; private set;}
 	public Diorite.KeyValueStorage master_config {get; private set;}
 	public Bindings bindings {get; private set;}
@@ -123,6 +122,7 @@ public class AppRunnerController : RunnerApplication
 	private FormatSupportCheck format_support = null;
 	private Drt.Lst<Component> components = null;
 	private string? api_token = null;
+	private HashTable<string, Variant>? web_worker_data = null;
 	
 	public AppRunnerController(Diorite.Storage storage, WebAppMeta web_app, WebAppStorage app_storage, string? api_token)
 	{
@@ -132,20 +132,23 @@ public class AppRunnerController : RunnerApplication
 		this.api_token = api_token;
 	}
 	
-	public override void activate()
+	private  void start()
 	{
-		if (main_window == null)
-			start();
-		main_window.present();
+		init_settings();
+		init_ipc();
+		init_gui();
+		init_web_engine();
+		format_support = new FormatSupportCheck(
+			new FormatSupport(storage.get_data_file("audio/audiotest.mp3").get_path()), this, storage, config,
+			web_engine.web_worker, web_engine);
+		format_support.check();
 	}
 	
-	private void start()
+	private void init_settings()
 	{
 		/* Disable GStreamer plugin helper because it is shown too often and quite annoying.  */
 		Environment.set_variable("GST_INSTALL_PLUGINS_HELPER", "/bin/true", true);
-		
-		var web_worker_data = new HashTable<string, Variant>(str_hash, str_equal);
-		set_up_communication(web_worker_data); // Now we have WebWorker
+		web_worker_data = new HashTable<string, Variant>(str_hash, str_equal);
 		
 		var gtk_settings = Gtk.Settings.get_default();
 		var default_config = new HashTable<string, Variant>(str_hash, str_equal);
@@ -158,113 +161,10 @@ public class AppRunnerController : RunnerApplication
 		config = new Config(app_storage.config_dir.get_child("config.json"), default_config);
 		config.changed.connect(on_config_changed);
 		gtk_settings.gtk_application_prefer_dark_theme = config.get_bool(ConfigKey.DARK_THEME);
-		
-		actions_helper = new ActionsHelper(actions, config);
-		main_window = new WebAppWindow(this);
-		main_window.can_destroy.connect(on_can_quit);
-		
-		fatal_error.connect(on_fatal_error);
-		show_error.connect(on_show_error);
-		show_warning.connect(on_show_warning);
-		
-		connection = new Connection(new Soup.Session(), app_storage.cache_dir.get_child("conn"), config);
-		WebEngine.init_web_context(app_storage);
-		web_engine = new WebEngine(this, ipc_bus, web_app, app_storage, config, connection.proxy_uri, web_worker_data);
-		web_engine.init_form.connect(on_init_form);
-		web_engine.notify.connect_after(on_web_engine_notify);
-		web_engine.show_alert_dialog.connect(on_show_alert_dialog);
-		actions.action_changed.connect(on_action_changed);
-		var widget = web_engine.widget;
-		widget.hexpand = widget.vexpand = true;
-		
-		append_actions();
-		menu_bar = new MenuBar(actions);
-		menu_bar.update();
-		menu_bar.set_menus(this);
-		
-		var gakb = new ActionsKeyBinderClient(ipc_bus.master);
-		global_keybindings = new GlobalKeybindings(gakb, actions);
-		
-		load_extensions();
-		
-		web_engine.set_user_agent(web_app.user_agent);
-		if (!web_engine.load())
-			return;
-		main_window.grid.add(widget);
-		widget.show();
-		
-		int x = (int) config.get_int64(ConfigKey.WINDOW_X);
-		int y = (int) config.get_int64(ConfigKey.WINDOW_Y);
-		if (x >= 0 && y >= 0)
-			main_window.move(x, y);
-			
-		int win_width = (int) config.get_int64(ConfigKey.WINDOW_WIDTH);
-		int win_height = (int) config.get_int64(ConfigKey.WINDOW_HEIGHT);
-		if (win_width > MINIMAL_REMEMBERED_WINDOW_SIZE && win_height > MINIMAL_REMEMBERED_WINDOW_SIZE)
-			main_window.resize(win_width, win_height);
-		
-		if (config.get_bool(ConfigKey.WINDOW_MAXIMIZED))
-			main_window.maximize();
-		
-		main_window.sidebar.add_page.connect_after(on_sidebar_page_added);
-		main_window.sidebar.remove_page.connect_after(on_sidebar_page_removed);
-		main_window.present();
-		main_window.window_state_event.connect(on_window_state_event);
-		main_window.configure_event.connect(on_configure_event);
-		main_window.notify["is-active"].connect_after(on_window_is_active_changed);
-		
-		if (config.get_bool(ConfigKey.WINDOW_SIDEBAR_VISIBLE))
-			main_window.sidebar.show();
-		else
-			main_window.sidebar.hide();
-		main_window.sidebar_position = (int) config.get_int64(ConfigKey.WINDOW_SIDEBAR_POS);
-		var sidebar_page = config.get_string(ConfigKey.WINDOW_SIDEBAR_PAGE);
-		if (sidebar_page != null)
-			main_window.sidebar.page = sidebar_page;
-		main_window.notify["sidebar-position"].connect_after((o, p) => config.set_int64(ConfigKey.WINDOW_SIDEBAR_POS, (int64) main_window.sidebar_position));
-		main_window.sidebar.notify["visible"].connect_after(on_sidebar_visibility_changed);
-		main_window.sidebar.page_changed.connect(on_sidebar_page_changed);
-		main_window.create_menu_button({Actions.ZOOM_IN, Actions.ZOOM_OUT, Actions.ZOOM_RESET, "|", Actions.TOGGLE_SIDEBAR});
-		main_window.create_toolbar({Actions.GO_BACK, Actions.GO_FORWARD, Actions.GO_RELOAD, Actions.GO_HOME});
-		
-		format_support = new FormatSupportCheck(
-			new FormatSupport(storage.get_data_file("audio/audiotest.mp3").get_path()), this, storage, config,
-			web_worker, web_engine);
-		format_support.check();
 	}
 	
-	private void do_format_support()
-	{
-		format_support.show_dialog(FormatSupportDialog.Tab.MP3);
-	}
-	
-	private void append_actions()
-	{
-		unowned ActionsHelper ah = actions_helper;
-		Diorite.Action[] actions_spec = {
-		//          Action(group, scope, name, label?, mnemo_label?, icon?, keybinding?, callback?)
-		ah.simple_action("main", "app", Actions.ACTIVATE, "Activate main window", null, null, null, do_activate),
-		ah.simple_action("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
-		ah.simple_action("main", "app", Actions.FORMAT_SUPPORT, "Format Support", "_Format support", null, null, do_format_support),
-		ah.simple_action("main", "app", Actions.ABOUT, "About", "_About", null, null, do_about),
-		ah.simple_action("main", "app", Actions.HELP, "Help", "_Help", null, "F1", do_help),
-		ah.simple_action("main", "app", Actions.PREFERENCES, "Preferences", "_Preferences", null, null, do_preferences),
-		ah.toggle_action("main", "win", Actions.TOGGLE_SIDEBAR, "Show sidebar", "Show _sidebar", null, null, do_toggle_sidebar, config.get_value(ConfigKey.WINDOW_SIDEBAR_VISIBLE)),
-		ah.simple_action("go", "app", Actions.GO_HOME, "Home", "_Home", "go-home", "<alt>Home", web_engine.go_home),
-		ah.simple_action("go", "app", Actions.GO_BACK, "Back", "_Back", "go-previous", "<alt>Left", web_engine.go_back),
-		ah.simple_action("go", "app", Actions.GO_FORWARD, "Forward", "_Forward", "go-next", "<alt>Right", web_engine.go_forward),
-		ah.simple_action("go", "app", Actions.GO_RELOAD, "Reload", "_Reload", "view-refresh", "<ctrl>R", web_engine.reload),
-		ah.simple_action("view", "win", Actions.ZOOM_IN, "Zoom in", null, "zoom-in", "<ctrl>plus", web_engine.zoom_in),
-		ah.simple_action("view", "win", Actions.ZOOM_OUT, "Zoom out", null, "zoom-out", "<ctrl>minus", web_engine.zoom_out),
-		ah.simple_action("view", "win", Actions.ZOOM_RESET, "Original zoom", null, "zoom-original", "<ctrl>0", web_engine.zoom_reset),
-		};
-		actions.add_actions(actions_spec);
-	}
-	
-	private void set_up_communication(HashTable<string, Variant> web_worker_data)
-	{
-		assert(ipc_bus == null);
-		
+	private void init_ipc()
+	{	
 		try
 		{
 			var bus_name = build_ui_runner_ipc_id(web_app.id);
@@ -292,10 +192,147 @@ public class AppRunnerController : RunnerApplication
 		{
 			error("Communication with master process failed: %s", e.message);
 		}
-		
 		var storage_client = new Diorite.KeyValueStorageClient(ipc_bus.master);
 		master_config = storage_client.get_proxy("master.config");
-		web_worker = new RemoteWebWorker(ipc_bus);
+		ipc_bus.router.add_method("/nuvola/core/get-component-info", Drt.ApiFlags.READABLE,
+			"Get info about component.",
+			handle_get_component_info, {
+			new Drt.StringParam("name", true, false, null, "Component name.")
+			});
+	}
+	
+	private void init_gui()
+	{
+		actions_helper = new ActionsHelper(actions, config);
+		unowned ActionsHelper ah = actions_helper;
+		Diorite.Action[] actions_spec = {
+		//          Action(group, scope, name, label?, mnemo_label?, icon?, keybinding?, callback?)
+		ah.simple_action("main", "app", Actions.ACTIVATE, "Activate main window", null, null, null, do_activate),
+		ah.simple_action("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
+		ah.simple_action("main", "app", Actions.ABOUT, "About", "_About", null, null, do_about),
+		ah.simple_action("main", "app", Actions.HELP, "Help", "_Help", null, "F1", do_help),
+		};
+		actions.add_actions(actions_spec);
+				
+		menu_bar = new MenuBar(actions);
+		menu_bar.update();
+		menu_bar.set_menus(this);
+		menu_bar.set_app_menu(this, {Actions.HELP, Actions.ABOUT, Actions.QUIT});
+		
+		main_window = new WebAppWindow(this);
+		main_window.can_destroy.connect(on_can_quit);
+		var x = (int) config.get_int64(ConfigKey.WINDOW_X);
+		var y = (int) config.get_int64(ConfigKey.WINDOW_Y);
+		if (x >= 0 && y >= 0)
+			main_window.move(x, y);
+		var win_width = (int) config.get_int64(ConfigKey.WINDOW_WIDTH);
+		var win_height = (int) config.get_int64(ConfigKey.WINDOW_HEIGHT);
+		if (win_width > MINIMAL_REMEMBERED_WINDOW_SIZE && win_height > MINIMAL_REMEMBERED_WINDOW_SIZE)
+			main_window.resize(win_width, win_height);
+		if (config.get_bool(ConfigKey.WINDOW_MAXIMIZED))
+			main_window.maximize();
+		
+		main_window.present();
+		main_window.window_state_event.connect(on_window_state_event);
+		main_window.configure_event.connect(on_configure_event);
+		main_window.notify["is-active"].connect_after(on_window_is_active_changed);
+		main_window.sidebar.hide();
+		
+		fatal_error.connect(on_fatal_error);
+		show_error.connect(on_show_error);
+		show_warning.connect(on_show_warning);
+	}
+	
+	private void init_web_engine()
+	{
+		connection = new Connection(new Soup.Session(), app_storage.cache_dir.get_child("conn"), config);
+		WebEngine.init_web_context(app_storage);
+		web_engine = new WebEngine(this, ipc_bus, web_app, app_storage, config, connection.proxy_uri, web_worker_data);
+		web_engine.set_user_agent(web_app.user_agent);
+		
+		web_engine.init_form.connect(on_init_form);
+		web_engine.notify.connect_after(on_web_engine_notify);
+		web_engine.show_alert_dialog.connect(on_show_alert_dialog);
+		actions.action_changed.connect(on_action_changed);
+		var widget = web_engine.widget;
+		widget.hexpand = widget.vexpand = true;
+		main_window.grid.add(widget);
+		widget.show();
+		web_engine.init_finished.connect(init_app_runner);
+		web_engine.app_runner_ready.connect(load_app);
+		web_engine.init();
+	}
+	
+	private void init_app_runner()
+	{
+		append_actions();
+		var gakb = new ActionsKeyBinderClient(ipc_bus.master);
+		global_keybindings = new GlobalKeybindings(gakb, actions);
+		load_extensions();
+		web_engine.widget.hide();
+		main_window.sidebar.hide();
+		web_engine.init_app_runner();
+	}
+	
+	private void load_app()
+	{
+		main_window.create_menu_button({Actions.ZOOM_IN, Actions.ZOOM_OUT, Actions.ZOOM_RESET, "|", Actions.TOGGLE_SIDEBAR});
+		main_window.create_toolbar({Actions.GO_BACK, Actions.GO_FORWARD, Actions.GO_RELOAD, Actions.GO_HOME});
+		
+		main_window.sidebar.add_page.connect_after(on_sidebar_page_added);
+		main_window.sidebar.remove_page.connect_after(on_sidebar_page_removed);
+		
+		if (config.get_bool(ConfigKey.WINDOW_SIDEBAR_VISIBLE))
+			main_window.sidebar.show();
+		else
+			main_window.sidebar.hide();
+		main_window.sidebar_position = (int) config.get_int64(ConfigKey.WINDOW_SIDEBAR_POS);
+		var sidebar_page = config.get_string(ConfigKey.WINDOW_SIDEBAR_PAGE);
+		if (sidebar_page != null)
+			main_window.sidebar.page = sidebar_page;
+		main_window.notify["sidebar-position"].connect_after((o, p) =>
+		{
+			config.set_int64(ConfigKey.WINDOW_SIDEBAR_POS, (int64) main_window.sidebar_position);
+		});
+		main_window.sidebar.notify["visible"].connect_after(on_sidebar_visibility_changed);
+		main_window.sidebar.page_changed.connect(on_sidebar_page_changed);
+		web_engine.widget.show();
+		menu_bar.set_app_menu(this, {Actions.FORMAT_SUPPORT,	Actions.PREFERENCES, Actions.HELP, Actions.ABOUT, Actions.QUIT});
+	
+		menu_bar.set_menu("01_go", "_Go", {Actions.GO_HOME, Actions.GO_RELOAD, Actions.GO_BACK, Actions.GO_FORWARD});
+		menu_bar.set_menu("02_view", "_View", {Actions.ZOOM_IN, Actions.ZOOM_OUT, Actions.ZOOM_RESET, "|", Actions.TOGGLE_SIDEBAR});
+		web_engine.load_app();
+	}
+	
+	public override void activate()
+	{
+		if (main_window == null)
+			start();
+		else
+			main_window.present();
+	}
+	
+	private void do_format_support()
+	{
+		format_support.show_dialog(FormatSupportDialog.Tab.MP3);
+	}
+	
+	private void append_actions()
+	{
+		unowned ActionsHelper ah = actions_helper;
+		Diorite.Action[] actions_spec = {
+		ah.simple_action("main", "app", Actions.FORMAT_SUPPORT, "Format Support", "_Format support", null, null, do_format_support),
+		ah.simple_action("main", "app", Actions.PREFERENCES, "Preferences", "_Preferences", null, null, do_preferences),
+		ah.toggle_action("main", "win", Actions.TOGGLE_SIDEBAR, "Show sidebar", "Show _sidebar", null, null, do_toggle_sidebar, config.get_value(ConfigKey.WINDOW_SIDEBAR_VISIBLE)),
+		ah.simple_action("go", "app", Actions.GO_HOME, "Home", "_Home", "go-home", "<alt>Home", web_engine.go_home),
+		ah.simple_action("go", "app", Actions.GO_BACK, "Back", "_Back", "go-previous", "<alt>Left", web_engine.go_back),
+		ah.simple_action("go", "app", Actions.GO_FORWARD, "Forward", "_Forward", "go-next", "<alt>Right", web_engine.go_forward),
+		ah.simple_action("go", "app", Actions.GO_RELOAD, "Reload", "_Reload", "view-refresh", "<ctrl>R", web_engine.reload),
+		ah.simple_action("view", "win", Actions.ZOOM_IN, "Zoom in", null, "zoom-in", "<ctrl>plus", web_engine.zoom_in),
+		ah.simple_action("view", "win", Actions.ZOOM_OUT, "Zoom out", null, "zoom-out", "<ctrl>minus", web_engine.zoom_out),
+		ah.simple_action("view", "win", Actions.ZOOM_RESET, "Original zoom", null, "zoom-original", "<ctrl>0", web_engine.zoom_reset),
+		};
+		actions.add_actions(actions_spec);
 	}
 	
 	private void do_quit()
@@ -388,6 +425,7 @@ public class AppRunnerController : RunnerApplication
 	private void load_extensions()
 	{	
 		var router = ipc_bus.router;
+		var web_worker = web_engine.web_worker;
 		bindings = new Bindings();
 		bindings.add_binding(new ActionsBinding(router, web_worker));
 		bindings.add_binding(new NotificationsBinding(router, web_worker));
@@ -419,12 +457,6 @@ public class AppRunnerController : RunnerApplication
 		components.prepend(new LyricsComponent(this, bindings, config));
 		components.prepend(new DeveloperComponent(this, bindings, config));
 		components.reverse();
-		
-		ipc_bus.router.add_method("/nuvola/core/get-component-info", Drt.ApiFlags.READABLE,
-			"Get info about component.",
-			handle_get_component_info, {
-			new Drt.StringParam("name", true, false, null, "Component name.")
-			});
 		
 		foreach (var component in components)
 		{
@@ -535,7 +567,7 @@ public class AppRunnerController : RunnerApplication
 		}
 		try
 		{
-			web_worker.call_function("Nuvola.core.emit", ref payload);
+			web_engine.web_worker.call_function("Nuvola.core.emit", ref payload);
 		}
 		catch (GLib.Error e)
 		{
@@ -546,15 +578,18 @@ public class AppRunnerController : RunnerApplication
 	private Variant? handle_get_component_info(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		var id = params.pop_string();
-		foreach (var component in components)
+		if (components != null)
 		{
-			if (id == component.id)
+			foreach (var component in components)
 			{
-				var builder = new VariantBuilder(new VariantType("a{smv}"));
-				builder.add("{smv}", "name", new Variant.string(component.name));
-				builder.add("{smv}", "found", new Variant.boolean(true));
-				builder.add("{smv}", "loaded", new Variant.boolean(component.enabled));
-				return builder.end();
+				if (id == component.id)
+				{
+					var builder = new VariantBuilder(new VariantType("a{smv}"));
+					builder.add("{smv}", "name", new Variant.string(component.name));
+					builder.add("{smv}", "found", new Variant.boolean(true));
+					builder.add("{smv}", "loaded", new Variant.boolean(component.enabled));
+					return builder.end();
+				}
 			}
 		}
 		var builder = new VariantBuilder(new VariantType("a{smv}"));
@@ -571,7 +606,7 @@ public class AppRunnerController : RunnerApplication
 		try
 		{
 			var payload = new Variant("(ssb)", "ActionEnabledChanged", action.name, action.enabled);
-			web_worker.call_function("Nuvola.actions.emit", ref payload);
+			web_engine.web_worker.call_function("Nuvola.actions.emit", ref payload);
 		}
 		catch (GLib.Error e)
 		{
@@ -591,14 +626,17 @@ public class AppRunnerController : RunnerApplication
 			break;
 		}
 		
-		try
+		if (web_engine.web_worker.ready)
 		{
-			var payload = new Variant("(ss)", "ConfigChanged", key);
-			web_worker.call_function("Nuvola.config.emit", ref payload);
-		}
-		catch (GLib.Error e)
-		{
-			warning("Communication failed: %s", e.message);
+			try
+			{
+				var payload = new Variant("(ss)", "ConfigChanged", key);
+				web_engine.web_worker.call_function("Nuvola.config.emit", ref payload);
+			}
+			catch (GLib.Error e)
+			{
+				warning("Communication failed: %s", e.message);
+			}
 		}
 	}
 	
@@ -617,21 +655,31 @@ public class AppRunnerController : RunnerApplication
 	
 	private void on_can_quit(ref bool can_quit)
 	{
-		try
+		if (web_engine != null)
 		{
-			can_quit = web_worker.send_data_request_bool("QuitRequest", "approved", can_quit);
-		}
-		catch (GLib.Error e)
-		{
-			warning("QuitRequest failed in web worker: %s", e.message);
-		}
-		try
-		{
-			can_quit = web_engine.send_data_request_bool("QuitRequest", "approved", can_quit);
-		}
-		catch (GLib.Error e)
-		{
-			warning("QuitRequest failed in web engine: %s", e.message);
+			try
+			{
+				if (web_engine.web_worker.ready)
+					can_quit = web_engine.web_worker.send_data_request_bool("QuitRequest", "approved", can_quit);
+				else
+					debug("WebWorker not ready");
+			}
+			catch (GLib.Error e)
+			{
+				warning("QuitRequest failed in web worker: %s", e.message);
+			}
+			try
+			{
+			
+				if (web_engine.ready)
+					can_quit = web_engine.send_data_request_bool("QuitRequest", "approved", can_quit);
+				else
+					debug("WebEngine not ready");
+			}
+			catch (GLib.Error e)
+			{
+				warning("QuitRequest failed in web engine: %s", e.message);
+			}
 		}
 	}
 	
@@ -647,7 +695,7 @@ public class AppRunnerController : RunnerApplication
 		{
 			init_form = Diorite.Form.create_from_spec(values, entries);
 			init_form.check_toggles();
-			init_form.expand = false;
+			init_form.expand = true;
 			init_form.valign = init_form.halign = Gtk.Align.CENTER;
 			init_form.show();
 			var button = new Gtk.Button.with_label("OK");
@@ -655,7 +703,8 @@ public class AppRunnerController : RunnerApplication
 			button.show();
 			button.clicked.connect(on_init_form_button_clicked);
 			init_form.attach_next_to(button, null, Gtk.PositionType.BOTTOM, 2, 1);
-			main_window.overlay.add_overlay(init_form);
+			main_window.grid.add(init_form);
+			init_form.show();
 		}
 		catch (Diorite.FormError e)
 		{
@@ -668,7 +717,7 @@ public class AppRunnerController : RunnerApplication
 	private void on_init_form_button_clicked(Gtk.Button button)
 	{
 		button.clicked.disconnect(on_init_form_button_clicked);
-		main_window.overlay.remove(init_form);
+		main_window.grid.remove(init_form);
 		var new_values = init_form.get_values();
 		init_form = null;
 		
@@ -681,7 +730,7 @@ public class AppRunnerController : RunnerApplication
 				config.set_value(key, new_value);
 		}
 		
-		web_engine.load();
+		web_engine.init_app_runner();
 	}
 	
 	private void on_sidebar_visibility_changed(GLib.Object o, ParamSpec p)

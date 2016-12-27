@@ -28,6 +28,8 @@ namespace Nuvola
 
 public interface WebWorker: GLib.Object, JSExecutor
 {
+	public abstract bool ready {get; set; default = false;}
+	
 	public abstract Variant? call_sync(string name, Variant? params) throws GLib.Error;
 	
 	public void disable_gstreamer()
@@ -45,6 +47,7 @@ public interface WebWorker: GLib.Object, JSExecutor
 
 public class RemoteWebWorker: GLib.Object, JSExecutor, WebWorker
 {
+	public bool ready {get; set; default = false;}
 	private IpcBus ipc_bus;
 	
 	public RemoteWebWorker(IpcBus ipc_bus)

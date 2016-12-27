@@ -37,26 +37,38 @@ public class MenuBar: GLib.Object, MenuBarInterface
 		this.actions_reg = actions_reg;
 		this.menus = new HashTable<string, SubMenu>(str_hash, str_equal);
 		menubar = new Menu();
-		app_menu = actions_reg.build_menu({
-			Actions.FORMAT_SUPPORT, Actions.DONATE,
-			Actions.PREFERENCES, Actions.HELP, Actions.ABOUT, Actions.QUIT}, true, false);
+		app_menu = new Menu();
+	}
+	
+	public void set_app_menu(Gtk.Application app, string[] actions)
+	{
+		app_menu.remove_all();
+		actions_reg.append_to_menu(app_menu, actions, true, false);
+		if (app.app_menu == null)
+		{
+			if (app.get_windows() != null)
+				warning("Cannot set an app menu because an app window has been already created.");
+			else
+				app.set_app_menu(app_menu);
+		}
+		else if (app.app_menu != app_menu)
+		{
+			warning("The app menu have been already set to a different one.");
+		}
 	}
 	
 	public void set_menus(Gtk.Application app)
 	{
 		app.set_menubar(menubar);
-		if (app.app_menu == null)
-			app.set_app_menu(app_menu);
 	}
 	
 	public void update()
 	{
 		menubar.remove_all();
-		menubar.append_submenu("_Go", actions_reg.build_menu({Actions.GO_HOME, Actions.GO_RELOAD, Actions.GO_BACK, Actions.GO_FORWARD}, true, false));
-		menubar.append_submenu("_View", actions_reg.build_menu({Actions.ZOOM_IN, Actions.ZOOM_OUT, Actions.ZOOM_RESET, "|", Actions.TOGGLE_SIDEBAR}, true, false));
-		var submenus = menus.get_values();
+		var submenus = menus.get_keys();
+		submenus.sort(strcmp);
 		foreach (var submenu in submenus)
-			submenu.append_to_menu(actions_reg, menubar);
+			menus[submenu].append_to_menu(actions_reg, menubar);
 	}
 	
 	public void set_submenu(string id, SubMenu submenu)
