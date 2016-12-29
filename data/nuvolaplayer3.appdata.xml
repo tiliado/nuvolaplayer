@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- https://www.freedesktop.org/software/appstream/docs/chap-Quickstart.html#sect-Quickstart-DesktopApps -->
 <component type="desktop">
   <id>eu.tiliado.Nuvola.desktop</id>
   <pkgname>nuvolaplayer3</pkgname>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>BSD-2-Clause</project_license>
-  <name>Nuvola Premium</name>
+  <name>Nuvola Premium (WebApp Runtime)</name>
   <summary>Cloud music integration for your desktop</summary>
   <icon type="stock">eu.tiliado.Nuvola</icon>
   <icon type="remote" width="96" height="96">https://tiliado.eu/static/nuvolaplayer/logo.png</icon>
@@ -50,11 +51,15 @@
     </screenshot>
   </screenshots>
   <url type="homepage">https://tiliado.eu/nuvolaplayer/</url>
+  <url type="bugtracker">https://github.com/tiliado/nuvolaplayer/wiki/Bug-Reporting-Guidelines</url>
+  <url type="help">https://tiliado.github.io/nuvolaplayer/documentation/3.0/explore.html</url>
+  <url type="donation">https://tiliado.eu/nuvolaplayer/funding/</url>
   <updatecontact>janousek.jiri@gmail.com</updatecontact>
   <project_group>Tiliado</project_group>
-  <categories>
-  ​  <category>AudioVideo</category>
-  ​  <category>Audio</category>
-  ​  <category>Network</category>
-  ​</categories>
+  <developer_name>Jiří Janoušek</developer_name>
+  <provides>
+    <binary>nuvolaplayer3</binary>
+    <binary>nuvolaplayer3ctl</binary>
+    <dbus type="user">eu.tiliado.Nuvola</dbus>
+  </provides>
 </component>
