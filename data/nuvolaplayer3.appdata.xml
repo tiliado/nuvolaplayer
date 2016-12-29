@@ -53,7 +53,6 @@
   <url type="help">https://tiliado.github.io/nuvolaplayer/documentation/3.0/explore.html</url>
   <url type="donation">https://tiliado.eu/nuvolaplayer/funding/</url>
   <updatecontact>janousek.jiri@gmail.com</updatecontact>
-  <project_group>Tiliado</project_group>
   <developer_name>Jiří Janoušek</developer_name>
   <provides>
     <binary>nuvolaplayer3</binary>
