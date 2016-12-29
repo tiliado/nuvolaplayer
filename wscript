@@ -29,13 +29,14 @@ top = '.'
 out = 'build'
 
 # Application name and version
-NAME="Nuvola Player R"
+NAME="Nuvola Premium"
 APPNAME = "nuvolaplayer3"
 VERSION = "3.1.1+"
 UNIQUE_NAME="eu.tiliado.Nuvola"
+ICON_NAME = UNIQUE_NAME
 GENERIC_NAME = "Cloud Player"
 BLURB = "Cloud music integration for your Linux desktop"
-WELCOME_SCREEN_NAME = "Nuvola Player 3.1 Rolling"
+WELCOME_SCREEN_NAME = "Nuvola Player 3.1 Premium"
 
 TARGET_GLIB = "2.42"
 MIN_GLIB = "2.42.1"
@@ -261,7 +262,7 @@ def configure(ctx):
 	ctx.define("NUVOLA_NAME", NAME)
 	ctx.define("NUVOLA_WELCOME_SCREEN_NAME", WELCOME_SCREEN_NAME)
 	ctx.define("NUVOLA_UNIQUE_NAME", UNIQUE_NAME)
-	ctx.define("NUVOLA_APP_ICON", APPNAME)
+	ctx.define("NUVOLA_APP_ICON", ICON_NAME)
 	ctx.define("NUVOLA_VERSION", VERSION)
 	ctx.define("NUVOLA_REVISION", REVISION_ID)
 	ctx.define("NUVOLA_VERSION_MAJOR", VERSIONS[0])
@@ -399,11 +400,11 @@ def build(ctx):
 	
 	ctx(features = 'subst',
 		source = 'data/templates/launcher.desktop',
-		target = "share/applications/%s.desktop" % APPNAME,
+		target = "share/applications/%s.desktop" % UNIQUE_NAME,
 		install_path = '${PREFIX}/share/applications',
 		BLURB = BLURB,
 		APP_NAME = NAME,
-		APP_ID = APPNAME,
+		ICON = ICON_NAME,
 		EXEC = APPNAME,
 		GENERIC_NAME=GENERIC_NAME,
 	)
@@ -418,16 +419,16 @@ def build(ctx):
 	if ctx.env.with_apps_alpha:
 		ctx(features = 'subst',
 			source = 'data/templates/launcher.desktop',
-			target = "share/applications/%s.desktop" % "nuvola",
+			target = "share/applications/%s.desktop" % "nuvola-apps",
 			install_path = '${PREFIX}/share/applications',
 			BLURB = "Web Apps for your desktop.",
 			APP_NAME = "Nuvola Apps Alpha",
-			APP_ID = APPNAME,
+			ICON = ICON_NAME,
 			EXEC = APPNAME + " __nuvola_apps__",
 			GENERIC_NAME="Web Apps",
 		)
 	
-	ctx.install_as('${PREFIX}/share/appdata/%s.appdata.xml' % APPNAME, ctx.path.find_node("data/nuvolaplayer3.appdata.xml"))
+	ctx.install_as('${PREFIX}/share/appdata/%s.appdata.xml' % UNIQUE_NAME, ctx.path.find_node("data/nuvolaplayer3.appdata.xml"))
 	
 	web_apps = ctx.path.find_dir("web_apps")
 	ctx.install_files('${PREFIX}/share/' + APPNAME, web_apps.ant_glob('**'), cwd=web_apps.parent, relative_trick=True)
@@ -436,8 +437,8 @@ def build(ctx):
 	
 	app_icons = ctx.path.find_node("data/icons")
 	for size in (16, 22, 24, 32, 48, 64):
-		ctx.install_as('${PREFIX}/share/icons/hicolor/%sx%s/apps/%s.png' % (size, size, APPNAME), app_icons.find_node("%s.png" % size))
-	ctx.install_as('${PREFIX}/share/icons/hicolor/scalable/apps/%s.svg' % APPNAME, app_icons.find_node("scalable.svg"))
+		ctx.install_as('${PREFIX}/share/icons/hicolor/%sx%s/apps/%s.png' % (size, size, ICON_NAME), app_icons.find_node("%s.png" % size))
+	ctx.install_as('${PREFIX}/share/icons/hicolor/scalable/apps/%s.svg' % ICON_NAME, app_icons.find_node("scalable.svg"))
 	
 	ctx(features = "mergejs",
 		source = ctx.path.ant_glob('src/mainjs/*.js'),
