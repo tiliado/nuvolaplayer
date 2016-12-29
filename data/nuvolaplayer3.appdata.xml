@@ -7,8 +7,6 @@
   <project_license>BSD-2-Clause</project_license>
   <name>Nuvola Premium (WebApp Runtime)</name>
   <summary>Cloud music integration for your desktop</summary>
-  <icon type="stock">eu.tiliado.Nuvola</icon>
-  <icon type="remote" width="96" height="96">https://tiliado.eu/static/nuvolaplayer/logo.png</icon>
   <description>
     <p>
       Nuvola is a runtime for web-based music streaming services providing more native user experience and
