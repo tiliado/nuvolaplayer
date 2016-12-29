@@ -431,6 +431,7 @@ def build(ctx):
 	ctx.symlink_as('${PREFIX}/bin/nuvola', APPNAME)
 	ctx.symlink_as('${PREFIX}/bin/nuvolactl', CONTROL)
 	ctx.install_as('${PREFIX}/share/appdata/%s.appdata.xml' % UNIQUE_NAME, ctx.path.find_node("data/nuvolaplayer3.appdata.xml"))
+	ctx.install_as('${PREFIX}/share/metainfo/%s.appdata.xml' % UNIQUE_NAME, ctx.path.find_node("data/nuvolaplayer3.appdata.xml"))
 	
 	web_apps = ctx.path.find_dir("web_apps")
 	ctx.install_files('${PREFIX}/share/' + APPNAME, web_apps.ant_glob('**'), cwd=web_apps.parent, relative_trick=True)
