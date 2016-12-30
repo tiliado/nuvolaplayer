@@ -237,7 +237,6 @@ def configure(ctx):
 	
 	ctx.check_dep('uuid', 'UUID', '0') # Engine.io
 	ctx.check_dep('libsoup-2.4', 'SOUP', '0') # Engine.io
-	ctx.check_dep('rest-0.7', 'REST', '0.7.92')
 		
 	
 	ctx.env.with_unity = ctx.options.unity
@@ -296,8 +295,8 @@ def build(ctx):
 	NUVOLAKIT_WORKER = APPNAME + "-worker"
 	
 	packages = 'dioritegtk-{0} dioriteglib-{0} '.format(ctx.env.DIORITE_SERIES)
-	packages += 'javascriptcoregtk-4.0 libnotify libarchive gtk+-3.0 gdk-3.0 gdk-x11-3.0 x11 posix json-glib-1.0 glib-2.0 gio-2.0 rest-0.7'
-	uselib = 'NOTIFY JSCORE LIBARCHIVE DIORITEGTK DIORITEGLIB GTK+ GDK GDKX11 XLIB JSON-GLIB GLIB GTHREAD GIO REST'
+	packages += 'javascriptcoregtk-4.0 libnotify libarchive gtk+-3.0 gdk-3.0 gdk-x11-3.0 x11 posix json-glib-1.0 glib-2.0 gio-2.0'
+	uselib = 'NOTIFY JSCORE LIBARCHIVE DIORITEGTK DIORITEGLIB GTK+ GDK GDKX11 XLIB JSON-GLIB GLIB GTHREAD GIO'
 	
 	vapi_dirs = ['vapi', 'engineio-soup/vapi']
 	if ctx.env.SNAPCRAFT:

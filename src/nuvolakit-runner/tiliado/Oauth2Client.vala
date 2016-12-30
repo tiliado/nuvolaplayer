@@ -34,30 +34,16 @@ public class Oauth2Client : GLib.Object
 	public string client_id;
 	public string? client_secret;
 	public string api_endpoint;
-	public Oauth2Token? token
-	{
-		get
-		{ 
-			return this._token;
-		}
-		set
-		{
-			this._token = value;
-			rest.set_access_token(this._token != null ? token.access_token : null);
-		}
-	}
+	public Oauth2Token? token {get; set;}
 	public string? token_endpoint;
 	private Soup.Session soup;
-	private Rest.OAuth2Proxy rest;
 	private string? device_code_endpoint = null;
 	private string? device_code = null;
 	private uint device_code_cb_id = 0;
-	public Oauth2Token? _token = null;
 	
 	public Oauth2Client(string client_id, string? client_secret, string api_endpoint, string? token_endpoint, Oauth2Token? token)
 	{
 		soup = new Soup.Session();
-		rest = new Rest.OAuth2Proxy(client_id, "http://127.0.0.1", api_endpoint, false);
 		this.client_id = client_id;
 		this.client_secret = client_secret;
 		this.api_endpoint = api_endpoint;
@@ -82,44 +68,32 @@ public class Oauth2Client : GLib.Object
 	
 	public virtual async JsonReader call(string? method, HashTable<string, string>? params=null, HashTable<string, string>? headers=null) throws Oauth2Error
 	{
-		var request = rest.new_call();
-		request.set_method("GET");
-		if (method != null)
-			request.set_function(method);
+		var uri = new Soup.URI(api_endpoint + (method ?? ""));
 		if (params != null)
-			params.for_each(request.add_param);
+			uri.set_query_from_form(params);
+		var msg = new Soup.Message.from_uri("GET", uri);
+		debug("Oauth2 GET %s", uri.to_string(false));
 		if (headers != null)
-			headers.for_each(request.add_header);
+			headers.for_each(msg.request_headers.replace);
+		if (token != null)
+			msg.request_headers.replace("Authorization", "%s %s".printf(token.token_type, token.access_token));
+			
+		SourceFunc resume_cb = call.callback;
+		soup.queue_message(msg, (s, m ) => {Idle.add((owned) resume_cb);});
+		yield;
 		
-		SourceFunc cb = call.callback;
-		GLib.Error? err = null;
-		try
+		unowned string response = (string) msg.response_body.flatten().data;
+		if (msg.status_code < 200 || msg.status_code >= 300)
 		{
-			request.run_async((req, error, obj) => {
-				err = error;
-				Idle.add((owned) cb);
-			});
-			yield;
-		}
-		catch (GLib.Error e)
-		{
-			err = e;
+			var http_error = "%u: %s".printf(msg.status_code, Soup.Status.get_phrase(msg.status_code));
+			warning("Oauth2 Response error. %s.\n%s", http_error, response);
+			throw new Oauth2Error.UNKNOWN(http_error);
 		}
 		
-		if (err != null)
-		{
-		
-			warning("Rest error: %s", err.message);
-			throw new Oauth2Error.UNKNOWN(err.message);
-		}
-		var status_code = request.get_status_code();
-		var payload = request.get_payload();
-		
-		warning("%u: %s", status_code, payload);
 		var reader = new JsonReader();
 		try
 		{
-			reader.load_from_data(payload);
+			reader.load_from_data(response);
 		}
 		catch (GLib.Error e)
 		{
