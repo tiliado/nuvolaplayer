@@ -130,7 +130,7 @@ public class WebEngine : GLib.Object, JSExecutor
 		web_view = new WebView(web_context);
 		config.set_default_value(ZOOM_LEVEL_CONF, 1.0);
 		web_view.zoom_level = config.get_double(ZOOM_LEVEL_CONF);
-		
+		web_view.load_changed.connect(on_load_changed);
 		session = new Diorite.KeyValueMap();
 		register_ipc_handlers();
 	}
@@ -680,6 +680,15 @@ public class WebEngine : GLib.Object, JSExecutor
 		});
 		
 		return null;
+	}
+	
+	private void on_load_changed(WebKit.LoadEvent load_event)
+	{
+		if (load_event == WebKit.LoadEvent.STARTED && web_worker != null)
+		{
+			debug("Load started");
+			web_worker.ready = false;
+		}
 	}
 	
 	private void on_download_started(WebKit.Download download)
