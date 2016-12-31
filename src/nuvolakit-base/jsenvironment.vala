@@ -116,6 +116,8 @@ public class JsEnvironment: GLib.Object, JSExecutor
 		unowned JS.Context ctx = context;
 		string[] names = name.split(".");
 		unowned JS.Object? object = main_object;
+		if (object == null)
+			throw new JSError.NOT_FOUND("Main object not found.'");
 		for (var i = 1; i < names.length - 1; i++)
 		{
 			object = o_get_object(ctx, object, names[i]);
