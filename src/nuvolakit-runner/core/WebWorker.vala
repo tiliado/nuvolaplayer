@@ -28,6 +28,7 @@ namespace Nuvola
 
 public interface WebWorker: GLib.Object, JSExecutor
 {
+	public abstract bool initialized {get; set; default = false;}
 	public abstract bool ready {get; set; default = false;}
 	
 	public abstract Variant? call_sync(string name, Variant? params) throws GLib.Error;
@@ -47,6 +48,7 @@ public interface WebWorker: GLib.Object, JSExecutor
 
 public class RemoteWebWorker: GLib.Object, JSExecutor, WebWorker
 {
+	public bool initialized {get; set; default = false;}
 	public bool ready {get; set; default = false;}
 	private IpcBus ipc_bus;
 	
@@ -66,7 +68,10 @@ public class RemoteWebWorker: GLib.Object, JSExecutor, WebWorker
 	public void call_function(string name, ref Variant? params) throws GLib.Error
 	{
 		var data = new Variant("(smv)", name, params);
-		params = call_sync("/nuvola/webworker/call-function", data);
+		if (ready)
+			params = call_sync("/nuvola/webworker/call-function", data);
+		else
+			debug("Cannot call %s", data.print(false));
 	}
 }
 

@@ -200,9 +200,9 @@ public class WebEngine : GLib.Object, JSExecutor
 	
 	private bool web_worker_initialized_cb()
 	{
-		if (!web_worker.ready)
+		if (!web_worker.initialized)
 		{
-			web_worker.ready = true;
+			web_worker.initialized = true;
 			debug("Init finished");
 			init_finished();
 		}
@@ -415,6 +415,9 @@ public class WebEngine : GLib.Object, JSExecutor
 		router.add_method("/nuvola/core/web-worker-initialized", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
 			"Notify that the web worker has been initialized.",
 			handle_web_worker_initialized, null);
+		router.add_method("/nuvola/core/web-worker-ready", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+			"Notify that the web worker is ready.",
+			handle_web_worker_ready, null);
 		router.add_method("/nuvola/core/get-data-dir", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.READABLE,
 			"Return data directory.",
 			handle_get_data_dir, null);
@@ -477,6 +480,14 @@ public class WebEngine : GLib.Object, JSExecutor
 				new Drt.StringParam("basename", true, false, null, "Basename of the file."),
 				new Drt.DoubleParam("callback-id", true, null, "Callback id.")
 			});
+	}
+	
+	private Variant? handle_web_worker_ready(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	{
+		if (!web_worker.ready)
+			web_worker.ready = true;
+		web_worker_ready();
+		return null;
 	}
 	
 	private Variant? handle_web_worker_initialized(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError

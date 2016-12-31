@@ -29,7 +29,6 @@ public class WebExtension: GLib.Object
 {
 	private WebKit.WebExtension extension;
 	private Drt.ApiChannel channel;
-	private HashTable<unowned WebKit.Frame, FrameBridge> bridges;
 	private File data_dir;
 	private File user_config_dir;
 	private JSApi js_api;
@@ -39,6 +38,7 @@ public class WebExtension: GLib.Object
 	private HashTable<string, Variant>? worker_data;
 	private LoginFormManager login_form_manager = null;
 	private unowned WebKit.WebPage page = null;
+	private FrameBridge bridge = null;
 	
 	public WebExtension(WebKit.WebExtension extension, Drt.ApiChannel channel, HashTable<string, Variant> worker_data)
 	{
@@ -56,8 +56,6 @@ public class WebExtension: GLib.Object
 	
 	private async void ainit()
 	{
-		Idle.add(ainit.callback); 
-		yield;
 		var router = channel.api_router;
 		router.add_method("/nuvola/webworker/call-function", Drt.ApiFlags.WRITABLE,
 			"Call JavaScript function.",
@@ -72,7 +70,6 @@ public class WebExtension: GLib.Object
 			"Enable Password Manager", handle_enable_password_manager, null);
 		router.add_method("/nuvola/password-manager/disable", Drt.ApiFlags.WRITABLE,
 			"Disable Password Manager", handle_disable_password_manager, null);
-		bridges = new HashTable<unowned WebKit.Frame, FrameBridge>(direct_hash, direct_equal);
 		
 		Variant response;
 		try
@@ -122,19 +119,16 @@ public class WebExtension: GLib.Object
 			critical("Initialization error: %s", e.message);
 		}
 		
-		Idle.add(() => {
-			channel.call.begin("/nuvola/core/web-worker-initialized", null, (o, res) =>
+		channel.call.begin("/nuvola/core/web-worker-initialized", null, (o, res) =>
+		{
+			try
 			{
-				try
-				{
-					channel.call.end(res);
-				}
-				catch (GLib.Error e)
-				{
-					error("Runner client error: %s", e.message);
-				}
-			});
-			return false;
+				channel.call.end(res);
+			}
+			catch (GLib.Error e)
+			{
+				error("Runner client error: %s", e.message);
+			}
 		});
 	}
 	
@@ -158,10 +152,10 @@ public class WebExtension: GLib.Object
 	
 	private void init_frame(WebKit.ScriptWorld world, WebKit.WebPage page, WebKit.Frame frame)
 	{
+		this.bridge = null;
 		unowned JS.GlobalContext context = (JS.GlobalContext) frame.get_javascript_context_for_script_world(world);
 		debug("Init frame: %s, %p, %p, %p", frame.get_uri(), frame, page, context);
 		var bridge = new FrameBridge(frame, context);
-		bridges.insert(frame, bridge);
 		try
 		{
 			js_api.inject(bridge);
@@ -171,23 +165,23 @@ public class WebExtension: GLib.Object
 		{
 			show_error("Failed to inject JavaScript API. %s".printf(e.message));
 		}
+		this.bridge = bridge;
 	}
 	
 	private Variant? handle_call_function(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		var name = params.pop_string();
 		var func_params = params.pop_variant();
-		var envs = bridges.get_values();
-		foreach (var env in envs)
+		try
 		{
-			try
-			{
-				env.call_function(name, ref func_params);
-			}
-			catch (GLib.Error e)
-			{
-				show_error("Error during call of %s: %s".printf(name, e.message));
-			}
+			if (bridge != null)
+				bridge.call_function(name, ref func_params);
+			else
+				warning("Bridge is null");
+		}
+		catch (GLib.Error e)
+		{
+			show_error("Error during call of %s: %s".printf(name, e.message));
 		}
 		return func_params;
 	}
@@ -386,13 +380,21 @@ public class WebExtension: GLib.Object
 			unowned JS.GlobalContext? context = (JS.GlobalContext) frame.get_javascript_context_for_script_world(
 				WebKit.ScriptWorld.get_default());
 			return_if_fail(context != null);
-			context = null;
 			/*
 			 * If InitWebWorker is called already in the window_object_cleared callback,
 			 * a local filesystem web page sometimes fails to load.
 			 */
-			var bridge = bridges[frame];
-			return_if_fail(bridge != null);
+			channel.call.begin("/nuvola/core/web-worker-ready", null, (o, res) =>
+			{
+				try
+				{
+					channel.call.end(res);
+				}
+				catch (GLib.Error e)
+				{
+					warning("Runner client error: %s", e.message);
+				}
+			});
 			try
 			{
 				var args = new Variant("(s)", "InitWebWorker");
