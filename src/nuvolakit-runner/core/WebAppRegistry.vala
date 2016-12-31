@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2011-2016 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -32,6 +32,7 @@ public class WebAppRegistry: GLib.Object
 {
 	private File user_storage;
 	private File[] system_storage;
+	private File? nuvola_flatpaks_info_dir;
 	
 	/**
 	 * Regular expression to check validity of service identifier
@@ -50,11 +51,12 @@ public class WebAppRegistry: GLib.Object
 	 * @param system_storage      system-wide directories with service integrations
 	 * @param allow_management    whether to allow services management (add/remove)
 	 */
-	public WebAppRegistry(File user_storage, File[] system_storage, bool allow_management)
+	public WebAppRegistry(File user_storage, File[] system_storage, bool allow_management, File? nuvola_flatpaks_info_dir=null)
 	{
 		this.user_storage = user_storage;
 		this.system_storage = system_storage;
 		this.allow_management = allow_management;
+		this.nuvola_flatpaks_info_dir = nuvola_flatpaks_info_dir;
 	}
 	
 	/**
@@ -102,6 +104,9 @@ public class WebAppRegistry: GLib.Object
 	 */
 	public HashTable<string, WebAppMeta> list_web_apps(string? filter_id=null)
 	{
+		#if FLATPAK
+		sync_packages_from_flatpaks();
+		#endif
 		HashTable<string,  WebAppMeta> result = new HashTable<string, WebAppMeta>(str_hash, str_equal);
 		find_apps(user_storage, filter_id, result);
 		foreach (var dir in system_storage)
@@ -156,6 +161,107 @@ public class WebAppRegistry: GLib.Object
 			}
 		}
 	}
+	#if FLATPAK
+	private void sync_packages_from_flatpaks()
+	{
+		if (nuvola_flatpaks_info_dir != null && nuvola_flatpaks_info_dir.query_exists())
+		{
+			var found = new GenericSet<string>(str_hash, str_equal);
+			try
+			{
+				FileInfo file_info;
+				var enumerator = nuvola_flatpaks_info_dir.enumerate_children(FileAttribute.STANDARD_NAME, 0);
+				while ((file_info = enumerator.next_file()) != null)
+				{
+					string name = file_info.get_name();					
+					if (!name.has_suffix(".info"))
+						continue;
+					name = name.slice(0, name.length - 5);
+					var parts = name.split("-");
+					if (parts.length != 2)
+						continue;
+					found.add(parts[0]);
+					try
+					{
+						install_package_from_flatpak(parts[0], parts[1]);
+					}
+					catch (GLib.Error e)
+					{
+						warning("Failed to install a package %s. %s", name, e.message);
+					}
+				}
+			}
+			catch (GLib.Error e)
+			{
+				warning("Filesystem error: %s", e.message);
+			}
+			uninstall_stale_packages(found);
+		}
+	}
+	
+	private void install_package_from_flatpak(string app_uid, string app_release) throws GLib.Error
+	{
+		var destination = user_storage.get_child(app_uid);
+		var destination_release = destination.get_child(app_release + ".info");
+		if (destination_release.query_exists())
+			return;
+		debug("Importing from flatpak: %s %s", app_uid, app_release);
+		
+		DataProvider data_provider = Bus.get_proxy_sync(
+			BusType.SESSION, app_uid + ".data", "/eu/tiliado/Nuvola/DataProvider");
+			
+		UnixInputStream? data_stream = null;
+		if (!data_provider.get_data_stream(out data_stream))
+		{
+			warning("%s failed to provide data.", app_uid);
+			return;
+		}
+		
+		Diorite.System.try_purge_dir(destination);
+		var tmp_dir = File.new_for_path(DirUtils.make_tmp("nuvolaplayerXXXXXX"));
+		try
+		{
+			extract_archive_fd(data_stream.fd, tmp_dir);
+			try
+			{
+				user_storage.make_directory_with_parents();
+			}
+			catch (Error e)
+			{
+				// Not fatal
+			}
+			var cancellable = new Cancellable();
+			Diorite.System.copy_tree(tmp_dir, destination, cancellable);
+			destination_release.create(0);
+		}
+		finally
+		{
+			Diorite.System.try_purge_dir(tmp_dir);
+		}
+	}
+	
+	private void uninstall_stale_packages(GenericSet<string> valid_names)
+	{
+		try
+		{
+			FileInfo file_info;
+			var enumerator = user_storage.enumerate_children(FileAttribute.STANDARD_NAME, 0);
+			while ((file_info = enumerator.next_file()) != null)
+			{
+				string name = file_info.get_name();
+				if (name != "test" && !(name in valid_names))
+				{
+					debug("Removing uninstalled flatpak import: %s", name);
+					Diorite.System.try_purge_dir(user_storage.get_child(name));
+				}
+			}
+		}
+		catch (GLib.Error e)
+		{
+			warning("Failed to remove uninstalled flatpak imports. %s", e.message);
+		}
+	}
+	#endif
 	
 	/**
 	 * Installs web app from a package
@@ -178,7 +284,7 @@ public class WebAppRegistry: GLib.Object
 		}
 		try
 		{
-			extract_archive(package, tmp_dir);
+			extract_archive_file(package, tmp_dir);
 		
 			var control_file = tmp_dir.get_child("control");
 			string control_data;
@@ -307,23 +413,38 @@ public class WebAppRegistry: GLib.Object
 		}
 	}
 	
-	private void extract_archive(File archive, File directory) throws ArchiveError
+	private void extract_archive_file(File archive, File directory)  throws ArchiveError
+	{
+		Archive.Read reader = new Archive.Read();
+		if (reader.support_format_tar() != Archive.Result.OK)
+			throw new ArchiveError.READ_ERROR("Cannot enable tar format. %s", reader.error_string());
+		if (reader.support_compression_gzip() != Archive.Result.OK)
+			throw new ArchiveError.READ_ERROR("Cannot enable gzip compression. %s", reader.error_string());
+		if (reader.open_filename(archive.get_path(), 10240) != Archive.Result.OK)
+			throw new ArchiveError.READ_ERROR("Cannot open archive '%s'. %s", archive.get_path(), reader.error_string());
+		extract_archive(reader, directory);
+	}
+	
+	private void extract_archive_fd(int archive_fd, File directory)  throws ArchiveError
+	{
+		Archive.Read reader = new Archive.Read();
+		if (reader.support_format_tar() != Archive.Result.OK)
+			throw new ArchiveError.READ_ERROR("Cannot enable tar format. %s", reader.error_string());
+		if (reader.support_compression_gzip() != Archive.Result.OK)
+			throw new ArchiveError.READ_ERROR("Cannot enable gzip compression. %s", reader.error_string());
+		if (reader.open_fd(archive_fd, 10240) != Archive.Result.OK)
+			throw new ArchiveError.READ_ERROR("Cannot open archive fd %d. %s", archive_fd, reader.error_string());
+		extract_archive(reader, directory);
+	}
+	
+	private void extract_archive(Archive.Read reader, File directory) throws ArchiveError
 	{
 		var current_dir = Environment.get_current_dir();
 		if (Environment.set_current_dir(directory.get_path()) < 0)
 			throw new ArchiveError.SYSTEM_ERROR("Failed to chdir to '%s'.", directory.get_path());
 		
-		Archive.Read reader;
 		try
 		{
-			reader = new Archive.Read();
-			if (reader.support_format_tar() != Archive.Result.OK)
-				throw new ArchiveError.READ_ERROR("Cannot enable tar format. %s", reader.error_string());
-			if (reader.support_compression_gzip() != Archive.Result.OK)
-				throw new ArchiveError.READ_ERROR("Cannot enable gzip compression. %s", reader.error_string());
-			if (reader.open_filename(archive.get_path(), 10240) != Archive.Result.OK)
-				throw new ArchiveError.READ_ERROR("Cannot open archive '%s'. %s", archive.get_path(), reader.error_string());
-			
 			var writer = new Archive.WriteDisk();
 			writer.set_options(Archive.ExtractFlags.TIME | Archive.ExtractFlags.SECURE_NODOTDOT | Archive.ExtractFlags.SECURE_SYMLINKS);
 			
@@ -409,5 +530,13 @@ public errordomain ArchiveError
 	READ_ERROR,
 	WRITE_ERROR;
 }
+
+#if FLATPAK
+[DBus (name="eu.tiliado.Nuvola.DataProvider")]
+private interface DataProvider: GLib.Object
+{	
+	public abstract bool get_data_stream(out GLib.UnixInputStream? input_stream) throws GLib.Error;
+}
+#endif
 
 } // namespace Nuvola

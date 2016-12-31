@@ -121,15 +121,20 @@ public int main(string[] args)
 	var storage = new Diorite.XdgStorage.for_project(Nuvola.get_app_id());
 	var web_apps_storage = storage.get_child("web_apps");
 	
+	File? packages_dir = null;
+	#if FLATPAK
+	packages_dir = File.new_for_path("/var/lib/flatpak/exports/nuvola");
+	#endif
+		
 	WebAppRegistry web_app_reg;
 	if (Args.apps_dir != null && Args.apps_dir != "")
 	{
 		local_only_args = true;
-		web_app_reg = new WebAppRegistry(File.new_for_path(Args.apps_dir), {}, false);
+		web_app_reg = new WebAppRegistry(File.new_for_path(Args.apps_dir), {}, false, packages_dir);
 	}
 	else
 	{
-		web_app_reg = new WebAppRegistry(web_apps_storage.user_data_dir, web_apps_storage.data_dirs, true);
+		web_app_reg = new WebAppRegistry(web_apps_storage.user_data_dir, web_apps_storage.data_dirs, true, packages_dir);
 	}
 	
 	string[] exec_cmd = {};

@@ -144,6 +144,7 @@ def options(ctx):
 	ctx.add_option('--with-apps-alpha', action='store_true', default=False, dest='apps_alpha', help="Include Nuvola Apps Alpha launcher.")
 	ctx.add_option('--allow-fuzzy-build', action='store_true', default=False, dest='fuzzy', help="Allow building without valid git revision information and absolutely no support from upstream.")
 	ctx.add_option('--snapcraft', action='store_true', default=False, dest='snapcraft', help="Apply workarounds for Snapcraft with given name.")
+	ctx.add_option('--flatpak', action='store_true', default=False, dest='flatpak', help="Apply workarounds for Flatpak.")
 	ctx.add_option('--tiliado-oauth2-server', type=str, default="https://tiliado.eu", help="Tiliado OAuth2 server to access Tiliado services.")
 	ctx.add_option('--tiliado-oauth2-client-id', type=str, default="", help="Tiliado OAuth2 client id to access Tiliado services.")
 	ctx.add_option('--tiliado-oauth2-client-secret', type=str, default="", help="Tiliado OAuth2 client secret to access Tiliado services.")
@@ -213,6 +214,11 @@ def configure(ctx):
 		ctx.vala_def("SNAPCRAFT")
 	else:
 		ctx.env.SNAPCRAFT = None
+	
+	# Flatpak
+	ctx.env.FLATPAK = ctx.options.flatpak
+	if ctx.env.FLATPAK:
+		ctx.vala_def("FLATPAK")
 		
 	# Check dependencies
 	ctx.env.DIORITE_SERIES = DIORITE_SERIES = "0.3"
