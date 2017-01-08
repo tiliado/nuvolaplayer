@@ -166,6 +166,27 @@ public class Oauth2Client : GLib.Object
 		device_code_grant_cancelled();
 	}
 	
+	public string? hmac_sha1_for_string(string data)
+	{
+		return hmac_for_string(ChecksumType.SHA1, data);
+	}
+	
+	public string? hmac_for_string(ChecksumType checksum, string data)
+	{
+		return client_secret != null ? Hmac.compute_for_string(checksum, client_secret.data, data) : null;
+	}
+	
+	public bool hmac_sha1_verify_string(string data, string hmac)
+	{
+		return hmac_verify_string(ChecksumType.SHA1, data, hmac);
+	}
+	
+	public bool hmac_verify_string(ChecksumType checksum, string data, string hmac)
+	{
+		var expected_hmac = hmac_for_string(checksum, data);
+		return expected_hmac != null ? Drt.Utils.const_time_byte_equal(expected_hmac.data, hmac.data) : false;
+	}
+	
 	private bool device_code_grant_cb()
 	{
 		if (device_code_endpoint == null || device_code == null)
