@@ -319,8 +319,8 @@ public class TiliadoAccountWidget : Gtk.Grid
 		catch (Oauth2Error e)
 		{
 			clear_all();
+			get_token();
 			warning("OAuth2 Error: %s", e.message);
-			activate_button.sensitive = true;
 			status_label = new Gtk.Label(null);
 			status_label.set_markup("<b>Authorization failed:</b> Failed to fetch user's details.");
 			status_label.hexpand = true;

@@ -51,6 +51,7 @@ public class MasterController : Diorite.Application
 	private const string TILIADO_ACCOUNT_MEMBERSHIP = "tiliado.account2.membership";
 	private const string TILIADO_ACCOUNT_USER = "tiliado.account2.user";
 	private const string TILIADO_ACCOUNT_EXPIRES = "tiliado.account2.expires";
+	private const string TILIADO_ACCOUNT_SIGNATURE = "tiliado.account2.signature";
 	
 	public WebAppListWindow? main_window {get; private set; default = null;}
 	public Diorite.Storage storage {get; private set; default = null;}
@@ -250,7 +251,7 @@ public class MasterController : Diorite.Application
 		{
 			string? user_name = null;
 			int membership = -1;
-			if (new DateTime.now_utc().to_unix() <= config.get_int64(TILIADO_ACCOUNT_EXPIRES))
+			if (is_tiliado_account_valid(0))
 			{
 				user_name = config.get_string(TILIADO_ACCOUNT_USER);
 				membership = (int) config.get_int64(TILIADO_ACCOUNT_MEMBERSHIP);
@@ -523,7 +524,7 @@ public class MasterController : Diorite.Application
 	{
 		if (main_window.selected_web_app == null)
 			return;
-		if (is_tiliado_account_valid())
+		if (is_tiliado_account_valid(3))
 		{
 			main_window.hide();
 			start_app(main_window.selected_web_app);
@@ -559,7 +560,7 @@ public class MasterController : Diorite.Application
 	
 	private void start_app(string app_id)
 	{
-		if (!is_tiliado_account_valid())
+		if (!is_tiliado_account_valid(3))
 		{
 			start_app_after_activation = app_id;
 			activate_nuvola_player();
@@ -650,14 +651,27 @@ public class MasterController : Diorite.Application
 		}
 	}
 	
-	public bool is_tiliado_account_valid()
+	public bool is_tiliado_account_valid(uint required_membership)
 	{
+		if (tiliado == null)
+			return true;  // Legacy builds
 		
-		var expired = new DateTime.now_utc().to_unix() > config.get_int64(TILIADO_ACCOUNT_EXPIRES);
-		if (tiliado != null)
-			return !expired && config.get_int64(TILIADO_ACCOUNT_MEMBERSHIP) >= 3;
-		else
-			return true; // Legacy builds
+		var signature = config.get_string(TILIADO_ACCOUNT_SIGNATURE);
+		if (signature == null)
+		{
+			unset_tiliado_user_info();
+			return false;
+		}
+		var expires = config.get_int64(TILIADO_ACCOUNT_EXPIRES);
+		var user_name = config.get_string(TILIADO_ACCOUNT_USER);
+		var	membership = (uint) config.get_int64(TILIADO_ACCOUNT_MEMBERSHIP);
+		if (!tiliado.hmac_sha1_verify_string(concat_tiliado_user_info(user_name, membership, expires), signature))
+		{
+			unset_tiliado_user_info();
+			return false;
+		}
+		
+		return new DateTime.now_utc().to_unix() <= expires && membership >= required_membership;			
 	}
 	
 	private void on_tiliado_api_token_changed(GLib.Object o, ParamSpec p)
@@ -676,9 +690,7 @@ public class MasterController : Diorite.Application
 			config.unset(TILIADO_ACCOUNT_ACCESS_TOKEN);
 			config.unset(TILIADO_ACCOUNT_REFRESH_TOKEN);
 			config.unset(TILIADO_ACCOUNT_SCOPE);
-			config.unset(TILIADO_ACCOUNT_USER);
-			config.unset(TILIADO_ACCOUNT_MEMBERSHIP);
-			config.unset(TILIADO_ACCOUNT_EXPIRES);
+			unset_tiliado_user_info();
 		}
 	}
 	
@@ -688,10 +700,8 @@ public class MasterController : Diorite.Application
 		if (user != null)
 		{
 			var expires = new DateTime.now_utc().add_weeks(2).to_unix();
-			config.set_string(TILIADO_ACCOUNT_USER, user.name);
-			config.set_int64(TILIADO_ACCOUNT_MEMBERSHIP, (int64) user.membership);
-			config.set_int64(TILIADO_ACCOUNT_EXPIRES, expires);
-			if (start_app_after_activation != null && is_tiliado_account_valid())
+			set_tiliado_user_info(user.name, user.membership, expires);
+			if (start_app_after_activation != null && is_tiliado_account_valid(3))
 			{
 				if (main_window != null)
 				{
@@ -704,11 +714,30 @@ public class MasterController : Diorite.Application
 		}
 		else
 		{
-			config.unset(TILIADO_ACCOUNT_USER);
-			config.unset(TILIADO_ACCOUNT_MEMBERSHIP);
-			config.unset(TILIADO_ACCOUNT_EXPIRES);
-			
+			unset_tiliado_user_info();
 		}
+	}
+	
+	private void set_tiliado_user_info(string name, uint membership_rank, int64 expires)
+	{
+		config.set_string(TILIADO_ACCOUNT_USER, name);
+		config.set_int64(TILIADO_ACCOUNT_MEMBERSHIP, (int64) membership_rank);
+		config.set_int64(TILIADO_ACCOUNT_EXPIRES, expires);
+		var signature = tiliado.hmac_sha1_for_string(concat_tiliado_user_info(name, membership_rank, expires));
+		config.set_string(TILIADO_ACCOUNT_SIGNATURE, signature);	
+	}
+	
+	private inline string concat_tiliado_user_info(string name, uint membership_rank, int64 expires)
+	{
+		return "%s:%u:%s".printf(name, membership_rank, expires.to_string());
+	}
+	
+	private void unset_tiliado_user_info()
+	{
+		config.unset(TILIADO_ACCOUNT_USER);
+		config.unset(TILIADO_ACCOUNT_MEMBERSHIP);
+		config.unset(TILIADO_ACCOUNT_EXPIRES);
+		config.unset(TILIADO_ACCOUNT_SIGNATURE);
 	}
 	
 	private enum InitState
