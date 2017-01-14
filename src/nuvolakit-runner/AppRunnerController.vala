@@ -276,6 +276,7 @@ public class AppRunnerController : RunnerApplication
 	
 	private void load_app()
 	{
+		menu_bar.set_app_menu(this, {Actions.FORMAT_SUPPORT, Actions.PREFERENCES, Actions.HELP, Actions.ABOUT, Actions.QUIT});
 		main_window.create_menu_button({Actions.ZOOM_IN, Actions.ZOOM_OUT, Actions.ZOOM_RESET, "|", Actions.TOGGLE_SIDEBAR});
 		main_window.create_toolbar({Actions.GO_BACK, Actions.GO_FORWARD, Actions.GO_RELOAD, Actions.GO_HOME});
 		
@@ -297,7 +298,6 @@ public class AppRunnerController : RunnerApplication
 		main_window.sidebar.notify["visible"].connect_after(on_sidebar_visibility_changed);
 		main_window.sidebar.page_changed.connect(on_sidebar_page_changed);
 		web_engine.widget.show();
-		menu_bar.set_app_menu(this, {Actions.FORMAT_SUPPORT,	Actions.PREFERENCES, Actions.HELP, Actions.ABOUT, Actions.QUIT});
 	
 		menu_bar.set_menu("01_go", "_Go", {Actions.GO_HOME, Actions.GO_RELOAD, Actions.GO_BACK, Actions.GO_FORWARD});
 		menu_bar.set_menu("02_view", "_View", {Actions.ZOOM_IN, Actions.ZOOM_OUT, Actions.ZOOM_RESET, "|", Actions.TOGGLE_SIDEBAR});
