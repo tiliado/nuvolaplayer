@@ -390,7 +390,7 @@ public class AppRunnerController : RunnerApplication
 		var dialog = new PreferencesDialog(this, main_window, form);
 		dialog.add_tab("Keyboard shortcuts", new KeybindingsSettings(actions, config, global_keybindings.keybinder));
 		dialog.add_tab("Network", new NetworkSettings(connection));
-		dialog.add_tab("Components", new ComponentsManager(components));
+		dialog.add_tab("Features", new ComponentsManager(components));
 		var response = dialog.run();
 		if (response == Gtk.ResponseType.OK)
 		{
