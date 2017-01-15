@@ -645,7 +645,9 @@ public class MasterController : Diorite.Application
 					config.get_string(TILIADO_ACCOUNT_REFRESH_TOKEN),
 					config.get_string(TILIADO_ACCOUNT_TOKEN_TYPE),
 					config.get_string(TILIADO_ACCOUNT_SCOPE));
-			tiliado = new TiliadoApi2(TILIADO_OAUTH2_CLIENT_ID, TILIADO_OAUTH2_CLIENT_SECRET, TILIADO_OAUTH2_API_ENDPOINT, TILIADO_OAUTH2_TOKEN_ENDPOINT, token);
+			tiliado = new TiliadoApi2(
+				TILIADO_OAUTH2_CLIENT_ID, Diorite.String.unmask(TILIADO_OAUTH2_CLIENT_SECRET.data),
+				TILIADO_OAUTH2_API_ENDPOINT, TILIADO_OAUTH2_TOKEN_ENDPOINT, token);
 			tiliado.notify["token"].connect_after(on_tiliado_api_token_changed);
 			tiliado.notify["user"].connect_after(on_tiliado_api_user_changed);
 		}

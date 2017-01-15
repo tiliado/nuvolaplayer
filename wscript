@@ -278,9 +278,15 @@ def configure(ctx):
 	ctx.env.NUVOLA_LIBDIR = "%s/%s" % (ctx.env.LIBDIR, APPNAME)
 	ctx.define("NUVOLA_TILIADO_OAUTH2_SERVER", ctx.options.tiliado_oauth2_server)
 	ctx.define("NUVOLA_TILIADO_OAUTH2_CLIENT_ID", ctx.options.tiliado_oauth2_client_id)
-	ctx.define("NUVOLA_TILIADO_OAUTH2_CLIENT_SECRET", ctx.options.tiliado_oauth2_client_secret)
 	ctx.define("NUVOLA_LIBDIR", ctx.env.NUVOLA_LIBDIR)
 	
+	with open("build/secret.h", "wb") as f:
+		if ctx.options.tiliado_oauth2_client_secret:
+			secret = mask(ctx.options.tiliado_oauth2_client_secret)
+		else:
+			secret = b""
+		f.write(
+			b'#pragma once\nstatic const char* NUVOLA_TILIADO_OAUTH2_CLIENT_SECRET = "'	+ secret + b'";')
 
 def build(ctx):
 	#~ print ctx.env
@@ -343,7 +349,7 @@ def build(ctx):
 			ctx.path.ant_glob('src/nuvolakit-runner/*.vala')
 			+ ctx.path.ant_glob('src/nuvolakit-runner/*/*.vala')
 			+ ctx.path.ant_glob('src/nuvolakit-runner/*/*/*.vala')
-			),
+			+ ctx.path.ant_glob('src/nuvolakit-runner/*.vapi')),
 		packages = 'webkit2gtk-4.0 javascriptcoregtk-4.0 gstreamer-1.0 libsecret-1',
 		uselib =  'JSCORE WEBKIT GST SECRET',
 		use = [NUVOLAKIT_BASE, ENGINEIO],
@@ -544,3 +550,8 @@ class mergejs(Task.Task):
 		output = merge_js([i.abspath() for i in self.inputs])
 		self.outputs[0].write(output)
 		return 0 
+
+def mask(string):
+    xord = lambda i: (ord(i) if isinstance (i, str) else i)
+    shift = int(1.0 * xord(os.urandom(1)[0]) / 255 * 85 + 15)
+    return bytes(bytearray([shift]) + bytearray(xord(c) + shift for c in string))
