@@ -305,11 +305,12 @@ def build(ctx):
 	uselib = 'NOTIFY JSCORE LIBARCHIVE DIORITEGTK DIORITEGLIB GTK+ GDK GDKX11 XLIB JSON-GLIB GLIB GTHREAD GIO'
 	
 	vapi_dirs = ['vapi', 'engineio-soup/vapi']
+	env_vapi_dir = os.environ.get("VAPIDIR")
+	if env_vapi_dir:
+		vapi_dirs.extend(os.path.relpath(path) for path in env_vapi_dir.split(":"))
 	if ctx.env.SNAPCRAFT:
 		vapi_dirs.append(os.path.relpath(ctx.env.SNAPCRAFT + "/usr/share/vala/vapi"))
-	print(vapi_dirs)
-	for dir in vapi_dirs:
-		print(os.listdir(dir))
+	
 	if ctx.env.with_unity:
 		packages += " unity Dbusmenu-0.4"
 		uselib += " UNITY DBUSMENU"
