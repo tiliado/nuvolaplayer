@@ -336,7 +336,7 @@ public class TiliadoAccountWidget : Gtk.Grid
 	{
 		if (user_name == null || membership < 0)
 		{
-			tiliado.fetch_current_user.begin("nuvolaplayer", on_get_current_user_done);
+			tiliado.fetch_current_user.begin(on_get_current_user_done);
 			return;
 		}
 	

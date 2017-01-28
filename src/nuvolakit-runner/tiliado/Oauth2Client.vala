@@ -26,7 +26,16 @@ namespace Nuvola
 {
 public errordomain Oauth2Error
 {
-	UNKNOWN, PARSE_ERROR, RESPONSE_ERROR, INVALID_CLIENT, INVALID_REQUEST;
+	UNKNOWN,
+	PARSE_ERROR,
+	RESPONSE_ERROR,
+	INVALID_CLIENT,
+	INVALID_REQUEST,
+	HTTP_ERROR,
+	HTTP_UNAUTHORIZED,
+	INVALID_GRANT,
+	UNAUTHORIZED_CLIENT,
+	UNSUPPORTED_GRANT_TYPE;
 }
 
 public class Oauth2Client : GLib.Object
@@ -66,7 +75,9 @@ public class Oauth2Client : GLib.Object
 		warning("Device code grant error: %s. %s", code, description ?? "(null)");
 	}
 	
-	public virtual async Drt.JsonObject call(string? method, HashTable<string, string>? params=null, HashTable<string, string>? headers=null) throws Oauth2Error
+	public virtual async Drt.JsonObject call(string? method, HashTable<string, string>? params=null,
+	HashTable<string, string>? headers=null)
+	throws Oauth2Error
 	{
 		var uri = new Soup.URI(api_endpoint + (method ?? ""));
 		if (params != null)
@@ -75,29 +86,72 @@ public class Oauth2Client : GLib.Object
 		debug("Oauth2 GET %s", uri.to_string(false));
 		if (headers != null)
 			headers.for_each(msg.request_headers.replace);
-		if (token != null)
-			msg.request_headers.replace("Authorization", "%s %s".printf(token.token_type, token.access_token));
-			
-		SourceFunc resume_cb = call.callback;
-		soup.queue_message(msg, (s, m ) => {Idle.add((owned) resume_cb);});
+		return yield send_message(msg, true);
+	}
+	
+	public async bool refresh_token()
+	throws Oauth2Error
+	{
+		if (token == null || token.refresh_token == null)
+			return false;
+		var msg = Soup.Form.request_new("POST", token_endpoint, "grant_type", "refresh_token",
+				"refresh_token", token.refresh_token, "client_id", client_id);
+		if (client_secret != null)
+			msg.request_headers.replace("Authorization",
+				"Basic " + Base64.encode("%s:%s".printf(client_id, client_secret).data));
+		SourceFunc resume_cb = refresh_token.callback;
+		soup.queue_message(msg, (s, m) => Idle.add((owned) resume_cb));
 		yield;
 		
-		unowned string response = (string) msg.response_body.flatten().data;
-		if (msg.status_code < 200 || msg.status_code >= 300)
-		{
-			var http_error = "%u: %s".printf(msg.status_code, Soup.Status.get_phrase(msg.status_code));
-			warning("Oauth2 Response error. %s.\n%s", http_error, response);
-			throw new Oauth2Error.UNKNOWN(http_error);
-		}
-		
+		unowned string response_data = (string) msg.response_body.flatten().data;
+		Drt.JsonObject response;
 		try
 		{
-			return Drt.JsonParser.load_object(response);
+			response = Drt.JsonParser.load_object(response_data);
 		}
 		catch (GLib.Error e)
 		{
 			throw new Oauth2Error.PARSE_ERROR(e.message);
 		}
+		
+		if (msg.status_code < 200 || msg.status_code >= 300)
+		{
+			string error_code; string? error_description;
+			parse_error(response, out error_code, out error_description);
+			if (error_description == null)
+				error_description = error_code;
+			else
+				error_description = "%s: %s".printf(error_code, error_description);
+			
+			switch (error_code)
+			{
+			case "invalid_request":
+				throw new Oauth2Error.INVALID_REQUEST(error_description);
+			case "invalid_grant":
+				throw new Oauth2Error.INVALID_GRANT(error_description);
+			case "invalid_client":
+				throw new Oauth2Error.INVALID_CLIENT(error_description);
+			case "unauthorized_client":
+				throw new Oauth2Error.UNAUTHORIZED_CLIENT(error_description);
+			case "unsupported_grant_type":
+				throw new Oauth2Error.UNSUPPORTED_GRANT_TYPE(error_description);
+			default:
+				throw new Oauth2Error.UNKNOWN("%s. %u: %s".printf(
+					error_description, msg.status_code, Soup.Status.get_phrase(msg.status_code)));
+			}
+		}
+		
+		string? access_token;
+		response.get_string("access_token", out access_token);
+		string? refresh_token;
+		response.get_string("refresh_token", out refresh_token);
+		string? token_type;
+		response.get_string("token_type", out token_type);
+		string? scope;
+		response.get_string("scope", out scope);
+		token = new Oauth2Token(access_token, refresh_token, token_type, scope);
+		debug("Refreshed token: %s.", token.to_string());
+		return true;
 	}
 	
 	public void start_device_code_grant(string device_code_endpoint)
@@ -183,6 +237,45 @@ public class Oauth2Client : GLib.Object
 	{
 		var expected_hmac = hmac_for_string(checksum, data);
 		return expected_hmac != null ? Drt.Utils.const_time_byte_equal(expected_hmac.data, hmac.data) : false;
+	}
+	
+	private async Drt.JsonObject send_message(Soup.Message msg, bool retry)
+	throws Oauth2Error
+	{
+		if (token != null)
+			msg.request_headers.replace("Authorization", "%s %s".printf(token.token_type, token.access_token));
+		SourceFunc resume_cb = send_message.callback;
+		soup.queue_message(msg, (s, m ) => {Idle.add((owned) resume_cb);});
+		yield;
+		unowned string response_data = (string) msg.response_body.flatten().data;
+		if (msg.status_code < 200 || msg.status_code >= 300)
+		{
+			var http_error = "%u: %s".printf(msg.status_code, Soup.Status.get_phrase(msg.status_code));
+			warning("Oauth2 Response error. %s.\n%s", http_error, response_data);
+			switch (msg.status_code)
+			{
+			case 401:
+				assert(token != null); 
+				if (token != null && retry)
+				{
+					message("Failed to send a message. Will try refreshing token. Reason: %s", http_error);
+					if (yield refresh_token())
+						return yield send_message(msg, false);
+				}
+				throw new Oauth2Error.HTTP_UNAUTHORIZED(http_error);
+			default:
+				throw new Oauth2Error.HTTP_ERROR(http_error);
+			}
+		}
+		
+		try
+		{
+			return Drt.JsonParser.load_object(response_data);
+		}
+		catch (GLib.Error e)
+		{
+			throw new Oauth2Error.PARSE_ERROR(e.message);
+		}
 	}
 	
 	private bool device_code_grant_cb()
