@@ -40,6 +40,7 @@ public errordomain Oauth2Error
 
 public class Oauth2Client : GLib.Object
 {
+	private static bool debug_soup;
 	public string client_id;
 	public string? client_secret;
 	public string api_endpoint;
@@ -50,15 +51,21 @@ public class Oauth2Client : GLib.Object
 	private string? device_code = null;
 	private uint device_code_cb_id = 0;
 	
+	static construct
+	{
+		debug_soup = Environment.get_variable("OAUTH2_DEBUG_SOUP") == "yes";
+	}
+	
 	public Oauth2Client(string client_id, string? client_secret, string api_endpoint, string? token_endpoint, Oauth2Token? token)
 	{
 		soup = new Soup.Session();
+		if (debug_soup)
+			soup.add_feature(new Soup.Logger(Soup.LoggerLogLevel.BODY, -1));
 		this.client_id = client_id;
 		this.client_secret = client_secret;
 		this.api_endpoint = api_endpoint;
 		this.token_endpoint = token_endpoint;
 		this.token = token;
-		
 	}
 	
 	public signal void device_code_grant_cancelled();
