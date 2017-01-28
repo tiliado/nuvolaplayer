@@ -91,39 +91,7 @@ public class MasterController : Diorite.Application
 	{
 		hold();
 		if (main_window == null)
-		{
 			create_main_window();
-			main_window.category = "Audio";
-		}
-		
-		main_window.show_all();
-		main_window.present();
-		show_welcome_window();
-		release();
-	}
-	
-	public void activate_nuvola_player()
-	{
-		hold();
-		if (main_window == null)
-			create_main_window();
-			
-		main_window.title = "Services - " + app_name;
-		main_window.category = "AudioVideo";
-		main_window.show_all();
-		main_window.present();
-		show_welcome_window();
-		release();
-	}
-	
-	public void activate_nuvola_apps()
-	{
-		hold();
-		if (main_window == null)
-			create_main_window();
-			
-		main_window.title = "Select a web app - Nuvola Apps Alpha";
-		main_window.category = null;
 		main_window.show_all();
 		main_window.present();
 		show_welcome_window();
@@ -298,7 +266,7 @@ public class MasterController : Diorite.Application
 		
 		try
 		{
-			var opt_context = new OptionContext("- Nuvola Player");
+			var opt_context = new OptionContext("- " + Nuvola.get_app_name());
 			opt_context.set_help_enabled(true);
 			opt_context.add_main_entries(options, null);
 			unowned string[] tmp = _args;
@@ -311,17 +279,7 @@ public class MasterController : Diorite.Application
 			return 1;
 		}
 		
-		var nuvola_apps = false;
-		foreach (var arg in _args)
-		{
-			if (arg == "__nuvola_apps__")
-			{
-				nuvola_apps = true;
-				break;
-			}
-		}
-		
-		if (_args.length > (nuvola_apps ? 2 : 1))
+		if (_args.length >  1)
 		{
 			command_line.printerr("%s", "Too many arguments.\n");
 			return 1;
@@ -330,11 +288,8 @@ public class MasterController : Diorite.Application
 		init_core();
 		if (app_id != null)
 			start_app(app_id);
-		else if (nuvola_apps)
-			activate_nuvola_apps();
 		else
-			activate_nuvola_player();
-		
+			activate();
 		return 0;
 	}
 	
@@ -563,7 +518,7 @@ public class MasterController : Diorite.Application
 		if (!is_tiliado_account_valid(3))
 		{
 			start_app_after_activation = app_id;
-			activate_nuvola_player();
+			activate();
 			return;
 		}
 		

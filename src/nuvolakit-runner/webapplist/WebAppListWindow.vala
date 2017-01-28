@@ -42,7 +42,7 @@ public class WebAppListWindow : Diorite.ApplicationWindow
 	public WebAppListWindow(MasterController app, WebAppListFilter model)
 	{
 		base(app, false);
-		title = "Services - " + app.app_name;
+		title = "Select a web app - " + app.app_name;
 		try
 		{
 			icon = Gtk.IconTheme.get_default().load_icon(app.icon, 48, 0);
@@ -110,7 +110,8 @@ public class WebAppListWindow : Diorite.ApplicationWindow
 		categories.hexpand = false;
 		categories.no_show_all = true;
 		categories.margin_right = 8;
-		categories.show();
+		categories.no_show_all = true;
+		categories.hide();
 		
 		grid = new Gtk.Grid();
 		grid.margin = 8;

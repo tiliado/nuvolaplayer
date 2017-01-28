@@ -64,7 +64,7 @@ private const string WELCOME_TEXT = """
 
 <h2>Become a Patron</h2>
 <p>
-  Development of Nuvola Player depends on voluntary payments from users.
+  Development of Nuvola Apps depends on voluntary payments from users.
   <a href="https://tiliado.eu/nuvolaplayer/funding/">Support the project</a> financially and enjoy
   <a href="https://tiliado.eu/accounts/group/3/">the benefits of the Nuvola Patron membership</a>.
 </p>
@@ -82,7 +82,7 @@ public class WelcomeWindow : Diorite.ApplicationWindow
 	public WelcomeWindow(Diorite.Application app, Diorite.Storage storage)
 	{
 		base(app, true);
-		title = "Welcome to Nuvola Player";
+		title = "Welcome to " + Nuvola.get_app_name();
 		set_default_size(1000, 800);
 		try
 		{

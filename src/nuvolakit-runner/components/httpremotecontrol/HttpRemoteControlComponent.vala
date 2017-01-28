@@ -113,7 +113,8 @@ public class Component: Nuvola.Component
 				label.margin = 10;
 				label.hexpand = true;
 				attach(label, 0, ++line, 4, 1);
-				label = new Gtk.Label("Specify a port and addresses Nuvola Player will be listening on.");
+				label = new Gtk.Label("Specify a port and addresses %s will be listening on.".printf(
+					Nuvola.get_app_name()));
 				label.wrap = true;
 				label.use_markup = true;
 				label.hexpand = true;

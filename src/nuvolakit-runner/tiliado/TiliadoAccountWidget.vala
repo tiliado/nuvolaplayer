@@ -96,7 +96,8 @@ public class TiliadoAccountWidget : Gtk.Grid
 		var label = new Gtk.Label(null);
 		label.hexpand = true;
 		label.set_markup(
-			"<b>Nuvola Player 3.1 Rolling Releases require the <i>Premium</i> or <i>Patron</i> plan.</b>");
+			"<b>%s 3.1 Rolling Releases require the <i>Premium</i> or <i>Patron</i> plan.</b>".printf(
+				Nuvola.get_app_name()));
 		label.wrap_mode = Pango.WrapMode.WORD_CHAR;
 		label.set_line_wrap(true);
 		label.show();
@@ -108,7 +109,7 @@ public class TiliadoAccountWidget : Gtk.Grid
 		clear_all();
 		show_premium_required();
 		
-		activate_button = new Gtk.Button.with_label("Activate Nuvola Player");
+		activate_button = new Gtk.Button.with_label("Activate " + Nuvola.get_app_name());
 		activate_button.get_style_context().add_class("suggested-action");
 		activate_button.hexpand = true;
 		activate_button.halign = Gtk.Align.CENTER;
@@ -274,7 +275,7 @@ public class TiliadoAccountWidget : Gtk.Grid
 			break;
 		case "invalid_client":
 		case "unauthorized_client":
-			detail = "This build of Nuvola Player is not authorized to use the Tiliado API.";
+			detail = "This build of %s is not authorized to use the Tiliado API.".printf(Nuvola.get_app_name());
 			break;
 		case "access_denied":
 			detail = "The authorization request has been dismissed. Please try again.";
@@ -283,7 +284,7 @@ public class TiliadoAccountWidget : Gtk.Grid
 			detail = "The authorization request has expired. Please try again.";
 			break;
 		default:
-			detail = "Nuvola Player has sent an invalid request.";
+			detail = "%s has sent an invalid request.".printf(Nuvola.get_app_name());
 			break;
 			
 		}

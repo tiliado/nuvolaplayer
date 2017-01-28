@@ -50,7 +50,7 @@ const string HTML5_AUDIO_DETECT_HTML = """<!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset="utf-8" />
-	<title>Audio Support &#8226; Nuvola Player</title>
+	<title>Audio Support &#8226; Nuvola Apps</title>
 	<style>
 		body {background-color: White; color: Black;}
 		table, td, th {border: 1px solid #EEE; border-collapse: collapse;}

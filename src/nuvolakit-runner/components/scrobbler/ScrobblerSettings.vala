@@ -149,7 +149,9 @@ public class ScrobblerSettings: Gtk.Grid
 				
 				var info_bar = new Gtk.InfoBar();
 				info_bar.message_type = Gtk.MessageType.INFO;
-				var label = new Gtk.Label("A web browser window should be opened for you to authorize access to your account. Then return to Nuvola Player.");
+				var label = new Gtk.Label((
+					"A web browser window should be opened for you to authorize access to your account. "
+					+ "Then return to %s.").printf(Nuvola.get_app_name()));
 				label.set_line_wrap(true);
 				info_bar.get_content_area().add(label);
 				info_bar.show_all();

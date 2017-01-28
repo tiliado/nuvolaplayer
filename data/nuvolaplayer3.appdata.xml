@@ -5,7 +5,7 @@
   <pkgname>nuvolaplayer3</pkgname>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>BSD-2-Clause</project_license>
-  <name>Nuvola Premium (WebApp Runtime)</name>
+  <name>Nuvola Apps (web app runtime)</name>
   <summary>Cloud music integration for your desktop</summary>
   <description>
     <p>
@@ -50,7 +50,7 @@
   </screenshots>
   <url type="homepage">https://tiliado.eu/nuvolaplayer/</url>
   <url type="bugtracker">https://github.com/tiliado/nuvolaplayer/wiki/Bug-Reporting-Guidelines</url>
-  <url type="help">https://tiliado.github.io/nuvolaplayer/documentation/3.0/explore.html</url>
+  <url type="help">https://tiliado.github.io/nuvolaplayer/documentation/3.1/explore.html</url>
   <url type="donation">https://tiliado.eu/nuvolaplayer/funding/</url>
   <updatecontact>janousek.jiri@gmail.com</updatecontact>
   <developer_name>Jiří Janoušek</developer_name>

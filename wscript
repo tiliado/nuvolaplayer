@@ -29,14 +29,14 @@ top = '.'
 out = 'build'
 
 # Application name and version
-NAME="Nuvola Premium"
+NAME="Nuvola Apps"
 APPNAME = "nuvolaplayer3"
 VERSION = "3.1.1+"
 UNIQUE_NAME="eu.tiliado.Nuvola"
 ICON_NAME = UNIQUE_NAME
 GENERIC_NAME = "Cloud Player"
 BLURB = "Cloud music integration for your Linux desktop"
-WELCOME_SCREEN_NAME = "Nuvola Player 3.1 Premium"
+WELCOME_SCREEN_NAME = "Nuvola Apps 3.1 Rolling Releases"
 
 TARGET_GLIB = "2.42"
 MIN_GLIB = "2.42.1"
@@ -141,7 +141,6 @@ def options(ctx):
 	ctx.add_option('--no-debug', action='store_false', dest='debug', help="Turn off debugging symbols")
 	ctx.add_option('--no-system-hooks', action='store_false', default=True, dest='system_hooks', help="Don't run system hooks after installation (ldconfig, icon cache update, ...")
 	ctx.add_option('--platform', default=_PLATFORM, help="Target platform")
-	ctx.add_option('--with-apps-alpha', action='store_true', default=False, dest='apps_alpha', help="Include Nuvola Apps Alpha launcher.")
 	ctx.add_option('--allow-fuzzy-build', action='store_true', default=False, dest='fuzzy', help="Allow building without valid git revision information and absolutely no support from upstream.")
 	ctx.add_option('--snapcraft', action='store_true', default=False, dest='snapcraft', help="Apply workarounds for Snapcraft with given name.")
 	ctx.add_option('--flatpak', action='store_true', default=False, dest='flatpak', help="Apply workarounds for Flatpak.")
@@ -260,9 +259,7 @@ def configure(ctx):
 	while version <= webkit_version:
 		ctx.vala_def("HAVE_WEBKIT_%d_%d" % version)
 		version = (version[0], version[1] + 2)
-	
-	ctx.env.with_apps_alpha = ctx.options.apps_alpha
-	
+		
 	ctx.define("NUVOLA_APPNAME", APPNAME)
 	ctx.define("NUVOLA_NAME", NAME)
 	ctx.define("NUVOLA_WELCOME_SCREEN_NAME", WELCOME_SCREEN_NAME)
@@ -427,18 +424,6 @@ def build(ctx):
 		NAME = UNIQUE_NAME,
 		EXEC = '%s/bin/nuvolaplayer3 --gapplication-service' % ctx.env.PREFIX
 	)
-	
-	if ctx.env.with_apps_alpha:
-		ctx(features = 'subst',
-			source = 'data/templates/launcher.desktop',
-			target = "share/applications/%s.desktop" % "nuvola-apps",
-			install_path = '${PREFIX}/share/applications',
-			BLURB = "Web Apps for your desktop.",
-			APP_NAME = "Nuvola Apps Alpha",
-			ICON = ICON_NAME,
-			EXEC = APPNAME + " __nuvola_apps__",
-			GENERIC_NAME="Web Apps",
-		)
 	
 	ctx.symlink_as('${PREFIX}/bin/nuvola', APPNAME)
 	ctx.symlink_as('${PREFIX}/bin/nuvolactl', CONTROL)

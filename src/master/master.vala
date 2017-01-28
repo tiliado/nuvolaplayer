@@ -173,7 +173,8 @@ public int main(string[] args)
 		if (local_only_args)
 			warning(
 				"Some command line parameters (-D, -v, -A, -L) are ignored because they apply only to a new instance."
-				+ " You might want to close all Nuvola Player instances and run it again with your parameters.");
+				+ " You might want to close all %s instances and run it again with your parameters.",
+				Nuvola.get_app_name());
 	}
 	return result;
 }
