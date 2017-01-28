@@ -126,14 +126,19 @@ public class Oauth2Client : GLib.Object
 			switch (error_code)
 			{
 			case "invalid_request":
+				token = null;
 				throw new Oauth2Error.INVALID_REQUEST(error_description);
 			case "invalid_grant":
+				token = null;
 				throw new Oauth2Error.INVALID_GRANT(error_description);
 			case "invalid_client":
+				token = null;
 				throw new Oauth2Error.INVALID_CLIENT(error_description);
 			case "unauthorized_client":
+				token = null;
 				throw new Oauth2Error.UNAUTHORIZED_CLIENT(error_description);
 			case "unsupported_grant_type":
+				token = null;
 				throw new Oauth2Error.UNSUPPORTED_GRANT_TYPE(error_description);
 			default:
 				throw new Oauth2Error.UNKNOWN("%s. %u: %s".printf(
