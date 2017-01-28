@@ -66,7 +66,7 @@ public class Oauth2Client : GLib.Object
 		warning("Device code grant error: %s. %s", code, description ?? "(null)");
 	}
 	
-	public virtual async JsonReader call(string? method, HashTable<string, string>? params=null, HashTable<string, string>? headers=null) throws Oauth2Error
+	public virtual async Drt.JsonObject call(string? method, HashTable<string, string>? params=null, HashTable<string, string>? headers=null) throws Oauth2Error
 	{
 		var uri = new Soup.URI(api_endpoint + (method ?? ""));
 		if (params != null)
@@ -90,16 +90,14 @@ public class Oauth2Client : GLib.Object
 			throw new Oauth2Error.UNKNOWN(http_error);
 		}
 		
-		var reader = new JsonReader();
 		try
 		{
-			reader.load_from_data(response);
+			return Drt.JsonParser.load_object(response);
 		}
 		catch (GLib.Error e)
 		{
 			throw new Oauth2Error.PARSE_ERROR(e.message);
 		}
-		return reader;
 	}
 	
 	public void start_device_code_grant(string device_code_endpoint)
@@ -111,11 +109,11 @@ public class Oauth2Client : GLib.Object
 				"Basic " + Base64.encode("%s:%s".printf(client_id, client_secret).data));
 		
 		soup.send_message(msg);
-		unowned string response = (string) msg.response_body.flatten().data;
-		var reader = new JsonReader();
+		unowned string response_data = (string) msg.response_body.flatten().data;
+		Drt.JsonObject response;
 		try
 		{
-			reader.load_from_data(response);
+			response = Drt.JsonParser.load_object(response_data);
 		}
 		catch (GLib.Error e)
 		{
@@ -127,25 +125,25 @@ public class Oauth2Client : GLib.Object
 		{
 			string error_code;
 			string? error_description;
-			parse_error(reader, out error_code, out error_description);
+			parse_error(response, out error_code, out error_description);
 			device_code_grant_error(error_code, error_description);
 			return;
 		}
 		
 		string device_code;
-		if (!reader.string_member("device_code", out device_code))
+		if (!response.get_string("device_code", out device_code))
 		{
 			device_code_grant_error("response_error", "The 'device_code' member is missing.");
 			return;
 		}
 		string verification_uri;
-		if (!reader.string_member("verification_uri", out verification_uri))
+		if (!response.get_string("verification_uri", out verification_uri))
 		{
 			device_code_grant_error("response_error", "The 'verification_uri' member is missing.");
 			return;
 		}
 		int interval;
-		if (!reader.int_member("interval", out interval))
+		if (!response.get_int("interval", out interval))
 			interval = 5;
 
 		this.device_code_endpoint = device_code_endpoint;
@@ -202,11 +200,11 @@ public class Oauth2Client : GLib.Object
 		if (device_code_endpoint == null || device_code == null)
 			return false;
 			
-		unowned string response = (string) msg.response_body.flatten().data;
-		var reader = new JsonReader();
+		unowned string response_data = (string) msg.response_body.flatten().data;
+		Drt.JsonObject response;
 		try
 		{
-			reader.load_from_data(response);
+			response = Drt.JsonParser.load_object(response_data);
 		}
 		catch (GLib.Error e)
 		{
@@ -218,7 +216,7 @@ public class Oauth2Client : GLib.Object
 		{
 			string error_code;
 			string? error_description;
-			parse_error(reader, out error_code, out error_description);
+			parse_error(response, out error_code, out error_description);
 			switch (error_code)
 			{
 			case "slow_down":
@@ -233,18 +231,15 @@ public class Oauth2Client : GLib.Object
 		}
 		
 		string access_token;
-		if (!reader.string_member("access_token", out access_token))
+		if (!response.get_string("access_token", out access_token))
 		{
 			device_code_grant_error("response_error", "The 'access_token' member is missing.");
 			cancel_device_code_grant();
 			return false;
 		}
-		string? refresh_token;
-		reader.string_member("refresh_token", out refresh_token);
-		string? token_type;
-		reader.string_member("token_type", out token_type);
-		string? scope;
-		reader.string_member("scope", out scope);
+		string? refresh_token = response.get_string_or("refresh_token", null);
+		string? token_type = response.get_string_or("token_type", null);
+		string? scope = response.get_string_or("scope", null);
 		token = new Oauth2Token(access_token, refresh_token, token_type, scope);
 		debug("Device code grant token: %s.", token.to_string());
 		device_code_cb_id = 0;
@@ -254,16 +249,16 @@ public class Oauth2Client : GLib.Object
 		return false;
 	}
 	
-	private void parse_error(JsonReader reader, out string error_code, out string? error_description)
+	private void parse_error(Drt.JsonObject response, out string error_code, out string? error_description)
 	{
-		if (!reader.string_member("error", out error_code))
+		if (!response.get_string("error", out error_code))
 		{
 			error_code = "response_error";
 			error_description = "The 'error' member is missing.";
 		}
 		else
 		{
-			reader.string_member("description", out error_description);
+			error_description =response.get_string_or("description", null);
 		}
 	} 
 }

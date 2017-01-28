@@ -37,16 +37,16 @@ public class TiliadoApi2 : Oauth2Client
 	
 	public async User fetch_current_user(string? project_id=null) throws Oauth2Error
 	{
-		var reader = yield call("me/");
+		var response = yield call("me/");
 		int[] groups;
-		if (!reader.intv_member("groups", out groups))
+		if (!response.get_int_array("groups", out groups))
 			groups = {};
 		var user = new User(
-			reader.get_int_member_or("id", 0),
-			reader.get_string_member_or("username", null),
-			reader.get_string_member_or("name", null),
-			reader.get_bool_member_or("is_authenticated", false),
-			reader.get_bool_member_or("is_active", false),
+			response.get_int_or("id", 0),
+			response.get_string_or("username", null),
+			response.get_string_or("name", null),
+			response.get_bool_or("is_authenticated", false),
+			response.get_bool_or("is_active", false),
 			(owned) groups);
 		if (project_id != null)
 			yield set_account_membership(user, project_id);
@@ -76,26 +76,26 @@ public class TiliadoApi2 : Oauth2Client
 	
 	public async Project get_project(string id) throws Oauth2Error
 	{
-		var reader = yield call("projects/projects/%s".printf(id));
+		var response = yield call("projects/projects/%s".printf(id));
 		int[] groups;
-		if (!reader.intv_member("patron_groups", out groups))
+		if (!response.get_int_array("patron_groups", out groups))
 			groups = {};
 		return new Project(
-			reader.get_string_member_or("id", id),
-			reader.get_string_member_or("name", id),
+			response.get_string_or("id", id),
+			response.get_string_or("name", id),
 			(owned) groups);
 	}
 	
 	public async Group get_group(int id) throws Oauth2Error
 	{
-		var reader = yield call("auth/groups/%d".printf(id));
+		var response = yield call("auth/groups/%d".printf(id));
 		int[] groups;
-		if (!reader.intv_member("patron_groups", out groups))
+		if (!response.get_int_array("patron_groups", out groups))
 			groups = {};
 		return new Group(
-			reader.get_int_member_or("id", id),
-			reader.get_string_member_or("name", id.to_string()),
-			reader.get_int_member_or("membership_rank", 0));
+			response.get_int_or("id", id),
+			response.get_string_or("name", id.to_string()),
+			response.get_int_or("membership_rank", 0));
 	}
 	
 	public class User
