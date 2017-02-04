@@ -140,7 +140,7 @@ public class AppRunnerController : RunnerApplication
 		init_web_engine();
 		format_support = new FormatSupportCheck(
 			new FormatSupport(storage.get_data_file("audio/audiotest.mp3").get_path()), this, storage, config,
-			web_engine.web_worker, web_engine);
+			web_engine.web_worker, web_engine, web_app);
 		format_support.check();
 	}
 	

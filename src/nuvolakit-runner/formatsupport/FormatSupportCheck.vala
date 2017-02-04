@@ -42,7 +42,7 @@ public class FormatSupportCheck : GLib.Object
 	private Gtk.InfoBar? mp3_bar = null;
 	
 	public FormatSupportCheck(FormatSupport format_support, Diorite.Application app, Diorite.Storage storage,
-	Config config, WebWorker web_worker, WebEngine web_engine)
+	Config config, WebWorker web_worker, WebEngine web_engine, WebAppMeta web_app)
 	{
 		this.format_support = format_support;
 		this.app = app;
@@ -51,9 +51,9 @@ public class FormatSupportCheck : GLib.Object
 		this.web_worker = web_worker;
 		this.web_engine = web_engine;
 		
-		config.set_default_value(WARN_FLASH_KEY, true);
+		config.set_default_value(WARN_FLASH_KEY, web_app.flash_enabled);
 		config.set_default_value(WARN_MP3_KEY, true);
-		config.set_default_value(WEB_PLUGINS_KEY, true);
+		config.set_default_value(WEB_PLUGINS_KEY, web_app.flash_enabled);
 		config.set_default_value(GSTREAMER_KEY, true);
 		web_engine.web_plugins = config.get_bool(WEB_PLUGINS_KEY);
 		if (!config.get_bool(GSTREAMER_KEY))

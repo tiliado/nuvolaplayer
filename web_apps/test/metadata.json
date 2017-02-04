@@ -12,5 +12,6 @@
 	"hidden": true,
 	"window_width": 2000,
 	"window_height": 2000,
-	"user_agent": "FIREFOX"
+	"user_agent": "FIREFOX",
+	"flash_enabled": true
 }
