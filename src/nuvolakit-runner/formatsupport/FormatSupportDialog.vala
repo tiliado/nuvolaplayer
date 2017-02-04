@@ -277,7 +277,10 @@ public class FormatSupportDialog: Gtk.Dialog
 				(frame.label_widget as Gtk.Label).use_markup = true;
 				var web_view = new WebView(WebEngine.get_web_context());
 				frame.add(web_view);
+				frame.vexpand = true;
+				frame.valign = Gtk.Align.FILL;
 				web_view.set_size_request(-1, 300);
+				web_view.vexpand = true;
 				web_view.show();
 				web_view.load_html(HTML5_AUDIO_DETECT_HTML, audio_detect_script.get_uri() + ".html"); 
 				attach(frame, 0, 4, 3, 1);

@@ -42,6 +42,11 @@ public class WebEngine : GLib.Object, JSExecutor
 		get {return web_view.get_settings().enable_plugins;}
 		set {web_view.get_settings().enable_plugins = value;}
 	}
+	public bool media_source_extension
+	{
+		get {return web_view.get_settings().enable_mediasource;}
+		set {web_view.get_settings().enable_mediasource = value;}
+	}
 	
 	private RunnerApplication runner_app;
 	private WebView web_view;

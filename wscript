@@ -147,6 +147,7 @@ def options(ctx):
 	ctx.add_option('--tiliado-oauth2-server', type=str, default="https://tiliado.eu", help="Tiliado OAuth2 server to access Tiliado services.")
 	ctx.add_option('--tiliado-oauth2-client-id', type=str, default="", help="Tiliado OAuth2 client id to access Tiliado services.")
 	ctx.add_option('--tiliado-oauth2-client-secret', type=str, default="", help="Tiliado OAuth2 client secret to access Tiliado services.")
+	ctx.add_option('--webkitgtk-supports-mse', action='store_true', default=False, dest='webkit_mse', help="Use only if you are absolutely sure that your particular build of the WebKitGTK library supports Media Source Extension (as of 2.15.3, it is disabled by default)")
 
 # Configure build process
 def configure(ctx):
@@ -218,7 +219,11 @@ def configure(ctx):
 	ctx.env.FLATPAK = ctx.options.flatpak
 	if ctx.env.FLATPAK:
 		ctx.vala_def("FLATPAK")
-		
+	
+	ctx.env.WEBKIT_MSE = ctx.options.webkit_mse
+	if ctx.options.webkit_mse:
+		ctx.vala_def("WEBKIT_SUPPORTS_MSE")
+	
 	# Check dependencies
 	ctx.env.DIORITE_SERIES = DIORITE_SERIES = "0.3"
 	DIORITE_BUGFIX = "1"

@@ -31,6 +31,7 @@ public class FormatSupportCheck : GLib.Object
 	private static const string WARN_MP3_KEY = "format_support.warn_mp3";
 	private static const string GSTREAMER_KEY = "format_support.gstreamer";
 	private static const string WEB_PLUGINS_KEY = "format_support.web_plugins";
+	private static const string MEDIA_SOURCE_EXTENSION_KEY = "format_support.mse";
 	private FormatSupport format_support;
 	private Diorite.Storage storage;
 	private Diorite.Application app;
@@ -55,7 +56,9 @@ public class FormatSupportCheck : GLib.Object
 		config.set_default_value(WARN_MP3_KEY, true);
 		config.set_default_value(WEB_PLUGINS_KEY, web_app.flash_enabled);
 		config.set_default_value(GSTREAMER_KEY, true);
+		config.set_default_value(MEDIA_SOURCE_EXTENSION_KEY, web_app.mse_enabled);
 		web_engine.web_plugins = config.get_bool(WEB_PLUGINS_KEY);
+		web_engine.media_source_extension = config.get_bool(MEDIA_SOURCE_EXTENSION_KEY);
 		if (!config.get_bool(GSTREAMER_KEY))
 		{
 			format_support.disable_gstreamer();
@@ -163,6 +166,14 @@ public class FormatSupportCheck : GLib.Object
 					"<b>Format support issue:</b> No GStreamer MP3 Audio decoder has been found. Music playback may fail.");
 				warning("MP3 Audio not supported.");
 			}
+			if (!web_engine.media_source_extension)
+				debug("MSE is disabled");
+			else
+				#if !WEBKIT_SUPPORTS_MSE
+				warning("MSE enabled but this particular build of WebKitGTK might not support it.");
+				#else
+				debug("MSE enabled and this particular build of WebKitGTK should support it.");
+				#endif
 		}
 		catch (GLib.Error e)
 		{

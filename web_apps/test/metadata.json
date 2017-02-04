@@ -13,5 +13,6 @@
 	"window_width": 2000,
 	"window_height": 2000,
 	"user_agent": "FIREFOX",
+	"mse_enabled": true,
 	"flash_enabled": true
 }
