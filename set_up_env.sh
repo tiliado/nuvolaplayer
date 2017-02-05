@@ -114,3 +114,5 @@ build_js_doc()
     ./nuvolajsdoc.py
     while true; do inotifywait -e delete -e create -e modify -r src/mainjs doc/theme/templates/jsdoc.html; sleep 1; ./nuvolajsdoc.py; done
 }
+
+ulimit -c unlimited
