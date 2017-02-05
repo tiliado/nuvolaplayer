@@ -34,8 +34,6 @@ public class WebExtension: GLib.Object
 	private File data_dir;
 	private File user_config_dir;
 	private JSApi js_api;
-	private JsRuntime bare_env;
-	private JSApi bare_api;
 	
 	public WebExtension(WebKit.WebExtension extension, Diorite.Ipc.MessageClient runner, Diorite.Ipc.MessageServer server)
 	{
@@ -87,21 +85,6 @@ public class WebExtension: GLib.Object
 			new KeyValueProxy(runner, "session"), webkit_version, libsoup_version);
 		js_api.send_message_async.connect(on_send_message_async);
 		js_api.send_message_sync.connect(on_send_message_sync);
-		
-		bare_env = new JsRuntime();
-		bare_api = new JSApi(storage, data_dir, user_config_dir, new KeyValueProxy(runner, "config"),
-			new KeyValueProxy(runner, "session"), webkit_version, libsoup_version);
-		try
-		{
-			bare_api.inject(bare_env);
-			bare_api.initialize(bare_env);
-			var args = new Variant("(s)", "InitWebWorkerHelper");
-			bare_env.call_function("Nuvola.core.emit", ref args);
-		}
-		catch (GLib.Error e)
-		{
-			critical("Initialization error: %s", e.message);
-		}
 		
 		Idle.add(() => {
 			try
@@ -221,69 +204,7 @@ public class WebExtension: GLib.Object
 		if (web_page.get_id() != 1)
 			return;
 		
-		web_page.send_request.connect(on_send_request);
 		web_page.document_loaded.connect(on_document_loaded);
-	}
-	
-	private bool on_send_request(WebKit.URIRequest request, WebKit.URIResponse? redirected_response)
-	{
-		var approved = true;
-		var uri = request.uri;
-		if (uri == WEB_ENGINE_LOADING_URI)
-			return false;
-		resource_request(ref uri, ref approved);
-		request.uri = uri;
-		return !approved;
-	}
-	
-	private void resource_request(ref string url, ref bool approved)
-	{
-		var builder = new VariantBuilder(new VariantType("a{smv}"));
-		builder.add("{smv}", "url", new Variant.string(url));
-		builder.add("{smv}", "approved", new Variant.boolean(true));
-		var args = new Variant("(s@a{smv})", "ResourceRequest", builder.end());
-		
-		try
-		{
-			bare_env.call_function("Nuvola.core.emit", ref args);
-		}
-		catch (GLib.Error e)
-		{
-			critical(e.message);
-			var msg = "The web app integration script has not provided a valid response and caused an error: %s";
-			show_error(msg.printf(e.message));
-			return;
-		}
-		
-		VariantIter iter = args.iterator();
-		assert(iter.next("s", null));
-		assert(iter.next("a{smv}", &iter));
-		string key = null;
-		Variant value = null;
-		while (iter.next("{smv}", &key, &value))
-		{
-			if (key == "approved")
-				approved = value != null ? value.get_boolean() : false;
-			else if (key == "url" && value != null)
-				url = value.get_string();
-		}
-		
-		if (url.has_prefix("nuvola://"))
-			url = data_dir.get_child(url.substring(9)).get_uri();
-			
-		if (url.has_prefix("file:"))
-		{
-			var file = File.new_for_uri(url);
-			if (!file.has_prefix(data_dir))
-			{
-				warning("URI '%s' is blocked because it is not a child of data dir '%s'.", url, data_dir.get_path());
-				approved = false;
-			}
-			else if (!file.query_exists())
-			{
-				warning("File '%s' doesn't exist.", file.get_path());
-			}
-		}
 	}
 	
 	private void on_document_loaded(WebKit.WebPage page)
