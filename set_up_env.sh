@@ -1,7 +1,7 @@
 export NUVOLA_WEB_APPS_DIR="web_apps"
 export DIORITE_LOG_MESSAGE_CHANNEL="yes"
 export DIORITE_DUPLEX_CHANNEL_FATAL_TIMEOUT="yes"
-export LD_LIBRARY_PATH="build"
+export LD_LIBRARY_PATH="build:$LD_LIBRARY_PATH"
 
 if [ -e /etc/fedora-release ]; then
     export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib64"
