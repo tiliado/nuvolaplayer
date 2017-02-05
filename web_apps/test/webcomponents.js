@@ -1,1 +1,1 @@
-alert("WebComponents");
+console.log("WebComponents not replaced");
