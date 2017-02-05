@@ -485,6 +485,8 @@ namespace WebKit {
 		public string serif_font_family { get; set construct; }
 		public string user_agent { get; set construct; }
 		public bool zoom_text_only { get; set construct; }
+		public bool allow_file_access_from_file_urls { get; set construct; }
+		public bool allow_universal_access_from_file_urls { get; set construct; }
 	}
 	[CCode (cheader_filename = "webkit2/webkit2.h", type_id = "webkit_uri_request_get_type ()")]
 	public class URIRequest : GLib.Object {

@@ -128,6 +128,12 @@ public class FormatSupportDialog: Gtk.Dialog
 			frame = new Gtk.Frame ("<b>Active Flash plugin</b>");
 			(frame.label_widget as Gtk.Label).use_markup = true;
 			var web_view = new WebView(WebEngine.get_web_context());
+			#if HAVE_WEBKIT_2_10
+			web_view.get_settings().allow_file_access_from_file_urls = true;
+			#endif
+			#if HAVE_WEBKIT_2_14
+			web_view.get_settings().allow_universal_access_from_file_urls = true;
+			#endif
 			frame.add(web_view);
 			web_view.set_size_request(-1, 50);
 			web_view.show();
@@ -276,6 +282,12 @@ public class FormatSupportDialog: Gtk.Dialog
 				var frame = new Gtk.Frame ("<b>HTML5 Audio Support Status</b>");
 				(frame.label_widget as Gtk.Label).use_markup = true;
 				var web_view = new WebView(WebEngine.get_web_context());
+				#if HAVE_WEBKIT_2_10
+				web_view.get_settings().allow_file_access_from_file_urls = true;
+				#endif
+				#if HAVE_WEBKIT_2_14
+				web_view.get_settings().allow_universal_access_from_file_urls = true;
+				#endif
 				frame.add(web_view);
 				frame.vexpand = true;
 				frame.valign = Gtk.Align.FILL;
