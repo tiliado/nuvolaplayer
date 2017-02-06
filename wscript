@@ -284,11 +284,14 @@ def configure(ctx):
 	
 	with open("build/secret.h", "wb") as f:
 		if ctx.options.tiliado_oauth2_client_secret:
-			secret = mask(ctx.options.tiliado_oauth2_client_secret)
+			secret = b"{"
+			for i in mask(ctx.options.tiliado_oauth2_client_secret):
+				secret += str(i).encode("ascii") + b", "
+			secret += b"0}"
 		else:
-			secret = b""
+			secret = b'""'
 		f.write(
-			b'#pragma once\nstatic const char* NUVOLA_TILIADO_OAUTH2_CLIENT_SECRET = "'	+ secret + b'";')
+			b'#pragma once\nstatic const char NUVOLA_TILIADO_OAUTH2_CLIENT_SECRET[] = '	+ secret + b';')
 
 def build(ctx):
 	#~ print ctx.env
@@ -544,4 +547,4 @@ class mergejs(Task.Task):
 def mask(string):
     xord = lambda i: (ord(i) if isinstance (i, str) else i)
     shift = int(1.0 * xord(os.urandom(1)[0]) / 255 * 85 + 15)
-    return bytes(bytearray([shift]) + bytearray(xord(c) + shift for c in string))
+    return [shift] + [xord(c) + shift for c in string]
