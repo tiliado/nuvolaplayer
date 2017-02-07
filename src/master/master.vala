@@ -122,9 +122,6 @@ public int main(string[] args)
 	var web_apps_storage = storage.get_child("web_apps");
 	
 	File? packages_dir = null;
-	#if FLATPAK
-	packages_dir = File.new_for_path("/var/lib/flatpak/exports/nuvola");
-	#endif
 		
 	WebAppRegistry web_app_reg;
 	if (Args.apps_dir != null && Args.apps_dir != "")
@@ -134,6 +131,9 @@ public int main(string[] args)
 	}
 	else
 	{
+		#if FLATPAK
+		packages_dir = File.new_for_path("/var/lib/flatpak/exports/nuvola");
+		#endif
 		web_app_reg = new WebAppRegistry(web_apps_storage.user_data_dir, web_apps_storage.data_dirs, true, packages_dir);
 	}
 	
