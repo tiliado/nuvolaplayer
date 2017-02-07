@@ -26,11 +26,11 @@ mk_symlinks()
 
 rebuild()
 {
-	python3 ./waf distclean configure build \
+	python3 ./waf -v distclean configure build \
 	    --tiliado-oauth2-server="http://localhost:8000" \
 	    --tiliado-oauth2-client-id="OEGTluvgDaNH8lPXcN3gkVVTU2aRJBwjmSJDUa8Q" \
 	    --tiliado-oauth2-client-secret="uCZvxvarVjfqR0qFZ3d2As1x8xcKjSCZyBQhjMo45UmRd3SUpEXrLCqByU8x1h35VcLQHzRttKbOcinFecEvk8lTHAx5SLGXA5jjnxq83sLWnoB9eQ0T1eRauyo6MSmh" \
-	    "$@"
+	    $WAF_CONFIGURE "$@"
 }
 
 run()
