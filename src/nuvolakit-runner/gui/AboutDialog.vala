@@ -96,7 +96,13 @@ public class AboutDialog: Gtk.Dialog
 			title.attach(img, 0, 0, 1, 2);
 		}
 		
-		label = new Gtk.Label(Nuvola.get_app_name());
+		var name = Nuvola.get_app_name();
+		#if FLATPAK
+		name += " (Flatpak Edition)";
+		#else
+		name += " (unsandboxed)";
+		#endif
+		label = new Gtk.Label(name);
 		attributes = new Pango.AttrList() ;
 		attributes.insert(new Pango.AttrSize(18*1000));
 		attributes.insert(new Pango.AttrFontDesc(Pango.FontDescription.from_string("bold")));
