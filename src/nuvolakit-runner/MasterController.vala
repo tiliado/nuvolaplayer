@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2017 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -95,10 +95,36 @@ public class MasterController : Diorite.Application
 		main_window.show_all();
 		main_window.present();
 		show_welcome_window();
+		#if FLATPAK
+		if (!is_desktop_portal_available())
+			quit();
+		#endif
 		release();
 	}
 	
 	public signal void runner_exited(AppRunner runner);
+	
+	#if FLATPAK
+	private bool is_desktop_portal_available()
+	{
+		
+		try
+		{
+			Flatpak.check_desktop_portal_available(null);
+			return true;
+		}
+		catch (GLib.Error e)
+		{
+			var dialog = new Gtk.MessageDialog.with_markup(
+				main_window, Gtk.DialogFlags.MODAL, Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE,
+				"<b><big>Failed to connect to XDG Desktop Portal</big></b>\n\nMake sure the XDG Desktop Portal is installed.\n\n%s",
+				e.message);
+			Timeout.add_seconds(60, () => { dialog.destroy(); return false;});
+			dialog.run();
+			return false;
+		}
+	}
+	#endif
 	
 	private void init_core()
 	{
@@ -515,6 +541,14 @@ public class MasterController : Diorite.Application
 	
 	private void start_app(string app_id)
 	{
+		#if FLATPAK
+		if (!is_desktop_portal_available())
+		{
+			quit();
+			return;
+		}
+		#endif
+	
 		if (!is_tiliado_account_valid(3))
 		{
 			start_app_after_activation = app_id;
