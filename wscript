@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # encoding: utf-8
 #
 # Copyright 2014-2015 Jiří Janoušek <janousek.jiri@gmail.com>
@@ -43,8 +42,6 @@ MIN_GLIB = "2.42.1"
 MIN_GTK = "3.14.5"
 MIN_WEBKIT = "2.6.2"
 
-import sys
-PY3 = sys.version_info > (3,)
 import subprocess
 try:
 	try:
@@ -53,8 +50,7 @@ try:
 	except Exception as e:
 		# Read revision info from current branch
 		output = subprocess.Popen(["git", "log", "-n", "1", "--pretty=format:%ct %h %H"], stdout=subprocess.PIPE).communicate()[0]
-		if PY3:
-			output = output.decode("utf-8")
+		output = output.decode("utf-8")
 		timestamp, short_id, long_id = output.split(" ", 2)
 	
 	from datetime import datetime
@@ -545,6 +541,5 @@ class mergejs(Task.Task):
 		return 0 
 
 def mask(string):
-    xord = lambda i: (ord(i) if isinstance (i, str) else i)
-    shift = int(1.0 * xord(os.urandom(1)[0]) / 255 * 85 + 15)
-    return [shift] + [xord(c) + shift for c in string]
+    shift = int(1.0 * os.urandom(1)[0] / 255 * 85 + 15)
+    return [shift] + [c + shift for c in string.encode("utf-8")]
