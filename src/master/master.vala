@@ -36,6 +36,8 @@ struct Args
 	static string? app_id = null;
 	static string? apps_dir = null;
 	static string? log_file = null;
+	static bool list_apps = false;
+	static bool list_apps_json = false;
 	
 	public static const OptionEntry[] options =
 	{
@@ -45,6 +47,8 @@ struct Args
 		{ "debug", 'D', 0, OptionArg.NONE, ref Args.debug, "Print debugging messages", null },
 		{ "version", 'V', 0, OptionArg.NONE, ref Args.version, "Print version and exit", null },
 		{ "log-file", 'L', 0, OptionArg.FILENAME, ref Args.log_file, "Log to file", "FILE" },
+		{ "list-apps", 'l', 0, OptionArg.NONE, ref list_apps, "List available application.", null },
+		{ "list-apps-json", 'j', 0, OptionArg.NONE, ref list_apps_json, "List available application (JSON output).", null },
 		{ null }
 	};
 }
@@ -163,6 +167,10 @@ public int main(string[] args)
 	
 	var controller = new MasterController(storage, web_app_reg, (owned) exec_cmd, Args.debug);
 	var controller_args = Args.app_id != null ? new string[]{args[0], "-a", Args.app_id} : new string[]{args[0]};
+	if (Args.list_apps)
+		controller_args += "-l";
+	if (Args.list_apps_json)
+		controller_args += "-j";
 	for (var i = 1; i < args.length; i++)
 		controller_args += args[i];
 	var result = controller.run(controller_args);

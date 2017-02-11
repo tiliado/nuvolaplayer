@@ -283,9 +283,13 @@ public class MasterController : Diorite.Application
 	private int handle_command_line(ApplicationCommandLine command_line)
 	{
 		string? app_id = null;
-		OptionEntry[] options = new OptionEntry[2];
+		bool list_apps = false;
+		bool list_apps_json = false;
+		OptionEntry[] options = new OptionEntry[4];
 		options[0] = { "app-id", 'a', 0, OptionArg.STRING, ref app_id, "Web app to run.", "ID" };
-		options[1] = { null };
+		options[1] = { "list-apps", 'l', 0, OptionArg.NONE, ref list_apps, "List available application.", null };
+		options[2] = { "list-apps-json", 'j', 0, OptionArg.NONE, ref list_apps_json, "List available application (JSON output).", null };
+		options[3] = { null };
 		
 		// We have to make an extra copy of the array, since .parse assumes
 		// that it can remove strings from the array without freeing them.
@@ -316,6 +320,48 @@ public class MasterController : Diorite.Application
 		}
 		
 		init_core();
+		
+		if (list_apps || list_apps_json)
+		{
+			var all_apps = web_app_reg.list_web_apps(null);
+			var keys = all_apps.get_keys();
+			keys.sort(strcmp);
+			
+			if (list_apps_json)
+			{
+				var builder = new Drt.JsonBuilder();
+				builder.begin_array();
+				foreach (var key in keys)
+				{
+					builder.begin_object();
+					builder.set_member("id").add_string(key);
+					var app = all_apps[key];
+					builder.set_member("name").add_string(app.name);
+					builder.set_member("version").add_printf("%d.%d", app.version_major, app.version_minor);
+					builder.set_member("datadir");
+					if (app.data_dir == null)
+						builder.add_null();
+					else
+						builder.add_string(app.data_dir.get_path());
+					builder.end_object();
+				}
+				builder.end_array();
+				command_line.print_literal(builder.to_pretty_string());
+			}
+			else
+			{
+				var buf = new StringBuilder();
+				foreach (var key in keys)
+				{
+					var app = all_apps[key];
+					string path = app.data_dir == null ? "" : app.data_dir.get_path();
+					buf.append_printf("%s | %s | %d.%d | %s\n",
+						key, app.name, app.version_major, app.version_minor, path);
+				}
+				command_line.print_literal(buf.str);
+			}
+			return 0;
+		}
 		if (app_id != null)
 			start_app(app_id);
 		else
