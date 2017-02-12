@@ -334,10 +334,10 @@ public class MasterController : Diorite.Application
 				foreach (var key in keys)
 				{
 					builder.begin_object();
-					builder.set_member("id").add_string(key);
+					builder.set_string("id", key);
 					var app = all_apps[key];
-					builder.set_member("name").add_string(app.name);
-					builder.set_member("version").add_printf("%d.%d", app.version_major, app.version_minor);
+					builder.set_string("name", app.name);
+					builder.set_printf("version", "%d.%d", app.version_major, app.version_minor);
 					builder.set_member("datadir");
 					if (app.data_dir == null)
 						builder.add_null();
