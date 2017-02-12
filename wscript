@@ -207,6 +207,8 @@ def configure(ctx):
 	# Anti-underlinking and anti-overlinking linker flags.
 	ctx.env.append_unique("LINKFLAGS", ["-Wl,--no-undefined", "-Wl,--as-needed"])
 	
+	ctx.env.CDK = ctx.options.cdk
+	ctx.env.ADK = ctx.options.adk
 	if ctx.options.cdk:
 		ctx.vala_def("NUVOLA_CDK")
 		ctx.env.NAME = CDK_NAME
@@ -436,7 +438,7 @@ def build(ctx):
 		BLURB = BLURB,
 		APP_NAME = ctx.env.NAME,
 		ICON = ctx.env.ICON_NAME,
-		EXEC = APPNAME,
+		EXEC = APPNAME if not ctx.env.ADK else "lxterminal",
 		GENERIC_NAME=GENERIC_NAME,
 	)
 	ctx(features = 'subst',
