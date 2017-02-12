@@ -32,6 +32,7 @@ DEFAULT_NAME="Nuvola Apps"
 ADK_NAME="Nuvola ADK"
 CDK_NAME="Nuvola CDK"
 APPNAME = "nuvolaplayer3"
+FUTURE_APPNAME = "nuvola"
 VERSION = "3.1.1+"
 DEFAULT_UNIQUE_NAME="eu.tiliado.Nuvola"
 ADK_UNIQUE_NAME="eu.tiliado.NuvolaAdk"
@@ -282,6 +283,7 @@ def configure(ctx):
 		version = (version[0], version[1] + 2)
 		
 	ctx.define("NUVOLA_APPNAME", APPNAME)
+	ctx.define("NUVOLA_FUTURE_APPNAME", FUTURE_APPNAME)
 	ctx.define("NUVOLA_NAME", ctx.env.NAME)
 	ctx.define("NUVOLA_WELCOME_SCREEN_NAME", WELCOME_SCREEN_NAME)
 	ctx.define("NUVOLA_UNIQUE_NAME", ctx.env.UNIQUE_NAME)
@@ -292,7 +294,7 @@ def configure(ctx):
 	ctx.define("NUVOLA_VERSION_MINOR", VERSIONS[1])
 	ctx.define("NUVOLA_VERSION_BUGFIX", VERSIONS[2])
 	ctx.define("NUVOLA_VERSION_SUFFIX", VERSION_SUFFIX)
-	ctx.define("GETTEXT_PACKAGE", "nuvolaplayer3")
+	ctx.define("GETTEXT_PACKAGE", FUTURE_APPNAME)
 	ctx.env.NUVOLA_LIBDIR = "%s/%s" % (ctx.env.LIBDIR, APPNAME)
 	ctx.define("NUVOLA_TILIADO_OAUTH2_SERVER", ctx.options.tiliado_oauth2_server)
 	ctx.define("NUVOLA_TILIADO_OAUTH2_CLIENT_ID", ctx.options.tiliado_oauth2_client_id)
@@ -446,11 +448,11 @@ def build(ctx):
 		target = "share/dbus-1/services/%s.service" % ctx.env.UNIQUE_NAME,
 		install_path = '${PREFIX}/share/dbus-1/services',
 		NAME = ctx.env.UNIQUE_NAME,
-		EXEC = '%s/bin/nuvolaplayer3 --gapplication-service' % ctx.env.PREFIX
+		EXEC = '%s/bin/%s --gapplication-service' % (ctx.env.PREFIX, APPNAME)
 	)
 	
-	ctx.symlink_as('${PREFIX}/bin/nuvola', APPNAME)
-	ctx.symlink_as('${PREFIX}/bin/nuvolactl', CONTROL)
+	ctx.symlink_as('${PREFIX}/bin/%s' % FUTURE_APPNAME, APPNAME)
+	ctx.symlink_as('${PREFIX}/bin/%sctl' % FUTURE_APPNAME, CONTROL)
 	ctx.install_as('${PREFIX}/share/appdata/%s.appdata.xml' % ctx.env.UNIQUE_NAME, ctx.path.find_node("data/nuvolaplayer3.appdata.xml"))
 	ctx.install_as('${PREFIX}/share/metainfo/%s.appdata.xml' % ctx.env.UNIQUE_NAME, ctx.path.find_node("data/nuvolaplayer3.appdata.xml"))
 	

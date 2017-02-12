@@ -104,7 +104,7 @@ public KeyFile create_desktop_file(WebAppMeta web_app)
 	var key_file = new KeyFile();
 	const string GROUP = "Desktop Entry";
 	key_file.set_string(GROUP, "Name", web_app.name);
-	key_file.set_string(GROUP, "Exec", "%s -a %s".printf(Nuvola.get_app_id(), web_app.id));
+	key_file.set_string(GROUP, "Exec", "%s -a %s".printf(Nuvola.get_future_app_id(), web_app.id));
 	key_file.set_string(GROUP, "Type", "Application");
 	key_file.set_string(GROUP, "Categories", web_app.categories);
 	key_file.set_string(GROUP, "Icon", web_app.get_icon_name_or_path(-1) ?? Nuvola.get_app_icon());
