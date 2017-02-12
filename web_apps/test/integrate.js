@@ -113,8 +113,14 @@ WebApp._onPageReady = function()
         actions.push(ACTION_RATING + "::" + i);
     player.addExtraActions(actions);
     
-    document.getElementsByTagName("h1")[0].innerText = Nuvola.format(
-        "Nuvola {1}, WebKitGTK {2}, libsoup {3}", fmtv(Nuvola.VERSION), fmtv(Nuvola.WEBKITGTK_VERSION), fmtv(Nuvola.LIBSOUP_VERSION));
+    try
+    {
+        document.getElementsByTagName("h1")[0].innerText = Nuvola.format(
+            "Nuvola {1}, WebKitGTK {2}, libsoup {3}", fmtv(Nuvola.VERSION), fmtv(Nuvola.WEBKITGTK_VERSION), fmtv(Nuvola.LIBSOUP_VERSION));
+    }
+    catch (e)
+    {
+    }
     
     // Connect handler for signal ActionActivated
     Nuvola.actions.connect("ActionActivated", this);
