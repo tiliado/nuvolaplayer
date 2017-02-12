@@ -58,6 +58,16 @@ Nuvola.format = function()
     });
 };
 
+
+Nuvola.formatVersion = function(encodedVersion)
+{
+    var micro = encodedVersion % 100;
+    encodedVersion = (encodedVersion - micro)/100;
+    var minor = encodedVersion % 100;
+    var major = (encodedVersion - minor)/100;
+    return major + "." + minor + "." + micro;
+};
+
 Nuvola.format._regex = new RegExp("{-?[0-9]+}", "g");
 
 Nuvola.inArray = function(array, item)
