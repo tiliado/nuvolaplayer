@@ -210,12 +210,22 @@ Core._unprefixWebkit = function(window)
         var prefixed = "webkit" + unprefixed;
         if (!window[prefixed])
         {
-            Nuvola.log("Missing hidden: {1} -> {2} | {3}", prefixed, unprefixed, "" + window[prefixed]);
+            Nuvola.log("Missing hidden: {1} -> {2} | {3}", prefixed, unprefixed, "" + window[unprefixed]);
         }
         else if (!window[unprefixed])
         {
             Nuvola.log("Unprefix hidden: {1} -> {2} | {3}", prefixed, unprefixed, "" + window[prefixed]);
             window[unprefixed] = window[prefixed];
+        }
+    }
+    if (window.MediaSource)
+    {
+        var origMediaSourceIsTypeSupported = window.MediaSource.isTypeSupported;
+        window.MediaSource.isTypeSupported = function(mimeType)
+        {
+            var result = origMediaSourceIsTypeSupported(mimeType);
+            console.log("MediaSource.isTypeSupported('" + mimeType +"') -> " + result);
+            return result;
         }
     }
 }
