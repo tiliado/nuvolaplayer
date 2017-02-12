@@ -28,11 +28,14 @@ top = '.'
 out = 'build'
 
 # Application name and version
-NAME="Nuvola Apps"
+DEFAULT_NAME="Nuvola Apps"
+ADK_NAME="Nuvola ADK"
+CDK_NAME="Nuvola CDK"
 APPNAME = "nuvolaplayer3"
 VERSION = "3.1.1+"
-UNIQUE_NAME="eu.tiliado.Nuvola"
-ICON_NAME = UNIQUE_NAME
+DEFAULT_UNIQUE_NAME="eu.tiliado.Nuvola"
+ADK_UNIQUE_NAME="eu.tiliado.NuvolaAdk"
+CDK_UNIQUE_NAME="eu.tiliado.NuvolaCdk"
 GENERIC_NAME = "Cloud Player"
 BLURB = "Cloud music integration for your Linux desktop"
 WELCOME_SCREEN_NAME = "Nuvola Apps 3.1 Rolling Releases"
@@ -140,6 +143,8 @@ def options(ctx):
 	ctx.add_option('--allow-fuzzy-build', action='store_true', default=False, dest='fuzzy', help="Allow building without valid git revision information and absolutely no support from upstream.")
 	ctx.add_option('--snapcraft', action='store_true', default=False, dest='snapcraft', help="Apply workarounds for Snapcraft with given name.")
 	ctx.add_option('--flatpak', action='store_true', default=False, dest='flatpak', help="Apply workarounds for Flatpak.")
+	ctx.add_option('--adk', action='store_true', default=False, dest='adk', help="Build as Nuvola ADK (App Developer Kit).")
+	ctx.add_option('--cdk', action='store_true', default=False, dest='cdk', help="Build as Nuvola CDK (Core Developer Kit).")
 	ctx.add_option('--tiliado-oauth2-server', type=str, default="https://tiliado.eu", help="Tiliado OAuth2 server to access Tiliado services.")
 	ctx.add_option('--tiliado-oauth2-client-id', type=str, default="", help="Tiliado OAuth2 client id to access Tiliado services.")
 	ctx.add_option('--tiliado-oauth2-client-secret', type=str, default="", help="Tiliado OAuth2 client secret to access Tiliado services.")
@@ -202,6 +207,19 @@ def configure(ctx):
 	# Anti-underlinking and anti-overlinking linker flags.
 	ctx.env.append_unique("LINKFLAGS", ["-Wl,--no-undefined", "-Wl,--as-needed"])
 	
+	if ctx.options.cdk:
+		ctx.vala_def("NUVOLA_CDK")
+		ctx.env.NAME = CDK_NAME
+		ctx.env.UNIQUE_NAME = CDK_UNIQUE_NAME
+	elif ctx.options.adk:
+		ctx.vala_def("NUVOLA_ADK")
+		ctx.env.NAME = ADK_NAME
+		ctx.env.UNIQUE_NAME = ADK_UNIQUE_NAME
+	else:
+		ctx.env.NAME = DEFAULT_NAME
+		ctx.env.UNIQUE_NAME = DEFAULT_UNIQUE_NAME
+	ctx.env.ICON_NAME = ctx.env.UNIQUE_NAME
+	
 	# Snapcraft hacks
 	if ctx.options.snapcraft:
 		ctx.env.SNAPCRAFT = SNAPCRAFT = os.environ["SNAPCRAFT_STAGE"]
@@ -262,10 +280,10 @@ def configure(ctx):
 		version = (version[0], version[1] + 2)
 		
 	ctx.define("NUVOLA_APPNAME", APPNAME)
-	ctx.define("NUVOLA_NAME", NAME)
+	ctx.define("NUVOLA_NAME", ctx.env.NAME)
 	ctx.define("NUVOLA_WELCOME_SCREEN_NAME", WELCOME_SCREEN_NAME)
-	ctx.define("NUVOLA_UNIQUE_NAME", UNIQUE_NAME)
-	ctx.define("NUVOLA_APP_ICON", ICON_NAME)
+	ctx.define("NUVOLA_UNIQUE_NAME", ctx.env.UNIQUE_NAME)
+	ctx.define("NUVOLA_APP_ICON", ctx.env.ICON_NAME)
 	ctx.define("NUVOLA_VERSION", VERSION)
 	ctx.define("NUVOLA_REVISION", REVISION_ID)
 	ctx.define("NUVOLA_VERSION_MAJOR", VERSIONS[0])
@@ -413,26 +431,26 @@ def build(ctx):
 	
 	ctx(features = 'subst',
 		source = 'data/templates/launcher.desktop',
-		target = "share/applications/%s.desktop" % UNIQUE_NAME,
+		target = "share/applications/%s.desktop" % ctx.env.UNIQUE_NAME,
 		install_path = '${PREFIX}/share/applications',
 		BLURB = BLURB,
-		APP_NAME = NAME,
-		ICON = ICON_NAME,
+		APP_NAME = ctx.env.NAME,
+		ICON = ctx.env.ICON_NAME,
 		EXEC = APPNAME,
 		GENERIC_NAME=GENERIC_NAME,
 	)
 	ctx(features = 'subst',
 		source = 'data/templates/dbus.service',
-		target = "share/dbus-1/services/%s.service" % UNIQUE_NAME,
+		target = "share/dbus-1/services/%s.service" % ctx.env.UNIQUE_NAME,
 		install_path = '${PREFIX}/share/dbus-1/services',
-		NAME = UNIQUE_NAME,
+		NAME = ctx.env.UNIQUE_NAME,
 		EXEC = '%s/bin/nuvolaplayer3 --gapplication-service' % ctx.env.PREFIX
 	)
 	
 	ctx.symlink_as('${PREFIX}/bin/nuvola', APPNAME)
 	ctx.symlink_as('${PREFIX}/bin/nuvolactl', CONTROL)
-	ctx.install_as('${PREFIX}/share/appdata/%s.appdata.xml' % UNIQUE_NAME, ctx.path.find_node("data/nuvolaplayer3.appdata.xml"))
-	ctx.install_as('${PREFIX}/share/metainfo/%s.appdata.xml' % UNIQUE_NAME, ctx.path.find_node("data/nuvolaplayer3.appdata.xml"))
+	ctx.install_as('${PREFIX}/share/appdata/%s.appdata.xml' % ctx.env.UNIQUE_NAME, ctx.path.find_node("data/nuvolaplayer3.appdata.xml"))
+	ctx.install_as('${PREFIX}/share/metainfo/%s.appdata.xml' % ctx.env.UNIQUE_NAME, ctx.path.find_node("data/nuvolaplayer3.appdata.xml"))
 	
 	web_apps = ctx.path.find_dir("web_apps")
 	ctx.install_files('${PREFIX}/share/' + APPNAME, web_apps.ant_glob('**'), cwd=web_apps.parent, relative_trick=True)
@@ -441,8 +459,8 @@ def build(ctx):
 	
 	app_icons = ctx.path.find_node("data/icons")
 	for size in (16, 22, 24, 32, 48, 64):
-		ctx.install_as('${PREFIX}/share/icons/hicolor/%sx%s/apps/%s.png' % (size, size, ICON_NAME), app_icons.find_node("%s.png" % size))
-	ctx.install_as('${PREFIX}/share/icons/hicolor/scalable/apps/%s.svg' % ICON_NAME, app_icons.find_node("scalable.svg"))
+		ctx.install_as('${PREFIX}/share/icons/hicolor/%sx%s/apps/%s.png' % (size, size, ctx.env.ICON_NAME), app_icons.find_node("%s.png" % size))
+	ctx.install_as('${PREFIX}/share/icons/hicolor/scalable/apps/%s.svg' % ctx.env.ICON_NAME, app_icons.find_node("scalable.svg"))
 	
 	ctx(features = "mergejs",
 		source = ctx.path.ant_glob('src/mainjs/*.js'),
