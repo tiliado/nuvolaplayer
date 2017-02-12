@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2016 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2011-2017 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -21,6 +21,39 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+var unprefixWebkit = function(window)
+{
+    for (var name in window)
+    {
+        if (name.indexOf("webkit") === 0)
+        {
+            var unprefixed = name.substring(6);
+            if (window[unprefixed] === undefined)
+            {
+                console.log("Unprefix: " + name + " -> " + unprefixed + " | " + window[name]);
+                window[unprefixed] = window[name];
+            }
+        }
+    }
+    
+    var unprefix = ["MediaSource", "AudioContext", "AudioPannerNode", "OfflineAudioContext", "URL"];
+    var size = unprefix.length;
+    for (var i = 0; i < size; i++)
+    {
+        var unprefixed = unprefix[i];
+        var prefixed = "webkit" + unprefixed;
+        if (!window[prefixed])
+        {
+            console.log("Missing hidden: " + prefixed + " -> " + unprefixed + " | " + window[unprefixed]);
+        }
+        else if (!window[unprefixed])
+        {
+            console.log("Unprefix hidden: " + prefixed + " -> " + unprefixed + " | " + window[prefixed] );
+            window[unprefixed] = window[prefixed];
+        }
+    }
+}
 
 var mimeTypes = {
 	ogg: {
@@ -122,4 +155,8 @@ var testAudio = function()
 	}
 }
 
-window.onload = testAudio;
+window.onload = function()
+{
+	unprefixWebkit(window);
+	testAudio();
+};
