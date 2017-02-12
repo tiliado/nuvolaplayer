@@ -104,9 +104,18 @@ public int main(string[] args)
 		var desktop_file_existed = true;
 		web_app.removable = false;
 		if (web_app.has_desktop_launcher)
+		{
 			delete_desktop_file_sync(web_app);
+		}
 		else
+		{
+			warning(
+				"The %s script doesn't provide a desktop file. It might not function properly in the next "
+				+ "Nuvola release. Ask the maintainer to switch to the Nuvola SDK "
+				+ "<https://github.com/tiliado/nuvolasdk> and build it with `./configure --with-desktop-launcher`.",
+				web_app.name);
 			desktop_file_existed = write_desktop_file_sync(web_app);
+		}
 		var storage = new Diorite.XdgStorage.for_project(Nuvola.get_app_id());
 		var app_storage = new WebAppStorage(
 		  storage.user_config_dir.get_child(WEB_APP_DATA_DIR).get_child(web_app.id),
