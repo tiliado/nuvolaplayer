@@ -33,6 +33,7 @@ var player = Nuvola.$object(Nuvola.MediaPlayer);
 // Handy aliases
 var PlaybackState = Nuvola.PlaybackState;
 var PlayerAction = Nuvola.PlayerAction;
+var fmtv = Nuvola.formatVersion;
 
 // Translations
 var _ = Nuvola.Translate.gettext;
@@ -113,7 +114,7 @@ WebApp._onPageReady = function()
     player.addExtraActions(actions);
     
     document.getElementsByTagName("h1")[0].innerText = Nuvola.format(
-        "WebKitGTK {1}, libsoup {2}", Nuvola.WEBKITGTK_VERSION, Nuvola.LIBSOUP_VERSION);
+        "Nuvola {1}, WebKitGTK {2}, libsoup {3}", fmtv(Nuvola.VERSION), fmtv(Nuvola.WEBKITGTK_VERSION), fmtv(Nuvola.LIBSOUP_VERSION));
     
     // Connect handler for signal ActionActivated
     Nuvola.actions.connect("ActionActivated", this);
