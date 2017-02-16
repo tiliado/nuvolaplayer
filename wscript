@@ -357,7 +357,7 @@ def build(ctx):
 		packages = 'uuid libsoup-2.4 json-glib-1.0', 
 		uselib = 'UUID SOUP JSON-GLIB',
 		defines = ['G_LOG_DOMAIN="Engineio"'],
-		vapi_dirs = ['engineio-soup/vapi'],
+		vapi_dirs = vapi_dirs,
 		vala_target_glib = TARGET_GLIB,
 	)
 	
