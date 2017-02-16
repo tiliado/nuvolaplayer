@@ -182,6 +182,12 @@ def configure(ctx):
 	ctx.env.VALAFLAGS.remove("--quiet")
 	ctx.env.append_value("VALAFLAGS", "-v")
 	
+	# Honor LD_LIBRARY_PATH
+	for path in os.environ.get("LD_LIBRARY_PATH", "").split(":"):
+		path = path.strip()
+		if path:
+			ctx.env.append_unique('LIBPATH', path)
+	
 	# enable threading
 	ctx.env.append_value("VALAFLAGS", "--thread")
 	
