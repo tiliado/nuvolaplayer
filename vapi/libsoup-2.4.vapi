@@ -325,7 +325,7 @@ namespace Soup {
 		[Version (since = "2.50")]
 		public GLib.IOStream steal_connection ();
 	}
-	[CCode (cheader_filename = "libsoup/soup.h")]
+	[CCode (cheader_filename = "libsoup/soup.h", has_type_id = false)]
 	[Compact]
 	public class Connection {
 	}
@@ -493,6 +493,12 @@ namespace Soup {
 		public void set_printer (owned Soup.LoggerPrinter printer);
 		public void set_request_filter (owned Soup.LoggerFilter request_filter);
 		public void set_response_filter (owned Soup.LoggerFilter response_filter);
+		[NoAccessorMethod]
+		[Version (since = "2.56")]
+		public Soup.LoggerLogLevel level { get; set; }
+		[NoAccessorMethod]
+		[Version (since = "2.56")]
+		public int max_body_size { get; set; }
 	}
 	[CCode (cheader_filename = "libsoup/soup.h", type_id = "soup_message_get_type ()")]
 	public class Message : GLib.Object {
@@ -668,11 +674,11 @@ namespace Soup {
 		[Version (since = "2.26")]
 		public void set_ranges (Soup.Range ranges, int length);
 	}
-	[CCode (cheader_filename = "libsoup/soup.h")]
+	[CCode (cheader_filename = "libsoup/soup.h", has_type_id = false)]
 	[Compact]
 	public class MessageQueue {
 	}
-	[CCode (cheader_filename = "libsoup/soup.h")]
+	[CCode (cheader_filename = "libsoup/soup.h", has_type_id = false)]
 	[Compact]
 	public class MessageQueueItem {
 	}
@@ -1101,14 +1107,20 @@ namespace Soup {
 		public unowned string get_close_data ();
 		public Soup.WebsocketConnectionType get_connection_type ();
 		public unowned GLib.IOStream get_io_stream ();
+		[Version (since = "2.56")]
+		public uint64 get_max_incoming_payload_size ();
 		public unowned string? get_origin ();
 		public unowned string? get_protocol ();
 		public Soup.WebsocketState get_state ();
 		public unowned Soup.URI get_uri ();
 		public void send_binary ([CCode (array_length_cname = "length", array_length_pos = 1.1, array_length_type = "gsize")] uint8[] data);
 		public void send_text (string text);
+		[Version (since = "2.56")]
+		public void set_max_incoming_payload_size (uint64 max_incoming_payload_size);
 		public Soup.WebsocketConnectionType connection_type { get; construct; }
 		public GLib.IOStream io_stream { get; construct; }
+		[Version (since = "2.56")]
+		public uint64 max_incoming_payload_size { get; set construct; }
 		public string origin { get; construct; }
 		public string protocol { get; construct; }
 		public Soup.WebsocketState state { get; }
@@ -1118,7 +1130,7 @@ namespace Soup {
 		public virtual signal void error (GLib.Error error);
 		public virtual signal void message (int type, GLib.Bytes message);
 	}
-	[CCode (cheader_filename = "libsoup/soup.h")]
+	[CCode (cheader_filename = "libsoup/soup.h", has_type_id = false)]
 	[Compact]
 	[Version (since = "2.52")]
 	public class XMLRPCParams {
@@ -1662,6 +1674,15 @@ namespace Soup {
 	public const int HEADERS_H;
 	[CCode (cheader_filename = "libsoup/soup.h", cname = "SOUP_LOGGER_H")]
 	public const int LOGGER_H;
+	[CCode (cheader_filename = "libsoup/soup.h", cname = "SOUP_LOGGER_LEVEL")]
+	[Version (since = "2.56")]
+	public const string LOGGER_LEVEL;
+	[CCode (cheader_filename = "libsoup/soup.h", cname = "SOUP_LOGGER_MAX_BODY_SIZE")]
+	[Version (since = "2.56")]
+	public const string LOGGER_MAX_BODY_SIZE;
+	[CCode (cheader_filename = "libsoup/soup.h", cname = "SOUP_MAJOR_VERSION")]
+	[Version (since = "2.42")]
+	public const int MAJOR_VERSION;
 	[CCode (cheader_filename = "libsoup/soup.h", cname = "SOUP_MESSAGE_BODY_H")]
 	public const int MESSAGE_BODY_H;
 	[CCode (cheader_filename = "libsoup/soup.h", cname = "SOUP_MESSAGE_FIRST_PARTY")]
@@ -1710,6 +1731,12 @@ namespace Soup {
 	public const string MESSAGE_URI;
 	[CCode (cheader_filename = "libsoup/soup.h", cname = "SOUP_METHOD_H")]
 	public const int METHOD_H;
+	[CCode (cheader_filename = "libsoup/soup.h", cname = "SOUP_MICRO_VERSION")]
+	[Version (since = "2.42")]
+	public const int MICRO_VERSION;
+	[CCode (cheader_filename = "libsoup/soup.h", cname = "SOUP_MINOR_VERSION")]
+	[Version (since = "2.42")]
+	public const int MINOR_VERSION;
 	[CCode (cheader_filename = "libsoup/soup.h", cname = "SOUP_MISC_H")]
 	public const int MISC_H;
 	[CCode (cheader_filename = "libsoup/soup.h", cname = "SOUP_MULTIPART_H")]
@@ -1866,6 +1893,9 @@ namespace Soup {
 	public const int URI_H;
 	[CCode (cheader_filename = "libsoup/soup.h", cname = "SOUP_VALUE_UTILS_H")]
 	public const int VALUE_UTILS_H;
+	[CCode (cheader_filename = "libsoup/soup.h", cname = "SOUP_VERSION_MIN_REQUIRED")]
+	[Version (since = "2.42")]
+	public const int VERSION_MIN_REQUIRED;
 	[CCode (cheader_filename = "libsoup/soup.h", cname = "SOUP_XMLRPC_H")]
 	public const int XMLRPC_H;
 	[CCode (cheader_filename = "libsoup/soup.h", cname = "SOUP_XMLRPC_OLD_H")]
@@ -1879,6 +1909,9 @@ namespace Soup {
 	public static unowned GLib.TimeoutSource add_io_watch (GLib.MainContext? async_context, GLib.IOChannel chan, GLib.IOCondition condition, GLib.IOFunc function);
 	[CCode (cheader_filename = "libsoup/soup.h")]
 	public static unowned GLib.TimeoutSource add_timeout (GLib.MainContext? async_context, uint interval, GLib.SourceFunc function);
+	[CCode (cheader_filename = "libsoup/soup.h")]
+	[Version (since = "2.42")]
+	public static bool check_version (uint major, uint minor, uint micro);
 	[CCode (cheader_filename = "libsoup/soup.h")]
 	[Version (since = "2.24")]
 	public static GLib.SList<Soup.Cookie> cookies_from_request (Soup.Message msg);
@@ -1924,6 +1957,15 @@ namespace Soup {
 	[CCode (cheader_filename = "libsoup/soup.h")]
 	[Version (deprecated_since = "vala-0.12", replacement = "Form.request_new_from_multipart")]
 	public static Soup.Message form_request_new_from_multipart (string uri, Soup.Multipart multipart);
+	[CCode (cheader_filename = "libsoup/soup.h")]
+	[Version (since = "2.42")]
+	public static uint get_major_version ();
+	[CCode (cheader_filename = "libsoup/soup.h")]
+	[Version (since = "2.42")]
+	public static uint get_micro_version ();
+	[CCode (cheader_filename = "libsoup/soup.h")]
+	[Version (since = "2.42")]
+	public static uint get_minor_version ();
 	[CCode (cheader_filename = "libsoup/soup.h")]
 	public static bool header_contains (string header, string token);
 	[CCode (cheader_filename = "libsoup/soup.h")]
@@ -2068,11 +2110,4 @@ namespace Soup {
 	[CCode (cheader_filename = "libsoup/soup.h", sentinel = "G_TYPE_INVALID")]
 	[Version (deprecated_since = "vala-0.12", replacement = "XMLRPC.set_response")]
 	public static void xmlrpc_set_response (Soup.Message msg, ...);
-	
-	[CCode (cheader_filename = "libsoup/soup.h")]
-	public static uint get_major_version ();
-	[CCode (cheader_filename = "libsoup/soup.h")]
-	public static uint get_micro_version ();
-	[CCode (cheader_filename = "libsoup/soup.h")]
-	public static uint get_minor_version ();
 }

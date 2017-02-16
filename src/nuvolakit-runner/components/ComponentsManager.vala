@@ -118,7 +118,8 @@ public class ComponentsManager: Gtk.Stack
 			label.vexpand = false;
 			label.hexpand = true;
 			label.halign = Gtk.Align.START;
-			label.yalign = label.xalign = 0.0f;
+			((Gtk.Misc) label).yalign = 0.0f;
+			((Gtk.Misc) label).xalign = 0.0f;
 			label.set_line_wrap(true);
 			grid.attach(label, 1, row, 1, 1);
 			

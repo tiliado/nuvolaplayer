@@ -113,7 +113,8 @@ public class WebAppWindow : Diorite.ApplicationWindow
 		title.use_markup = true;
 		var body = new Gtk.Label(text);
 		body.halign = Gtk.Align.START;
-		body.yalign = body.xalign = 0.0f;
+		((Gtk.Misc) body).yalign = 0.0f;
+		((Gtk.Misc) body).xalign = 0.0f;
 		body.set_line_wrap(true);
 		var close_button = new Gtk.Button.with_label("Close");
 		close_button.hexpand = false;

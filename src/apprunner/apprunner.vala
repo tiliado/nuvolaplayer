@@ -95,7 +95,8 @@ public int main(string[] args)
 	
 	// Init GTK early to have be able to use Gtk.IconTheme stuff
 	string[] empty_argv = {};
-	Gtk.init(ref empty_argv);
+	unowned string[] unowned_empty_argv = empty_argv;
+	Gtk.init(ref unowned_empty_argv);
 	
 	try
 	{
