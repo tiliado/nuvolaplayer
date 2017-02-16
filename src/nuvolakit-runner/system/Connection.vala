@@ -27,9 +27,9 @@ namespace Nuvola
 
 public class Connection : GLib.Object
 {
-	private static const string PROXY_TYPE_CONF = "webview.proxy.type";
-	private static const string PROXY_HOST_CONF = "webview.proxy.host";
-	private static const string PROXY_PORT_CONF = "webview.proxy.port";
+	private const string PROXY_TYPE_CONF = "webview.proxy.type";
+	private const string PROXY_HOST_CONF = "webview.proxy.host";
+	private const string PROXY_PORT_CONF = "webview.proxy.port";
 	
 	public Soup.Session session {get; construct set;}
 	public File cache_dir {get; construct set;}

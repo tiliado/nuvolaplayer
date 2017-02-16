@@ -35,7 +35,7 @@ struct Args
 	[CCode (array_length = false, array_null_terminated = true)]
 	static string?[] command;
 	
-	public static const OptionEntry[] main_options =
+	public const OptionEntry[] main_options =
 	{
 		{ "app", 'a', 0, GLib.OptionArg.FILENAME, ref Args.app, "Web app to control.", "ID" },
 		{ "verbose", 'v', 0, OptionArg.NONE, ref Args.verbose, "Print informational messages", null },

@@ -115,7 +115,7 @@ public class AppRunnerController : RunnerApplication
 	public IpcBus ipc_bus {get; private set; default=null;}
 	public ActionsHelper actions_helper {get; private set; default = null;}
 	private GlobalKeybindings global_keybindings;
-	private static const int MINIMAL_REMEMBERED_WINDOW_SIZE = 300;
+	private const int MINIMAL_REMEMBERED_WINDOW_SIZE = 300;
 	private uint configure_event_cb_id = 0;
 	private MenuBar menu_bar;
 	private Diorite.Form? init_form = null;

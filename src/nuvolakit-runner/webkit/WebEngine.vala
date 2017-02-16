@@ -29,7 +29,7 @@ namespace Nuvola
 
 public class WebEngine : GLib.Object, JSExecutor
 {
-	private static const string ZOOM_LEVEL_CONF = "webview.zoom_level";
+	private const string ZOOM_LEVEL_CONF = "webview.zoom_level";
 	
 	public Gtk.Widget widget {get {return web_view;}}
 	public WebAppMeta web_app {get; private set;}

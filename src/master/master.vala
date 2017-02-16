@@ -39,7 +39,7 @@ struct Args
 	static bool list_apps = false;
 	static bool list_apps_json = false;
 	
-	public static const OptionEntry[] options =
+	public const OptionEntry[] options =
 	{
 		{ "app-id", 'a', 0, OptionArg.STRING, ref app_id, "Web app to run, e.g. \"happy_songs\" for Happy Songs web app.", "ID" },
 		{ "apps-dir", 'A', 0, GLib.OptionArg.FILENAME, ref Args.apps_dir, "Search for web app integrations only in directory DIR and disable service management.", "DIR" },

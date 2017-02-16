@@ -71,34 +71,34 @@ public errordomain JSError
  */
 public class JSApi : GLib.Object
 {
-	private static const string MAIN_JS = "main.js";
-	private static const string META_JSON = "metadata.json";
-	private static const string META_PROPERTY = "meta";
-	private static const string JS_DIR = "js";
+	private const string MAIN_JS = "main.js";
+	private const string META_JSON = "metadata.json";
+	private const string META_PROPERTY = "meta";
+	private const string JS_DIR = "js";
 	/**
 	 * Name of file with integration script.
 	 */
-	private static const string INTEGRATE_JS = "integrate.js";
+	private const string INTEGRATE_JS = "integrate.js";
 	/**
 	 * Name of file with settings script.
 	 */
-	private static const string SETTINGS_SCRIPT = "settings.js";
+	private const string SETTINGS_SCRIPT = "settings.js";
 	/**
 	 * Major version of the JavaScript API
 	 */
-	public static const int API_VERSION_MAJOR = 3;
-	public static const int API_VERSION_MINOR = 1;
-	public static const int API_VERSION = API_VERSION_MAJOR * 100 + API_VERSION_MINOR;
+	public const int API_VERSION_MAJOR = 3;
+	public const int API_VERSION_MINOR = 1;
+	public const int API_VERSION = API_VERSION_MAJOR * 100 + API_VERSION_MINOR;
 	
 	private static unowned JS.Class klass;
 	/**
 	 * Identifier of the main frame
 	 */
-	public static const string MAIN_FRAME_ID = "__main__";
+	public const string MAIN_FRAME_ID = "__main__";
 	/**
 	 * Identifier of the frame for service's preferences.
 	 */
-	public static const string PREFERENCES_FRAME_ID = "__preferences__";
+	public const string PREFERENCES_FRAME_ID = "__preferences__";
 	
 	private Diorite.Storage storage;
 	private File data_dir;
@@ -240,7 +240,7 @@ public class JSApi : GLib.Object
 	 * Default methods of the main object. Other functions are implemented in JavaScript,
 	 * see file main.js
 	 */
-	private static const JS.StaticFunction[] static_functions =
+	private const JS.StaticFunction[] static_functions =
 	{
 		{"_callIpcMethodAsync", call_ipc_method_async_func, 0},
 		{"_callIpcMethodSync", call_ipc_method_sync_func, 0},

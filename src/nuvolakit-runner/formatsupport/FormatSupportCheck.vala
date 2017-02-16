@@ -27,11 +27,11 @@ namespace Nuvola
 
 public class FormatSupportCheck : GLib.Object
 {
-	private static const string WARN_FLASH_KEY = "format_support.warn_flash";
-	private static const string WARN_MP3_KEY = "format_support.warn_mp3";
-	private static const string GSTREAMER_KEY = "format_support.gstreamer";
-	private static const string WEB_PLUGINS_KEY = "format_support.web_plugins";
-	private static const string MEDIA_SOURCE_EXTENSION_KEY = "format_support.mse";
+	private const string WARN_FLASH_KEY = "format_support.warn_flash";
+	private const string WARN_MP3_KEY = "format_support.warn_mp3";
+	private const string GSTREAMER_KEY = "format_support.gstreamer";
+	private const string WEB_PLUGINS_KEY = "format_support.web_plugins";
+	private const string MEDIA_SOURCE_EXTENSION_KEY = "format_support.mse";
 	private FormatSupport format_support;
 	private Diorite.Storage storage;
 	private Diorite.Application app;

@@ -30,7 +30,7 @@ public class WebAppMeta : GLib.Object
 	/**
 	 * Name of file with metadata.
 	 */
-	private static const string METADATA_FILENAME = "metadata.json";
+	private const string METADATA_FILENAME = "metadata.json";
 	
 	public string id {get; construct;}
 	public string name {get; construct;}

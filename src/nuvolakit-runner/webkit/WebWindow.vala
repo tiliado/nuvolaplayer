@@ -27,10 +27,10 @@ namespace Nuvola
 
 public class WebWindow: Gtk.Window
 {
-	private static const int MINIMAL_WIDTH = 100;
-	private static const int MINIMAL_HEIGHT = 100;
-	private static const int INITIAL_WIDTH = 800;
-	private static const int INITIAL_HEIGHT = 600;
+	private const int MINIMAL_WIDTH = 100;
+	private const int MINIMAL_HEIGHT = 100;
+	private const int INITIAL_WIDTH = 800;
+	private const int INITIAL_HEIGHT = 600;
 	private weak WebKit.WebView web_view;
 	
 	public WebWindow(WebKit.WebView web_view)

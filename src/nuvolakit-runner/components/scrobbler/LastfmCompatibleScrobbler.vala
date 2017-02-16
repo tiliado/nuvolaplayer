@@ -27,8 +27,8 @@ namespace Nuvola
 
 public class LastfmCompatibleScrobbler: AudioScrobbler
 {
-	public static const string HTTP_GET = "GET";
-	public static const string HTTP_POST = "POST";
+	public const string HTTP_GET = "GET";
+	public const string HTTP_POST = "POST";
 	
 	public string? session {get; protected set; default = null;}
 	public bool has_session { get{ return session != null; }}

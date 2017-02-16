@@ -72,7 +72,7 @@ private const string WELCOME_TEXT = """
 
 public class WelcomeWindow : Diorite.ApplicationWindow
 {
-	private static const string PATRONS_BOX_URI = "https://tiliado.eu/nuvolaplayer/funding/patrons_list_box/";
+	private const string PATRONS_BOX_URI = "https://tiliado.eu/nuvolaplayer/funding/patrons_list_box/";
 	private Gtk.Grid grid;
 	private Diorite.Application app;
 	private WebView web_view;

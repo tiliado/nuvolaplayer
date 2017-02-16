@@ -27,7 +27,7 @@ namespace Nuvola
 
 public class AudioScrobblerComponent: Component
 {
-	private static const int SCROBBLE_SONG_DELAY = 60;
+	private const int SCROBBLE_SONG_DELAY = 60;
 	
 	private Bindings bindings;
 	private Diorite.Application app;

@@ -27,7 +27,7 @@ public abstract class Nuvola.Binding<ObjectType>: GLib.Object
 	/**
 	 * Return value to continue propagation of binding handlers.
 	 */
-	public static const bool CONTINUE = false;
+	public const bool CONTINUE = false;
 	public string name {get; construct;}
 	public bool active {get; protected set; default = false;}
 	protected Drt.ApiRouter router;

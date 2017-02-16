@@ -27,7 +27,7 @@ namespace Nuvola
 
 public class WebAppListView : Gtk.IconView
 {
-	public static const int ICON_SIZE = 48;
+	public const int ICON_SIZE = 48;
 	
 	public WebAppListView(Gtk.TreeModel model)
 	{

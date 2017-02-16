@@ -28,8 +28,8 @@ namespace Nuvola
 
 public class WebView: WebKit.WebView
 {
-	public static const double ZOOM_DEFAULT = 1.0;
-	public static const double ZOOM_STEP = 1.2;
+	public const double ZOOM_DEFAULT = 1.0;
+	public const double ZOOM_STEP = 1.2;
 	private SList<WebWindow> web_windows = null;
 	
 	public WebView(WebKit.WebContext context)

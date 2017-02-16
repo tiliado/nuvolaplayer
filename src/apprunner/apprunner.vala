@@ -36,7 +36,7 @@ struct Args
 	static string? app_dir;
 	static string? log_file;
 	
-	public static const OptionEntry[] options =
+	public const OptionEntry[] options =
 	{
 		{ "app-dir", 'a', 0, GLib.OptionArg.FILENAME, ref Args.app_dir, "Web app to run.", "DIR" },
 		{ "verbose", 'v', 0, OptionArg.NONE, ref Args.verbose, "Print informational messages", null },

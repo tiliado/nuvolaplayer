@@ -31,7 +31,7 @@ public class GlobalActionsKeyBinder : GLib.Object, ActionsKeyBinder
 	private Config config;
 	private HashTable<string, string> keybindings;
 	
-	private static const string CONF_PREFIX = "nuvola.global_keybindings.";
+	private const string CONF_PREFIX = "nuvola.global_keybindings.";
 	
 	public class GlobalActionsKeyBinder(XKeyGrabber grabber, Config config)
 	{
