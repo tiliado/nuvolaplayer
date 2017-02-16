@@ -29,7 +29,6 @@ namespace Nuvola.Flatpak
 public void check_desktop_portal_available(Cancellable? cancellable = null) throws GLib.Error
 {
     var conn = Bus.get_sync(BusType.SESSION, cancellable);
-    var flags = DBusProxyFlags.DO_NOT_LOAD_PROPERTIES|DBusProxyFlags.DO_NOT_CONNECT_SIGNALS;
     const string NAME = "org.freedesktop.portal.Desktop";
     const string PATH = "/org/freedesktop/portal/desktop";
     try
