@@ -42,6 +42,7 @@ public class WebAppMeta : GLib.Object
 	public int api_major {get; construct;}
 	public int api_minor {get; construct;}
 	public string? user_agent {get; construct set;}
+	public string? requirements {get; construct set;}
 	public int window_width {get; construct;}
 	public int window_height {get; construct;}
 	public File? data_dir {get; private set; default = null;}
@@ -105,6 +106,20 @@ public class WebAppMeta : GLib.Object
 		{
 			item = item.strip();
 			if (category[0] != 0 && item == category)
+				return true;
+		}
+		return false;
+	}
+	
+	public bool has_requirement(string requirement)
+	{
+		if (this.requirements == null)
+			return false;
+		var name = requirement.down();
+		var requirements = this.requirements.split(";");
+		foreach (var item in requirements)
+		{
+			if (item.strip().down() == name)
 				return true;
 		}
 		return false;
