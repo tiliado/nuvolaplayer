@@ -38,6 +38,7 @@ public class FormatSupportCheck : GLib.Object
 	private Config config;
 	private WebWorker web_worker;
 	private WebEngine web_engine;
+	private WebAppMeta web_app;
 	private FormatSupportDialog format_support_dialog = null;
 	private Gtk.InfoBar? flash_bar = null;
 	private Gtk.InfoBar? mp3_bar = null;
@@ -51,6 +52,7 @@ public class FormatSupportCheck : GLib.Object
 		this.config = config;
 		this.web_worker = web_worker;
 		this.web_engine = web_engine;
+		this.web_app = web_app;
 		
 		config.set_default_value(WARN_FLASH_KEY, web_app.flash_enabled);
 		config.set_default_value(WARN_MP3_KEY, true);
@@ -179,6 +181,29 @@ public class FormatSupportCheck : GLib.Object
 		{
 			warning("Plugin listing error: %s", e.message);
 		}
+		if (web_app.html5_audio != null)
+		{
+			try
+			{
+				var expr = new FormatSupportExpression(format_support);
+				var html5_audio = expr.eval(web_app.html5_audio);
+				debug("HTML5 Audio expression: '%s' -> %s", web_app.html5_audio, html5_audio.to_string());
+				if (!html5_audio && web_app.has_requirement("HTML5AudioRequired"))
+					app.fatal_error(
+						"HTML5 Audio Required",
+						("This web app requires HTML5 Audio technologies to function properly but this requirement "
+						+ "has not been satisfied. You may contact support. "
+						+ "Failed requirement:\n\n%s.").printf(web_app.html5_audio));
+			}
+			catch (Drt.ConditionalExpressionError e)
+			{
+				app.show_error(
+					"Invalid Metadata",
+					("This web app provides invalid metadata about HTML5 audio requirements."
+					+ " Please create a bug report. The error message is: %s").printf(e.message));
+			}
+		}
+		
 	}
 	
 	private void on_flash_response(int response)

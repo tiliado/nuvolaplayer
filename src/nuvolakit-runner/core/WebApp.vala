@@ -42,6 +42,7 @@ public class WebAppMeta : GLib.Object
 	public int api_major {get; construct;}
 	public int api_minor {get; construct;}
 	public string? user_agent {get; construct set;}
+	public string? html5_audio {get; construct set;}
 	public string? requirements {get; construct set;}
 	public int window_width {get; construct;}
 	public int window_height {get; construct;}
