@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2017 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -25,16 +25,6 @@
 namespace Nuvola
 {
 
-public async void create_desktop_files(WebAppRegistry web_app_reg, bool create_hidden)
-{
-	Idle.add(create_desktop_files.callback);
-	yield;
-	var web_apps = web_app_reg.list_web_apps();
-	foreach (var web_app in web_apps.get_values())
-		if ((create_hidden || !web_app.hidden) && !web_app.has_desktop_launcher)
-			yield write_desktop_file(web_app);
-}
-	
 public bool write_desktop_file_sync(WebAppMeta web_app)
 {
 	var storage = new Diorite.XdgStorage();
