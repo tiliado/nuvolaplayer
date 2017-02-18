@@ -28,8 +28,6 @@ namespace Nuvola
 namespace Actions
 {
 	public const string START_APP = "start-app";
-	public const string INSTALL_APP = "install-app";
-	public const string REMOVE_APP = "remove-app";
 	public const string QUIT = "quit";
 	public const string CREATE_LAUNCHERS = "create-launchers";
 	public const string DELETE_LAUNCHERS = "delete-launchers";
@@ -219,8 +217,6 @@ public class MasterController : Diorite.Application
 		new Diorite.SimpleAction("main", "app", Actions.CREATE_LAUNCHERS, "Create application launchers", null, null, null, do_create_launchers),
 		new Diorite.SimpleAction("main", "app", Actions.DELETE_LAUNCHERS, "Delete application launchers", null, null, null, do_delete_launchers),
 		new Diorite.SimpleAction("main", "win", Actions.START_APP, "Start app", "_Start app", "media-playback-start", "<ctrl>S", do_start_app),
-		new Diorite.SimpleAction("main", "win", Actions.INSTALL_APP, "Install app", "_Install app", "list-add", "<ctrl>plus", do_install_app),
-		new Diorite.SimpleAction("main", "win", Actions.REMOVE_APP, "Remove app", "_Remove app", "list-remove", "<ctrl>minus", do_remove_app)
 		};
 		actions.add_actions(actions_spec);
 		
@@ -232,7 +228,7 @@ public class MasterController : Diorite.Application
 		{
 			/* For Unity */
 			var menu = new Menu();
-			menu.append_submenu("_Apps", actions.build_menu({Actions.START_APP, "|", Actions.INSTALL_APP, Actions.REMOVE_APP}));
+			menu.append_submenu("_Apps", actions.build_menu({Actions.START_APP}));
 			set_menubar(menu);
 		}
 		init_state = InitState.GUI;
@@ -472,66 +468,6 @@ public class MasterController : Diorite.Application
 		remove_window(main_window);
 		main_window.destroy();
 		main_window = null;
-	}
-	
-	private void do_install_app()
-	{
-		show_uri("https://github.com/tiliado/nuvolaplayer/wiki/Web-App-Scripts");
-		#if FALSE
-		// TODO: create web app script tarballs or remove this code
-		var dialog = new Gtk.FileChooserDialog(("Choose service integration package"),
-			main_window, Gtk.FileChooserAction.OPEN, "Cancel",
-			Gtk.ResponseType.CANCEL, "Open", Gtk.ResponseType.ACCEPT
-		);
-		dialog.set_default_size(400, -1);
-		var response = dialog.run();
-		var file = dialog.get_file();
-		dialog.destroy();
-		
-		if (response == Gtk.ResponseType.ACCEPT)
-		{
-			try
-			{
-				var app = web_app_reg.install_app(file);
-				var info = new Diorite.InfoDialog(("Installation successfull"),
-					("Service %1$s (version %2$d.%3$d) has been installed succesfuly").printf(
-					app.name, app.version_major, app.version_minor));
-//~ 				reload(service.id);
-				info.run();
-			}
-			catch (WebAppError e)
-			{
-				var error = new Diorite.ErrorDialog(("Installation failed"),
-					("Installation of service from package %s failed.").printf(file.get_path())
-					+ "\n\n" + e.message);
-				error.run();
-			}
-		}
-		#endif
-	}
-	
-	private void do_remove_app()
-	{
-		if (main_window.selected_web_app == null)
-			return;
-		
-		var web_app = web_app_reg.get_app_meta(main_window.selected_web_app);
-		if (web_app == null)
-			return;
-		try
-		{
-			web_app_reg.remove_app(web_app);
-			var info = new Diorite.InfoDialog(("Removal successfull"),
-				("Service %1$s (version %2$d.%3$d) has been succesfuly removed").printf(web_app.name, web_app.version_major, web_app.version_minor));
-			info.run();
-		}
-		catch (WebAppError e)
-		{
-			var error = new Diorite.ErrorDialog(("Removal failed"),
-				_("Removal of service %s failed.").printf(web_app.name)
-				+ "\n\n" + e.message);
-			error.run();
-		}
 	}
 	
 	private void on_list_item_activated(Gtk.TreePath path)

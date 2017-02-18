@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2017 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -54,7 +54,6 @@ public class WebAppListWindow : Diorite.ApplicationWindow
 		set_default_size(600, 500);
 		
 		this.app = app;
-		app.actions.get_action(Actions.REMOVE_APP).enabled = false;
 		app.actions.get_action(Actions.START_APP).enabled = false;
 		this.model = model;
 		view = new WebAppListView(model);
@@ -69,7 +68,7 @@ public class WebAppListWindow : Diorite.ApplicationWindow
 		scroll.vexpand = true;
 		scroll.hexpand = true;
 		
-		create_toolbar({Actions.START_APP, "|", Actions.INSTALL_APP, Actions.REMOVE_APP});
+		create_toolbar({Actions.START_APP});
 		
 		details = new Gtk.Grid();
 		details.orientation = Gtk.Orientation.HORIZONTAL;
@@ -138,7 +137,6 @@ public class WebAppListWindow : Diorite.ApplicationWindow
 		{
 			details.hide();
 			selected_web_app = null;
-			app.actions.get_action(Actions.REMOVE_APP).enabled = false;
 			app.actions.get_action(Actions.START_APP).enabled = false;
 			return;
 		}
@@ -149,7 +147,6 @@ public class WebAppListWindow : Diorite.ApplicationWindow
 		{
 			details.hide();
 			selected_web_app = null;
-			app.actions.get_action(Actions.REMOVE_APP).enabled = false;
 			app.actions.get_action(Actions.START_APP).enabled = false;
 			return;
 		}
@@ -175,7 +172,6 @@ public class WebAppListWindow : Diorite.ApplicationWindow
 		app_maintainer.label = "<a href=\"%s\">%s</a>".printf(
 		Markup.escape_text(maintainer_link), Markup.escape_text(maintainer_name));
 		details.show();
-		app.actions.get_action(Actions.REMOVE_APP).enabled = removable;
 		app.actions.get_action(Actions.START_APP).enabled = true;
 	}
 	
