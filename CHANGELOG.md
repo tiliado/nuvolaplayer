@@ -1,6 +1,27 @@
 Nuvola Player Changelog
 =======================
 
+Release 3.0.5 - February 18th, 2017
+-----------------------------------
+
+This is a bug fix release addressing following issues:
+
+  * False positive "Too many flash plugins" has been fixed.
+    Issue: tiliado/nuvolaplayer#159
+  * Repeated Runner: prefix in debugging output has been suppressed.
+    Issue: tiliado/nuvolaplayer#265
+  * Nuvola is compatible with scripts built with the Nuvola SDK build system
+    providing own desktop launchers. Moreover, scripts without the desktop files
+    are deprecated and might not function properly in the next release.
+    Issue: tiliado/nuvolaplayer#263
+  * The usage of the old Tiliado API has been removed along with the donation bar.
+  * Frequent deadlocks of the web rendering process of recent versions of WebKitGTK
+    have been addressed.
+    Issue: tiliado/nuvolaplayer#279
+  * A workaround addressing a bug in older graphics drivers is now disabled with recent versions
+    of WebKitGTK as it is no longer necessary and causes huge CPU usage under Wayland.
+    Issue: tiliado/nuvolaplayer#260
+
 Release 3.0.4 - September 17th, 2016
 ------------------------------------
 
