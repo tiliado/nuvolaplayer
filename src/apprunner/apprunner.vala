@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2017 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -102,6 +102,7 @@ public int main(string[] args)
 	{
 		var app_dir = File.new_for_path(Args.app_dir);
 		var web_app = WebAppMeta.load_from_dir(app_dir);
+		#if !FLATPAK
 		var desktop_file_existed = true;
 		web_app.removable = false;
 		if (web_app.has_desktop_launcher)
@@ -117,16 +118,18 @@ public int main(string[] args)
 				web_app.name);
 			desktop_file_existed = write_desktop_file_sync(web_app);
 		}
+		#endif
 		var storage = new Diorite.XdgStorage.for_project(Nuvola.get_app_id());
 		var app_storage = new WebAppStorage(
 		  storage.user_config_dir.get_child(WEB_APP_DATA_DIR).get_child(web_app.id),
 		  storage.user_data_dir.get_child(WEB_APP_DATA_DIR).get_child(web_app.id),
 		  storage.user_cache_dir.get_child(WEB_APP_DATA_DIR).get_child(web_app.id));
 		
+		#if !FLATPAK
 		/* Sleep a second to give GNOME Shell a chance to register desktop file */
 		if (!desktop_file_existed)
 			Thread.usleep(1000*1000);
-		
+		#endif
 		var api_token = stdin.read_line();
 		var controller = new AppRunnerController(storage, web_app, app_storage, api_token);
 		return controller.run(args);
