@@ -113,8 +113,10 @@ public class MasterController : Diorite.Application
 		{
 			var dialog = new Gtk.MessageDialog.with_markup(
 				main_window, Gtk.DialogFlags.MODAL, Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE,
-				"<b><big>Failed to connect to XDG Desktop Portal</big></b>\n\nMake sure the XDG Desktop Portal is installed.\n\n%s",
-				e.message);
+				("<b><big>Failed to connect to XDG Desktop Portal</big></b>\n\n"
+				+ "Make sure the XDG Desktop Portal is installed on your system. "
+				+ "It might be sufficient to install the xdg-desktop-portal and xdg-desktop-portal-gtk "
+				+ "packages.\n\n%s"), e.message);
 			Timeout.add_seconds(60, () => { dialog.destroy(); return false;});
 			dialog.run();
 			return false;
