@@ -54,11 +54,11 @@ public class FormatSupportCheck : GLib.Object
 		this.web_engine = web_engine;
 		this.web_app = web_app;
 		
-		config.set_default_value(WARN_FLASH_KEY, web_app.flash_enabled);
+		config.set_default_value(WARN_FLASH_KEY, web_app.traits().flash_required);
 		config.set_default_value(WARN_MP3_KEY, true);
-		config.set_default_value(WEB_PLUGINS_KEY, web_app.flash_enabled);
+		config.set_default_value(WEB_PLUGINS_KEY, web_app.traits().flash_required);
 		config.set_default_value(GSTREAMER_KEY, true);
-		config.set_default_value(MEDIA_SOURCE_EXTENSION_KEY, web_app.mse_enabled);
+		config.set_default_value(MEDIA_SOURCE_EXTENSION_KEY, web_app.traits().mse_required);
 		web_engine.web_plugins = config.get_bool(WEB_PLUGINS_KEY);
 		web_engine.media_source_extension = config.get_bool(MEDIA_SOURCE_EXTENSION_KEY);
 		if (!config.get_bool(GSTREAMER_KEY))
@@ -181,27 +181,22 @@ public class FormatSupportCheck : GLib.Object
 		{
 			warning("Plugin listing error: %s", e.message);
 		}
-		if (web_app.html5_audio != null)
+		try
 		{
-			try
-			{
-				var expr = new FormatSupportExpression(format_support);
-				var html5_audio = expr.eval(web_app.html5_audio);
-				debug("HTML5 Audio expression: '%s' -> %s", web_app.html5_audio, html5_audio.to_string());
-				if (!html5_audio && web_app.has_requirement("HTML5AudioRequired"))
-					app.fatal_error(
-						"HTML5 Audio Required",
-						("This web app requires HTML5 Audio technologies to function properly but this requirement "
-						+ "has not been satisfied. You may contact support. "
-						+ "Failed requirement:\n\n%s.").printf(web_app.html5_audio));
-			}
-			catch (Drt.ConditionalExpressionError e)
-			{
-				app.show_error(
-					"Invalid Metadata",
-					("This web app provides invalid metadata about HTML5 audio requirements."
-					+ " Please create a bug report. The error message is: %s").printf(e.message));
-			}
+			if (!web_app.check_requirements(format_support))
+				app.fatal_error(
+					"Requirements Not Satisfied",
+					("This web app requires certain technologies to function properly but these requirements "
+					+ "have not been satisfied. You may contact support. "
+					+ "Failed requirements:\n\n%s.").printf(web_app.requirements));
+		}
+		catch (Drt.RequirementError e)
+		{
+			app.show_error(
+				"Invalid Metadata",
+				("This web app provides invalid metadata about its requirements."
+				+ " Please create a bug report. The error message is: %s\n\n%s"
+				).printf(e.message, web_app.requirements));
 		}
 		
 	}

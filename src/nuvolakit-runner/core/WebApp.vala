@@ -49,12 +49,11 @@ public class WebAppMeta : GLib.Object
 	public File? data_dir {get; private set; default = null;}
 	public bool removable {get; set; default = false;}
 	public bool hidden {get; set; default = false;}	
-	public bool flash_enabled {get; set; default = true;}
-	public bool mse_enabled {get; set; default = false;}
 	public bool allow_insecure_content {get; set; default = false;}
 	public bool has_desktop_launcher {get; set; default = false;}
 	private List<IconInfo?> icons = null;
 	private bool icons_set = false;
+	private Traits? _traits = null;
 	
 	public static WebAppMeta load_from_dir(File dir) throws WebAppError
 	{
@@ -112,18 +111,31 @@ public class WebAppMeta : GLib.Object
 		return false;
 	}
 	
-	public bool has_requirement(string requirement)
+	public unowned Traits traits()
 	{
-		if (this.requirements == null)
-			return false;
-		var name = requirement.down();
-		var requirements = this.requirements.split(";");
-		foreach (var item in requirements)
+		if (_traits == null)
 		{
-			if (item.strip().down() == name)
-				return true;
+			_traits = new Traits(requirements);
+			try
+			{
+				_traits.eval();
+			}
+			catch (Drt.RequirementError e)
+			{
+				warning("Failed to parse requirements. %s", e.message);
+			}
 		}
-		return false;
+		return _traits;
+	}
+	
+	public bool check_requirements(FormatSupport format_support) throws Drt.RequirementError
+	{
+		var traits = this.traits();
+		traits.set_from_format_support(format_support);
+		debug("Requirements expression: '%s'", requirements);
+		var result = traits.eval();
+		debug("Requirements expression: '%s' -> %s", requirements, result.to_string());
+		return result;
 	}
 	
 	public string? get_icon_name(int size)
