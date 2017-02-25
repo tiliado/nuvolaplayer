@@ -58,7 +58,7 @@ namespace Actions
 
 public static string build_camel_id(string web_app_id)
 {
-	var buffer = new StringBuilder("cz.fenryxo.NuvolaApp");
+	var buffer = new StringBuilder("eu.tiliado.NuvolaApp");
 	foreach (var part in web_app_id.split("_"))
 	{
 		buffer.append_c(part[0].toupper());
@@ -93,10 +93,11 @@ public abstract class RunnerApplication: Diorite.Application
 	public RunnerApplication(string web_app_id, string web_app_name, Diorite.Storage storage)
 	{
 		var dashed_id = build_dashed_id(web_app_id);
+		var uid = build_camel_id(web_app_id);
 		base(
-			build_camel_id(web_app_id),
+			uid,
 			web_app_name,
-			"%s.desktop".printf(dashed_id),
+			"%s.desktop".printf(uid),
 			dashed_id);
 		this.storage = storage;
 		icon = Nuvola.get_app_icon();
