@@ -35,7 +35,7 @@ public void check_desktop_portal_available(Cancellable? cancellable = null) thro
     {
         conn.call_sync(
             NAME, PATH, "org.freedesktop.portal.OpenURI", "OpenURI",
-                null, null, DBusCallFlags.NONE, 100, cancellable);
+                null, null, DBusCallFlags.NONE, 60000, cancellable);
     }
     catch (GLib.Error e)
     {
