@@ -68,11 +68,6 @@ public static string build_camel_id(string web_app_id)
 	return buffer.str;
 }
 
-public static string build_dashed_id(string web_app_id)
-{
-	return "%s-%s".printf(Nuvola.get_app_id(), web_app_id.replace("_", "-"));
-}
-
 public string build_ui_runner_ipc_id(string web_app_id)
 {
 	return "%s.%s.%s".printf(Nuvola.get_app_id(), web_app_id, "uirunner");
@@ -95,12 +90,8 @@ public abstract class RunnerApplication: Diorite.Application
 	
 	public RunnerApplication(string web_app_id, string web_app_name, Diorite.Storage storage)
 	{
-		var dashed_id = build_dashed_id(web_app_id);
-		base(
-			build_camel_id(web_app_id),
-			web_app_name,
-			"%s.desktop".printf(dashed_id),
-			dashed_id);
+		var uid = build_camel_id(web_app_id);
+		base(uid, web_app_name);
 		this.storage = storage;
 		icon = Nuvola.get_app_icon();
 		version = Nuvola.get_version();

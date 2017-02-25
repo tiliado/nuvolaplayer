@@ -72,9 +72,7 @@ public class MasterController : Diorite.Application
 	
 	public MasterController(Diorite.Storage storage, WebAppRegistry web_app_reg, string[] exec_cmd, bool debuging=false)
 	{
-		base(
-			Nuvola.get_app_uid(), Nuvola.get_app_name(), "%s.desktop".printf(Nuvola.get_app_uid()),
-			Nuvola.get_app_uid(), ApplicationFlags.HANDLES_COMMAND_LINE);
+		base(Nuvola.get_app_uid(), Nuvola.get_app_name(), ApplicationFlags.HANDLES_COMMAND_LINE);
 		icon = Nuvola.get_app_icon();
 		version = Nuvola.get_version();
 		this.storage = storage;
