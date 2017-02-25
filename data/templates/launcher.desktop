@@ -7,4 +7,5 @@ Icon=@ICON@
 Terminal=false
 Type=Application
 StartupNotify=true
+StartupWMClass=@WMCLASS@
 Categories=AudioVideo;Audio;Network;

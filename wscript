@@ -448,6 +448,7 @@ def build(ctx):
 		ICON = ctx.env.ICON_NAME,
 		EXEC = APPNAME if not ctx.env.ADK else "lxterminal",
 		GENERIC_NAME=GENERIC_NAME,
+		WMCLASS = ctx.env.UNIQUE_NAME,
 	)
 	ctx(features = 'subst',
 		source = 'data/templates/dbus.service',
