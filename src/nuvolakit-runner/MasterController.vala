@@ -112,6 +112,7 @@ public class MasterController : Diorite.Application
 		if (init_state >= InitState.CORE)
 			return;
 		
+		Nuvola.delete_desktop_files.begin((o, res) => Nuvola.delete_desktop_files.end(res));
 		/*
 		 * Workaround for a GPU-related WebKit issue
 		 * https://github.com/tiliado/nuvolaplayer/issues/24
