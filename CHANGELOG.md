@@ -1,6 +1,19 @@
 Nuvola Player Changelog
 =======================
 
+Release 3.0.6 - February 25th, 2017
+-----------------------------------
+
+This is a bug fix release addressing following issues:
+
+  * NuvolaPlayer/SoundCloud 3.0.5 menu item 'Unknown application name'. Issue: tiliado/nuvolaplayer#301
+  * SoundCloud 3.0.5 crashes when started from a Ubuntu Launcher. Issue: tiliado/nuvolaplayer#302
+  * Web App scripts should provide own desktop files. Issue: tiliado/nuvolaplayer#263
+
+In addition, Nuvola 3.0.6 no longer supports scripts not built with
+the [Nuvola SDK](https://github.com/tiliado/nuvolasdk). This backward incompatible change is necessary
+for a smooth transition to Nuvola 4.0.
+  
 Release 3.0.5 - February 18th, 2017
 -----------------------------------
 
