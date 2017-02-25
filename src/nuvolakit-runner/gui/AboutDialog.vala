@@ -98,9 +98,9 @@ public class AboutDialog: Gtk.Dialog
 		
 		var name = Nuvola.get_app_name();
 		#if FLATPAK
-		name += " (Flatpak Edition)";
+		name += "\n(Flatpak Edition)";
 		#else
-		name += " (unsandboxed)";
+		name += "\n(Legacy Edition)";
 		#endif
 		label = new Gtk.Label(name);
 		attributes = new Pango.AttrList() ;
