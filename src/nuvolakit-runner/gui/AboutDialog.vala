@@ -122,7 +122,7 @@ public class AboutDialog: Gtk.Dialog
 		label.selectable = true;
 		grid.attach(label, 1, 3, 1, 1);
 		grid.attach(new Gtk.Label("Copyright"), 0, 4, 1, 1);
-		label = new Gtk.Label(Markup.printf_escaped("© 2011-2016 <a href=\"%s\">%s</a>", "https://github.com/fenryxo", "Jiří Janoušek"));
+		label = new Gtk.Label(Markup.printf_escaped("© 2011-2017 <a href=\"%s\">%s</a>", "https://github.com/fenryxo", "Jiří Janoušek"));
 		label.use_markup = true;
 		grid.attach(label, 1, 4, 1, 1);
 		
