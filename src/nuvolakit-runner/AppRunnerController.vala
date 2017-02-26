@@ -92,13 +92,12 @@ public abstract class RunnerApplication: Diorite.Application
 	
 	public RunnerApplication(string web_app_id, string web_app_name, Diorite.Storage storage)
 	{
-		var dashed_id = build_dashed_id(web_app_id);
 		var uid = build_camel_id(web_app_id);
 		base(
 			uid,
 			web_app_name,
 			"%s.desktop".printf(uid),
-			dashed_id);
+			uid);
 		this.storage = storage;
 		icon = Nuvola.get_app_icon();
 		version = Nuvola.get_version();
