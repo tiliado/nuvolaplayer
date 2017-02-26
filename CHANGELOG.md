@@ -1,7 +1,7 @@
 Nuvola Player Changelog
 =======================
 
-Release 3.0.6 - February 25th, 2017
+Release 3.0.7 - February 26th, 2017
 -----------------------------------
 
 This is a bug fix release addressing following issues:
@@ -13,6 +13,13 @@ This is a bug fix release addressing following issues:
 In addition, Nuvola 3.0.6 no longer supports scripts not built with
 the [Nuvola SDK](https://github.com/tiliado/nuvolasdk). This backward incompatible change is necessary
 for a smooth transition to Nuvola 4.0.
+
+
+Release 3.0.6 - February 25th, 2017
+-----------------------------------
+
+Same as 3.0.7 but with an insufficient fix for issues #301 & #302.
+
   
 Release 3.0.5 - February 18th, 2017
 -----------------------------------
