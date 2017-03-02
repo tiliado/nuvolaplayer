@@ -353,7 +353,7 @@ def build(ctx):
 		APP_ID = APPNAME,
 		EXEC = APPNAME,
 		GENERIC_NAME=GENERIC_NAME,
-		WMCLASS = UNIQUE_NAME,
+		WMCLASS = APPNAME,
 	)
 	
 	if ctx.env.with_apps_alpha:
