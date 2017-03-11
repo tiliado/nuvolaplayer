@@ -50,6 +50,13 @@ run()
 
 }
 
+dbus()
+{
+	mk_symlinks
+	python3 ./waf -v && XDG_DATA_DIRS=build/share:/usr/share:/usr/local/share \
+	NUVOLA_LIBDIR=build build/apprunner -D -N eu.tiliado.NuvolaCdk -a "$@"
+}
+
 ctl()
 {
     python3 ./waf -v && XDG_DATA_DIRS=build/share:/usr/share:/usr/local/share \

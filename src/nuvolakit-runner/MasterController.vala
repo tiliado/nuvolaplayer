@@ -57,6 +57,8 @@ public class MasterController : Diorite.Application
 	private Queue<AppRunner> app_runners = null;
 	private HashTable<string, AppRunner> app_runners_map = null;
 	private MasterBus server = null;
+	private DbusApi? dbus_api = null;
+	private uint dbus_api_id = 0;
 	
 	private Diorite.KeyValueStorageServer storage_server = null;
 	private ActionsKeyBinderServer actions_key_binder = null;
@@ -97,6 +99,28 @@ public class MasterController : Diorite.Application
 	}
 	
 	public signal void runner_exited(AppRunner runner);
+	
+	
+	public override bool dbus_register(DBusConnection conn, string object_path)
+		throws GLib.Error
+	{
+		if (!base.dbus_register(conn, object_path))
+			return false;
+		init_core();
+		dbus_api = new DbusApi(this);
+		dbus_api_id = conn.register_object(object_path, dbus_api);
+		return true;
+	}
+	
+	public override void dbus_unregister(DBusConnection conn, string object_path)
+	{
+		if (dbus_api_id > 0)
+		{
+			conn.unregister_object(dbus_api_id);
+			dbus_api_id = 0;
+		}
+		base.dbus_unregister(conn, object_path);
+	}
 	
 	#if FLATPAK
 	private bool is_desktop_portal_available()
@@ -546,7 +570,7 @@ public class MasterController : Diorite.Application
 		debug("Launch app runner for '%s': %s", app_id, string.joinv(" ", argv));
 		try
 		{
-			runner = new AppRunner(app_id, argv, server.router.hex_token);
+			runner = new SubprocessAppRunner(app_id, argv, server.router.hex_token);
 		}
 		catch (GLib.Error e)
 		{
@@ -567,8 +591,57 @@ public class MasterController : Diorite.Application
 			debug("App runner for '%s' is already running.", app_id);
 		else
 			app_runners_map[app_id] = runner;
+		show_welcome_window();
+	}
+	
+	public bool start_app_from_dbus(string app_id, string dbus_id, out string token)
+	{
+		token = null;
+		#if FLATPAK
+		if (!is_desktop_portal_available())
+		{
+			quit();
+			return false;
+		}
+		#endif
+	
+		if (!is_tiliado_account_valid(3))
+		{
+			activate();
+			return false;
+		}
+		
+		hold();
+		AppRunner runner;
+		token = null;
+		debug("Launch app runner for '%s': %s", app_id, dbus_id);
+		try
+		{
+			runner = new DbusAppRunner(app_id, dbus_id, server.router.hex_token);
+			token = server.router.hex_token;
+		}
+		catch (GLib.Error e)
+		{
+			warning("Failed to launch app runner for '%s'. %s", app_id, e.message);
+			var dialog = new Diorite.ErrorDialog(
+				"Web App Loading Error",
+				"The web application '%s' has failed to load.".printf(dbus_id));
+			dialog.run();
+			dialog.destroy();
+			release();
+			return false;
+		}
+		
+		runner.exited.connect(on_runner_exited);
+		app_runners.push_tail(runner);
+		
+		if (app_id in app_runners_map)
+			debug("App runner for '%s' is already running.", app_id);
+		else
+			app_runners_map[app_id] = runner;
 		
 		show_welcome_window();
+		return true;
 	}
 	
 	private void on_runner_exited(AppRunner runner)
@@ -699,6 +772,26 @@ public class MasterController : Diorite.Application
 		NONE,
 		CORE,
 		GUI;
+	}
+}
+
+
+[DBus(name="eu.tiliado.Nuvola")]
+public class DbusApi: GLib.Object
+{
+	private unowned MasterController controller;
+	
+	public DbusApi(MasterController controller)
+	{
+		this.controller = controller;
+	}
+	
+	public void get_connection(string app_id, string dbus_id, out Socket? socket, out string? token) throws GLib.Error
+	{
+		if (controller.start_app_from_dbus(app_id, dbus_id, out token))
+			socket = Diorite.SocketChannel.create_socket_from_name(build_master_ipc_id()).socket;
+		else
+			throw new Diorite.Error.ACCESS_DENIED("Nuvola refused connection.");
 	}
 }
 

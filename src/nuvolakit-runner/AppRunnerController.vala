@@ -113,14 +113,16 @@ public class AppRunnerController : RunnerApplication
 	private FormatSupportCheck format_support = null;
 	private Drt.Lst<Component> components = null;
 	private string? api_token = null;
+	private string? nuvola_bus = null;
 	private HashTable<string, Variant>? web_worker_data = null;
 	
-	public AppRunnerController(Diorite.Storage storage, WebAppMeta web_app, WebAppStorage app_storage, string? api_token)
+	public AppRunnerController(Diorite.Storage storage, WebAppMeta web_app, WebAppStorage app_storage, string? api_token, string? nuvola_bus)
 	{
 		base(web_app.id, web_app.name, storage);
 		this.app_storage = app_storage;
 		this.web_app = web_app;
 		this.api_token = api_token;
+		this.nuvola_bus = nuvola_bus;
 	}
 	
 	private  void start()
@@ -163,15 +165,34 @@ public class AppRunnerController : RunnerApplication
 			web_worker_data["RUNNER_BUS_NAME"] = bus_name;
 			ipc_bus = new IpcBus(bus_name);
 			ipc_bus.start();
-			
-			bus_name = Environment.get_variable("NUVOLA_IPC_MASTER");
-			assert(bus_name != null);
-			ipc_bus.connect_master(bus_name, api_token);
+			if (nuvola_bus != null)
+			{
+				var nuvola_path = "/" + nuvola_bus.replace(".", "/");
+				var nuvola_api = Bus.get_proxy_sync<DbusIfce>(
+					BusType.SESSION, nuvola_bus, nuvola_path,
+					DBusProxyFlags.DO_NOT_CONNECT_SIGNALS|DBusProxyFlags.DO_NOT_LOAD_PROPERTIES);
+				GLib.Socket socket;
+				nuvola_api.get_connection(this.web_app.id, this.app_id, out socket, out api_token);
+				if (socket == null)
+				{
+					warning("Master server refused conection.");
+					quit();
+					return;
+				}
+				ipc_bus.connect_master_socket(socket, api_token);
+			}
+			else
+			{
+				bus_name = Environment.get_variable("NUVOLA_IPC_MASTER");
+				assert(bus_name != null);
+				ipc_bus.connect_master(bus_name, api_token);
+			}
 		}
-		catch (Diorite.IOError e)
+		catch (GLib.Error e)
 		{
 			warning("Master server error: %s", e.message);
 			quit();
+			return;
 		}
 		
 		try
@@ -756,6 +777,12 @@ public class AppRunnerController : RunnerApplication
 		main_window.show_overlay_alert(text);
 		handled = true;
 	}
+}
+
+[DBus(name="eu.tiliado.Nuvola")]
+public interface DbusIfce: GLib.Object
+{
+	public abstract void get_connection(string app_id, string dbus_id, out GLib.Socket? socket, out string? token) throws GLib.Error;
 }
 
 } // namespace Nuvola

@@ -25,31 +25,24 @@
 namespace Nuvola
 {
 
-public class AppRunner : GLib.Object
+public abstract class AppRunner : GLib.Object
 {
-	private static bool gdb = false;
+	protected static bool gdb = false;
 	public string app_id {get; private set;}
 	public bool connected {get{ return channel != null;}}
-	public bool running {get; private set; default = false;}
-	private GenericSet<string> capatibilities;
-	private Drt.ApiChannel channel = null;
-	private GLib.Subprocess process;
-	private string? stderr_last_line = null;
+	public bool running {get; protected set; default = false;}
+	protected GenericSet<string> capatibilities;
+	protected Drt.ApiChannel channel = null;
 	
 	static construct
 	{
 		gdb = Environment.get_variable("NUVOLA_APP_RUNNER_GDB_SERVER") != null;
 	}
 	
-	public AppRunner(string app_id, string[] argv, string api_token) throws GLib.Error
+	public AppRunner(string app_id, string api_token) throws GLib.Error
 	{
 		this.app_id = app_id;
 		this.capatibilities = new GenericSet<string>(str_hash, str_equal);
-		process = new GLib.Subprocess.newv(argv, GLib.SubprocessFlags.STDIN_PIPE|GLib.SubprocessFlags.STDERR_PIPE);
-		running = true;
-		log_stderr.begin(on_log_stderr_done);
-		pass_api_token.begin(api_token, pass_api_token_done);
-		process.wait_async.begin(null, on_wait_async_done);
 	}
 	
 	public signal void notification(string path, string? detail, Variant? data);
@@ -72,6 +65,72 @@ public class AppRunner : GLib.Object
 	public bool remove_capatibility(string capatibility)
 	{
 		return capatibilities.remove(capatibility.down());
+	}
+	
+	/**
+	 * Emitted when the subprocess exited.
+	 */
+	public signal void exited();
+	
+	public void connect_channel(Drt.ApiChannel channel)
+	{
+		this.channel = channel;
+		channel.api_router.notification.connect(on_notification);
+	}
+	
+	public Variant? call_sync(string name, Variant? params) throws GLib.Error
+	{
+		if (channel == null)
+			throw new Diorite.MessageError.IOERROR("No connected to app runner '%s'.", app_id);
+		
+		return channel.call_sync(name, params);
+	}
+	
+	public async Variant? call_with_dict(string name, Variant? params) throws GLib.Error
+	{
+		if (channel == null)
+			throw new Diorite.MessageError.IOERROR("No connected to app runner '%s'.", app_id);
+		
+		return yield channel.call_with_dict(name, params);
+	}
+	
+	public async Variant? call_full(string method, bool allow_private, string flags, string params_format, Variant? params) throws GLib.Error
+	{
+		if (channel == null)
+			throw new Diorite.MessageError.IOERROR("No connected to app runner '%s'.", app_id);
+		
+		return yield channel.call_full(method, allow_private, flags, params_format, params);
+	}
+	
+	public Variant? call_full_sync(string method, bool allow_private, string flags, string params_format, Variant? params) throws GLib.Error
+	{
+		if (channel == null)
+			throw new Diorite.MessageError.IOERROR("No connected to app runner '%s'.", app_id);
+		
+		return channel.call_full_sync(method, allow_private, flags, params_format, params);
+	}
+	
+	private void on_notification(Drt.ApiRouter router, GLib.Object source, string path, string? detail, Variant? data)
+	{
+		if (source == channel)
+			notification(path, detail, data);
+	}
+}
+
+
+public class SubprocessAppRunner : AppRunner
+{		
+	private GLib.Subprocess process;
+	private string? stderr_last_line = null;
+	
+	public SubprocessAppRunner(string app_id, string[] argv, string api_token) throws GLib.Error
+	{
+		base(app_id, api_token);
+		process = new GLib.Subprocess.newv(argv, GLib.SubprocessFlags.STDIN_PIPE|GLib.SubprocessFlags.STDERR_PIPE);
+		running = true;
+		log_stderr.begin(on_log_stderr_done);
+		pass_api_token.begin(api_token, pass_api_token_done);
+		process.wait_async.begin(null, on_wait_async_done);
 	}
 
 	private async void log_stderr()
@@ -144,49 +203,6 @@ public class AppRunner : GLib.Object
 		pass_api_token.end(res);
 	}
 	
-	/**
-	 * Emitted when the subprocess exited.
-	 */
-	public signal void exited();
-	
-	public void connect_channel(Drt.ApiChannel channel)
-	{
-		this.channel = channel;
-		channel.api_router.notification.connect(on_notification);
-	}
-	
-	public Variant? call_sync(string name, Variant? params) throws GLib.Error
-	{
-		if (channel == null)
-			throw new Diorite.MessageError.IOERROR("No connected to app runner '%s'.", app_id);
-		
-		return channel.call_sync(name, params);
-	}
-	
-	public async Variant? call_with_dict(string name, Variant? params) throws GLib.Error
-	{
-		if (channel == null)
-			throw new Diorite.MessageError.IOERROR("No connected to app runner '%s'.", app_id);
-		
-		return yield channel.call_with_dict(name, params);
-	}
-	
-	public async Variant? call_full(string method, bool allow_private, string flags, string params_format, Variant? params) throws GLib.Error
-	{
-		if (channel == null)
-			throw new Diorite.MessageError.IOERROR("No connected to app runner '%s'.", app_id);
-		
-		return yield channel.call_full(method, allow_private, flags, params_format, params);
-	}
-	
-	public Variant? call_full_sync(string method, bool allow_private, string flags, string params_format, Variant? params) throws GLib.Error
-	{
-		if (channel == null)
-			throw new Diorite.MessageError.IOERROR("No connected to app runner '%s'.", app_id);
-		
-		return channel.call_full_sync(method, allow_private, flags, params_format, params);
-	}
-	
 	private void on_wait_async_done(GLib.Object? o, AsyncResult res)
 	{
 		try
@@ -200,11 +216,29 @@ public class AppRunner : GLib.Object
 		running = false;
 		exited();
 	}
+}
+
+
+public class DbusAppRunner : AppRunner
+{		
+	private uint watch_id = 0;
 	
-	private void on_notification(Drt.ApiRouter router, GLib.Object source, string path, string? detail, Variant? data)
+	public DbusAppRunner(string app_id, string dbus_id, string api_token) throws GLib.Error
 	{
-		if (source == channel)
-			notification(path, detail, data);
+		base(app_id, api_token);
+		watch_id = Bus.watch_name(BusType.SESSION, dbus_id, 0, on_name_appeared, on_name_vanished);
+	}
+	
+	private void on_name_appeared(DBusConnection conn, string name, string name_owner)
+	{
+		running = true;
+	}
+	
+	private void on_name_vanished(DBusConnection conn, string name)
+	{
+		Bus.unwatch_name(watch_id);
+		running = false;
+		exited();
 	}
 }
 

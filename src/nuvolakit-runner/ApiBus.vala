@@ -45,6 +45,14 @@ public class IpcBus: Drt.ApiBus
         return master;
     }
     
+    public Drt.ApiChannel? connect_master_socket(Socket socket, string? api_token) throws Diorite.IOError
+    {
+		return_val_if_fail(master == null, null);
+        master = connect_channel_socket(socket, IPC_TIMEOUT);
+        master.api_token = api_token;
+        return master;
+    }
+    
     public void connect_web_worker(Drt.ApiChannel channel)
     {
         web_worker = channel;
