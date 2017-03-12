@@ -33,7 +33,7 @@ namespace Actions
 
 public string build_master_ipc_id()
 {
-	return Nuvola.get_app_id() + ".master";
+	return "N3";
 }
 
 public class MasterController : Diorite.Application

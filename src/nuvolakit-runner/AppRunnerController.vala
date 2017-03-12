@@ -70,12 +70,7 @@ public static string build_camel_id(string web_app_id)
 
 public string build_ui_runner_ipc_id(string web_app_id)
 {
-	return "%s.%s.%s".printf(Nuvola.get_app_id(), web_app_id, "uirunner");
-}
-
-public string build_web_worker_ipc_id(string web_app_id)
-{
-	return "%s.%s.%s".printf(Nuvola.get_app_id(), web_app_id, "webworker");
+	return "N3" + web_app_id.replace("_", "");
 }
 
 public abstract class RunnerApplication: Diorite.Application
