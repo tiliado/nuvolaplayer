@@ -104,6 +104,8 @@ public class AppRunnerController : RunnerApplication
 	public Diorite.KeyValueStorage master_config {get; private set;}
 	public Bindings bindings {get; private set;}
 	public IpcBus ipc_bus {get; private set; default=null;}
+	private AppDbusApi? dbus_api = null;
+	private uint dbus_api_id = 0;
 	public ActionsHelper actions_helper {get; private set; default = null;}
 	private GlobalKeybindings global_keybindings;
 	private const int MINIMAL_REMEMBERED_WINDOW_SIZE = 300;
@@ -123,6 +125,26 @@ public class AppRunnerController : RunnerApplication
 		this.web_app = web_app;
 		this.api_token = api_token;
 		this.nuvola_bus = nuvola_bus;
+	}
+	
+	public override bool dbus_register(DBusConnection conn, string object_path)
+		throws GLib.Error
+	{
+		if (!base.dbus_register(conn, object_path))
+			return false;
+		dbus_api = new AppDbusApi(this);
+		dbus_api_id = conn.register_object(object_path, dbus_api);
+		return true;
+	}
+	
+	public override void dbus_unregister(DBusConnection conn, string object_path)
+	{
+		if (dbus_api_id > 0)
+		{
+			conn.unregister_object(dbus_api_id);
+			dbus_api_id = 0;
+		}
+		base.dbus_unregister(conn, object_path);
 	}
 	
 	private  void start()
@@ -778,6 +800,24 @@ public class AppRunnerController : RunnerApplication
 		handled = true;
 	}
 }
+
+
+[DBus(name="eu.tiliado.NuvolaApp")]
+public class AppDbusApi: GLib.Object
+{
+	private unowned AppRunnerController controller;
+	
+	public AppDbusApi(AppRunnerController controller)
+	{
+		this.controller = controller;
+	}
+	
+	public void activate()
+	{
+		Idle.add(() => {controller.activate(); return false;});
+	}
+}
+
 
 [DBus(name="eu.tiliado.Nuvola")]
 public interface DbusIfce: GLib.Object

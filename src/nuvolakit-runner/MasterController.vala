@@ -100,7 +100,6 @@ public class MasterController : Diorite.Application
 	
 	public signal void runner_exited(AppRunner runner);
 	
-	
 	public override bool dbus_register(DBusConnection conn, string object_path)
 		throws GLib.Error
 	{
@@ -528,9 +527,11 @@ public class MasterController : Diorite.Application
 	
 	private void start_app(string app_id)
 	{
+		hold();
 		#if FLATPAK
 		if (!is_desktop_portal_available())
 		{
+			release();
 			quit();
 			return;
 		}
@@ -540,11 +541,34 @@ public class MasterController : Diorite.Application
 		{
 			start_app_after_activation = app_id;
 			activate();
+			release();
 			return;
 		}
-		
-		hold();
-		
+		#if FLATPAK && !NUVOLA_ADK && !NUVOLA_CDK
+		try
+		{
+			var uid = build_camel_id(app_id);
+			var path = "/" + uid.replace(".", "/");
+			var app_api = Bus.get_proxy_sync<AppDbusIfce>(
+				BusType.SESSION, uid, path,
+				DBusProxyFlags.DO_NOT_CONNECT_SIGNALS|DBusProxyFlags.DO_NOT_LOAD_PROPERTIES);
+			app_api.activate();
+			debug("DBus activation of %s succeeded.", uid);
+			show_welcome_window();
+			Timeout.add_seconds(5, () => {release(); return false;});
+		}
+		catch (GLib.Error e)
+		{
+			warning("DBus Activation error: %s", e.message);
+			var dialog = new Diorite.ErrorDialog(
+				"Web App Loading Error",
+				("The web application with id '%s' has not been found.\n\n"
+				+ "DBus Activation has ended with an error:\n%s").printf(app_id, e.message));
+			dialog.run();
+			dialog.destroy();
+			release();
+		}
+		#else		
 		var app_meta = web_app_reg.get_app_meta(app_id);
 		if (app_meta == null)
 		{
@@ -592,6 +616,7 @@ public class MasterController : Diorite.Application
 		else
 			app_runners_map[app_id] = runner;
 		show_welcome_window();
+		#endif
 	}
 	
 	public bool start_app_from_dbus(string app_id, string dbus_id, out string token)
@@ -793,6 +818,13 @@ public class DbusApi: GLib.Object
 		else
 			throw new Diorite.Error.ACCESS_DENIED("Nuvola refused connection.");
 	}
+}
+
+
+[DBus(name="eu.tiliado.NuvolaApp")]
+public interface AppDbusIfce: GLib.Object
+{
+	public abstract void activate() throws GLib.Error;
 }
 
 } // namespace Nuvola
