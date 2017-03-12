@@ -727,7 +727,7 @@ public class WebEngine : GLib.Object, JSExecutor
 			user_gesture.to_string());
 		
 		// We care only about user clicks
-		if (type != WebKit.NavigationType.LINK_CLICKED || user_gesture)
+		if (type != WebKit.NavigationType.LINK_CLICKED && !user_gesture)
 			return false;
 		
 		if (result)
