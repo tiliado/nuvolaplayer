@@ -1,0 +1,10 @@
+prefix=@PREFIX@
+libdir=@LIBDIR@
+includedir=@INCLUDEDIR@
+
+Name: NuvolaKitRunner
+Description: Nuvola Apps Runner Library
+Version: @VERSION@
+Requires.private: glib-2.0 @DIORITE_GLIB@ @DIORITE_GTK@ @NUVOLAKIT_BASE@
+Libs: -L${libdir} -l@LIBNAME@
+Cflags: -I${includedir}/@APPNAME@-1.0 @PC_CFLAGS@

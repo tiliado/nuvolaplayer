@@ -334,6 +334,8 @@ def build(ctx):
 	NUVOLAKIT_RUNNER = APPNAME + "-runner"
 	NUVOLAKIT_BASE = APPNAME + "-base"
 	NUVOLAKIT_WORKER = APPNAME + "-worker"
+	DIORITE_GLIB = 'dioriteglib-' + ctx.env.DIORITE_SERIES
+	DIORITE_GTK = 'dioriteglib-' + ctx.env.DIORITE_SERIES
 	
 	packages = 'dioritegtk-{0} dioriteglib-{0} '.format(ctx.env.DIORITE_SERIES)
 	packages += 'javascriptcoregtk-4.0 libnotify libarchive gtk+-3.0 gdk-3.0 gdk-x11-3.0 x11 posix json-glib-1.0 glib-2.0 gio-2.0'
@@ -457,6 +459,36 @@ def build(ctx):
 		NAME = ctx.env.UNIQUE_NAME,
 		EXEC = '%s/bin/%s --gapplication-service' % (ctx.env.PREFIX, APPNAME)
 	)
+	
+	PC_CFLAGS = ""
+	ctx(features = 'subst',
+		source='src/nuvolakitbase.pc.in',
+		target='{}-base.pc'.format(APPNAME),
+		install_path='${LIBDIR}/pkgconfig',
+		VERSION=VERSION,
+		PREFIX=ctx.env.PREFIX,
+		INCLUDEDIR = ctx.env.INCLUDEDIR,
+		LIBDIR = ctx.env.LIBDIR,
+		APPNAME=APPNAME,
+		PC_CFLAGS=PC_CFLAGS,
+		LIBNAME=NUVOLAKIT_BASE,
+		DIORITE_GLIB=DIORITE_GLIB,
+		)
+	ctx(features = 'subst',
+		source='src/nuvolakitrunner.pc.in',
+		target='{}-runner.pc'.format(APPNAME),
+		install_path='${LIBDIR}/pkgconfig',
+		VERSION=VERSION,
+		PREFIX=ctx.env.PREFIX,
+		INCLUDEDIR = ctx.env.INCLUDEDIR,
+		LIBDIR = ctx.env.LIBDIR,
+		APPNAME=APPNAME,
+		PC_CFLAGS=PC_CFLAGS,
+		LIBNAME=NUVOLAKIT_RUNNER,
+		NUVOLAKIT_BASE=NUVOLAKIT_BASE,
+		DIORITE_GLIB=DIORITE_GLIB,
+		DIORITE_GTK=DIORITE_GTK,
+		)
 	
 	ctx.symlink_as('${PREFIX}/bin/%s' % FUTURE_APPNAME, APPNAME)
 	ctx.symlink_as('${PREFIX}/bin/%sctl' % FUTURE_APPNAME, CONTROL)
