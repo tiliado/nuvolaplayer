@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2017 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -41,13 +41,16 @@ public class XKeyGrabber: GLib.Object
 	};
 	
 	private HashTable<string, uint> keybindings;
+	private Gdk.X11.Window? root_window = null;
 	
 	public  XKeyGrabber()
 	{
 		keybindings = new HashTable<string, uint>(str_hash, str_equal);
-		var root_window = Gdk.get_default_root_window() as Gdk.X11.Window;
-		return_if_fail(root_window != null);
-		root_window.add_filter(event_filter);
+		var display = Gdk.Display.get_default();
+		if (display != null)
+			setup_display(display);
+		else
+			Gdk.DisplayManager.get().display_opened.connect(setup_display);
 	}
 	
 	public signal void keybinding_pressed(string accelerator, uint32 time);
@@ -101,6 +104,11 @@ public class XKeyGrabber: GLib.Object
 	
 	private bool grab_ungrab(bool grab, string accelerator)
 	{
+		if (root_window == null)
+		{
+			warning("Failed to set a keybinding '%s' because a X11 window has not been set yet.", accelerator);
+			return false;
+		}
 		uint keysym;
 		Gdk.ModifierType modifiers;
 		Gtk.accelerator_parse(accelerator, out keysym, out modifiers);
@@ -114,8 +122,6 @@ public class XKeyGrabber: GLib.Object
 			return false;
 		}
 		
-		var root_window = Gdk.get_default_root_window() as Gdk.X11.Window;
-		return_val_if_fail(root_window != null, false);
 		var gdk_display = root_window.get_display() as Gdk.X11.Display;
 		return_val_if_fail(gdk_display != null, false);
 		
@@ -164,6 +170,27 @@ public class XKeyGrabber: GLib.Object
 				warning("Unknown keybinding %s", accelerator);
 		}
 		return Gdk.FilterReturn.CONTINUE;
+	}
+	
+	private void setup_display(Gdk.Display display)
+	{
+		if (root_window != null)
+		{
+			warning("A display '%s' appeared but the root window had been already set.", display.get_name());
+		}
+		else
+		{
+			root_window = Gdk.get_default_root_window() as Gdk.X11.Window;
+			if (root_window == null)
+			{
+				warning("Failed to get a X11 Window for the display '%s'.", display.get_name());
+			}
+			else
+			{
+				debug("Obtained a X11 Window for the display '%s'.", display.get_name());
+				root_window.add_filter(event_filter);
+			}
+		}
 	}
 }
 
