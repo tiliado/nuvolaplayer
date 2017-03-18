@@ -50,6 +50,7 @@ public class Server: Soup.Server
 	private Channel eio_channel;
 	private HashTable<string, Drt.Lst<Subscription>> subscribers;
 	private Nm.NetworkManager? nm = null;
+	private string? nm_error = null;
 	private Drt.Lst<Address> addresses;
 	
 	public Server(
@@ -152,35 +153,35 @@ public class Server: Soup.Server
 	
 	public void refresh_addresses()
 	{
-		if (nm == null)
-			return;
-		
 		this.addresses.clear();
 		var config = app.config;
 		var addr_str = "127.0.0.1";
 		var key = mk_address_enabled_key(addr_str);
 		this.addresses.append(new Address(addr_str, "Localhost", config.has_key(key) ? config.get_bool(key) : true));
-		var connections = nm.get_active_connections();
-		if (connections != null)
+		if (nm != null)
 		{
-			foreach (var conn in connections)
+			var connections = nm.get_active_connections();
+			if (connections != null)
 			{
-				var ip4_config =  conn.get_ip4_config();
-				if (ip4_config == null)
-					continue;
-				var addresses = ip4_config.get_addresses();
-				if (addresses == null)
-					continue;
-				foreach (var ip4 in addresses)
+				foreach (var conn in connections)
 				{
-					addr_str = "%u.%u.%u.%u".printf(
-						(ip4 & 0xFF),
-						(ip4 >> 8) & 0xFF,
-						(ip4 >> 16) & 0xFF,
-						(ip4 >> 24) & 0xFF);
-					key = mk_address_enabled_key(addr_str);
-					var enabled = config.has_key(key) ? config.get_bool(key) : false;
-					this.addresses.append(new Address(addr_str, conn.id, enabled));
+					var ip4_config =  conn.get_ip4_config();
+					if (ip4_config == null)
+						continue;
+					var addresses = ip4_config.get_addresses();
+					if (addresses == null)
+						continue;
+					foreach (var ip4 in addresses)
+					{
+						addr_str = "%u.%u.%u.%u".printf(
+							(ip4 & 0xFF),
+							(ip4 >> 8) & 0xFF,
+							(ip4 >> 16) & 0xFF,
+							(ip4 >> 24) & 0xFF);
+						key = mk_address_enabled_key(addr_str);
+						var enabled = config.has_key(key) ? config.get_bool(key) : false;
+						this.addresses.append(new Address(addr_str, conn.id, enabled));
+					}
 				}
 			}
 		}
@@ -492,12 +493,12 @@ public class Server: Soup.Server
 		return null;
 	}
 	
-	private Variant? handle_get_addresses(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_get_addresses(GLib.Object source, Drt.ApiParams? params) throws GLib.Error
 	{
 		var builder = new VariantBuilder(new VariantType("a(ssb)"));
 		foreach (var addr in addresses)
 			builder.add("(ssb)", addr.address, addr.name, addr.enabled);
-		return builder.end();
+		return new Variant("(a(ssb)ms)", builder, nm_error);
 	}
 	
 	private Variant? handle_set_address_enabled(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
@@ -572,12 +573,14 @@ public class Server: Soup.Server
 		try
 		{
 			nm = Nm.get_client.end(res);
-			refresh_addresses();
 		}
 		catch (GLib.Error e)
 		{
 			warning("Failed to create NM client: %s", e.message);
+			nm = null;
+			nm_error = e.message;
 		}
+		refresh_addresses();
 	}
 	
 	private void on_port_changed(GLib.Object o, ParamSpec p)

@@ -95,7 +95,9 @@ public class Component: Nuvola.Component
 				var addresses = yield ipc_bus.master.call("/nuvola/httpremotecontrol/get-addresses", null);
 				port = Diorite.variant_to_uint(yield ipc_bus.master.call("/nuvola/httpremotecontrol/get-port", null));
 				return_if_fail(addresses != null);
-				var iter = addresses.iterator();
+				VariantIter iter;
+				string? nm_error;
+				addresses.get("(a(ssb)ms)", out iter, out nm_error);
 				string? address; string? name; bool enabled;
 				int line = 0;
 				var label = new Gtk.Label("<b>Security Warning</b>");
@@ -150,6 +152,19 @@ public class Component: Nuvola.Component
 					button.set_data<string>("address", address);
 					button.clicked.connect(on_home_button_clicked);
 					attach(button, 3, line, 1, 1);
+				}
+				if (nm_error != null)
+				{
+					label = new Gtk.Label("<b>Network Manager Error</b>");
+					label.use_markup = true;
+					label.margin = 10;
+					label.hexpand = true;
+					attach(label, 0, ++line, 4, 1);
+					label = new Gtk.Label("%s uses Network Manager to obtain information about available network interfaces. Unfortunately, a communication with Network Manager resulted in an error:\n\n%s.".printf(Nuvola.get_app_name(), nm_error));
+					label.wrap = true;
+					label.selectable = true;
+					label.hexpand = true;
+					attach(label, 0, ++line, 4, 1);
 				}
 				show_all();
 			}

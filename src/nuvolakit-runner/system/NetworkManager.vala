@@ -55,6 +55,8 @@ public interface NetworkManager : GLib.Object
 	{
 		return get_proxies<ActiveConnection>(BusType.SYSTEM, BUS_NAME, ActiveConnections);
 	}
+	
+	public abstract uint32 check_connectivity() throws GLib.Error;
 }
 
 [DBus(name = "org.freedesktop.NetworkManager.Connection.Active")]
@@ -115,7 +117,10 @@ public interface Ip4Config : GLib.Object
 
 public static async NetworkManager? get_client(Cancellable? cancellable) throws GLib.Error
 {
-   return yield Bus.get_proxy<NetworkManager>(BusType.SYSTEM, BUS_NAME, "/org/freedesktop/NetworkManager", 0, cancellable);
+	var nm = yield Bus.get_proxy<NetworkManager>(BusType.SYSTEM, BUS_NAME, "/org/freedesktop/NetworkManager", 0, cancellable);
+	if (nm != null)
+		nm.check_connectivity();
+	return nm;
 }
 
 
