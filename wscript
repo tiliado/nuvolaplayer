@@ -225,6 +225,7 @@ def configure(ctx):
 		ctx.env.NAME = ADK_NAME
 		ctx.env.UNIQUE_NAME = ADK_UNIQUE_NAME
 	else:
+		ctx.vala_def("NUVOLA_STD")
 		ctx.env.NAME = DEFAULT_NAME
 		ctx.env.UNIQUE_NAME = DEFAULT_UNIQUE_NAME
 	ctx.env.ICON_NAME = ctx.env.UNIQUE_NAME
