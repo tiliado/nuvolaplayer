@@ -33,6 +33,7 @@ public class AppIndexWebView : WebView
 	{
 		base(context);
 		decide_policy.connect(on_decide_policy);
+		zoom_level = 0.90;
 	}
 	
 	public void load_app_index(string index_uri, string? root_uri=null)

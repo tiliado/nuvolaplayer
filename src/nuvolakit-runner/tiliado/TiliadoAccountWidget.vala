@@ -27,6 +27,7 @@ namespace Nuvola
 
 public class TiliadoAccountWidget : Gtk.Grid
 {
+	public bool full_width {get; private set; default = true;}
 	private Gtk.Orientation orientation;
 	private Gtk.Button? activate_button;
 	private Gtk.Button? plan_button = null;
@@ -157,6 +158,7 @@ public class TiliadoAccountWidget : Gtk.Grid
 	
 	private void clear_all()
 	{
+		this.full_width = true;
 		clear_status_row();
 		if (plan_button != null)
 		{
@@ -342,7 +344,7 @@ public class TiliadoAccountWidget : Gtk.Grid
 	
 		clear_all();
 		
-		logout_button = new Gtk.Button.with_label("Log out");
+		logout_button = new Gtk.Button.from_icon_name("system-shutdown-symbolic", Gtk.IconSize.BUTTON);
 		logout_button.hexpand = true;
 		logout_button.vexpand = false;
 		logout_button.halign = Gtk.Align.END;
@@ -381,25 +383,27 @@ public class TiliadoAccountWidget : Gtk.Grid
 		}
 		else
 		{
-			var label = new Gtk.Label(null);
-			label.set_markup(Markup.printf_escaped("<b>User:</b> %s", user_name));
-			label.hexpand = false;
-			label.halign = Gtk.Align.START;
-			label.wrap_mode = Pango.WrapMode.WORD_CHAR;
-			label.set_line_wrap(true);
+			var label = new Gtk.Label(user_name);
+			label.max_width_chars = 15;
+			label.ellipsize = Pango.EllipsizeMode.END;
+			label.lines = 1;
+			label.hexpand = label.vexpand = false;
+			label.halign = Gtk.Align.END;
 			label.show();
+			label.margin_left = 	15;
 			attach(label, 0, 1, 1, 1);
 			
 			var account_label = new AccountTypeLabel((uint) membership);
-			account_label.hexpand = true;
+			account_label.hexpand = false;
 			account_label.vexpand = false;
-			account_label.halign = Gtk.Align.START;
+			account_label.halign = Gtk.Align.END;
 			account_label.show();
 			attach(account_label, 1, 1, 1, 1);
 			
 			button_box.add(logout_button);
 			button_box.halign = Gtk.Align.END;
 			attach(button_box, 2, 1, 1, 1);
+			this.full_width = false;
 		}
 		
 		button_box.hexpand = true;

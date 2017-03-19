@@ -276,13 +276,17 @@ public class MasterController : Diorite.Application
 			}
 			tiliado_widget = new TiliadoAccountWidget(tiliado, this, Gtk.Orientation.HORIZONTAL, user_name, membership);
 			main_window.top_grid.insert_row(1);
-			main_window.top_grid.attach(tiliado_widget, 0, 1, 1, 1);
+			if (tiliado_widget.full_width)
+				main_window.top_grid.attach(tiliado_widget, 0, 1, 1, 1);
+			else
+				main_window.header_bar.pack_end(tiliado_widget);
+			tiliado_widget.notify["full-width"].connect_after(on_tiliado_widget_full_width_changed);
 		}
 		#if FLATPAK
 		var app_index_view = new AppIndexWebView(WebEngine.get_web_context());
 		app_index_view.load_app_index(Nuvola.REPOSITORY_INDEX, Nuvola.REPOSITORY_ROOT);
 		app_index_view.show_all();
-		main_window.notebook.append_page(app_index_view, new Gtk.Label("Nuvola Apps Repository Index"));
+		main_window.stack.add_titled(app_index_view, "repository", "Repository Index");
 		#endif
 	}
 	
@@ -796,6 +800,18 @@ public class MasterController : Diorite.Application
 		config.unset(TILIADO_ACCOUNT_MEMBERSHIP);
 		config.unset(TILIADO_ACCOUNT_EXPIRES);
 		config.unset(TILIADO_ACCOUNT_SIGNATURE);
+	}
+	
+	private void on_tiliado_widget_full_width_changed(GLib.Object emitter, ParamSpec p)
+	{
+		var tiliado_widget = emitter as TiliadoAccountWidget;
+		var parent = tiliado_widget.get_parent();
+		if (parent != null)
+			parent.remove(tiliado_widget);
+		if (tiliado_widget.full_width)
+			main_window.top_grid.attach(tiliado_widget, 0, 1, 1, 1);
+		else
+			main_window.header_bar.pack_end(tiliado_widget);
 	}
 	
 	private enum InitState
