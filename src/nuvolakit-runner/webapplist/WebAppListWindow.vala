@@ -38,6 +38,9 @@ public class WebAppListWindow : Diorite.ApplicationWindow
 	private Gtk.Label app_name;
 	private Gtk.Label app_version;
 	private Gtk.Label app_maintainer;
+	#if FLATPAK
+	public Gtk.Notebook notebook;
+	#endif
 	
 	public WebAppListWindow(MasterController app, WebAppListFilter model)
 	{
@@ -51,7 +54,7 @@ public class WebAppListWindow : Diorite.ApplicationWindow
 		{
 			warning("Unable to load application icon.");
 		}
-		set_default_size(600, 500);
+		set_default_size(800, 600);
 		
 		this.app = app;
 		app.actions.get_action(Actions.START_APP).enabled = false;
@@ -114,7 +117,6 @@ public class WebAppListWindow : Diorite.ApplicationWindow
 		
 		grid = new Gtk.Grid();
 		grid.margin = 8;
-		top_grid.add(grid);
 		grid.attach(categories, 0, 0, 1, 1);
 		grid.attach(scroll, 1, 0, 1, 1);
 		grid.attach(details, 0, 1, 2, 1);
@@ -124,6 +126,16 @@ public class WebAppListWindow : Diorite.ApplicationWindow
 		notify["category"].connect_after(on_category_changed);
 		model.bind_property(
 			"category", categories, "category", GLib.BindingFlags.BIDIRECTIONAL|GLib.BindingFlags.SYNC_CREATE);
+		
+		#if FLATPAK
+		notebook = new Gtk.Notebook();
+		top_grid.add(notebook);
+		grid.show_all();
+		notebook.append_page(grid, new Gtk.Label("Installed Scripts"));
+		notebook.show_all();
+		#else
+		top_grid.add(grid);
+		#endif
 	}
 	
 	private void on_selection_changed()

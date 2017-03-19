@@ -149,6 +149,7 @@ def options(ctx):
 	ctx.add_option('--tiliado-oauth2-server', type=str, default="https://tiliado.eu", help="Tiliado OAuth2 server to access Tiliado services.")
 	ctx.add_option('--tiliado-oauth2-client-id', type=str, default="", help="Tiliado OAuth2 client id to access Tiliado services.")
 	ctx.add_option('--tiliado-oauth2-client-secret', type=str, default="", help="Tiliado OAuth2 client secret to access Tiliado services.")
+	ctx.add_option('--repository-index', type=str, default="https://nuvola.tiliado.eu/", help="Nuvola Apps Repository Index URI.")
 	ctx.add_option('--webkitgtk-supports-mse', action='store_true', default=False, dest='webkit_mse', help="Use only if you are absolutely sure that your particular build of the WebKitGTK library supports Media Source Extension (as of 2.15.3, it is disabled by default)")
 
 # Configure build process
@@ -305,6 +306,10 @@ def configure(ctx):
 	ctx.env.NUVOLA_LIBDIR = "%s/%s" % (ctx.env.LIBDIR, APPNAME)
 	ctx.define("NUVOLA_TILIADO_OAUTH2_SERVER", ctx.options.tiliado_oauth2_server)
 	ctx.define("NUVOLA_TILIADO_OAUTH2_CLIENT_ID", ctx.options.tiliado_oauth2_client_id)
+	repo_index = ctx.options.repository_index.split("|")
+	repo_index, repo_root = repo_index if len(repo_index) > 1 else  repo_index + repo_index 
+	ctx.define("NUVOLA_REPOSITORY_INDEX", repo_index)
+	ctx.define("NUVOLA_REPOSITORY_ROOT", repo_root)
 	ctx.define("NUVOLA_LIBDIR", ctx.env.NUVOLA_LIBDIR)
 	
 	with open("build/secret.h", "wb") as f:

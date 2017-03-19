@@ -253,6 +253,8 @@ public class MasterController : Diorite.Application
 			menu.append_submenu("_Apps", actions.build_menu({Actions.START_APP}));
 			set_menubar(menu);
 		}
+		var app_storage = new WebAppStorage(storage.user_config_dir, storage.user_data_dir, storage.user_cache_dir);
+		WebEngine.init_web_context(app_storage);
 		init_state = InitState.GUI;
 	}
 	
@@ -276,14 +278,18 @@ public class MasterController : Diorite.Application
 			main_window.top_grid.insert_row(1);
 			main_window.top_grid.attach(tiliado_widget, 0, 1, 1, 1);
 		}
+		#if FLATPAK
+		var app_index_view = new AppIndexWebView(WebEngine.get_web_context());
+		app_index_view.load_app_index(Nuvola.REPOSITORY_INDEX, Nuvola.REPOSITORY_ROOT);
+		app_index_view.show_all();
+		main_window.notebook.append_page(app_index_view, new Gtk.Label("Nuvola Apps Repository Index"));
+		#endif
 	}
 	
 	private void show_welcome_window()
 	{
 		if (config.get_string("nuvola.welcome_screen") != get_welcome_screen_name())
 		{
-			var app_storage = new WebAppStorage(storage.user_config_dir, storage.user_data_dir, storage.user_cache_dir);
-			WebEngine.init_web_context(app_storage);
 			var welcome_window = new WelcomeWindow(this, storage);
 			welcome_window.present();
 			config.set_string("nuvola.welcome_screen", get_welcome_screen_name());
