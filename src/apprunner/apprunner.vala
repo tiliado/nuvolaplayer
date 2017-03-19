@@ -51,6 +51,11 @@ struct Args
 
 public int main(string[] args)
 {
+	/* We are not ready for Wayland yet.
+	 * https://github.com/tiliado/nuvolaplayer/issues/181
+	 * https://github.com/tiliado/nuvolaplayer/issues/240
+	 */
+	Environment.set_variable("GDK_BACKEND", "x11", true);
 	try
 	{
 		var opt_context = new OptionContext("- %s".printf(Nuvola.get_app_name()));
