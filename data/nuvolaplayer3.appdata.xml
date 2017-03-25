@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- https://www.freedesktop.org/software/appstream/docs/chap-Quickstart.html#sect-Quickstart-DesktopApps -->
 <component type="desktop">
   <id>eu.tiliado.Nuvola.desktop</id>
   <pkgname>nuvolaplayer3</pkgname>
@@ -29,36 +28,60 @@
   </description>
   <screenshots>
     <screenshot type="default">
-      <image>https://tiliado.github.io/nuvolaplayer/documentation/images/3.0/new/orig/gnome_grooveshark_add_to_favorites.png</image>
-      <caption>Nuvola Player creates desktop launchers for quick access to streaming services</caption>
+      <image>https://nuvola.tiliado.eu/screenshots/nuvola/unity_quick_list_lock.png</image>
+      <caption>Nuvola provides a tight integration of web apps with Linux desktop environments, e.g. Ubuntu Unity interface.</caption>
     </screenshot>
     <screenshot>
-      <image>https://tiliado.github.io/nuvolaplayer/documentation/images/3.0/new/orig/gnome_media_keys.png</image>
-      <caption>Nuvola Player allows you to use multimedia keys to control playback</caption>
+      <image>https://nuvola.tiliado.eu/screenshots/nuvola/gnome_app_window.png</image>
+      <caption>Nuvola provides a tight integration of web apps with Linux desktop environments, e.g. GNOME.</caption>
     </screenshot>
     <screenshot>
-      <image>https://tiliado.github.io/nuvolaplayer/documentation/images/3.0/gnome/orig/gnome_notification_expanded.png</image>
-      <caption>Nuvola Player provides notifications with playback controls</caption>
+      <image>https://nuvola.tiliado.eu/screenshots/nuvola/unity_sound_menu.png</image>
+      <caption>Media player web apps are integrated with the media player applet situated in the sound menu of Ubuntu Unity interface.</caption>
     </screenshot>
     <screenshot>
-      <image>https://tiliado.github.io/nuvolaplayer/documentation/images/3.0/gnome/orig/gnome_lock_screen_controls.png</image>
-      <caption>You can control Nuvola Player from a lock screen</caption>
+      <image>https://nuvola.tiliado.eu/screenshots/nuvola/gnome_mpris_applet.png</image>
+      <caption>Media player web apps are integrated with the media player applet of GNOME Shell.</caption>
     </screenshot>
     <screenshot>
-      <image>https://tiliado.github.io/nuvolaplayer/documentation/images/3.0/unity/orig/unity_google_play_music_launcher_star_rating.png</image>
-      <caption>Integration with Unity Launcher provides Quick List items</caption>
+      <image>https://nuvola.tiliado.eu/screenshots/nuvola/gnome_media_player_extension_rating.png</image>
+      <caption>Media player web apps are supported with the Media Player GNOME Shell Extension, including the track rating feature.</caption>
     </screenshot>
     <screenshot>
-      <image>https://tiliado.github.io/nuvolaplayer/documentation/images/3.0/unity/orig/unity_grooveshark_lock_to_launcher.png</image>
-      <caption>Nuvola Player creates desktop launchers for quick access to streaming services</caption>
+      <image>https://nuvola.tiliado.eu/screenshots/nuvola/unity_quick_list_pause.png</image>
+      <caption>Media player web apps add playback controls to the Unity launcher menu.</caption>
     </screenshot>
     <screenshot>
-      <image>https://tiliado.github.io/nuvolaplayer/documentation/images/3.0/unity/orig/unity_grooveshark_hud_toggle_play.png</image>
-      <caption>Nuvola Player integrates with Unity Head-Up display</caption>
+      <image>https://nuvola.tiliado.eu/screenshots/nuvola/unity_lyrics.png</image>
+      <caption>Media player web apps support lyrics fetching.</caption>
     </screenshot>
     <screenshot>
-      <image>https://tiliado.github.io/nuvolaplayer/documentation/images/3.0/unity/orig/unity_grooveshark_sound_menu.png</image>
-      <caption>You can control Nuvola Player from Unity Sound indicator</caption>
+      <image>https://nuvola.tiliado.eu/screenshots/nuvola/unity_menubar.png</image>
+      <caption>The global menu bar of Ubuntu Unity interface is fully supported.</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://nuvola.tiliado.eu/screenshots/nuvola/unity_untick_show_toolbar.png</image>
+      <caption>In order to save screen space, it is possible to hide the toolbar.</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://nuvola.tiliado.eu/screenshots/nuvola/unity_toolbar_hidden.png</image>
+      <caption>Main window with a hidden toolbar.</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://nuvola.tiliado.eu/screenshots/nuvola/gnome_keyboard_shortcuts.png</image>
+      <caption>It is possible to assign keyboard shortcuts to common actions.</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://nuvola.tiliado.eu/screenshots/nuvola/gnome_features_1.png</image>
+      <caption>Other features include Tray Icon, Unity Laucher, Notifications, Media keys, Password manager, Audio Scrobbler, ...</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://nuvola.tiliado.eu/screenshots/nuvola/gnome_features_2.png</image>
+      <caption>(features continued) ... Remote control over HTTP and Lyrics fetching.</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://nuvola.tiliado.eu/screenshots/nuvola/unity_features_1.png</image>
+      <caption>Other features include Tray Icon, Notifications, Media keys, Password manager, Audio Scrobbler and Remote control over HTTP.</caption>
     </screenshot>
   </screenshots>
   <url type="homepage">https://tiliado.eu/nuvolaplayer/</url>
