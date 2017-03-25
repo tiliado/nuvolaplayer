@@ -9,9 +9,22 @@
   <summary>Cloud music integration for your desktop</summary>
   <description>
     <p>
-      Nuvola is a runtime for web-based music streaming services providing more native user experience and
+      Nuvola is a runtime for semi-sandboxed web apps providing more native user experience and tighter
       integration with Linux desktop environments than usual web browsers can offer. It tries to feel and look
-      like a native application as possible. 
+      like a native application as much as possible.
+      Nuvola mostly specializes on music streaming web apps (e.g. Google Play Music, Spotify, Amazon Music, Deezer,
+      and more), but progress is being made to support generic web apps (e.g. Google Calendar, Google Keep, etc.).
+    </p>
+    <p>
+      Features of Nuvola: desktop launchers, integration with media applets (e.g. in GNOME Shell and Ubuntu sound menu),
+      Unity launcher quick list actions, lyrics fetching, Last.fm audio scrobbler, tray icon, desktop notifications,
+      media keys binding, password manager, remote control over HTTP and more. Some features may be availably only to
+      users with premium or patron plans available at https://tiliado.eu/nuvolaplayer/funding/
+    </p>
+    <p>
+      Users of the official Flatpak builds available at https://nuvola.tiliado.eu are eligible for user support
+      free of charge. Users of third-party build should contact the customer care of their distributor or order
+      paid support provided by the Nuvola developer.
     </p>
   </description>
   <screenshots>
