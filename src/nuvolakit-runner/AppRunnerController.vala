@@ -366,6 +366,9 @@ public class AppRunnerController : RunnerApplication
 	
 	private void do_quit()
 	{
+		var windows = Gtk.Window.list_toplevels();
+		foreach (var window in windows)
+			window.hide();
 		quit();
 	}
 	
