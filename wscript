@@ -1,6 +1,6 @@
 # encoding: utf-8
 #
-# Copyright 2014-2015 Jiří Janoušek <janousek.jiri@gmail.com>
+# Copyright 2014-2017 Jiří Janoušek <janousek.jiri@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met: 
@@ -33,7 +33,7 @@ ADK_NAME="Nuvola ADK"
 CDK_NAME="Nuvola CDK"
 APPNAME = "nuvolaplayer3"
 FUTURE_APPNAME = "nuvola"
-VERSION = "3.1.1+"
+VERSION = "3.1.1"
 DEFAULT_UNIQUE_NAME="eu.tiliado.Nuvola"
 ADK_UNIQUE_NAME="eu.tiliado.NuvolaAdk"
 CDK_UNIQUE_NAME="eu.tiliado.NuvolaCdk"
@@ -50,34 +50,21 @@ import subprocess
 try:
 	try:
 		# Read revision info from file revision-info created by ./waf dist
-		timestamp, short_id, long_id = open("upstream-revision", "rt").read().split(" ", 2)
+		with open("version-info.txt", "rt") as f:
+			__, revision_id = f.read().strip().split("-", 1)
 	except Exception as e:
 		# Read revision info from current branch
-		output = subprocess.Popen(["git", "log", "-n", "1", "--pretty=format:%ct %h %H"], stdout=subprocess.PIPE).communicate()[0]
-		output = output.decode("utf-8")
-		timestamp, short_id, long_id = output.split(" ", 2)
-	
-	from datetime import datetime
-	timestamp = datetime.utcfromtimestamp(int(timestamp))
+		output = subprocess.Popen(["git", "describe", "--tags", "--long"], stdout=subprocess.PIPE).communicate()[0]
+		__, revision_id = output.decode("utf-8").strip().split("-", 1)
+	revision_id = revision_id.replace("-", ".")
 except Exception as e:
-	print("Failed to get git revision information: {}".format(e))
-	timestamp, short_id, long_id = None, "fuzzy", "fuzzy"
+	revision_id = "snapshot"
+	
+REVISION_ID = revision_id
+VERSION_SUFFIX = revision_id
+VERSIONS = tuple(int(i) for i in VERSION.split("."))
+VERSION += "+" + revision_id
 
-REVISION_ID = str(long_id).strip()
-
-
-VERSIONS, VERSION_SUFFIX = VERSION.split("+")
-if VERSION_SUFFIX == "stable":
-	VERSION = VERSIONS
-elif VERSION_SUFFIX == "":
-	if timestamp:
-		suffix = "{}.{}".format(timestamp.strftime("%Y%m%d%H%M"), short_id)
-		VERSION_SUFFIX += suffix
-		VERSION += suffix
-	else:
-		VERSION = VERSIONS
-
-VERSIONS = tuple(int(i) for i in VERSIONS.split("."))
 
 import sys
 import os
@@ -161,7 +148,7 @@ def configure(ctx):
 	
 	ctx.env.fuzzy = ctx.options.fuzzy
 	ctx.msg("Version", VERSION, "GREEN")
-	if REVISION_ID != "fuzzy":
+	if REVISION_ID != "snapshot":
 		ctx.msg("Upstream revision", REVISION_ID, "GREEN")
 	else:
 		ctx.msg("Upstream revision", "unknown (unsupported build)", "RED")
@@ -280,8 +267,7 @@ def configure(ctx):
 		ctx.check_dep('dbusmenu-glib-0.4', 'DBUSMENU', '0.4')
 		ctx.vala_def("UNITY")
 	
-	if VERSION_SUFFIX != "stable":
-		ctx.vala_def("EXPERIMENTAL")
+	ctx.vala_def("EXPERIMENTAL")
 		
 	# Define HAVE_WEBKIT_X_YY Vala compiler definitions
 	webkit_version = tuple(int(i) for i in ctx.check_cfg(modversion='webkit2gtk-4.0').split(".")[0:2])
@@ -548,12 +534,12 @@ def post(ctx):
 
 def dist(ctx):
 	ctx.algo = "tar.gz"
-	ctx.excl = '.git .gitignore build/* **/.waf* **/*~ **/*.swp **/.lock* bzrcommit.txt **/*.pyc'
-	ctx.exec_command("git log -n 1 --pretty='format:%ct %h %H' > upstream-revision")
+	ctx.excl = '.git .gitignore build/* **/.waf* **/*~ **/*.swp **/.lock* bzrcommit.txt **/*.pyc core'
+	ctx.exec_command("git describe --tags --long > version-info.txt")
 	
 	def archive():
 		ctx._archive()
-		node = ctx.path.find_node("upstream-revision")
+		node = ctx.path.find_node("version-info.txt")
 		if node:
 			node.delete()
 	ctx._archive = ctx.archive
