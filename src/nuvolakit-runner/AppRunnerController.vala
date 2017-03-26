@@ -369,6 +369,7 @@ public class AppRunnerController : RunnerApplication
 		var windows = Gtk.Window.list_toplevels();
 		foreach (var window in windows)
 			window.hide();
+		Timeout.add_seconds(10, () => {warning("Force quit after timeout."); GLib.Process.exit(0);});
 		quit();
 	}
 	
