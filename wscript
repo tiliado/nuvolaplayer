@@ -33,7 +33,7 @@ ADK_NAME="Nuvola ADK"
 CDK_NAME="Nuvola CDK"
 APPNAME = "nuvolaplayer3"
 FUTURE_APPNAME = "nuvola"
-VERSION = "3.1.1"
+VERSION = "3.1.2"
 DEFAULT_UNIQUE_NAME="eu.tiliado.Nuvola"
 ADK_UNIQUE_NAME="eu.tiliado.NuvolaAdk"
 CDK_UNIQUE_NAME="eu.tiliado.NuvolaCdk"
@@ -238,7 +238,7 @@ def configure(ctx):
 	
 	# Check dependencies
 	ctx.env.DIORITE_SERIES = DIORITE_SERIES = "0.3"
-	DIORITE_BUGFIX = "1"
+	DIORITE_BUGFIX = "3"
 	ctx.check_dep('glib-2.0', 'GLIB', MIN_GLIB)
 	ctx.check_dep('gio-2.0', 'GIO', MIN_GLIB)
 	ctx.check_dep('gthread-2.0', 'GTHREAD', MIN_GLIB)

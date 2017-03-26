@@ -1,10 +1,56 @@
-Nuvola Player Changelog
+Nuvola Apps Changelog
 =======================
 
 Releases 3.1.x
 --------------
 
 Rolling releases.
+
+Milestone 3.1.2 - March 26, 2017
+--------------------------------
+
+New Features:
+
+  * Nuvola Player was renamed to Nuvola Apps as non-media player apps (Google Calendar) were enabled
+    and should be fully supported in the 4.0 release.
+  * Nuvola Apps are distributed as [cross-distribution flatpak builds](https://nuvola.tiliado.eu/).
+    There have been a lot of changes under the hood to support this transition.
+  * The `nuvolaplayer3` and `nuvolaplayer3ctl` commands are deprecated in favor of `nuvola` and `nuvolactl`.
+  * WebApp scripts provide own desktop files so the unnecessary create/delete desktop launchers actions
+    were removed.
+
+Enhancements:
+
+  * Enhanced support of HTML5 Audio and Media Source Extension (MSE), which is currently enabled only
+    in the BBC iPlayer script with a custom WebKitGTK+ build.
+  * Album art is downloaded with WebKit's NetworkProcess to access images that are otherwise restricted.
+    Issue: tiliado/nuvolaplayer#76
+  * Preferences dialog: Components tab was renamed to Features as it is more user-friendly.
+
+Under the Hood:
+
+  * Inter-process communication has been reworked for greater flexibility as required by the HTTP Remote Control
+    feature.
+  * Nuvola and individual apps are DBus-activatable.
+  * The unique name has been changed to `eu.tiliado.Nuvola` and most of the resources (e.g. icons) use this name.
+  * AppData/AppStream metadata have been updated.
+  * The build script now honors the VAPIDIR env variable.
+  * Added a script to set up Nuvola CDK environment (`setup_nuvolacdk.sh`).
+
+Bug Fixes:
+
+  * "Too many flash plugins" false positives. Resolve symlinks and track final paths not to count duplicates.
+    Issue: tiliado/nuvolaplayer#159
+  * Repeated Runner: prefix in debugging output. Issue: tiliado/nuvolaplayer#265
+  * Disable LIBGL_DRI3_DISABLE workaround with WebKitGTK 2.14+ to fix performance issues.
+    Issue: tiliado/nuvolaplayer#260
+
+News for Script Maintainers:
+
+  * Documentation has been updated and Mantainer's Guide merged into the tutorial.
+  * Format requirements flag were implemented but not yet documented.
+  * Web app scripts are built with Nuvola SDK.
+
 
 Milestone 3.1.1 - October 30, 2016
 ----------------------------------
