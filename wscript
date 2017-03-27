@@ -43,7 +43,7 @@ WELCOME_SCREEN_NAME = "Nuvola Apps 3.1 Rolling Releases"
 
 TARGET_GLIB = "2.42"
 MIN_GLIB = "2.42.1"
-MIN_GTK = "3.14.5"
+MIN_GTK = "3.22.0"
 MIN_WEBKIT = "2.6.2"
 
 import subprocess
