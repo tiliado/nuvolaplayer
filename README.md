@@ -57,22 +57,21 @@ Build and Install
 
 ### Dependencies
 
-  * [Python 2](http://python.org) >= 2.7 (recommended)
-    or [Python 3](http://python.org) >= 3.4 (not well tested)
-  * [Vala](https://wiki.gnome.org/Projects/Vala) >= 0.26.1
+  * [Python 3](http://python.org) >= 3.4 (not well tested)
+  * [Vala](https://wiki.gnome.org/Projects/Vala) >= 0.34.0
   * [Diorite library](https://github.com/tiliado/diorite) 0.3.x
-  * [glib-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.42.1
-  * [gio-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.42.1
-  * [gobject-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.42.1
-  * [gthread-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.42.1
-  * [gtk+-3.0](http://www.gtk.org/) >= 3.14.5
-  * [gdk-3.0](http://www.gtk.org/) >= 3.14.5
-  * [gdk-x11-3.0](http://www.gtk.org/) >= 3.14.5
+  * [glib-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.50.0
+  * [gio-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.50.0
+  * [gobject-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.50.0
+  * [gthread-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.50.0
+  * [gtk+-3.0](http://www.gtk.org/) >= 3.22.0
+  * [gdk-3.0](http://www.gtk.org/) >= 3.22.0
+  * [gdk-x11-3.0](http://www.gtk.org/) >= 3.22.0
   * [x11](http://www.x.org/wiki/) >= 0.5
   * [json-glib-1.0](https://wiki.gnome.org/Projects/JsonGlib) >= 0.7
   * [libarchive](http://www.libarchive.org/) >= 3.1
-  * [webkit2gtk-4.0](http://webkitgtk.org/) >= 2.6.2 
-  * [javascriptcoregtk-4.0](http://webkitgtk.org/) >= 2.6.2
+  * [webkit2gtk-4.0](http://webkitgtk.org/) >= 2.16.0 
+  * [javascriptcoregtk-4.0](http://webkitgtk.org/) >= 2.16.0
   * [libnotify](https://git.gnome.org/browse/libnotify/) >= 0.7
   * libuuid
   * libsecret-1 >= 0.16

@@ -41,10 +41,10 @@ GENERIC_NAME = "Cloud Player"
 BLURB = "Cloud music integration for your Linux desktop"
 WELCOME_SCREEN_NAME = "Nuvola Apps 3.1 Rolling Releases"
 
-TARGET_GLIB = "2.42"
+TARGET_GLIB = "2.50"
 MIN_GLIB = "2.42.1"
-MIN_GTK = "3.14.5"
-MIN_WEBKIT = "2.6.2"
+MIN_GTK = "3.22.0"
+MIN_WEBKIT = "2.16.0"
 
 import subprocess
 try:
@@ -165,7 +165,7 @@ def configure(ctx):
 	ctx.msg('Install prefix', ctx.options.prefix, "GREEN")
 	
 	ctx.load('compiler_c vala')
-	ctx.check_vala(min_version=(0, 26, 1))
+	ctx.check_vala(min_version=(0, 34, 0))
 	# Don't be quiet
 	ctx.env.VALAFLAGS.remove("--quiet")
 	ctx.env.append_value("VALAFLAGS", "-v")
