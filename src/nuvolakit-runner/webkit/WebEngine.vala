@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2017 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -101,7 +101,7 @@ public class WebEngine : GLib.Object, JSExecutor
 	}
 	
 	public WebEngine(RunnerApplication runner_app, IpcBus ipc_bus, WebAppMeta web_app,
-		WebAppStorage storage, Config config, string? proxy_uri, HashTable<string, Variant> worker_data)
+		WebAppStorage storage, Config config, Connection? connection, HashTable<string, Variant> worker_data)
 	{
 		this.ipc_bus = ipc_bus;
 		this.runner_app = runner_app;
@@ -117,8 +117,11 @@ public class WebEngine : GLib.Object, JSExecutor
 		worker_data["LIBSOUP_MAJOR"] = Soup.get_major_version();
 		worker_data["LIBSOUP_MINOR"] = Soup.get_minor_version();
 		worker_data["LIBSOUP_MICRO"] = Soup.get_micro_version();
-		apply_network_proxy(proxy_uri);	
 		
+		#if HAVE_WEBKIT_2_16
+		if (connection != null)
+			apply_network_proxy(connection);	
+		#endif
 		var web_context = get_web_context();
 		var webkit_extension_dir = Nuvola.get_libdir();
 		debug("Nuvola WebKit Extension directory: %s", webkit_extension_dir);
@@ -254,17 +257,33 @@ public class WebEngine : GLib.Object, JSExecutor
 		}
 	}
 	
-	private void apply_network_proxy(string? proxy_uri)
+	#if HAVE_WEBKIT_2_16
+	public void apply_network_proxy(Connection connection)
 	{
-		if (proxy_uri != null)
+		WebKit.NetworkProxyMode proxy_mode;
+		WebKit.NetworkProxySettings? proxy_settings = null;
+		string? host;
+		int port;
+		var type = connection.get_network_proxy(out host, out port);
+		switch (type)
 		{
-			/* This is an ugly hack! See https://bugs.webkit.org/show_bug.cgi?id=128674 */
-			Environment.unset_variable("GNOME_DESKTOP_SESSION_ID");
-			Environment.unset_variable("DESKTOP_SESSION");
-			Environment.set_variable("http_proxy", proxy_uri, true);
-			Environment.set_variable("https_proxy", proxy_uri, true);
+		case NetworkProxyType.SYSTEM:
+			proxy_mode = WebKit.NetworkProxyMode.DEFAULT;
+			break;
+		case NetworkProxyType.DIRECT:
+			proxy_mode = WebKit.NetworkProxyMode.NO_PROXY;
+			break;
+		default:
+			proxy_mode = WebKit.NetworkProxyMode.CUSTOM;
+			var proxy_uri = "%s://%s:%d/".printf(
+				type == NetworkProxyType.HTTP ? "http" : "socks",
+				(host != null && host != "") ? host : "127.0.0.1", port);
+			proxy_settings = new WebKit.NetworkProxySettings(proxy_uri, null);
+			break;
 		}
+		get_web_context().set_network_proxy_settings(proxy_mode, proxy_settings);
 	}
+	#endif
 		
 	private bool load_uri(string uri)
 	{
@@ -667,9 +686,9 @@ public class WebEngine : GLib.Object, JSExecutor
 		handler_ids[1] = download.failed.connect((d, err) => {
 			WebKit.DownloadError e = (WebKit.DownloadError) err;
 			if (e is WebKit.DownloadError.DESTINATION)
-			    warning("Download failed because of destination: %s", e.message);
+				warning("Download failed because of destination: %s", e.message);
 			else
-			    warning("Download failed: %s", e.message);
+				warning("Download failed: %s", e.message);
 			try
 			{
 				var payload = new Variant(
@@ -708,8 +727,8 @@ public class WebEngine : GLib.Object, JSExecutor
 			download.cancel();
 		download.decide_destination.disconnect(on_download_decide_destination);
 		return true;
-    }
-    
+	}
+	
 	private bool decide_navigation_policy(bool new_window, WebKit.NavigationPolicyDecision decision)
 	{
 		var action = decision.navigation_action;

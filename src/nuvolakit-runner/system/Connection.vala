@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2015 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2011-2017 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -27,6 +27,7 @@ namespace Nuvola
 
 public class Connection : GLib.Object
 {
+	public const string PROXY_DIRECT = "direct://";
 	private const string PROXY_TYPE_CONF = "webview.proxy.type";
 	private const string PROXY_HOST_CONF = "webview.proxy.host";
 	private const string PROXY_PORT_CONF = "webview.proxy.port";
@@ -119,12 +120,10 @@ public class Connection : GLib.Object
 				proxy_uri = "socks://%s:%d/".printf(host, port);
 				break;
 			default:
-				proxy_uri = "direct://";
+				proxy_uri = PROXY_DIRECT;
 				break;
 			}
 			debug("Network Proxy: '%s'", proxy_uri);
-			Environment.set_variable("http_proxy", proxy_uri, true);
-			Environment.set_variable("https_proxy", proxy_uri, true);
 			session.proxy_uri = new Soup.URI(proxy_uri);
 		}
 		else
@@ -135,11 +134,12 @@ public class Connection : GLib.Object
 		}
 	}
 	
-	public void store_network_proxy(NetworkProxyType type, string? server, int port)
+	public void set_network_proxy(NetworkProxyType type, string? server, int port)
 	{
 		config.set_string(PROXY_TYPE_CONF, type.to_string());
 		config.set_string(PROXY_HOST_CONF, server);
 		config.set_int64(PROXY_PORT_CONF, (int64) port);
+		apply_network_proxy();
 	}
 	
 	public NetworkProxyType get_network_proxy(out string? host, out int port)

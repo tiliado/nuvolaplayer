@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2017 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -276,7 +276,7 @@ public class AppRunnerController : RunnerApplication
 	{
 		connection = new Connection(new Soup.Session(), app_storage.cache_dir.get_child("conn"), config);
 		WebEngine.init_web_context(app_storage);
-		web_engine = new WebEngine(this, ipc_bus, web_app, app_storage, config, connection.proxy_uri, web_worker_data);
+		web_engine = new WebEngine(this, ipc_bus, web_app, app_storage, config, connection, web_worker_data);
 		web_engine.set_user_agent(web_app.user_agent);
 		
 		web_engine.init_form.connect(on_init_form);
@@ -422,7 +422,10 @@ public class AppRunnerController : RunnerApplication
 		
 		var dialog = new PreferencesDialog(this, main_window, form);
 		dialog.add_tab("Keyboard shortcuts", new KeybindingsSettings(actions, config, global_keybindings.keybinder));
-		dialog.add_tab("Network", new NetworkSettings(connection));
+		#if HAVE_WEBKIT_2_16
+		var network_settings = new NetworkSettings(connection);
+		dialog.add_tab("Network", network_settings);
+		#endif
 		dialog.add_tab("Features", new ComponentsManager(components));
 		var response = dialog.run();
 		if (response == Gtk.ResponseType.OK)
@@ -436,6 +439,17 @@ public class AppRunnerController : RunnerApplication
 				else
 					config.set_value(key, new_value);
 			}
+			#if HAVE_WEBKIT_2_16
+			NetworkProxyType type;
+			string? host;
+			int port;
+			if (network_settings.get_proxy_settings(out type, out host, out port))
+			{
+				debug("New network proxy settings: %s %s %d", type.to_string(), host, port);
+				connection.set_network_proxy(type, host, port);
+				web_engine.apply_network_proxy(connection);
+			}
+			#endif
 		}
 		// Don't destroy dialog before form data are retrieved
 		dialog.destroy();
