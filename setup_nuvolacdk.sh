@@ -4,7 +4,7 @@ if [ -z "$DIORITE_PATH" -o ! -d "$DIORITE_PATH" ]; then
 	echo "Error: Specify the path to the Diorite library repository checkout as the first argument"
 else
 	WAF_CONFIGURE=" --flatpak --cdk --webkitgtk-supports-mse --tiliado-oauth2-client-id="
-	. set_up_env.sh
+	. setup_env.sh
 	export DIORITE_PATH="$DIORITE_PATH"
 	export PKG_CONFIG_PATH="$DIORITE_PATH/build:/app/lib/pkgconfig:$PKG_CONFIG_PATH"
 	export VAPIDIR="$DIORITE_PATH/build"
