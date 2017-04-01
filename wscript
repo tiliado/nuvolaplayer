@@ -44,7 +44,8 @@ WELCOME_SCREEN_NAME = "Nuvola Apps 3.1 Rolling Releases"
 TARGET_GLIB = "2.50"
 MIN_GLIB = "2.42.1"
 MIN_GTK = "3.22.0"
-MIN_WEBKIT = "2.16.0"
+LEGACY_WEBKIT = "2.14.5"
+FLATPAK_WEBKIT = "2.16.0" 
 
 import subprocess
 try:
@@ -204,14 +205,17 @@ def configure(ctx):
 	
 	ctx.env.CDK = ctx.options.cdk
 	ctx.env.ADK = ctx.options.adk
+	MIN_WEBKIT = LEGACY_WEBKIT
 	if ctx.options.cdk:
 		ctx.vala_def("NUVOLA_CDK")
 		ctx.env.NAME = CDK_NAME
 		ctx.env.UNIQUE_NAME = CDK_UNIQUE_NAME
+		MIN_WEBKIT = FLATPAK_WEBKIT
 	elif ctx.options.adk:
 		ctx.vala_def("NUVOLA_ADK")
 		ctx.env.NAME = ADK_NAME
 		ctx.env.UNIQUE_NAME = ADK_UNIQUE_NAME
+		MIN_WEBKIT = FLATPAK_WEBKIT
 	else:
 		ctx.vala_def("NUVOLA_STD")
 		ctx.env.NAME = DEFAULT_NAME
@@ -231,6 +235,7 @@ def configure(ctx):
 	ctx.env.FLATPAK = ctx.options.flatpak
 	if ctx.env.FLATPAK:
 		ctx.vala_def("FLATPAK")
+		MIN_WEBKIT = FLATPAK_WEBKIT
 	
 	ctx.env.WEBKIT_MSE = ctx.options.webkit_mse
 	if ctx.options.webkit_mse:
