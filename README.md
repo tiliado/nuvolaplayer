@@ -57,7 +57,7 @@ Build and Install
 
 ### Dependencies
 
-  * [Python 3](http://python.org) >= 3.4 (not well tested)
+  * [Python 3](http://python.org) >= 3.4
   * [Vala](https://wiki.gnome.org/Projects/Vala) >= 0.34.0
   * [Diorite library](https://github.com/tiliado/diorite) 0.3.x
   * [glib-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.50.0
@@ -70,8 +70,8 @@ Build and Install
   * [x11](http://www.x.org/wiki/) >= 0.5
   * [json-glib-1.0](https://wiki.gnome.org/Projects/JsonGlib) >= 0.7
   * [libarchive](http://www.libarchive.org/) >= 3.1
-  * [webkit2gtk-4.0](http://webkitgtk.org/) >= 2.16.0 
-  * [javascriptcoregtk-4.0](http://webkitgtk.org/) >= 2.16.0
+  * [webkit2gtk-4.0](http://webkitgtk.org/) >= 2.14.5 (2.16.0 recommended)
+  * [javascriptcoregtk-4.0](http://webkitgtk.org/) >= 2.14.5 (2.16.0 recommended)
   * [libnotify](https://git.gnome.org/browse/libnotify/) >= 0.7
   * libuuid
   * libsecret-1 >= 0.16
