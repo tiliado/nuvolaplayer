@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # coding: utf-8
 
 # Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
@@ -23,13 +23,10 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from __future__ import unicode_literals
-
 import os
 import re
 import sys
 from importlib import import_module
-from codecs import open
 from string import Template
 from xml.sax.saxutils import escape
 from collections import defaultdict
@@ -151,7 +148,7 @@ class Symbols(object):
         self.canonical[alias] = canonical
         
         append_symbols = []
-        for symbol, node in self.symbols.iteritems():
+        for symbol, node in self.symbols.items():
             if node.parent == alias:
                 canonical = self.get_symbol_name(node)
                 self.canonical[symbol] = canonical
@@ -311,7 +308,7 @@ class HtmlPrinter(object):
         tree = self.tree
         ns = (None, self.ns)
         symbols = defaultdict(list)
-        for symbol, node in tree.symbols.iteritems():
+        for symbol, node in tree.symbols.items():
             if node.parent in ns and tree.is_canonical(symbol):
                 symbols[node.type].append(symbol)
         
@@ -323,7 +320,7 @@ class HtmlPrinter(object):
         
         types = ("field", "function", "prototype", "namespace", "mixin", "enum")
         types_names = ("Fields", "Functions", "Prototypes", "Namespaces", "Mixins", "Enums")
-        for i in xrange(len(types)):
+        for i in range(len(types)):
             type_name = escape(types_names[i])
             index.append('<h4>{0}</h4>\n<ul>\n'.format(type_name))
             body.append('<h3>{0}</h3>\n<ul>\n'.format(type_name))
@@ -675,7 +672,7 @@ def parse_source(source):
     mode = MODE_CODE
     level = 0
     doc = None
-    with open(source, "rt", "utf-8") as f:
+    with open(source, "rt", encoding="utf-8") as f:
         lineno = 0
         for line in f:
             bare = line.strip()
@@ -748,7 +745,7 @@ def generate_doc(ns, out_file, sources_dir, config_file, template=None):
         safe_mode='escape',
         lazy_ol=False)
 
-    interlinks = getattr(config, "INTERLINKS", defaultdict(unicode))
+    interlinks = getattr(config, "INTERLINKS", defaultdict(str))
     printer = HtmlPrinter(tree, ns, markdown, interlinks=interlinks)
     index, body = printer.process()
     
@@ -760,7 +757,7 @@ def generate_doc(ns, out_file, sources_dir, config_file, template=None):
         os.makedirs(os.path.dirname(out_file))
     except OSError:
         pass
-    with open(out_file, "wt", "utf-8") as f:
+    with open(out_file, "wt", encoding="utf-8") as f:
         f.write(process_template(template, data))
 
 if __name__ == "__main__":
