@@ -99,18 +99,34 @@ Git & GitHub Guidelines
 
 ### Releases
 
-  * **Never increase version number** in `metadata.json` in regular commits nor in pull requests,
-    but only in special release commits with a commit message `Release X.Y` and git tag `X.Y`
-    (not `vX.Y` nor `release-X.Y`, just `X.Y`). Moreover, **you don't have to make release
-    commits at all**, just jump to the next step.
+  * **Never increase version number in `metadata.json` in regular commits** nor in pull requests,
+    but only in special release commits.
+  * **Release commits** have a commit message `Release X.Y`, are tagged `X.Y` (not `vX.Y` nor `release-X.Y`, just `X.Y`)
+    and must also update changelog (`X.Y.Z - unreleased` → `X.Y.Z - ${release date}`, e.g. `1.2 - September 28, 2016`,
+    [example](https://raw.githubusercontent.com/tiliado/nuvola-app-siriusxm/0d8432f18f6164b19b58b5b68b1ca4f3d260179d/CHANGELOG.md)).
+    However, **you don't have to make release commits at all**, just jump to the next step.
   * Create a Github issue "Release X.Y" and assing it to @fenryxo when ready for a new release.
     He will decide whether the release should be made or a few other changes should be made before next
     release. He will also create a tagged release commit and build new packages for the Nuvola Player
     Package Repository.
-  * Don't hesitate to release often. Packages of service integration script are lightweight
-    with a typical build time a few seconds thanks to [fpm](https://github.com/jordansissel/fpm).
+  * Don't hesitate to release often. It takes only a few minutes to rebuild packages with a new release.
     Users will love you if you release a fix as soon as possible.
 
+### Changelog
+
+  * Every user-facing change or an important internal change must be also mentioned in the CHANGELOG.md file. You should
+    update the changelog in the same commit that introduces the change. The changelog will be eventually parsed by the
+    flatpak builder and displayed in GNOME Software and similar package managers.
+  * The changelog should be written with a limited subset of Markdown syntax
+    ([example](https://raw.githubusercontent.com/tiliado/nuvola-app-google-play-music/master/CHANGELOG.md)).
+  * The first heading is `${app name} Changelog`.
+  * Then there is one subheading for each release followed by a bullet-point list of changes.
+  * If there are unreleased changes, the very first subheading contains version number of the next release and
+    ends with `- unreleased`
+    ([example](https://raw.githubusercontent.com/tiliado/nuvola-app-google-play-music/09a31c87133e036671441fbad5557c2ef6c74e45/CHANGELOG.md)).
+  * **Don't mix unrelated changes in a single commit.** As a rule of thumb, if your commit adds more then a single entry
+    to the CHANGELOG.md file, you should split it into more commits.
+    
 ### Commit Messages
 
 Commit messages should follow this template:
@@ -130,6 +146,7 @@ forget to link to issues.
 Issue: tiliado/nuvolaplayer#128
 ```
 
+* Don't forget to update the CHANGELOG.md file.
 * Write **useful commit summary** (the first line. max 50 chars):
     + Use verbs and don't end summary with a dot, e.g. "Add test for AboutDialog" instead of
       "Added test for AboutDialog." or "Adding test for AboutDialog."
