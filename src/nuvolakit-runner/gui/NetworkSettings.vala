@@ -29,7 +29,7 @@ public class NetworkSettings: Gtk.Grid
 {
     private Connection connection;
     private Gtk.InfoBar info_bar; 
-    private Gtk.RadioButton proxy_types[4];
+    private Gtk.RadioButton[] proxy_types;
     private Gtk.Entry proxy_server;
     private Gtk.SpinButton proxy_port;
     private NetworkProxyType original_type;
