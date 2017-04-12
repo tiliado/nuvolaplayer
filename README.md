@@ -1,6 +1,8 @@
 Nuvola Player 3
 ===============
 
+[![Join the chat at https://gitter.im/tiliado/nuvolaplayer](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/tiliado/nuvolaplayer?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 *Nuvola Player 3 is a runtime for web-based music streaming services providing more native user
 experience and integration with Linux desktop environments than usual web browsers can offer.
 Nuvola Players handles multimedia keys, shows desktop notifications, integrates with various sound
