@@ -1,6 +1,17 @@
 Nuvola Player Changelog
 =======================
 
+Release 3.0.8 - April 15th, 2017
+--------------------------------
+
+This is a bug fix release addressing following issues:
+
+  * Missing license file.
+  * Updated copyright year in the About dialog.
+  * Fixed start-up WM Class in the desktop file. Issue: tiliado/nuvolaplayer#305
+  * Build script fixed to require Diorite 0.2.2.
+  * Fixed crash with Valac 0.36.
+  
 Release 3.0.7 - February 26th, 2017
 -----------------------------------
 
