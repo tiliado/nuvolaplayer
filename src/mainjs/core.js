@@ -253,6 +253,33 @@ Core.isComponentLoaded = function(id)
     return info.loaded;
 }
 
+/**
+ * Activates or deactivates a component
+ * 
+ * The component must be loaded.
+ * 
+ * @param id id of the component
+ * @param Boolean active whether to activate or deactivate the component
+ * @return Boolean true if the component has been activated or deactivated
+ */
+Core.toggleComponentActive = function(id, active)
+{
+    return Nuvola._callIpcMethodSync("/nuvola/core/toggle-component-active", id + "", !!active);
+}
+
+
+/**
+ * Returns whether a component is loaded and active
+ * 
+ * @param id    id of the component
+ * @return Boolean true if the component is active
+ */
+Core.isComponentActive = function(id)
+{
+    var info = this.getComponentInfo(id);
+    return info.active;
+}
+
 // export public items
 Nuvola.Core = Core;
 

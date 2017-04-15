@@ -228,6 +228,12 @@ public class AppRunnerController : RunnerApplication
 			handle_get_component_info, {
 			new Drt.StringParam("name", true, false, null, "Component name.")
 			});
+		ipc_bus.router.add_method("/nuvola/core/toggle-component-active", Drt.ApiFlags.WRITABLE|Drt.ApiFlags.PRIVATE,
+			"Set whether the component is active.",
+			handle_toggle_component_active, {
+			new Drt.StringParam("name", true, false, null, "Component name."),
+			new Drt.BoolParam("name", true, false, "Component active state.")
+			});
 	}
 	
 	private void init_gui()
@@ -635,6 +641,7 @@ public class AppRunnerController : RunnerApplication
 					builder.add("{smv}", "name", new Variant.string(component.name));
 					builder.add("{smv}", "found", new Variant.boolean(true));
 					builder.add("{smv}", "loaded", new Variant.boolean(component.enabled));
+					builder.add("{smv}", "active", new Variant.boolean(component.active));
 					return builder.end();
 				}
 			}
@@ -644,6 +651,21 @@ public class AppRunnerController : RunnerApplication
 		builder.add("{smv}", "found", new Variant.boolean(false));
 		builder.add("{smv}", "loaded", new Variant.boolean(false));
 		return builder.end();
+	}
+	
+	private Variant? handle_toggle_component_active(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	{
+		var id = params.pop_string();
+		var active = params.pop_bool();
+		if (components != null)
+		{
+			foreach (var component in components)
+			{
+				if (id == component.id)
+					return new Variant.boolean(component.toggle_active(active));
+			}
+		}
+		return new Variant.boolean(false);
 	}
 	
 	private void on_action_changed(Diorite.Action action, ParamSpec p)
