@@ -39,7 +39,7 @@ public class HeaderLabel: Gtk.Label
 
 public class DeveloperSidebar: Gtk.ScrolledWindow
 {
-	private Diorite.ActionsRegistry? actions_reg;
+	private Diorite.Actions? actions_reg;
 	private Gtk.Grid grid;
 	private Gtk.Image? artwork = null;
 	private Gtk.Label? song = null; 

@@ -28,9 +28,9 @@ namespace Nuvola
 public class GlobalKeybindings: GLib.Object
 {
 	public ActionsKeyBinder keybinder {get; private set;}
-	private Diorite.ActionsRegistry actions;
+	private Diorite.Actions actions;
 	
-	public GlobalKeybindings(ActionsKeyBinder keybinder, Diorite.ActionsRegistry actions)
+	public GlobalKeybindings(ActionsKeyBinder keybinder, Diorite.Actions actions)
 	{
 		this.keybinder = keybinder;
 		this.actions = actions;

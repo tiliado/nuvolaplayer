@@ -47,7 +47,7 @@ public class TrayIcon: GLib.Object
 {
 	public bool visible {get; private set; default = false;}
 	private AppRunnerController controller;
-	private Diorite.ActionsRegistry actions_reg;
+	private Diorite.Actions actions_reg;
 	private LauncherModel model;
 	private Gtk.Menu? menu = null;
 	#if APPINDICATOR

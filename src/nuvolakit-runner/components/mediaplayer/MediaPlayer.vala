@@ -38,9 +38,9 @@ public class Nuvola.MediaPlayer: GLib.Object, Nuvola.MediaPlayerModel
 	public bool can_stop {get; set; default = false;}
 	public bool can_rate {get; set; default = false;}
 	public SList<string> playback_actions {get; owned set;}
-	private Diorite.ActionsRegistry actions;
+	private Diorite.Actions actions;
 	
-	public MediaPlayer(Diorite.ActionsRegistry actions)
+	public MediaPlayer(Diorite.Actions actions)
 	{
 		this.actions = actions;
 	}

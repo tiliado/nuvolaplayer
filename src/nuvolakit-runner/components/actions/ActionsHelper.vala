@@ -24,10 +24,10 @@
 
 public class Nuvola.ActionsHelper: GLib.Object, ActionsInterface
 {
-	private Diorite.ActionsRegistry actions;
+	private Diorite.Actions actions;
 	private Config config;
 	
-	public ActionsHelper(Diorite.ActionsRegistry actions, Config config)
+	public ActionsHelper(Diorite.Actions actions, Config config)
 	{
 		this.actions = actions;
 		this.config = config;

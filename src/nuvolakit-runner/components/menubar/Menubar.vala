@@ -27,12 +27,12 @@ namespace Nuvola
 
 public class MenuBar: GLib.Object, MenuBarInterface
 {
-	private Diorite.ActionsRegistry actions_reg;
+	private Diorite.Actions actions_reg;
 	private HashTable<string, SubMenu> menus;
 	private Menu? menubar = null;
 	private Menu? app_menu = null;
 	
-	public MenuBar(Diorite.ActionsRegistry actions_reg)
+	public MenuBar(Diorite.Actions actions_reg)
 	{
 		this.actions_reg = actions_reg;
 		this.menus = new HashTable<string, SubMenu>(str_hash, str_equal);
@@ -95,7 +95,7 @@ public class SubMenu
 		this.actions = actions;
 	}
 	
-	public void append_to_menu(Diorite.ActionsRegistry actions_reg, Menu menu)
+	public void append_to_menu(Diorite.Actions actions_reg, Menu menu)
 	{
 		menu.append_submenu(label, actions_reg.build_menu(actions, true, false));
 	}

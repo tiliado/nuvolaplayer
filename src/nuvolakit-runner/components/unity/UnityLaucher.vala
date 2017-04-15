@@ -32,7 +32,7 @@ namespace Nuvola
 public class UnityLauncher: GLib.Object
 {
 	private Diorite.Application controller;
-	private Diorite.ActionsRegistry actions_reg;
+	private Diorite.Actions actions_reg;
 	private Unity.LauncherEntry dock_item;
 	private LauncherModel model;
 	private SList<ActionAdaptor> adaptors = null;

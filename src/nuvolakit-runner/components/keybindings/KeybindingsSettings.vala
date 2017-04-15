@@ -27,7 +27,7 @@ namespace Nuvola
 
 public class KeybindingsSettings : Gtk.Grid
 {
-	private Diorite.ActionsRegistry actions_reg;
+	private Diorite.Actions actions_reg;
 	private Config config;
 	private ActionsKeyBinder global_keybindings;
 	private Gtk.TreeView view;
@@ -40,7 +40,7 @@ public class KeybindingsSettings : Gtk.Grid
 	 * 
 	 * @param app Application object
 	 */
-	public KeybindingsSettings(Diorite.ActionsRegistry actions_reg, Config config, ActionsKeyBinder global_keybindings)
+	public KeybindingsSettings(Diorite.Actions actions_reg, Config config, ActionsKeyBinder global_keybindings)
 	{
 		
 		this.actions_reg = actions_reg;
