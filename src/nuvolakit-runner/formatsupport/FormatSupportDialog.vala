@@ -198,10 +198,12 @@ public class FormatSupportDialog: Gtk.Dialog
 		plugins_view.show();
 		notebook.append_page(scrolled_window, new Gtk.Label("Web Plugins"));
 		mp3_warning_switch = new Gtk.Switch();
-		mp3_warning_switch.vexpand = flash_warning_switch.hexpand = false;
+		mp3_warning_switch.vexpand = mp3_warning_switch.hexpand = false;
+		mp3_warning_switch.halign = Gtk.Align.CENTER;
 		mp3_warning_switch.show();
 		gstreamer_switch = new Gtk.Switch();
-		gstreamer_switch.vexpand = flash_warning_switch.hexpand = false;
+		gstreamer_switch.halign = Gtk.Align.CENTER;
+		gstreamer_switch.vexpand = gstreamer_switch.hexpand = false;
 		gstreamer_switch.show();
 		var help_button = new Gtk.Button.with_label("Help");
 		help_button.clicked.connect(() => {app.show_uri("http://tiliado.github.io/nuvolaplayer/documentation/3.1/install.html");});
