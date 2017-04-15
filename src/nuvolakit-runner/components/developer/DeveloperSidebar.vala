@@ -116,7 +116,7 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
 		try
 		{
 			var icon_name = broken ? "dialog-error": "audio-x-generic";
-			var pixbuf = Gtk.IconTheme.get_default().load_icon(icon_name, 80, 0);
+			var pixbuf = Gtk.IconTheme.get_default().load_icon(icon_name, 80, Gtk.IconLookupFlags.FORCE_SIZE);
 			artwork.set_from_pixbuf(pixbuf);
 		}
 		catch (GLib.Error e)
