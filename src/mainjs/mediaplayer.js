@@ -101,6 +101,7 @@ var RUN_IN_BACKGROUND_OPTIONS = [
 ];
 
 var COMPONENT_NOTIFICATIONS = "notifications";
+var COMPONENTS_TO_ACTIVATE = ["mpris", "lyrics", "mediakeys", "scrobbler"];
 
 /**
  * Media player controller.
@@ -343,6 +344,8 @@ MediaPlayer._onInitAppRunner = function(emitter)
     Nuvola.core.connect("ComponentLoaded", this);
     Nuvola.core.connect("ComponentUnloaded", this);
     this._toggleNotifications(Nuvola.core.isComponentLoaded(COMPONENT_NOTIFICATIONS));
+    for (var i = 0; i < COMPONENTS_TO_ACTIVATE.length; i++)
+        this._activateComponent(COMPONENTS_TO_ACTIVATE[i]);
     
     // Take into account the old BACKGROUND_PLAYBACK value
     Nuvola.config.setDefault(BACKGROUND_PLAYBACK, true);
@@ -526,12 +529,20 @@ MediaPlayer._onComponentLoaded = function(emitter, id)
 {
     if (id == COMPONENT_NOTIFICATIONS)
         this._toggleNotifications(true);
+    
+    if (Nuvola.inArray(COMPONENTS_TO_ACTIVATE, id))
+        this._activateComponent(id);
 }
 
 MediaPlayer._onComponentUnloaded = function(emitter, id)
 {
     if (id == COMPONENT_NOTIFICATIONS)
         this._toggleNotifications(false);
+}
+
+MediaPlayer._activateComponent = function (id)
+{
+    Nuvola.core.toggleComponentActive(id, true);
 }
 
 MediaPlayer._toggleNotifications = function(enabled)

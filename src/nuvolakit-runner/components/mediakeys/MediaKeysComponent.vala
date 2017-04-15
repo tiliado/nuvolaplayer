@@ -42,6 +42,7 @@ public class MediaKeysComponent: Component
 		this.web_app_id = web_app_id;
 		config.bind_object_property("component.mediakeys.", this, "enabled").set_default(true).update_property();
 		enabled_set = true;
+		auto_activate = false;
 		if (enabled)
 			load();
 	}
