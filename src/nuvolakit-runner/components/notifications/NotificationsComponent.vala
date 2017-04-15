@@ -45,18 +45,20 @@ public class NotificationsComponent: Component
 			load();
 	}
 	
-	protected override void load()
+	protected override bool activate()
 	{
 		notifications = new Notifications(app, actions_helper);
 		notifications.start();
 		bindings.add_object(notifications);
+		return true;
 	}
 	
-	protected override void unload()
+	protected override bool deactivate()
 	{
 		bindings.remove_object(notifications);
 		notifications.stop();
 		notifications = null;
+		return true;
 	}
 }
 

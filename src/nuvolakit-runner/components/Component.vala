@@ -36,6 +36,8 @@ public abstract class Component: GLib.Object
 	public bool hidden {get; protected set; default = false;}
 	public bool enabled {get; protected set; default = false;}
 	public bool enabled_set {get; protected set; default = false;}
+	public bool active {get; protected set; default = false;}
+	public bool auto_activate {get; protected set; default = true;}
 	public bool has_settings {get; protected set; default = false;}
 	
 	public Component(string id, string name, string description)
@@ -54,6 +56,8 @@ public abstract class Component: GLib.Object
 		}
 		
 		this.enabled = enabled;
+		if (!enabled)
+			this.active = false;
 	}
 	
 	public virtual Gtk.Widget? get_settings()
@@ -61,9 +65,32 @@ public abstract class Component: GLib.Object
 		return null;
 	}
 	
-	protected abstract void load();
+	protected virtual void load()
+	{
+		if (auto_activate)
+			toggle_active(true);
+	}
 	
-	protected abstract void unload();
+	protected virtual void unload()
+	{
+		toggle_active(false);
+	}
+	
+	public bool toggle_active(bool active)
+	{
+		if (!enabled)
+			return false;
+		bool result = false;
+		if (this.active != active)
+			result = active ? activate() : deactivate();
+		if (result)
+			this.active = active;
+		return result;
+	}
+	
+	protected abstract bool activate();
+	
+	protected abstract bool deactivate();
 }
 
 } // namespace Nuvola

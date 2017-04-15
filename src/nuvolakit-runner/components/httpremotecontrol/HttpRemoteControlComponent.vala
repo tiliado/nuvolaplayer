@@ -51,14 +51,16 @@ public class Component: Nuvola.Component
 		return new Settings(app, ipc_bus);
 	}
 	
-	protected override void load()
+	protected override bool activate()
 	{
 		register(true);
+		return true;
 	}
 	
-	protected override void unload()
+	protected override bool deactivate()
 	{
 		register(false);
+		return true;
 	}
 	
 	private void register(bool register)

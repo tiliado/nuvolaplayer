@@ -42,16 +42,18 @@ public class MPRISComponent: Component
 			load();
 	}
 	
-	protected override void load()
+	protected override bool activate()
 	{
 		mpris = new MPRISProvider(app, bindings.get_model<MediaPlayerModel>());
 		mpris.start();
+		return true;
 	}
 	
-	protected override void unload()
+	protected override bool deactivate()
 	{
 		mpris.stop();
 		mpris = null;
+		return true;
 	}
 }
 

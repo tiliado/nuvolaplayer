@@ -47,16 +47,18 @@ public class TrayIconComponent: Component
 			load();
 	}
 	
-	protected override void load()
+	protected override bool activate()
 	{
 		tray_icon = new TrayIcon(controller, bindings.get_model<LauncherModel>());
 		controller.main_window.can_destroy.connect(on_can_quit);
+		return true;
 	}
 	
-	protected override void unload()
+	protected override bool deactivate()
 	{
 		controller.main_window.can_destroy.disconnect(on_can_quit);
 		tray_icon = null;
+		return true;
 	}
 	
 	public override Gtk.Widget? get_settings()

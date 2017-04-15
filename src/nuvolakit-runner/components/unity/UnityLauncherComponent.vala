@@ -43,14 +43,16 @@ public class UnityLauncherComponent: Component
 			load();
 	}
 	
-	protected override void load()
+	protected override bool activate()
 	{
 		launcher = new UnityLauncher(app, bindings.get_model<LauncherModel>());
+		return true;
 	}
 	
-	protected override void unload()
+	protected override bool deactivate()
 	{
 		launcher = null;
+		return true;
 	}
 }
 

@@ -78,7 +78,7 @@ public class AudioScrobblerComponent: Component
 		return grid;
 	}
 	
-	protected override void load()
+	protected override bool activate()
 	{
 		var scrobbler = new LastfmScrobbler(connection);
 		this.scrobbler = scrobbler;
@@ -93,9 +93,10 @@ public class AudioScrobblerComponent: Component
 		player.set_track_info.connect(on_set_track_info);
 		scrobbler.notify.connect_after(on_scrobbler_notify);
 		on_set_track_info(player.title, player.artist, player.album, player.state);
+		return true;
 	}
 	
-	protected override void unload()
+	protected override bool deactivate()
 	{
 		scrobbler.notify.disconnect(on_scrobbler_notify);
 		scrobbler = null;
@@ -106,6 +107,7 @@ public class AudioScrobblerComponent: Component
 		scrobble_artist = null;
 		scrobble_album = null;
 		scrobbled = false;
+		return true;
 	}
 	
 	private void schedule_scrobbling(string? title, string? artist, string? album, string? state)

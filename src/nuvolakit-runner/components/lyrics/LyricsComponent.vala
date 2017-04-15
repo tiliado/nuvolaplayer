@@ -42,7 +42,7 @@ public class LyricsComponent: Component
 			load();
 	}
 	
-	protected override void load()
+	protected override bool activate()
 	{
 		SList<LyricsFetcher> fetchers = null;
 		fetchers.append(new LyricsFetcherCache(app.storage.get_cache_path("lyrics")));
@@ -50,12 +50,14 @@ public class LyricsComponent: Component
 		var provider = new LyricsProvider(bindings.get_model<MediaPlayerModel>(), (owned) fetchers);
 		sidebar = new LyricsSidebar(app, provider);
 		app.main_window.sidebar.add_page("lyricssidebar", _("Lyrics"), sidebar);
+		return true;
 	}
 	
-	protected override void unload()
+	protected override bool deactivate()
 	{
 		app.main_window.sidebar.remove_page(sidebar);
 		sidebar = null;
+		return true;
 	}
 }
 

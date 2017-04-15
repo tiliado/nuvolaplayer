@@ -42,16 +42,18 @@ public class DeveloperComponent: Component
 			load();
 	}
 	
-	protected override void load()
+	protected override bool activate()
 	{
 		sidebar = new DeveloperSidebar(app, bindings.get_model<MediaPlayerModel>());
 		app.main_window.sidebar.add_page("developersidebar", _("Developer"), sidebar);
+		return true;
 	}
 	
-	protected override void unload()
+	protected override bool deactivate()
 	{
 		app.main_window.sidebar.remove_page(sidebar);
 		sidebar = null;
+		return true;
 	}
 }
 

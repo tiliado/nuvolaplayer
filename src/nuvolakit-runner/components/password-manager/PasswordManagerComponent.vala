@@ -47,11 +47,12 @@ public class PasswordManagerComponent: Component
 			load();
 	}
 	
-	protected override void load()
+	protected override bool activate()
 	{
 		manager = new PasswordManager(engine, web_app_id);
 		binding = new PasswordManagerBinding(ipc_bus.router, web_worker, manager);
 		manager.fetch_passwords.begin(on_passwords_fetched);
+		return true;
 	}
 	
 	private void on_passwords_fetched(GLib.Object? o, AsyncResult res)
@@ -77,7 +78,7 @@ public class PasswordManagerComponent: Component
 		}
 	}
 	
-	protected override void unload()
+	protected override bool deactivate()
 	{
 		try
 		{
@@ -93,6 +94,7 @@ public class PasswordManagerComponent: Component
 		binding.dispose();
 		binding = null;
 		manager = null;
+		return true;
 	}
 	
 	private void on_web_worker_notify(GLib.Object o, ParamSpec p)

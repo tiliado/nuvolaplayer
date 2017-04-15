@@ -46,18 +46,20 @@ public class MediaKeysComponent: Component
 			load();
 	}
 	
-	protected override void load()
+	protected override bool activate()
 	{
 		media_keys = new MediaKeysClient(web_app_id, conn);
 		bindings.add_object(media_keys);
 		media_keys.manage();
+		return true;
 	}
 	
-	protected override void unload()
+	protected override bool deactivate()
 	{
 		bindings.remove_object(media_keys);
 		media_keys.unmanage();
 		media_keys = null;
+		return true;
 	}
 }
 
