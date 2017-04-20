@@ -249,10 +249,9 @@ public class AppRunnerController : RunnerApplication
 		};
 		actions.add_actions(actions_spec);
 				
-		menu_bar = new MenuBar(actions);
+		menu_bar = new MenuBar(this);
 		menu_bar.update();
-		menu_bar.set_menus(this);
-		menu_bar.set_app_menu(this, {Actions.HELP, Actions.ABOUT, Actions.QUIT});
+		set_app_menu_items({Actions.HELP, Actions.ABOUT, Actions.QUIT});
 		
 		main_window = new WebAppWindow(this);
 		main_window.can_destroy.connect(on_can_quit);
@@ -311,8 +310,8 @@ public class AppRunnerController : RunnerApplication
 	
 	private void load_app()
 	{
-		menu_bar.set_app_menu(this, {Actions.FORMAT_SUPPORT, Actions.PREFERENCES, Actions.HELP, Actions.ABOUT, Actions.QUIT});
-		main_window.create_menu_button({Actions.ZOOM_IN, Actions.ZOOM_OUT, Actions.ZOOM_RESET, "|", Actions.TOGGLE_SIDEBAR});
+		set_app_menu_items({Actions.FORMAT_SUPPORT, Actions.PREFERENCES, Actions.HELP, Actions.ABOUT, Actions.QUIT});
+		main_window.set_menu_button_items({Actions.ZOOM_IN, Actions.ZOOM_OUT, Actions.ZOOM_RESET, "|", Actions.TOGGLE_SIDEBAR});
 		main_window.create_toolbar({Actions.GO_BACK, Actions.GO_FORWARD, Actions.GO_RELOAD, Actions.GO_HOME});
 		
 		main_window.sidebar.add_page.connect_after(on_sidebar_page_added);

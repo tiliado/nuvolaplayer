@@ -27,48 +27,22 @@ namespace Nuvola
 
 public class MenuBar: GLib.Object, MenuBarInterface
 {
-	private Diorite.Actions actions_reg;
+	private unowned Diorite.Application app;
 	private HashTable<string, SubMenu> menus;
-	private Menu? menubar = null;
-	private Menu? app_menu = null;
 	
-	public MenuBar(Diorite.Actions actions_reg)
+	public MenuBar(Diorite.Application app)
 	{
-		this.actions_reg = actions_reg;
+		this.app = app;
 		this.menus = new HashTable<string, SubMenu>(str_hash, str_equal);
-		menubar = new Menu();
-		app_menu = new Menu();
 	}
-	
-	public void set_app_menu(Gtk.Application app, string[] actions)
-	{
-		app_menu.remove_all();
-		actions_reg.append_to_menu(app_menu, actions, true, false);
-		if (app.app_menu == null)
-		{
-			if (app.get_windows() != null)
-				warning("Cannot set an app menu because an app window has been already created.");
-			else
-				app.set_app_menu(app_menu);
-		}
-		else if (app.app_menu != app_menu)
-		{
-			warning("The app menu have been already set to a different one.");
-		}
-	}
-	
-	public void set_menus(Gtk.Application app)
-	{
-		app.set_menubar(menubar);
-	}
-	
+		
 	public void update()
 	{
-		menubar.remove_all();
+		var menubar = app.reset_menubar();
 		var submenus = menus.get_keys();
 		submenus.sort(strcmp);
 		foreach (var submenu in submenus)
-			menus[submenu].append_to_menu(actions_reg, menubar);
+			menus[submenu].append_to_menu(app.actions, menubar);
 	}
 	
 	public void set_submenu(string id, SubMenu submenu)
@@ -95,9 +69,9 @@ public class SubMenu
 		this.actions = actions;
 	}
 	
-	public void append_to_menu(Diorite.Actions actions_reg, Menu menu)
+	public void append_to_menu(Diorite.Actions actions, Menu menu)
 	{
-		menu.append_submenu(label, actions_reg.build_menu(actions, true, false));
+		menu.append_submenu(label, actions.build_menu(this.actions, true, false));
 	}
 }
 

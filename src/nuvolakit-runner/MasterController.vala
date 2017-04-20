@@ -242,17 +242,9 @@ public class MasterController : Diorite.Application
 		};
 		actions.add_actions(actions_spec);
 		
-		// TODO: actions.get_action(Actions.INSTALL_APP).enabled = web_app_reg.allow_management;
+		set_app_menu_items({Actions.HELP,Actions.ABOUT, Actions.QUIT});
+		reset_menubar().append_submenu("_Apps", actions.build_menu({Actions.START_APP})); // For Unity
 		
-		set_app_menu(actions.build_menu({Actions.HELP,Actions.ABOUT, Actions.QUIT}, true, false));
-		
-		if (Gtk.Settings.get_default().gtk_shell_shows_menubar)
-		{
-			/* For Unity */
-			var menu = new Menu();
-			menu.append_submenu("_Apps", actions.build_menu({Actions.START_APP}));
-			set_menubar(menu);
-		}
 		var app_storage = new WebAppStorage(storage.user_config_dir, storage.user_data_dir, storage.user_cache_dir);
 		WebEngine.init_web_context(app_storage);
 		init_state = InitState.GUI;
