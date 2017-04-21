@@ -516,7 +516,7 @@ public class MasterController : Diorite.Application
 	{
 		if (main_window.selected_web_app == null)
 			return;
-		if (is_tiliado_account_valid(3))
+		if (is_tiliado_account_valid(TiliadoMembership.PREMIUM))
 		{
 			main_window.hide();
 			start_app(main_window.selected_web_app);
@@ -540,7 +540,7 @@ public class MasterController : Diorite.Application
 		}
 		#endif
 	
-		if (!is_tiliado_account_valid(3))
+		if (!is_tiliado_account_valid(TiliadoMembership.PREMIUM))
 		{
 			start_app_after_activation = app_id;
 			activate();
@@ -633,7 +633,7 @@ public class MasterController : Diorite.Application
 		}
 		#endif
 	
-		if (!is_tiliado_account_valid(3))
+		if (!is_tiliado_account_valid(TiliadoMembership.PREMIUM))
 		{
 			activate();
 			return false;
@@ -706,7 +706,7 @@ public class MasterController : Diorite.Application
 		}
 	}
 	
-	public bool is_tiliado_account_valid(uint required_membership)
+	public bool is_tiliado_account_valid(TiliadoMembership required_membership)
 	{
 		if (tiliado == null)
 			return true;  // Legacy builds
@@ -756,7 +756,7 @@ public class MasterController : Diorite.Application
 		{
 			var expires = new DateTime.now_utc().add_weeks(2).to_unix();
 			set_tiliado_user_info(user.name, user.membership, expires);
-			if (start_app_after_activation != null && is_tiliado_account_valid(3))
+			if (start_app_after_activation != null && is_tiliado_account_valid(TiliadoMembership.PREMIUM))
 			{
 				if (main_window != null)
 				{

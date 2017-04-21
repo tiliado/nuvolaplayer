@@ -25,6 +25,16 @@
 namespace Nuvola
 {
 
+public enum TiliadoMembership
+{
+	NONE = 0,
+	PREMIUM = 1,
+	PREMIUM_PLUS = 2,
+	PATRON = 3,
+	PATRON_PLUS = 4,
+	DEVELOPER = 5;
+}
+
 public class TiliadoApi2 : Oauth2Client
 {
 	public User? user {get; private set; default = null;}

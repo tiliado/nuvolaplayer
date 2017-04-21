@@ -430,15 +430,15 @@ public class AccountTypeLabel : Gtk.Label
 	{
 		switch (membership)
 		{
-		case 0:
+		case TiliadoMembership.NONE:
 			return "Basic account";
-		case 1:
+		case TiliadoMembership.PREMIUM:
 			return "★ Premium";
-		case 2:
+		case TiliadoMembership.PREMIUM_PLUS:
 			return "★ Premium+";
-		case 3:
+		case TiliadoMembership.PATRON:
 			return "★ Patron";
-		case 4:
+		case TiliadoMembership.PATRON_PLUS:
 			return "★ Patron+";
 		default:
 			return "☢ Developer";
