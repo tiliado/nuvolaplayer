@@ -50,14 +50,19 @@ public abstract class Component: GLib.Object
 		if (this.enabled != enabled)
 		{
 			if (enabled)
+			{
+				message("Load %s %s", id, name);
+				this.enabled = true;
 				load();
+			}
 			else
+			{
+				message("Unload %s %s", id, name);
 				unload();
+				this.enabled = false;
+				this.active = false;
+			}
 		}
-		
-		this.enabled = enabled;
-		if (!enabled)
-			this.active = false;
 	}
 	
 	public virtual Gtk.Widget? get_settings()
@@ -82,7 +87,12 @@ public abstract class Component: GLib.Object
 			return false;
 		bool result = false;
 		if (this.active != active)
+		{
+			message("%s: %s %s", active ? "Activate" : "Deactivate", id, name);
 			result = active ? activate() : deactivate();
+			if (!result)
+				warning("Failed to %s: %s %s", active ? "activate" : "deactivate", id, name);
+		}
 		if (result)
 			this.active = active;
 		return result;
