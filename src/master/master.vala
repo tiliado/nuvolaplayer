@@ -77,7 +77,13 @@ public int main(string[] args)
 	
 	if (Args.version)
 	{
-		stdout.printf("%s %s\n", Nuvola.get_app_name(), Nuvola.get_version());
+		#if GENUINE
+		var blurb = "Genuine flatpak build";
+		#else
+		var blurb = "based on Nuvola Apps™ project";
+		#endif
+		stdout.printf("%s - %s\n", Nuvola.get_app_name(), blurb);
+		stdout.printf("Version %s\n", Nuvola.get_version());
 		stdout.printf("Revision %s\n", Nuvola.get_revision());
 		stdout.printf("Diorite %s\n", Drt.get_version());
 		stdout.printf("WebKitGTK %u.%u.%u\n", WebKit.get_major_version(), WebKit.get_minor_version(), WebKit.get_micro_version());

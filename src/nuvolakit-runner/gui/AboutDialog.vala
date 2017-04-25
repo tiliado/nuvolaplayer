@@ -97,10 +97,11 @@ public class AboutDialog: Gtk.Dialog
 		}
 		
 		var name = Nuvola.get_app_name();
-		#if FLATPAK
-		name += "\n(Flatpak Edition)";
+		var subtitle = "Web App Integration Runtime\n";
+		#if GENUINE
+		subtitle += "Genuine flatpak build";
 		#else
-		name += "\n(Legacy Edition)";
+		subtitle += "based on Nuvola Apps™ project";
 		#endif
 		label = new Gtk.Label(name);
 		attributes = new Pango.AttrList() ;
@@ -108,7 +109,7 @@ public class AboutDialog: Gtk.Dialog
 		attributes.insert(new Pango.AttrFontDesc(Pango.FontDescription.from_string("bold")));
 		label.attributes = (owned) attributes;
 		title.attach(label, 1, 0, 1, 1);
-		title.attach(new Gtk.Label("Web App Integration Runtime"), 1, 1, 1, 1);
+		title.attach(new Gtk.Label(subtitle), 1, 1, 1, 1);
 		grid.attach(title, 0, 0, 2, 1);
 		grid.attach(new Gtk.Label("Version"), 0, 2, 1, 1);
 		label = new Gtk.Label(Nuvola.get_version());
