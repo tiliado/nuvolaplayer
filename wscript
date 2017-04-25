@@ -229,7 +229,7 @@ def configure(ctx):
 	pkgconfig(ctx, 'libarchive', 'LIBARCHIVE', '3.1')
 	pkgconfig(ctx, 'libnotify', 'NOTIFY', '0.7')
 	pkgconfig(ctx, 'libsecret-1', 'SECRET', '0.16')
-	pkgconfig(ctx, "gstreamer-1.0", 'GST', "1.0")
+	pkgconfig(ctx, "gstreamer-1.0", 'GST', "1.11.90" if ctx.options.webkit_mse else "1.8")
 	pkgconfig(ctx, 'webkit2gtk-4.0', 'WEBKIT', MIN_WEBKIT)
 	pkgconfig(ctx, 'webkit2gtk-web-extension-4.0', 'WEBKITEXT', MIN_WEBKIT)
 	pkgconfig(ctx, 'javascriptcoregtk-4.0', 'JSCORE', MIN_WEBKIT)

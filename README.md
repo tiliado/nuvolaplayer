@@ -63,7 +63,6 @@ Build and Install
   * [glib-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.50.0
   * [gio-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.50.0
   * [gobject-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.50.0
-  * [gthread-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.50.0
   * [gtk+-3.0](http://www.gtk.org/) >= 3.22.0
   * [gdk-3.0](http://www.gtk.org/) >= 3.22.0
   * [gdk-x11-3.0](http://www.gtk.org/) >= 3.22.0
@@ -73,6 +72,7 @@ Build and Install
   * [webkit2gtk-4.0](http://webkitgtk.org/) >= 2.14.5 (2.16.0 recommended)
   * [javascriptcoregtk-4.0](http://webkitgtk.org/) >= 2.14.5 (2.16.0 recommended)
   * [libnotify](https://git.gnome.org/browse/libnotify/) >= 0.7
+  * [gstreamer](https://gstreamer.freedesktop.org/) >= 1.8.3 (>= 1.12 for MSE)
   * libuuid
   * libsecret-1 >= 0.16
   * optional unity >= 3.0
