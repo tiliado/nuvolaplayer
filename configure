@@ -7,6 +7,7 @@ import sys, os, subprocess
 
 waf = ["python3", "./waf", "distclean", "configure"]
 prefix="/usr/local"
+libdir = None
 
 for arg in sys.argv[1:]:
 	try:
@@ -16,7 +17,7 @@ for arg in sys.argv[1:]:
 	if arg.startswith("!-"):
 		waf.append(arg[1:])
 	elif name == "--libdir":
-		waf.append(arg)
+		libdir = value
 	elif name == "--prefix":
 		waf.append(arg)
 		prefix = value
@@ -24,6 +25,10 @@ for arg in sys.argv[1:]:
 		os.environ[name] = value
 	else:
 		print("Warning: Unknown argument: ", arg)
+
+if not libdir:
+	libdir = prefix + "/lib"
+waf.append("--libdir=" + libdir)
 
 print(waf)
 subprocess.check_call(waf)
@@ -33,7 +38,7 @@ DESTDIR ?= /
 all:
 	python3 ./waf build -vv
 install:
-	python3 ./waf install --no-system-hooks --destdir="$(DESTDIR)"
+	python3 ./waf install --destdir="$(DESTDIR)"
 .NOTPARALLEL:
 """
 

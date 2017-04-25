@@ -78,40 +78,32 @@ Build and Install
   * optional unity >= 3.0
   * optional dbusmenu-glib-0.4 >= 0.4
 
-### Help
 
-    $ ./waf --help
+### Waf
 
-### Configure
+Nuvola uses [waf build system](https://waf.io). You are supposed to use the waf binary bundled with
+Nuvola's source code. The build script `wscript` may not be compatible with other versions. If you manage
+to port wscript to a newer stable waf release, you may provide us with patches to be merged once we decide
+to update our waf binary. Meantime, you can carry them downstream.
 
-    $ ./waf configure
-    
-or
-    
-    $ ./waf configure --with-unity
-    
-helpful:
-    
-    $ ./waf configure --prefix=/usr
+To find out what build parameters can be set run ./waf --help 
 
 ### Build
 
+    $ ./waf configure [--prefix=...] [--libdir=...] [--noopt] [--nodebug] [--nounity]
     $ ./waf build
 
 ### Install
 
-    # ./waf install
-    
-or
-    
-    # ./waf install --no-system-hooks
+    # ./waf install [--destdir=...]
     # /sbin/ldconfig
     # gtk-update-icon-cache ...
     # gtk-update-icon-cache-3.0 ...
     
-helpful:
+### Uninstall
 
-    # ./waf --no-system-hooks --destdir=/whatever
+    # ./waf uninstall [--destdir=...]
+
 
 Changelog
 ---------
