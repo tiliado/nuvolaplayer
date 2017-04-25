@@ -254,8 +254,11 @@ def configure(ctx):
 		version = (version[0], version[1] + 2)
 	
 	# Definitions
+	ctx.env.GENUINE = genuine
 	if genuine:
 		vala_def(ctx, ("EXPERIMENTAL", "GENUINE"))
+	else:
+		ctx.env.NAME = "Web Apps"
 	ctx.define("NUVOLA_APPNAME", APPNAME)
 	ctx.define("NUVOLA_FUTURE_APPNAME", FUTURE_APPNAME)
 	ctx.define("NUVOLA_NAME", ctx.env.NAME)
@@ -470,10 +473,24 @@ def build(ctx):
 		DIORITE_GTK=DIORITE_GTK,
 	)
 	
+	ctx(
+		features = 'subst',
+		source=ctx.path.find_node("data/nuvolaplayer3.appdata.xml"),
+		target=ctx.path.get_bld().make_node(ctx.env.UNIQUE_NAME + '.appdata.xml'),
+		install_path='${PREFIX}/share/appdata',
+		encoding="utf-8",
+		FULL_NAME=ctx.env.NAME,
+		PRELUDE=(
+			"" if ctx.env.GENUINE
+			else '<p>{} software is based on the open source code from the Nuvola Apps™ project.</p>'.format(ctx.env.NAME)
+		),
+	)
+	ctx.install_as(
+		'${PREFIX}/share/metainfo/%s.appdata.xml' % ctx.env.UNIQUE_NAME,
+		ctx.path.get_bld().find_node(ctx.env.UNIQUE_NAME + '.appdata.xml'))
+	
 	ctx.symlink_as('${PREFIX}/bin/%s' % FUTURE_APPNAME, APPNAME)
 	ctx.symlink_as('${PREFIX}/bin/%sctl' % FUTURE_APPNAME, CONTROL)
-	ctx.install_as('${PREFIX}/share/appdata/%s.appdata.xml' % ctx.env.UNIQUE_NAME, ctx.path.find_node("data/nuvolaplayer3.appdata.xml"))
-	ctx.install_as('${PREFIX}/share/metainfo/%s.appdata.xml' % ctx.env.UNIQUE_NAME, ctx.path.find_node("data/nuvolaplayer3.appdata.xml"))
 	
 	web_apps = ctx.path.find_dir("web_apps")
 	ctx.install_files('${PREFIX}/share/' + APPNAME, web_apps.ant_glob('**'), cwd=web_apps.parent, relative_trick=True)
