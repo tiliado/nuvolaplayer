@@ -1,22 +1,37 @@
-Nuvola Player 3
-===============
+Nuvola Apps Runtime
+===================
 
-*Nuvola Player 3 is a runtime for web-based music streaming services providing more native user
-experience and integration with Linux desktop environments than usual web browsers can offer.
-Nuvola Players handles multimedia keys, shows desktop notifications, integrates with various sound
-menus, applets and launchers and more. Additional features include Last FM scrobling.*
+About Nuvola
+------------
 
+**Nuvola Apps™** is a runtime for semi-sandboxed web apps providing more native user experience and tighter
+integration with Linux desktop environments than usual web browsers can offer. It tries to feel and look
+like a native application as much as possible.
+Nuvola™ mostly specializes on music streaming web apps (e.g. Google Play Music, Spotify, Amazon Music, Deezer,
+nd more), but progress is being made to support generic web apps (e.g. Google Calendar, Google Keep, etc.).
+
+**Features of Nuvola:** Desktop launchers, integration with media applets (e.g. in GNOME Shell and Ubuntu sound menu),
+Unity launcher quick list actions, lyrics fetching, Last.fm audio scrobbler, tray icon, desktop notifications,
+media keys binding, password manager, remote control over HTTP and more. Some features may be available only to
+users with premium or patron plans available at https://tiliado.eu/nuvolaplayer/funding/
+ 
+**Support:** Users of the genuine Nuvola builds available at https://nuvola.tiliado.eu are eligible for 
+a limited user support free of charge. Users of third-party builds should contact the customer care of their distributor
+or order paid support provided by the Nuvola developer.
+
+**Trademarks:** Nuvola™, Nuvola Player™ and Nuvola Apps™ are trademarks held by Jiří Janoušek,
+the founder of Nuvola project. Nuvola Apps software is not affiliated with the Nuvola icon theme.
 
 Code hosting and issue tracker
 ------------------------------
 
-Nuvola Player uses [Git version control system][2] for its code base and [GitHub][3] for
+Nuvola uses [Git version control system][2] for its code base and [GitHub][3] for
 both code hosting and issue tracking. All official Git repositories are located under
 [Tiliado organization account](https://github.com/tiliado). The code-base is divided to three parts:
 
  1. [Diorite library](https://github.com/tiliado/diorite): Private utility and widget library for
     Nuvola Player project based on GLib, GIO and GTK.
- 2. [Nuvola Player 3](https://github.com/tiliado/nuvolaplayer): The Nuvola Player run-time without
+ 2. [Nuvola Apps](https://github.com/tiliado/nuvolaplayer): The Nuvola Apps run-time without
     service integrations.
  3. Service integrations that have certain degree of independence and are maintained in separate
     [repositories](https://github.com/tiliado) named ``nuvola-app-...``.
@@ -28,10 +43,10 @@ both code hosting and issue tracking. All official Git repositories are located 
 How can I help
 --------------
 
-If you would like to contribute to Nuvola Player project development, there are two areas you can
+If you would like to contribute to Nuvola Apps project development, there are two areas you can
 jump in.
 
-  * [**Core development**][4] - development of the Nuvola Player run-time that loads web app
+  * [**Core development**][4] - development of the Nuvola Apps run-time that loads web app
     integrations and interacts with the Linux desktop components.
     
     *Skills:*
@@ -42,7 +57,7 @@ jump in.
     [JavaScript](https://developer.mozilla.org/en/docs/Web/JavaScript)
 
   * [**Service Integrations**][5] - service integration scripts that runs in the web
-    interface and communicates with Nuvola Player run-time.
+    interface and communicates with Nuvola Apps run-time.
     
     *Skills:*
     [JavaScript](https://developer.mozilla.org/en/docs/Web/JavaScript),
