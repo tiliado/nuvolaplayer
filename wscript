@@ -434,11 +434,13 @@ def build(ctx):
 		GENERIC_NAME=GENERIC_NAME,
 		WMCLASS = ctx.env.UNIQUE_NAME,
 	)
+	
+	dbus_name = ctx.env.UNIQUE_NAME if ctx.env.GENUINE else "eu.tiliado.NuvolaOse"	
 	ctx(features = 'subst',
 		source = 'data/templates/dbus.service',
-		target = "share/dbus-1/services/%s.service" % ctx.env.UNIQUE_NAME,
+		target = "share/dbus-1/services/%s.service" % dbus_name,
 		install_path = '${PREFIX}/share/dbus-1/services',
-		NAME = ctx.env.UNIQUE_NAME,
+		NAME = dbus_name,
 		EXEC = '%s/bin/%s --gapplication-service' % (ctx.env.PREFIX, APPNAME)
 	)
 	
