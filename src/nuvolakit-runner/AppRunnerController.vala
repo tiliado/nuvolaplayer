@@ -212,6 +212,9 @@ public class AppRunnerController : RunnerApplication
 			return;
 		}
 		
+		ipc_bus.router.add_method(IpcApi.CORE_GET_METADATA, Drt.ApiFlags.READABLE|Drt.ApiFlags.PRIVATE,
+			"Get web app metadata.", handle_get_metadata, null);
+		
 		try
 		{
 			var response = ipc_bus.master.call_sync("/nuvola/core/runner-started", new Variant("(ss)", web_app.id, ipc_bus.router.hex_token));
@@ -625,6 +628,11 @@ public class AppRunnerController : RunnerApplication
 		{
 			warning("Communication with web worker failed: %s", e.message);
 		}
+	}
+	
+	private Variant? handle_get_metadata(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	{
+		return web_app.to_variant();
 	}
 	
 	private Variant? handle_get_component_info(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
