@@ -228,7 +228,7 @@ public class MasterController : Diorite.Application
 		foreach (var data_dir in storage.data_dirs)
 			www_roots += data_dir.get_child(www_root_dirname);
 		http_remote_control = new HttpRemoteControl.Server(
-			this, server, app_runners_map, app_runners, web_app_reg, www_roots);
+			this, server, app_runners_map, app_runners, www_roots);
 		#endif
 		init_state = InitState.CORE;
 	}

@@ -44,7 +44,6 @@ public class Server: Soup.Server
 	private HashTable<string, AppRunner> app_runners;
 	private unowned Queue<AppRunner> app_runners_order;
 	private GenericSet<string> registered_runners;
-	private WebAppRegistry web_app_registry;
 	private bool running = false;
 	private File[] www_roots;
 	private Channel eio_channel;
@@ -55,14 +54,12 @@ public class Server: Soup.Server
 	
 	public Server(
 		MasterController app, MasterBus bus,
-		HashTable<string, AppRunner> app_runners, Queue<AppRunner> app_runners_order,
-		WebAppRegistry web_app_registry, File[] www_roots)
+		HashTable<string, AppRunner> app_runners, Queue<AppRunner> app_runners_order, File[] www_roots)
 	{
 		this.app = app;
 		this.bus = bus;
 		this.app_runners = app_runners;
 		this.app_runners_order = app_runners_order;
-		this.web_app_registry = web_app_registry;
 		this.www_roots = www_roots;
 		app.config.set_default_value(PORT_KEY, new Variant.int64(8089));
 		service_port = (int) app.config.get_int64(PORT_KEY);
