@@ -435,55 +435,18 @@ public class MasterController : Diorite.Application
 	{
 		var builder = new VariantBuilder(new VariantType("aa{sv}"));
 		var dict_type = new VariantType("a{sv}");
-		var all_apps = web_app_reg.list_web_apps();
-		var keys = all_apps.get_keys();
+		var keys = app_runners_map.get_keys();
 		keys.sort(string.collate);
 		foreach (var app_id in keys)
-		{
-			var app = all_apps[app_id];
-			builder.open(dict_type);
-			builder.add("{sv}", "id", new Variant.string(app_id));
-			builder.add("{sv}", "name", new Variant.string(app.name));
-			builder.add("{sv}", "version", new Variant.string("%u.%u".printf(app.version_major, app.version_minor)));
-			builder.add("{sv}", "maintainer", new Variant.string(app.maintainer_name));
-			var app_runner = app_runners_map[app_id];
-			builder.add("{sv}", "running", new Variant.boolean(app_runner != null));
-			var capatibilities_array = new VariantBuilder(new VariantType("as"));
-			if (app_runner != null)
-			{
-				var capatibilities = app_runner.get_capatibilities();
-				foreach (var capability in capatibilities)
-					capatibilities_array.add("s", capability);
-			}
-			builder.add("{sv}", "capabilities", capatibilities_array.end());
-			builder.close();
-		}
+			builder.add_value(app_runners_map[app_id].query_meta());
 		return builder.end();
 	}
 	
 	private Variant? handle_get_app_info(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		var app_id = params.pop_string();
-		var app = web_app_reg.get_app_meta(app_id);
-		if (app == null)
-			return null;
-			
-		var builder = new VariantBuilder(new VariantType("a{sv}"));
-		builder.add("{sv}", "id", new Variant.string(app_id));
-		builder.add("{sv}", "name", new Variant.string(app.name));
-		builder.add("{sv}", "version", new Variant.string("%u.%u".printf(app.version_major, app.version_minor)));
-		builder.add("{sv}", "maintainer", new Variant.string(app.maintainer_name));
-		var app_runner = app_runners_map[app_id];
-		builder.add("{sv}", "running", new Variant.boolean(app_runner != null));
-		var capatibilities_array = new VariantBuilder(new VariantType("as"));
-		if (app_runner != null)
-		{
-			var capatibilities = app_runner.get_capatibilities();
-			foreach (var capability in capatibilities)
-				capatibilities_array.add("s", capability);
-		}
-		builder.add("{sv}", "capabilities", capatibilities_array.end());
-		return builder.end();
+		var app = app_runners_map[app_id];
+		return app != null ? app.query_meta() : null;
 	}
 	
 	private bool on_main_window_delete_event(Gdk.EventAny event)
