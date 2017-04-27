@@ -111,6 +111,19 @@ public class WebAppMeta : GLib.Object
 		return false;
 	}
 	
+	public string[] list_categories()
+	{
+		string[] result = {};
+		var categories = this.categories.split(";");
+		foreach (var item in categories)
+		{
+			item = item.strip().down();
+			if (item[0] != 0)
+				result += item;
+		}
+		return result;
+	}
+	
 	public unowned Traits traits()
 	{
 		if (_traits == null)
