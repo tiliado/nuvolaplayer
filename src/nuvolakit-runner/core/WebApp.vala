@@ -330,6 +330,17 @@ public class WebAppMeta : GLib.Object
 		}
 	}
 	
+	public Variant to_variant()
+	{
+		var builder = new VariantBuilder(new VariantType("a{sv}"));
+		builder.add("{sv}", "id", new Variant.string(id));
+		builder.add("{sv}", "name", new Variant.string(name));
+		builder.add("{sv}", "version", new Variant.string("%u.%u".printf(version_major, version_minor)));
+		builder.add("{sv}", "maintainer", new Variant.string(maintainer_name));
+		builder.add("{sv}", "categories", new Variant.strv(list_categories()));
+		return builder.end();
+	}
+	
 	private string? get_old_main_icon()
 	{
 		// TODO: get rid of old main icon
