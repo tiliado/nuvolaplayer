@@ -520,16 +520,22 @@ public class AppRunnerController : RunnerApplication
 		}
 	}
 	
-	private void on_fatal_error(string title, string message)
+	private void on_fatal_error(string title, string message, bool markup)
 	{
-		var dialog = new Diorite.ErrorDialog(title, message + "\n\nThe application has reached an inconsistent state and will quit for that reason.");
+		var dialog = new Diorite.ErrorDialog(
+			title,
+			message + "\n\nThe application has reached an inconsistent state and will quit for that reason.",
+			markup);
 		dialog.run();
 		dialog.destroy();
 	}
 	
-	private void on_show_error(string title, string message)
+	private void on_show_error(string title, string message, bool markup)
 	{
-		var dialog = new Diorite.ErrorDialog(title, message + "\n\nThe application might not function properly.");
+		var dialog = new Diorite.ErrorDialog(
+			title,
+			message + "\n\nThe application might not function properly.",
+			markup);
 		dialog.run();
 		dialog.destroy();
 	}
