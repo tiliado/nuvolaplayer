@@ -45,22 +45,13 @@ public class Traits
 		#endif
 	}
 	
-	public bool eval() throws Drt.RequirementError
+	public bool eval(out string? failed_requirements) throws Drt.RequirementError
 	{
-		if (rule == null)
-		{
-			/* Legacy settings */
-			rule = "Feature[flash] Codec[mp3]";
-			warning("No requirements specified. '%s' used by default but that may change in the future.", rule);
-			flash_required = true;
-			return true;
-		}
-		return new Parser(this).eval(rule);
+		return new Parser(this).eval(rule, out failed_requirements);
 	}
 	
 	public void set_from_format_support(FormatSupport format_support)
 	{
-		
 		flash_supported = format_support.n_flash_plugins > 0;
 		mp3_supported = format_support.mp3_supported;
 	}

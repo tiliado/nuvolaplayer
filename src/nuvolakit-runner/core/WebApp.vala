@@ -131,7 +131,7 @@ public class WebAppMeta : GLib.Object
 			_traits = new Traits(requirements);
 			try
 			{
-				_traits.eval();
+				_traits.eval(null);
 			}
 			catch (Drt.RequirementError e)
 			{
@@ -141,13 +141,13 @@ public class WebAppMeta : GLib.Object
 		return _traits;
 	}
 	
-	public bool check_requirements(FormatSupport format_support) throws Drt.RequirementError
+	public bool check_requirements(FormatSupport format_support, out string? failed_requirements) throws Drt.RequirementError
 	{
 		var traits = this.traits();
 		traits.set_from_format_support(format_support);
 		debug("Requirements expression: '%s'", requirements);
-		var result = traits.eval();
-		debug("Requirements expression: '%s' -> %s", requirements, result.to_string());
+		var result = traits.eval(out failed_requirements);
+		debug("Requirements expression: '%s' -> %s; %s", requirements, result.to_string(), failed_requirements);
 		return result;
 	}
 	
@@ -327,6 +327,12 @@ public class WebAppMeta : GLib.Object
 		{
 			categories = "Network;";
 			warning("Empty 'categories' entry for web app '%s'. Using '%s' as a fallback.", id, categories);
+		}
+		
+		if (requirements == null)
+		{
+			requirements = "Feature[flash] Codec[mp3]";
+			warning("No requirements specified. '%s' used by default but that may change in the future.", requirements);
 		}
 	}
 	

@@ -183,12 +183,16 @@ public class FormatSupportCheck : GLib.Object
 		}
 		try
 		{
-			if (!web_app.check_requirements(format_support))
+			string? failed_requirements = null;
+			if (!web_app.check_requirements(format_support, out failed_requirements))
 				app.fatal_error(
 					"Requirements Not Satisfied",
-					("This web app requires certain technologies to function properly but these requirements "
-					+ "have not been satisfied. You may contact support. "
-					+ "Failed requirements:\n\n%s.").printf(web_app.requirements));
+					Markup.printf_escaped(
+						"This web app requires certain technologies to function properly but these requirements "
+						+ "have not been satisfied.\n\nFailed requirements: <i>%s</i>\n\n"
+						+ "<a href=\"%s\">Get help with installation</a>",
+						failed_requirements ?? "", WEB_APP_REQUIREMENTS_HELP_URL),
+					true);
 		}
 		catch (Drt.RequirementError e)
 		{

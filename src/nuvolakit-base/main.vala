@@ -38,6 +38,7 @@ private extern const int VERSION_BUGFIX;
 private extern const string VERSION_SUFFIX;
 private extern const string LIBDIR;
 
+public extern const string WEB_APP_REQUIREMENTS_HELP_URL;
 public extern const string REPOSITORY_INDEX;
 public extern const string REPOSITORY_ROOT;
 public extern const string TILIADO_OAUTH2_SERVER;
