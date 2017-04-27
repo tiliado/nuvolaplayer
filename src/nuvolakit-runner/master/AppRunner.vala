@@ -47,6 +47,26 @@ public abstract class AppRunner : GLib.Object
 	
 	public signal void notification(string path, string? detail, Variant? data);
 	
+	public Variant? query_meta()
+	{
+		try
+		{
+			var dict = new VariantDict(call_sync(IpcApi.CORE_GET_METADATA, null));
+			dict.insert_value("running", new Variant.boolean(true));
+			var capatibilities_array = new VariantBuilder(new VariantType("as"));
+			var capatibilities = get_capatibilities();
+			foreach (var capability in capatibilities)
+				capatibilities_array.add("s", capability);
+			dict.insert_value("capabilities", capatibilities_array.end());
+			return dict.end();
+		}
+		catch (GLib.Error e)
+		{
+			warning("Failed to query metadata: %s", e.message);
+			return null;
+		}
+	}
+	
 	public List<unowned string> get_capatibilities()
 	{
 		return capatibilities.get_values();
