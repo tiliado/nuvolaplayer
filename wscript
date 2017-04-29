@@ -39,6 +39,7 @@ CDK_UNIQUE_NAME="eu.tiliado.NuvolaCdk"
 GENERIC_NAME = "Cloud Player"
 BLURB = "Cloud music integration for your Linux desktop"
 WELCOME_SCREEN_NAME = "Nuvola Apps 3.1 Rolling Releases"
+HELP_URL = "https://tiliado.github.io/nuvolaplayer/documentation/3.1/help.html"
 WEB_APP_REQUIREMENTS_HELP_URL = "https://github.com/tiliado/nuvolaplayer/wiki/Web-App-Requirements"
 
 MIN_DIORITE = "0.3.3"
@@ -280,6 +281,7 @@ def configure(ctx):
 	ctx.define("NUVOLA_REPOSITORY_INDEX", repo_index)
 	ctx.define("NUVOLA_REPOSITORY_ROOT", repo_root)
 	ctx.define("NUVOLA_WEB_APP_REQUIREMENTS_HELP_URL", WEB_APP_REQUIREMENTS_HELP_URL)
+	ctx.define("NUVOLA_HELP_URL", HELP_URL)
 	ctx.define("NUVOLA_LIBDIR", ctx.env.NUVOLA_LIBDIR)
 	
 	ctx.define('GLIB_VERSION_MAX_ALLOWED', glib_encode_version(MIN_GLIB))
