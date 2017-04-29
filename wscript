@@ -38,7 +38,6 @@ ADK_UNIQUE_NAME="eu.tiliado.NuvolaAdk"
 CDK_UNIQUE_NAME="eu.tiliado.NuvolaCdk"
 GENERIC_NAME = "Cloud Player"
 BLURB = "Cloud music integration for your Linux desktop"
-WELCOME_SCREEN_NAME = "Nuvola Apps 3.1 Rolling Releases"
 HELP_URL = "https://tiliado.github.io/nuvolaplayer/documentation/3.1/help.html"
 WEB_APP_REQUIREMENTS_HELP_URL = "https://github.com/tiliado/nuvolaplayer/wiki/Web-App-Requirements"
 
@@ -62,6 +61,7 @@ TARGET_GLIB = MIN_GLIB.rsplit(".", 1)[0]
 SERIES = VERSION.rsplit(".", 1)[0]
 VERSIONS = tuple(int(i) for i in VERSION.split("."))
 REVISION_SNAPSHOT = "snapshot"
+WELCOME_SCREEN_NAME = VERSION
 
 
 def get_revision_id():
@@ -185,6 +185,7 @@ def configure(ctx):
 		ctx.env.append_unique('CFLAGS', '-g3')
 	
 	# Variants
+	ctx.env.BRANDING = "tiliado"
 	genuine = False
 	ctx.env.CDK = ctx.options.cdk
 	ctx.env.ADK = ctx.options.adk
@@ -436,6 +437,18 @@ def build(ctx):
 		EXEC = APPNAME if not ctx.env.ADK else "lxterminal",
 		GENERIC_NAME=GENERIC_NAME,
 		WMCLASS = ctx.env.UNIQUE_NAME,
+	)
+	
+	ctx(features = 'subst',
+		source = 'branding/%s/welcome.xml' % ctx.env.BRANDING,
+		target = 'share/%s/welcome.xml' % APPNAME,
+		install_path = '${PREFIX}/share/%s' % APPNAME,
+		BLURB = BLURB,
+		NAME = ctx.env.NAME,
+		VERSION = VERSION,
+		FULL_VERSION = ctx.env.VERSION,
+		HELP_URL = HELP_URL,
+		WEB_APP_REQUIREMENTS_HELP_URL = WEB_APP_REQUIREMENTS_HELP_URL,
 	)
 	
 	dbus_name = ctx.env.UNIQUE_NAME if ctx.env.GENUINE else "eu.tiliado.NuvolaOse"	

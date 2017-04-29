@@ -25,51 +25,6 @@
 namespace Nuvola
 {
 
-private const string WELCOME_TEXT = """
-<h1>%1$s</h1>
-<p>
-  <b>Congratulations!</b> You have installed %1$s.
-  <a href="https://tiliado.github.io/nuvolaplayer/documentation/3.1.html">Read release notes</a> to find out
-  what is new.
-</p>
-<h2>Be connected</h2>
-<p>Get informed about new features, new streaming services and bug fixes.</p>
-<ul>
-  <li>
-    Follow Nuvola Player on <a href="https://www.facebook.com/nuvolaplayer">Facebook</a>,
-    <a href="https://plus.google.com/110794636546911932554">Google+</a>
-    or <a href="https://twitter.com/NuvolaPlayer">Twitter</a>.
-  </li>
-  <li>
-    Subscribe to the Nuvola Player Newsletter: <a href="http://eepurl.com/bLbm5H">weekly (recommended)</a>
-    or <a href="http://eepurl.com/bLbtM1">monthly</a>.
-  </li>
-</ul>
-
-<h2>Explore all features</h2>
-<p>We reccommend you to <a href="https://tiliado.github.io/nuvolaplayer/documentation/3.1/explore.html">explore all features</a> including</p>
-<ul>
-  <li><a href="https://tiliado.github.io/nuvolaplayer/documentation/3.1/explore.html#explore-unity">Unity integration</a></li>
-  <li><a href="https://tiliado.github.io/nuvolaplayer/documentation/3.1/explore.html#explore-gnome">GNOME integration</a></li>
-  <li><a href="https://tiliado.github.io/nuvolaplayer/documentation/3.1/explore.html#explore-common">Common features</a></li>
-  <li><a href="https://tiliado.github.io/nuvolaplayer/documentation/3.1/explore.html#explore-terminal">Command line controller</a></li>
-</ul>
-
-<h2>Get help</h2>
-<p>Whenever in trouble, select "Help" menu item.</p>
-<ul>
-  <li><b>Unity</b>: Gear menu button → Help</li>
-  <li><b>GNOME</b>: Application menu button → Help</li>
-</ul>
-
-<h2>Become a Patron</h2>
-<p>
-  Development of Nuvola Apps depends on voluntary payments from users.
-  <a href="https://tiliado.eu/nuvolaplayer/funding/">Support the project</a> financially and enjoy
-  <a href="https://tiliado.eu/accounts/group/3/">the benefits of the Nuvola Patron membership</a>.
-</p>
-""";
-
 public class WelcomeScreen : Gtk.Grid
 {
 	private const string PATRONS_BOX_URI = "https://tiliado.eu/nuvolaplayer/funding/patrons_list_box/";
@@ -81,16 +36,31 @@ public class WelcomeScreen : Gtk.Grid
 	
 	public WelcomeScreen(Diorite.Application app, Diorite.Storage storage)
 	{
-//~ 		set_default_size(1000, 800);
 		this.app = app;
 		
 		grid = new Gtk.Grid();
 		grid.override_background_color(Gtk.StateFlags.NORMAL, {1.0, 1.0, 1.0, 1.0});
 		grid.orientation = Gtk.Orientation.VERTICAL;
+		
+		string welcome_xml = null;
+		var welcome_xml_file = storage.get_data_file("welcome.xml");
+		if (welcome_xml_file != null)
+		{
+			try
+			{
+				welcome_xml = Diorite.System.read_file(welcome_xml_file);
+			}
+			catch (GLib.Error e)
+			{
+				warning("Failed to load '%s': %s", welcome_xml_file.get_path(), e.message);
+			}
+		}		
+		if (welcome_xml == null)
+			welcome_xml = """<h1>Error</h1>\n<p>Failed to find welcome text.</p>""";
 		var buffer = new Diorite.RichTextBuffer();
 		try
 		{
-			buffer.load(WELCOME_TEXT.printf(get_welcome_screen_name()));
+			buffer.load(welcome_xml);
 		}
 		catch (MarkupError e)
 		{

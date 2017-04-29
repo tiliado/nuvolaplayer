@@ -1,0 +1,49 @@
+<h1>@NAME@ @VERSION@</h1>
+<p>
+  You have installed <b>@NAME@ @VERSION@</b>.
+  <a href="https://tiliado.github.io/nuvolaplayer/documentation/3.1.html">Read release notes</a> to find out
+  what is new.
+</p>
+<p>
+  <b>Nuvola™</b> is a runtime for semi-sandboxed web apps providing more native user experience and tighter
+  integration with Linux desktop environments than usual web browsers can offer. It tries to feel and look
+  like a native application as much as possible.
+  Nuvola mostly specializes on music streaming web apps (e.g. Google Play Music, Spotify, Amazon Music, Deezer,
+  and more), but progress is being made to support generic web apps (e.g. Google Calendar, Google Keep, etc.).
+</p>
+
+<h2>Be connected</h2>
+<p>Get informed about new features, new streaming services and bug fixes.</p>
+<ul>
+  <li>
+    Follow Nuvola Player on <a href="https://www.facebook.com/nuvolaplayer">Facebook</a>,
+    <a href="https://plus.google.com/110794636546911932554">Google+</a>
+    or <a href="https://twitter.com/NuvolaPlayer">Twitter</a>.
+  </li>
+  <li>
+    Subscribe to the Nuvola Player Newsletter: <a href="http://eepurl.com/bLbm5H">weekly (recommended)</a>
+    or <a href="http://eepurl.com/bLbtM1">monthly</a>.
+  </li>
+</ul>
+
+<h2>Explore all features</h2>
+<p>We recommend that you <a href="https://tiliado.github.io/nuvolaplayer/documentation/3.1/explore.html">explore all features</a> including</p>
+<ul>
+  <li><a href="https://tiliado.github.io/nuvolaplayer/documentation/3.1/explore.html#explore-unity">Unity integration</a></li>
+  <li><a href="https://tiliado.github.io/nuvolaplayer/documentation/3.1/explore.html#explore-gnome">GNOME integration</a></li>
+  <li><a href="https://tiliado.github.io/nuvolaplayer/documentation/3.1/explore.html#explore-common">Common features</a></li>
+  <li><a href="https://tiliado.github.io/nuvolaplayer/documentation/3.1/explore.html#explore-terminal">Command line controller</a></li>
+</ul>
+
+<h2>Get help</h2>
+<p>Whenever in trouble, select "Help" menu item to <a href="@HELP_URL@">access online documentation</a>.</p>
+<ul>
+  <li><b>Unity</b>: Gear menu button → Help</li>
+  <li><b>GNOME</b>: Application menu button → Help</li>
+</ul>
+
+<h2>Get Premium</h2>
+<p>
+  Some features are only available to users with a Premium account.
+  <a href="https://tiliado.eu/nuvolaplayer/funding/">Get Premium account now.</a>
+</p>
