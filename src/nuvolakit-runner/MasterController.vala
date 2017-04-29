@@ -49,7 +49,8 @@ public class MasterController : Diorite.Application
 	private const string TILIADO_ACCOUNT_EXPIRES = "tiliado.account2.expires";
 	private const string TILIADO_ACCOUNT_SIGNATURE = "tiliado.account2.signature";
 	
-	public WebAppListWindow? main_window {get; private set; default = null;}
+	public MasterWindow? main_window {get; private set; default = null;}
+	public WebAppList? web_app_list {get; private set; default = null;}
 	public Diorite.Storage storage {get; private set; default = null;}
 	public WebAppRegistry web_app_reg {get; private set; default = null;}
 	public Config config {get; private set; default = null;}
@@ -248,8 +249,7 @@ public class MasterController : Diorite.Application
 		};
 		actions.add_actions(actions_spec);
 		
-		set_app_menu_items({Actions.HELP,Actions.ABOUT, Actions.QUIT});
-		reset_menubar().append_submenu("_Apps", actions.build_menu({Actions.START_APP})); // For Unity
+		set_app_menu_items({Actions.HELP, Actions.ABOUT, Actions.QUIT});
 		
 		var app_storage = new WebAppStorage(storage.user_config_dir, storage.user_data_dir, storage.user_cache_dir);
 		WebEngine.init_web_context(app_storage);
@@ -259,10 +259,23 @@ public class MasterController : Diorite.Application
 	private void create_main_window()
 	{
 		init_gui();
+		main_window = new MasterWindow(this);
+		main_window.page_changed.connect(on_master_stack_page_changed);
+		#if FLATPAK
+		var app_index_view = new AppIndexWebView(WebEngine.get_web_context());
+		app_index_view.load_app_index(Nuvola.REPOSITORY_INDEX, Nuvola.REPOSITORY_ROOT);
+		app_index_view.show_all();
+		main_window.stack.add_titled(app_index_view, "repository", "Repository Index");
+		#endif
+		
+		#if !FLATPAK || !NUVOLA_STD
 		var model = new WebAppListFilter(new WebAppListModel(web_app_reg), debuging, null);
-		main_window = new WebAppListWindow(this, model);
+		web_app_list = new WebAppList(this, model);
 		main_window.delete_event.connect(on_main_window_delete_event);
-		main_window.view.item_activated.connect_after(on_list_item_activated);
+		web_app_list.view.item_activated.connect_after(on_list_item_activated);
+		main_window.stack.add_titled(web_app_list, "scripts", "Installed Apps");
+		#endif
+		
 		if (tiliado != null)
 		{
 			string? user_name = null;
@@ -280,12 +293,6 @@ public class MasterController : Diorite.Application
 				main_window.header_bar.pack_end(tiliado_widget);
 			tiliado_widget.notify["full-width"].connect_after(on_tiliado_widget_full_width_changed);
 		}
-		#if FLATPAK
-		var app_index_view = new AppIndexWebView(WebEngine.get_web_context());
-		app_index_view.load_app_index(Nuvola.REPOSITORY_INDEX, Nuvola.REPOSITORY_ROOT);
-		app_index_view.show_all();
-		main_window.stack.add_titled(app_index_view, "repository", "Repository Index");
-		#endif
 	}
 	
 	private void show_welcome_window()
@@ -449,6 +456,19 @@ public class MasterController : Diorite.Application
 		return app != null ? app.query_meta() : null;
 	}
 	
+	private void on_master_stack_page_changed(Gtk.Widget? page, string? name, string? title)
+	{
+		if (page != null && page == web_app_list)
+		{
+			main_window.create_toolbar({Actions.START_APP});
+			reset_menubar().append_submenu("_Apps", actions.build_menu({Actions.START_APP})); // For Unity
+		}
+		else
+		{
+			main_window.create_toolbar({});
+			reset_menubar();
+		}
+	}
 	private bool on_main_window_delete_event(Gdk.EventAny event)
 	{
 		do_quit();
@@ -482,17 +502,17 @@ public class MasterController : Diorite.Application
 	
 	private void do_start_app()
 	{
-		if (main_window.selected_web_app == null)
+		if (web_app_list.selected_web_app == null)
 			return;
 		if (is_tiliado_account_valid(TiliadoMembership.PREMIUM))
 		{
 			main_window.hide();
-			start_app(main_window.selected_web_app);
+			start_app(web_app_list.selected_web_app);
 			do_quit();
 		}
 		else
 		{
-			start_app_after_activation = main_window.selected_web_app;
+			start_app_after_activation = web_app_list.selected_web_app;
 		}
 	}
 	

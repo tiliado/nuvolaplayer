@@ -25,41 +25,21 @@
 namespace Nuvola
 {
 
-public class WebAppListWindow : Diorite.ApplicationWindow
+public class WebAppList : Gtk.Grid
 {
 	public WebAppListView view {get; private set;}
 	public WebAppListFilter model {get; private set;}
 	public string? category {get; set; default = null;}
 	public string? selected_web_app {get; private set; default = null;}
 	private AppCategoriesView categories;
-	private MasterController app;
-	private Gtk.Grid grid;
+	private unowned MasterController app;
 	private Gtk.Grid details;
 	private Gtk.Label app_name;
 	private Gtk.Label app_version;
 	private Gtk.Label app_maintainer;
-	#if FLATPAK
-	public Gtk.Stack stack;
-	public Gtk.StackSwitcher switcher;
-	#endif
 	
-	public WebAppListWindow(MasterController app, WebAppListFilter model)
+	public WebAppList(MasterController app, WebAppListFilter model)
 	{
-		base(app, false);
-		title = "Select a web app - " + app.app_name;
-		try
-		{
-			icon = Gtk.IconTheme.get_default().load_icon(app.icon, 48, 0);
-		}
-		catch (Error e)
-		{
-			warning("Unable to load application icon.");
-		}
-		#if FLATPAK
-		set_default_size(900, 600);
-		#else
-		set_default_size(700, 600);
-		#endif
 		this.app = app;
 		app.actions.get_action(Actions.START_APP).enabled = false;
 		this.model = model;
@@ -74,8 +54,6 @@ public class WebAppListWindow : Diorite.ApplicationWindow
 		scroll.halign = Gtk.Align.FILL;
 		scroll.vexpand = true;
 		scroll.hexpand = true;
-		
-		create_toolbar({Actions.START_APP});
 		
 		details = new Gtk.Grid();
 		details.orientation = Gtk.Orientation.HORIZONTAL;
@@ -119,31 +97,16 @@ public class WebAppListWindow : Diorite.ApplicationWindow
 		categories.no_show_all = true;
 		categories.hide();
 		
-		grid = new Gtk.Grid();
-		grid.margin = 8;
-		grid.attach(categories, 0, 0, 1, 1);
-		grid.attach(scroll, 1, 0, 1, 1);
-		grid.attach(details, 0, 1, 2, 1);
+		margin = 8;
+		attach(categories, 0, 0, 1, 1);
+		attach(scroll, 1, 0, 1, 1);
+		attach(details, 0, 1, 2, 1);
 		
 		view.select_path(new Gtk.TreePath.first());
 		category = model.category;
 		notify["category"].connect_after(on_category_changed);
 		model.bind_property(
 			"category", categories, "category", GLib.BindingFlags.BIDIRECTIONAL|GLib.BindingFlags.SYNC_CREATE);
-		
-		#if FLATPAK
-		stack = new Gtk.Stack();
-		switcher = new Gtk.StackSwitcher();
-		switcher.set_stack(stack);
-		header_bar.set_custom_title(switcher);
-		switcher.show();
-		top_grid.add(stack);
-		grid.show_all();
-		stack.add_titled(grid, "scripts", "Installed Apps");
-		stack.show_all();
-		#else
-		top_grid.add(grid);
-		#endif
 	}
 	
 	private void on_selection_changed()
