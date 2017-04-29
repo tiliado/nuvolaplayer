@@ -49,22 +49,18 @@ public class MasterWindow : Diorite.ApplicationWindow
 		{
 			warning("Unable to load application icon.");
 		}
-		#if FLATPAK
 		set_default_size(900, 600);
-		#else
-		set_default_size(700, 600);
-		#endif
 		this.app = app;
 		update_title();
 		create_toolbar({});
 		stack = new Gtk.Stack();
+		stack.notify["visible-child"].connect_after(update);
 		switcher = new Gtk.StackSwitcher();
 		switcher.set_stack(stack);
 		header_bar.set_custom_title(switcher);
 		switcher.show();
 		top_grid.add(stack);
 		stack.show_all();
-		stack.notify["visible-child"].connect_after(on_stack_visible_child_changed);
 	}
 	
 	/**
@@ -76,12 +72,27 @@ public class MasterWindow : Diorite.ApplicationWindow
 	 */
 	public signal void page_changed(Gtk.Widget? widget, string? name, string? title);
 	
-	private void update_title(string? title=null)
+	/**
+	 * Add page to the main page stack
+	 * 
+	 * @param page     A widget to add.
+	 * @param name     A page name.
+	 * @param title    A title for the switcher.
+	 */
+	public void add_page(Gtk.Widget page, string name, string title)
 	{
-		this.title = title != null ? title + app.app_name : app.app_name;
+		var was_empty = stack.visible_child == null;
+		stack.add_titled(page, name, title);
+		if (was_empty)
+			update();
 	}
 	
-	private void on_stack_visible_child_changed(GLib.Object emitter, ParamSpec param)
+	private void update_title(string? title=null)
+	{
+		this.title = title != null ? "%s - %s".printf(title, app.app_name) : app.app_name;
+	}
+	
+	private void update()
 	{
 		var child = stack.visible_child;
 		string? name = null;

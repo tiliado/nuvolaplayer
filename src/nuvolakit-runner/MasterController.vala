@@ -265,7 +265,7 @@ public class MasterController : Diorite.Application
 		var app_index_view = new AppIndexWebView(WebEngine.get_web_context());
 		app_index_view.load_app_index(Nuvola.REPOSITORY_INDEX, Nuvola.REPOSITORY_ROOT);
 		app_index_view.show_all();
-		main_window.stack.add_titled(app_index_view, "repository", "Repository Index");
+		main_window.add_page(app_index_view, "repository", "Repository Index");
 		#endif
 		
 		if (web_app_reg != null)
@@ -274,7 +274,7 @@ public class MasterController : Diorite.Application
 			web_app_list = new WebAppList(this, model);
 			main_window.delete_event.connect(on_main_window_delete_event);
 			web_app_list.view.item_activated.connect_after(on_list_item_activated);
-			main_window.stack.add_titled(web_app_list, "scripts", "Installed Apps");
+			main_window.add_page(web_app_list, "scripts", "Installed Apps");
 		}
 		
 		if (tiliado != null)
