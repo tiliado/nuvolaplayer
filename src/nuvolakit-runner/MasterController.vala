@@ -52,7 +52,7 @@ public class MasterController : Diorite.Application
 	public MasterWindow? main_window {get; private set; default = null;}
 	public WebAppList? web_app_list {get; private set; default = null;}
 	public Diorite.Storage storage {get; private set; default = null;}
-	public WebAppRegistry web_app_reg {get; private set; default = null;}
+	public WebAppRegistry? web_app_reg {get; private set; default = null;}
 	public Config config {get; private set; default = null;}
 	private string[] exec_cmd;
 	private Queue<AppRunner> app_runners = null;
@@ -73,7 +73,7 @@ public class MasterController : Diorite.Application
 	private InitState init_state = InitState.NONE;
 	private bool debuging;
 	
-	public MasterController(Diorite.Storage storage, WebAppRegistry web_app_reg, string[] exec_cmd, bool debuging=false)
+	public MasterController(Diorite.Storage storage, WebAppRegistry? web_app_reg, string[] exec_cmd, bool debuging=false)
 	{
 		#if GENUINE
 		string? dbus_id = null;
@@ -268,13 +268,14 @@ public class MasterController : Diorite.Application
 		main_window.stack.add_titled(app_index_view, "repository", "Repository Index");
 		#endif
 		
-		#if !FLATPAK || !NUVOLA_STD
-		var model = new WebAppListFilter(new WebAppListModel(web_app_reg), debuging, null);
-		web_app_list = new WebAppList(this, model);
-		main_window.delete_event.connect(on_main_window_delete_event);
-		web_app_list.view.item_activated.connect_after(on_list_item_activated);
-		main_window.stack.add_titled(web_app_list, "scripts", "Installed Apps");
-		#endif
+		if (web_app_reg != null)
+		{
+			var model = new WebAppListFilter(new WebAppListModel(web_app_reg), debuging, null);
+			web_app_list = new WebAppList(this, model);
+			main_window.delete_event.connect(on_main_window_delete_event);
+			web_app_list.view.item_activated.connect_after(on_list_item_activated);
+			main_window.stack.add_titled(web_app_list, "scripts", "Installed Apps");
+		}
 		
 		if (tiliado != null)
 		{

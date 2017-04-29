@@ -33,22 +33,26 @@ struct Args
 	static bool debug;
 	static bool verbose;
 	static bool version;
+	static string? log_file = null;
+	#if !FLATPAK || !NUVOLA_STD
 	static string? app_id = null;
 	static string? apps_dir = null;
-	static string? log_file = null;
 	static bool list_apps = false;
 	static bool list_apps_json = false;
+	#endif
 	
 	public const OptionEntry[] options =
 	{
+		#if !FLATPAK || !NUVOLA_STD
 		{ "app-id", 'a', 0, OptionArg.STRING, ref app_id, "Web app to run, e.g. \"happy_songs\" for Happy Songs web app.", "ID" },
 		{ "apps-dir", 'A', 0, GLib.OptionArg.FILENAME, ref Args.apps_dir, "Search for web app integrations only in directory DIR and disable service management.", "DIR" },
+		{ "list-apps", 'l', 0, OptionArg.NONE, ref list_apps, "List available application.", null },
+		{ "list-apps-json", 'j', 0, OptionArg.NONE, ref list_apps_json, "List available application (JSON output).", null },
+		#endif
 		{ "verbose", 'v', 0, OptionArg.NONE, ref Args.verbose, "Print informational messages", null },
 		{ "debug", 'D', 0, OptionArg.NONE, ref Args.debug, "Print debugging messages", null },
 		{ "version", 'V', 0, OptionArg.NONE, ref Args.version, "Print version and exit", null },
 		{ "log-file", 'L', 0, OptionArg.FILENAME, ref Args.log_file, "Log to file", "FILE" },
-		{ "list-apps", 'l', 0, OptionArg.NONE, ref list_apps, "List available application.", null },
-		{ "list-apps-json", 'j', 0, OptionArg.NONE, ref list_apps_json, "List available application (JSON output).", null },
 		{ null }
 	};
 }
@@ -125,14 +129,13 @@ public int main(string[] args)
 	if (Environment.get_variable("NUVOLA_TEST_ABORT") == "master")
 		error("Master abort requested.");
 	
+	WebAppRegistry? web_app_reg = null;
+	var storage = new Diorite.XdgStorage.for_project(Nuvola.get_app_id());
+	
+	#if !FLATPAK || !NUVOLA_STD
 	if (Args.apps_dir == null)
 		Args.apps_dir = Environment.get_variable("NUVOLA_WEB_APPS_DIR");
 	
-	var storage = new Diorite.XdgStorage.for_project(Nuvola.get_app_id());
-	var web_apps_storage = storage.get_child("web_apps");
-	
-		
-	WebAppRegistry web_app_reg;
 	if (Args.apps_dir != null && Args.apps_dir != "")
 	{
 		local_only_args = true;
@@ -140,8 +143,10 @@ public int main(string[] args)
 	}
 	else
 	{
+		var web_apps_storage = storage.get_child("web_apps");
 		web_app_reg = new WebAppRegistry(web_apps_storage.user_data_dir, web_apps_storage.data_dirs);
 	}
+	#endif
 	
 	string[] exec_cmd = {};
 	
@@ -154,8 +159,7 @@ public int main(string[] args)
 	}
 	#endif
 	
-	exec_cmd += Nuvola.get_app_runner_path();
-	
+	exec_cmd += Nuvola.get_app_runner_path();	
 	if (Args.debug)
 	{
 		local_only_args = true;
@@ -168,11 +172,18 @@ public int main(string[] args)
 	}
 	
 	var controller = new MasterController(storage, web_app_reg, (owned) exec_cmd, Args.debug);
-	var controller_args = Args.app_id != null ? new string[]{args[0], "-a", Args.app_id} : new string[]{args[0]};
+	var controller_args = new string[]{args[0]};
+	#if !FLATPAK || !NUVOLA_STD
 	if (Args.list_apps)
 		controller_args += "-l";
 	if (Args.list_apps_json)
 		controller_args += "-j";
+	if (Args.app_id != null)
+	{
+		controller_args += "-a";
+		controller_args += Args.app_id;
+	}
+	#endif
 	for (var i = 1; i < args.length; i++)
 		controller_args += args[i];
 	var result = controller.run(controller_args);
