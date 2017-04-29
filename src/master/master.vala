@@ -136,11 +136,11 @@ public int main(string[] args)
 	if (Args.apps_dir != null && Args.apps_dir != "")
 	{
 		local_only_args = true;
-		web_app_reg = new WebAppRegistry(File.new_for_path(Args.apps_dir), {}, false);
+		web_app_reg = new WebAppRegistry(File.new_for_path(Args.apps_dir), {});
 	}
 	else
 	{
-		web_app_reg = new WebAppRegistry(web_apps_storage.user_data_dir, web_apps_storage.data_dirs, true);
+		web_app_reg = new WebAppRegistry(web_apps_storage.user_data_dir, web_apps_storage.data_dirs);
 	}
 	
 	string[] exec_cmd = {};

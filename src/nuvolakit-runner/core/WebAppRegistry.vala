@@ -39,37 +39,16 @@ public class WebAppRegistry: GLib.Object
 	private static Regex id_regex;
 	
 	/**
-	 * Whether it is allowed to install/remove services.
-	 */
-	public bool allow_management {get; private set;}
-	
-	/**
 	 * Creates new web app registry
 	 * 
 	 * @param user_storage        user-specific directory with service integrations
 	 * @param system_storage      system-wide directories with service integrations
-	 * @param allow_management    whether to allow services management (add/remove)
 	 */
-	public WebAppRegistry(File user_storage, File[] system_storage, bool allow_management)
+	public WebAppRegistry(File user_storage, File[] system_storage)
 	{
 		this.user_storage = user_storage;
 		this.system_storage = system_storage;
-		this.allow_management = allow_management;
 	}
-	
-	/**
-	 * Emitted when a service has been installed
-	 * 
-	 * @param id    service's id
-	 */
-	public signal void app_installed(string id);
-	
-	/**
-	 * Emitted when a service has been removed
-	 * 
-	 * @param id    service's id
-	 */
-	public signal void app_removed(string id);
 	
 	/**
 	 * Return web app by id.
@@ -158,230 +137,6 @@ public class WebAppRegistry: GLib.Object
 	}
 	
 	/**
-	 * Installs web app from a package
-	 * 
-	 * @param package    package file
-	 * @return meta object on the installed web app
-	 */
-	public WebAppMeta install_app(File package) throws WebAppError
-	{
-		if (!allow_management)
-			throw new WebAppError.NOT_ALLOWED("WebApp management is disabled");
-		File tmp_dir;
-		try
-		{
-			tmp_dir = File.new_for_path(DirUtils.make_tmp("nuvolaplayerXXXXXX"));
-		}
-		catch (FileError e)
-		{
-			throw new WebAppError.IOERROR(e.message);
-		}
-		try
-		{
-			extract_archive_file(package, tmp_dir);
-		
-			var control_file = tmp_dir.get_child("control");
-			string control_data;
-			try
-			{
-				control_data = Diorite.System.read_file(control_file);
-			}
-			catch (GLib.Error e)
-			{
-				throw new WebAppError.IOERROR("Cannot read '%s'. %s", control_file.get_path(), e.message);
-			}
-			
-			const string GROUP = "package";
-			control_data = "[%s]\n%s".printf(GROUP, control_data);
-			var control = new KeyFile();
-			string web_app_id;
-			try
-			{
-				control.load_from_data(control_data, -1, KeyFileFlags.NONE);
-				var format = control.get_integer(GROUP, "format");
-				web_app_id = control.get_string(GROUP, "app_id");
-				if (format != 3 || web_app_id == null || web_app_id == "")
-					throw new WebAppError.INVALID_FILE("Package has wrong format.");
-			}
-			catch (KeyFileError e)
-			{
-				throw new WebAppError.INVALID_FILE("Invalid control file '%s'. %s", control_file.get_path(), e.message);
-			}
-			
-			var web_app_dir = tmp_dir.get_child(web_app_id);
-			if (web_app_dir.query_file_type(0) != FileType.DIRECTORY)
-				throw new WebAppError.INVALID_FILE("Package does not contain directory '%s'.", web_app_id);
-			
-			WebAppMeta.load_from_dir(web_app_dir); // throws WebAppError
-			
-			var destination = user_storage.get_child(web_app_id);
-			if (destination.query_exists())
-			{
-				try
-				{
-					Diorite.System.purge_directory_content(destination, true);
-					destination.delete();
-				}
-				catch (GLib.Error e)
-				{
-					throw new WebAppError.IOERROR("Cannot purge dir '%s'. %s", destination.get_path(), e.message);
-				}
-			}
-			else
-			{
-				try
-				{
-					destination.get_parent().make_directory_with_parents();
-				}
-				catch (Error e)
-				{
-					// Not fatal
-				}
-			}
-			
-			try
-			{
-				var cancellable = new Cancellable();
-				Diorite.System.copy_tree(web_app_dir, destination, cancellable);
-			}
-			catch (GLib.Error e)
-			{
-				try
-				{
-					Diorite.System.purge_directory_content(destination, true);
-					destination.delete();
-				}
-				catch (GLib.Error e2)
-				{
-					warning("Cannot purge dir '%s'. %s", destination.get_path(), e2.message);
-				}
-				
-				throw new WebAppError.IOERROR("Cannot copy integration to '%s'. %s", destination.get_path(), e.message);
-			}
-			
-			var web_app = WebAppMeta.load_from_dir(destination); // throws WebAppError
-			app_installed(web_app.id);
-			return web_app;
-		}
-		catch (ArchiveError e)
-		{
-			throw new WebAppError.EXTRACT_ERROR("Failed to extract package '%s'. %s", package.get_path(), e.message);
-		}
-		finally
-		{
-			Diorite.System.try_purge_dir(tmp_dir);
-		}
-	}
-	
-	/**
-	 * Removes web app.
-	 * 
-	 * @param app    web_app to remove
-	 * @throw        WebAppError on failure
-	 */
-	public void remove_app(WebAppMeta app) throws WebAppError
-	{
-		if (!allow_management)
-			throw new WebAppError.NOT_ALLOWED("Web app management is disabled");
-		
-		var dir = app.data_dir;
-		if (dir == null)
-			throw new WebAppError.IOERROR("Invalid web app directory");
-		
-		if (dir.query_exists())
-		{
-			try
-			{
-				Diorite.System.purge_directory_content(dir, true);
-				dir.delete();
-				app_removed(app.id);
-			}
-			catch (GLib.Error e)
-			{
-				throw new WebAppError.IOERROR(e.message);
-			}
-		}
-		else
-		{
-			throw new WebAppError.IOERROR("'%s' does not exist.", dir.get_path());
-		}
-	}
-	
-	private void extract_archive_file(File archive, File directory)  throws ArchiveError
-	{
-		Archive.Read reader = new Archive.Read();
-		if (reader.support_format_tar() != Archive.Result.OK)
-			throw new ArchiveError.READ_ERROR("Cannot enable tar format. %s", reader.error_string());
-		if (reader.support_compression_gzip() != Archive.Result.OK)
-			throw new ArchiveError.READ_ERROR("Cannot enable gzip compression. %s", reader.error_string());
-		if (reader.open_filename(archive.get_path(), 10240) != Archive.Result.OK)
-			throw new ArchiveError.READ_ERROR("Cannot open archive '%s'. %s", archive.get_path(), reader.error_string());
-		extract_archive(reader, directory);
-	}
-	
-	private void extract_archive_fd(int archive_fd, File directory)  throws ArchiveError
-	{
-		Archive.Read reader = new Archive.Read();
-		if (reader.support_format_tar() != Archive.Result.OK)
-			throw new ArchiveError.READ_ERROR("Cannot enable tar format. %s", reader.error_string());
-		if (reader.support_compression_gzip() != Archive.Result.OK)
-			throw new ArchiveError.READ_ERROR("Cannot enable gzip compression. %s", reader.error_string());
-		if (reader.open_fd(archive_fd, 10240) != Archive.Result.OK)
-			throw new ArchiveError.READ_ERROR("Cannot open archive fd %d. %s", archive_fd, reader.error_string());
-		extract_archive(reader, directory);
-	}
-	
-	private void extract_archive(Archive.Read reader, File directory) throws ArchiveError
-	{
-		var current_dir = Environment.get_current_dir();
-		if (Environment.set_current_dir(directory.get_path()) < 0)
-			throw new ArchiveError.SYSTEM_ERROR("Failed to chdir to '%s'.", directory.get_path());
-		
-		try
-		{
-			var writer = new Archive.WriteDisk();
-			writer.set_options(Archive.ExtractFlags.TIME | Archive.ExtractFlags.SECURE_NODOTDOT | Archive.ExtractFlags.SECURE_SYMLINKS);
-			
-			while (true)
-			{
-				unowned Archive.Entry entry;
-				var result = reader.next_header(out entry);
-				if (result == Archive.Result.EOF)
-					break;
-				if (result != Archive.Result.OK)
-					throw new ArchiveError.READ_ERROR("Failed to read next header. %s", reader.error_string());
-				debug("Extract '%s'", entry.pathname());
-				if (writer.write_header(entry) != Archive.Result.OK)
-					throw new ArchiveError.WRITE_ERROR("Failed to write header. %s", writer.error_string());
-				
-				void* buff;
-				size_t size;
-				Archive.off_t offset;
-			
-				while (true)
-				{
-					result = reader.read_data_block (out buff, out size, out offset);
-					if (result == Archive.Result.EOF)
-						break;
-					if (result != Archive.Result.OK)
-						throw new ArchiveError.READ_ERROR("Failed to read data. %s", reader.error_string());
-					if (writer.write_data_block(buff, size, offset) != Archive.Result.OK)
-						throw new ArchiveError.WRITE_ERROR("Failed to write data. %s", writer.error_string()); 
-				}
-				
-				if (writer.finish_entry() != Archive.Result.OK)
-					throw new ArchiveError.WRITE_ERROR("Failed to finish entry. %s", writer.error_string());
-			}
-		}
-		finally
-		{
-			reader.close();
-			if (Environment.set_current_dir(current_dir) < 0)
-				warning("Failed to chdir back to '%s'.", current_dir);
-		}
-	}
-	
-	/**
 	 * Check if the service identifier is valid
 	 * 
 	 * @param id service identifier
@@ -416,13 +171,6 @@ public errordomain WebAppError
 	SERVER_ERROR,
 	SERVER_ERROR_MESSAGE,
 	EXTRACT_ERROR;
-}
-
-public errordomain ArchiveError
-{
-	SYSTEM_ERROR,
-	READ_ERROR,
-	WRITE_ERROR;
 }
 
 } // namespace Nuvola

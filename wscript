@@ -227,7 +227,6 @@ def configure(ctx):
 	pkgconfig(ctx, 'dioriteglib-' + TARGET_DIORITE, 'DIORITEGLIB', MIN_DIORITE)
 	pkgconfig(ctx, 'dioritegtk-' + TARGET_DIORITE, 'DIORITEGTK', MIN_DIORITE)
 	pkgconfig(ctx, 'json-glib-1.0', 'JSON-GLIB', '0.7')
-	pkgconfig(ctx, 'libarchive', 'LIBARCHIVE', '3.1')
 	pkgconfig(ctx, 'libnotify', 'NOTIFY', '0.7')
 	pkgconfig(ctx, 'libsecret-1', 'SECRET', '0.16')
 	pkgconfig(ctx, "gstreamer-1.0", 'GST', "1.11.90" if ctx.options.webkit_mse else "1.8")

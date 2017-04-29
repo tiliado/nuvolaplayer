@@ -50,8 +50,6 @@ public class WebAppListModel : Gtk.ListStore
 			typeof(WebAppMeta) // meta
 			});
 		load();
-		web_app_reg.app_installed.connect(on_app_installed_or_removed);
-		web_app_reg.app_removed.connect(on_app_installed_or_removed);
 	}
 	
 	public void reload()
@@ -83,11 +81,6 @@ public class WebAppListModel : Gtk.ListStore
 		web_apps.sort(WebAppMeta.cmp_by_name);
 		foreach (var web_app in web_apps)
 				append_web_app(web_app, web_app.get_icon_pixbuf(WebAppListView.ICON_SIZE));
-	}
-	
-	private void on_app_installed_or_removed()
-	{
-		reload();
 	}
 }
 

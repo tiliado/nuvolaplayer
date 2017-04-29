@@ -83,7 +83,6 @@ Build and Install
   * [gdk-x11-3.0](http://www.gtk.org/) >= 3.22.0
   * [x11](http://www.x.org/wiki/) >= 0.5
   * [json-glib-1.0](https://wiki.gnome.org/Projects/JsonGlib) >= 0.7
-  * [libarchive](http://www.libarchive.org/) >= 3.1
   * [webkit2gtk-4.0](http://webkitgtk.org/) >= 2.14.5 (2.16.0 recommended)
   * [javascriptcoregtk-4.0](http://webkitgtk.org/) >= 2.14.5 (2.16.0 recommended)
   * [libnotify](https://git.gnome.org/browse/libnotify/) >= 0.7
