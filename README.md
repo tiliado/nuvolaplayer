@@ -22,6 +22,36 @@ or order paid support provided by the Nuvola developer.
 **Trademarks:** Nuvola™, Nuvola Player™ and Nuvola Apps™ are trademarks held by Jiří Janoušek,
 the founder of Nuvola project. Nuvola Apps software is not affiliated with the Nuvola icon theme.
 
+Branding
+--------
+
+To avoid confusion, the default build doesn't pretend to be Nuvola Apps but "Web Apps based on the open source code
+from Nuvola Apps project™". If you distribute binaries based on Nuvola code, keep in mind that it is your responsibility
+to provide your users with support and documentation. You should customize your build with following two branding files
+at least and enable branding by passing `--branding=NAME` to `waf configure`.
+
+
+### File branding/NAME.json
+
+A file in JSON format. All keys are optional.
+
+  *  "name": The name of your Nuvola derivative, e.g. "Cloud Apps".
+  *  "help_url": The web page to be opened when users activates a Help menu item or command. It should provide
+     basic documentation.
+     [Default page](https://github.com/tiliado/nuvolaplayer/wiki/Unofficial).
+  *  "requirements_help_url": The web page to be opened when system fails to satisfy requirements of a particular app.
+     It should provide information on how to install missing requirements (e.g. Adobe Flash plugin).
+     [Default page](https://github.com/tiliado/nuvolaplayer/wiki/Web-App-Requirements).
+
+### File branding/NAME/welcome.xml
+
+A file in XML-like format. A subset of HTML formatting is supported (e.g. h1, h2, p, a, i and b).
+This file is shown in the Welcome tab of the main window of Nuvola's master process. It should answer
+following questions:
+
+  * How to find out which Nuvola apps are available and in which version?
+  * Where to report bugs and how to get support?
+
 Code hosting and issue tracker
 ------------------------------
 
@@ -104,7 +134,7 @@ To find out what build parameters can be set run ./waf --help
 
 ### Build
 
-    $ ./waf configure [--prefix=...] [--libdir=...] [--noopt] [--nodebug] [--nounity]
+    $ ./waf configure [--prefix=...] [--libdir=...] [--branding=...] [--noopt] [--nodebug] [--nounity]
     $ ./waf build
 
 ### Install

@@ -65,8 +65,10 @@ public class MasterController : Diorite.Application
 	private Diorite.KeyValueStorageServer storage_server = null;
 	private ActionsKeyBinderServer actions_key_binder = null;
 	private MediaKeysServer media_keys = null;
+	#if TILIADO_API
 	private TiliadoApi2? tiliado = null;
 	private TiliadoAccountWidget? tiliado_widget = null;
+	#endif
 	private string? start_app_after_activation = null;
 	#if EXPERIMENTAL
 	private HttpRemoteControl.Server http_remote_control = null;
@@ -182,7 +184,9 @@ public class MasterController : Diorite.Application
 		var default_config = new HashTable<string, Variant>(str_hash, str_equal);
 		config = new Config(storage.user_config_dir.get_child("master").get_child("config.json"), default_config);
 		
+		#if TILIADO_API
 		init_tiliado_account();
+		#endif
 		
 		var server_name = build_master_ipc_id();
 		Environment.set_variable("NUVOLA_IPC_MASTER", server_name, true);
@@ -288,23 +292,22 @@ public class MasterController : Diorite.Application
 			main_window.add_page(web_app_list, "scripts", "Installed Apps");
 		}
 		
-		if (tiliado != null)
+		#if TILIADO_API
+		string? user_name = null;
+		int membership = -1;
+		if (is_tiliado_account_valid(0))
 		{
-			string? user_name = null;
-			int membership = -1;
-			if (is_tiliado_account_valid(0))
-			{
-				user_name = config.get_string(TILIADO_ACCOUNT_USER);
-				membership = (int) config.get_int64(TILIADO_ACCOUNT_MEMBERSHIP);
-			}
-			tiliado_widget = new TiliadoAccountWidget(tiliado, this, Gtk.Orientation.HORIZONTAL, user_name, membership);
-			main_window.top_grid.insert_row(1);
-			if (tiliado_widget.full_width)
-				main_window.top_grid.attach(tiliado_widget, 0, 1, 1, 1);
-			else
-				main_window.header_bar.pack_end(tiliado_widget);
-			tiliado_widget.notify["full-width"].connect_after(on_tiliado_widget_full_width_changed);
+			user_name = config.get_string(TILIADO_ACCOUNT_USER);
+			membership = (int) config.get_int64(TILIADO_ACCOUNT_MEMBERSHIP);
 		}
+		tiliado_widget = new TiliadoAccountWidget(tiliado, this, Gtk.Orientation.HORIZONTAL, user_name, membership);
+		main_window.top_grid.insert_row(1);
+		if (tiliado_widget.full_width)
+			main_window.top_grid.attach(tiliado_widget, 0, 1, 1, 1);
+		else
+			main_window.header_bar.pack_end(tiliado_widget);
+		tiliado_widget.notify["full-width"].connect_after(on_tiliado_widget_full_width_changed);
+		#endif
 	}
 	
 	private void show_welcome_screen()
@@ -685,30 +688,33 @@ public class MasterController : Diorite.Application
 		release();
 	}
 	
+	#if !TILIADO_API
+	public bool is_tiliado_account_valid(TiliadoMembership required_membership)
+	{
+		return true;
+	}
+	#endif
+	
+	#if TILIADO_API
 	private void init_tiliado_account()	
 	{
-		if (TILIADO_OAUTH2_CLIENT_ID != null && TILIADO_OAUTH2_CLIENT_ID[0] != '\0')
-		{
-			Oauth2Token token = null;
-			if (config.has_key(TILIADO_ACCOUNT_ACCESS_TOKEN))
-				token = new Oauth2Token(
-					config.get_string(TILIADO_ACCOUNT_ACCESS_TOKEN),
-					config.get_string(TILIADO_ACCOUNT_REFRESH_TOKEN),
-					config.get_string(TILIADO_ACCOUNT_TOKEN_TYPE),
-					config.get_string(TILIADO_ACCOUNT_SCOPE));
-			tiliado = new TiliadoApi2(
-				TILIADO_OAUTH2_CLIENT_ID, Diorite.String.unmask(TILIADO_OAUTH2_CLIENT_SECRET.data),
-				TILIADO_OAUTH2_API_ENDPOINT, TILIADO_OAUTH2_TOKEN_ENDPOINT, token, "nuvolaplayer");
-			tiliado.notify["token"].connect_after(on_tiliado_api_token_changed);
-			tiliado.notify["user"].connect_after(on_tiliado_api_user_changed);
-		}
+		assert(TILIADO_OAUTH2_CLIENT_ID != null && TILIADO_OAUTH2_CLIENT_ID[0] != '\0');
+		Oauth2Token token = null;
+		if (config.has_key(TILIADO_ACCOUNT_ACCESS_TOKEN))
+			token = new Oauth2Token(
+				config.get_string(TILIADO_ACCOUNT_ACCESS_TOKEN),
+				config.get_string(TILIADO_ACCOUNT_REFRESH_TOKEN),
+				config.get_string(TILIADO_ACCOUNT_TOKEN_TYPE),
+				config.get_string(TILIADO_ACCOUNT_SCOPE));
+		tiliado = new TiliadoApi2(
+			TILIADO_OAUTH2_CLIENT_ID, Diorite.String.unmask(TILIADO_OAUTH2_CLIENT_SECRET.data),
+			TILIADO_OAUTH2_API_ENDPOINT, TILIADO_OAUTH2_TOKEN_ENDPOINT, token, "nuvolaplayer");
+		tiliado.notify["token"].connect_after(on_tiliado_api_token_changed);
+		tiliado.notify["user"].connect_after(on_tiliado_api_user_changed);
 	}
 	
 	public bool is_tiliado_account_valid(TiliadoMembership required_membership)
-	{
-		if (tiliado == null)
-			return true;  // Legacy builds
-		
+	{	
 		var signature = config.get_string(TILIADO_ACCOUNT_SIGNATURE);
 		if (signature == null)
 		{
@@ -804,6 +810,7 @@ public class MasterController : Diorite.Application
 		else
 			main_window.header_bar.pack_end(tiliado_widget);
 	}
+	#endif
 	
 	private enum InitState
 	{

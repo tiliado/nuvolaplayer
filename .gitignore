@@ -3,3 +3,5 @@
 build
 *.pyc
 web_apps/template/icons
+branding/tiliado.json
+branding/tiliado

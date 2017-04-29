@@ -35,6 +35,7 @@ public enum TiliadoMembership
 	DEVELOPER = 5;
 }
 
+#if TILIADO_API
 public class TiliadoApi2 : Oauth2Client
 {
 	public User? user {get; private set; default = null;}
@@ -185,5 +186,5 @@ public class TiliadoApi2 : Oauth2Client
 		}
 	}
 }
-
+#endif
 } // namespace Nuvola

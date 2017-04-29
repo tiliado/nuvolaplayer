@@ -1,0 +1,12 @@
+{
+	"vendor": "Tiliado",
+	"name": "Flatpak Web Apps",
+	"short_name": "Web Apps",
+	"flatpak": true,
+	"tiliado_api": {
+		"enabled": true,
+		"server": "http://localhost:8000",
+		"client_id": "OEGTluvgDaNH8lPXcN3gkVVTU2aRJBwjmSJDUa8Q",
+		"client_secret": "uCZvxvarVjfqR0qFZ3d2As1x8xcKjSCZyBQhjMo45UmRd3SUpEXrLCqByU8x1h35VcLQHzRttKbOcinFecEvk8lTHAx5SLGXA5jjnxq83sLWnoB9eQ0T1eRauyo6MSmh"
+	}
+}

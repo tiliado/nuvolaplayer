@@ -22,6 +22,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#if TILIADO_API
 namespace Nuvola
 {
 
@@ -464,3 +465,4 @@ public class AccountTypeButton : Gtk.Button
 }
 
 } // namespace Nuvola
+#endif

@@ -27,19 +27,14 @@
 
 top = '.'
 out = 'build'
-DEFAULT_NAME="Nuvola Apps"
-ADK_NAME="Nuvola ADK"
-CDK_NAME="Nuvola CDK"
+
 APPNAME = "nuvolaplayer3"
 FUTURE_APPNAME = "nuvola"
 VERSION = "3.1.2"
-DEFAULT_UNIQUE_NAME="eu.tiliado.Nuvola"
-ADK_UNIQUE_NAME="eu.tiliado.NuvolaAdk"
-CDK_UNIQUE_NAME="eu.tiliado.NuvolaCdk"
-GENERIC_NAME = "Cloud Player"
-BLURB = "Cloud music integration for your Linux desktop"
-HELP_URL = "https://tiliado.github.io/nuvolaplayer/documentation/3.1/help.html"
-WEB_APP_REQUIREMENTS_HELP_URL = "https://github.com/tiliado/nuvolaplayer/wiki/Web-App-Requirements"
+GENERIC_NAME = "Web Apps"
+BLURB = "Tight integration of web apps with your Linux desktop"
+DEFAULT_HELP_URL = "https://github.com/tiliado/nuvolaplayer/wiki/Unofficial"
+DEFAULT_WEB_APP_REQUIREMENTS_HELP_URL = "https://github.com/tiliado/nuvolaplayer/wiki/Web-App-Requirements"
 
 MIN_DIORITE = "0.3.3"
 MIN_VALA = "0.34.0"
@@ -52,6 +47,7 @@ FLATPAK_WEBKIT = "2.16.1"
 #========#
 
 import os
+import json
 from waflib.Errors import ConfigurationError
 from waflib import TaskGen, Utils, Errors, Node, Task
 from nuvolamergejs import mergejs as merge_js
@@ -101,6 +97,15 @@ def pkgconfig(ctx, pkg, uselib, version, mandatory=True, store=None, valadef=Non
 			ctx.env[store] = result
 	return res
 
+def loadjson(path, optional=False):
+	try:
+		with open(path, "rt", encoding="utf-8") as f:
+			data = "".join((line if not line.strip().startswith("#") else "\n") for line in f)
+			return json.loads(data)
+	except FileNotFoundError:
+		if optional:
+			return {}
+		raise
 
 def mask(string):
     shift = int(1.0 * os.urandom(1)[0] / 255 * 85 + 15)
@@ -147,18 +152,12 @@ class mergejs(Task.Task):
 
 def options(ctx):
 	ctx.load('compiler_c vala')
+	ctx.add_option('--branding', type=str, default="default", help="Branding profile to load.")
 	ctx.add_option('--noopt', action='store_true', default=False, dest='noopt', help="Turn off compiler optimizations")
-	ctx.add_option('--flatpak', action='store_true', default=False, dest='flatpak', help="Enable Flatpak tweaks.")
 	ctx.add_option('--nodebug', action='store_false', default=True, dest='debug', help="Turn off debugging symbols")
 	ctx.add_option('--nounity', action='store_false', default=True, dest='unity', help="Don't build Unity features.")
-	ctx.add_option('--flatpak', action='store_true', default=False, dest='flatpak', help="Apply workarounds for Flatpak.")
-	ctx.add_option('--adk', action='store_true', default=False, dest='adk', help="Build as Nuvola ADK (App Developer Kit).")
-	ctx.add_option('--cdk', action='store_true', default=False, dest='cdk', help="Build as Nuvola CDK (Core Developer Kit).")
-	ctx.add_option('--tiliado-oauth2-server', type=str, default="https://tiliado.eu", help="Tiliado OAuth2 server to access Tiliado services.")
-	ctx.add_option('--tiliado-oauth2-client-id', type=str, default="", help="Tiliado OAuth2 client id to access Tiliado services.")
-	ctx.add_option('--tiliado-oauth2-client-secret', type=str, default="", help="Tiliado OAuth2 client secret to access Tiliado services.")
-	ctx.add_option('--repository-index', type=str, default="https://nuvola.tiliado.eu/", help="Nuvola Apps Repository Index URI.")
-	ctx.add_option('--webkitgtk-supports-mse', action='store_true', default=False, dest='webkit_mse', help="Use only if you are absolutely sure that your particular build of the WebKitGTK library supports Media Source Extension (as of 2.15.3, it is disabled by default)")
+	ctx.add_option('--webkitgtk-supports-mse', action='store_true', default=False, dest='webkit_mse',
+		help="Use only if you are absolutely sure that your particular build of the WebKitGTK library supports Media Source Extension (as of 2.15.3, it is disabled by default)")
 
 def configure(ctx):
 	ctx.env.REVISION_ID = get_revision_id()
@@ -166,10 +165,10 @@ def configure(ctx):
 	
 	ctx.msg("Version", VERSION, "GREEN")
 	if ctx.env.REVISION_ID != REVISION_SNAPSHOT:
-		ctx.msg("Upstream revision", ctx.env.REVISION_ID, "GREEN")
+		ctx.msg("Upstream revision", ctx.env.REVISION_ID, color="GREEN")
 	else:
-		ctx.msg("Upstream revision", "unknown", "RED")
-	ctx.msg('Install prefix', ctx.options.prefix, "GREEN")
+		ctx.msg("Upstream revision", "unknown", color="RED")
+	ctx.msg('Install prefix', ctx.options.prefix, color="GREEN")
 	
 	ctx.env.append_unique("VALAFLAGS", "-v")
 	ctx.env.append_unique('CFLAGS', ['-w'])
@@ -184,34 +183,52 @@ def configure(ctx):
 		ctx.env.append_unique('VALAFLAGS', '-g')
 		ctx.env.append_unique('CFLAGS', '-g3')
 	
+	# Branding
+	ctx.env.BRANDING = ctx.options.branding or "default"
+	ctx.msg("Branding", ctx.env.BRANDING, color="GREEN")
+	branding_json = "branding/%s.json" % ctx.env.BRANDING
+	if os.path.isfile(branding_json):
+		ctx.msg("Branding metadata", branding_json, color="GREEN")
+		branding = loadjson(branding_json, False)
+	else:
+		if ctx.env.BRANDING != "default":
+			ctx.msg("Branding metadata not found", branding_json, color="RED")
+		branding = {}
+	ctx.env.WELCOME_XML = "branding/%s/welcome.xml" % ctx.env.BRANDING
+	if os.path.isfile(ctx.env.WELCOME_XML):
+		ctx.msg("Welcome screen", ctx.env.WELCOME_XML, color="GREEN")
+	else:
+		ctx.msg("Welcome screen not found", ctx.env.WELCOME_XML, color="RED")
+		ctx.env.WELCOME_XML = "branding/default/welcome.xml"
+		
+	genuine = branding.get("genuine", False)
+	ctx.env.NAME = branding.get("name", "Web Apps")
+	ctx.env.SHORT_NAME = branding.get("short_name", ctx.env.NAME)
+	ctx.env.VENDOR = branding.get("vendor", "unknown")
+	ctx.env.HELP_URL = branding.get("help_url", DEFAULT_HELP_URL)
+	ctx.env.WEB_APP_REQUIREMENTS_HELP_URL = branding.get("requirements_help_url", DEFAULT_WEB_APP_REQUIREMENTS_HELP_URL)
+	tiliado_api = branding.get("tiliado_api", {})
+	
 	# Variants
-	ctx.env.BRANDING = "tiliado"
-	genuine = False
-	ctx.env.CDK = ctx.options.cdk
-	ctx.env.ADK = ctx.options.adk
+	ctx.env.CDK = branding.get("cdk", False)
+	ctx.env.ADK = branding.get("adk", False)
+	ctx.env.FLATPAK = branding.get("flatpak", False)
 	MIN_WEBKIT = LEGACY_WEBKIT
-	if ctx.options.cdk:
-		genuine = True
+	if ctx.env.CDK:
 		vala_def(ctx, "NUVOLA_CDK")
-		ctx.env.NAME = CDK_NAME
-		ctx.env.UNIQUE_NAME = CDK_UNIQUE_NAME
+		ctx.env.UNIQUE_NAME = "eu.tiliado.NuvolaCdk"
 		MIN_WEBKIT = FLATPAK_WEBKIT
-	elif ctx.options.adk:
-		genuine = True
-		vala_def(ctx, "NUVOLA_ADK")
-		ctx.env.NAME = ADK_NAME
-		ctx.env.UNIQUE_NAME = ADK_UNIQUE_NAME
+	elif ctx.env.ADK:
+		ctx.env.UNIQUE_NAME = "eu.tiliado.NuvolaAdk"
 		MIN_WEBKIT = FLATPAK_WEBKIT
 	else:
 		vala_def(ctx, "NUVOLA_STD")
-		ctx.env.NAME = DEFAULT_NAME
-		ctx.env.UNIQUE_NAME = DEFAULT_UNIQUE_NAME
+		ctx.env.UNIQUE_NAME = "eu.tiliado.Nuvola"
 	ctx.env.ICON_NAME = ctx.env.UNIQUE_NAME
 	
 	# Flatpak
-	ctx.env.FLATPAK = ctx.options.flatpak
+	
 	if ctx.env.FLATPAK:
-		genuine = True
 		vala_def(ctx, "FLATPAK")
 		MIN_WEBKIT = FLATPAK_WEBKIT
 		
@@ -259,8 +276,9 @@ def configure(ctx):
 	ctx.env.GENUINE = genuine
 	if genuine:
 		vala_def(ctx, ("EXPERIMENTAL", "GENUINE"))
-	else:
-		ctx.env.NAME = "Web Apps"
+	if tiliado_api.get("enabled", False):
+		vala_def(ctx, "TILIADO_API")
+	
 	ctx.define("NUVOLA_APPNAME", APPNAME)
 	ctx.define("NUVOLA_FUTURE_APPNAME", FUTURE_APPNAME)
 	ctx.define("NUVOLA_NAME", ctx.env.NAME)
@@ -275,14 +293,14 @@ def configure(ctx):
 	ctx.define("NUVOLA_VERSION_SUFFIX", ctx.env.REVISION_ID)
 	ctx.define("GETTEXT_PACKAGE", FUTURE_APPNAME)
 	ctx.env.NUVOLA_LIBDIR = "%s/%s" % (ctx.env.LIBDIR, APPNAME)
-	ctx.define("NUVOLA_TILIADO_OAUTH2_SERVER", ctx.options.tiliado_oauth2_server)
-	ctx.define("NUVOLA_TILIADO_OAUTH2_CLIENT_ID", ctx.options.tiliado_oauth2_client_id)
-	repo_index = ctx.options.repository_index.split("|")
+	ctx.define("NUVOLA_TILIADO_OAUTH2_SERVER", tiliado_api.get("server", "https://tiliado.eu"))
+	ctx.define("NUVOLA_TILIADO_OAUTH2_CLIENT_ID", tiliado_api.get("client_id", ""))
+	repo_index = branding.get("repository_index", "https://nuvola.tiliado.eu/").split("|")
 	repo_index, repo_root = repo_index if len(repo_index) > 1 else  repo_index + repo_index 
 	ctx.define("NUVOLA_REPOSITORY_INDEX", repo_index)
 	ctx.define("NUVOLA_REPOSITORY_ROOT", repo_root)
-	ctx.define("NUVOLA_WEB_APP_REQUIREMENTS_HELP_URL", WEB_APP_REQUIREMENTS_HELP_URL)
-	ctx.define("NUVOLA_HELP_URL", HELP_URL)
+	ctx.define("NUVOLA_WEB_APP_REQUIREMENTS_HELP_URL", ctx.env.WEB_APP_REQUIREMENTS_HELP_URL)
+	ctx.define("NUVOLA_HELP_URL", ctx.env.HELP_URL)
 	ctx.define("NUVOLA_LIBDIR", ctx.env.NUVOLA_LIBDIR)
 	
 	ctx.define('GLIB_VERSION_MAX_ALLOWED', glib_encode_version(MIN_GLIB))
@@ -291,9 +309,10 @@ def configure(ctx):
 	ctx.define('GDK_VERSION_MIN_REQUIRED', glib_encode_version(MIN_GTK))
 	
 	with open("build/secret.h", "wb") as f:
-		if ctx.options.tiliado_oauth2_client_secret:
+		client_secret = tiliado_api.get("client_secret", "")
+		if client_secret:
 			secret = b"{"
-			for i in mask(ctx.options.tiliado_oauth2_client_secret):
+			for i in mask(client_secret):
 				secret += str(i).encode("ascii") + b", "
 			secret += b"0}"
 		else:
@@ -440,15 +459,16 @@ def build(ctx):
 	)
 	
 	ctx(features = 'subst',
-		source = 'branding/%s/welcome.xml' % ctx.env.BRANDING,
+		source = ctx.env.WELCOME_XML,
 		target = 'share/%s/welcome.xml' % APPNAME,
 		install_path = '${PREFIX}/share/%s' % APPNAME,
 		BLURB = BLURB,
 		NAME = ctx.env.NAME,
 		VERSION = VERSION,
 		FULL_VERSION = ctx.env.VERSION,
-		HELP_URL = HELP_URL,
-		WEB_APP_REQUIREMENTS_HELP_URL = WEB_APP_REQUIREMENTS_HELP_URL,
+		HELP_URL = ctx.env.HELP_URL,
+		WEB_APP_REQUIREMENTS_HELP_URL = ctx.env.WEB_APP_REQUIREMENTS_HELP_URL,
+		VENDOR = ctx.env.VENDOR,
 	)
 	
 	dbus_name = ctx.env.UNIQUE_NAME if ctx.env.GENUINE else "eu.tiliado.NuvolaOse"	
