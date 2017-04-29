@@ -555,7 +555,7 @@ public class MasterController : Diorite.Application
 				DBusProxyFlags.DO_NOT_CONNECT_SIGNALS|DBusProxyFlags.DO_NOT_LOAD_PROPERTIES);
 			app_api.activate();
 			debug("DBus activation of %s succeeded.", uid);
-			show_welcome_window();
+			show_welcome_screen();
 			Timeout.add_seconds(5, () => {release(); return false;});
 		}
 		catch (GLib.Error e)
