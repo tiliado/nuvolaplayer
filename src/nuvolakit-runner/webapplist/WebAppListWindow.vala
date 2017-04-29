@@ -54,6 +54,7 @@ public class WebAppList : Gtk.Grid
 		scroll.halign = Gtk.Align.FILL;
 		scroll.vexpand = true;
 		scroll.hexpand = true;
+		scroll.show_all();
 		
 		details = new Gtk.Grid();
 		details.orientation = Gtk.Orientation.HORIZONTAL;

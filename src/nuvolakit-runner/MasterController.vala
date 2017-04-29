@@ -94,7 +94,6 @@ public class MasterController : Diorite.Application
 		hold();
 		if (main_window == null)
 			create_main_window();
-		main_window.show_all();
 		main_window.present();
 		show_welcome_window();
 		#if FLATPAK
@@ -264,7 +263,7 @@ public class MasterController : Diorite.Application
 		#if FLATPAK
 		var app_index_view = new AppIndexWebView(WebEngine.get_web_context());
 		app_index_view.load_app_index(Nuvola.REPOSITORY_INDEX, Nuvola.REPOSITORY_ROOT);
-		app_index_view.show_all();
+		app_index_view.show();
 		main_window.add_page(app_index_view, "repository", "Repository Index");
 		#endif
 		
@@ -274,6 +273,7 @@ public class MasterController : Diorite.Application
 			web_app_list = new WebAppList(this, model);
 			main_window.delete_event.connect(on_main_window_delete_event);
 			web_app_list.view.item_activated.connect_after(on_list_item_activated);
+			web_app_list.show();
 			main_window.add_page(web_app_list, "scripts", "Installed Apps");
 		}
 		
