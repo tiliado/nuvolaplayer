@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2015-2017 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -70,7 +70,7 @@ private const string WELCOME_TEXT = """
 </p>
 """;
 
-public class WelcomeWindow : Diorite.ApplicationWindow
+public class WelcomeScreen : Gtk.Grid
 {
 	private const string PATRONS_BOX_URI = "https://tiliado.eu/nuvolaplayer/funding/patrons_list_box/";
 	private Gtk.Grid grid;
@@ -79,20 +79,9 @@ public class WelcomeWindow : Diorite.ApplicationWindow
 	private Diorite.RichTextView welcome_text;
 	private Gtk.ScrolledWindow scroll;
 	
-	public WelcomeWindow(Diorite.Application app, Diorite.Storage storage)
+	public WelcomeScreen(Diorite.Application app, Diorite.Storage storage)
 	{
-		base(app, true);
-		title = "Welcome to " + Nuvola.get_app_name();
-		set_default_size(1000, 800);
-		try
-		{
-			icon = Gtk.IconTheme.get_default().load_icon(app.icon, 48, 0);
-		}
-		catch (Error e)
-		{
-			warning("Unable to load application icon.");
-		}
-		
+//~ 		set_default_size(1000, 800);
 		this.app = app;
 		
 		grid = new Gtk.Grid();
@@ -130,21 +119,12 @@ public class WelcomeWindow : Diorite.ApplicationWindow
 		web_view.set_size_request(275, -1);
 		grid.attach(web_view, 1, 0, 1, 1);
 		
-		var button = new Gtk.Button.with_label("Close");
-		button.clicked.connect(() => {destroy();});
-		button.margin = 10;
-		button.margin_right = 18;
-		button.margin_top = 0;
-		button.vexpand = button.hexpand = false;
-		button.halign = Gtk.Align.END;
-		grid.attach(button, 1, 1, 1, 1);
-		
 		scroll = new Gtk.ScrolledWindow(null, null);
 		scroll.add(grid);
 		scroll.vexpand = true;
 		scroll.hexpand = true;
-		top_grid.add(scroll);
-		top_grid.show_all();
+		add(scroll);
+		scroll.show_all();
 	}
 	
 	private bool on_scroll_event(Gdk.EventScroll event)

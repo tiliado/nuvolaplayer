@@ -48,6 +48,7 @@ public class MasterController : Diorite.Application
 	private const string TILIADO_ACCOUNT_USER = "tiliado.account2.user";
 	private const string TILIADO_ACCOUNT_EXPIRES = "tiliado.account2.expires";
 	private const string TILIADO_ACCOUNT_SIGNATURE = "tiliado.account2.signature";
+	private const string PAGE_WELCOME = "welcome";
 	
 	public MasterWindow? main_window {get; private set; default = null;}
 	public WebAppList? web_app_list {get; private set; default = null;}
@@ -92,15 +93,22 @@ public class MasterController : Diorite.Application
 	public override void activate()
 	{
 		hold();
-		if (main_window == null)
-			create_main_window();
-		main_window.present();
-		show_welcome_window();
+		show_main_window();
+		show_welcome_screen();
 		#if FLATPAK
 		if (!is_desktop_portal_available())
 			quit();
 		#endif
 		release();
+	}
+	
+	public void show_main_window(string? page=null)
+	{
+		if (main_window == null)
+			create_main_window();
+		main_window.present();
+		if (page != null)
+			main_window.stack.visible_child_name = page;
 	}
 	
 	public signal void runner_exited(AppRunner runner);
@@ -260,6 +268,9 @@ public class MasterController : Diorite.Application
 		init_gui();
 		main_window = new MasterWindow(this);
 		main_window.page_changed.connect(on_master_stack_page_changed);
+		var welcome_screen = new WelcomeScreen(this, storage);
+		welcome_screen.show();
+		main_window.add_page(welcome_screen, PAGE_WELCOME, "Welcome");
 		#if FLATPAK
 		var app_index_view = new AppIndexWebView(WebEngine.get_web_context());
 		app_index_view.load_app_index(Nuvola.REPOSITORY_INDEX, Nuvola.REPOSITORY_ROOT);
@@ -296,12 +307,11 @@ public class MasterController : Diorite.Application
 		}
 	}
 	
-	private void show_welcome_window()
+	private void show_welcome_screen()
 	{
 		if (config.get_string("nuvola.welcome_screen") != get_welcome_screen_name())
 		{
-			var welcome_window = new WelcomeWindow(this, storage);
-			welcome_window.present();
+			show_main_window(PAGE_WELCOME);
 			config.set_string("nuvola.welcome_screen", get_welcome_screen_name());
 		}
 	}
@@ -607,7 +617,7 @@ public class MasterController : Diorite.Application
 			debug("App runner for '%s' is already running.", app_id);
 		else
 			app_runners_map[app_id] = runner;
-		show_welcome_window();
+		show_welcome_screen();
 		#endif
 	}
 	
@@ -657,7 +667,7 @@ public class MasterController : Diorite.Application
 		else
 			app_runners_map[app_id] = runner;
 		
-		show_welcome_window();
+		show_welcome_screen();
 		return true;
 	}
 	
