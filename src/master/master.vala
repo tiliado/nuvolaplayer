@@ -149,15 +149,12 @@ public int main(string[] args)
 	#endif
 	
 	string[] exec_cmd = {};
-	
-	#if LINUX
 	var gdb_server = Environment.get_variable("NUVOLA_APP_RUNNER_GDB_SERVER");
 	if (gdb_server != null)
 	{
 		exec_cmd += "/usr/bin/gdbserver";
 		exec_cmd += gdb_server ;
 	}
-	#endif
 	
 	exec_cmd += Nuvola.get_app_runner_path();	
 	if (Args.debug)
