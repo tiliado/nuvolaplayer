@@ -452,7 +452,6 @@ public class MasterController : Diorite.Application
 	private Variant? handle_list_apps(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		var builder = new VariantBuilder(new VariantType("aa{sv}"));
-		var dict_type = new VariantType("a{sv}");
 		var keys = app_runners_map.get_keys();
 		keys.sort(string.collate);
 		foreach (var app_id in keys)
