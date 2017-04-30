@@ -306,6 +306,7 @@ public class MasterController : Diorite.Application
 			main_window.top_grid.attach(tiliado_widget, 0, 1, 1, 1);
 		else
 			main_window.header_bar.pack_end(tiliado_widget);
+		tiliado_widget.show();
 		tiliado_widget.notify["full-width"].connect_after(on_tiliado_widget_full_width_changed);
 		#endif
 	}
@@ -473,15 +474,25 @@ public class MasterController : Diorite.Application
 	{
 		if (page != null && page == web_app_list)
 		{
-			main_window.create_toolbar({Actions.START_APP});
+			set_toolbar({Actions.START_APP});
 			reset_menubar().append_submenu("_Apps", actions.build_menu({Actions.START_APP})); // For Unity
 		}
 		else
 		{
-			main_window.create_toolbar({});
+			set_toolbar({});
 			reset_menubar();
 		}
 	}
+	
+	private void set_toolbar(string[] items)
+	{
+		main_window.create_toolbar(items);
+		#if TILIADO_API
+		if (tiliado_widget != null && !tiliado_widget.full_width)
+			main_window.header_bar.pack_end(tiliado_widget);
+		#endif
+	}
+	
 	private bool on_main_window_delete_event(Gdk.EventAny event)
 	{
 		do_quit();
