@@ -58,7 +58,17 @@ namespace Actions
 
 public static string build_camel_id(string web_app_id)
 {
-	var buffer = new StringBuilder("eu.tiliado.NuvolaApp");
+	return build_uid(Nuvola.get_app_uid() + "App", web_app_id);
+}
+
+public static string build_dbus_id(string web_app_id)
+{
+	return build_uid(Nuvola.get_dbus_id() + "App", web_app_id);
+}
+
+private static string build_uid(string base_id, string web_app_id)
+{
+	var buffer = new StringBuilder(base_id);
 	foreach (var part in web_app_id.split("_"))
 	{
 		buffer.append_c(part[0].toupper());
@@ -81,13 +91,16 @@ public abstract class RunnerApplication: Diorite.Application
 	public WebAppWindow? main_window {get; protected set; default = null;}
 	public WebAppMeta web_app {get; protected set;}
 	public WebAppStorage app_storage {get; protected set;}
+	public string dbus_id {get; private set;}
 
 	
 	public RunnerApplication(string web_app_id, string web_app_name, Diorite.Storage storage)
 	{
 		var uid = build_camel_id(web_app_id);
-		base(uid, web_app_name);
+		var dbus_id = build_dbus_id(web_app_id);
+		base(uid, web_app_name, dbus_id);
 		this.storage = storage;
+		this.dbus_id = dbus_id;
 		icon = Nuvola.get_app_icon();
 		version = Nuvola.get_version();
 	}
@@ -110,16 +123,18 @@ public class AppRunnerController : RunnerApplication
 	private FormatSupportCheck format_support = null;
 	private Drt.Lst<Component> components = null;
 	private string? api_token = null;
-	private string? nuvola_bus = null;
+	private bool use_nuvola_dbus = false;
 	private HashTable<string, Variant>? web_worker_data = null;
 	
-	public AppRunnerController(Diorite.Storage storage, WebAppMeta web_app, WebAppStorage app_storage, string? api_token, string? nuvola_bus)
+	public AppRunnerController(
+		Diorite.Storage storage, WebAppMeta web_app, WebAppStorage app_storage,
+		string? api_token, bool use_nuvola_dbus=false)
 	{
 		base(web_app.id, web_app.name, storage);
 		this.app_storage = app_storage;
 		this.web_app = web_app;
 		this.api_token = api_token;
-		this.nuvola_bus = nuvola_bus;
+		this.use_nuvola_dbus = use_nuvola_dbus;
 	}
 	
 	public override bool dbus_register(DBusConnection conn, string object_path)
@@ -182,14 +197,13 @@ public class AppRunnerController : RunnerApplication
 			web_worker_data["RUNNER_BUS_NAME"] = bus_name;
 			ipc_bus = new IpcBus(bus_name);
 			ipc_bus.start();
-			if (nuvola_bus != null)
+			if (use_nuvola_dbus)
 			{
-				var nuvola_path = "/" + nuvola_bus.replace(".", "/");
 				var nuvola_api = Bus.get_proxy_sync<DbusIfce>(
-					BusType.SESSION, nuvola_bus, nuvola_path,
+					BusType.SESSION, Nuvola.get_dbus_id(), Nuvola.get_dbus_path(),
 					DBusProxyFlags.DO_NOT_CONNECT_SIGNALS|DBusProxyFlags.DO_NOT_LOAD_PROPERTIES);
 				GLib.Socket socket;
-				nuvola_api.get_connection(this.web_app.id, this.app_id, out socket, out api_token);
+				nuvola_api.get_connection(this.web_app.id, this.dbus_id, out socket, out api_token);
 				if (socket == null)
 				{
 					warning("Master server refused conection.");

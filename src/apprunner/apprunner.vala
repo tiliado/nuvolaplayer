@@ -34,12 +34,12 @@ struct Args
 	static bool verbose;
 	static bool version;
 	static string? app_dir;
-	static string? nuvola_bus;
+	static bool nuvola_dbus;
 	static string? log_file;
 	
 	public const OptionEntry[] options =
 	{
-		{ "nuvola-bus", 'N', 0, GLib.OptionArg.STRING, ref Args.nuvola_bus, "Nuvola DBus address", "address" },
+		{ "dbus", 0, 0, OptionArg.NONE, ref Args.nuvola_dbus, "Connect to Nuvola via DBus", null },
 		{ "app-dir", 'a', 0, GLib.OptionArg.FILENAME, ref Args.app_dir, "Web app to run.", "DIR" },
 		{ "verbose", 'v', 0, OptionArg.NONE, ref Args.verbose, "Print informational messages", null },
 		{ "debug", 'D', 0, OptionArg.NONE, ref Args.debug, "Print debugging messages", null },
@@ -126,8 +126,8 @@ public int main(string[] args)
 		  storage.user_data_dir.get_child(WEB_APP_DATA_DIR).get_child(web_app.id),
 		  storage.user_cache_dir.get_child(WEB_APP_DATA_DIR).get_child(web_app.id));
 		
-		var api_token = Args.nuvola_bus == null ? stdin.read_line() : null;
-		var controller = new AppRunnerController(storage, web_app, app_storage, api_token, Args.nuvola_bus);
+		var api_token = !Args.nuvola_dbus ? stdin.read_line() : null;
+		var controller = new AppRunnerController(storage, web_app, app_storage, api_token, Args.nuvola_dbus);
 		return controller.run(args);
 	}
 	catch (WebAppError e)

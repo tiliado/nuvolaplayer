@@ -55,6 +55,20 @@ public string get_app_uid()
 	return UNIQUE_NAME;
 }
 
+public string get_dbus_id()
+{
+	#if GENUINE
+	return get_app_uid();
+	#else
+	return "eu.tiliado.NuvolaOse";
+	#endif
+}
+
+public string get_dbus_path()
+{
+	return "/" + get_dbus_id().replace(".", "/");
+}
+
 public string get_app_icon()
 {
 	return APP_ICON;

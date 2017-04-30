@@ -78,12 +78,7 @@ public class MasterController : Diorite.Application
 	
 	public MasterController(Diorite.Storage storage, WebAppRegistry? web_app_reg, string[] exec_cmd, bool debuging=false)
 	{
-		#if GENUINE
-		string? dbus_id = null;
-		#else
-		string? dbus_id = "eu.tiliado.NuvolaOse";
-		#endif
-		base(Nuvola.get_app_uid(), Nuvola.get_app_name(), dbus_id, ApplicationFlags.HANDLES_COMMAND_LINE);
+		base(Nuvola.get_app_uid(), Nuvola.get_app_name(), Nuvola.get_dbus_id(), ApplicationFlags.HANDLES_COMMAND_LINE);
 		icon = Nuvola.get_app_icon();
 		version = Nuvola.get_version();
 		this.storage = storage;
@@ -438,7 +433,7 @@ public class MasterController : Diorite.Application
 	{
 		var app_id = params.pop_string();
 		var runner = app_runners_map[app_id];
-		return_val_if_fail(runner != null, null);
+		return_val_if_fail(runner != null, false);
 		
 		if (!app_runners.remove(runner))
 			critical("Runner for '%s' not found in queue.", runner.app_id);
