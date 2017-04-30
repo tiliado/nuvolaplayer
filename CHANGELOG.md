@@ -6,6 +6,40 @@ Releases 3.1.x
 
 Rolling releases.
 
+Milestone 3.1.3 - April 30, 2017
+--------------------------------
+
+New Features:
+
+  * elementaryOS Loki has been added among officially supported distributions. Nuvola flatpaks contain
+    a work-in-progress GTK+ 3.22 port of the elementary theme to provide elementaryOS users with a native look.
+    Installation instructions and documentation have been updated accordingly.
+    Issue: tiliado/nuvolaplayer#4
+  * All three variants of the Arc theme have been added to Nuvola flatpaks. Issue: tiliado/nuvolaplayer/issues/318
+
+Enhancements:
+
+  * Ubuntu themes have been updated. Issue: tiliado/nuvolaplayer#324
+  * Initial start-up of flatpak builds is faster.
+  * The text of Welcome dialog was moved to the first tab of the main window because it may contain useful information.
+  * WebKitGTK+ 2.16 API to set network proxy is used replacing previous legacy hacks.
+  * The official builds of Nuvola are marked as "genuine flatpak builds"
+
+Bug fixes:
+
+  * Apps that are not media players no longer steal media keys. Issue: tiliado/nuvolaplayer#230
+  * Fixed activation for Premium users. Issue: tiliado/nuvolaplayer#325
+  * App menu, toolbar & menu bar handling was refactored and double app menus fixed. Issue: tiliado/diorite#4
+
+Under the Hood:
+
+  * Build script of Nuvola was reworked, ported to Waf 1.9.10 and supports branding. See Readme.md
+    for more information.
+  * Build script of Diorite was reworked and ported to Waf 1.9.10. See Diorite's Readme.md for more information.
+  * Modernisation has begun. Dependencies were raised and legacy code is being removed.
+  * All Python scripts require Python >= 3.4.
+  * Code has been ported to Valac 0.36.
+  
 Milestone 3.1.2 - March 26, 2017
 --------------------------------
 

@@ -30,13 +30,13 @@ out = 'build'
 
 APPNAME = "nuvolaplayer3"
 FUTURE_APPNAME = "nuvola"
-VERSION = "3.1.2"
+VERSION = "3.1.3"
 GENERIC_NAME = "Web Apps"
 BLURB = "Tight integration of web apps with your Linux desktop"
 DEFAULT_HELP_URL = "https://github.com/tiliado/nuvolaplayer/wiki/Unofficial"
 DEFAULT_WEB_APP_REQUIREMENTS_HELP_URL = "https://github.com/tiliado/nuvolaplayer/wiki/Web-App-Requirements"
 
-MIN_DIORITE = "0.3.3"
+MIN_DIORITE = "0.3.4"
 MIN_VALA = "0.34.0"
 MIN_GLIB = "2.42.1"
 MIN_GTK = "3.22.0"
