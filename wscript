@@ -46,6 +46,9 @@ FLATPAK_WEBKIT = "2.16.1"
 # Extras #
 #========#
 
+import sys
+assert sys.version_info >= (3, 4, 0), "Run waf with Python >= 3.4"
+
 import os
 import json
 from waflib.Errors import ConfigurationError
