@@ -164,15 +164,6 @@ public class MasterController : Diorite.Application
 		#if !FLATPAK
 		Nuvola.delete_desktop_files.begin((o, res) => Nuvola.delete_desktop_files.end(res));
 		#endif
-		/*
-		 * Workaround for a GPU-related WebKit issue
-		 * https://github.com/tiliado/nuvolaplayer/issues/24
-		 * WebKitGTK should have a workaround
-		 * https://bugs.freedesktop.org/show_bug.cgi?id=85064
-		 */
-		#if !HAVE_WEBKIT_2_14
-		Environment.set_variable("LIBGL_DRI3_DISABLE", "1", true);
-		#endif
 		
 		app_runners = new Queue<AppRunner>();
 		app_runners_map = new HashTable<string, AppRunner>(str_hash, str_equal);
