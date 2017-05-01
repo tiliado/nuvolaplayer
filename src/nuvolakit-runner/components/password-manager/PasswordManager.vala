@@ -45,17 +45,13 @@ public class PasswordManager
 			SCHEMA_HOSTNAME, Secret.SchemaAttributeType.STRING,
 			SCHEMA_USERNAME, Secret.SchemaAttributeType.STRING);
 		this.web_engine = web_engine;
-		#if HAVE_WEBKIT_2_8
 		web_engine.context_menu.connect(on_context_menu);
-		#endif
 	}
 	
 	~PasswordManager()
 	{
 		debug("~PasswordManager");
-		#if HAVE_WEBKIT_2_8
 		web_engine.context_menu.disconnect(on_context_menu);
-		#endif
 	}
 	
 	public signal void prefill_username(int username_index);
@@ -115,7 +111,6 @@ public class PasswordManager
 		}
 	}
 	
-	#if HAVE_WEBKIT_2_8
 	private void on_context_menu(WebKit.ContextMenu menu, Gdk.Event event, WebKit.HitTestResult hit_test_result)
 	{
 		var data = menu.get_user_data();
@@ -144,7 +139,6 @@ public class PasswordManager
 	{
 		prefill_username(int.parse(action.name.substring(17)));
 	}
-	#endif
 }
 
 } // namespace Nuvola

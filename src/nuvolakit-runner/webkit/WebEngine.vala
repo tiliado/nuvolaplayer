@@ -66,12 +66,8 @@ public class WebEngine : GLib.Object, JSExecutor
 			return false;
 		
 		WebKit.WebContext wc;
-		#if HAVE_WEBKIT_2_8
-			wc = (WebKit.WebContext) GLib.Object.@new(typeof(WebKit.WebContext),
+		wc = (WebKit.WebContext) GLib.Object.@new(typeof(WebKit.WebContext),
 				"local-storage-directory", storage.data_dir.get_child("local_storage").get_path());
-		#else
-			wc = WebKit.WebContext.get_default();
-		#endif
 		wc.set_favicon_database_directory(storage.data_dir.get_child("favicons").get_path());
 		wc.set_disk_cache_directory(storage.cache_dir.get_child("webcache").get_path());
 		var cm = wc.get_cookie_manager();

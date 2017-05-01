@@ -200,7 +200,6 @@ public class LoginFormManager: GLib.Object
 			look_up_forms_source_id = Timeout.add_seconds(2, look_up_forms_cb);
 	}
 	
-	#if HAVE_WEBKIT_2_8
 	public bool manage_context_menu(WebKit.ContextMenu menu, WebKit.DOM.Node? node)
 	{
 		if (node != null && node is HTMLInputElement)
@@ -225,7 +224,6 @@ public class LoginFormManager: GLib.Object
 		}
 		return false;
 	}
-	#endif
 	
 	private bool look_up_forms()
 	{

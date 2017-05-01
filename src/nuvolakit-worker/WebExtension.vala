@@ -274,9 +274,7 @@ public class WebExtension: GLib.Object
 			return;
 		
 		web_page.document_loaded.connect(on_document_loaded);
-		#if HAVE_WEBKIT_2_8
 		web_page.context_menu.connect(on_context_menu);
-		#endif
 	}
 	
 	private void on_document_loaded(WebKit.WebPage page)
@@ -331,14 +329,12 @@ public class WebExtension: GLib.Object
 		}
 	}
 	
-	#if HAVE_WEBKIT_2_8
 	private bool on_context_menu(WebKit.ContextMenu menu, WebKit.WebHitTestResult hit_test)
 	{
 		if (login_form_manager != null)
 			return login_form_manager.manage_context_menu(menu, hit_test.node);
 		return false;
 	}
-	#endif
 }
 
 } // namespace Nuvola
