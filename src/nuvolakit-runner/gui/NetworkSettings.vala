@@ -22,7 +22,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if HAVE_WEBKIT_2_16
 namespace Nuvola
 {
 
@@ -157,4 +156,3 @@ public class NetworkSettings: Gtk.Grid
 }
 
 } // namespace Nuvola
-#endif

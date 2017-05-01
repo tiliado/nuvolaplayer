@@ -114,10 +114,8 @@ public class WebEngine : GLib.Object, JSExecutor
 		worker_data["LIBSOUP_MINOR"] = Soup.get_minor_version();
 		worker_data["LIBSOUP_MICRO"] = Soup.get_micro_version();
 		
-		#if HAVE_WEBKIT_2_16
 		if (connection != null)
 			apply_network_proxy(connection);	
-		#endif
 		var web_context = get_web_context();
 		var webkit_extension_dir = Nuvola.get_libdir();
 		debug("Nuvola WebKit Extension directory: %s", webkit_extension_dir);
@@ -253,7 +251,6 @@ public class WebEngine : GLib.Object, JSExecutor
 		}
 	}
 	
-	#if HAVE_WEBKIT_2_16
 	public void apply_network_proxy(Connection connection)
 	{
 		WebKit.NetworkProxyMode proxy_mode;
@@ -279,7 +276,6 @@ public class WebEngine : GLib.Object, JSExecutor
 		}
 		get_web_context().set_network_proxy_settings(proxy_mode, proxy_settings);
 	}
-	#endif
 		
 	private bool load_uri(string uri)
 	{

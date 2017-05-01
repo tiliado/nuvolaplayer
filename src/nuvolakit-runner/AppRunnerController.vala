@@ -444,10 +444,8 @@ public class AppRunnerController : RunnerApplication
 		
 		var dialog = new PreferencesDialog(this, main_window, form);
 		dialog.add_tab("Keyboard shortcuts", new KeybindingsSettings(actions, config, global_keybindings.keybinder));
-		#if HAVE_WEBKIT_2_16
 		var network_settings = new NetworkSettings(connection);
 		dialog.add_tab("Network", network_settings);
-		#endif
 		dialog.add_tab("Features", new ComponentsManager(components));
 		var response = dialog.run();
 		if (response == Gtk.ResponseType.OK)
@@ -461,7 +459,6 @@ public class AppRunnerController : RunnerApplication
 				else
 					config.set_value(key, new_value);
 			}
-			#if HAVE_WEBKIT_2_16
 			NetworkProxyType type;
 			string? host;
 			int port;
@@ -471,7 +468,6 @@ public class AppRunnerController : RunnerApplication
 				connection.set_network_proxy(type, host, port);
 				web_engine.apply_network_proxy(connection);
 			}
-			#endif
 		}
 		// Don't destroy dialog before form data are retrieved
 		dialog.destroy();
