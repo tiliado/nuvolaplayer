@@ -447,6 +447,7 @@ public class AppRunnerController : RunnerApplication
 		var network_settings = new NetworkSettings(connection);
 		dialog.add_tab("Network", network_settings);
 		dialog.add_tab("Features", new ComponentsManager(components));
+		dialog.add_tab("Website Data", new WebsiteDataManager(WebEngine.get_web_context().get_website_data_manager()));
 		var response = dialog.run();
 		if (response == Gtk.ResponseType.OK)
 		{
