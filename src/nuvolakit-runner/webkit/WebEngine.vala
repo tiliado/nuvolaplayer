@@ -65,23 +65,28 @@ public class WebEngine : GLib.Object, JSExecutor
 		if (default_context != null)
 			return false;
 		
-		WebKit.WebContext wc;
-		wc = (WebKit.WebContext) GLib.Object.@new(typeof(WebKit.WebContext),
-				"local-storage-directory", storage.data_dir.get_child("local_storage").get_path());
-		wc.set_favicon_database_directory(storage.data_dir.get_child("favicons").get_path());
-		wc.set_disk_cache_directory(storage.cache_dir.get_child("webcache").get_path());
-		var cm = wc.get_cookie_manager();
-		cm.set_persistent_storage(storage.data_dir.get_child("cookies.dat").get_path(),
-			WebKit.CookiePersistentStorage.SQLITE);
-		
-		default_context = wc;
+		var data_manager = (WebKit.WebsiteDataManager) GLib.Object.@new(
+			typeof(WebKit.WebsiteDataManager),
+			"base-cache-directory", storage.cache_dir.get_child("webkit").get_path(),
+			"disk-cache-directory", storage.cache_dir.get_child("webcache").get_path(),
+			"offline-application-cache-directory", storage.cache_dir.get_child("offline_apps").get_path(),
+			"base-data-directory", storage.data_dir.get_child("webkit").get_path(),
+			"local-storage-directory", storage.data_dir.get_child("local_storage").get_path(),
+			"indexeddb-directory", storage.data_dir.get_child("indexeddb").get_path(),
+			"websql-directory", storage.data_dir.get_child("websql").get_path());
+		var cookie_manager = data_manager.get_cookie_manager();
+		cookie_manager.set_persistent_storage(storage.data_dir.get_child("cookies.dat").get_path(),
+			WebKit.CookiePersistentStorage.SQLITE);	
+		var web_context =  new WebKit.WebContext.with_website_data_manager(data_manager);
+		web_context.set_favicon_database_directory(storage.data_dir.get_child("favicons").get_path());
+		default_context = web_context;
 		return true;
 	}
 	
-	public static WebKit.WebContext? get_web_context()
+	public static WebKit.WebContext get_web_context()
 	{
 		if (default_context == null)
-			critical("Default context hasn't been set up yet. Call WebEngine.set_up_web_context().");
+			error("Default context hasn't been set up yet. Call WebEngine.set_up_web_context().");
 		return default_context;
 	}
 	
