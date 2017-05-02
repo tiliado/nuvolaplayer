@@ -121,6 +121,7 @@ Build and Install
   * libsecret-1 >= 0.16
   * optional unity >= 3.0
   * optional dbusmenu-glib-0.4 >= 0.4
+  * optional appindicator3-0.1 >= 0.4
 
 
 ### Waf
@@ -134,7 +135,7 @@ To find out what build parameters can be set run ./waf --help
 
 ### Build
 
-    $ ./waf configure [--prefix=...] [--libdir=...] [--branding=...] [--noopt] [--nodebug] [--nounity]
+    $ ./waf configure [--prefix=...] [--libdir=...] [--branding=...] [--noopt] [--nodebug] [--nounity] [--noappindicator]
     $ ./waf build
 
 ### Install
