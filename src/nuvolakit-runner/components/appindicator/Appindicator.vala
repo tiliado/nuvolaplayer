@@ -118,7 +118,7 @@ public class Appindicator: GLib.Object
 				radio_groups[action.name] = radio_item;
 				action.notify["state"].connect_after(on_radio_action_state_changed);
 			}
-			radio_item.active = action.state != null && action.state.equal(option.parameter);
+			radio_item.active = action.state != null && Diorite.variant_equal(action.state, option.parameter);
 			item = radio_item;
 			item.set_data<Variant?>("diorite_action_param", option.parameter);
 		}
@@ -168,7 +168,7 @@ public class Appindicator: GLib.Object
 			var parameter = item.get_data<Variant?>("diorite_action_param");
 			var radio_action = action as Diorite.RadioAction;
 			var toggle_action = action as Diorite.ToggleAction;
-			if (radio_action == null || !radio_action.state.equal(parameter))
+			if (radio_action == null || !Diorite.variant_equal(radio_action.state, parameter))
 				action.activate(parameter);
 			if (toggle_action != null)
 			{
@@ -200,7 +200,7 @@ public class Appindicator: GLib.Object
 		/* Mark the new active radio */
 		foreach (var radio in radios)
 		{
-			if (state.equal(radio.get_data<Variant?>("diorite_action_param")))
+			if (Diorite.variant_equal(state, radio.get_data<Variant?>("diorite_action_param")))
 			{
 				radio.active = true;
 				break;
