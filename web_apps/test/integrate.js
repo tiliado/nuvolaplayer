@@ -67,6 +67,9 @@ var ratingOptions = [
 // Add new radio action named ``rating`` with initial state ``3`` (3 stars)
 var ACTION_RATING = "rating";
 Nuvola.actions.addRadioAction("playback", "win", ACTION_RATING, 3, ratingOptions);
+// Add new togle action
+var ACTION_WONDERFUL = "wonderful";
+Nuvola.actions.addAction("playback", "win", ACTION_WONDERFUL, "Wonderful song", null, null, null, true);
 
 // Create new WebApp prototype
 var WebApp = Nuvola.$WebApp();
@@ -108,7 +111,7 @@ WebApp._onInitWebWorker = function(emitter)
 // Page is ready for magic
 WebApp._onPageReady = function()
 {
-    var actions = [];
+    var actions = [ACTION_WONDERFUL];
     for (var i=0; i <= 5; i++)
         actions.push(ACTION_RATING + "::" + i);
     player.addExtraActions(actions);
@@ -250,6 +253,8 @@ WebApp.update = function()
     }
     player.setCanPause(enabled);
     
+    Nuvola.actions.updateEnabledFlag(ACTION_RATING, true);
+    Nuvola.actions.updateEnabledFlag(ACTION_WONDERFUL, true);
     // Schedule the next update
     setTimeout(this.update.bind(this), 500);
 }
@@ -270,6 +275,12 @@ WebApp._onActionActivated = function(emitter, name, param)
         break;
     case PlayerAction.NEXT_SONG:
         Nuvola.clickOnElement(document.getElementById("next"));
+        break;
+    case ACTION_RATING:
+        Nuvola.actions.updateState(ACTION_RATING, param);
+        break;
+    case ACTION_WONDERFUL:
+        Nuvola.actions.updateState(ACTION_WONDERFUL, !!param);
         break;
     }
 }

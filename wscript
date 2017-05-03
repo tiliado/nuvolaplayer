@@ -159,6 +159,7 @@ def options(ctx):
 	ctx.add_option('--noopt', action='store_true', default=False, dest='noopt', help="Turn off compiler optimizations")
 	ctx.add_option('--nodebug', action='store_false', default=True, dest='debug', help="Turn off debugging symbols")
 	ctx.add_option('--nounity', action='store_false', default=True, dest='unity', help="Don't build Unity features.")
+	ctx.add_option('--noappindicator', action='store_false', default=True, dest='appindicator', help="Don't build functionality dependent on libappindicator")
 	ctx.add_option('--webkitgtk-supports-mse', action='store_true', default=False, dest='webkit_mse',
 		help="Use only if you are absolutely sure that your particular build of the WebKitGTK library supports Media Source Extension (as of 2.15.3, it is disabled by default)")
 
@@ -267,6 +268,10 @@ def configure(ctx):
 		pkgconfig(ctx, 'unity', 'UNITY', '3.0')
 		pkgconfig(ctx, 'dbusmenu-glib-0.4', 'DBUSMENU', '0.4')
 		vala_def(ctx, "UNITY")
+	ctx.env.with_appindicator = ctx.options.appindicator
+	if ctx.options.appindicator:
+		pkgconfig(ctx, 'appindicator3-0.1', 'APPINDICATOR', '0.4')
+		vala_def(ctx, "APPINDICATOR")
 	
 	# Define HAVE_WEBKIT_X_YY Vala compiler definitions
 	webkit_version = tuple(int(i) for i in ctx.check_cfg(modversion='webkit2gtk-4.0').split(".")[0:2])
@@ -363,6 +368,9 @@ def build(ctx):
 	if ctx.env.with_unity:
 		packages += " unity Dbusmenu-0.4"
 		uselib += " UNITY DBUSMENU"
+	if ctx.env.with_appindicator:
+		packages += " appindicator3-0.1"
+		uselib += " APPINDICATOR"
 	
 	valalib( 
 		target = ENGINEIO,

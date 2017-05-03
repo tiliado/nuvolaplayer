@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2017 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -27,10 +27,16 @@ namespace Nuvola
 
 public class TrayIconComponent: Component
 {
-	public bool always_close_to_tray {get; public set; default = false;}
+	private const string NAMESPACE = "component.tray_icon.";
+	public bool always_close_to_tray {get; set; default = false;}
+	public bool use_x11_icon {get; set; default = false;}
+	public bool use_appindicator {get; set; default = false;}
 	private AppRunnerController controller;
 	private Bindings bindings;
-	private TrayIcon tray_icon = null;
+	private TrayIcon x11_icon = null;
+	#if APPINDICATOR
+	private Appindicator appindicator = null;
+	#endif
 	
 	public TrayIconComponent(AppRunnerController controller, Bindings bindings, Diorite.KeyValueStorage config)
 	{
@@ -38,9 +44,13 @@ public class TrayIconComponent: Component
 		this.has_settings = true;
 		this.bindings = bindings;
 		this.controller = controller;
-		config.bind_object_property("component.tray_icon.", this, "always_close_to_tray")
+		config.bind_object_property(NAMESPACE, this, "always_close_to_tray")
 			.set_default(true).update_property();
-		config.bind_object_property("component.tray_icon.", this, "enabled")
+		config.bind_object_property(NAMESPACE, this, "use_x11_icon")
+			.set_default(false).update_property();
+		config.bind_object_property(NAMESPACE, this, "use_appindicator")
+			.set_default(false).update_property();
+		config.bind_object_property(NAMESPACE, this, "enabled")
 			.set_default(false).update_property();
 		enabled_set = true;
 		if (enabled)
@@ -49,45 +59,132 @@ public class TrayIconComponent: Component
 	
 	protected override bool activate()
 	{
-		tray_icon = new TrayIcon(controller, bindings.get_model<LauncherModel>());
+		update();
 		controller.main_window.can_destroy.connect(on_can_quit);
+		notify["use-x11-icon"].connect_after(update);
+		notify["use-appindicator"].connect_after(update);
 		return true;
 	}
 	
 	protected override bool deactivate()
 	{
 		controller.main_window.can_destroy.disconnect(on_can_quit);
-		tray_icon = null;
+		notify["use-x11-icon"].disconnect(update);
+		notify["use-appindicator"].disconnect(update);
+		x11_icon = null;
+		#if APPINDICATOR
+		appindicator = null;
+		#endif
 		return true;
+	}
+	
+	private void update()
+	{
+		if (use_x11_icon && x11_icon == null)
+			x11_icon = new TrayIcon(controller, bindings.get_model<LauncherModel>());
+		if (!use_x11_icon && x11_icon != null)
+			x11_icon = null;
+		#if APPINDICATOR
+		if (use_appindicator && appindicator == null)
+			appindicator = new Appindicator(controller, bindings.get_model<LauncherModel>());
+		if (!use_appindicator && appindicator != null)
+			appindicator = null;
+		#endif
 	}
 	
 	public override Gtk.Widget? get_settings()
 	{		
-		var grid = new Gtk.Grid();
-		grid.orientation = Gtk.Orientation.HORIZONTAL;
-		var label = new Gtk.Label("Always close main window to tray icon");
-		label.vexpand = false;
-		label.hexpand = true;
-		grid.add(label);
-		var close_to_tray_switch = new Gtk.Switch();
-		close_to_tray_switch.active = always_close_to_tray;
-		close_to_tray_switch.notify["active"].connect_after(on_close_to_tray_switch_changed);
-		grid.add(close_to_tray_switch);
-		grid.show_all();
-		return grid;
+		return new TrayIconSettings(this);
 	}
 	
-	private void on_close_to_tray_switch_changed(GLib.Object object, ParamSpec p)
+	private bool is_visible()
 	{
-		var close_to_tray_switch = object as Gtk.Switch;
-		return_if_fail(close_to_tray_switch != null);
-		always_close_to_tray = close_to_tray_switch.active;
+		#if APPINDICATOR
+		return x11_icon != null && x11_icon.visible || appindicator != null && appindicator.visible;
+		#else
+		return x11_icon != null && x11_icon.visible;
+		#endif
 	}
 	
 	private void on_can_quit(ref bool can_quit)
 	{
-		if (always_close_to_tray && tray_icon != null && tray_icon.visible)
+		if (always_close_to_tray && is_visible())
 			can_quit = false;
+	}
+}
+
+
+public class TrayIconSettings : Gtk.Grid
+{
+	private Gtk.Switch close_to_tray_switch;
+	private Gtk.Switch x11_icon_switch;
+	private Gtk.Switch appindicator_switch;
+	
+	public TrayIconSettings(TrayIconComponent component)
+	{
+		orientation = Gtk.Orientation.VERTICAL;
+		row_spacing = 10;
+		column_spacing = 10;
+		var line = 0;
+		var label = Drt.Labels.header("Variants");
+		label.hexpand = true;
+		label.show();
+		attach(label, 0, line, 2, 1);
+		line++;
+		var bind_flags = BindingFlags.BIDIRECTIONAL|BindingFlags.SYNC_CREATE;
+		
+		label = Drt.Labels.markup("<span size='medium'><b>%s</b></span>", "Legacy X11 icon");
+		attach(label, 1, line, 1, 1);
+		label.show();
+		x11_icon_switch = new Gtk.Switch();
+		component.bind_property("use-x11-icon", x11_icon_switch, "active", bind_flags);
+		attach(x11_icon_switch, 0, line, 1, 1);
+		x11_icon_switch.show();
+		line++;
+		label = Drt.Labels.plain("It should work in XFCE, LXDE, Mate and GNOME (X11) but does not work in Unity.", true);
+		attach(label, 1, line, 1, 1);
+		label.show();
+		line++;
+		
+		label = Drt.Labels.markup("<span size='medium'><b>%s</b></span>", "AppIndicator icon");
+		attach(label, 1, line, 1, 1);
+		label.show();
+		appindicator_switch = new Gtk.Switch();
+		#if APPINDICATOR
+		component.bind_property("use-appindicator", appindicator_switch, "active", bind_flags);
+		#else
+		appindicator_switch.sensitive = false;
+		#endif
+		attach(appindicator_switch, 0, line, 1, 1);
+		appindicator_switch.show();
+		line++;
+		label = Drt.Labels.markup(
+			"It should work in Unity, elementaryOS and GNOME (with "
+			+ "<a href=\"https://extensions.gnome.org/extension/615/appindicator-support\">AppIndicator extension</a>)"
+			+ " but does not work in other environments.");
+		attach(label, 1, line, 1, 1);
+		label.show();
+		line++;
+		#if !APPINDICATOR
+		label = Drt.Labels.markup("<i>%s</i>", Nuvola.get_app_name() + " was built without appindicator library.");
+		attach(label, 1, line, 1, 1);
+		label.show();
+		line++;
+		#endif
+		
+		label = Drt.Labels.header("Options");
+		label.hexpand = true;
+		label.show();
+		attach(label, 0, line, 2, 1);
+		line++;
+		
+		label = Drt.Labels.plain("Always close main window to tray icon");
+		attach(label, 1, line, 1, 1);
+		label.show();
+		close_to_tray_switch = new Gtk.Switch();
+		component.bind_property("always_close_to_tray", close_to_tray_switch, "active", bind_flags);
+		attach(close_to_tray_switch, 0, line, 1, 1);
+		close_to_tray_switch.show();
 	}
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2015 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2011-2016 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -50,12 +50,8 @@ public class TrayIcon: GLib.Object
 	private Diorite.Actions actions_reg;
 	private LauncherModel model;
 	private Gtk.Menu? menu = null;
-	#if APPINDICATOR
-	private AppIndicator.Indicator? indicator = null;
-	#else
 	private Gtk.StatusIcon? icon;
 	private int number = -1;
-	#endif
 	
 	public TrayIcon(AppRunnerController controller, LauncherModel model)
 	{
@@ -63,13 +59,6 @@ public class TrayIcon: GLib.Object
 		this.actions_reg = controller.actions;
 		this.model = model;
 		model.notify.connect_after(on_model_changed);
-		#if APPINDICATOR
-		critical("AppIndicator support is incomplete");
-		indicator = new AppIndicator.Indicator(
-			controller.path_name, controller.icon, AppIndicator.IndicatorCategory.APPLICATION_STATUS);
-		indicator.set_status(AppIndicator.IndicatorStatus.ACTIVE);
-		create_menu();
-		#else
 		icon = new Gtk.StatusIcon.from_icon_name(controller.icon);
 		icon.visible = true;
 		icon.title = controller.app_name;
@@ -81,7 +70,6 @@ public class TrayIcon: GLib.Object
 		icon.notify.connect_after(on_icon_notifify);
 		this.visible = icon.visible && icon.embedded;
 		render_icon();
-		#endif
 	}
 	
 	public void unset_number()
@@ -91,10 +79,8 @@ public class TrayIcon: GLib.Object
 	
 	public void set_number(int number)
 	{
-		#if !APPINDICATOR
 		this.number = number;
 		render_icon();
-		#endif
 	}
 	
 	private static void render_number(int number, ref Gdk.Pixbuf pixbuf)
@@ -147,7 +133,6 @@ public class TrayIcon: GLib.Object
 		pixbuf = Gdk.pixbuf_get_from_surface (surface, 0, 0, size, size);
 	}
 	
-	#if !APPINDICATOR
 	private bool on_size_changed(int size)
 	{
 		render_icon();
@@ -167,7 +152,6 @@ public class TrayIcon: GLib.Object
 		render_number(number, ref pixbuf);
 		icon.set_from_pixbuf(pixbuf);
 	}
-	#endif
 	
 	private void on_activate()
 	{
@@ -179,9 +163,7 @@ public class TrayIcon: GLib.Object
 		switch (p.name)
 		{
 		case "tooltip":
-			#if !APPINDICATOR
 			icon.tooltip_text = model.tooltip;
-			#endif
 			break;
 		case "actions":
 			create_menu();
@@ -191,36 +173,24 @@ public class TrayIcon: GLib.Object
 	
 	~TrayIcon()
 	{
-		#if APPINDICATOR
-		indicator = null;
-		#else
 		if (menu != null)
 			menu.detach();
 		icon.visible = false;
 		icon = null;
-		#endif
 		model.notify.disconnect(on_model_changed);
 		menu = null;
 	}
 	
 	private void create_menu()
 	{
-		#if !APPINDICATOR
 		if (menu != null)
 			menu.detach();
-		#endif
 		
 		var model = actions_reg.build_menu(slist_strings_to_array(model.actions), false, true);
 		menu = new Gtk.Menu.from_model(model);
-		
-		#if APPINDICATOR
-		indicator.set_menu(menu);
-		#else
 		menu.attach_to_widget(controller.main_window, null);
-		#endif
 	}
 	
-	#if !APPINDICATOR
 	private void on_popup_menu(uint button, uint time)
 	{
 		return_if_fail(menu != null);
@@ -239,7 +209,6 @@ public class TrayIcon: GLib.Object
 			break;
 		}
 	}
-	#endif
 }
 
 } // namespace Nuvola
