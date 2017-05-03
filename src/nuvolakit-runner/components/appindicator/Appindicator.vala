@@ -27,7 +27,7 @@ namespace Nuvola
 
 public class Appindicator: GLib.Object
 {
-	public bool visible {get; private set; default = false;}
+	public bool visible {get{return indicator != null && indicator.connected;}}
 	private AppRunnerController controller;
 	private Diorite.Actions actions;
 	private LauncherModel model;
@@ -41,7 +41,6 @@ public class Appindicator: GLib.Object
 		this.actions = controller.actions;
 		this.model = model;
 		model.notify.connect_after(on_model_changed);
-		warning("AppIndicator support is experimental.");
 		indicator = new AppIndicator.Indicator(
 			controller.web_app.id, controller.icon, AppIndicator.IndicatorCategory.APPLICATION_STATUS);
 		indicator.set_status(AppIndicator.IndicatorStatus.ACTIVE);
