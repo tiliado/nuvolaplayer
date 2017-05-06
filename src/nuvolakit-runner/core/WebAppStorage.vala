@@ -34,6 +34,16 @@ public class WebAppStorage : GLib.Object
 	public WebAppStorage(File config_dir, File data_dir, File cache_dir)
 	{
 		Object(config_dir: config_dir, data_dir: data_dir, cache_dir: cache_dir);
+		try
+		{
+			Diorite.System.make_dirs(config_dir);
+			Diorite.System.make_dirs(data_dir);
+			Diorite.System.make_dirs(cache_dir);
+		}
+		catch (GLib.Error e)
+		{
+			error("Failed to create directory. %s", e.message);
+		}
 	}
 }
 
