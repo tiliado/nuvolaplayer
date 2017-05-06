@@ -339,6 +339,10 @@ public class WebEngine : GLib.Object, JSExecutor
 	
 	public void set_user_agent(string? user_agent)
 	{
+		const string APPLE_WEBKIT_VERSION = "604.1";
+		const string SAFARI_VERSION = "11.0";
+		const string FIREFOX_VERSION = "52.0";
+		const string CHROME_VERSION = "58.0.3029.81";
 		string? agent = null;
 		string? browser = null;
 		string? version = null;	
@@ -372,16 +376,33 @@ public class WebEngine : GLib.Object, JSExecutor
 		{
 		case "CHROME":
 			var s = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Safari/537.36";
-			agent = s.printf(version ?? "50.0.2661.94");
+			agent = s.printf(version ?? CHROME_VERSION);
 			break;
 		case "FIREFOX":
 			var s = "Mozilla/5.0 (X11; Linux x86_64; rv:%1$s) Gecko/20100101 Firefox/%1$s";
-			agent = s.printf(version ?? "46.0");
+			agent = s.printf(version ?? FIREFOX_VERSION);
+			break;
+		case "SAFARI":
+			var s = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/%1$s (KHTML, like Gecko) Version/%2$s Safari/%1$s";
+			agent = s.printf(APPLE_WEBKIT_VERSION, version ?? SAFARI_VERSION);
+			break;
+		case "WEBKIT":
+			var s = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/%1$s (KHTML, like Gecko) Version/%2$s Safari/%1$s";
+			agent = s.printf(APPLE_WEBKIT_VERSION, version ?? SAFARI_VERSION);
 			break;
 		}
 		
-		unowned WebKit.Settings settings = web_view.get_settings();	
-		settings.user_agent = agent;
+		unowned WebKit.Settings settings = web_view.get_settings();
+		if (agent == null)
+		{
+			settings.enable_site_specific_quirks = true;
+			settings.set_user_agent_with_application_details("Nuvola", Nuvola.get_short_version());
+		}
+		else
+		{
+			settings.enable_site_specific_quirks = false;
+			settings.user_agent = agent + " Nuvola/" + Nuvola.get_short_version();
+		}
 		message("User agent set '%s'", settings.user_agent);
 	}
 	public void get_preferences(out Variant values, out Variant entries)

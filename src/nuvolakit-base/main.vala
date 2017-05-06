@@ -99,6 +99,11 @@ public string get_version()
 	return VERSION;
 }
 
+public string get_short_version()
+{
+	return "%d.%d.%d".printf(VERSION_MAJOR, VERSION_MINOR, VERSION_BUGFIX);
+}
+
 public string get_version_suffix()
 {
 	return VERSION_SUFFIX;
