@@ -187,16 +187,10 @@ public class ComponentsManager: Gtk.Stack
 			button.valign = button.halign = Gtk.Align.CENTER;
 			button.clicked.connect(on_back_clicked);
 			grid.attach(button, 0, 0, 1, 1);
-			var label = new Gtk.Label(Markup.printf_escaped(
-				"<span size='medium'><b>%s</b></span>\n<span foreground='#999999' size='small'>%s</span>",
-				component.name, component.description));
-			label.use_markup = true;
-			label.vexpand = false;
-			label.hexpand = true;
-			label.halign = Gtk.Align.START;
-			label.set_line_wrap(true);
+			var label = Drt.Labels.markup(
+				"<span size='medium'><b>%s</b></span>\n<span foreground='#444' size='small'>%s</span>",
+				component.name, component.description);
 			grid.attach(label, 1, 0, 1, 1);
-			
 			
 			var component_widget = component.get_settings();
 			if (component_widget != null)
