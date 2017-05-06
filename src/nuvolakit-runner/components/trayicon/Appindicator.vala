@@ -144,6 +144,7 @@ public class Appindicator: GLib.Object
 		
 		item.set_data<Diorite.Action?>("diorite_action", action);
 		item.activate.connect(on_menu_item_activated);
+		action.bind_property("enabled", item, "sensitive", BindingFlags.DEFAULT|BindingFlags.SYNC_CREATE);
 		item.show();
 		menu.add(item);
 	}
