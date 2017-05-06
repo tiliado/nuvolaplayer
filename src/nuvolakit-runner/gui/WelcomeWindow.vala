@@ -43,20 +43,16 @@ public class WelcomeScreen : Gtk.Grid
 		grid.orientation = Gtk.Orientation.VERTICAL;
 		
 		string welcome_xml = null;
-		var welcome_xml_file = storage.get_data_file("welcome.xml");
-		if (welcome_xml_file != null)
+		var welcome_xml_file = storage.require_data_file("welcome.xml");
+		try
 		{
-			try
-			{
-				welcome_xml = Diorite.System.read_file(welcome_xml_file);
-			}
-			catch (GLib.Error e)
-			{
-				warning("Failed to load '%s': %s", welcome_xml_file.get_path(), e.message);
-			}
-		}		
-		if (welcome_xml == null)
-			welcome_xml = """<h1>Error</h1>\n<p>Failed to find welcome text.</p>""";
+			welcome_xml = Diorite.System.read_file(welcome_xml_file);
+		}
+		catch (GLib.Error e)
+		{
+			error("Failed to load '%s': %s", welcome_xml_file.get_path(), e.message);
+		}	
+		
 		var buffer = new Diorite.RichTextBuffer();
 		try
 		{
@@ -64,9 +60,7 @@ public class WelcomeScreen : Gtk.Grid
 		}
 		catch (MarkupError e)
 		{
-			warning("Markup Error: %s", e.message);
-			destroy();
-			return;
+			error("Markup Error in '%s': %s", welcome_xml_file.get_path(), e.message);
 		}
 		
 		welcome_text = new Diorite.RichTextView(buffer);
