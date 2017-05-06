@@ -549,7 +549,7 @@ def build(ctx):
 	ctx.install_files('${PREFIX}/share/' + APPNAME, www.ant_glob('**'), cwd=www.parent, relative_trick=True)
 	
 	app_icons = ctx.path.find_node("data/icons")
-	for size in (16, 22, 24, 32, 48, 64):
+	for size in (16, 22, 24, 32, 48, 64, 128, 256):
 		ctx.install_as('${PREFIX}/share/icons/hicolor/%sx%s/apps/%s.png' % (size, size, ctx.env.ICON_NAME), app_icons.find_node("%s.png" % size))
 	ctx.install_as('${PREFIX}/share/icons/hicolor/scalable/apps/%s.svg' % ctx.env.ICON_NAME, app_icons.find_node("scalable.svg"))
 	
