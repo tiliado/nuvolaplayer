@@ -45,6 +45,46 @@ public class WebAppStorage : GLib.Object
 			error("Failed to create directory. %s", e.message);
 		}
 	}
+	
+	/**
+	 * Returns the default path of cache subdir with given name, create it if it doesn't exist.
+	 * 
+	 * @param path    Subdirectory path.
+	 * @return cache subdirectory
+	 */
+	public File create_cache_subdir(string path)
+	{
+		var dir = cache_dir.get_child(path);
+		try
+		{
+			Diorite.System.make_dirs(dir);
+		}
+		catch (GLib.Error e)
+		{
+			warning("Failed to create directory '%s'. %s", dir.get_path(), e.message);
+		}
+		return dir;
+	}
+	
+	/**
+	 * Returns the default path of data subdir with given name, create it if it doesn't exist.
+	 * 
+	 * @param path    Subdirectory path.
+	 * @return data subdirectory
+	 */
+	public File create_data_subdir(string path)
+	{
+		var dir = data_dir.get_child(path);
+		try
+		{
+			Diorite.System.make_dirs(dir);
+		}
+		catch (GLib.Error e)
+		{
+			warning("Failed to create directory '%s'. %s", dir.get_path(), e.message);
+		}
+		return dir;
+	}
 }
 
 }
