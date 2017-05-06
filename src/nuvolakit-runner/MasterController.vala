@@ -262,7 +262,7 @@ public class MasterController : Diorite.Application
 		welcome_screen.show();
 		main_window.add_page(welcome_screen, PAGE_WELCOME, "Welcome");
 		#if FLATPAK
-		var app_index_view = new AppIndexWebView(WebEngine.get_web_context());
+		var app_index_view = new AppIndexWebView(this, WebEngine.get_web_context());
 		app_index_view.load_app_index(Nuvola.REPOSITORY_INDEX, Nuvola.REPOSITORY_ROOT);
 		app_index_view.show();
 		main_window.add_page(app_index_view, "repository", "Repository Index");

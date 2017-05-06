@@ -793,15 +793,7 @@ public class WebEngine : GLib.Object, JSExecutor
 			}
 			else
 			{
-				try
-				{
-					Gtk.show_uri(null, uri, Gdk.CURRENT_TIME);
-				}
-				catch (GLib.Error e)
-				{
-					critical("Failed to open '%s' in a default web browser. %s", uri, e.message);
-				}
-				handled = true;
+				runner_app.show_uri(uri);
 			}
 		}
 		if (handled)

@@ -27,11 +27,13 @@ namespace Nuvola
 	
 public class AppIndexWebView : WebView
 {
+	private unowned Diorite.Application app;
 	private string? root_uri = null;
 	
-	public AppIndexWebView(WebKit.WebContext context)
+	public AppIndexWebView(Diorite.Application app, WebKit.WebContext context)
 	{
 		base(context);
+		this.app = app;
 		decide_policy.connect(on_decide_policy);
 		zoom_level = 0.90;
 		hexpand = vexpand = true;
@@ -86,17 +88,9 @@ public class AppIndexWebView : WebView
 		}
 		else
 		{
-			try
-			{
-				Gtk.show_uri_on_window(get_toplevel() as Gtk.Window, uri, Gdk.CURRENT_TIME);
-				decision.ignore();
-				return true;
-			}
-			catch (GLib.Error e)
-			{
-				critical("Failed to open '%s' in a default web browser. %s", uri, e.message);
-				return false;
-			}
+			app.show_uri(uri);
+			decision.ignore();
+			return true;
 		}
 	}
 }
