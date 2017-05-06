@@ -754,53 +754,70 @@ public class WebEngine : GLib.Object, JSExecutor
 		if (!uri.has_prefix("http://") && !uri.has_prefix("https://"))
 			return false;
 		
+		var handled = false;
+		var load_uri = false;
 		var new_window_override = new_window;
-		var result = navigation_request(uri, ref new_window_override);
+		var approved = navigation_request(uri, ref new_window_override);
+		var javascript_enabled = true;
+		const string KEEP_USER_AGENT = "KEEP_USER_AGENT";
+		string? user_agent = KEEP_USER_AGENT;
+		ask_page_settings(uri, new_window_override, ref javascript_enabled, ref user_agent);
+		var web_settings = web_view.get_settings();
 		
 		var type = action.get_navigation_type();
 		var user_gesture = action.is_user_gesture();
-		debug("Navigation, %s window: uri = %s, result = %s, frame = %s, type = %s, user gesture %s",
-			new_window_override ? "new" : "current", uri, result.to_string(), decision.frame_name, type.to_string(),
+		debug("Navigation, %s window: uri = %s, approved = %s, frame = %s, type = %s, user gesture %s",
+			new_window_override ? "new" : "current", uri, approved.to_string(), decision.frame_name, type.to_string(),
 			user_gesture.to_string());
 		
 		// We care only about user clicks
-		if (type != WebKit.NavigationType.LINK_CLICKED && !user_gesture)
-			return false;
-		
-		if (result)
+		if (type == WebKit.NavigationType.LINK_CLICKED || user_gesture)
 		{
-			if (new_window != new_window_override)
+			if (approved)
 			{
-				if (!new_window_override)
+				load_uri = handled = true;
+				if (new_window != new_window_override)
 				{
-					// Open in current window instead of a new window
-					decision.ignore();
-					Idle.add(() => 
+					if (!new_window_override)
 					{
-						web_view.load_uri(uri);
-						return false;
-					});
-					return true;
+						// Open in current window instead of a new window
+						load_uri = false;
+						Idle.add(() => {web_view.load_uri(uri); return false;});
+					}
+					else
+					{
+						warning("Overriding of new window flag false -> true hasn't been implemented yet.");
+					}
 				}
-				warning("Overriding of new window flag false -> true hasn't been implemented yet.");
 			}
-			decision.use();
-			return true;
+			else
+			{
+				try
+				{
+					Gtk.show_uri(null, uri, Gdk.CURRENT_TIME);
+				}
+				catch (GLib.Error e)
+				{
+					critical("Failed to open '%s' in a default web browser. %s", uri, e.message);
+				}
+				handled = true;
+			}
 		}
-		else
+		if (handled)
 		{
-			try
+			if (load_uri)
 			{
-				Gtk.show_uri(null, uri, Gdk.CURRENT_TIME);
-				decision.ignore();
-				return true;
+				web_settings.enable_javascript = javascript_enabled;
+				if (user_agent != KEEP_USER_AGENT)
+					set_user_agent(user_agent);
+				decision.use();
 			}
-			catch (GLib.Error e)
+			else
 			{
-				critical("Failed to open '%s' in a default web browser. %s", uri, e.message);
-				return false;
+				decision.ignore();
 			}
 		}
+		return handled;
 	}
 	
 	private bool on_decide_policy(WebKit.PolicyDecision decision, WebKit.PolicyDecisionType decision_type)
@@ -847,6 +864,42 @@ public class WebEngine : GLib.Object, JSExecutor
 				new_window = value.get_boolean();
 		}
 		return approved;
+	}
+	
+	private void ask_page_settings(string url, bool new_window, ref bool javascript_enabled, ref string? user_agent)
+	{
+		var builder = new VariantBuilder(new VariantType("a{smv}"));
+		builder.add("{smv}", "url", new Variant.string(url));
+		builder.add("{smv}", "newWindow", new Variant.boolean(new_window));
+		builder.add("{smv}", "javascript", new Variant.boolean(javascript_enabled));
+		builder.add("{smv}", "userAgent", user_agent != null ? new Variant.string(user_agent) : new Variant("mv", null));
+		var args = new Variant("(s@a{smv})", "PageSettings", builder.end());
+		try
+		{
+			env.call_function("Nuvola.core.emit", ref args);
+		}
+		catch (GLib.Error e)
+		{
+			runner_app.show_error("Integration script error", "The web app integration script has not provided a valid response and caused an error: %s".printf(e.message));
+			return;
+		}
+		VariantIter iter = args.iterator();
+		assert(iter.next("s", null));
+		assert(iter.next("a{smv}", &iter));
+		string key = null;
+		Variant value = null;
+		while (iter.next("{smv}", &key, &value))
+		{
+			switch (key)
+			{
+			case "javascript":
+				javascript_enabled = value != null ? value.get_boolean() : false;
+				break;
+			case "userAgent":
+				user_agent = Diorite.variant_to_string(value);
+				break;
+			}
+		}
 	}
 	
 	private void on_uri_changed(GLib.Object o, ParamSpec p)

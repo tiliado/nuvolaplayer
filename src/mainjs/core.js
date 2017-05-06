@@ -100,6 +100,27 @@ Core.$init = function()
     this.addSignal("NavigationRequest");
     
     /**
+     * Emitted on request for web page settings.
+     * 
+     * @param String request.url            URL of the new page
+     * @param Boolean request.newWindow     whether to open request in a new window, you can overwrite this field
+     * @param Boolean request.javascript    whether javascript should be enabled
+     * @param String request.userAgent       whether to override user agent string
+     * 
+     * ```
+     * var _onPageSettings = function(object, request)
+     * {
+     *     request.userAgent = (
+     *         request.url.startsWith("https://accounts.google.com/")
+     *         || request.url.startsWith("https://accounts.youtube.com/")
+     *         ? "WEBKIT" : null
+     *     );
+     * }
+     * ```
+     */
+    this.addSignal("PageSettings");
+    
+    /**
      * Emitted on request for loading a web resource.
      * 
      * @param String request.url           URL of the resource (can be overwritten)
