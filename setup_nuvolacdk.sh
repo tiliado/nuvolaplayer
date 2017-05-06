@@ -11,4 +11,5 @@ else
 	export C_INCLUDE_PATH="$DIORITE_PATH/build"
 	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$DIORITE_PATH/build"
 	export LIBRARY_PATH="$DIORITE_PATH/build"
+	export NUVOLA_ICON="eu.tiliado.NuvolaCdk"
 fi

@@ -2,6 +2,7 @@ export NUVOLA_WEB_APPS_DIR="web_apps"
 export DIORITE_LOG_MESSAGE_CHANNEL="yes"
 export DIORITE_DUPLEX_CHANNEL_FATAL_TIMEOUT="yes"
 export LD_LIBRARY_PATH="build:$LD_LIBRARY_PATH"
+export NUVOLA_ICON="eu.tiliado.Nuvola"
 
 if [ -e /etc/fedora-release ]; then
     export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib64"
@@ -21,7 +22,33 @@ mk_symlinks()
 	if [ ! -e "${build_datadir}/${datadir}" ]; then
 	    ln -sv "../../../data/$datadir" "$build_datadir"
 	fi
-    done 
+    done
+    for size in 16 22 24 32 48 64 128 256 
+    do
+	icon_dir="$HOME/.local/share/icons/hicolor/${size}x${size}/apps"
+	test -d "$icon_dir" || mkdir -p "$icon_dir"
+	cp "data/icons/${size}.png" "$icon_dir/${NUVOLA_ICON}.png"
+	cp "web_apps/test/icons/${size}.png" "$icon_dir/${NUVOLA_ICON}AppTest.png"
+    done
+    icon_dir="$HOME/.local/share/icons/hicolor/scalable/apps"
+    test -d "$icon_dir" || mkdir -p "$icon_dir"
+    cp "data/icons/scalable.svg" "$icon_dir/${NUVOLA_ICON}.svg"
+    cp "web_apps/test/icons/scalable.svg" "$icon_dir/${NUVOLA_ICON}AppTest.svg"
+    
+    if [ ! -z "$XDG_DATA_HOME" ] && [ "$XDG_DATA_HOME" != "$HOME/.local/share" ]
+    then
+	for size in 16 22 24 32 48 64 128 256 
+	do
+	    icon_dir="$XDG_DATA_HOME/icons/hicolor/${size}x${size}/apps"
+	    test -d "$icon_dir" || mkdir -p "$icon_dir"
+	    cp "data/icons/${size}.png" "$icon_dir/${NUVOLA_ICON}.png"
+	    cp "web_apps/test/icons/${size}.png" "$icon_dir/${NUVOLA_ICON}AppTest.png"
+	done
+	icon_dir="$XDG_DATA_HOME/icons/hicolor/scalable/apps"
+	test -d "$icon_dir" || mkdir -p "$icon_dir"
+	cp "data/icons/scalable.svg" "$icon_dir/${NUVOLA_ICON}.svg"
+	cp "web_apps/test/icons/scalable.svg" "$icon_dir/${NUVOLA_ICON}AppTest.svg"
+    fi
 }
 
 reconf()
