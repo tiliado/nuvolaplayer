@@ -94,15 +94,15 @@ public abstract class RunnerApplication: Diorite.Application
 	public string dbus_id {get; private set;}
 
 	
-	public RunnerApplication(string web_app_id, string web_app_name, Diorite.Storage storage)
+	public RunnerApplication(string web_app_id, string web_app_name, string version, Diorite.Storage storage)
 	{
 		var uid = build_camel_id(web_app_id);
 		var dbus_id = build_dbus_id(web_app_id);
 		base(uid, web_app_name, dbus_id);
 		this.storage = storage;
 		this.dbus_id = dbus_id;
-		icon = Nuvola.get_app_icon();
-		version = Nuvola.get_version();
+		icon = uid;
+		this.version = version;
 	}
 }
 
@@ -130,7 +130,7 @@ public class AppRunnerController : RunnerApplication
 		Diorite.Storage storage, WebAppMeta web_app, WebAppStorage app_storage,
 		string? api_token, bool use_nuvola_dbus=false)
 	{
-		base(web_app.id, web_app.name, storage);
+		base(web_app.id, web_app.name, "%d.%d".printf(web_app.version_major, web_app.version_minor), storage);
 		this.app_storage = app_storage;
 		this.web_app = web_app;
 		this.api_token = api_token;
