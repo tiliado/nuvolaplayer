@@ -67,18 +67,19 @@ public class WebEngine : GLib.Object, JSExecutor
 		
 		var data_manager = (WebKit.WebsiteDataManager) GLib.Object.@new(
 			typeof(WebKit.WebsiteDataManager),
-			"base-cache-directory", storage.cache_dir.get_child("webkit").get_path(),
-			"disk-cache-directory", storage.cache_dir.get_child("webcache").get_path(),
-			"offline-application-cache-directory", storage.cache_dir.get_child("offline_apps").get_path(),
-			"base-data-directory", storage.data_dir.get_child("webkit").get_path(),
-			"local-storage-directory", storage.data_dir.get_child("local_storage").get_path(),
-			"indexeddb-directory", storage.data_dir.get_child("indexeddb").get_path(),
-			"websql-directory", storage.data_dir.get_child("websql").get_path());
+			"base-cache-directory", storage.create_cache_subdir("webkit").get_path(),
+			"disk-cache-directory", storage.create_cache_subdir("webcache").get_path(),
+			"offline-application-cache-directory", storage.create_cache_subdir("offline_apps").get_path(),
+			"base-data-directory", storage.create_data_subdir("webkit").get_path(),
+			"local-storage-directory", storage.create_data_subdir("local_storage").get_path(),
+			"indexeddb-directory", storage.create_data_subdir("indexeddb").get_path(),
+			"websql-directory", storage.create_data_subdir("websql").get_path());
+		var web_context =  new WebKit.WebContext.with_website_data_manager(data_manager);
+		web_context.set_favicon_database_directory(storage.create_data_subdir("favicons").get_path());
+		/* Persistence must be set up after WebContext is created! */
 		var cookie_manager = data_manager.get_cookie_manager();
 		cookie_manager.set_persistent_storage(storage.data_dir.get_child("cookies.dat").get_path(),
 			WebKit.CookiePersistentStorage.SQLITE);	
-		var web_context =  new WebKit.WebContext.with_website_data_manager(data_manager);
-		web_context.set_favicon_database_directory(storage.data_dir.get_child("favicons").get_path());
 		default_context = web_context;
 		return true;
 	}
