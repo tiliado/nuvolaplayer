@@ -283,7 +283,9 @@ def configure(ctx):
 	# Definitions
 	ctx.env.GENUINE = genuine
 	if genuine:
-		vala_def(ctx, ("EXPERIMENTAL", "GENUINE"))
+		vala_def(ctx, "GENUINE")
+	if any((ctx.env.GENUINE, ctx.env.CDK, ctx.env.ADK)):
+		vala_def(ctx, "EXPERIMENTAL")
 	if tiliado_api.get("enabled", False):
 		vala_def(ctx, "TILIADO_API")
 	
