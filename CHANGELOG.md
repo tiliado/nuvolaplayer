@@ -1,11 +1,43 @@
 Nuvola Apps Changelog
 =======================
 
-Releases 3.1.x
---------------
+Milestone 3.1.4 - still in development
+--------------------------------------
 
-Rolling releases.
+New Features:
 
+  * Tray icon feature can now use AppIndicator library instead of obsolete X11 tray icons. Although app indicators
+    are mostly known from Ubuntu's Unity desktop, they also work in elementaryOS and GNOME Shell (with
+    [AppIndicator extension](https://extensions.gnome.org/extension/615/appindicator-support)) and provide
+    superior user experience. Issue: tiliado/nuvolaplayer#45
+  * Users can easily clear cookies, cache and temporary files, IndexedDB and WebSQL databases and local storage
+    from the Preferences dialog → tab Website Data. Issue: tiliado/nuvolaplayer#331
+
+Enhancements:
+
+  * Nuvola can do its own user agent quirks (i.e. to disguise itself as a different web browser) in order to work
+    around web pages that doesn't work with the WebKit's user agent string. Issue: tiliado/nuvolaplayer#336
+
+Web App Scripts:
+
+  * Google Play Music script uses own user agent quirks to work around the malfunctioning Google sign-in web page.
+    Issue: tiliado/nuvolaplayer#336
+
+Bug fixes:
+
+  * The build script now raises error if it is ran with Python < 3.4.
+  * Fixed a bug when the menus of tray icons and dock items were not updated.
+  * Nuvola now aborts when required data files are not found (e.g. in incomplete installation) rather they running
+    with errors in the background.
+  * Obsolete test suite has been removed. A new one will be created during ongoing modernization.
+    Issue: tiliado/nuvolaplayer#335
+
+Under the Hood:
+
+  * WebKitGTK+ >= 2.16.0 is required as all new API is now used unconditionally to make maintenance easier.
+  * Added optional dependency on appindicator3-0.1 >= 0.4. Use `./waf configure --noappindicator` to disable
+    this dependency and related functionality (AppIndicator backend for Tray icon feature).
+    
 Milestone 3.1.3 - April 30, 2017
 --------------------------------
 
