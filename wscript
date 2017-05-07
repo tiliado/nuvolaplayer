@@ -103,7 +103,7 @@ def pkgconfig(ctx, pkg, uselib, version, mandatory=True, store=None, valadef=Non
 def loadjson(path, optional=False):
 	try:
 		with open(path, "rt", encoding="utf-8") as f:
-			data = "".join((line if not line.strip().startswith("#") else "\n") for line in f)
+			data = "".join((line if not line.strip().startswith("//") else "\n") for line in f)
 			return json.loads(data)
 	except FileNotFoundError:
 		if optional:
