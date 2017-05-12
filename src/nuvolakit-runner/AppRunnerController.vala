@@ -503,7 +503,9 @@ public class AppRunnerController : RunnerApplication
 		bindings.add_object(actions_helper);
 		
 		components = new Drt.Lst<Component>();
+		#if APPINDICATOR
 		components.prepend(new TrayIconComponent(this, bindings, config));
+		#endif
 		#if UNITY
 		components.prepend(new UnityLauncherComponent(this, bindings, config));
 		#endif

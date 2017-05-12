@@ -22,6 +22,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#if APPINDICATOR
 namespace Nuvola
 {
 
@@ -212,3 +213,4 @@ public class TrayIcon: GLib.Object
 }
 
 } // namespace Nuvola
+#endif

@@ -22,6 +22,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#if APPINDICATOR
 namespace Nuvola
 {
 
@@ -34,9 +35,7 @@ public class TrayIconComponent: Component
 	private AppRunnerController controller;
 	private Bindings bindings;
 	private TrayIcon x11_icon = null;
-	#if APPINDICATOR
 	private Appindicator appindicator = null;
-	#endif
 	
 	public TrayIconComponent(AppRunnerController controller, Bindings bindings, Diorite.KeyValueStorage config)
 	{
@@ -72,9 +71,7 @@ public class TrayIconComponent: Component
 		notify["use-x11-icon"].disconnect(update);
 		notify["use-appindicator"].disconnect(update);
 		x11_icon = null;
-		#if APPINDICATOR
 		appindicator = null;
-		#endif
 		return true;
 	}
 	
@@ -84,12 +81,10 @@ public class TrayIconComponent: Component
 			x11_icon = new TrayIcon(controller, bindings.get_model<LauncherModel>());
 		if (!use_x11_icon && x11_icon != null)
 			x11_icon = null;
-		#if APPINDICATOR
 		if (use_appindicator && appindicator == null)
 			appindicator = new Appindicator(controller, bindings.get_model<LauncherModel>());
 		if (!use_appindicator && appindicator != null)
 			appindicator = null;
-		#endif
 	}
 	
 	public override Gtk.Widget? get_settings()
@@ -99,11 +94,7 @@ public class TrayIconComponent: Component
 	
 	private bool is_visible()
 	{
-		#if APPINDICATOR
 		return x11_icon != null && x11_icon.visible || appindicator != null && appindicator.visible;
-		#else
-		return x11_icon != null && x11_icon.visible;
-		#endif
 	}
 	
 	private void on_can_quit(ref bool can_quit)
@@ -133,6 +124,22 @@ public class TrayIconSettings : Gtk.Grid
 		line++;
 		var bind_flags = BindingFlags.BIDIRECTIONAL|BindingFlags.SYNC_CREATE;
 		
+		label = Drt.Labels.markup("<span size='medium'><b>%s</b></span>", "AppIndicator icon");
+		attach(label, 1, line, 1, 1);
+		label.show();
+		appindicator_switch = new Gtk.Switch();
+		component.bind_property("use-appindicator", appindicator_switch, "active", bind_flags);
+		attach(appindicator_switch, 0, line, 1, 1);
+		appindicator_switch.show();
+		line++;
+		label = Drt.Labels.markup(
+			"It should work in Unity, elementaryOS and GNOME (with "
+			+ "<a href=\"https://extensions.gnome.org/extension/615/appindicator-support\">AppIndicator extension</a>)"
+			+ " but does not work in other environments.");
+		attach(label, 1, line, 1, 1);
+		label.show();
+		line++;
+		
 		label = Drt.Labels.markup("<span size='medium'><b>%s</b></span>", "Legacy X11 icon");
 		attach(label, 1, line, 1, 1);
 		label.show();
@@ -145,32 +152,6 @@ public class TrayIconSettings : Gtk.Grid
 		attach(label, 1, line, 1, 1);
 		label.show();
 		line++;
-		
-		label = Drt.Labels.markup("<span size='medium'><b>%s</b></span>", "AppIndicator icon");
-		attach(label, 1, line, 1, 1);
-		label.show();
-		appindicator_switch = new Gtk.Switch();
-		#if APPINDICATOR
-		component.bind_property("use-appindicator", appindicator_switch, "active", bind_flags);
-		#else
-		appindicator_switch.sensitive = false;
-		#endif
-		attach(appindicator_switch, 0, line, 1, 1);
-		appindicator_switch.show();
-		line++;
-		label = Drt.Labels.markup(
-			"It should work in Unity, elementaryOS and GNOME (with "
-			+ "<a href=\"https://extensions.gnome.org/extension/615/appindicator-support\">AppIndicator extension</a>)"
-			+ " but does not work in other environments.");
-		attach(label, 1, line, 1, 1);
-		label.show();
-		line++;
-		#if !APPINDICATOR
-		label = Drt.Labels.markup("<i>%s</i>", Nuvola.get_app_name() + " was built without appindicator library.");
-		attach(label, 1, line, 1, 1);
-		label.show();
-		line++;
-		#endif
 		
 		label = Drt.Labels.header("Options");
 		label.hexpand = true;
@@ -189,3 +170,4 @@ public class TrayIconSettings : Gtk.Grid
 }
 
 } // namespace Nuvola
+#endif
