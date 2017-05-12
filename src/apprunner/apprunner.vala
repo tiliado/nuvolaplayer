@@ -35,7 +35,6 @@ struct Args
 	static bool version;
 	static string? app_dir;
 	static bool nuvola_dbus;
-	static string? log_file;
 	
 	public const OptionEntry[] options =
 	{
@@ -44,7 +43,6 @@ struct Args
 		{ "verbose", 'v', 0, OptionArg.NONE, ref Args.verbose, "Print informational messages", null },
 		{ "debug", 'D', 0, OptionArg.NONE, ref Args.debug, "Print debugging messages", null },
 		{ "version", 'V', 0, OptionArg.NONE, ref Args.version, "Print version and exit", null },
-		{ "log-file", 'L', 0, OptionArg.FILENAME, ref Args.log_file, "Log to file", "FILE" },
 		{ null }
 	};
 }
@@ -82,18 +80,7 @@ public int main(string[] args)
 		return 1;
 	}
 	
-	FileStream? log = null;
-	if (Args.log_file != null)
-	{
-		log = FileStream.open(Args.log_file, "w");
-		if (log == null)
-		{
-			stderr.printf("Cannot open log file '%s' for writting.\n", Args.log_file);
-			return 1;
-		}
-	}
-	
-	Diorite.Logger.init(log != null ? log : stderr, Args.debug ? GLib.LogLevelFlags.LEVEL_DEBUG
+	Diorite.Logger.init(stderr, Args.debug ? GLib.LogLevelFlags.LEVEL_DEBUG
 	  : (Args.verbose ? GLib.LogLevelFlags.LEVEL_INFO: GLib.LogLevelFlags.LEVEL_WARNING),
 	  true, "Runner");
 	
