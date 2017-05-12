@@ -3,6 +3,7 @@ export DIORITE_LOG_MESSAGE_CHANNEL="yes"
 export DIORITE_DUPLEX_CHANNEL_FATAL_TIMEOUT="yes"
 export LD_LIBRARY_PATH="build:$LD_LIBRARY_PATH"
 export NUVOLA_ICON="eu.tiliado.Nuvola"
+export DATADIR="/usr/share"
 
 if [ -e /etc/fedora-release ]; then
     export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib64"
@@ -49,6 +50,9 @@ mk_symlinks()
 	cp "data/icons/scalable.svg" "$icon_dir/${NUVOLA_ICON}.svg"
 	cp "web_apps/test/icons/scalable.svg" "$icon_dir/${NUVOLA_ICON}AppTest.svg"
     fi
+    
+    test -e "${build_datadir}/www/engine.io.js" || \
+	ln -s "$DATADIR/javascript/engine.io-client/engine.io.js" "${build_datadir}/www/engine.io.js"
 }
 
 reconf()

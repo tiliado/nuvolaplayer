@@ -5,3 +5,5 @@ build
 web_apps/template/icons
 branding/tiliado.json
 branding/tiliado
+data/www/engine.io.js
+engineio-soup/examples/www/engine.io.js

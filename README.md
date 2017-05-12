@@ -122,6 +122,8 @@ Build and Install
   * optional unity >= 3.0
   * optional dbusmenu-glib-0.4 >= 0.4
   * optional appindicator3-0.1 >= 0.4
+  * optional [engine.io-client](https://github.com/socketio/engine.io-client) >= 3.1.0
+    (installed as /usr/share/javascript/engine.io-client/engine.io.js)
 
 
 ### Waf

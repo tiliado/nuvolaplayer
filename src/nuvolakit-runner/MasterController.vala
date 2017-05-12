@@ -221,6 +221,7 @@ public class MasterController : Diorite.Application
 		media_keys = new MediaKeysServer(new MediaKeys(this.app_id, key_grabber), server, app_runners);
 		
 		#if EXPERIMENTAL
+		storage.assert_data_file("www/engine.io.js");
 		var www_root_dirname = "www";
 		File[] www_roots = {storage.user_data_dir.get_child(www_root_dirname)};
 		foreach (var data_dir in storage.data_dirs)

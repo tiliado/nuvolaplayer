@@ -155,6 +155,7 @@ class mergejs(Task.Task):
 
 def options(ctx):
 	ctx.load('compiler_c vala')
+	ctx.add_option('--jsdir', type=str, default=None, help="Path to JavaScript modules [DATADIR/javascript].")
 	ctx.add_option('--branding', type=str, default="default", help="Branding profile to load.")
 	ctx.add_option('--noopt', action='store_true', default=False, dest='noopt', help="Turn off compiler optimizations")
 	ctx.add_option('--nodebug', action='store_false', default=True, dest='debug', help="Turn off debugging symbols")
@@ -231,7 +232,6 @@ def configure(ctx):
 	ctx.env.ICON_NAME = ctx.env.UNIQUE_NAME
 	
 	# Flatpak
-	
 	if ctx.env.FLATPAK:
 		vala_def(ctx, "FLATPAK")
 		MIN_WEBKIT = FLATPAK_WEBKIT
@@ -258,6 +258,9 @@ def configure(ctx):
 	pkgconfig(ctx, 'javascriptcoregtk-4.0', 'JSCORE', MIN_WEBKIT)
 	pkgconfig(ctx, 'uuid', 'UUID', '0') # Engine.io
 	pkgconfig(ctx, 'libsoup-2.4', 'SOUP', '0') # Engine.io
+	
+	# JavaScript dir
+	ctx.env.JSDIR = ctx.options.jsdir if ctx.options.jsdir else ctx.env.DATADIR + "/javascript"
 	
 	# Optional features
 	ctx.env.WEBKIT_MSE = ctx.options.webkit_mse
@@ -540,6 +543,7 @@ def build(ctx):
 		'${PREFIX}/share/metainfo/%s.appdata.xml' % ctx.env.UNIQUE_NAME,
 		ctx.path.get_bld().find_node(ctx.env.UNIQUE_NAME + '.appdata.xml'))
 	
+	ctx.symlink_as('${PREFIX}/share/%s/www/engine.io.js' % APPNAME, ctx.env.JSDIR + '/engine.io-client/engine.io.js')
 	ctx.symlink_as('${PREFIX}/bin/%s' % FUTURE_APPNAME, APPNAME)
 	ctx.symlink_as('${PREFIX}/bin/%sctl' % FUTURE_APPNAME, CONTROL)
 	

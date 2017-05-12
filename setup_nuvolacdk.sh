@@ -12,4 +12,5 @@ else
 	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$DIORITE_PATH/build"
 	export LIBRARY_PATH="$DIORITE_PATH/build"
 	export NUVOLA_ICON="eu.tiliado.NuvolaCdk"
+	export DATADIR="/app/share"
 fi

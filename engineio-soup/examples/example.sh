@@ -12,6 +12,13 @@ NAME="example"
 mkdir -p ${OUT}
 	
 set -x
+
+if [ ! -f www/engine.io.js ]
+then
+	cd www
+	wget https://raw.githubusercontent.com/socketio/engine.io-client/master/engine.io.js
+	cd ..
+fi
 	
 valac -C -d ${OUT} -b . --thread --save-temps -v \
 	--vapidir $BUILD  --vapidir ../vapi \
