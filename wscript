@@ -185,7 +185,6 @@ def configure(ctx):
 	if not ctx.options.noopt:
 		ctx.env.append_unique('CFLAGS', '-O2')
 	if ctx.options.debug:
-		ctx.env.append_unique('VALAFLAGS', '-g')
 		ctx.env.append_unique('CFLAGS', '-g3')
 	
 	# Branding
