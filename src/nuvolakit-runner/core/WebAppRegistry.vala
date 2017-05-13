@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2016 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2011-2017 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -34,11 +34,6 @@ public class WebAppRegistry: GLib.Object
 	private File[] system_storage;
 	
 	/**
-	 * Regular expression to check validity of service identifier
-	 */
-	private static Regex id_regex;
-	
-	/**
 	 * Creates new web app registry
 	 * 
 	 * @param user_storage        user-specific directory with service integrations
@@ -55,7 +50,7 @@ public class WebAppRegistry: GLib.Object
 	 */
 	public WebApp? get_app_meta(string id)
 	{
-		if  (!check_id(id))
+		if  (!WebApp.validate_id(id))
 		{
 			warning("Service id '%s' is invalid.", id);
 			return null;
@@ -105,7 +100,7 @@ public class WebAppRegistry: GLib.Object
 					
 					try
 					{
-						var app = WebApp.load_from_dir(app_dir);
+						var app = new WebApp.from_dir(app_dir);
 						app.removable = false;
 						var id = app.id;
 						debug("Found web app %s at %s, version %u.%u",
@@ -134,29 +129,6 @@ public class WebAppRegistry: GLib.Object
 				warning("Filesystem error: %s", e.message);
 			}
 		}
-	}
-	
-	/**
-	 * Check if the service identifier is valid
-	 * 
-	 * @param id service identifier
-	 * @return true if id is valid
-	 */
-	public static bool check_id(string id)
-	{
-		const string ID_REGEX = "^[a-z0-9]+(?:_[a-z0-9]+)*$";
-		if (id_regex == null)
-		{
-			try
-			{
-				id_regex = new Regex(ID_REGEX);
-			}
-			catch (RegexError e)
-			{
-				error("Unable to compile regular expression /%s/.", ID_REGEX);
-			}
-		}
-		return id_regex.match(id);
 	}
 }
 

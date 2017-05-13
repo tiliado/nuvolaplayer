@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2017 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -30,32 +30,119 @@ public class WebApp : GLib.Object
 	/**
 	 * Name of file with metadata.
 	 */
-	private const string METADATA_FILENAME = "metadata.json";
+	public const string METADATA_FILENAME = "metadata.json";
+	public const string DEFAULT_CATEGORY = "Network";
 	
-	public string id {get; construct;}
-	public string name {get; construct;}
-	public string maintainer_name {get; construct;}
-	public string maintainer_link {get; construct;}
-	public string categories {get; construct set;}
-	public int version_major {get; construct;}
-	public int version_minor {get; construct;}
-	public int api_major {get; construct;}
-	public int api_minor {get; construct;}
-	public string? user_agent {get; construct set;}
-	public string? html5_audio {get; construct set;}
-	public string? requirements {get; construct set;}
-	public int window_width {get; construct;}
-	public int window_height {get; construct;}
-	public File? data_dir {get; private set; default = null;}
+	/**
+	 * Regular expression to check validity of service identifier
+	 */
+	private static Regex id_regex;
+	
+	/**
+	 * Check if the service identifier is valid
+	 * 
+	 * @param id service identifier
+	 * @return true if id is valid
+	 */
+	public static bool validate_id(string id)
+	{
+		const string ID_REGEX = "^[a-z0-9]+(?:_[a-z0-9]+)*$";
+		if (id_regex == null)
+		{
+			try
+			{
+				id_regex = new Regex(ID_REGEX);
+			}
+			catch (RegexError e)
+			{
+				error("Unable to compile regular expression /%s/.", ID_REGEX);
+			}
+		}
+		return id_regex.match(id);
+	}
+	
+	public string id {get; construct; default = null;}
+	public string name {get; construct; default = null;}
+	public string maintainer_name {get; construct; default = null;}
+	public string maintainer_link {get; construct; default = null;}
+	public int version_major {get; construct; default = 0;}
+	public int version_minor {get; construct; default = 0;}
+	public int api_major {get; construct; default = 0;}
+	public int api_minor {get; construct; default = 0;}
+	public string? user_agent {get; set; default = null;}
+	public string? requirements {get; construct; default = null;}
+	public int window_width {get; construct; default = 0;}
+	public int window_height {get; construct; default = 0;}
+	public File? data_dir {get; construct; default = null;}
 	public bool removable {get; set; default = false;}
 	public bool hidden {get; set; default = false;}	
 	public bool allow_insecure_content {get; set; default = false;}
-	public bool has_desktop_launcher {get; set; default = false;}
+	public bool has_desktop_launcher {get; set; default = false;} 
+	public GenericSet<string> categories {get; construct;}
 	private List<IconInfo?> icons = null;
 	private bool icons_set = false;
 	private Traits? _traits = null;
 	
-	public static WebApp load_from_dir(File dir) throws WebAppError
+	/**
+	 * Creates new WebApp metadata object
+	 * 
+	 * @param id    web app id
+	 * @param name    web app name
+	 * @param maintainer_name    the name of the maintainer
+	 * @param maintainer_link    the URL of the maintainer
+	 * @param version_major      major version of the script
+	 * @param version_minor      minor version of the script
+	 * @param api_major          major version of Nuvola API
+	 * @param api_minor          minor version of Nuvola API
+	 * @param data_dir    corresponding data directory of the web app to load
+	 * @param requirements      format requirements of the web app
+	 * @param categories        desktop app categories
+	 * @param window_width      default window width
+	 * @param window_height     default window height
+	 **/
+	public WebApp(string id, string name, string maintainer_name, string maintainer_link,
+		int version_major, int version_minor, int api_major, int api_minor, File? data_dir,
+		string? requirements, GenericSet<string>? categories, int window_width, int window_height) throws WebAppError
+	{
+		if (!WebApp.validate_id(id))
+			throw new WebAppError.INVALID_METADATA("Invalid app id '%s'.", id);
+		if (name == "")
+			throw new WebAppError.INVALID_METADATA("Empty 'name' entry");
+		if (version_major <= 0)
+			throw new WebAppError.INVALID_METADATA("Major version must be greater than zero");
+		if (version_minor < 0)
+			throw new WebAppError.INVALID_METADATA("Minor version must be greater or equal to zero");
+		if (api_major <= 0)
+			throw new WebAppError.INVALID_METADATA("Major api_version must be greater than zero");
+		if (api_minor < 0)
+			throw new WebAppError.INVALID_METADATA("Minor api_version must be greater or equal to zero");
+		if (!JSApi.is_supported(api_major, api_minor))
+			throw new WebAppError.INVALID_METADATA(
+				"Requested unsupported NuvolaKit API '%d.%d'.".printf(api_major, api_minor));
+		if (maintainer_name == "")
+			throw new WebAppError.INVALID_METADATA("Empty 'maintainer_name' entry");
+		if (!maintainer_link.has_prefix("http://")
+		&&  !maintainer_link.has_prefix("https://")
+		&&  !maintainer_link.has_prefix("mailto:"))
+			throw new WebAppError.INVALID_METADATA("Empty or invalid 'maintainer_link' entry: '%s'", maintainer_link);
+		if (window_width < 0)
+			throw new WebAppError.INVALID_METADATA("Property window_width must be greater or equal to zero");
+		if (window_height < 0)
+			throw new WebAppError.INVALID_METADATA("Property window_height must be greater or equal to zero");
+		
+		GLib.Object(id: id, name: name, maintainer_name: maintainer_name, maintainer_link: maintainer_link,
+			version_major: version_major, version_minor: version_minor, api_major: api_major, api_minor: api_minor,
+			data_dir: data_dir, window_width: window_width, window_height: window_height,
+			categories: categories ?? new GenericSet<string>(str_hash, str_equal),
+			requirements: requirements);
+	}
+	
+	/**
+	 * Load web app metadata from data directory
+	 * 
+	 * @param dir   data directory of the web app to load
+	 **/
+	public WebApp.from_dir(File dir) throws WebAppError
 	{
 		if (dir.query_file_type(0) != FileType.DIRECTORY)
 			throw new WebAppError.LOADING_FAILED(@"$(dir.get_path()) is not a directory");
@@ -73,24 +160,73 @@ public class WebApp : GLib.Object
 		{
 			throw new WebAppError.LOADING_FAILED("Cannot read '%s'. %s", metadata_file.get_path(), e.message);
 		}
-		
-		// Prevents a critical warning from Json.gobject_from_data
-		if (metadata == null || metadata[0] != '{')
-			throw new WebAppError.INVALID_METADATA("Invalid metadata file '%s'. Opening object literal not found.", metadata_file.get_path());
-		
-		WebApp? meta;
+		this.from_metadata(metadata, dir);
+	}
+	
+	/**
+	 * Load web app metadata from a data string
+	 * 
+	 * @param metadata    metadata string in JSON format
+	 * @param data_dir    corresponding data directory of the web app to load
+	 **/
+	public WebApp.from_metadata(string metadata, File? data_dir) throws WebAppError
+	{
+		Drt.JsonObject meta;
 		try
 		{
-			meta = Json.gobject_from_data(typeof(WebApp), metadata) as WebApp;
+			meta = Drt.JsonParser.load_object(metadata);
 		}
-		catch (GLib.Error e)
+		catch (Drt.JsonError e)
 		{
-			throw new WebAppError.INVALID_METADATA("Invalid metadata file '%s'. %s", metadata_file.get_path(), e.message);
+			throw new WebAppError.INVALID_METADATA("Invalid metadata file. %s", e.message);
 		}
 		
-		meta.check();
-		meta.data_dir = dir;
-		return meta;
+		string id;
+		if (!meta.get_string("id", out id))
+			throw new WebAppError.INVALID_METADATA("The id key is missing or is not a string.");
+		string name;
+		if (!meta.get_string("name", out name))
+			throw new WebAppError.INVALID_METADATA("The name key is missing or is not a string.");
+		string maintainer_name;
+		if (!meta.get_string("maintainer_name", out maintainer_name))
+			throw new WebAppError.INVALID_METADATA("The maintainer_name key is missing or is not a string.");
+		string maintainer_link;
+		if (!meta.get_string("maintainer_link", out maintainer_link))
+			throw new WebAppError.INVALID_METADATA("The maintainer_link key is missing or is not a string.");
+		int version_major;
+		if (!meta.get_int("version_major", out version_major))
+			throw new WebAppError.INVALID_METADATA("The version_major key is missing or is not an integer.");
+		int version_minor;
+		if (!meta.get_int("version_minor", out version_minor))
+			throw new WebAppError.INVALID_METADATA("The version_minor key is missing or is not an integer.");
+		int api_major;
+		if (!meta.get_int("api_major", out api_major))
+			throw new WebAppError.INVALID_METADATA("The api_major key is missing or is not an integer.");
+		int api_minor;
+		if (!meta.get_int("api_minor", out api_minor))
+			throw new WebAppError.INVALID_METADATA("The api_minor key is missing or is not an integer.");
+		var categories = meta.get_string_or("categories");
+		if (Diorite.String.is_empty(categories))
+		{
+			warning("Empty 'categories' entry for web app '%s'. Using '%s' as a fallback.", id, DEFAULT_CATEGORY);
+			categories = DEFAULT_CATEGORY;
+		}
+		var requirements = meta.get_string_or("requirements");
+		if (requirements == null)
+		{
+			requirements = "Feature[flash] Codec[mp3]";
+			warning("No requirements specified. '%s' used by default but that may change in the future.", requirements);
+		}
+		
+		this(id, name, maintainer_name, maintainer_link,
+			version_major, version_minor, api_major, api_minor, data_dir,
+			requirements, Diorite.String.semicolon_separated_set(categories, true),
+			meta.get_int_or("window_width"), meta.get_int_or("window_height"));
+		
+		hidden = meta.get_bool_or("hidden", false);
+		has_desktop_launcher = meta.get_bool_or("has_desktop_launcher", false);
+		allow_insecure_content = meta.get_bool_or("allow_insecure_content", false);
+		user_agent = meta.get_string_or("user_agent");
 	}
 	
 	/**
@@ -101,27 +237,12 @@ public class WebApp : GLib.Object
 	 */
 	public bool in_category(string category)
 	{
-		var categories = this.categories.split(";");
-		foreach (var item in categories)
-		{
-			item = item.strip();
-			if (category[0] != 0 && item == category)
-				return true;
-		}
-		return false;
+		return categories.contains(category.down());
 	}
 	
-	public string[] list_categories()
+	public List<string> list_categories()
 	{
-		string[] result = {};
-		var categories = this.categories.split(";");
-		foreach (var item in categories)
-		{
-			item = item.strip().down();
-			if (item[0] != 0)
-				result += item;
-		}
-		return result;
+		return categories.get_values();
 	}
 	
 	public unowned Traits traits()
@@ -294,48 +415,6 @@ public class WebApp : GLib.Object
 		icons_set = true;
 	}
 	
-	public void check() throws WebAppError
-	{
-		if (!WebAppRegistry.check_id(id))
-			throw new WebAppError.INVALID_METADATA("Invalid app id '%s'.", id);
-		if (name == "")
-			throw new WebAppError.INVALID_METADATA("Empty 'name' entry");
-		if (version_major <= 0)
-			throw new WebAppError.INVALID_METADATA("Major version must be greater than zero");
-		if (version_minor < 0)
-			throw new WebAppError.INVALID_METADATA("Minor version must be greater or equal to zero");
-		if (api_major <= 0)
-			throw new WebAppError.INVALID_METADATA("Major api_version must be greater than zero");
-		if (api_minor < 0)
-			throw new WebAppError.INVALID_METADATA("Minor api_version must be greater or equal to zero");
-		if (window_width < 0)
-			throw new WebAppError.INVALID_METADATA("Property window_width must be greater or equal to zero");
-		if (window_height < 0)
-			throw new WebAppError.INVALID_METADATA("Property window_height must be greater or equal to zero");
-		if (maintainer_name == "")
-			throw new WebAppError.INVALID_METADATA("Empty 'maintainer_name' entry");
-		if (!maintainer_link.has_prefix("http://")
-		&&  !maintainer_link.has_prefix("https://")
-		&&  !maintainer_link.has_prefix("mailto:"))
-			throw new WebAppError.INVALID_METADATA("Empty or invalid 'maintainer_link' entry: '%s'", maintainer_link);
-		
-		if (!JSApi.is_supported(api_major, api_minor))
-			throw new WebAppError.INVALID_METADATA(
-				"Requested unsupported NuvolaKit API '%d.%d'.".printf(api_major, api_minor));
-		
-		if (categories == null || categories == "")
-		{
-			categories = "Network;";
-			warning("Empty 'categories' entry for web app '%s'. Using '%s' as a fallback.", id, categories);
-		}
-		
-		if (requirements == null)
-		{
-			requirements = "Feature[flash] Codec[mp3]";
-			warning("No requirements specified. '%s' used by default but that may change in the future.", requirements);
-		}
-	}
-	
 	public Variant to_variant()
 	{
 		var builder = new VariantBuilder(new VariantType("a{sv}"));
@@ -343,7 +422,7 @@ public class WebApp : GLib.Object
 		builder.add("{sv}", "name", new Variant.string(name));
 		builder.add("{sv}", "version", new Variant.string("%u.%u".printf(version_major, version_minor)));
 		builder.add("{sv}", "maintainer", new Variant.string(maintainer_name));
-		builder.add("{sv}", "categories", new Variant.strv(list_categories()));
+		builder.add("{sv}", "categories", new Variant.strv(Drt.Utils.list_to_strv(list_categories())));
 		return builder.end();
 	}
 	
