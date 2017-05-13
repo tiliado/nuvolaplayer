@@ -44,11 +44,13 @@ mk_symlinks()
 	    test -d "$icon_dir" || mkdir -p "$icon_dir"
 	    cp "data/icons/${size}.png" "$icon_dir/${NUVOLA_ICON}.png"
 	    cp "web_apps/test/icons/${size}.png" "$icon_dir/${NUVOLA_ICON}AppTest.png"
+	    cp "web_apps/test/icons/${size}.png" "$icon_dir/${NUVOLA_ICON}AppTestmse.png"
 	done
 	icon_dir="$XDG_DATA_HOME/icons/hicolor/scalable/apps"
 	test -d "$icon_dir" || mkdir -p "$icon_dir"
 	cp "data/icons/scalable.svg" "$icon_dir/${NUVOLA_ICON}.svg"
 	cp "web_apps/test/icons/scalable.svg" "$icon_dir/${NUVOLA_ICON}AppTest.svg"
+	cp "web_apps/test/icons/scalable.svg" "$icon_dir/${NUVOLA_ICON}AppTestmse.svg"
     fi
     
     test -e "${build_datadir}/www/engine.io.js" || \
