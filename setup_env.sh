@@ -76,6 +76,12 @@ run()
 
 }
 
+build()
+{
+    mk_symlinks
+    python3 ./waf -v
+}
+
 tests()
 {
     mk_symlinks
