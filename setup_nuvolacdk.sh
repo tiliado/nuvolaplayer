@@ -13,4 +13,5 @@ else
 	export LIBRARY_PATH="$DIORITE_PATH/build"
 	export NUVOLA_ICON="eu.tiliado.NuvolaCdk"
 	export DATADIR="/app/share"
+	export DIORITE_TESTGEN="$DIORITE_PATH/testgen.py"
 fi

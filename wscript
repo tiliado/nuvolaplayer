@@ -259,6 +259,9 @@ def configure(ctx):
 	pkgconfig(ctx, 'uuid', 'UUID', '0') # Engine.io
 	pkgconfig(ctx, 'libsoup-2.4', 'SOUP', '0') # Engine.io
 	
+	# For tests
+	ctx.find_program("diorite-testgen-0.3", var="DIORITE_TESTGEN")
+	
 	# JavaScript dir
 	ctx.env.JSDIR = ctx.options.jsdir if ctx.options.jsdir else ctx.env.DATADIR + "/javascript"
 	
@@ -356,6 +359,8 @@ def build(ctx):
 	NUVOLAKIT_RUNNER = APPNAME + "-runner"
 	NUVOLAKIT_BASE = APPNAME + "-base"
 	NUVOLAKIT_WORKER = APPNAME + "-worker"
+	NUVOLAKIT_TESTS = APPNAME + "-tests"
+	RUN_NUVOLAKIT_TESTS = "run-" + NUVOLAKIT_TESTS
 	DIORITE_GLIB = 'dioriteglib-' + TARGET_DIORITE
 	DIORITE_GTK = 'dioriteglib-' + TARGET_DIORITE
 	
@@ -460,6 +465,41 @@ def build(ctx):
 		vapi_dirs = vapi_dirs,
 		vala_target_glib = TARGET_GLIB,
 		install_path = ctx.env.NUVOLA_LIBDIR,
+	)
+	
+	valalib(
+		target = NUVOLAKIT_TESTS,
+		source_dir = 'src/tests',
+		packages = packages + ' webkit2gtk-4.0 javascriptcoregtk-4.0 gstreamer-1.0 libsecret-1',
+		uselib =  uselib + ' JSCORE WEBKIT GST SECRET',
+		use = [NUVOLAKIT_BASE, NUVOLAKIT_RUNNER, ENGINEIO],
+		lib = ['m'],
+		includes = ["build"],
+		vala_defines = vala_defines,
+		defines = ['G_LOG_DOMAIN="Nuvola"'],
+		vapi_dirs = vapi_dirs,
+		vala_target_glib = TARGET_GLIB,
+		install_path = None,
+		install_binding = False
+	)
+	
+	ctx(
+		rule='"%s" -i ${SRC} -o ${TGT}' % ctx.env.DIORITE_TESTGEN[0],
+		source=ctx.path.find_or_declare('src/tests/%s.vapi' % NUVOLAKIT_TESTS),
+		target=ctx.path.find_or_declare("%s.vala" % RUN_NUVOLAKIT_TESTS)
+	)
+	
+	valaprog(
+		target = RUN_NUVOLAKIT_TESTS,
+		source = [ctx.path.find_or_declare("%s.vala" % RUN_NUVOLAKIT_TESTS)],
+		packages = packages,
+		uselib = uselib,
+		use = [NUVOLAKIT_BASE, ENGINEIO, NUVOLAKIT_TESTS],
+		vala_defines = vala_defines,
+		defines = ['G_LOG_DOMAIN="Nuvola"'],
+		vapi_dirs = vapi_dirs,
+		vala_target_glib = TARGET_GLIB,
+		install_path = None
 	)
 	
 	ctx(features = 'subst',

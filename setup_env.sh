@@ -64,7 +64,8 @@ reconf()
 rebuild()
 {
 	python3 ./waf -v distclean configure build \
-	    $WAF_CONFIGURE "$@"
+	    $WAF_CONFIGURE "$@" \
+	&& NUVOLA_LIBDIR=build build/run-nuvolaplayer3-tests
 }
 
 run()
@@ -73,6 +74,12 @@ run()
 	python3 ./waf -v && XDG_DATA_DIRS="build/share:$XDG_DATA_DIRS" \
 	NUVOLA_LIBDIR=build build/nuvolaplayer3 -D "$@"
 
+}
+
+tests()
+{
+    mk_symlinks
+    python3 ./waf -v && NUVOLA_LIBDIR=build build/run-nuvolaplayer3-tests
 }
 
 dbus()
