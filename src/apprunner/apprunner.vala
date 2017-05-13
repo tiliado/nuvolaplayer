@@ -108,14 +108,10 @@ public int main(string[] args)
 		}
 		#endif
 		var storage = new Diorite.XdgStorage.for_project(Nuvola.get_app_id());
-		var app_storage = new WebAppStorage(
-		  storage.user_config_dir.get_child(WEB_APP_DATA_SUBDIR).get_child(web_app.id),
-		  storage.user_data_dir.get_child(WEB_APP_DATA_SUBDIR).get_child(web_app.id),
-		  storage.user_cache_dir.get_child(WEB_APP_DATA_SUBDIR).get_child(web_app.id));
-		
-		var api_token = !Args.nuvola_dbus ? stdin.read_line() : null;
-		var controller = new AppRunnerController(storage, web_app, app_storage, api_token, Args.nuvola_dbus);
-		return controller.run(args);
+		if (Args.nuvola_dbus)
+			return AppRunnerController.run_web_app_with_dbus_handshake(storage, web_app, args);
+		else
+			return AppRunnerController.run_web_app_as_subprocess(storage, web_app, stdin.read_line(), args);
 	}
 	catch (WebAppError e)
 	{
