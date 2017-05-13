@@ -95,7 +95,7 @@ public int main(string[] args)
 	try
 	{
 		var app_dir = File.new_for_path(Args.app_dir);
-		var web_app = WebAppMeta.load_from_dir(app_dir);
+		var web_app = WebApp.load_from_dir(app_dir);
 		#if !FLATPAK
 		web_app.removable = false;
 		if (!web_app.has_desktop_launcher)
@@ -109,9 +109,9 @@ public int main(string[] args)
 		#endif
 		var storage = new Diorite.XdgStorage.for_project(Nuvola.get_app_id());
 		var app_storage = new WebAppStorage(
-		  storage.user_config_dir.get_child(WEB_APP_DATA_DIR).get_child(web_app.id),
-		  storage.user_data_dir.get_child(WEB_APP_DATA_DIR).get_child(web_app.id),
-		  storage.user_cache_dir.get_child(WEB_APP_DATA_DIR).get_child(web_app.id));
+		  storage.user_config_dir.get_child(WEB_APP_DATA_SUBDIR).get_child(web_app.id),
+		  storage.user_data_dir.get_child(WEB_APP_DATA_SUBDIR).get_child(web_app.id),
+		  storage.user_cache_dir.get_child(WEB_APP_DATA_SUBDIR).get_child(web_app.id));
 		
 		var api_token = !Args.nuvola_dbus ? stdin.read_line() : null;
 		var controller = new AppRunnerController(storage, web_app, app_storage, api_token, Args.nuvola_dbus);

@@ -48,7 +48,7 @@ public const string TILIADO_OAUTH2_TOKEN_ENDPOINT = TILIADO_OAUTH2_SERVER + "/o/
 public const string TILIADO_OAUTH2_DEVICE_CODE_ENDPOINT = TILIADO_OAUTH2_SERVER + "/o/device-token/";
 public const string TILIADO_OAUTH2_API_ENDPOINT = TILIADO_OAUTH2_SERVER + "/api/";
 
-public const string WEB_APP_DATA_DIR = "apps_data";
+public const string WEB_APP_DATA_SUBDIR = "apps_data";
 
 public string get_app_uid()
 {

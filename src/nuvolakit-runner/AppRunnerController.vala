@@ -89,7 +89,7 @@ public abstract class RunnerApplication: Diorite.Application
 	public Config config {get; protected set; default = null;}
 	public Connection connection {get; protected set;}
 	public WebAppWindow? main_window {get; protected set; default = null;}
-	public WebAppMeta web_app {get; protected set;}
+	public WebApp web_app {get; protected set;}
 	public WebAppStorage app_storage {get; protected set;}
 	public string dbus_id {get; private set;}
 
@@ -127,7 +127,7 @@ public class AppRunnerController : RunnerApplication
 	private HashTable<string, Variant>? web_worker_data = null;
 	
 	public AppRunnerController(
-		Diorite.Storage storage, WebAppMeta web_app, WebAppStorage app_storage,
+		Diorite.Storage storage, WebApp web_app, WebAppStorage app_storage,
 		string? api_token, bool use_nuvola_dbus=false)
 	{
 		base(web_app.id, web_app.name, "%d.%d".printf(web_app.version_major, web_app.version_minor), storage);

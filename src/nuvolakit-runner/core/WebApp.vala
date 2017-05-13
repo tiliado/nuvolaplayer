@@ -25,7 +25,7 @@
 namespace Nuvola
 {
 
-public class WebAppMeta : GLib.Object
+public class WebApp : GLib.Object
 {
 	/**
 	 * Name of file with metadata.
@@ -55,7 +55,7 @@ public class WebAppMeta : GLib.Object
 	private bool icons_set = false;
 	private Traits? _traits = null;
 	
-	public static WebAppMeta load_from_dir(File dir) throws WebAppError
+	public static WebApp load_from_dir(File dir) throws WebAppError
 	{
 		if (dir.query_file_type(0) != FileType.DIRECTORY)
 			throw new WebAppError.LOADING_FAILED(@"$(dir.get_path()) is not a directory");
@@ -78,10 +78,10 @@ public class WebAppMeta : GLib.Object
 		if (metadata == null || metadata[0] != '{')
 			throw new WebAppError.INVALID_METADATA("Invalid metadata file '%s'. Opening object literal not found.", metadata_file.get_path());
 		
-		WebAppMeta? meta;
+		WebApp? meta;
 		try
 		{
-			meta = Json.gobject_from_data(typeof(WebAppMeta), metadata) as WebAppMeta;
+			meta = Json.gobject_from_data(typeof(WebApp), metadata) as WebApp;
 		}
 		catch (GLib.Error e)
 		{
@@ -361,7 +361,7 @@ public class WebAppMeta : GLib.Object
 		return null;
 	}
 	
-	public static inline int cmp_by_name(WebAppMeta a, WebAppMeta b)
+	public static inline int cmp_by_name(WebApp a, WebApp b)
 	{
 		return strcmp(a.name, b.name);
 	}

@@ -27,7 +27,7 @@ namespace Nuvola
 
 public class AboutDialog: Gtk.Dialog
 {
-	public AboutDialog(Gtk.Window? parent, WebAppMeta? web_app)
+	public AboutDialog(Gtk.Window? parent, WebApp? web_app)
 	{
 		GLib.Object(title: "About", transient_for: parent);
 		resizable = false;

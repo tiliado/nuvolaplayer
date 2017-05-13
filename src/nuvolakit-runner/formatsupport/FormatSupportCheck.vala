@@ -38,13 +38,13 @@ public class FormatSupportCheck : GLib.Object
 	private Config config;
 	private WebWorker web_worker;
 	private WebEngine web_engine;
-	private WebAppMeta web_app;
+	private WebApp web_app;
 	private FormatSupportDialog format_support_dialog = null;
 	private Gtk.InfoBar? flash_bar = null;
 	private Gtk.InfoBar? mp3_bar = null;
 	
 	public FormatSupportCheck(FormatSupport format_support, Diorite.Application app, Diorite.Storage storage,
-	Config config, WebWorker web_worker, WebEngine web_engine, WebAppMeta web_app)
+	Config config, WebWorker web_worker, WebEngine web_engine, WebApp web_app)
 	{
 		this.format_support = format_support;
 		this.app = app;

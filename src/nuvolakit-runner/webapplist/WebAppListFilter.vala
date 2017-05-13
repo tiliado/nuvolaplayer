@@ -39,7 +39,7 @@ public class WebAppListFilter : Gtk.TreeModelFilter
 	
 	private bool visible_func(Gtk.TreeModel model, Gtk.TreeIter iter)
 	{
-		WebAppMeta web_app = null;
+		WebApp web_app = null;
 		model.get(iter, WebAppListModel.Pos.META, out web_app);
 		assert(web_app != null);
 		if (!show_hidden && web_app.hidden)

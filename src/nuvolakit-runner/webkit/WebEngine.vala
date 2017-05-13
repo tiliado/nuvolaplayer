@@ -32,7 +32,7 @@ public class WebEngine : GLib.Object, JSExecutor
 	private const string ZOOM_LEVEL_CONF = "webview.zoom_level";
 	
 	public Gtk.Widget widget {get {return web_view;}}
-	public WebAppMeta web_app {get; private set;}
+	public WebApp web_app {get; private set;}
 	public WebAppStorage storage {get; private set;}
 	public bool ready {get; private set; default = false;}
 	public bool can_go_back {get; private set; default = false;}
@@ -102,7 +102,7 @@ public class WebEngine : GLib.Object, JSExecutor
  		return version >= min && (max == 0 || version < max);
 	}
 	
-	public WebEngine(RunnerApplication runner_app, IpcBus ipc_bus, WebAppMeta web_app,
+	public WebEngine(RunnerApplication runner_app, IpcBus ipc_bus, WebApp web_app,
 		WebAppStorage storage, Config config, Connection? connection, HashTable<string, Variant> worker_data)
 	{
 		this.ipc_bus = ipc_bus;
