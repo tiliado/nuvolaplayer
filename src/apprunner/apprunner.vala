@@ -68,12 +68,6 @@ public int main(string[] args)
 		return 1;
 	}
 	
-	if (Args.version)
-	{
-		stdout.printf("%s %s\n", Nuvola.get_app_name(), Nuvola.get_version());
-		return 0;
-	}
-	
 	if (Args.app_dir == null)
 	{
 		stderr.printf("No app specified.");
@@ -96,6 +90,11 @@ public int main(string[] args)
 	{
 		var app_dir = File.new_for_path(Args.app_dir);
 		var web_app = new WebApp.from_dir(app_dir);
+		if (Args.version)
+		{
+			print_version_info(stdout, web_app);
+			return 0;
+		}
 		var storage = new Diorite.XdgStorage.for_project(Nuvola.get_app_id());
 		if (Args.nuvola_dbus)
 			return AppRunnerController.run_web_app_with_dbus_handshake(storage, web_app, args);

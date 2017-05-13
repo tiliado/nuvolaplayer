@@ -25,6 +25,27 @@
 namespace Nuvola
 {
 
+public void print_version_info(FileStream output, WebApp? web_app)
+{
+	if (web_app != null)
+	{
+		output.printf("%s script %d.%d\n", web_app.name, web_app.version_major, web_app.version_minor);
+		output.printf("Maintainer: %s\n", web_app.maintainer_name);
+		output.printf("\n--- Powered by ---\n\n");
+	}
+	#if GENUINE
+	var blurb = "Genuine flatpak build";
+	#else
+	var blurb = "based on Nuvola Apps™ project";
+	#endif
+	output.printf("%s - %s\n", Nuvola.get_app_name(), blurb);
+	output.printf("Version %s\n", Nuvola.get_version());
+	output.printf("Revision %s\n", Nuvola.get_revision());
+	output.printf("Diorite %s\n", Drt.get_version());
+	output.printf("WebKitGTK %u.%u.%u\n", WebKit.get_major_version(), WebKit.get_minor_version(), WebKit.get_micro_version());
+	output.printf("libsoup %u.%u.%u\n", Soup.get_major_version(), Soup.get_minor_version(), Soup.get_micro_version());
+}
+
 public class AboutDialog: Gtk.Dialog
 {
 	public AboutDialog(Gtk.Window? parent, WebApp? web_app)
