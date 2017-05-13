@@ -24,41 +24,6 @@
 
 namespace Nuvola
 {
-#if !FLATPAK
-public async void delete_desktop_files()
-{
-	var pattern = new PatternSpec("nuvolaplayer3-*.desktop");
-	var dir = new Diorite.XdgStorage().user_data_dir.get_child("applications");
-	try
-	{
-		var enumerator = yield dir.enumerate_children_async(
-			FileAttribute.STANDARD_NAME, FileQueryInfoFlags.NOFOLLOW_SYMLINKS);
-		FileInfo info;
-		while ((info = enumerator.next_file(null)) != null)
-		{
-			var name = info.get_name();
-			if (pattern.match_string(name))
-			{
-				
-				var file = dir.get_child(name);
-				try
-				{
-					yield file.delete_async();
-				}
-				catch (GLib.Error e)
-				{
-					warning("Failed to delete desktop file %s. %s", file.get_path(), e.message);
-				}
-				
-			}
-		}
-	}
-	catch (GLib.Error e)
-	{
-		warning("Directory enumeration failed: %s. %s\n", dir.get_path(), e.message);
-	}
-}
-#endif
 
 private static HashTable<string,string> desktop_categories = null;
 

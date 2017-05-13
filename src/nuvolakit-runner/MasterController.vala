@@ -161,10 +161,6 @@ public class MasterController : Diorite.Application
 		if (init_state >= InitState.CORE)
 			return;
 		
-		#if !FLATPAK
-		Nuvola.delete_desktop_files.begin((o, res) => Nuvola.delete_desktop_files.end(res));
-		#endif
-		
 		app_runners = new Queue<AppRunner>();
 		app_runners_map = new HashTable<string, AppRunner>(str_hash, str_equal);
 		var default_config = new HashTable<string, Variant>(str_hash, str_equal);

@@ -76,7 +76,6 @@ public class WebApp : GLib.Object
 	public File? data_dir {get; construct; default = null;}
 	public bool hidden {get; set; default = false;}	
 	public bool allow_insecure_content {get; set; default = false;}
-	public bool has_desktop_launcher {get; set; default = false;} 
 	public GenericSet<string> categories {get; construct;}
 	private List<IconInfo?> icons = null;
 	private bool icons_set = false;
@@ -204,6 +203,8 @@ public class WebApp : GLib.Object
 		int api_minor;
 		if (!meta.get_int("api_minor", out api_minor))
 			throw new WebAppError.INVALID_METADATA("The api_minor key is missing or is not an integer.");
+		if (!meta.get_bool_or("has_desktop_launcher", false))
+			throw new WebAppError.INVALID_METADATA("Web apps without a desktop launcher are no longer supported. Upgrade Nuvola SDK.");
 		var categories = meta.get_string_or("categories");
 		if (Diorite.String.is_empty(categories))
 		{
@@ -223,7 +224,6 @@ public class WebApp : GLib.Object
 			meta.get_int_or("window_width"), meta.get_int_or("window_height"));
 		
 		hidden = meta.get_bool_or("hidden", false);
-		has_desktop_launcher = meta.get_bool_or("has_desktop_launcher", false);
 		allow_insecure_content = meta.get_bool_or("allow_insecure_content", false);
 		user_agent = meta.get_string_or("user_agent");
 	}

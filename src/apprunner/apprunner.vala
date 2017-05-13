@@ -96,16 +96,6 @@ public int main(string[] args)
 	{
 		var app_dir = File.new_for_path(Args.app_dir);
 		var web_app = new WebApp.from_dir(app_dir);
-		#if !FLATPAK
-		if (!web_app.has_desktop_launcher)
-		{
-			warning(
-				"The %s script doesn't provide a desktop file. It might not function properly."
-				+ " Ask the maintainer to switch to the Nuvola SDK "
-				+ "<https://github.com/tiliado/nuvolasdk> and build it with `./configure --with-desktop-launcher`.",
-				web_app.name);
-		}
-		#endif
 		var storage = new Diorite.XdgStorage.for_project(Nuvola.get_app_id());
 		if (Args.nuvola_dbus)
 			return AppRunnerController.run_web_app_with_dbus_handshake(storage, web_app, args);

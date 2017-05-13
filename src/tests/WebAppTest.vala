@@ -95,7 +95,8 @@ public class WebAppTest: Diorite.TestCase
 				"hidden": true,
 				"window_width": 2000,
 				"window_height": 2000,
-				"requirements": "Codec[MP3] Feature[Flash]"
+				"requirements": "Codec[MP3] Feature[Flash]",
+				"has_desktop_launcher": true
 			}
 			""", null),
 			"valid meta");
@@ -114,7 +115,8 @@ public class WebAppTest: Diorite.TestCase
 				"hidden": true,
 				"window_width": 2000,
 				"window_height": 2000,
-				"requirements": "Codec[MP3] Feature[Flash]"
+				"requirements": "Codec[MP3] Feature[Flash]",
+				"has_desktop_launcher": true
 			}
 			""", null),
 			"*The id key is missing or is not a string*", "invalid id");
@@ -133,7 +135,8 @@ public class WebAppTest: Diorite.TestCase
 				"hidden": true,
 				"window_width": 2000,
 				"window_height": 2000,
-				"requirements": "Codec[MP3] Feature[Flash]"
+				"requirements": "Codec[MP3] Feature[Flash]",
+				"has_desktop_launcher": true
 			}
 			""", null),
 			"*The name key is missing or is not a string*", "invalid name");
@@ -152,7 +155,8 @@ public class WebAppTest: Diorite.TestCase
 				"hidden": true,
 				"window_width": 2000,
 				"window_height": 2000,
-				"requirements": "Codec[MP3] Feature[Flash]"
+				"requirements": "Codec[MP3] Feature[Flash]",
+				"has_desktop_launcher": true
 			}
 			""", null),
 			"*The maintainer_name key is missing or is not a string*", "invalid maintainer_name");
@@ -171,7 +175,8 @@ public class WebAppTest: Diorite.TestCase
 				"hidden": true,
 				"window_width": 2000,
 				"window_height": 2000,
-				"requirements": "Codec[MP3] Feature[Flash]"
+				"requirements": "Codec[MP3] Feature[Flash]",
+				"has_desktop_launcher": true
 			}
 			""", null),
 			"*The maintainer_link key is missing or is not a string*", "invalid maintainer_link");
@@ -190,7 +195,8 @@ public class WebAppTest: Diorite.TestCase
 				"hidden": true,
 				"window_width": 2000,
 				"window_height": 2000,
-				"requirements": "Codec[MP3] Feature[Flash]"
+				"requirements": "Codec[MP3] Feature[Flash]",
+				"has_desktop_launcher": true
 			}
 			""", null),
 			"*The version_major key is missing or is not an integer*", "invalid version_major");
@@ -209,7 +215,8 @@ public class WebAppTest: Diorite.TestCase
 				"hidden": true,
 				"window_width": 2000,
 				"window_height": 2000,
-				"requirements": "Codec[MP3] Feature[Flash]"
+				"requirements": "Codec[MP3] Feature[Flash]",
+				"has_desktop_launcher": true
 			}
 			""", null),
 			"*The version_minor key is missing or is not an integer*", "invalid version_minor");
@@ -228,7 +235,8 @@ public class WebAppTest: Diorite.TestCase
 				"hidden": true,
 				"window_width": 2000,
 				"window_height": 2000,
-				"requirements": "Codec[MP3] Feature[Flash]"
+				"requirements": "Codec[MP3] Feature[Flash]",
+				"has_desktop_launcher": true
 			}
 			""", null),
 			"*The api_major key is missing or is not an integer*", "invalid api_major");
@@ -247,10 +255,12 @@ public class WebAppTest: Diorite.TestCase
 				"hidden": true,
 				"window_width": 2000,
 				"window_height": 2000,
-				"requirements": "Codec[MP3] Feature[Flash]"
+				"requirements": "Codec[MP3] Feature[Flash]",
+				"has_desktop_launcher": true
 			}
 			""", null),
 			"*The api_minor key is missing or is not an integer*", "invalid api_minor");
+		
 		expect_error(() => new Nuvola.WebApp.from_metadata("""
 			{
 				"id": 1,
@@ -266,7 +276,8 @@ public class WebAppTest: Diorite.TestCase
 				"hidden": true,
 				"window_width": 2000,
 				"window_height": 2000,
-				"requirements": "Codec[MP3] Feature[Flash]"
+				"requirements": "Codec[MP3] Feature[Flash]",
+				"has_desktop_launcher": true
 			}
 			""", null),
 			"*The id key is missing or is not a string*", "invalid id");
@@ -285,7 +296,8 @@ public class WebAppTest: Diorite.TestCase
 				"hidden": true,
 				"window_width": 2000,
 				"window_height": 2000,
-				"requirements": "Codec[MP3] Feature[Flash]"
+				"requirements": "Codec[MP3] Feature[Flash]",
+				"has_desktop_launcher": true
 			}
 			""", null),
 			"*The name key is missing or is not a string*", "invalid name");
@@ -304,7 +316,8 @@ public class WebAppTest: Diorite.TestCase
 				"hidden": true,
 				"window_width": 2000,
 				"window_height": 2000,
-				"requirements": "Codec[MP3] Feature[Flash]"
+				"requirements": "Codec[MP3] Feature[Flash]",
+				"has_desktop_launcher": true
 			}
 			""", null),
 			"*The maintainer_name key is missing or is not a string*", "invalid maintainer_name");
@@ -323,7 +336,8 @@ public class WebAppTest: Diorite.TestCase
 				"hidden": true,
 				"window_width": 2000,
 				"window_height": 2000,
-				"requirements": "Codec[MP3] Feature[Flash]"
+				"requirements": "Codec[MP3] Feature[Flash]",
+				"has_desktop_launcher": true
 			}
 			""", null),
 			"*The maintainer_link key is missing or is not a string*", "invalid maintainer_link");
@@ -342,7 +356,8 @@ public class WebAppTest: Diorite.TestCase
 				"hidden": true,
 				"window_width": 2000,
 				"window_height": 2000,
-				"requirements": "Codec[MP3] Feature[Flash]"
+				"requirements": "Codec[MP3] Feature[Flash]",
+				"has_desktop_launcher": true
 			}
 			""", null),
 			"*The version_major key is missing or is not an integer*", "invalid version_major");
@@ -361,7 +376,8 @@ public class WebAppTest: Diorite.TestCase
 				"hidden": true,
 				"window_width": 2000,
 				"window_height": 2000,
-				"requirements": "Codec[MP3] Feature[Flash]"
+				"requirements": "Codec[MP3] Feature[Flash]",
+				"has_desktop_launcher": true
 			}
 			""", null),
 			"*The version_minor key is missing or is not an integer*", "invalid version_minor");
@@ -380,7 +396,8 @@ public class WebAppTest: Diorite.TestCase
 				"hidden": true,
 				"window_width": 2000,
 				"window_height": 2000,
-				"requirements": "Codec[MP3] Feature[Flash]"
+				"requirements": "Codec[MP3] Feature[Flash]",
+				"has_desktop_launcher": true
 			}
 			""", null),
 			"*The api_major key is missing or is not an integer*", "invalid api_major");
@@ -399,10 +416,75 @@ public class WebAppTest: Diorite.TestCase
 				"hidden": true,
 				"window_width": 2000,
 				"window_height": 2000,
-				"requirements": "Codec[MP3] Feature[Flash]"
+				"requirements": "Codec[MP3] Feature[Flash]",
+				"has_desktop_launcher": true
 			}
 			""", null),
 			"*The api_minor key is missing or is not an integer*", "invalid api_minor");
+	}
+	
+	public void test_desktop_launcher_required()
+	{
+		expect_error(() => new Nuvola.WebApp.from_metadata("""
+			{
+				"id": "test",
+				"name": "Test",
+				"maintainer_name": "Jiří Janoušek",
+				"maintainer_link": "https://github.com/fenryxo",
+				"version_major": 1,
+				"version_minor": 0,
+				"api_major": 3,
+				"api_minor": 1,
+				"categories": "AudioVideo;Audio;",
+				"home_url": "nuvola://home.html",
+				"hidden": true,
+				"window_width": 2000,
+				"window_height": 2000,
+				"requirements": "Codec[MP3] Feature[Flash]",
+				"#has_desktop_launcher": true
+			}
+			""", null),
+			"*Web apps without a desktop launcher are no longer supported*", "no desktop launcher");
+		expect_error(() => new Nuvola.WebApp.from_metadata("""
+			{
+				"id": "test",
+				"name": "Test",
+				"maintainer_name": "Jiří Janoušek",
+				"maintainer_link": "https://github.com/fenryxo",
+				"version_major": 1,
+				"version_minor": 0,
+				"api_major": 3,
+				"api_minor": 1,
+				"categories": "AudioVideo;Audio;",
+				"home_url": "nuvola://home.html",
+				"hidden": true,
+				"window_width": 2000,
+				"window_height": 2000,
+				"requirements": "Codec[MP3] Feature[Flash]",
+				"has_desktop_launcher": false
+			}
+			""", null),
+			"*Web apps without a desktop launcher are no longer supported*", "no desktop launcher");
+		expect_error(() => new Nuvola.WebApp.from_metadata("""
+			{
+				"id": "test",
+				"name": "Test",
+				"maintainer_name": "Jiří Janoušek",
+				"maintainer_link": "https://github.com/fenryxo",
+				"version_major": 1,
+				"version_minor": 0,
+				"api_major": 3,
+				"api_minor": 1,
+				"categories": "AudioVideo;Audio;",
+				"home_url": "nuvola://home.html",
+				"hidden": true,
+				"window_width": 2000,
+				"window_height": 2000,
+				"requirements": "Codec[MP3] Feature[Flash]",
+				"has_desktop_launcher": 0
+			}
+			""", null),
+			"*Web apps without a desktop launcher are no longer supported*", "no desktop launcher");
 	}
 }
 
