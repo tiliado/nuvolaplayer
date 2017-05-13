@@ -97,7 +97,6 @@ public int main(string[] args)
 		var app_dir = File.new_for_path(Args.app_dir);
 		var web_app = new WebApp.from_dir(app_dir);
 		#if !FLATPAK
-		web_app.removable = false;
 		if (!web_app.has_desktop_launcher)
 		{
 			warning(

@@ -140,14 +140,12 @@ public class WebAppList : Gtk.Grid
 		string version;
 		string maintainer_name;
 		string maintainer_link;
-		bool removable;
 		model.get(iter,
 			WebAppListModel.Pos.ID, out id,
 			WebAppListModel.Pos.NAME, out name,
 			WebAppListModel.Pos.VERSION, out version,
 			WebAppListModel.Pos.MAINTAINER_NAME, out maintainer_name,
-			WebAppListModel.Pos.MAINTAINER_LINK, out maintainer_link,
-			WebAppListModel.Pos.REMOVABLE, out removable
+			WebAppListModel.Pos.MAINTAINER_LINK, out maintainer_link
 		);
 		
 		selected_web_app = id;

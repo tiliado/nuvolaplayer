@@ -74,7 +74,6 @@ public class WebApp : GLib.Object
 	public int window_width {get; construct; default = 0;}
 	public int window_height {get; construct; default = 0;}
 	public File? data_dir {get; construct; default = null;}
-	public bool removable {get; set; default = false;}
 	public bool hidden {get; set; default = false;}	
 	public bool allow_insecure_content {get; set; default = false;}
 	public bool has_desktop_launcher {get; set; default = false;} 

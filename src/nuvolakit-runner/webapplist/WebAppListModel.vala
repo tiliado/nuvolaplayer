@@ -31,7 +31,7 @@ public class WebAppListModel : Gtk.ListStore
 	
 	public enum Pos
 	{
-		ID, NAME, ICON, VERSION, MAINTAINER_NAME, MAINTAINER_LINK, REMOVABLE, META;
+		ID, NAME, ICON, VERSION, MAINTAINER_NAME, MAINTAINER_LINK, META;
 	}
 	
 	public WebAppListModel(WebAppRegistry web_app_reg)
@@ -46,7 +46,6 @@ public class WebAppListModel : Gtk.ListStore
 			typeof(string),  // version
 			typeof(string),  // maintainer_name
 			typeof(string),  // maintainer_link
-			typeof(bool),  // removable
 			typeof(WebApp) // meta
 			});
 		load();
@@ -69,7 +68,6 @@ public class WebAppListModel : Gtk.ListStore
 			Pos.VERSION, "%d.%d".printf(web_app.version_major, web_app.version_minor),
 			Pos.MAINTAINER_NAME, web_app.maintainer_name,
 			Pos.MAINTAINER_LINK, web_app.maintainer_link,
-			Pos.REMOVABLE, web_app.removable,
 			Pos.META, web_app,
 			-1);
 	}

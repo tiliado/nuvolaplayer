@@ -101,7 +101,6 @@ public class WebAppRegistry: GLib.Object
 					try
 					{
 						var app = new WebApp.from_dir(app_dir);
-						app.removable = false;
 						var id = app.id;
 						debug("Found web app %s at %s, version %u.%u",
 						app.name, app_dir.get_path(), app.version_major, app.version_minor);
