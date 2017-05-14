@@ -108,26 +108,6 @@ public abstract class RunnerApplication: Diorite.Application
 
 public class AppRunnerController : RunnerApplication
 {	
-	public static int run_web_app_with_dbus_handshake(Diorite.Storage storage, WebApp web_app, string[] argv)
-	{
-		return run_web_app(storage, web_app, null, true, argv);
-	}
-	
-	public static int run_web_app_as_subprocess(Diorite.Storage storage, WebApp web_app, string api_token, string[] argv)
-	{
-		return run_web_app(storage, web_app, api_token, false, argv);
-	}
-	
-	private static int run_web_app(Diorite.Storage storage, WebApp web_app, string? api_token, bool use_dbus, string[] argv)
-	{
-		var app_storage = new WebAppStorage(
-		  storage.user_config_dir.get_child(WEB_APP_DATA_SUBDIR).get_child(web_app.id),
-		  storage.user_data_dir.get_child(WEB_APP_DATA_SUBDIR).get_child(web_app.id),
-		  storage.user_cache_dir.get_child(WEB_APP_DATA_SUBDIR).get_child(web_app.id));
-		var controller = new Nuvola.AppRunnerController(storage, web_app, app_storage, api_token, use_dbus);
-		return controller.run(argv);
-	}
-	
 	public WebEngine web_engine {get; private set;}
 	public Diorite.KeyValueStorage master_config {get; private set;}
 	public Bindings bindings {get; private set;}

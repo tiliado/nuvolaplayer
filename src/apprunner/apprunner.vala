@@ -49,11 +49,6 @@ struct Args
 
 public int main(string[] args)
 {
-	/* We are not ready for Wayland yet.
-	 * https://github.com/tiliado/nuvolaplayer/issues/181
-	 * https://github.com/tiliado/nuvolaplayer/issues/240
-	 */
-	Environment.set_variable("GDK_BACKEND", "x11", true);
 	try
 	{
 		var opt_context = new OptionContext("- %s".printf(Nuvola.get_app_name()));
@@ -81,29 +76,22 @@ public int main(string[] args)
 	if (Environment.get_variable("NUVOLA_TEST_ABORT") == "runner")
 		error("App runner abort requested.");
 	
-	// Init GTK early to have be able to use Gtk.IconTheme stuff
-	string[] empty_argv = {};
-	unowned string[] unowned_empty_argv = empty_argv;
-	Gtk.init(ref unowned_empty_argv);
+	var app_dir = File.new_for_path(Args.app_dir);
+	if (Args.version)
+		return Nuvola.Startup.print_web_app_version(stdout, app_dir);
 	
 	try
 	{
-		var app_dir = File.new_for_path(Args.app_dir);
-		var web_app = new WebApp.from_dir(app_dir);
-		if (Args.version)
-		{
-			print_version_info(stdout, web_app);
-			return 0;
-		}
-		var storage = new Diorite.XdgStorage.for_project(Nuvola.get_app_id());
 		if (Args.nuvola_dbus)
-			return AppRunnerController.run_web_app_with_dbus_handshake(storage, web_app, args);
+			return Nuvola.Startup.run_web_app_with_dbus_handshake(app_dir, args);
 		else
-			return AppRunnerController.run_web_app_as_subprocess(storage, web_app, stdin.read_line(), args);
+			return Nuvola.Startup.run_web_app_as_subprocess(app_dir, stdin.read_line(), args);
 	}
 	catch (WebAppError e)
 	{
-		warning("Failed to load web app from '%s'. %s", Args.app_dir, e.message);
+		stderr.puts("Failed to load web app!\n");
+		stderr.printf("Dir: %s\n", Args.app_dir);
+		stderr.printf("Error: %s\n", e.message);
 		return 1;
 	}
 }
