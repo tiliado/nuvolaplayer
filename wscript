@@ -28,8 +28,9 @@
 top = '.'
 out = 'build'
 
-APPNAME = "nuvolaplayer3"
-FUTURE_APPNAME = "nuvola"
+APPNAME = "nuvolaruntime"
+NUVOLA_BIN = "nuvola"
+NUVOLACTL_BIN = "nuvolactl"
 NEW_VERSION_SCHEME = False
 VERSION = "3.1.3" if not NEW_VERSION_SCHEME else "4.4.0"
 GENERIC_NAME = "Web Apps"
@@ -311,7 +312,7 @@ def configure(ctx):
 		vala_def(ctx, "TILIADO_API")
 	
 	ctx.define("NUVOLA_APPNAME", APPNAME)
-	ctx.define("NUVOLA_FUTURE_APPNAME", FUTURE_APPNAME)
+	ctx.define("NUVOLA_OLDNAME", "nuvolaplayer3")
 	ctx.define("NUVOLA_NAME", ctx.env.NAME)
 	ctx.define("NUVOLA_WELCOME_SCREEN_NAME", ctx.env.RELEASE)
 	ctx.define("NUVOLA_UNIQUE_NAME", ctx.env.UNIQUE_NAME)
@@ -323,7 +324,7 @@ def configure(ctx):
 	ctx.define("NUVOLA_VERSION_MINOR", ctx.env.VERSIONS[1])
 	ctx.define("NUVOLA_VERSION_BUGFIX", ctx.env.VERSIONS[2])
 	ctx.define("NUVOLA_VERSION_SUFFIX", ctx.env.REVISION_ID)
-	ctx.define("GETTEXT_PACKAGE", FUTURE_APPNAME)
+	ctx.define("GETTEXT_PACKAGE", APPNAME)
 	ctx.env.NUVOLA_LIBDIR = "%s/%s" % (ctx.env.LIBDIR, APPNAME)
 	ctx.define("NUVOLA_TILIADO_OAUTH2_SERVER", tiliado_api.get("server", "https://tiliado.eu"))
 	ctx.define("NUVOLA_TILIADO_OAUTH2_CLIENT_ID", tiliado_api.get("client_id", ""))
@@ -370,7 +371,6 @@ def build(ctx):
 	vala_defines = ctx.env.VALA_DEFINES
 	
 	APP_RUNNER = "apprunner"
-	CONTROL = APPNAME + "ctl"
 	ENGINEIO = "engineio"
 	NUVOLAKIT_RUNNER = APPNAME + "-runner"
 	NUVOLAKIT_BASE = APPNAME + "-base"
@@ -434,7 +434,7 @@ def build(ctx):
 	)
 
 	valaprog(
-		target = APPNAME,
+		target = NUVOLA_BIN,
 		source_dir = 'src/master',
 		packages = "",
 		uselib = uselib + " SOUP WEBKIT",
@@ -459,7 +459,7 @@ def build(ctx):
 	)
 	
 	valaprog(
-		target = CONTROL,
+		target = NUVOLACTL_BIN,
 		source_dir = 'src/control',
 		packages = "",
 		uselib = uselib + " SOUP WEBKIT",
@@ -549,7 +549,7 @@ def build(ctx):
 		target = "share/dbus-1/services/%s.service" % dbus_name,
 		install_path = '${PREFIX}/share/dbus-1/services',
 		NAME = dbus_name,
-		EXEC = '%s/bin/%s --gapplication-service' % (ctx.env.PREFIX, APPNAME)
+		EXEC = '%s/bin/%s --gapplication-service' % (ctx.env.PREFIX, NUVOLA_BIN)
 	)
 	
 	PC_CFLAGS = ""
@@ -600,8 +600,6 @@ def build(ctx):
 		ctx.path.get_bld().find_node(ctx.env.UNIQUE_NAME + '.appdata.xml'))
 	
 	ctx.symlink_as('${PREFIX}/share/%s/www/engine.io.js' % APPNAME, ctx.env.JSDIR + '/engine.io-client/engine.io.js')
-	ctx.symlink_as('${PREFIX}/bin/%s' % FUTURE_APPNAME, APPNAME)
-	ctx.symlink_as('${PREFIX}/bin/%sctl' % FUTURE_APPNAME, CONTROL)
 	
 	web_apps = ctx.path.find_dir("web_apps")
 	ctx.install_files('${PREFIX}/share/' + APPNAME, web_apps.ant_glob('**'), cwd=web_apps.parent, relative_trick=True)

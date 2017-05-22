@@ -16,7 +16,7 @@ unset prompt_prefix
 
 mk_symlinks()
 {
-    build_datadir="./build/share/nuvolaplayer3"
+    build_datadir="./build/share/nuvolaruntime"
     mkdir -p "$build_datadir"
     datadirs="www"
     for datadir in $datadirs; do
@@ -67,14 +67,14 @@ rebuild()
 {
 	python3 ./waf -v distclean configure build \
 	    $WAF_CONFIGURE "$@" \
-	&& NUVOLA_LIBDIR=build build/run-nuvolaplayer3-tests
+	&& NUVOLA_LIBDIR=build build/run-nuvolaruntime-tests
 }
 
 run()
 {
 	mk_symlinks
 	python3 ./waf -v && XDG_DATA_DIRS="build/share:$XDG_DATA_DIRS" \
-	NUVOLA_LIBDIR=build build/nuvolaplayer3 -D "$@"
+	NUVOLA_LIBDIR=build build/nuvola -D "$@"
 
 }
 
@@ -87,7 +87,7 @@ build()
 tests()
 {
     mk_symlinks
-    python3 ./waf -v && NUVOLA_LIBDIR=build build/run-nuvolaplayer3-tests
+    python3 ./waf -v && NUVOLA_LIBDIR=build build/run-nuvolaruntime-tests
 }
 
 dbus()
@@ -107,14 +107,14 @@ debug_dbus()
 ctl()
 {
     python3 ./waf -v && XDG_DATA_DIRS="build/share:$XDG_DATA_DIRS" \
-    NUVOLA_LIBDIR=build build/nuvolaplayer3ctl -D "$@"
+    NUVOLA_LIBDIR=build build/nuvolactl -D "$@"
 }
 
 debug()
 {
 	mk_symlinks
 	python3 ./waf -v && XDG_DATA_DIRS="build/share:$XDG_DATA_DIRS" \
-	NUVOLA_LIBDIR=build gdb --args build/nuvolaplayer3 -D "$@"
+	NUVOLA_LIBDIR=build gdb --args build/nuvola -D "$@"
 }
 
 debug_criticals()
@@ -122,14 +122,14 @@ debug_criticals()
 	mk_symlinks
 	python3 ./waf -v && XDG_DATA_DIRS="build/share:$XDG_DATA_DIRS" \
 	NUVOLA_LIBDIR=build G_DEBUG=fatal-criticals \
-	gdb  --args build/nuvolaplayer3 -D "$@"
+	gdb  --args build/nuvola -D "$@"
 }
 
 debug_app_runner()
 {
 	mk_symlinks
 	python3 ./waf -v && XDG_DATA_DIRS="build/share:$XDG_DATA_DIRS" \
-	NUVOLA_LIBDIR=build NUVOLA_APP_RUNNER_GDB_SERVER='localhost:9090' build/nuvolaplayer3 -D "$@"
+	NUVOLA_LIBDIR=build NUVOLA_APP_RUNNER_GDB_SERVER='localhost:9090' build/nuvola -D "$@"
 }
 
 debug_app_runner_criticals()
@@ -137,7 +137,7 @@ debug_app_runner_criticals()
 	mk_symlinks
 	python3 ./waf -v && XDG_DATA_DIRS="build/share:$XDG_DATA_DIRS" \
 	NUVOLA_LIBDIR=build G_DEBUG=fatal-criticals NUVOLA_APP_RUNNER_GDB_SERVER='localhost:9090' \
-	build/nuvolaplayer3 -D "$@"
+	build/nuvola -D "$@"
 }
 
 debug_app_runner_join()
@@ -151,7 +151,7 @@ debug_web_worker()
 {
 	mk_symlinks
 	python3 ./waf -v && XDG_DATA_DIRS="build/share:$XDG_DATA_DIRS" \
-	NUVOLA_LIBDIR=build NUVOLA_WEB_WORKER_SLEEP=30 build/nuvolaplayer3 -D "$@"
+	NUVOLA_LIBDIR=build NUVOLA_WEB_WORKER_SLEEP=30 build/nuvola -D "$@"
 }
 
 debug_web_worker_criticals()
@@ -159,7 +159,7 @@ debug_web_worker_criticals()
 	mk_symlinks
 	python3 ./waf -v && XDG_DATA_DIRS="build/share:$XDG_DATA_DIRS" \
 	NUVOLA_LIBDIR=build G_DEBUG=fatal-criticals NUVOLA_WEB_WORKER_SLEEP=30 \
-	build/nuvolaplayer3 -D "$@"
+	build/nuvola -D "$@"
 }
 
 watch_and_build()

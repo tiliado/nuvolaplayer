@@ -25,7 +25,7 @@
 namespace Nuvola
 {
 private extern const string APPNAME;
-private extern const string FUTURE_APPNAME;
+private extern const string OLDNAME;
 private extern const string NAME;
 private extern const string WELCOME_SCREEN_NAME;
 private extern const string UNIQUE_NAME;
@@ -79,9 +79,9 @@ public string get_app_id()
 	return APPNAME;
 }
 
-public string get_future_app_id()
+public string get_old_id()
 {
-	return FUTURE_APPNAME;
+	return OLDNAME;
 }
 
 public string get_app_name()

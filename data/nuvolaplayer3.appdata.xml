@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop">
   <id>eu.tiliado.Nuvola.desktop</id>
-  <pkgname>nuvolaplayer3</pkgname>
+  <pkgname>nuvolaruntime</pkgname>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>BSD-2-Clause</project_license>
   <name>@FULL_NAME@ (web app runtime)</name>
@@ -96,8 +96,8 @@
   <updatecontact>janousek.jiri@gmail.com</updatecontact>
   <developer_name>Jiří Janoušek</developer_name>
   <provides>
-    <binary>nuvolaplayer3</binary>
-    <binary>nuvolaplayer3ctl</binary>
+    <binary>nuvola</binary>
+    <binary>nuvolactl</binary>
     <dbus type="user">eu.tiliado.Nuvola</dbus>
   </provides>
 </component>
