@@ -30,13 +30,14 @@ out = 'build'
 
 APPNAME = "nuvolaplayer3"
 FUTURE_APPNAME = "nuvola"
-VERSION = "3.1.3"
+NEW_VERSION_SCHEME = False
+VERSION = "3.1.3" if not NEW_VERSION_SCHEME else "4.4.0"
 GENERIC_NAME = "Web Apps"
 BLURB = "Tight integration of web apps with your Linux desktop"
 DEFAULT_HELP_URL = "https://github.com/tiliado/nuvolaplayer/wiki/Unofficial"
 DEFAULT_WEB_APP_REQUIREMENTS_HELP_URL = "https://github.com/tiliado/nuvolaplayer/wiki/Web-App-Requirements"
 
-MIN_DIORITE = "0.3.4"
+MIN_DIORITE = "0.3.4" if not NEW_VERSION_SCHEME else "4.4.0"
 MIN_VALA = "0.34.0"
 MIN_GLIB = "2.42.1"
 MIN_GTK = "3.22.0"
@@ -55,23 +56,40 @@ from waflib.Errors import ConfigurationError
 from waflib import TaskGen, Utils, Errors, Node, Task
 from nuvolamergejs import mergejs as merge_js
 
-TARGET_DIORITE = MIN_DIORITE.rsplit(".", 1)[0]
+if NEW_VERSION_SCHEME:
+	TARGET_DIORITE = str(MIN_DIORITE[0])
+else:
+	TARGET_DIORITE = MIN_DIORITE.rsplit(".", 1)[0]
 TARGET_GLIB = MIN_GLIB.rsplit(".", 1)[0]
-SERIES = VERSION.rsplit(".", 1)[0]
-VERSIONS = tuple(int(i) for i in VERSION.split("."))
 REVISION_SNAPSHOT = "snapshot"
-WELCOME_SCREEN_NAME = VERSION
 
 
-def get_revision_id():
+def get_git_version():
 	import subprocess
 	try:
 		output = subprocess.Popen(["git", "describe", "--tags", "--long"], stdout=subprocess.PIPE).communicate()[0]
-		__, revision_id = output.decode("utf-8").strip().split("-", 1)
-		revision_id = revision_id.replace("-", ".")
+		return output.decode("utf-8").strip().split("-")
 	except Exception as e:
-		revision_id = REVISION_SNAPSHOT
-	return revision_id
+		return VERSION, "0", REVISION_SNAPSHOT
+
+def add_version_info(ctx):
+	bare_version, n_commits, revision_id = get_git_version()
+	if revision_id != REVISION_SNAPSHOT:
+		revision_id = "{}-{}".format(n_commits, revision_id)
+	versions = list(int(i) for i in bare_version.split("."))
+	if NEW_VERSION_SCHEME:
+		versions[2] += int(n_commits)
+	version = "{}.{}.{}".format(*versions)
+	if NEW_VERSION_SCHEME:
+		release = "{}.{}".format(*versions)
+	else:
+		release = version
+		version += "." + n_commits
+		
+	ctx.env.VERSION = version
+	ctx.env.VERSIONS = versions
+	ctx.env.RELEASE = release
+	ctx.env.REVISION_ID = revision_id
 
 def glib_encode_version(version):
 	major, minor, _ = tuple(int(i) for i in version.split("."))
@@ -165,10 +183,8 @@ def options(ctx):
 		help="Use only if you are absolutely sure that your particular build of the WebKitGTK library supports Media Source Extension (as of 2.15.3, it is disabled by default)")
 
 def configure(ctx):
-	ctx.env.REVISION_ID = get_revision_id()
-	ctx.env.VERSION  = VERSION + "+" + ctx.env.REVISION_ID
-	
-	ctx.msg("Version", VERSION, "GREEN")
+	add_version_info(ctx)
+	ctx.msg("Version", ctx.env.VERSION, "GREEN")
 	if ctx.env.REVISION_ID != REVISION_SNAPSHOT:
 		ctx.msg("Upstream revision", ctx.env.REVISION_ID, color="GREEN")
 	else:
@@ -246,8 +262,8 @@ def configure(ctx):
 	pkgconfig(ctx, 'gdk-x11-3.0', 'GDKX11', MIN_GTK)
 	pkgconfig(ctx, 'x11', 'X11', "0")
 	pkgconfig(ctx, 'sqlite3', 'SQLITE', "3.7")
-	pkgconfig(ctx, 'dioriteglib-' + TARGET_DIORITE, 'DIORITEGLIB', MIN_DIORITE)
-	pkgconfig(ctx, 'dioritegtk-' + TARGET_DIORITE, 'DIORITEGTK', MIN_DIORITE)
+	pkgconfig(ctx, 'dioriteglib' + TARGET_DIORITE, 'DIORITEGLIB', MIN_DIORITE)
+	pkgconfig(ctx, 'dioritegtk' + TARGET_DIORITE, 'DIORITEGTK', MIN_DIORITE)
 	pkgconfig(ctx, 'json-glib-1.0', 'JSON-GLIB', '0.7')
 	pkgconfig(ctx, 'libnotify', 'NOTIFY', '0.7')
 	pkgconfig(ctx, 'libsecret-1', 'SECRET', '0.16')
@@ -259,7 +275,7 @@ def configure(ctx):
 	pkgconfig(ctx, 'libsoup-2.4', 'SOUP', '0') # Engine.io
 	
 	# For tests
-	ctx.find_program("diorite-testgen-0.3", var="DIORITE_TESTGEN")
+	ctx.find_program("diorite-testgen{}".format(TARGET_DIORITE), var="DIORITE_TESTGEN")
 	
 	# JavaScript dir
 	ctx.env.JSDIR = ctx.options.jsdir if ctx.options.jsdir else ctx.env.DATADIR + "/javascript"
@@ -297,14 +313,15 @@ def configure(ctx):
 	ctx.define("NUVOLA_APPNAME", APPNAME)
 	ctx.define("NUVOLA_FUTURE_APPNAME", FUTURE_APPNAME)
 	ctx.define("NUVOLA_NAME", ctx.env.NAME)
-	ctx.define("NUVOLA_WELCOME_SCREEN_NAME", WELCOME_SCREEN_NAME)
+	ctx.define("NUVOLA_WELCOME_SCREEN_NAME", ctx.env.RELEASE)
 	ctx.define("NUVOLA_UNIQUE_NAME", ctx.env.UNIQUE_NAME)
 	ctx.define("NUVOLA_APP_ICON", ctx.env.ICON_NAME)
+	ctx.define("NUVOLA_RELEASE", ctx.env.RELEASE)
 	ctx.define("NUVOLA_VERSION", ctx.env.VERSION)
 	ctx.define("NUVOLA_REVISION", ctx.env.REVISION_ID)
-	ctx.define("NUVOLA_VERSION_MAJOR", VERSIONS[0])
-	ctx.define("NUVOLA_VERSION_MINOR", VERSIONS[1])
-	ctx.define("NUVOLA_VERSION_BUGFIX", VERSIONS[2])
+	ctx.define("NUVOLA_VERSION_MAJOR", ctx.env.VERSIONS[0])
+	ctx.define("NUVOLA_VERSION_MINOR", ctx.env.VERSIONS[1])
+	ctx.define("NUVOLA_VERSION_BUGFIX", ctx.env.VERSIONS[2])
 	ctx.define("NUVOLA_VERSION_SUFFIX", ctx.env.REVISION_ID)
 	ctx.define("GETTEXT_PACKAGE", FUTURE_APPNAME)
 	ctx.env.NUVOLA_LIBDIR = "%s/%s" % (ctx.env.LIBDIR, APPNAME)
@@ -360,10 +377,10 @@ def build(ctx):
 	NUVOLAKIT_WORKER = APPNAME + "-worker"
 	NUVOLAKIT_TESTS = APPNAME + "-tests"
 	RUN_NUVOLAKIT_TESTS = "run-" + NUVOLAKIT_TESTS
-	DIORITE_GLIB = 'dioriteglib-' + TARGET_DIORITE
-	DIORITE_GTK = 'dioriteglib-' + TARGET_DIORITE
+	DIORITE_GLIB = 'dioriteglib' + TARGET_DIORITE
+	DIORITE_GTK = 'dioriteglib' + TARGET_DIORITE
 	
-	packages = 'dioritegtk-{0} dioriteglib-{0} '.format(TARGET_DIORITE)
+	packages = 'dioritegtk{0} dioriteglib{0} '.format(TARGET_DIORITE)
 	packages += 'javascriptcoregtk-4.0 libnotify libarchive gtk+-3.0 gdk-3.0 gdk-x11-3.0 x11 posix json-glib-1.0 glib-2.0 gio-2.0'
 	uselib = 'NOTIFY JSCORE LIBARCHIVE DIORITEGTK DIORITEGLIB GTK+ GDK GDKX11 X11 JSON-GLIB GLIB GIO'
 	
@@ -456,7 +473,7 @@ def build(ctx):
 	valalib(
 		target = NUVOLAKIT_WORKER,
 		source_dir = 'src/nuvolakit-worker',
-		packages = "dioriteglib-{0} {1} {2}".format(TARGET_DIORITE, 'webkit2gtk-web-extension-4.0', 'javascriptcoregtk-4.0'),
+		packages = "dioriteglib{0} {1} {2}".format(TARGET_DIORITE, 'webkit2gtk-web-extension-4.0', 'javascriptcoregtk-4.0'),
 		uselib = "SOUP DIORITEGLIB DIORITEGTK WEBKITEXT JSCORE",
 		use = [NUVOLAKIT_BASE],
 		vala_defines = vala_defines,
@@ -519,7 +536,7 @@ def build(ctx):
 		install_path = '${PREFIX}/share/%s' % APPNAME,
 		BLURB = BLURB,
 		NAME = ctx.env.NAME,
-		VERSION = VERSION,
+		VERSION = ctx.env.RELEASE,
 		FULL_VERSION = ctx.env.VERSION,
 		HELP_URL = ctx.env.HELP_URL,
 		WEB_APP_REQUIREMENTS_HELP_URL = ctx.env.WEB_APP_REQUIREMENTS_HELP_URL,
@@ -540,7 +557,7 @@ def build(ctx):
 		source='src/nuvolakitbase.pc.in',
 		target='{}-base.pc'.format(APPNAME),
 		install_path='${LIBDIR}/pkgconfig',
-		VERSION=VERSION,
+		VERSION=ctx.env.RELEASE,
 		PREFIX=ctx.env.PREFIX,
 		INCLUDEDIR = ctx.env.INCLUDEDIR,
 		LIBDIR = ctx.env.LIBDIR,
@@ -554,7 +571,7 @@ def build(ctx):
 		source='src/nuvolakitrunner.pc.in',
 		target='{}-runner.pc'.format(APPNAME),
 		install_path='${LIBDIR}/pkgconfig',
-		VERSION=VERSION,
+		VERSION=ctx.env.RELEASE,
 		PREFIX=ctx.env.PREFIX,
 		INCLUDEDIR = ctx.env.INCLUDEDIR,
 		LIBDIR = ctx.env.LIBDIR,
