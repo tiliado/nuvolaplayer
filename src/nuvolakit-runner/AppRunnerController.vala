@@ -222,6 +222,15 @@ public class AppRunnerController : RunnerApplication
 		catch (GLib.Error e)
 		{
 			warning("Master server error: %s", e.message);
+			if (use_nuvola_dbus)
+				on_show_error(
+					"Failed to connect to Nuvola service",
+					#if FLATPAK
+					"Make sure Nuvola runtime flatpak is installed.\n\n" +
+					#endif
+					"Error message:\n%s".printf(e.message),
+				false
+				);
 			quit();
 			return;
 		}
