@@ -239,7 +239,7 @@ public class WebApp : GLib.Object
 		return categories.contains(category.down());
 	}
 	
-	public List<string> list_categories()
+	public List<unowned string> list_categories()
 	{
 		return categories.get_values();
 	}
