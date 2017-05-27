@@ -61,7 +61,7 @@ both code hosting and issue tracking. All official Git repositories are located 
 
  1. [Diorite library](https://github.com/tiliado/diorite): Private utility and widget library for
     Nuvola Player project based on GLib, GIO and GTK.
- 2. [Nuvola Apps](https://github.com/tiliado/nuvolaplayer): The Nuvola Apps run-time without
+ 2. [Nuvola Apps Runtime](https://github.com/tiliado/nuvolaruntime): The Nuvola Apps run-time without
     service integrations.
  3. Service integrations that have certain degree of independence and are maintained in separate
     [repositories](https://github.com/tiliado) named ``nuvola-app-...``.

@@ -1,8 +1,8 @@
 Nuvola Apps Changelog
 =======================
 
-Milestone 3.1.4 - still in development
---------------------------------------
+Release 4.4.0 - 27th May, 2017
+------------------------------
 
 New Features:
 
@@ -15,8 +15,12 @@ New Features:
 
 Enhancements:
 
+  * Versioning scheme was changed to be more compact, e.g. 4.4.1 instead of 3.1.4-1.gabcd. Nuvola 4.0 was re-targeted
+    as Nuvola 5.0.
   * Nuvola can do its own user agent quirks (i.e. to disguise itself as a different web browser) in order to work
     around web pages that doesn't work with the WebKit's user agent string. Issue: tiliado/nuvolaplayer#336
+  * Flatpak builds use the latest stable WebKitGTK+ 2.16.3 bringing fixes for three security vulnerabilities as well as
+    several crashes and rendering issues.
 
 Web App Scripts:
 
@@ -31,12 +35,24 @@ Bug fixes:
     with errors in the background.
   * Obsolete test suite has been removed. A new one will be created during ongoing modernization.
     Issue: tiliado/nuvolaplayer#335
+  * Broken -L/--log-file options were removed. Issue: tiliado/nuvolaplayer#338
+  * Various fixes of HTTP Remote Control feature.
 
 Under the Hood:
 
+  * Nuvola's filesystem namespace was changed from `nuvolaplayer3` to `nuvolaruntime`. The data dir is installed at
+    PREFIX/share/nuvolaruntime, libraries were renamed to `libnuvolaruntime-*.so` and binaries to `nuvola(ctl)`.
+    Users' configuration, data and cache is migrated automatically.
+  * Nuvola's git repository was moved to https://github.com/tiliado/nuvolaruntime.
   * WebKitGTK+ >= 2.16.0 is required as all new API is now used unconditionally to make maintenance easier.
   * Added optional dependency on appindicator3-0.1 >= 0.4. Use `./waf configure --noappindicator` to disable
-    this dependency and related functionality (AppIndicator backend for Tray icon feature).
+    this dependency and related functionality (Tray icon feature).
+  * Nuvola no longer bundles Engine.io-client JavaScript library but expect version 3.1.0 of it located at the
+    JSDIR/engine.io-client/engine.io.js (JSDIR is DATADIR/javascript unless changed with --jsdir).
+    Issue: tiliado/nuvolaplayer#341
+  * Nuvola no longer supports web app scripts without a desktop file.
+  * Test suite was reintroduced (build/run-nuvolaruntime-tests). Issue: tiliado/nuvolaplayer#335
+  * A lot of refactoring and removal of obsolete code and other improvements.
     
 Milestone 3.1.3 - April 30, 2017
 --------------------------------
