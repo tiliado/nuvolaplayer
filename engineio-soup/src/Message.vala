@@ -50,11 +50,13 @@ public string serialize_message(MessageType type, int id, string method, Json.No
 {
 	int data_size = 0;
 	var data_str = stringify_json(data, out data_size);
-	return "%d%d:%d:%s%d:%s".printf((int) type, id, method.length, method, data_size, data_str);
+	return "%d%d:%d:%s%d:%s".printf(
+		(int) type, id, Parser.utf16_strlen(method), method, Parser.utf16_strlen(data_str), data_str);
 }
 
 public bool deserialize_message(string message, out MessageType type, out int id, out string method, out Json.Node? data)
 {
+	// FIXME: Str len is in utf-16 code points.
 	type = (MessageType) int.parse(message.substring(0, 1));
 	id = 0;
 	data = null;

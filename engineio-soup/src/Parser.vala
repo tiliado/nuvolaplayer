@@ -37,6 +37,26 @@ public errordomain Error
 	INVALID_LENGTH;
 }
 
+/**
+ * Return the number of UTF-16 code points to store given string.
+ * 
+ * It corresponds to JavaScript's String.length.
+ * 
+ * @param str    a string
+ * @return a number of UTF-16 code points
+ */
+public int utf16_strlen(string? str)
+{
+	if (str == null)
+		return 0;
+	int len = 0;
+	unichar c = 0;
+	int i = 0;
+	while (str.get_next_char(ref i, out c))
+		len += (uint) c <= 0xFFFF ? 1 : 2;
+	return len;
+}
+
 /* *** ENCODING *** */
 
 /**
@@ -54,7 +74,8 @@ public string? encode_payload(SList<Packet> packets)
 	foreach (unowned Packet packet in packets)
 	{
 		var data = encode_packet(packet);
-		buffer.append_printf("%d:", data.length);
+		/* Engine.io protocol requires a string length to be in UTF-16 characters rather than in bytes */
+		buffer.append_printf("%d:", utf16_strlen(data));
 		buffer.append((owned) data);
 	}
 	return buffer.str;
@@ -279,6 +300,7 @@ public class StringPayloadDecoder
 					length.truncate();
 					continue;
 				}
+				// FIXME: Is packet_length in UTF-16 code points?
 				var msg = data.substring(i + 1, packet_len);
 				if (msg.length != packet_len)
 				{

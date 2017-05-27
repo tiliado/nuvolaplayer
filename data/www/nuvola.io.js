@@ -78,9 +78,16 @@ Nuvolaio.deserializeMessage = function(message)
 				throw new Error("Invalid message data size: " + size);
 			i++;
 			if (size == 0)
+			{
 				result.data = null;
+			}
 			else
-				result.data = JSON.parse(message.substr(i, size)); // throws SyntaxError
+			{
+				var data = message.substr(i, size);
+				if (data.length < size)
+					throw new Error("Truncated data: " + data.length + " < " + size + ".");
+				result.data = JSON.parse(data); // throws SyntaxError
+			}
 			break;
 		}
 	}
