@@ -525,7 +525,7 @@ def build(ctx):
 		BLURB = BLURB,
 		APP_NAME = ctx.env.NAME,
 		ICON = ctx.env.ICON_NAME,
-		EXEC = APPNAME if not ctx.env.ADK else "lxterminal",
+		EXEC = NUVOLA_BIN if not ctx.env.ADK else "lxterminal",
 		GENERIC_NAME=GENERIC_NAME,
 		WMCLASS = ctx.env.UNIQUE_NAME,
 	)
