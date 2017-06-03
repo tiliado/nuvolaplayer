@@ -33,7 +33,7 @@ struct Args
 	static bool debug;
 	static bool verbose;
 	static bool version;
-	#if !FLATPAK || !NUVOLA_STD
+	#if !FLATPAK || !NUVOLA_RUNTIME
 	static string? app_id = null;
 	static string? apps_dir = null;
 	static bool list_apps = false;
@@ -42,7 +42,7 @@ struct Args
 	
 	public const OptionEntry[] options =
 	{
-		#if !FLATPAK || !NUVOLA_STD
+		#if !FLATPAK || !NUVOLA_RUNTIME
 		{ "app-id", 'a', 0, OptionArg.STRING, ref app_id, "Web app to run, e.g. \"happy_songs\" for Happy Songs web app.", "ID" },
 		{ "apps-dir", 'A', 0, GLib.OptionArg.FILENAME, ref Args.apps_dir, "Search for web app integrations only in directory DIR and disable service management.", "DIR" },
 		{ "list-apps", 'l', 0, OptionArg.NONE, ref list_apps, "List available application.", null },
@@ -109,7 +109,7 @@ public int main(string[] args)
 	var storage = new Diorite.XdgStorage.for_project(Nuvola.get_app_id());
 	move_old_xdg_dirs(new Diorite.XdgStorage.for_project(Nuvola.get_old_id()), storage);
 	
-	#if !FLATPAK || !NUVOLA_STD
+	#if !FLATPAK || !NUVOLA_RUNTIME
 	if (Args.apps_dir == null)
 		Args.apps_dir = Environment.get_variable("NUVOLA_WEB_APPS_DIR");
 	
@@ -147,7 +147,7 @@ public int main(string[] args)
 	
 	var controller = new MasterController(storage, web_app_reg, (owned) exec_cmd, Args.debug);
 	var controller_args = new string[]{args[0]};
-	#if !FLATPAK || !NUVOLA_STD
+	#if !FLATPAK || !NUVOLA_RUNTIME
 	if (Args.list_apps)
 		controller_args += "-l";
 	if (Args.list_apps_json)
