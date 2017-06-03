@@ -242,6 +242,7 @@ def configure(ctx):
 		ctx.env.UNIQUE_NAME = "eu.tiliado.NuvolaCdk"
 		MIN_WEBKIT = FLATPAK_WEBKIT
 	elif ctx.env.ADK:
+		vala_def(ctx, "NUVOLA_ADK")
 		ctx.env.UNIQUE_NAME = "eu.tiliado.NuvolaAdk"
 		MIN_WEBKIT = FLATPAK_WEBKIT
 	else:
