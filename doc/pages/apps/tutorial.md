@@ -71,6 +71,7 @@ Let's look at the example:
         "api_major": 3,
         "api_minor": 0,
         "categories": "AudioVideo;Audio;",
+        "requirements": "Feature[Flash] Codec[MP3]",
         "home_url": "nuvola://home.html",
         "license": "2-Clause BSD, CC-BY-3.0",
         "build": {
@@ -144,10 +145,7 @@ This file contains several mandatory fields:
 `requirements`
 
 :   If your streaming service requires **Flash plugin** or **HTML5 Audio support** for playback
-    (very likely), you have to
-    [set a proper format requirement flag](https://github.com/tiliado/nuvolaplayer/issues/158#issuecomment-177193663).
-    Although Nuvola Player 3.0 currently doesn't check this flag and enables both Flash and HTML5 Audio by default,
-    this is going to be changed in the next stable release **Nuvola Player 3.2**.
+    (very likely), you need to [add respective web app requirement flags for Nuvola 4.x+](#web-technologies).
 
 `build`
 
@@ -402,6 +400,30 @@ sidebar), then enable **WebKit Web Inspector** (right-click the web page anywher
 You can also launch your service integration with id `happy_songs` directly.
 
     nuvola -D -A ~/projects/nuvola-apps -a happy_songs
+
+Web Compatibility Issues
+========================
+
+Web Technologies
+----------------
+
+A particular web app may require certain technologies to function properly.
+At present, Nuvola enables both Flash plugin and GStreamer HTML5 Audio by default.
+However, this will change for Nuvola 4.x in the future and you should not count on it.
+
+**Web app requirements** in Nuvola Apps Runtime 4.x are specified as the `requirements` property
+in `metadata.in.json`. It can contain a space separated list of following requirements:
+
+  * `Codec[MP3]`: The web app can play audio with HTML5 audio technology and requires a MP3 codec.
+  * `Feature[Flash]`: The web app requires Adobe Flash plugin. Use only if your app cannot use 
+    HTML5 Audio.
+  * `WebKitGTK[X.Y.Z]`: The web app doesn't work properly in WebKitGTK < X.Y.Z. While the genuine flatpak
+    builds of Nuvola always contain the latest stable release of WebKitGTK, this may not be true for
+    unofficial third-party builds.
+  * `Feature[MSE]`: The web app requires Media Source extension for HTML5 Audio playback. *Experimental,
+    not available in stable flatpak builds.*
+  * `Codec[H264]`: The web app requires h264 codec for HTML5 Audio playback. *Experimental,
+    not available in stable flatpak builds.*
 
 Debugging and logging messages
 ==============================
