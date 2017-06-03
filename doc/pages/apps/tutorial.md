@@ -165,6 +165,11 @@ This file can include also optional fields:
     `Runner: **CONSOLE WARN [blocked]** The page at https://play.pocketcasts.com/web **was not allowed** to display
     insecure content from http://media.scpr.org/.` The default value is `false`.
 
+`user_agent` (since Nuvola 4.4)
+:   It can sometimes happen that a web page provides a different code depending on which web browser is used.
+    Nuvola uses the user agent of WebKitGTK web rendering engine by default. However, if the web app you are
+    writing script for doesn't work with it, you can [disguise Nuvola as a different browser](#user-agent-quirks).
+
 !!! danger "Extra rules for metadata.in.json"
     If you want to have your integration script maintained and distributed as a part of the Nuvola
     Apps project, you have to follow rules in [Service Integrations Guidelines](:apps/guidelines.html).
@@ -424,6 +429,28 @@ in `metadata.in.json`. It can contain a space separated list of following requir
     not available in stable flatpak builds.*
   * `Codec[H264]`: The web app requires h264 codec for HTML5 Audio playback. *Experimental,
     not available in stable flatpak builds.*
+
+User Agent Quirks
+-----------------
+
+It can sometimes happen that a web page provides a different code depending on which web browser is used.
+Nuvola uses the user agent of WebKitGTK web rendering engine by default. However, if the web app you are
+writing script for doesn't work with it, you can disguise Nuvola as a different browser (this is known as
+user agent quirks) by setting the `user_agent` attribute in `metadata.in.json`. There are several predefined
+values (in order of preference):
+
+  * `WEBKITGTK` or `WEBKITGTK nn`: The default user agent of WebKitGTK library. If no version number `nn` is provided,
+    the latest known version is used.
+  * `SAFARI` or `SAFARI nn`: The user agent of the Safari web browser, which also uses WebKit engine.
+     If no version number `nn` is provided, the latest known version is used.
+  * `CHROME` or `CHROME nn`: The user agent of the Google Chrome web browser, which uses the Blink engine
+    originally based on WebKit. If no version number `nn` is provided, the latest known version is used.
+  * `FIREFOX` or `FIREFOX nn`: The user agent of the Firefox web browser, which uses the Gecko engine
+    originally based on WebKit. If no version number `nn` is provided, the latest known version is used.
+
+Alternatively, you can provide a complete user agent string, e.g. `Mozilla/5.0 (Windows NT 10.0; Win64; x64)
+AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246` for Microsoft Edge
+web browser.
 
 Debugging and logging messages
 ==============================
