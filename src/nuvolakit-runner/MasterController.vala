@@ -542,7 +542,7 @@ public class MasterController : Diorite.Application
 			release();
 			return;
 		}
-		#if FLATPAK && !NUVOLA_ADK && !NUVOLA_CDK
+		#if FLATPAK && NUVOLA_RUNTIME
 		try
 		{
 			var uid = build_camel_id(app_id);
