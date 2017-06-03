@@ -2,27 +2,27 @@ Title: Service Integrations Tutorial
 
 [TOC]
 
-This tutorial briefly describes creation of **a new service integration for Nuvola Player 3 from
+This tutorial briefly describes creation of **a new web app script for Nuvola Apps Runtime from
 scratch**. The goal is to write an integration script for *fake Happy Songs  service* shipped with
-Nuvola Player and to prepare you to create your own service integration.
+Nuvola SDK and to prepare you to create your own service integration.
 I'm looking forward to a code review ;-)
 
 Prepare development environment
 ===============================
 
- 1. Install Nuvola Player 3.
- 2. Install [Nuvola SDK](https://github.com/tiliado/nuvolasdk).
-    
-        sudo pip3 install -U nuvolasdk
+ 1. Install [Nuvola App Developer Kit (ADK)](https://github.com/tiliado/nuvolaruntime/wiki/Nuvola-App-Developer-Kit).
+    This is a flatpak runtime that contains Nuvola Apps Runtime, SDK and dependencies.
 
- 3. Create a project directory `~/projects/nuvola-player` (or any other name, but don't forget to
+ 2. Create a project directory `~/projects/nuvola-apps` (or any other name, but don't forget to
     adjust paths in this tutorial).
     
-        mkdir -p ~/projects/nuvola-player
+        mkdir -p ~/projects/nuvola-apps
+ 
+ 3. [Launch and set up Nuvola ADK](https://github.com/tiliado/nuvolaruntime/wiki/Nuvola-App-Developer-Kit#running-and-set-up)
      
  4. Create a new project with "nuvola://home.html" as a home URL.
     
-        $ cd ~/projects/nuvola-player
+        $ cd ~/projects/nuvola-apps
         $ nuvolasdk new-project --name "Happy Songs" --url "nuvola://home.html"
         ...
         Finished!
@@ -46,7 +46,7 @@ Prepare development environment
  5. Copy a dumb example of a streaming website.
     
         :::sh
-        cd ~/projects/nuvola-player/nuvola-app-happy-songs
+        cd ~/projects/nuvola-apps/nuvola-app-happy-songs
         cp "$(nuvolasdk data-dir)/examples/home.html" .
 
  6. If you are not familiar with the [Git version control system][git],
@@ -87,8 +87,6 @@ This file contains several mandatory fields:
 
 :   Identifier of the service. It can contain only letters `a-z`, digits `0-9` and underscore `_` to
     separate words, e.g. `google_play_music` for Google Play Music, `8tracks` for 8tracks.com.
-    (Nuvola Player 2 required the id must be same as the directory name of the service
-    integration, but Nuvola Player 3 doesn't have this limitation.)
 
 `name`
 
@@ -117,17 +115,18 @@ This file contains several mandatory fields:
 
 `api_major` and `api_minor`
 
-:   A required version of JavaScript API, currently ``3.0``. You should update API version only
-    if your script doesn't work with older API. For example, if Nuvola Player adds a new feature
-    into API 3.X that is so essential for your script that it cannot function properly without it,
-    you will increase API requirement to 3.X. However, all Nuvola Player versions with API less
-    then 3.1 won't be able to load your script any more.
+:   A required version of Nuvola Runtime API. It's `3.0` for Nuvola 3.0, `3.1` for Nuvola 3.1 and 4.4,
+    `4.5` for Nuvola 4.5 and `4.x` for Nuvola 4.x (x >= 5). You should update API version only
+    if your script doesn't work with older API. For example, if Nuvola Runtime adds a new feature
+    into API 4.X that is so essential for your script that it cannot function properly without it,
+    you will increase API requirement to 4.X. However, all Nuvola versions with API less
+    then 4.x won't be able to load your script any more.
 
 ``categories``
 
 :   [Application categories](http://standards.freedesktop.org/menu-spec/latest/apa.html) suitable
     for the web app. It is used to place a desktop launcher to proper category in applications menu.
-    Nuvola Player services should be in ``"AudioVideo;Audio;"``.
+    Media player services should be in ``"AudioVideo;Audio;"``.
 
 `home_url`
 
@@ -161,7 +160,7 @@ This file can include also optional fields:
 
 :   Suggested window width or height in pixels.
 
-`allow_insecure_content` (since Nuvola Player 3.1)
+`allow_insecure_content` (since Nuvola 3.1)
 
 :   Whether the page served over the secure HTTPS protocol depends on insecure content served over the HTTP protocol.
     As a rule of thumb, set `allow_insecure_content` to `true` if you see console warnings similar to that of Pocket Casts:
@@ -170,7 +169,7 @@ This file can include also optional fields:
 
 !!! danger "Extra rules for metadata.in.json"
     If you want to have your integration script maintained and distributed as a part of the Nuvola
-    Player project, you have to follow rules in [Service Integrations Guidelines](:apps/guidelines.html).
+    Apps project, you have to follow rules in [Service Integrations Guidelines](:apps/guidelines.html).
 
 Integration script
 ==================
@@ -276,7 +275,7 @@ WebApp.start();
 Lines 2-22
 
 :   Copyright and license information. While you can choose any license for your work, it's
-    recommended to use the license of Nuvola Player as shown in the example.
+    recommended to use the license of Nuvola Apps Runtime as shown in the example.
 
 Line 25
 
@@ -325,10 +324,10 @@ Line 84
 App Runner and Web Worker
 =========================
 
-Nuvola Player uses two processes for each service (web app):
+Nuvola Apps Runtime uses two processes for each service (web app):
 
   * **App Runner process** that manages user interface, desktop integration components and
-    a life-cycle of the WebKitGtk WebView. On start-up, Nuvola Player executes once the integration
+    a life-cycle of the WebKitGtk WebView. On start-up, Nuvola Runtime executes once the integration
     script in the App Runner process to perform initialization of the web app. Note that the script
     is executed in a **bare JavaScript environment**, which means there are no `window`, `document`
     or other common object provided by a web browser engine. Therefore, make sure you don't use any of these
@@ -343,7 +342,7 @@ Nuvola Player uses two processes for each service (web app):
     
  
   * **Web Worker process** is created by WebKitGtk WebView and it's the place where the web
-    interface of a web app lives, i.e. where the website is loaded. Nuvola Player executes the
+    interface of a web app lives, i.e. where the website is loaded. Nuvola Runtime executes the
     integration script in the Web Worker process everytime a web page is loaded in it to integrate
     the web page. The script is executed in a complete WebKit JavaScript environment with all bells
     and whistles.
@@ -365,26 +364,26 @@ Finally, execute following commands:
   * `./configure` to generate `Makefile` and `metadata.json` from `metadata.in.json`
   * `make all` to build the project
 
-After the project have been built, you can run Nuvola Player 3 from terminal with following command and you will see a list with only one
-service Happy Songs, because we told Nuvola Player to load service integrations only from directory
-`~/projects/nuvola-player`.
+After the project have been built, you can run Nuvola Runtime from terminal with following command and you will see a list with only one
+service Happy Songs, because we told Nuvola to load service integrations only from directory
+`~/projects/nuvola-apps`.
     
-    $ nuvolaplayer3 -D -A ~/projects/nuvola-player
+    $ nuvola -D -A ~/projects/nuvola-apps
     ...
-    [Master:DEBUG    Nuvola] WebAppRegistry.vala:128: Found web app Happy Songs at /home/fenryxo/projects/nuvola-player/nuvola-app-happy-songs, version 1.0
+    [Master:DEBUG    Nuvola] WebAppRegistry.vala:128: Found web app Happy Songs at /home/fenryxo/projects/nuvola-aps/nuvola-app-happy-songs, version 1.0
     ...
 
 
 
-!!! danger "Make sure all Nuvola Player instances have been closed"
-    If you see following warning in terminal, there is a running instance of Nuvola Player
+!!! danger "Make sure all Nuvola Apps instances have been closed"
+    If you see following warning in terminal, there is a running instance of Nuvola Apps
     that must be closed. Otherwise, the `-A` parameter is ignored.
     
     
-        [Master:INFO     Nuvola] master.vala:135: Nuvola Player 3 instance is already running
+        [Master:INFO     Nuvola] master.vala:135: Nuvola App instance is already running
         and will be activated.
         [Master:WARNING  Nuvola] master.vala:137: Some command line parameters (-D, -v, -A, -L) are
-        ignored because they apply only to a new instance. You might want to close all Nuvola Player
+        ignored because they apply only to a new instance. You might want to close all Nuvola Apps
         instances and run it again with your parameters.
 
 ![A list with single service integration](:images/guide/app_list_one_service.png)
@@ -402,17 +401,17 @@ sidebar), then enable **WebKit Web Inspector** (right-click the web page anywher
 
 You can also launch your service integration with id `happy_songs` directly.
 
-    nuvolaplayer3 -D -A ~/projects/nuvola-player -a happy_songs
+    nuvola -D -A ~/projects/nuvola-apps -a happy_songs
 
 Debugging and logging messages
 ==============================
 
 You might want to print some debugging messages to console during development. There are two types
-of them in Nuvola Player:
+of them in Nuvola Apps Runtime:
 
   * **JavaScript console** is shown in the WebKit Web Inspector.
   * **Terminal console** is the black window with white text. Debugging messages are only printed
-    if you have launched Nuvola Player with ``-D`` or ``--debug`` flag.
+    if you have launched Nuvola Apps Runtime with ``-D`` or ``--debug`` flag.
 
 The are two ways how to print debugging messages:
 
@@ -423,7 +422,7 @@ The are two ways how to print debugging messages:
     fallback and a warning is issued.
 
 You might be wondering **why the Window object isn't always available as the global JavaScript
-object**. That's because Nuvola Player executes a lot of JavaScript code in a pure JavaScript
+object**. That's because Nuvola Runtime executes a lot of JavaScript code in a pure JavaScript
 environment outside the web view. However, the [Core::InitWebWorker signal](apiref>Core%3A%3AInitWebWorker)
 and your ``WebApp._onInitWebWorker`` and ``WebApp._onActionActivated`` signal handlers are
 invoked in the web view with the global window object, so feel free to use ``console.log()``.
@@ -657,11 +656,11 @@ Push your work upstream
 =======================
 
 If you would like to have your service integration **maintained as a part of Nuvola
-Player project** and distributed in Nuvola Player repository, follow these steps:
+Apps project** and distributed in Nuvola Player repository, follow these steps:
 
   * Make sure your script follows the [Service Integration Guidelines](:apps/guidelines.html).
   * Make sure your ``integrate.js`` contain proper copyright information 
-    "Copyright 2014 Your name &lt;your e-mail&gt;".
+    "Copyright 2017 Your name &lt;your e-mail&gt;".
   * The test service used in tutorial and guide contains 2-Clause BSD license. If you have severe
     reasons to choose a different license, update license text in both ``integrate.js`` and
     ``LICENSE`` files.
@@ -673,8 +672,8 @@ Player project** and distributed in Nuvola Player repository, follow these steps
         git remote add origin git@github.com:fenryxo/nuvola-app-test.git
         git push -u origin master
 
-  * Create new issue in your repository titled "Push to Nuvola Player project"
-  * Create new issue at [Nuvola Player repository](https://github.com/tiliado/nuvolaplayer/issues/new)
+  * Create new issue in your repository titled "Push to Nuvola Apps project"
+  * Create new issue at [Nuvola Apps Runtime repository](https://github.com/tiliado/nuvolapruntime/issues/new)
     with subject "Code review: You Service Name integration" and post a link the the issue created
     above.
  
@@ -688,9 +687,9 @@ Supposing you have followed this tutorial, you have enough knowledge to create y
 integration. You are encouraged to take a look at articles in advanced section to spice up your work:
 
   * [URL Filtering (URL Sandbox)](:apps/url-filtering.html):
-    Decide which urls are opened in a default web browser instead of Nuvola Player.
+    Decide which urls are opened in a default web browser instead of Nuvola Apps.
   * [Configuration and session storage](:apps/configuration-and-session-storage.html):
-    Nuvola Player 3 allows service integrations to store both a persistent configuration and a temporary session information.
+    Nuvola Runtime allows service integrations to store both a persistent configuration and a temporary session information.
   * [Initialization and Preferences Forms](:apps/initialization-and-preferences-forms.html):
     These forms are useful when you need to get user input.
   * [Web apps with a variable home page URL](:apps/variable-home-page-url.html):
