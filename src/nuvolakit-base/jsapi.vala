@@ -86,8 +86,8 @@ public class JSApi : GLib.Object
 	/**
 	 * Major version of the JavaScript API
 	 */
-	public const int API_VERSION_MAJOR = 3;
-	public const int API_VERSION_MINOR = 1;
+	public const int API_VERSION_MAJOR = VERSION_MAJOR;
+	public const int API_VERSION_MINOR = VERSION_MINOR;
 	public const int API_VERSION = API_VERSION_MAJOR * 100 + API_VERSION_MINOR;
 	
 	private static unowned JS.Class klass;
@@ -121,7 +121,7 @@ public class JSApi : GLib.Object
 	
 	public static bool is_supported(int api_major, int api_minor)
 	{
-		return api_major == API_VERSION_MAJOR && api_minor <= API_VERSION_MINOR;
+		return api_major >= 3 && api_major * 100 + api_minor <= API_VERSION;
 	}
 	
 	public uint get_webkit_version()
