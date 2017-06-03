@@ -258,7 +258,7 @@ public class MasterController : Diorite.Application
 		var welcome_screen = new WelcomeScreen(this, storage);
 		welcome_screen.show();
 		main_window.add_page(welcome_screen, PAGE_WELCOME, "Welcome");
-		#if FLATPAK
+		#if FLATPAK && !NUVOLA_ADK
 		var app_index_view = new AppIndexWebView(this, WebEngine.get_web_context());
 		app_index_view.load_app_index(Nuvola.REPOSITORY_INDEX, Nuvola.REPOSITORY_ROOT);
 		app_index_view.show();
