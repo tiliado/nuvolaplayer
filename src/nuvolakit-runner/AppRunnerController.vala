@@ -264,6 +264,9 @@ public class AppRunnerController : RunnerApplication
 	
 	private void init_gui()
 	{
+		#if FLATPAK
+		Graphics.ensure_gl_extension_mounted(main_window);
+		#endif
 		actions_helper = new ActionsHelper(actions, config);
 		unowned ActionsHelper ah = actions_helper;
 		Diorite.Action[] actions_spec = {

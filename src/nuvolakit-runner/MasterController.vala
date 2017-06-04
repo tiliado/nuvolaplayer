@@ -234,6 +234,10 @@ public class MasterController : Diorite.Application
 		if (init_state >= InitState.GUI)
 			return;
 		
+		#if FLATPAK
+		Graphics.ensure_gl_extension_mounted(main_window);
+		#endif
+		
 		Diorite.Action[] actions_spec = {
 		//          Action(group, scope, name, label?, mnemo_label?, icon?, keybinding?, callback?)
 		new Diorite.SimpleAction("main", "app", Actions.HELP, "Help", "_Help", null, "F1", do_help),
