@@ -78,27 +78,44 @@ Nuvola.inArray = function(array, item)
 /**
  * Triggers mouse event on element
  * 
+ * @since API 4.5: x, y coordinates were added.
+ * 
  * @param HTMLElement elm    Element object
  * @param String name        Event name
+ * @param Number x           Relative x position within the element 0.0..1.0 (default 0.5)
+ * @param Number y           Relative y position within the element 0.0..1.0 (default 0.5)
  */
-Nuvola.triggerMouseEvent = function(elm, name)
+Nuvola.triggerMouseEvent = function(elm, name, x, y)
 {
     var event = document.createEvent('MouseEvents');
-    event.initMouseEvent(name, true, true, document.defaultView, 1, 0, 0, 0, 0, false, false, false, false, 0, elm);
+    var width = elm.clientWidth * (x === undefined ? 0.5 : x);
+    var height = elm.clientHeight * (x === undefined ? 0.5 : x);
+    var clientX = elm.clientLeft + width;
+    var clientY = elm.clientTop + height;
+    var screenX = elm.scrollLeft + clientX;
+    var screenY = elm.scrollTop + clientY;
+    event.initMouseEvent(
+        name, true, true, document.defaultView, 1,
+        screenX, screenY, clientX, clientY,
+        false, false, false, false, 0, elm);
     elm.dispatchEvent(event);
 }
 
 /**
  * Simulates click on element
  * 
+ * @since API 4.5: x, y coordinates were added.
+ * 
  * @param HTMLElement elm    Element object
+ * @param Number x           Relative x position within the element 0.0..1.0 (default 0.5)
+ * @param Number y           Relative y position within the element 0.0..1.0 (default 0.5)
  */
-Nuvola.clickOnElement = function(elm)
+Nuvola.clickOnElement = function(elm, x, y)
 {
-    Nuvola.triggerMouseEvent(elm, 'mouseover');
-    Nuvola.triggerMouseEvent(elm, 'mousedown');
-    Nuvola.triggerMouseEvent(elm, 'mouseup');
-    Nuvola.triggerMouseEvent(elm, 'click');
+    Nuvola.triggerMouseEvent(elm, 'mouseover', x, y);
+    Nuvola.triggerMouseEvent(elm, 'mousedown', x, y);
+    Nuvola.triggerMouseEvent(elm, 'mouseup', x, y);
+    Nuvola.triggerMouseEvent(elm, 'click', x, y);
 }
 
 /**
