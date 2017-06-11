@@ -88,12 +88,13 @@ Nuvola.inArray = function(array, item)
 Nuvola.triggerMouseEvent = function(elm, name, x, y)
 {
     var event = document.createEvent('MouseEvents');
-    var width = elm.clientWidth * (x === undefined ? 0.5 : x);
-    var height = elm.clientHeight * (x === undefined ? 0.5 : x);
-    var clientX = elm.clientLeft + width;
-    var clientY = elm.clientTop + height;
-    var screenX = elm.scrollLeft + clientX;
-    var screenY = elm.scrollTop + clientY;
+    var rect = elm.getBoundingClientRect();
+    var width = rect.width * (x === undefined ? 0.5 : x);
+    var height = rect.height * (x === undefined ? 0.5 : x);
+    var clientX = rect.left + width;
+    var clientY = rect.top + height;
+    var screenX = window.scrollX + clientX;
+    var screenY = window.scrollY + clientY;
     event.initMouseEvent(
         name, true, true, document.defaultView, 1,
         screenX, screenY, clientX, clientY,
