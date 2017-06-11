@@ -138,6 +138,7 @@ MediaPlayer.$init = function()
     this._canPlay = null;
     this._canPause = null;
     this._canRate = null;
+    this._canSeek = null;
     this._extraActions = [];
     this._artworkLoop = 0;
     this._baseActions = [PlayerAction.TOGGLE_PLAY, PlayerAction.PLAY, PlayerAction.PAUSE, PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG];
@@ -196,7 +197,7 @@ MediaPlayer.setTrack = function(track)
  * 
  * @param String|Number position    the current track position as a string (`HH:MM:SS.xxx`, e.g. `1:25.54`) or number of microseconds.
  */
-MediaPlayer.setTrackPosition = function (position)
+MediaPlayer.setTrackPosition = function(position)
 {
     var position = Nuvola.parseTimeUsec(position);
     if (this._trackPosition != position)
@@ -386,7 +387,7 @@ MediaPlayer._onInitAppRunner = function(emitter)
     Nuvola.actions.addAction("playback", "win", PlayerAction.STOP, "Stop", null, "media-playback-stop", null);
     Nuvola.actions.addAction("playback", "win", PlayerAction.PREV_SONG, "Previous song", null, "media-skip-backward", null);
     Nuvola.actions.addAction("playback", "win", PlayerAction.NEXT_SONG, "Next song", null, "media-skip-forward", null);
-    Nuvola.actions.addAction("playback", "win", PlayerAction.SEEK, "Seek", null, null, 0);
+    Nuvola.actions.addAction("playback", "win", PlayerAction.SEEK, "Seek", null, null, null, 0);
     // FIXME: remove action if notifications compoment is disabled
     Nuvola.actions.addAction("playback", "win", PlayerAction.PLAYBACK_NOTIFICATION, "Show playback notification", null, null, null);
     
