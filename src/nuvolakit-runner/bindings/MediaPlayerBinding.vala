@@ -28,6 +28,7 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 {
 	private const string TRACK_INFO_CHANGED = "track-info-changed";
 	private const string TRACK_POSITION_CHANGED = "track-position-changed";
+	private const string VOLUME_CHANGED = "volume-changed";
 	
 	public MediaPlayerBinding(Drt.ApiRouter router, WebWorker web_worker, MediaPlayerModel model)
 	{
@@ -61,14 +62,22 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 			new Drt.DoubleParam("position", false, 0.0)
 
 		});
+		bind("update-volume", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE, null, handle_update_volume, {
+			new Drt.DoubleParam("volume", false, 1.0)
+
+		});
 		bind("track-info", Drt.ApiFlags.READABLE, "Returns information about currently playing track.",
 			handle_get_track_info, null);
+		bind("volume", Drt.ApiFlags.READABLE, "Returns information about current volume.",
+			handle_get_volume, null);
 		bind("track-position", Drt.ApiFlags.READABLE, "Returns information about current track position.",
 			handle_get_track_position, null);
 		add_notification(TRACK_INFO_CHANGED, Drt.ApiFlags.WRITABLE|Drt.ApiFlags.SUBSCRIBE,
 			"Sends a notification when track info is changed.");
 		add_notification(TRACK_POSITION_CHANGED, Drt.ApiFlags.WRITABLE|Drt.ApiFlags.SUBSCRIBE,
 			"Sends a notification when track position is changed.");
+		add_notification(VOLUME_CHANGED, Drt.ApiFlags.WRITABLE|Drt.ApiFlags.SUBSCRIBE,
+			"Sends a notification when volume is changed.");
 		model.set_rating.connect(on_set_rating);
 	}
 	
@@ -125,6 +134,21 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 		return new Variant.double((double) model.track_position);
 	}
 	
+	private Variant? handle_update_volume(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	{
+		check_not_empty();
+		var volume = params.pop_double();
+		model.volume = volume;
+		emit(VOLUME_CHANGED);
+		return new Variant.boolean(true);
+	}
+	
+	private Variant? handle_get_volume(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	{
+		check_not_empty();
+		return new Variant.double(model.volume);
+	}
+	
 	private Variant? handle_set_flag(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
@@ -140,6 +164,7 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 		case "can-stop":
 		case "can-rate":
 		case "can-seek":
+		case "can-change-volume":
 			handled = true;
 			GLib.Value value = GLib.Value(typeof(bool));
 			value.set_boolean(state);
@@ -165,6 +190,7 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 		case "can-stop":
 		case "can-rate":
 		case "can-seek":
+		case "can-change-volume":
 			GLib.Value value = GLib.Value(typeof(bool));
 			model.@get_property(name, ref value);
 			return new Variant.boolean(value.get_boolean());

@@ -22,7 +22,7 @@
 			</form>
 		</div>
 		<script type="text/javascript">true;</script>
-		<p>
+		<p>[Volume <span id="volume">100</span>%]
 		<strong id="status"></strong>
 		<span id="timer"></span>
 		<span id="nowplaying">
@@ -152,6 +152,7 @@ var Player = function()
 		progressmark: document.getElementById("progressmark"),
 		timeelapsed: document.getElementById("timeelapsed"),
 		timetotal: document.getElementById("timetotal"),
+		volume: document.getElementById("volume"),
 	}
 	
 	this.elm.prev.disabled = true;

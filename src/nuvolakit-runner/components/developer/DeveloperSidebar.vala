@@ -64,8 +64,10 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
 		artwork = new Gtk.Image();
 		clear_artwork(false);
 		grid.add(artwork);
-		position = new Gtk.Label(
-			Utils.format_track_time(player.track_position) + " / " + Utils.format_track_time(player.track_length));
+		position = new Gtk.Label("T: %s/%s  V: %d%%".printf(
+			Utils.format_track_time(player.track_position),
+			Utils.format_track_time(player.track_length),
+			(int)(player.volume * 100)));
 		position.set_line_wrap(true);
 		position.halign = Gtk.Align.CENTER;
 		grid.attach_next_to(position, artwork, Gtk.PositionType.BOTTOM, 1, 1);
@@ -170,8 +172,11 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
 			break;
 		case "track-length":
 		case "track-position":
-			position.label = Utils.format_track_time(player.track_position)
-				+ " / " + Utils.format_track_time(player.track_length);
+		case "volume":
+			position.label = "T: %s/%s  V: %d%%".printf(
+				Utils.format_track_time(player.track_position),
+				Utils.format_track_time(player.track_length),
+				(int)(player.volume * 100));
 			break;
 		case "rating":
 			rating.label = player.rating >= 0.0 ? player.rating.to_string() : "(null)";

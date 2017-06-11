@@ -33,6 +33,7 @@ public interface Nuvola.MediaPlayerModel: GLib.Object
 	public abstract string? artwork_file {get; set; default = null;}
 	public abstract int track_length {get; set; default = 0;}
 	public abstract int track_position {get; set; default = 0;}
+	public abstract double volume {get; set; default = 1.0;}
 	public abstract bool can_go_next {get; set;}
 	public abstract bool can_go_previous {get; set;}
 	public abstract bool can_play {get; set;}
@@ -66,6 +67,8 @@ public interface Nuvola.MediaPlayerModel: GLib.Object
 	public abstract void next_song();
 	
 	public abstract void seek(int64 position);
+	
+	public abstract void change_volume(double volume);
 	
 	public signal void set_rating(double rating);
 }

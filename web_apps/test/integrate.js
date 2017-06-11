@@ -224,11 +224,22 @@ WebApp.update = function()
         var trackPosition = null;
     }
 
+    try
+    {
+        var volume = document.getElementById("volume").innerText / 100 || null;
+    }
+    catch (e)
+    {
+        var volume = null;
+    }
+    
     player.setTrack(track);
     player.setTrackPosition(trackPosition);
+    player.updateVolume(volume);
     player.setPlaybackState(state);
     player.setCanRate(state !== PlaybackState.UNKNOWN);
     player.setCanSeek(state !== PlaybackState.UNKNOWN);
+    player.setCanChangeVolume(state !== PlaybackState.UNKNOWN);
     
     var enabled;
     try
@@ -300,6 +311,9 @@ WebApp._onActionActivated = function(emitter, name, param)
         break;
     case ACTION_WONDERFUL:
         Nuvola.actions.updateState(ACTION_WONDERFUL, !!param);
+        break;
+    case PlayerAction.CHANGE_VOLUME:
+        document.getElementById("volume").innerText = Math.round(param * 100);
         break;
     case PlayerAction.SEEK:
         alert("Seek: " + param);

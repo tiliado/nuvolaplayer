@@ -73,6 +73,10 @@ var PlayerAction = {
      * Seek to a new position
      */
     SEEK: "seek",
+    /**
+     * Change volume
+     */
+    CHANGE_VOLUME: "change-volume",
 }
 
 /**
@@ -139,11 +143,13 @@ MediaPlayer.$init = function()
     this._canPause = null;
     this._canRate = null;
     this._canSeek = null;
+    this._canChangeVolume = null;
     this._extraActions = [];
     this._artworkLoop = 0;
     this._baseActions = [PlayerAction.TOGGLE_PLAY, PlayerAction.PLAY, PlayerAction.PAUSE, PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG];
     this._notification = null;
     this._trackPosition = 0;
+    this._volume = 1.0;
     Nuvola.core.connect("InitAppRunner", this);
     Nuvola.core.connect("InitWebWorker", this);
 }
@@ -204,6 +210,25 @@ MediaPlayer.setTrackPosition = function(position)
     {
         this._trackPosition = position;
         Nuvola._callIpcMethodAsync("/nuvola/mediaplayer/set-track-position", position);
+    }
+}
+
+/**
+ * Update current volume
+ * 
+ * If the current volume is the same as the previous one, this method does nothing.
+ * 
+ * @since API 4.5
+ * 
+ * @param Number volume    the current volume from 0.0 to 1.0.
+ */
+MediaPlayer.updateVolume = function(volume)
+{
+    var volume = (volume || 0.0) * 1;
+    if (this._volume != volume)
+    {
+        this._volume = volume;
+        Nuvola._callIpcMethodAsync("/nuvola/mediaplayer/update-volume", volume);
     }
 }
 
@@ -349,6 +374,25 @@ MediaPlayer.setCanSeek = function(canSeek)
 }
 
 /**
+ * Set whether it is possible to change volume
+ *  
+ * If the argument is same as in the previous call, this method does nothing.
+ * 
+ * @since API 4.5
+ * 
+ * @param Boolean canChangeVolume    true if remote volume setting should be allowed
+ */
+MediaPlayer.setCanChangeVolume = function(canChangeVolume)
+{
+    if (this._canChangeVolume !== canChangeVolume)
+    {
+        this._canChangeVolume = canChangeVolume;
+        Nuvola.actions.setEnabled(PlayerAction.CHANGE_VOLUME, !!canChangeVolume);
+        this._setFlag("can-change-volume", !!canChangeVolume);
+    }
+}
+
+/**
  * Add actions for media player capabilities
  * 
  * For example: star rating, thumbs up/down, like/love/unlike.
@@ -388,6 +432,7 @@ MediaPlayer._onInitAppRunner = function(emitter)
     Nuvola.actions.addAction("playback", "win", PlayerAction.PREV_SONG, "Previous song", null, "media-skip-backward", null);
     Nuvola.actions.addAction("playback", "win", PlayerAction.NEXT_SONG, "Next song", null, "media-skip-forward", null);
     Nuvola.actions.addAction("playback", "win", PlayerAction.SEEK, "Seek", null, null, null, 0);
+    Nuvola.actions.addAction("playback", "win", PlayerAction.CHANGE_VOLUME, "Change volume", null, null, null, -1.0);
     // FIXME: remove action if notifications compoment is disabled
     Nuvola.actions.addAction("playback", "win", PlayerAction.PLAYBACK_NOTIFICATION, "Show playback notification", null, null, null);
     

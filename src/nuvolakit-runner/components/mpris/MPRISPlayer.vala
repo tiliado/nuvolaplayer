@@ -40,6 +40,7 @@ public class MPRISPlayer : GLib.Object
 		player.notify.connect_after((o, p) => {schedule_update(p.name);});
 		metadata = create_metadata();
 		position = player.track_position;
+		_volume = player.volume;
 		playback_status = map_playback_state();
 		pending_update = new HashTable<string, Variant>(str_hash, str_equal);
 		can_go_next = player.can_go_next;
@@ -76,6 +77,13 @@ public class MPRISPlayer : GLib.Object
 	public bool can_control {get{return true;}}
 	public bool nuvola_can_rate {get; private set; default = false;}
 	public HashTable<string, Variant> metadata {get; private set; default = null;}
+	
+	private double _volume = 1.0;
+	public double volume
+	{
+		get {return _volume;}
+		set {player.change_volume(value < 0.0 ? 0.0 : value);}
+	}
 	
 	public signal void seeked(int64 position);
 	
@@ -150,6 +158,10 @@ public class MPRISPlayer : GLib.Object
 			pending_update["Position"] = position;
 			if (delta > 2 || delta < -2)
 				seeked(position);
+			break;
+		case "volume":
+			if (_volume != player.volume)
+				pending_update["Volume"] = _volume = player.volume;
 			break;
 		case "state":
 			if (update_can_play())

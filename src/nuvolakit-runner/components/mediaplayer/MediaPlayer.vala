@@ -33,6 +33,7 @@ public class Nuvola.MediaPlayer: GLib.Object, Nuvola.MediaPlayerModel
 	public string? artwork_file {get; set; default = null;}
 	public int track_length {get; set; default = 0;}
 	public int track_position {get; set; default = 0;}
+	public double volume {get; set; default = 1.0;}
 	public bool can_go_next {get; set; default = false;}
 	public bool can_go_previous {get; set; default = false;}
 	public bool can_play {get; set; default = false;}
@@ -40,6 +41,7 @@ public class Nuvola.MediaPlayer: GLib.Object, Nuvola.MediaPlayerModel
 	public bool can_stop {get; set; default = false;}
 	public bool can_rate {get; set; default = false;}
 	public bool can_seek {get; set; default = false;}
+	public bool can_change_volume {get; set; default = false;}
 	public SList<string> playback_actions {get; owned set;}
 	private Diorite.Actions actions;
 	
@@ -95,6 +97,11 @@ public class Nuvola.MediaPlayer: GLib.Object, Nuvola.MediaPlayerModel
 	public void seek(int64 position)
 	{
 		activate_action("seek", position);
+	}
+	
+	public void change_volume(double volume)
+	{
+		activate_action("change-volume", volume);
 	}
 	
 	private void activate_action(string name, Variant? parameter=null)
