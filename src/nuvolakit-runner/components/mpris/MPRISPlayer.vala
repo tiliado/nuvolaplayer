@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2017 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -39,10 +39,12 @@ public class MPRISPlayer : GLib.Object
 		this.conn = conn;
 		player.notify.connect_after((o, p) => {schedule_update(p.name);});
 		metadata = create_metadata();
+		position = player.track_position;
 		playback_status = map_playback_state();
 		pending_update = new HashTable<string, Variant>(str_hash, str_equal);
 		can_go_next = player.can_go_next;
 		can_go_previous = player.can_go_previous;
+		can_seek = player.can_seek;
 		update_can_play();
 		update_can_pause();
 	}
@@ -65,6 +67,7 @@ public class MPRISPlayer : GLib.Object
 	}
 	public double minimum_rate {get{return 1.0;}}
 	public double maximum_rate {get{return 1.0;}}
+	public int64 position {get; private set; default = 0;}
 	public bool can_go_next {get; private set; default = false;}
 	public bool can_go_previous {get; private set; default = false;}
 	public bool can_play {get; private set; default = false;}
@@ -108,10 +111,13 @@ public class MPRISPlayer : GLib.Object
 	
 	public void seek(int64 offset)
 	{
+		if (can_seek)
+			player.seek(player.track_position + offset);
 	}
 	
-	public void set_position(string track_id, int64 position)
+	public void SetPosition(ObjectPath track_id, int64 position)
 	{
+		player.seek(position);
 	}
 	
 	public void open_uri(string uri)
@@ -132,10 +138,18 @@ public class MPRISPlayer : GLib.Object
 		case "album":
 		case "artwork-file":
 		case "rating":
+		case "track-length":
 			var new_metadata = create_metadata();
 			if (new_metadata.size() == 0 && metadata.size() == 0)
 				return;
 			pending_update["Metadata"] = metadata = new_metadata;
+			break;
+		case "track-position":
+			var delta = player.track_position - position;
+			position = player.track_position;
+			pending_update["Position"] = position;
+			if (delta > 2 || delta < -2)
+				seeked(position);
 			break;
 		case "state":
 			if (update_can_play())
@@ -172,6 +186,11 @@ public class MPRISPlayer : GLib.Object
 				return;
 			pending_update["NuvolaCanRate"] = nuvola_can_rate = player.can_rate;
 			break;
+		case "can-seek":
+			if (can_seek == player.can_seek)
+				return;
+			pending_update["CanSeek"] = can_seek = player.can_seek;
+			break;
 		default:
 			return;
 		}
@@ -204,9 +223,9 @@ public class MPRISPlayer : GLib.Object
 		return false;
 	}
 	
-	private HashTable<string,Variant> create_metadata()
+	private HashTable<string, Variant> create_metadata()
 	{
-		var metadata = new HashTable<string,Variant>(str_hash, str_equal);
+		var metadata = new HashTable<string, Variant>(str_hash, str_equal);
 		if(player.artist != null)
 		{
 			string[] artistArray = {player.artist};
@@ -219,11 +238,16 @@ public class MPRISPlayer : GLib.Object
 		if (player.artwork_file != null)
 			metadata.insert("mpris:artUrl", "file://" + player.artwork_file);
 		if (player.rating >= 0.0)
-			metadata.insert("xesam:userRating", player.rating);
-			
+			metadata.insert("xesam:userRating", player.rating);	
+		if (player.track_length > 0)
+			metadata.insert("mpris:length", new Variant.int64((int64) player.track_length));
 		if (metadata.size() > 0)
 		{
-			metadata.insert("mpris:trackid", new Variant.string("1"));
+			var hash = Checksum.compute_for_string(ChecksumType.MD5, "%s:%s:%s".printf(
+				player.title ?? "unknown title",
+				player.artist ?? "unknown artist",
+				player.album ?? "unknown album"));
+			metadata.insert("mpris:trackid", new Variant.string(Nuvola.get_dbus_path() + "/mpris/" + hash));
 			// Workaround for a bug eonpatapon/gnome-shell-extensions-mediaplayer#234
 			metadata.insert("xesam:genre", new Variant.array(VariantType.STRING, {}));
 		}

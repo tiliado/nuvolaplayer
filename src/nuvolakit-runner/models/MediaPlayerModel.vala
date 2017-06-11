@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2017 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -31,24 +31,27 @@ public interface Nuvola.MediaPlayerModel: GLib.Object
 	public abstract string? state {get; set; default = null;}
 	public abstract string? artwork_location {get; set; default = null;}
 	public abstract string? artwork_file {get; set; default = null;}
+	public abstract int track_length {get; set; default = 0;}
+	public abstract int track_position {get; set; default = 0;}
 	public abstract bool can_go_next {get; set;}
 	public abstract bool can_go_previous {get; set;}
 	public abstract bool can_play {get; set;}
 	public abstract bool can_pause {get; set;}
 	public abstract bool can_stop {get; set;}
 	public abstract bool can_rate {get; set;}
+	public abstract bool can_seek {get; set;}
 	public abstract SList<string> playback_actions {get; owned set;}
 	
 	public virtual signal void set_track_info(
 		string? title, string? artist, string? album, string? state, string? artwork_location, string? artwork_file,
-		double rating)
+		double rating, int length)
 	{
-		handle_set_track_info(title, artist, album, state, artwork_location, artwork_file, rating);
+		handle_set_track_info(title, artist, album, state, artwork_location, artwork_file, rating, length);
 	}
 	
 	protected abstract void handle_set_track_info(
 		string? title, string? artist, string? album, string? state, string? artwork_location, string? artwork_file,
-		double rating);
+		double rating, int length);
 	
 	public abstract void play();
 	
@@ -61,6 +64,8 @@ public interface Nuvola.MediaPlayerModel: GLib.Object
 	public abstract void prev_song();
 	
 	public abstract void next_song();
+	
+	public abstract void seek(int64 position);
 	
 	public signal void set_rating(double rating);
 }

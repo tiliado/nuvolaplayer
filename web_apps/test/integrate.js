@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2017 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -148,6 +148,27 @@ WebApp._onPageReady = function()
 // Extract data from the web page
 WebApp.update = function()
 {
+    try
+    {
+        switch(document.getElementById("status").innerText)
+        {
+            case "Playing":
+                var state = PlaybackState.PLAYING;
+                break;
+            case "Paused":
+                var state = PlaybackState.PAUSED;
+                break;
+            default:
+                var state = PlaybackState.UNKNOWN;
+                break;
+        }
+    }
+    catch(e)
+    {
+        // Always expect errors, e.g. document.getElementById("status") might be null
+        var state = PlaybackState.UNKNOWN;
+    }
+    
     var track = {
         artLocation: null // always null
     }
@@ -184,32 +205,30 @@ WebApp.update = function()
     catch (e)
     {
     }
-
-    player.setTrack(track);
     
     try
     {
-        switch(document.getElementById("status").innerText)
-        {
-            case "Playing":
-                var state = PlaybackState.PLAYING;
-                break;
-            case "Paused":
-                var state = PlaybackState.PAUSED;
-                break;
-            default:
-                var state = PlaybackState.UNKNOWN;
-                break;
-        }
+        track.length = document.getElementById("timetotal").innerText || null;
     }
-    catch(e)
+    catch (e)
     {
-        // Always expect errors, e.g. document.getElementById("status") might be null
-        var state = PlaybackState.UNKNOWN;
+        track.length = null;
+    }
+    
+    try
+    {
+        var trackPosition = document.getElementById("timeelapsed").innerText || null;
+    }
+    catch (e)
+    {
+        var trackPosition = null;
     }
 
+    player.setTrack(track);
+    player.setTrackPosition(trackPosition);
     player.setPlaybackState(state);
     player.setCanRate(state !== PlaybackState.UNKNOWN);
+    player.setCanSeek(state !== PlaybackState.UNKNOWN);
     
     var enabled;
     try
@@ -281,6 +300,9 @@ WebApp._onActionActivated = function(emitter, name, param)
         break;
     case ACTION_WONDERFUL:
         Nuvola.actions.updateState(ACTION_WONDERFUL, !!param);
+        break;
+    case PlayerAction.SEEK:
+        alert("Seek: " + param);
         break;
     }
 }

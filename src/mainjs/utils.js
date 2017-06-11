@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2017 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -151,4 +151,35 @@ Nuvola.objectDiff = function(object1, object2)
     }
     
     return changes;
+}
+
+/**
+ * Parse time as number of microseconds
+ * 
+ * @param String time    time expression `HH:MM:SS'
+ * @return the time in microseconds
+ */
+Nuvola.parseTimeUsec = function(time)
+{
+    if (!time)
+        return 0;
+    if (time * 1 === time)
+        return time;
+    var parts = time.split(":");
+    var seconds = 0;
+    var item = parts.pop();
+    if (item !== undefined)
+    {
+        seconds = 1 * item;
+        item = parts.pop();
+        if (item !== undefined)
+        {
+            seconds += 60 * item;
+            item = parts.pop();
+            if (item !== undefined)
+                tseconds += 60 * 60 * item;
+        }
+    }
+    return seconds !== NaN ? seconds * 1000 * 1000 : 0;
+    
 }

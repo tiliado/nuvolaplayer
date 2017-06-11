@@ -7,6 +7,9 @@
 		tbody tr {cursor: pointer;}
 		.playing td {font-weight: bold; background-color: yellow;}
 		#nowplaying {display:none;}
+		#progressbar {border: 1px solid green; background-color: #666; width: 500px; display: none; position: relative;}
+		#progresstext {color: white; font-weight: bold; text-align: center; display: block; z-index: 10; position: relative;}
+		#progressmark {display: block; background-color: green; width: 80%; height: 100%; position: absolute; z-index: 5;}
 		</style>
 	</head>
 	<body>
@@ -26,6 +29,9 @@
 			<i id="track"></i> by <i id="artist"></i> from <i id="album"></i> rated <i id="rating"></i>
 		</span>
 		</p>
+		<p id="progressbar">
+			<span id="progressmark"></span>
+			<span id="progresstext"><span id="timeelapsed"></span> / <span id="timetotal"></span></span>
 		<p>
 		<button id="pp" onclick="player.togglePlay();">Play</button>
 		<button id="prev" onclick="player.prev();">Prev</button>
@@ -141,7 +147,11 @@ var Player = function()
 		track: document.getElementById("track"),
 		artist: document.getElementById("artist"),
 		album: document.getElementById("album"),
-		rating: document.getElementById("rating")
+		rating: document.getElementById("rating"),
+		progressbar: document.getElementById("progressbar"),
+		progressmark: document.getElementById("progressmark"),
+		timeelapsed: document.getElementById("timeelapsed"),
+		timetotal: document.getElementById("timetotal")
 	}
 	
 	this.elm.prev.disabled = true;
@@ -158,59 +168,71 @@ Player.songs =
 		name: "Surrender",
 		artist: "Billy Talent",
 		album: "Billy Talent II",
-		rating: 1
+		rating: 1,
+		time: 25
 	},
 	{
 		name: "Holiday",
 		artist: "Green Day",
 		album: "American Idiot",
-		rating: -1
+		rating: -1,
+		time: 8
 	},
 	{
 		name: "Fallen Leaves",
 		artist: "Billy Talent",
 		album: "Billy Talent II",
-		rating: 0
+		rating: 0,
+		time: 10
 	},
 	{
 		name: "Boten Anna",
 		artist: "Basshunter",
 		album: "LOL",
-		rating: 1
+		rating: 1,
+		time: 5
 	},
 	{
 		name: "Set Your Monster Free",
 		artist: "Quiet Company",
 		album: "We Are All Where We Belong",
-		rating: 1
+		rating: 1,
+		time: 5
 	},
 	{
 		name: "Come Home",
 		artist: "Morandi",
 		album: "Mindfields",
-		rating: -1
+		rating: -1,
+		time: 5
 	},
 	{
 		name: "Dancer in the Dark",
 		artist: "The Rasmus",
 		album: "Hide From the Sun",
-		rating: -1
+		rating: -1,
+		time: 5
 	},
 	{
 		name: "Have You Ever",
 		artist: "The Offspring",
 		album: "Americana",
-		rating: 0
+		rating: 0,
+		time: 5
 	},
 	{
 		name: "Pushing Me Away",
 		artist: "Linkin Park",
 		album: "Hybrid Theory",
-		rating: 0
+		rating: 0,
+		time: 5
 	}
 ];
 
 Player.statuses = ["Not playing", "Playing", "Paused"];
+Player.STOPPED = 0;
+Player.PLAYING = 1;
+Player.PAUSED = 2;
 	
 Player.prototype.setStatus = function(status)
 {
@@ -233,12 +255,18 @@ Player.prototype.setPos = function(pos)
 	if (pos >= 0)
 	{
 		var track = Player.songs[pos];
+		this.timer = track.time;
 		this.elm.timer.innerText = this.timer;
 		this.elm.track.innerText = track.name;
 		this.elm.artist.innerText = track.artist;
 		this.elm.album.innerText = track.album;
 		this.elm.rating.innerText = RATING_TEXT[track.rating + 1];
 		this.elm.nowplaying.style.display = "inline";
+		this.elm.progressbar.style.display = "block";
+		var totaltime = track.time < 10 ? "0" + track.time : track.time;
+		this.elm.timetotal.innerText = "00:" + totaltime;
+		this.elm.timeelapsed.innerText = "00:00";
+		this.elm.progressmark.style.width = 0 + "%";
 	}
 	else
 	{
@@ -247,30 +275,31 @@ Player.prototype.setPos = function(pos)
 		this.elm.artist.innerText = "";
 		this.elm.album.innerText = "";
 		this.elm.nowplaying.style.display = "none";
+		this.elm.progressbar.style.display = "none";
 	}
 }
 
 Player.prototype.play = function()
 {
-	if (this.status == 2)
+	if (this.status == Player.PAUSED)
 	{
-		this.setStatus(1);
+		this.setStatus(Player.PLAYING);
 		this.timerId = setTimeout(this.tick.bind(this), 1000);
 	}
-	else if (this.status == 0)
+	else if (this.status == Player.STOPPED)
 	{
 		if (this.pos < 0)
 			this.setPos(0);
-		this.setStatus(1);
+		this.setStatus(Player.PLAYING);
 		this.startTimer();
 	}
 }
 
 Player.prototype.pause = function()
 {
-	if (this.status == 1)
+	if (this.status == Player.PLAYING)
 	{
-		this.setStatus(2);
+		this.setStatus(Player.PAUSED);
 		clearTimeout(this.timerId);
 		this.timerId = 0;
 	}
@@ -278,7 +307,7 @@ Player.prototype.pause = function()
 
 Player.prototype.togglePlay = function()
 {
-	if (this.status == 1)
+	if (this.status == Player.PLAYING)
 		this.pause();
 	else
 		this.play();
@@ -316,6 +345,11 @@ Player.prototype.tick = function()
 	if (this.timer > 0)
 	{
 		this.elm.timer.innerText = this.timer--;
+		var total = Player.songs[this.pos].time;
+		var elapsed = total - this.timer;
+		this.elm.progressmark.style.width = (elapsed / total * 100) + "%";
+		elapsed = elapsed < 10 ? "0" + elapsed : elapsed;
+		this.elm.timeelapsed.innerText = "00:" + elapsed;
 		this.timerId = setTimeout(this.tick.bind(this), 1000);
 	}
 	else

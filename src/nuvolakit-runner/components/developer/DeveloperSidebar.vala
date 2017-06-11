@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2017 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -42,6 +42,7 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
 	private Diorite.Actions? actions_reg;
 	private Gtk.Grid grid;
 	private Gtk.Image? artwork = null;
+	private Gtk.Label? position = null; 
 	private Gtk.Label? song = null; 
 	private Gtk.Label? artist = null;
 	private Gtk.Label? album = null;
@@ -63,9 +64,14 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
 		artwork = new Gtk.Image();
 		clear_artwork(false);
 		grid.add(artwork);
+		position = new Gtk.Label(
+			Utils.format_track_time(player.track_position) + " / " + Utils.format_track_time(player.track_length));
+		position.set_line_wrap(true);
+		position.halign = Gtk.Align.CENTER;
+		grid.attach_next_to(position, artwork, Gtk.PositionType.BOTTOM, 1, 1);
 		var label = new HeaderLabel("Song");
 		label.halign = Gtk.Align.START;
-		grid.attach_next_to(label, artwork, Gtk.PositionType.BOTTOM, 1, 1);
+		grid.attach_next_to(label, position, Gtk.PositionType.BOTTOM, 1, 1);
 		song = new Gtk.Label(player.title ?? "(null)");
 		song.set_line_wrap(true);
 		song.halign = Gtk.Align.START;
@@ -161,6 +167,11 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
 			break;
 		case "state":
 			state.label = player.state ?? "(null)";
+			break;
+		case "track-length":
+		case "track-position":
+			position.label = Utils.format_track_time(player.track_position)
+				+ " / " + Utils.format_track_time(player.track_length);
 			break;
 		case "rating":
 			rating.label = player.rating >= 0.0 ? player.rating.to_string() : "(null)";

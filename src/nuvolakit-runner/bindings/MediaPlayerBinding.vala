@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2017 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -27,6 +27,7 @@ using Diorite;
 public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 {
 	private const string TRACK_INFO_CHANGED = "track-info-changed";
+	private const string TRACK_POSITION_CHANGED = "track-position-changed";
 	
 	public MediaPlayerBinding(Drt.ApiRouter router, WebWorker web_worker, MediaPlayerModel model)
 	{
@@ -53,12 +54,21 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 			new Drt.StringParam("artworkLocation", false, true),
 			new Drt.StringParam("artworkFile", false, true),
 			new Drt.DoubleParam("rating", false, 0.0),
+			new Drt.DoubleParam("length", false, 0.0),
 			new Drt.StringArrayParam("playbackActions", false),
+		});
+		bind("set-track-position", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE, null, handle_set_track_position, {
+			new Drt.DoubleParam("position", false, 0.0)
+
 		});
 		bind("track-info", Drt.ApiFlags.READABLE, "Returns information about currently playing track.",
 			handle_get_track_info, null);
+		bind("track-position", Drt.ApiFlags.READABLE, "Returns information about current track position.",
+			handle_get_track_position, null);
 		add_notification(TRACK_INFO_CHANGED, Drt.ApiFlags.WRITABLE|Drt.ApiFlags.SUBSCRIBE,
 			"Sends a notification when track info is changed.");
+		add_notification(TRACK_POSITION_CHANGED, Drt.ApiFlags.WRITABLE|Drt.ApiFlags.SUBSCRIBE,
+			"Sends a notification when track position is changed.");
 		model.set_rating.connect(on_set_rating);
 	}
 	
@@ -72,7 +82,8 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 		var artwork_location = params.pop_string();
 		var artwork_file = params.pop_string();
 		var rating = params.pop_double();
-		model.set_track_info(title, artist, album, state, artwork_location, artwork_file, rating);
+		var length = params.pop_double();
+		model.set_track_info(title, artist, album, state, artwork_location, artwork_file, rating, (int) length);
 		
 		SList<string> playback_actions = null;
 		var actions = params.pop_strv();
@@ -99,6 +110,21 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 		return builder.end();
 	}
 	
+	private Variant? handle_set_track_position(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	{
+		check_not_empty();
+		var position = params.pop_double();
+		model.track_position = (int) position;
+		emit(TRACK_POSITION_CHANGED);
+		return new Variant.boolean(true);
+	}
+	
+	private Variant? handle_get_track_position(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	{
+		check_not_empty();
+		return new Variant.double((double) model.track_position);
+	}
+	
 	private Variant? handle_set_flag(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
 	{
 		check_not_empty();
@@ -113,6 +139,7 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 		case "can-pause":
 		case "can-stop":
 		case "can-rate":
+		case "can-seek":
 			handled = true;
 			GLib.Value value = GLib.Value(typeof(bool));
 			value.set_boolean(state);
@@ -137,6 +164,7 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 		case "can-pause":
 		case "can-stop":
 		case "can-rate":
+		case "can-seek":
 			GLib.Value value = GLib.Value(typeof(bool));
 			model.@get_property(name, ref value);
 			return new Variant.boolean(value.get_boolean());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2017 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -31,12 +31,15 @@ public class Nuvola.MediaPlayer: GLib.Object, Nuvola.MediaPlayerModel
 	public string? state {get; set; default = null;}
 	public string? artwork_location {get; set; default = null;}
 	public string? artwork_file {get; set; default = null;}
+	public int track_length {get; set; default = 0;}
+	public int track_position {get; set; default = 0;}
 	public bool can_go_next {get; set; default = false;}
 	public bool can_go_previous {get; set; default = false;}
 	public bool can_play {get; set; default = false;}
 	public bool can_pause {get; set; default = false;}
 	public bool can_stop {get; set; default = false;}
 	public bool can_rate {get; set; default = false;}
+	public bool can_seek {get; set; default = false;}
 	public SList<string> playback_actions {get; owned set;}
 	private Diorite.Actions actions;
 	
@@ -47,7 +50,7 @@ public class Nuvola.MediaPlayer: GLib.Object, Nuvola.MediaPlayerModel
 	
 	protected void handle_set_track_info(
 		string? title, string? artist, string? album, string? state, string? artwork_location, string? artwork_file,
-		double rating)
+		double rating, int length)
 	{
 		this.title = title;
 		this.artist = artist;
@@ -56,6 +59,7 @@ public class Nuvola.MediaPlayer: GLib.Object, Nuvola.MediaPlayerModel
 		this.state = state;
 		this.artwork_location = artwork_location;
 		this.artwork_file = artwork_file;
+		this.track_length = length;
 	}
 	
 	public void play()
@@ -88,9 +92,14 @@ public class Nuvola.MediaPlayer: GLib.Object, Nuvola.MediaPlayerModel
 		activate_action("next-song");
 	}
 	
-	private void activate_action(string name)
+	public void seek(int64 position)
 	{
-		if (!actions.activate_action(name))
+		activate_action("seek", position);
+	}
+	
+	private void activate_action(string name, Variant? parameter=null)
+	{
+		if (!actions.activate_action(name, parameter))
 			critical("Failed to activate action '%s'.", name);
 	}
 }

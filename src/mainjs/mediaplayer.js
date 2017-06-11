@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2017 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -69,6 +69,10 @@ var PlayerAction = {
      * Show playback notification
      */
     PLAYBACK_NOTIFICATION: "playback-notification",
+    /**
+     * Seek to a new position
+     */
+    SEEK: "seek",
 }
 
 /**
@@ -138,6 +142,7 @@ MediaPlayer.$init = function()
     this._artworkLoop = 0;
     this._baseActions = [PlayerAction.TOGGLE_PLAY, PlayerAction.PLAY, PlayerAction.PAUSE, PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG];
     this._notification = null;
+    this._trackPosition = 0;
     Nuvola.core.connect("InitAppRunner", this);
     Nuvola.core.connect("InitWebWorker", this);
 }
@@ -152,9 +157,11 @@ MediaPlayer.$init = function()
  * @param String|null track.album          track album
  * @param String|null track.artLocation    URL of album/track artwork
  * @param double|null track.rating         track rating from `0.0` to `1.0`. *This item is ignored prior API 3.1.*
+ * @param double|null track.length         track length as a string (`HH:MM:SS.xxx`, e.g. `1:25.54`) or number of microseconds. *This item is ignored prior API 4.5.*
  */
 MediaPlayer.setTrack = function(track)
 {
+    track.length = Nuvola.parseTimeUsec(track.length);
     var changed = Nuvola.objectDiff(this._track, track);
     
     if (!changed.length)
@@ -177,6 +184,25 @@ MediaPlayer.setTrack = function(track)
     else
     {
         this._updateTrackInfo(changed);
+    }
+}
+
+/**
+ * Set current playback position
+ * 
+ * If the current position is the same as the previous one, this method does nothing.
+ * 
+ * @since API 4.5
+ * 
+ * @param String|Number position    the current track position as a string (`HH:MM:SS.xxx`, e.g. `1:25.54`) or number of microseconds.
+ */
+MediaPlayer.setTrackPosition = function (position)
+{
+    var position = Nuvola.parseTimeUsec(position);
+    if (this._trackPosition != position)
+    {
+        this._trackPosition = position;
+        Nuvola._callIpcMethodAsync("/nuvola/mediaplayer/set-track-position", position);
     }
 }
 
@@ -303,6 +329,25 @@ MediaPlayer.setCanRate = function(canRate)
 }
 
 /**
+ * Set whether it is possible to seek to a specific position of the track
+ *  
+ * If the argument is same as in the previous call, this method does nothing.
+ * 
+ * @since API 4.5
+ * 
+ * @param Boolean canSeek    true if remote seeking should be allowed
+ */
+MediaPlayer.setCanSeek = function(canSeek)
+{
+    if (this._canSeek !== canSeek)
+    {
+        this._canSeek = canSeek;
+        Nuvola.actions.setEnabled(PlayerAction.SEEK, !!canSeek);
+        this._setFlag("can-seek", !!canSeek);
+    }
+}
+
+/**
  * Add actions for media player capabilities
  * 
  * For example: star rating, thumbs up/down, like/love/unlike.
@@ -341,6 +386,7 @@ MediaPlayer._onInitAppRunner = function(emitter)
     Nuvola.actions.addAction("playback", "win", PlayerAction.STOP, "Stop", null, "media-playback-stop", null);
     Nuvola.actions.addAction("playback", "win", PlayerAction.PREV_SONG, "Previous song", null, "media-skip-backward", null);
     Nuvola.actions.addAction("playback", "win", PlayerAction.NEXT_SONG, "Next song", null, "media-skip-forward", null);
+    Nuvola.actions.addAction("playback", "win", PlayerAction.SEEK, "Seek", null, null, 0);
     // FIXME: remove action if notifications compoment is disabled
     Nuvola.actions.addAction("playback", "win", PlayerAction.PLAYBACK_NOTIFICATION, "Show playback notification", null, null, null);
     
@@ -411,6 +457,7 @@ MediaPlayer._sendDevelInfo = function()
         "artist": this._track.artist || null,
         "album": this._track.album || null,
         "rating": rating,
+        "length": this._track.length || 0,
         "artworkLocation": this._track.artLocation || null,
         "artworkFile": this._artworkFile || null,
         "playbackActions": this._baseActions.concat(this._extraActions),
