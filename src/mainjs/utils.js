@@ -183,3 +183,31 @@ Nuvola.parseTimeUsec = function(time)
     return seconds !== NaN ? seconds * 1000 * 1000 : 0;
     
 }
+
+/**
+ * Encode version info as a single number
+ * 
+ * @param Number major    major version
+ * @param Number minor    minor version
+ * @param Number micro    micro version
+ * @return encoded version number
+ */
+Nuvola.encodeVersion = function(major, minor, micro)
+{
+    return (major || 0) * 100000 + (minor || 0) * 1000 + (micro || 0);
+}
+
+/**
+ * Check sufficient Nuvola's version
+ * 
+ * @param Number major    major version
+ * @param Number minor    minor version
+ * @param Number micro    micro version
+ * @return true if Nuvola's version is greater than or equal to the required version
+ */
+Nuvola.checkVersion = function(major, minor, micro)
+{
+    var v1 = Nuvola.encodeVersion(major, minor, micro);
+    var v2 = Nuvola.encodeVersion(Nuvola.VERSION_MAJOR, Nuvola.VERSION_MINOR, Nuvola.VERSION_MICRO);
+    return v2 >= v1;
+}
