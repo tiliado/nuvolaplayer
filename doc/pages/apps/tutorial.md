@@ -476,12 +476,13 @@ environment outside the web view. However, the [Core::InitWebWorker signal](apir
 and your ``WebApp._onInitWebWorker`` and ``WebApp._onActionActivated`` signal handlers are
 invoked in the web view with the global window object, so feel free to use ``console.log()``.
 
-Playback state and track details
-================================
 
-The first task of your service integration is to **extract playback state and track details from the
-web page** and provide them to the media player component. There are two ways how to extract playback
-state and track details:
+Integrate Web App
+=================
+
+After everything has been set up and the web page works correctly, we finally proceed to the main task: web app
+integration. That means you script is supposed to extract data from a web page and pass them to Nuvola Apps Runtime
+by calling [NuvolaKit JavaScript API](apiref>). There are two ways to extract data from a web page:
 
  1. Use [Document Object Model][DOM] to get information from the HTML code of the web page.
  2. Use JavaScript API provided by the web page if there is any.
@@ -505,201 +506,19 @@ The first way is more general and will be described here. The folowing methods a
 
 [B1]: https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Getting_Started/Selectors
 
-Playback state
---------------
 
-Looking at the code of a web page shown in the picture bellow, the code to extract playback state
-might be. Playback states are defined in an enumeration
-[Nuvola.PlaybackState](apiref>Nuvola.PlaybackState) and set by method
-[player.setPlaybackState()](apiref>Nuvola.MediaPlayer.setPlaybackState).
+Media Player Integration
+------------------------
 
-```js
-var PlaybackState = Nuvola.PlaybackState;
+Historically, Nuvola Apps Runtime (previously known as Nuvola Player) has a great support for media players and
+offers [a high level API for Media Player Integration](./mediaplayer.html).
 
-...
-
-WebApp.update = function()
-{
-    ...
-    
-    try
-    {
-        switch(document.getElementById("status").innerText)
-        {
-            case "Playing":
-                var state = PlaybackState.PLAYING;
-                break;
-            case "Paused":
-                var state = PlaybackState.PAUSED;
-                break;
-            default:
-                var state = PlaybackState.UNKNOWN;
-                break;
-        }
-    }
-    catch(e)
-    {
-        // Always expect errors, e.g. document.getElementById("status") might be null
-        var state = PlaybackState.UNKNOWN;
-    }
-    
-    player.setPlaybackState(state);
-    
-    ...
-}
-```
-![Playback state](:images/guide/playback_state.png)
-
-Track details
+Other web apps
 -------------
 
-Similarly, we can obtain track details and pass them to method [player.setTrack()](apiref>Nuvola.MediaPlayer.setTrack)
+Other web apps can use [NuvolaKit JavaScript API](apiref>) directly as there is no high level API for other kinds of web
+apps yet.
 
-```js
-WebApp.update = function()
-{
-    ...
-    
-    var track = {
-        artLocation: null, // always null
-        rating: null // same
-    }
-    
-    var idMap = {title: "track", artist: "artist", album: "album"}
-    for (var key in idMap)
-    {
-        try
-        {
-            track[key] = document.getElementById(idMap[key]).innerText || null;
-        }
-        catch(e)
-        {
-            // Always expect errors, e.g. document.getElementById() might return null
-            track[key] = null;
-        }
-    }
-    
-    player.setTrack(track);
-    
-    ...
-}
-```
-
-![Track details](:images/guide/track_details.png)
-
-Player Actions
-==============
-
-The second responsibility of a service integration is to **manage media player actions**:
-
- 1. Set which actions are enabled.
- 2. Invoke the actions when they are activated.
-
-The first part is done via calls [player.setCanPause()](apiref>Nuvola.MediaPlayer.setCanPause),
-[player.setCanPlay()](apiref>Nuvola.MediaPlayer.setCanPlay),
-[player.setCanGoPrev()](apiref>Nuvola.MediaPlayer.setCanGoPrev) and
-[player.setCanGoNext()](apiref>Nuvola.MediaPlayer.setCanGoNext):
-
-```js
-WebApp.update = function()
-{
-    ...
-    
-    var enabled;
-    try
-    {
-        enabled = !document.getElementById("prev").disabled;
-    }
-    catch(e)
-    {
-        enabled = false;
-    }
-    player.setCanGoPrev(enabled);
-    
-    try
-    {
-        enabled  = !document.getElementById("next").disabled;
-    }
-    catch(e)
-    {
-        enabled = false;
-    }
-    player.setCanGoNext(enabled);
-    
-    var playPause = document.getElementById("pp");
-    try
-    {
-        enabled  = playPause.innerText == "Play";
-    }
-    catch(e)
-    {
-        enabled = false;
-    }
-    player.setCanPlay(enabled);
-    
-    try
-    {
-        enabled  = playPause.innerText == "Pause";
-    }
-    catch(e)
-    {
-        enabled = false;
-    }
-    player.setCanPause(enabled);
-    
-    ...
-}
-```
-
-![Playback actions](:images/guide/playback_actions.png)
-
-To handle playback actions defined in an enumeration [PlayerAction](apiref>Nuvola.PlayerAction),
-it is necessary to connect to [Actions::ActionActivated signal](apiref>Nuvola.Actions%3A%3AActionActivated).
-You can use a convenient function [Nuvola.clickOnElement()](apiref>Nuvola.clickOnElement) to
-simulate clicking.
-
-```js
-var PlayerAction = Nuvola.PlayerAction;
-
-...
-
-WebApp._onPageReady = function()
-{
-    // Connect handler for signal ActionActivated
-    Nuvola.actions.connect("ActionActivated", this);
-    
-    // Start update routine
-    this.update();
-}
-
-...
-
-WebApp._onActionActivated = function(emitter, name, param)
-{
-    switch (name)
-    {
-    case PlayerAction.TOGGLE_PLAY:
-    case PlayerAction.PLAY:
-    case PlayerAction.PAUSE:
-    case PlayerAction.STOP:
-        Nuvola.clickOnElement(document.getElementById("pp"));
-        break;
-    case PlayerAction.PREV_SONG:
-        Nuvola.clickOnElement(document.getElementById("prev"));
-        break;
-    case PlayerAction.NEXT_SONG:
-        Nuvola.clickOnElement(document.getElementById("next"));
-        break;
-    }
-}
-```
-
-!!! danger "Always test playback actions"
-    You should click action buttons in the developer's sidebar to be sure they are working as expected.
-
-!!! info "Custom actions"
-    Service integrations can also create [custom Actions](:apps/custom-actions.html) like thumbs
-    up/down or star rating.
 
 Push your work upstream
 =======================
