@@ -205,6 +205,8 @@ Nuvola.parseTimeUsec = function(time)
 /**
  * Encode version info as a single number
  * 
+ * @since API 4.5
+ * 
  * @param Number major    major version
  * @param Number minor    minor version
  * @param Number micro    micro version
@@ -218,10 +220,19 @@ Nuvola.encodeVersion = function(major, minor, micro)
 /**
  * Check sufficient Nuvola's version
  * 
+ * @since API 4.5
+ * 
  * @param Number major    major version
  * @param Number minor    minor version
  * @param Number micro    micro version
  * @return true if Nuvola's version is greater than or equal to the required version
+ * 
+ * ```js
+ * if (Nuvola.checkVersion && Nuvola.checkVersion(4, 5))
+ * {
+ *     // Safe to use API >= 4.5
+ * }
+ * ```
  */
 Nuvola.checkVersion = function(major, minor, micro)
 {
