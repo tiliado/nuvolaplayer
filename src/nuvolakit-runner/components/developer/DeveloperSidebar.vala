@@ -42,7 +42,8 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
 	private Diorite.Actions? actions_reg;
 	private Gtk.Grid grid;
 	private Gtk.Image? artwork = null;
-	private Gtk.Label? position = null; 
+	private TimePositionButton time_pos;
+	private Gtk.VolumeButton volume_button;
 	private Gtk.Label? song = null; 
 	private Gtk.Label? artist = null;
 	private Gtk.Label? album = null;
@@ -64,16 +65,19 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
 		artwork = new Gtk.Image();
 		clear_artwork(false);
 		grid.add(artwork);
-		position = new Gtk.Label("T: %s/%s  V: %d%%".printf(
-			Utils.format_track_time(player.track_position),
-			Utils.format_track_time(player.track_length),
-			(int)(player.volume * 100)));
-		position.set_line_wrap(true);
-		position.halign = Gtk.Align.CENTER;
-		grid.attach_next_to(position, artwork, Gtk.PositionType.BOTTOM, 1, 1);
+		time_pos = new TimePositionButton(0, player.track_length / 1000000, player.track_position/1000000);
+		time_pos.position_changed.connect_after(on_time_position_changed);
+		volume_button = new Gtk.VolumeButton();
+		volume_button.use_symbolic = true;
+		volume_button.value = player.volume;
+		volume_button.value_changed.connect_after(on_volume_changed);
+		var box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 5);
+		box.add(time_pos);
+		box.add(volume_button);
+		grid.attach_next_to(box, artwork, Gtk.PositionType.BOTTOM, 1, 1);
 		var label = new HeaderLabel("Song");
 		label.halign = Gtk.Align.START;
-		grid.attach_next_to(label, position, Gtk.PositionType.BOTTOM, 1, 1);
+		grid.attach_next_to(label, box, Gtk.PositionType.BOTTOM, 1, 1);
 		song = new Gtk.Label(player.title ?? "(null)");
 		song.set_line_wrap(true);
 		song.halign = Gtk.Align.START;
@@ -171,12 +175,13 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
 			state.label = player.state ?? "(null)";
 			break;
 		case "track-length":
+			time_pos.end_sec = player.track_length / 1000000;
+			break;
 		case "track-position":
+			time_pos.position_sec = player.track_position / 1000000;
+			break;
 		case "volume":
-			position.label = "T: %s/%s  V: %d%%".printf(
-				Utils.format_track_time(player.track_position),
-				Utils.format_track_time(player.track_length),
-				(int)(player.volume * 100));
+			volume_button.value = player.volume;
 			break;
 		case "rating":
 			rating.label = player.rating >= 0.0 ? player.rating.to_string() : "(null)";
@@ -312,6 +317,23 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
 			string detailed_name;
 			if (actions_reg.find_and_parse_action(full_name, out detailed_name, out action, out option))
 				action.notify["state"].disconnect(on_radio_action_changed);
+		}
+	}
+	
+	private void on_time_position_changed()
+	{
+		var action = actions_reg.get_action("seek");
+		if (action != null)
+			action.activate(new Variant.double(time_pos.position_sec * 1000000.0));
+	}
+	
+	private void on_volume_changed()
+	{
+		if (player.volume != volume_button.value)
+		{
+			var action = actions_reg.get_action("change-volume");
+			if (action != null)
+				action.activate(new Variant.double(volume_button.value));
 		}
 	}
 }
