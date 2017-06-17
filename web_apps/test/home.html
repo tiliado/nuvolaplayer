@@ -387,9 +387,8 @@ Player.prototype._onProgressBarClicked = function(button, event)
 	if (event.button === 0)
 	{
 		var x = event.clientX;
-		var width = button.getBoundingClientRect().width;
-		var pos = x / width;
-		pos = Math.max(0, Math.min(1, pos));
+		var rect = button.getBoundingClientRect();
+		var pos = (x - rect.left) / rect.width;
 		var total = Player.songs[this.pos].time;
 		this.timer = total - Math.round(pos * total);
 		this.updateProgressBar();
