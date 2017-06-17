@@ -298,3 +298,82 @@ WebApp._onActionActivated = function(emitter, name, param)
 !!! info "Custom actions"
     Service integrations can also create [custom Actions](:apps/custom-actions.html) like thumbs
     up/down or star rating.
+
+Progress bar
+------------
+
+Since **Nuvola 4.5**, it is also possible to integrate progress bar. If you wish to make your script compatible with
+older versions, use respective [Nuvola.checkVersion](apiref>Nuvola.checkVersion) condition as shown in examples bellow.
+
+In order to extract track length and position, use these two API calls:
+
+  * [MediaPlayer.setTrack](apiref>Nuvola.MediaPlayer.setTrack) supports `track.length` property, which holds track
+    length either as a string "mm:ss" or number of microseconds. This property is ignored in Nuvola < 4.5.
+  * [MediaPlayer.setTrackPosition](apiref>Nuvola.MediaPlayer.setTrackPosition) is used to update track position.
+    This method is not available in Nuvola < 4.5 and results in error.
+    
+```js
+WebApp.update = function()
+{
+    ...
+    
+    // @API 4.5: track.length ignored in Nuvola < 4.5
+    var elm = document.getElementById("timetotal");
+    track.length = elm ? elm.innerText || null : null;
+    player.setTrack(track);
+    
+    ...
+    
+    if (Nuvola.checkVersion && Nuvola.checkVersion(4, 4, 18))  // @API 4.5
+    {
+        var elm = document.getElementById("timeelapsed");
+        player.setTrackPosition(elm ? elm.innerText || null : null);
+    }
+    
+    ...
+}
+```
+
+If you wish to let user change track position, use this API:
+
+  * [MediaPlayer.setCanSeek](apiref>Nuvola.MediaPlayer.setCanSeek) is used to enable/disable remote seek.
+    This method is not available in Nuvola < 4.5 and results in error.
+  * Then the [PlayerAction.SEEK](apiref>Nuvola.PlayerAction) is emitted whenever a remote seek is requested.
+    The action parameter contains a track position in microseconds. `PlayerAction.SEEK` is undefined in
+    Nuvola < 4.5 and the handler is never executed.
+  * You may need to use [Nuvola.clickOnElement](apiref>Nuvola.clickOnElement) with coordinates to trigger a click
+    event at the position of progress bar corresponding to the track position,
+    e.g. `Nuvola.clickOnElement(progressBar, param/Nuvola.parseTimeUsec(trackLength), 0.5)`.
+
+```js
+WebApp.update = function()
+{
+    ...
+    if (Nuvola.checkVersion && Nuvola.checkVersion(4, 4, 18))  // @API 4.5
+    {
+        player.setCanSeek(state !== PlaybackState.UNKNOWN);
+    }
+    ...
+}
+
+...
+
+WebApp._onActionActivated = function(emitter, name, param)
+{
+    switch (name)
+    {
+    ...
+    case PlayerAction.SEEK:  // @API 4.5: undefined & ignored in Nuvola < 4.5
+        var elm = document.getElementById("timetotal");
+        var total = Nuvola.parseTimeUsec(elm ? elm.innerText : null);
+        if (param > 0 && param <= total)
+            Nuvola.clickOnElement(document.getElementById("progresstext"), param/total, 0.5);
+        break;
+    ...
+    }
+}
+
+...
+```
+
+![Playback time](:images/guide/progress_bar.png)
