@@ -45,7 +45,8 @@ Actions.$init = function()
     /**
      * Emitted when an action is activated.
      * 
-     * @param String name    action name
+     * @param String name      action name
+     * @param Variant param    action parameter, usually null
      * 
      * ```
      * MyObject.$init = function()
@@ -53,7 +54,7 @@ Actions.$init = function()
      *     Nuvola.actions.connect("ActionActivated", this);
      * }
      * 
-     * MyObject._onActionActivated = function(emitter, name)
+     * MyObject._onActionActivated = function(emitter, name, param)
      * {
      *     console.log("Action activated: " + name);
      * }
