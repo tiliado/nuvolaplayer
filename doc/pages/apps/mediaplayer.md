@@ -377,3 +377,67 @@ WebApp._onActionActivated = function(emitter, name, param)
 ```
 
 ![Playback time](:images/guide/progress_bar.png)
+
+Volume management
+-----------------
+
+Since **Nuvola 4.5**, it is also possible to integrate volume management. If you wish to make your script compatible with
+older versions, use respective [Nuvola.checkVersion](apiref>Nuvola.checkVersion) condition as shown in examples bellow.
+
+In order to extract volume, use [MediaPlayer.updateVolume](apiref>Nuvola.MediaPlayer.updateVolume) with the parameter
+in range 0.0-1.0 (i.e. 0-100%). This method is not available in Nuvola < 4.5 and results in error.
+    
+```js
+WebApp.update = function()
+{
+    ...
+    
+    if (Nuvola.checkVersion && Nuvola.checkVersion(4, 4, 18))  // @API 4.5
+    {
+        var elm = document.getElementById("volume");
+        player.updateVolume(elm ? elm.innerText / 100 || null : null);
+    }
+    
+    ...
+}
+```
+
+If you wish to let user change volume, use this API:
+
+  * [MediaPlayer.setCanChangeVolume](apiref>Nuvola.MediaPlayer.setCanChangeVolume) is used to enable/disable remote
+    volume managementThis method is not available in Nuvola < 4.5 and results in error.
+  * Then the [PlayerAction.CHANGE_VOLUME](apiref>Nuvola.PlayerAction) is emitted whenever a remote volume change
+    requested. The action parameter contains new volume as a double value in range 0.0-1.0.
+    `PlayerAction.CHANGE_VOLUME` is undefined in Nuvola < 4.5 and the handler is never executed.
+  * You may need to use [Nuvola.clickOnElement](apiref>Nuvola.clickOnElement) with coordinates to trigger a click
+    event at the position of volume bar corresponding to the desired volume,
+    e.g. `Nuvola.clickOnElement(volumeBar, param, 0.5)`.
+```js
+WebApp.update = function()
+{
+    ...
+    if (Nuvola.checkVersion && Nuvola.checkVersion(4, 4, 18))  // @API 4.5
+    {
+        player.setCanChangeVolume(state !== PlaybackState.UNKNOWN);
+    }
+    ...
+}
+
+...
+
+WebApp._onActionActivated = function(emitter, name, param)
+{
+    switch (name)
+    {
+    ...
+    case PlayerAction.CHANGE_VOLUME:  // @API 4.5: undefined & ignored in Nuvola < 4.5
+        document.getElementById("volume").innerText = Math.round(param * 100);
+        break;
+    ...
+    }
+}
+
+...
+```
+
+![Playback volume](:images/guide/volume_management.png)
