@@ -8,7 +8,7 @@
 		.playing td {font-weight: bold; background-color: yellow;}
 		#nowplaying {display:none;}
 		#progressbar {border: 1px solid green; background-color: #666; width: 500px; display: none; position: relative;}
-		#progresstext {color: white; font-weight: bold; text-align: center; display: block; z-index: 10; position: relative;}
+		#progresstext {color: white; font-weight: bold; text-align: center; display: block; z-index: 10; position: relative; cursor: pointer;}
 		#progressmark {display: block; background-color: green; width: 80%; height: 100%; position: absolute; z-index: 5;}
 		</style>
 	</head>
@@ -151,10 +151,16 @@ var Player = function()
 		rating: document.getElementById("rating"),
 		progressbar: document.getElementById("progressbar"),
 		progressmark: document.getElementById("progressmark"),
+		progresstext: document.getElementById("progresstext"),
 		timeelapsed: document.getElementById("timeelapsed"),
 		timetotal: document.getElementById("timetotal"),
 		volume: document.getElementById("volume"),
 	}
+	
+	this.elm.progresstext.onclick = function(event)
+	{
+		self._onProgressBarClicked(this, event);
+	};
 	
 	this.elm.prev.disabled = true;
 	this.elm.next.disabled = true;
@@ -347,11 +353,7 @@ Player.prototype.tick = function()
 	if (this.timer > 0)
 	{
 		this.elm.timer.innerText = this.timer--;
-		var total = Player.songs[this.pos].time;
-		var elapsed = total - this.timer;
-		this.elm.progressmark.style.width = (elapsed / total * 100) + "%";
-		elapsed = elapsed < 10 ? "0" + elapsed : elapsed;
-		this.elm.timeelapsed.innerText = "00:" + elapsed;
+		this.updateProgressBar();
 		this.timerId = setTimeout(this.tick.bind(this), 1000);
 	}
 	else
@@ -369,6 +371,29 @@ Player.prototype.reset = function()
 	this.setStatus(0);
 	this.elm.timer.innerText = "";
 	this.timerId = 0;
+}
+
+Player.prototype.updateProgressBar = function()
+{
+	var total = Player.songs[this.pos].time;
+	var elapsed = total - this.timer;
+	this.elm.progressmark.style.width = (elapsed / total * 100) + "%";
+	elapsed = elapsed < 10 ? "0" + elapsed : elapsed;
+	this.elm.timeelapsed.innerText = "00:" + elapsed;
+}
+
+Player.prototype._onProgressBarClicked = function(button, event)
+{
+	if (event.button === 0)
+	{
+		var x = event.clientX;
+		var width = button.getBoundingClientRect().width;
+		var pos = x / width;
+		pos = Math.max(0, Math.min(1, pos));
+		var total = Player.songs[this.pos].time;
+		this.timer = total - Math.round(pos * total);
+		this.updateProgressBar();
+	}
 }
 
 var player = new Player();

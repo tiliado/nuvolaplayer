@@ -316,7 +316,10 @@ WebApp._onActionActivated = function(emitter, name, param)
         document.getElementById("volume").innerText = Math.round(param * 100);
         break;
     case PlayerAction.SEEK:
-        alert("Seek: " + param);
+        var elm = document.getElementById("timetotal");
+        var total = Nuvola.parseTimeUsec(elm ? elm.innerText : null);
+        if (param > 0 && param <= total)
+            Nuvola.clickOnElement(document.getElementById("progresstext"), param/total, 0.5);
         break;
     }
 }
