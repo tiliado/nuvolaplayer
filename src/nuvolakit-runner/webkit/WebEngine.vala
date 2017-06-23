@@ -727,6 +727,14 @@ public class WebEngine : GLib.Object, JSExecutor
 	
 	private void on_load_changed(WebKit.LoadEvent load_event)
 	{
+		#if FLATPAK
+		if (load_event == WebKit.LoadEvent.COMMITTED)
+		{
+			debug("Terminate WebKitPluginProcess2");
+			/* https://github.com/tiliado/nuvolaruntime/issues/354 */
+			Drt.System.sigall(Drt.System.find_pid_by_basename("WebKitPluginProcess2"), GLib.ProcessSignal.TERM);
+		}
+		#endif
 		if (load_event == WebKit.LoadEvent.STARTED && web_worker != null)
 		{
 			debug("Load started");
