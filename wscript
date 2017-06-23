@@ -31,14 +31,13 @@ out = 'build'
 APPNAME = "nuvolaruntime"
 NUVOLA_BIN = "nuvola"
 NUVOLACTL_BIN = "nuvolactl"
-NEW_VERSION_SCHEME = True
-VERSION = "3.1.3" if not NEW_VERSION_SCHEME else "4.4.0"
+VERSION = "4.4.0"
 GENERIC_NAME = "Web Apps"
 BLURB = "Tight integration of web apps with your Linux desktop"
 DEFAULT_HELP_URL = "https://github.com/tiliado/nuvolaplayer/wiki/Unofficial"
 DEFAULT_WEB_APP_REQUIREMENTS_HELP_URL = "https://github.com/tiliado/nuvolaplayer/wiki/Web-App-Requirements"
 
-MIN_DIORITE = "0.3.4" if not NEW_VERSION_SCHEME else "4.4.0"
+MIN_DIORITE = "4.4.0"
 MIN_VALA = "0.34.0"
 MIN_GLIB = "2.42.1"
 MIN_GTK = "3.22.0"
@@ -57,10 +56,8 @@ from waflib.Errors import ConfigurationError
 from waflib import TaskGen, Utils, Errors, Node, Task
 from nuvolamergejs import mergejs as merge_js
 
-if NEW_VERSION_SCHEME:
-	TARGET_DIORITE = str(MIN_DIORITE[0])
-else:
-	TARGET_DIORITE = MIN_DIORITE.rsplit(".", 1)[0]
+TARGET_DIORITE = str(MIN_DIORITE[0])
+MIN_DIORITE.rsplit(".", 1)[0]
 TARGET_GLIB = MIN_GLIB.rsplit(".", 1)[0]
 REVISION_SNAPSHOT = "snapshot"
 
@@ -80,15 +77,9 @@ def add_version_info(ctx):
 	if revision_id != REVISION_SNAPSHOT:
 		revision_id = "{}-{}".format(n_commits, revision_id)
 	versions = list(int(i) for i in bare_version.split("."))
-	if NEW_VERSION_SCHEME:
-		versions[2] += int(n_commits)
+	versions[2] += int(n_commits)
 	version = "{}.{}.{}".format(*versions)
-	if NEW_VERSION_SCHEME:
-		release = "{}.{}".format(*versions)
-	else:
-		release = version
-		version += "." + n_commits
-		
+	release = "{}.{}".format(*versions)
 	ctx.env.VERSION = version
 	ctx.env.VERSIONS = versions
 	ctx.env.RELEASE = release
