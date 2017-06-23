@@ -56,27 +56,6 @@ namespace Actions
 	public const string ZOOM_RESET = "zoom-reset";
 }
 
-public static string build_camel_id(string web_app_id)
-{
-	return build_uid(Nuvola.get_app_uid() + "App", web_app_id);
-}
-
-public static string build_dbus_id(string web_app_id)
-{
-	return build_uid(Nuvola.get_dbus_id() + "App", web_app_id);
-}
-
-private static string build_uid(string base_id, string web_app_id)
-{
-	var buffer = new StringBuilder(base_id);
-	foreach (var part in web_app_id.split("_"))
-	{
-		buffer.append_c(part[0].toupper());
-		if (part.length > 1)
-			buffer.append(part.substring(1));
-	}
-	return buffer.str;
-}
 
 public string build_ui_runner_ipc_id(string web_app_id)
 {
@@ -94,15 +73,16 @@ public abstract class RunnerApplication: Diorite.Application
 	public string dbus_id {get; private set;}
 
 	
-	public RunnerApplication(string web_app_id, string web_app_name, string version, Diorite.Storage storage)
+	public RunnerApplication(WebApp web_app, Diorite.Storage storage)
 	{
-		var uid = build_camel_id(web_app_id);
-		var dbus_id = build_dbus_id(web_app_id);
-		base(uid, web_app_name, dbus_id);
+		var uid = web_app.get_uid();
+		var dbus_id = web_app.get_dbus_id();
+		base(uid, web_app.name, dbus_id);
+		this.web_app = web_app;
 		this.storage = storage;
 		this.dbus_id = dbus_id;
-		icon = uid;
-		this.version = version;
+		this.icon = web_app.get_icon_name();
+		this.version = "%d.%d".printf(web_app.version_major, web_app.version_minor);
 	}
 }
 
@@ -130,9 +110,8 @@ public class AppRunnerController : RunnerApplication
 		Diorite.Storage storage, WebApp web_app, WebAppStorage app_storage,
 		string? api_token, bool use_nuvola_dbus=false)
 	{
-		base(web_app.id, web_app.name, "%d.%d".printf(web_app.version_major, web_app.version_minor), storage);
+		base(web_app, storage);
 		this.app_storage = app_storage;
-		this.web_app = web_app;
 		this.api_token = api_token;
 		this.use_nuvola_dbus = use_nuvola_dbus;
 	}
@@ -551,8 +530,8 @@ public class AppRunnerController : RunnerApplication
 			title,
 			message + "\n\nThe application has reached an inconsistent state and will quit for that reason.",
 			markup);
-		dialog.run();
-		dialog.destroy();
+		dialog.present();
+//~ 		dialog.destroy();
 	}
 	
 	private void on_show_error(string title, string message, bool markup)
@@ -561,8 +540,8 @@ public class AppRunnerController : RunnerApplication
 			title,
 			message + "\n\nThe application might not function properly.",
 			markup);
-		dialog.run();
-		dialog.destroy();
+		dialog.present();
+//~ 		dialog.destroy();
 	}
 	
 	private void on_show_warning(string title, string message)
