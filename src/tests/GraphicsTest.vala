@@ -39,6 +39,15 @@ public class GraphicsTest: Diorite.TestCase
 		|| FileUtils.test("/app/lib/libvdpau_i965.so", FileTest.EXISTS);
 		expect_true(expected == result, "have vdpau driver");
 	}
+	
+	public void test_have_vaapi_driver()
+	{
+		var name = "i965";
+		var result = Graphics.have_vaapi_driver(name);
+		var expected = FileUtils.test("/usr/lib/dri/i965_dri_video.so", FileTest.EXISTS)
+		|| FileUtils.test("/app/lib/dri/i965_dri_video.so", FileTest.EXISTS);
+		expect_true(expected == result, "have vaapi driver");
+	}
 }
 
 } // namespace Nuvola

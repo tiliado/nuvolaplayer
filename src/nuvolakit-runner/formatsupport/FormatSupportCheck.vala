@@ -187,6 +187,8 @@ public class FormatSupportCheck : GLib.Object
 			var dri2_driver = Graphics.dri2_get_driver_name();
 			if (!Graphics.have_vdpau_driver(dri2_driver))
 				warning("VDPAU Driver for %s not found. Flash plugin may suffer.", dri2_driver);
+			if (!Graphics.have_vaapi_driver(dri2_driver))
+				warning("VA-API Driver for %s not found. Flash plugin may suffer.", dri2_driver);
 		}
 		catch (Graphics.DriError e)
 		{

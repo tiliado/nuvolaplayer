@@ -144,4 +144,31 @@ public bool have_vdpau_driver(string name)
 	return false;
 }
 
+/**
+ * Check whether VA-API driver is available
+ * 
+ * @param name    The driver name.
+ * @return `true` if the corresponding `dri/XXX_dri_video.so` has been found, false otherwise.
+ */
+public bool have_vaapi_driver(string name)
+{
+	var filename = "/usr/lib/dri/%s_dri_video.so".printf(name);
+	if (FileUtils.test(filename, FileTest.EXISTS))
+	{
+		debug("VA-API driver found: %s", filename);
+		return true;
+	}
+	var libdirs = Diorite.String.split_strip(Environment.get_variable("LD_LIBRARY_PATH"), ":");
+	foreach (unowned string libdir in libdirs)
+	{
+		filename = "%s/dri/%s_dri_video.so".printf(libdir, name);
+		if (FileUtils.test(filename, FileTest.EXISTS))
+		{
+			debug("VA-API driver found: %s", filename);
+			return true;
+		}
+	}
+	return false;
+}
+
 } // namespace Nuvola.Graphics
