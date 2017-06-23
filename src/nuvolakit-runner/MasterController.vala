@@ -549,7 +549,7 @@ public class MasterController : Diorite.Application
 		#if FLATPAK && NUVOLA_RUNTIME
 		try
 		{
-			var uid = build_camel_id(app_id);
+			var uid = WebApp.build_uid_from_app_id(app_id);
 			var path = "/" + uid.replace(".", "/");
 			var app_api = Bus.get_proxy_sync<AppDbusIfce>(
 				BusType.SESSION, uid, path,

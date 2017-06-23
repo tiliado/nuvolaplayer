@@ -61,6 +61,19 @@ public class WebApp : GLib.Object
 		return id_regex.match(id);
 	}
 	
+	public static string build_uid_from_app_id(string app_id, string? base_id=null)
+	{
+		var buffer = new StringBuilder(base_id ?? Nuvola.get_app_uid());
+		buffer.append("App");
+		foreach (var part in app_id.split("_"))
+		{
+			buffer.append_c(part[0].toupper());
+			if (part.length > 1)
+				buffer.append(part.substring(1));
+		}
+		return buffer.str;
+	}
+	
 	public string id {get; construct; default = null;}
 	public string name {get; construct; default = null;}
 	public string maintainer_name {get; construct; default = null;}
@@ -230,29 +243,17 @@ public class WebApp : GLib.Object
 	
 	public string get_uid()
 	{
-		return build_uid(Nuvola.get_app_uid() + "App");
+		return build_uid_from_app_id(this.id, Nuvola.get_app_uid());
 	}
 	
 	public string get_dbus_id()
 	{
-		return build_uid(Nuvola.get_dbus_id() + "App");
+		return build_uid_from_app_id(this.id, Nuvola.get_dbus_id());
 	}
 	
 	public string get_icon_name()
 	{
 		return get_uid();
-	}
-	
-	private string build_uid(string base_id)
-	{
-		var buffer = new StringBuilder(base_id);
-		foreach (var part in this.id.split("_"))
-		{
-			buffer.append_c(part[0].toupper());
-			if (part.length > 1)
-				buffer.append(part.substring(1));
-		}
-		return buffer.str;
 	}
 	
 	/**
