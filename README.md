@@ -117,6 +117,8 @@ Build and Install
   * [javascriptcoregtk-4.0](http://webkitgtk.org/) >= 2.16.0 (2.16.1 recommended)
   * [libnotify](https://git.gnome.org/browse/libnotify/) >= 0.7
   * [gstreamer](https://gstreamer.freedesktop.org/) >= 1.8.3 (>= 1.12 for MSE)
+  * [libdri2](https://github.com/robclark/libdri2) >= 1.0.0
+  * [libdrm](https://dri.freedesktop.org/libdrm/) >= 2.2
   * libuuid
   * libsecret-1 >= 0.16
   * optional unity >= 3.0

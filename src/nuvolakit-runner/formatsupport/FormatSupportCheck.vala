@@ -181,6 +181,17 @@ public class FormatSupportCheck : GLib.Object
 		{
 			warning("Plugin listing error: %s", e.message);
 		}
+		
+		try
+		{
+			var dri2_driver = Graphics.dri2_get_driver_name();
+			if (!Graphics.have_vdpau_driver(dri2_driver))
+				warning("VDPAU Driver for %s not found. Flash plugin may suffer.", dri2_driver);
+		}
+		catch (Graphics.DriError e)
+		{
+			warning("Failed to get DRI2 driver name. %s", e.message);
+		}
 		try
 		{
 			string? failed_requirements = null;

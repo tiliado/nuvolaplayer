@@ -277,6 +277,8 @@ def configure(ctx):
 	pkgconfig(ctx, 'javascriptcoregtk-4.0', 'JSCORE', MIN_WEBKIT)
 	pkgconfig(ctx, 'uuid', 'UUID', '0') # Engine.io
 	pkgconfig(ctx, 'libsoup-2.4', 'SOUP', '0') # Engine.io
+	pkgconfig(ctx, 'dri2', 'DRI2', '1.0')
+	pkgconfig(ctx, 'libdrm', 'DRM', '2.2')
 	
 	# For tests
 	ctx.find_program("diorite-testgen{}".format(TARGET_DIORITE), var="DIORITE_TESTGEN")
@@ -425,8 +427,8 @@ def build(ctx):
 	valalib(
 		target = NUVOLAKIT_RUNNER,
 		source_dir = 'src/nuvolakit-runner',
-		packages = packages + ' webkit2gtk-4.0 javascriptcoregtk-4.0 gstreamer-1.0 libsecret-1',
-		uselib =  uselib + ' JSCORE WEBKIT GST SECRET',
+		packages = packages + ' webkit2gtk-4.0 javascriptcoregtk-4.0 gstreamer-1.0 libsecret-1 dri2 libdrm',
+		uselib =  uselib + ' JSCORE WEBKIT GST SECRET DRI2 DRM',
 		use = [NUVOLAKIT_BASE, ENGINEIO],
 		lib = ['m'],
 		includes = ["build"],

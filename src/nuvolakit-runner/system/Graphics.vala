@@ -69,4 +69,79 @@ public void ensure_gl_extension_mounted(Gtk.Window? parent_window)
 }
 #endif
 
+const Dri2.EventOps DRI2_NO_OPS = {};
+
+public errordomain DriError
+{
+	INIT_DISPLAY,
+	EXTENSION_QUERY,
+	VERSION_QUERY,
+	CONNECT;
+}
+
+/**
+ * Get the name of DRI2 driver
+ * 
+ * @return driver name
+ * @throws DriError on failure
+ */
+public string dri2_get_driver_name() throws DriError
+{
+	var dpy = new X.Display(null);
+	int major, minor;
+	string driver;
+	dri2_connect(dpy, out major, out minor, out driver);
+	debug("DRI %d.%d; driver %s", major, minor, driver);
+	return driver;
+}
+
+private void dri2_connect(X.Display dpy, out int major, out int minor, out string driver) throws DriError
+{
+	major = 0;
+	minor = 0;
+	int driverType = Dri2.DriverDRI;
+	driver = null;
+	int eventBase, errorBase;
+	string? device = null;	
+
+	if (!Dri2.init_display(dpy, DRI2_NO_OPS))
+		throw new DriError.INIT_DISPLAY("DRI2InitDisplay failed.");
+
+	if (!Dri2.query_extension(dpy, out eventBase, out errorBase))
+		throw new DriError.EXTENSION_QUERY("DRI2QueryExtension failed, %d, %d", eventBase, errorBase);
+
+	if (!Dri2.query_version(dpy, out major, out minor)) 
+		throw new DriError.VERSION_QUERY("DRI2QueryVersion failed");
+
+	if (!Dri2.connect(dpy, dpy.default_root_window(), driverType, out driver, out device))
+		throw new DriError.CONNECT("DRI2Connect failed");
+}
+
+/**
+ * Check whether VDPAU driver is available
+ * 
+ * @param name    The driver name.
+ * @return `true` if the corresponding `libvdpau_XXX.so` has been found, false otherwise.
+ */
+public bool have_vdpau_driver(string name)
+{
+	var filename = "/usr/lib/libvdpau_%s.so".printf(name);
+	if (FileUtils.test(filename, FileTest.EXISTS))
+	{
+		debug("VDPAU driver found: %s", filename);
+		return true;
+	}
+	var libdirs = Diorite.String.split_strip(Environment.get_variable("LD_LIBRARY_PATH"), ":");
+	foreach (unowned string libdir in libdirs)
+	{
+		filename = "%s/libvdpau_%s.so".printf(libdir, name);
+		if (FileUtils.test(filename, FileTest.EXISTS))
+		{
+			debug("VDPAU driver found: %s", filename);
+			return true;
+		}
+	}
+	return false;
+}
+
 } // namespace Nuvola.Graphics
