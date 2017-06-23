@@ -44,8 +44,8 @@ public class GraphicsTest: Diorite.TestCase
 	{
 		var name = "i965";
 		var result = Graphics.have_vaapi_driver(name);
-		var expected = FileUtils.test("/usr/lib/dri/i965_dri_video.so", FileTest.EXISTS)
-		|| FileUtils.test("/app/lib/dri/i965_dri_video.so", FileTest.EXISTS);
+		var expected = FileUtils.test("/usr/lib/drv/i965_drv_video.so", FileTest.EXISTS)
+		|| FileUtils.test("/app/lib/dri/i965_drv_video.so", FileTest.EXISTS);
 		expect_true(expected == result, "have vaapi driver");
 	}
 }
