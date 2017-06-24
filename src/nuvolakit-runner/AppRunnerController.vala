@@ -145,7 +145,15 @@ public class AppRunnerController : RunnerApplication
 		format_support = new FormatSupportCheck(
 			new FormatSupport(storage.require_data_file("audio/audiotest.mp3").get_path()), this, storage, config,
 			web_engine.web_worker, web_engine, web_app);
-		format_support.check();
+		format_support.check.begin(on_format_support_check_done);
+	}
+	
+	private void on_format_support_check_done(GLib.Object? source, AsyncResult res)
+	{
+		/* It is necessary to init WebEngine after format support check because WebKitPluginProcess2
+		 * must not be terminated during plugin discovery process. Issue: tiliado/nuvolaruntime#354 */
+		format_support.check.end(res);
+		web_engine.init();
 	}
 	
 	private void init_settings()
@@ -302,7 +310,6 @@ public class AppRunnerController : RunnerApplication
 		widget.show();
 		web_engine.init_finished.connect(init_app_runner);
 		web_engine.app_runner_ready.connect(load_app);
-		web_engine.init();
 	}
 	
 	private void init_app_runner()

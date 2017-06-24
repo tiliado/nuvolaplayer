@@ -68,83 +68,11 @@ public class FormatSupportCheck : GLib.Object
 		}
 	}
 	
-	public void check()
-	{
-		format_support.check.begin(format_support_check_done);
-	}
-	
-	public void show_dialog(FormatSupportDialog.Tab tab=FormatSupportDialog.Tab.DEFAULT)
-	{
-		if (format_support_dialog == null)
-		{
-			format_support_dialog = new FormatSupportDialog(app, format_support, storage, app.active_window);
-			format_support_dialog.flash_warning_switch.active = config.get_bool(WARN_FLASH_KEY);
-			format_support_dialog.web_plugins_switch.active = config.get_bool(WEB_PLUGINS_KEY);
-			format_support_dialog.mp3_warning_switch.active = config.get_bool(WARN_MP3_KEY);
-			format_support_dialog.gstreamer_switch.active = config.get_bool(GSTREAMER_KEY);
-			Idle.add(() => {
-				format_support_dialog.flash_warning_switch.notify["active"].connect_after(on_flash_warning_switched);
-				format_support_dialog.web_plugins_switch.notify["active"].connect_after(on_web_plugins_switched);
-				format_support_dialog.mp3_warning_switch.notify["active"].connect_after(on_mp3_warning_switched);
-				format_support_dialog.gstreamer_switch.notify["active"].connect_after(on_gstreamer_switched);
-				format_support_dialog.run();
-				format_support_dialog.flash_warning_switch.notify["active"].disconnect(on_flash_warning_switched);
-				format_support_dialog.web_plugins_switch.notify["active"].disconnect(on_web_plugins_switched);
-				format_support_dialog.mp3_warning_switch.notify["active"].disconnect(on_mp3_warning_switched);
-				format_support_dialog.gstreamer_switch.notify["active"].disconnect(on_gstreamer_switched);
-				format_support_dialog.destroy();
-				format_support_dialog = null;
-				return false;
-			});
-		}
-		format_support_dialog.show_tab(tab);
-	}
-	
-	public void show_flash_warning(string text)
-	{
-		var window = app.active_window as Diorite.ApplicationWindow;
-		if (!web_engine.web_plugins || flash_bar != null || !config.get_bool(WARN_FLASH_KEY) || window == null)
-			return;
-		flash_bar = new Gtk.InfoBar();
-		flash_bar.show_close_button = true;
-		flash_bar.message_type = Gtk.MessageType.WARNING;
-		var label = new Gtk.Label(text);
-		label.use_markup = true;
-		label.set_line_wrap(true);
-		label.hexpand = false;
-		flash_bar.get_content_area().add(label);
-		flash_bar.add_button("Details", Gtk.ResponseType.ACCEPT);
-		flash_bar.response.connect(on_flash_response);
-		flash_bar.show_all();
-		window.info_bars.add(flash_bar);
-	}
-	
-	public void show_mp3_warning(string text)
-	{
-		var window = app.active_window as Diorite.ApplicationWindow;
-		if (format_support.gstreamer_disabled || mp3_bar != null || !config.get_bool(WARN_MP3_KEY) || window == null)
-			return;
-		mp3_bar = new Gtk.InfoBar();
-		mp3_bar.show_close_button = true;
-		mp3_bar.message_type = Gtk.MessageType.WARNING;
-		var label = new Gtk.Label(text);
-		label.use_markup = true;
-		label.set_line_wrap(true);
-		label.hexpand = false;
-		mp3_bar.get_content_area().add(label);
-		mp3_bar.add_button("Details", Gtk.ResponseType.ACCEPT);
-		mp3_bar.response.connect(on_mp3_response);
-		mp3_bar.show_all();
-		window.info_bars.add(mp3_bar);
-	}
-	
-	private void format_support_check_done(GLib.Object? source_object, GLib.AsyncResult result)
+	public async void check()
 	{
 		try
 		{
-			var format_support = source_object as FormatSupport;
-			assert(format_support != null);
-			format_support.check.end(result);
+			yield format_support.check();
 			unowned List<WebPlugin?> plugins = format_support.list_web_plugins();
 			foreach (unowned WebPlugin plugin in plugins)
 				debug("Nuvola.WebPlugin: %s (%s, %s) at %s: %s", plugin.name, plugin.enabled ? "enabled" : "disabled",
@@ -216,6 +144,71 @@ public class FormatSupportCheck : GLib.Object
 				).printf(e.message, web_app.requirements));
 		}
 		
+	}
+	
+	public void show_dialog(FormatSupportDialog.Tab tab=FormatSupportDialog.Tab.DEFAULT)
+	{
+		if (format_support_dialog == null)
+		{
+			format_support_dialog = new FormatSupportDialog(app, format_support, storage, app.active_window);
+			format_support_dialog.flash_warning_switch.active = config.get_bool(WARN_FLASH_KEY);
+			format_support_dialog.web_plugins_switch.active = config.get_bool(WEB_PLUGINS_KEY);
+			format_support_dialog.mp3_warning_switch.active = config.get_bool(WARN_MP3_KEY);
+			format_support_dialog.gstreamer_switch.active = config.get_bool(GSTREAMER_KEY);
+			Idle.add(() => {
+				format_support_dialog.flash_warning_switch.notify["active"].connect_after(on_flash_warning_switched);
+				format_support_dialog.web_plugins_switch.notify["active"].connect_after(on_web_plugins_switched);
+				format_support_dialog.mp3_warning_switch.notify["active"].connect_after(on_mp3_warning_switched);
+				format_support_dialog.gstreamer_switch.notify["active"].connect_after(on_gstreamer_switched);
+				format_support_dialog.run();
+				format_support_dialog.flash_warning_switch.notify["active"].disconnect(on_flash_warning_switched);
+				format_support_dialog.web_plugins_switch.notify["active"].disconnect(on_web_plugins_switched);
+				format_support_dialog.mp3_warning_switch.notify["active"].disconnect(on_mp3_warning_switched);
+				format_support_dialog.gstreamer_switch.notify["active"].disconnect(on_gstreamer_switched);
+				format_support_dialog.destroy();
+				format_support_dialog = null;
+				return false;
+			});
+		}
+		format_support_dialog.show_tab(tab);
+	}
+	
+	public void show_flash_warning(string text)
+	{
+		var window = app.active_window as Diorite.ApplicationWindow;
+		if (!web_engine.web_plugins || flash_bar != null || !config.get_bool(WARN_FLASH_KEY) || window == null)
+			return;
+		flash_bar = new Gtk.InfoBar();
+		flash_bar.show_close_button = true;
+		flash_bar.message_type = Gtk.MessageType.WARNING;
+		var label = new Gtk.Label(text);
+		label.use_markup = true;
+		label.set_line_wrap(true);
+		label.hexpand = false;
+		flash_bar.get_content_area().add(label);
+		flash_bar.add_button("Details", Gtk.ResponseType.ACCEPT);
+		flash_bar.response.connect(on_flash_response);
+		flash_bar.show_all();
+		window.info_bars.add(flash_bar);
+	}
+	
+	public void show_mp3_warning(string text)
+	{
+		var window = app.active_window as Diorite.ApplicationWindow;
+		if (format_support.gstreamer_disabled || mp3_bar != null || !config.get_bool(WARN_MP3_KEY) || window == null)
+			return;
+		mp3_bar = new Gtk.InfoBar();
+		mp3_bar.show_close_button = true;
+		mp3_bar.message_type = Gtk.MessageType.WARNING;
+		var label = new Gtk.Label(text);
+		label.use_markup = true;
+		label.set_line_wrap(true);
+		label.hexpand = false;
+		mp3_bar.get_content_area().add(label);
+		mp3_bar.add_button("Details", Gtk.ResponseType.ACCEPT);
+		mp3_bar.response.connect(on_mp3_response);
+		mp3_bar.show_all();
+		window.info_bars.add(mp3_bar);
 	}
 	
 	private void on_flash_response(int response)
