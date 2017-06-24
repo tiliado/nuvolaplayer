@@ -1,6 +1,50 @@
 Nuvola Apps Changelog
 =======================
 
+Release 4.5.0 - 24th June, 2017
+-------------------------------
+
+New Features:
+
+  * Nuvola Apps Runtime supports the integration of a progress bar and volume management. Web app scripts
+    which use this feature can not only provide track length & position and current volume but also allow
+    user to change that remotely, e.g. from Media Player GNOME Shell extension. At the present, only Deezer
+    and Google Play Music scripts use these features but others will follow.
+    Issue: tiliado/nuvolaruntime#22 Issue: tiliado/nuvolaruntime#155
+  * If Nuvola Apps Runtime detect a Nvidia graphics card, it checks whether the flatpak extension with 
+    corresponding graphics driver is installed. If it isn't, e.g. because of a bug in GNOME Software,
+    an error message is shown to provide the user with installation instructions. Issue: tiliado/nuvolaruntime#342
+  * After a lot of effort, a workaround for the instability of Flash plugin was found out and is used until
+    WebKitGTK developers find a proper fix. However, it is applied only in flatpak builds because it may have
+    negative impact on other WebKitGTK applications otherwise. Issue: tiliado/nuvolaruntime#354
+
+Bug fixes:
+
+  * Wrong command in desktop launcher was fixed. Issue: tiliado/nuvolaruntime#348
+  * Fix wscript for non-git builds. Issue: tiliado/diorite#16
+
+News for Script Maintainers:
+
+  * `Nuvola.VERSION_MICRO` contains micro version of Nuvola Runtime.
+  * `Nuvola.API_VERSION_MAJOR` and `Nuvola.API_VERSION_MINOR` are now deprecated aliases of `Nuvola.VERSION_MAJOR`
+    and `Nuvola.VERSION_MINOR`.
+  * Tutorial was updated to use Nuvola ADK 4.4.
+  * Added documentation of web app requirement flags.
+  * Added documentation of user agent quirks.
+  * New API for progress bar integration.
+  * New API for volume management integration.
+  * New utility functions `Nuvola.encodeVersion` and `Nuvola.checkVersion`.
+  * `Nuvola.triggerMouseEvent` and `clickOnElement` support relative x & y coordinates.
+
+Under the Hood:
+
+  * New dependencies: libdrm >= 2.2 and libdri2 >= 1.0
+  * Nuvola checks whether VDPAU and VA-API drivers are installed and prints debugging information to console.
+    It will show error dialog in the future though, so make sure the drivers are installed.
+    Issue: tiliado/nuvolaruntime#280
+  * Internal icon loading code was refactored. Legacy icon.png and nuvolaplayer3_XXX icons are no longer supported.
+    eu.tiliado.NuvolaAppXxx is used everywhere. Issue: tiliado/nuvolaruntime#353
+
 Release 4.4.0 - 27th May, 2017
 ------------------------------
 
