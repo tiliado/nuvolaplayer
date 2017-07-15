@@ -73,6 +73,7 @@ const Dri2.EventOps DRI2_NO_OPS = {};
 
 public errordomain DriError
 {
+	NO_X_DISPLAY,
 	INIT_DISPLAY,
 	EXTENSION_QUERY,
 	VERSION_QUERY,
@@ -88,6 +89,8 @@ public errordomain DriError
 public string dri2_get_driver_name() throws DriError
 {
 	var dpy = new X.Display(null);
+	if (dpy == null)
+		throw new DriError.NO_X_DISPLAY("Cannot connect to X display.");
 	int major, minor;
 	string driver;
 	dri2_connect(dpy, out major, out minor, out driver);
