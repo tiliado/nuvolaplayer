@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2016-2017 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -98,7 +98,7 @@ public class TiliadoAccountWidget : Gtk.Grid
 		var label = new Gtk.Label(null);
 		label.hexpand = true;
 		label.set_markup(
-			"<b>%s 3.1 Rolling Releases require the <i>Premium</i> or <i>Patron</i> plan.</b>".printf(
+			"<b>%s 4.x Rolling Releases require the <i>Premium</i> or <i>Patron</i> plan.</b>".printf(
 				Nuvola.get_app_name()));
 		label.wrap_mode = Pango.WrapMode.WORD_CHAR;
 		label.set_line_wrap(true);
