@@ -92,7 +92,7 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 		var artwork_file = params.pop_string();
 		var rating = params.pop_double();
 		var length = params.pop_double();
-		model.set_track_info(title, artist, album, state, artwork_location, artwork_file, rating, (int) length);
+		model.set_track_info(title, artist, album, state, artwork_location, artwork_file, rating, (int64) length);
 		
 		SList<string> playback_actions = null;
 		var actions = params.pop_strv();
@@ -123,7 +123,7 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 	{
 		check_not_empty();
 		var position = params.pop_double();
-		model.track_position = (int) position;
+		model.track_position = (int64) position;
 		emit(TRACK_POSITION_CHANGED);
 		return new Variant.boolean(true);
 	}

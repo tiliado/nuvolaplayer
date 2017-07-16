@@ -65,7 +65,7 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
 		artwork = new Gtk.Image();
 		clear_artwork(false);
 		grid.add(artwork);
-		time_pos = new TimePositionButton(0, player.track_length / 1000000, player.track_position/1000000);
+		time_pos = new TimePositionButton(0, (int)(player.track_length / 1000000), (int)(player.track_position/1000000));
 		time_pos.position_changed.connect_after(on_time_position_changed);
 		volume_button = new Gtk.VolumeButton();
 		volume_button.use_symbolic = true;
@@ -175,10 +175,10 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
 			state.label = player.state ?? "(null)";
 			break;
 		case "track-length":
-			time_pos.end_sec = player.track_length / 1000000;
+			time_pos.end_sec = (int)(player.track_length / 1000000);
 			break;
 		case "track-position":
-			time_pos.position_sec = player.track_position / 1000000;
+			time_pos.position_sec = (int)(player.track_position / 1000000);
 			break;
 		case "volume":
 			volume_button.value = player.volume;
