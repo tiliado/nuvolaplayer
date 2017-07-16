@@ -474,6 +474,25 @@ WebApp.runUnitTests = function()
 {
     if (!window.unitjs)
         throw new Error("Unit.js not installed");
+    
+    this.testParseTimeUsec();
+}
+
+WebApp.testParseTimeUsec = function()
+{
+    unitjs.number(Nuvola.parseTimeUsec(123456789)).is(123456789);
+    unitjs.number(Nuvola.parseTimeUsec(null)).is(0);
+    unitjs.number(Nuvola.parseTimeUsec(undefined)).is(0);
+    unitjs.number(Nuvola.parseTimeUsec("")).is(0);
+    unitjs.number(Nuvola.parseTimeUsec("0")).is(0);
+    unitjs.number(Nuvola.parseTimeUsec("10")).is(10 * 1000000);
+    unitjs.number(Nuvola.parseTimeUsec("0:10")).is(10 * 1000000);
+    unitjs.number(Nuvola.parseTimeUsec("1:10")).is((60 + 10) * 1000000);
+    unitjs.number(Nuvola.parseTimeUsec("25:10")).is((25 * 60 + 10) * 1000000);
+    unitjs.number(Nuvola.parseTimeUsec("0:25:10")).is((25 * 60 + 10) * 1000000);
+    unitjs.number(Nuvola.parseTimeUsec("9:25:10")).is((9 * 3600 + 25 * 60 + 10) * 1000000);
+    unitjs.exception(() => Nuvola.parseTimeUsec(true));
+    unitjs.number(Nuvola.parseTimeUsec(false)).is(0);
 }
 
 WebApp.start();

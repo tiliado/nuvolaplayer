@@ -198,7 +198,7 @@ Nuvola.parseTimeUsec = function(time)
             seconds += 60 * item;
             item = parts.pop();
             if (item !== undefined)
-                tseconds += 60 * 60 * item;
+                seconds += 60 * 60 * item;
         }
     }
     return seconds !== NaN ? seconds * 1000 * 1000 : 0;
