@@ -143,8 +143,7 @@ WebApp._onPageReady = function()
         Nuvola.config.set("integration.track", track);
         console.log(Nuvola.config.get("integration.track"));
     }
-    
-    this.runUnitTests();
+    setTimeout(this.launchUnitTest.bind(this), 100);
 }
 
 // Extract data from the web page
@@ -456,6 +455,19 @@ WebApp.testTranslation = function()
     
     console.log(Nuvola.Translate.pgettext("Navigation", "Forward"));
     console.log(Nuvola.Translate.pgettext("Body part", "Forward"));
+}
+
+WebApp.launchUnitTest = function()
+{
+    try
+    {
+        this.runUnitTests();
+    }
+    catch (e)
+    {
+        alert("Unit test failure: " + e.message);
+        throw(e);
+    }
 }
 
 WebApp.runUnitTests = function()
