@@ -15,3 +15,8 @@ else
 	export DATADIR="/app/share"
 	export DIORITE_TESTGEN="$DIORITE_PATH/testgen.py"
 fi
+
+if [ ! -f web_apps/test/unit.js ]
+then
+	ln -sv "$DATADIR/javascript/unitjs/unit.js" web_apps/test/unit.js
+fi

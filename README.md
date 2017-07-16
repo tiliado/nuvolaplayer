@@ -126,6 +126,10 @@ Build and Install
   * optional appindicator3-0.1 >= 0.4
   * optional [engine.io-client](https://github.com/socketio/engine.io-client) >= 3.1.0
     (installed as /usr/share/javascript/engine.io-client/engine.io.js)
+  * optional [unit.js](https://github.com/unitjs/unit.js/releases/tag/v2.0.0) 2.0.0
+    (installed as /usr/share/javascript/unitjs/unit.js) for JavaScript unit tests
+    (included in the test service - web_apps/test subdirectory)
+
 
 
 ### Waf

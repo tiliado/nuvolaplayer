@@ -143,6 +143,8 @@ WebApp._onPageReady = function()
         Nuvola.config.set("integration.track", track);
         console.log(Nuvola.config.get("integration.track"));
     }
+    
+    this.runUnitTests();
 }
 
 // Extract data from the web page
@@ -454,6 +456,12 @@ WebApp.testTranslation = function()
     
     console.log(Nuvola.Translate.pgettext("Navigation", "Forward"));
     console.log(Nuvola.Translate.pgettext("Body part", "Forward"));
+}
+
+WebApp.runUnitTests = function()
+{
+    if (!window.unitjs)
+        throw new Error("Unit.js not installed");
 }
 
 WebApp.start();
