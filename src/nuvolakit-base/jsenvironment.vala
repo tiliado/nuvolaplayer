@@ -105,7 +105,7 @@ public class JsEnvironment: GLib.Object, JSExecutor
 	public unowned Value execute_script(string script, string path = "about:blank", int line=1) throws JSError
 	{ 
 		JS.Value exception = null;
-		unowned Value value = context.evaluate_script(new JS.String(script), main_object, new JS.String(path), line=0, out exception);
+		unowned Value value = context.evaluate_script(new JS.String(script), main_object, new JS.String(path), line, out exception);
 		if (exception != null)
 			throw new JSError.EXCEPTION(JSTools.exception_to_string(context, exception));
 		return value;
