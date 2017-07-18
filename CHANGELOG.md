@@ -1,6 +1,14 @@
 Nuvola Player Changelog
 =======================
 
+Release 3.0.9 - July 18, 2017
+-----------------------------
+
+This is a maintenance release.
+
+  * Require WebKitGTK+ >= 2.16.3 as it fixes a lot of web compatibility issues.
+  * Welcome text updated with Nuvola 3.0x EOL information.
+
 Release 3.0.8 - April 15th, 2017
 --------------------------------
 
