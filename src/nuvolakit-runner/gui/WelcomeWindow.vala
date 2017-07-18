@@ -35,6 +35,11 @@ private const string WELCOME_TEXT = """
   <a href="https://tiliado.github.io/nuvolaplayer/documentation/4.html">Nuvola 4.x Rolling Releases</a>.
 </p>
 
+<h2>Nuvola 3.0.x End of Life</h2>
+
+<p>The end of life for Nuvola 3.0.x series is scheduled to December 31st, 2017 (two years since the initial 3.0.0 release).
+<a href="https://medium.com/nuvola-news/nuvola-3-0-9-688e20f18a1c">More details and upgrade options.</a></p>
+
 <h2>Be connected</h2>
 <p>Get informed about new features, new streaming services and bug fixes.</p>
 <ul>
