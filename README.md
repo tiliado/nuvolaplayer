@@ -71,8 +71,8 @@ Build and Install
   * [x11](http://www.x.org/wiki/) >= 0.5
   * [json-glib-1.0](https://wiki.gnome.org/Projects/JsonGlib) >= 0.7
   * [libarchive](http://www.libarchive.org/) >= 3.1
-  * [webkit2gtk-3.0 or webkit2gtk-4.0](http://webkitgtk.org/) >= 2.4 
-  * [javascriptcoregtk-3.0 or javascriptcoregtk-4.0](http://webkitgtk.org/) >= 2.4
+  * [webkit2gtk-4.0](http://webkitgtk.org/) >= 2.16.3 
+  * [javascriptcoregtk-4.0](http://webkitgtk.org/) >= 2.16.3
   * [libnotify](https://git.gnome.org/browse/libnotify/) >= 0.7
   * optional unity >= 3.0
   * optional dbusmenu-glib-0.4 >= 0.4
