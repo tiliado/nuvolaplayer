@@ -32,7 +32,7 @@ private const string WELCOME_TEXT = """
   <a href="https://tiliado.github.io/nuvolaplayer/documentation/3.0/notes.html">Read release notes</a> to find out what
   is new.  <b>Nuvola Player 3.0 is the current stable series.</b> New releases 3.0.x receive only bug fixes, but no new
   features except for compatible service integrations. <b>Do you want something more fresh?</b> Check out
-  <a href="https://tiliado.github.io/nuvolaplayer/documentation/3.1.html">Nuvola Player 3.1 Rolling Releases</a>.
+  <a href="https://tiliado.github.io/nuvolaplayer/documentation/4.html">Nuvola 4.x Rolling Releases</a>.
 </p>
 
 <h2>Be connected</h2>
@@ -40,12 +40,12 @@ private const string WELCOME_TEXT = """
 <ul>
   <li>
     Follow Nuvola Player on <a href="https://www.facebook.com/nuvolaplayer">Facebook</a>,
-    <a href="https://plus.google.com/110794636546911932554">Google+</a>
-    or <a href="https://twitter.com/NuvolaPlayer">Twitter</a>.
+    <a href="https://plus.google.com/110794636546911932554">Google+</a>,
+    <a href="https://twitter.com/NuvolaPlayer">Twitter</a>,
+    or <a href="https://medium.com/nuvola-news">Medium</a>.
   </li>
   <li>
-    Subscribe to the Nuvola Player Newsletter: <a href="http://eepurl.com/bLbm5H">weekly (recommended)</a>
-    or <a href="http://eepurl.com/bLbtM1">monthly</a>.
+    Subscribe to the <a href="http://eepurl.com/bLbm5H">Nuvola  Newsletter</a>.
   </li>
 </ul>
 
