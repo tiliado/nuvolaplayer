@@ -305,12 +305,15 @@ Progress bar
 Since **Nuvola 4.5**, it is also possible to integrate progress bar. If you wish to make your script compatible with
 older versions, use respective [Nuvola.checkVersion](apiref>Nuvola.checkVersion) condition as shown in examples bellow.
 
-In order to extract track length and position, use these two API calls:
+In order to extract track length and position, use these API calls:
 
   * [MediaPlayer.setTrack](apiref>Nuvola.MediaPlayer.setTrack) supports `track.length` property, which holds track
     length either as a string "mm:ss" or number of microseconds. This property is ignored in Nuvola < 4.5.
   * [MediaPlayer.setTrackPosition](apiref>Nuvola.MediaPlayer.setTrackPosition) is used to update track position.
     This method is not available in Nuvola < 4.5 and results in error.
+  * [Nuvola.parseTimeUsec](apiref>Nuvola.parseTimeUsec) (in Nuvola >= 4.5) can be used to convert track length string (e.g. "2:35")
+    into the number of microseconds. [MediaPlayer.setTrack](apiref>Nuvola.MediaPlayer.setTrack) does that automatically
+    for the `track.length` property.
     
 ```js
 WebApp.update = function()
