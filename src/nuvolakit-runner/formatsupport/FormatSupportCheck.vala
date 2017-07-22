@@ -27,13 +27,12 @@ namespace Nuvola
 
 public class FormatSupportCheck : GLib.Object
 {
-	private FormatSupport format_support;
+	public FormatSupport format_support;
 	private Diorite.Storage storage;
 	private Diorite.Application app;
 	private Config config;
 	private WebEngine web_engine;
 	private WebApp web_app;
-	private FormatSupportDialog format_support_dialog = null;
 	
 	public FormatSupportCheck(FormatSupport format_support, Diorite.Application app, Diorite.Storage storage,
 	Config config, WebEngine web_engine, WebApp web_app)
@@ -116,21 +115,6 @@ public class FormatSupportCheck : GLib.Object
 				).printf(e.message, web_app.requirements));
 		}
 		
-	}
-	
-	public void show_dialog(FormatSupportDialog.Tab tab=FormatSupportDialog.Tab.DEFAULT)
-	{
-		if (format_support_dialog == null)
-		{
-			format_support_dialog = new FormatSupportDialog(app, format_support, storage, app.active_window);
-			Idle.add(() => {
-				format_support_dialog.run();
-				format_support_dialog.destroy();
-				format_support_dialog = null;
-				return false;
-			});
-		}
-		format_support_dialog.show_tab(tab);
 	}
 }
 

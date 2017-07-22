@@ -48,7 +48,6 @@ namespace Actions
 	public const string GO_BACK = "go-back";
 	public const string GO_FORWARD = "go-forward";
 	public const string GO_RELOAD = "go-reload";
-	public const string FORMAT_SUPPORT = "format-support";
 	public const string PREFERENCES = "preferences";
 	public const string TOGGLE_SIDEBAR = "toggle-sidebar";
 	public const string ZOOM_IN = "zoom-in";
@@ -317,7 +316,7 @@ public class AppRunnerController: Diorite.Application
 	
 	private void load_app()
 	{
-		set_app_menu_items({Actions.FORMAT_SUPPORT, Actions.PREFERENCES, Actions.HELP, Actions.ABOUT, Actions.QUIT});
+		set_app_menu_items({Actions.PREFERENCES, Actions.HELP, Actions.ABOUT, Actions.QUIT});
 		main_window.set_menu_button_items({Actions.ZOOM_IN, Actions.ZOOM_OUT, Actions.ZOOM_RESET, "|", Actions.TOGGLE_SIDEBAR});
 		main_window.create_toolbar({Actions.GO_BACK, Actions.GO_FORWARD, Actions.GO_RELOAD, Actions.GO_HOME});
 		
@@ -353,16 +352,10 @@ public class AppRunnerController: Diorite.Application
 			main_window.present();
 	}
 	
-	private void do_format_support()
-	{
-		format_support.show_dialog(FormatSupportDialog.Tab.MP3);
-	}
-	
 	private void append_actions()
 	{
 		unowned ActionsHelper ah = actions_helper;
 		Diorite.Action[] actions_spec = {
-		ah.simple_action("main", "app", Actions.FORMAT_SUPPORT, "Format Support", "_Format support", null, null, do_format_support),
 		ah.simple_action("main", "app", Actions.PREFERENCES, "Preferences", "_Preferences", null, null, do_preferences),
 		ah.toggle_action("main", "win", Actions.TOGGLE_SIDEBAR, "Show sidebar", "Show _sidebar", null, null, do_toggle_sidebar, config.get_value(ConfigKey.WINDOW_SIDEBAR_VISIBLE)),
 		ah.simple_action("go", "app", Actions.GO_HOME, "Home", "_Home", "go-home", "<alt>Home", web_engine.go_home),
@@ -438,6 +431,7 @@ public class AppRunnerController: Diorite.Application
 		dialog.add_tab("Network", network_settings);
 		dialog.add_tab("Features", new ComponentsManager(components));
 		dialog.add_tab("Website Data", new WebsiteDataManager(WebEngine.get_web_context().get_website_data_manager()));
+		dialog.add_tab("Format Support", new FormatSupportScreen(this, format_support.format_support, storage));
 		var response = dialog.run();
 		if (response == Gtk.ResponseType.OK)
 		{

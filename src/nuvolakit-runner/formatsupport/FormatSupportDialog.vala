@@ -62,23 +62,18 @@ const string HTML5_AUDIO_DETECT_HTML = """<!DOCTYPE html>
 </html>
 """;
 
-public class FormatSupportDialog: Gtk.Dialog
+public class FormatSupportScreen: Gtk.Notebook
 {
 	public Diorite.Application app {get; construct;}
 	public FormatSupport format_support {get; construct;}
 	public Diorite.Storage storage {get; construct;}
-	private Gtk.Notebook notebook;
 	
-	public FormatSupportDialog(Diorite.Application app, FormatSupport format_support, Diorite.Storage storage, Gtk.Window? parent)
+	public FormatSupportScreen(Diorite.Application app, FormatSupport format_support, Diorite.Storage storage)
 	{
-		GLib.Object(title: "Format Support", transient_for: parent, format_support: format_support, storage: storage, app:app);
-		add_button("_Close", Gtk.ResponseType.CLOSE);
-		set_default_size(700, 450);
-		
+		GLib.Object(format_support: format_support, storage: storage, app:app);
 		Gtk.Label label = null;
+		margin = 10;
 		
-		notebook = new Gtk.Notebook();
-		notebook.margin = 10;
 		var plugins_view = new Gtk.Grid();
 		plugins_view.margin = 10;
 		plugins_view.row_spacing = 10;
@@ -170,21 +165,19 @@ public class FormatSupportDialog: Gtk.Dialog
 			other_plugins_grid.get_parent().hide();
 		
 		plugins_view.show();
-		notebook.append_page(scrolled_window, new Gtk.Label("Web Plugins"));
+		append_page(scrolled_window, new Gtk.Label("Web Plugins"));
 		var help_button = new Gtk.Button.with_label("Help");
 		help_button.clicked.connect(() => {app.show_uri(WEB_APP_REQUIREMENTS_HELP_URL);});
 		var audio_detect_script = storage.get_data_file("js/audio.js");
 		var mp3_view = new Mp3View(format_support, help_button, audio_detect_script);
 		mp3_view.show();
-		notebook.append_page(mp3_view, new Gtk.Label("MP3 format"));
-		notebook.show();
-		get_content_area().add(notebook);
+		append_page(mp3_view, new Gtk.Label("MP3 format"));
+		show();
 	}
 	
 	public void show_tab(Tab tab)
 	{
-		notebook.page = tab == Tab.DEFAULT ? 0 : (int) tab - 1;
-		present();
+		this.page = tab == Tab.DEFAULT ? 0 : (int) tab - 1;
 	}
 	
 	public enum Tab
