@@ -30,10 +30,14 @@ namespace Nuvola
  */
 public class MediaKeys: GLib.Object, MediaKeysInterface
 {
+	private const string GNOME_MEDIA_KEYS_DAEMON_1 = "org.gnome.SettingsDaemon.MediaKeys";
+	private const string GNOME_MEDIA_KEYS_DAEMON_2 = "org.gnome.SettingsDaemon";
 	private static bool debug_keys = false;
 	public bool managed {get; protected set; default=false;}
 	private string app_id;
 	private XKeyGrabber key_grabber;
+	private bool gnome_media_keys_daemon_1 = false;
+	private bool gnome_media_keys_daemon_2 = false;
 	private GnomeMediaKeys? gnome_media_keys = null;
 	private HashTable<string, string> keymap;
 	
@@ -70,7 +74,12 @@ public class MediaKeys: GLib.Object, MediaKeysInterface
 		if (managed)
 			return;
 		
-		Bus.watch_name(BusType.SESSION, "org.gnome.SettingsDaemon",
+		// https://bugzilla.gnome.org/show_bug.cgi?id=781326
+		gnome_media_keys_daemon_1 = true;
+		gnome_media_keys_daemon_2 = true;
+		Bus.watch_name(BusType.SESSION, GNOME_MEDIA_KEYS_DAEMON_1,
+			BusNameWatcherFlags.NONE, gnome_settings_appeared, gnome_settings_vanished);
+		Bus.watch_name(BusType.SESSION, GNOME_MEDIA_KEYS_DAEMON_2,
 			BusNameWatcherFlags.NONE, gnome_settings_appeared, gnome_settings_vanished);
 		managed = true;
 	}
@@ -108,22 +117,35 @@ public class MediaKeys: GLib.Object, MediaKeysInterface
 	private void gnome_settings_appeared(DBusConnection conn, string name, string owner)
 	{
 		debug("GNOME settings daemon appeared: %s, %s", name, owner);
+		switch (name)
+		{
+		case GNOME_MEDIA_KEYS_DAEMON_1:
+			gnome_media_keys_daemon_1 = true;
+			break;
+		case GNOME_MEDIA_KEYS_DAEMON_2:
+			gnome_media_keys_daemon_2 = true;
+			break;
+		}
+		
+		if (gnome_media_keys != null)
+			return;
+		
 		ungrab_media_keys();
-		if (!grab_gnome_media_keys())
+		if (!grab_gnome_media_keys(name))
 		{
 			gnome_media_keys = null;
 			grab_media_keys();
 		}
 	}
 	
-	private bool grab_gnome_media_keys()
+	private bool grab_gnome_media_keys(string dbus_name)
 	{
 		if (debug_keys)
 			return false;
 		try
 		{
 			gnome_media_keys = Bus.get_proxy_sync(BusType.SESSION,
-			"org.gnome.SettingsDaemon",
+			dbus_name,
 			"/org/gnome/SettingsDaemon/MediaKeys");
 			/* Vala includes "return false" if DBus method call fails! */
 			gnome_media_keys.grab_media_player_keys(app_id, 0);
@@ -141,10 +163,22 @@ public class MediaKeys: GLib.Object, MediaKeysInterface
 	private void gnome_settings_vanished(DBusConnection conn, string name)
 	{
 		debug("GNOME settings daemon vanished: %s", name);
-		if (gnome_media_keys != null)
-			gnome_media_keys.media_player_key_pressed.disconnect(on_media_key_pressed);
-		gnome_media_keys = null;
-		grab_media_keys();
+		switch (name)
+		{
+		case GNOME_MEDIA_KEYS_DAEMON_1:
+			gnome_media_keys_daemon_1 = false;
+			break;
+		case GNOME_MEDIA_KEYS_DAEMON_2:
+			gnome_media_keys_daemon_2 = false;
+			break;
+		}
+		if (!gnome_media_keys_daemon_1 && !gnome_media_keys_daemon_2)
+		{
+			if (gnome_media_keys != null)
+				gnome_media_keys.media_player_key_pressed.disconnect(on_media_key_pressed);
+			gnome_media_keys = null;
+			grab_media_keys();
+		}
 	}
 	
 	private void on_media_key_pressed(string app_name, string key)
@@ -160,6 +194,7 @@ public class MediaKeys: GLib.Object, MediaKeysInterface
 	 */
 	private void grab_media_keys()
 	{
+		debug("Grabbing media keys with X key grabber");
 		var keys = keymap.get_keys();
 		foreach (var key in keys)
 			key_grabber.grab(key, true);
