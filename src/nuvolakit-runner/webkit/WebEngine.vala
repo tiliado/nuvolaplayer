@@ -48,7 +48,7 @@ public class WebEngine : GLib.Object, JSExecutor
 		set {web_view.get_settings().enable_mediasource = value;}
 	}
 	
-	private RunnerApplication runner_app;
+	private AppRunnerController runner_app;
 	private WebView web_view;
 	private JsEnvironment? env = null;
 	private JSApi api;
@@ -102,7 +102,7 @@ public class WebEngine : GLib.Object, JSExecutor
  		return version >= min && (max == 0 || version < max);
 	}
 	
-	public WebEngine(RunnerApplication runner_app, IpcBus ipc_bus, WebApp web_app,
+	public WebEngine(AppRunnerController runner_app, IpcBus ipc_bus, WebApp web_app,
 		WebAppStorage storage, Config config, Connection? connection, HashTable<string, Variant> worker_data)
 	{
 		this.ipc_bus = ipc_bus;

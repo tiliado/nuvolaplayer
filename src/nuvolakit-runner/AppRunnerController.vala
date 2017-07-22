@@ -62,7 +62,7 @@ public string build_ui_runner_ipc_id(string web_app_id)
 	return "N3" + web_app_id.replace("_", "");
 }
 
-public abstract class RunnerApplication: Diorite.Application
+public class AppRunnerController: Diorite.Application
 {
 	public Diorite.Storage storage {get; private set;}
 	public Config config {get; protected set; default = null;}
@@ -71,30 +71,13 @@ public abstract class RunnerApplication: Diorite.Application
 	public WebApp web_app {get; protected set;}
 	public WebAppStorage app_storage {get; protected set;}
 	public string dbus_id {get; private set;}
-
-	
-	public RunnerApplication(WebApp web_app, Diorite.Storage storage)
-	{
-		var uid = web_app.get_uid();
-		var dbus_id = web_app.get_dbus_id();
-		base(uid, web_app.name, dbus_id);
-		this.web_app = web_app;
-		this.storage = storage;
-		this.dbus_id = dbus_id;
-		this.icon = web_app.get_icon_name();
-		this.version = "%d.%d".printf(web_app.version_major, web_app.version_minor);
-	}
-}
-
-public class AppRunnerController : RunnerApplication
-{	
 	public WebEngine web_engine {get; private set;}
 	public Diorite.KeyValueStorage master_config {get; private set;}
 	public Bindings bindings {get; private set;}
 	public IpcBus ipc_bus {get; private set; default=null;}
+	public ActionsHelper actions_helper {get; private set; default = null;}
 	private AppDbusApi? dbus_api = null;
 	private uint dbus_api_id = 0;
-	public ActionsHelper actions_helper {get; private set; default = null;}
 	private GlobalKeybindings global_keybindings;
 	private const int MINIMAL_REMEMBERED_WINDOW_SIZE = 300;
 	private uint configure_event_cb_id = 0;
@@ -110,7 +93,14 @@ public class AppRunnerController : RunnerApplication
 		Diorite.Storage storage, WebApp web_app, WebAppStorage app_storage,
 		string? api_token, bool use_nuvola_dbus=false)
 	{
-		base(web_app, storage);
+		var uid = web_app.get_uid();
+		var dbus_id = web_app.get_dbus_id();
+		base(uid, web_app.name, dbus_id);
+		this.web_app = web_app;
+		this.storage = storage;
+		this.dbus_id = dbus_id;
+		this.icon = web_app.get_icon_name();
+		this.version = "%d.%d".printf(web_app.version_major, web_app.version_minor);
 		this.app_storage = app_storage;
 		this.api_token = api_token;
 		this.use_nuvola_dbus = use_nuvola_dbus;

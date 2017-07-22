@@ -28,10 +28,10 @@ namespace Nuvola
 public class LyricsComponent: Component
 {
 	private Bindings bindings;
-	private RunnerApplication app;
+	private AppRunnerController app;
 	private LyricsSidebar? sidebar = null;
 	
-	public LyricsComponent(RunnerApplication app, Bindings bindings, Diorite.KeyValueStorage config)
+	public LyricsComponent(AppRunnerController app, Bindings bindings, Diorite.KeyValueStorage config)
 	{
 		base("lyrics", "Lyrics", "Shows lyrics for the current song.");
 		this.bindings = bindings;

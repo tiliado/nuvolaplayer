@@ -28,10 +28,10 @@ namespace Nuvola
 public class DeveloperComponent: Component
 {
 	private Bindings bindings;
-	private RunnerApplication app;
+	private AppRunnerController app;
 	private DeveloperSidebar? sidebar = null;
 	
-	public DeveloperComponent(RunnerApplication app, Bindings bindings, Diorite.KeyValueStorage config)
+	public DeveloperComponent(AppRunnerController app, Bindings bindings, Diorite.KeyValueStorage config)
 	{
 		base("developer", "Developer's tools", "Enables developer's sidebar ");
 		this.bindings = bindings;

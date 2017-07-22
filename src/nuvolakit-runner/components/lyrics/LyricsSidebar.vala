@@ -31,7 +31,7 @@ public class LyricsSidebar: Gtk.Grid
 	private Gtk.TextView view;
 	private LyricsProvider lyrics_provider;
 	
-	public LyricsSidebar(RunnerApplication app, LyricsProvider lyrics_provider)
+	public LyricsSidebar(AppRunnerController app, LyricsProvider lyrics_provider)
 	{
 		this.lyrics_provider = lyrics_provider;
 		row_spacing = 5;

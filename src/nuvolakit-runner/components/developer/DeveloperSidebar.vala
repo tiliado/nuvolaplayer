@@ -53,7 +53,7 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
 	private HashTable<string, Gtk.RadioButton>? radios = null;
 	private MediaPlayerModel player;
 	
-	public DeveloperSidebar(RunnerApplication app, MediaPlayerModel player)
+	public DeveloperSidebar(AppRunnerController app, MediaPlayerModel player)
 	{
 		vexpand = true;
 		actions_reg = app.actions;

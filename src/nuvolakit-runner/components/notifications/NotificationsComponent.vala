@@ -28,12 +28,12 @@ namespace Nuvola
 public class NotificationsComponent: Component
 {
 	private Bindings bindings;
-	private RunnerApplication app;
+	private AppRunnerController app;
 	private ActionsHelper actions_helper;
 	private Notifications? notifications = null;
 	
 	
-	public NotificationsComponent(RunnerApplication app, Bindings bindings, ActionsHelper actions_helper)
+	public NotificationsComponent(AppRunnerController app, Bindings bindings, ActionsHelper actions_helper)
 	{
 		base("notifications", "Notifications", "Shows desktop notifications.");
 		this.bindings = bindings;

@@ -149,14 +149,14 @@ public class Notification
 public class Notifications : GLib.Object, NotificationsInterface, NotificationInterface
 {
 	public bool running {get; private set; default = false;}
-	private RunnerApplication app;
+	private AppRunnerController app;
 	private ActionsHelper actions_helper;
 	private HashTable<string, Notification> notifications;
 	private bool actions_supported = false;
 	private bool persistence_supported = false;
 	private bool icons_supported = false;
 	
-	public Notifications(RunnerApplication app, ActionsHelper actions_helper)
+	public Notifications(AppRunnerController app, ActionsHelper actions_helper)
 	{
 		this.app = app;
 		this.actions_helper = actions_helper;

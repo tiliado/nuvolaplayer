@@ -29,10 +29,10 @@ namespace Nuvola.HttpRemoteControl
 public class Component: Nuvola.Component
 {
 	private Bindings bindings;
-	private RunnerApplication app;
+	private AppRunnerController app;
 	private IpcBus ipc_bus;
 	
-	public Component(RunnerApplication app, Bindings bindings, Diorite.KeyValueStorage config, IpcBus ipc_bus)
+	public Component(AppRunnerController app, Bindings bindings, Diorite.KeyValueStorage config, IpcBus ipc_bus)
 	{
 		base("httpremotecontrol", "Remote control over HTTP (experimental)", "Remote media player HTTP interface for control over network.");
 		this.hidden = false;
@@ -79,10 +79,10 @@ public class Component: Nuvola.Component
 	private class Settings : Gtk.Grid
 	{
 		private IpcBus ipc_bus;
-		private RunnerApplication app;
+		private AppRunnerController app;
 		private uint port = 0;
 		
-		public Settings(RunnerApplication app, IpcBus ipc_bus)
+		public Settings(AppRunnerController app, IpcBus ipc_bus)
 		{
 			GLib.Object(row_spacing: 5, column_spacing: 10, hexpand: true, halign: Gtk.Align.CENTER);
 			this.app = app;
