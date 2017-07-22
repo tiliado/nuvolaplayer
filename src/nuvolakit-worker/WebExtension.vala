@@ -61,9 +61,6 @@ public class WebExtension: GLib.Object
 			new Drt.StringParam("name", true, false, null, "Function name."),
 			new Drt.VariantParam("params", true, true, null, "Function parameters.")
 		});
-		router.add_method("/nuvola/webworker/disable-gstreamer", Drt.ApiFlags.WRITABLE,
-			"Disable GStreamer",
-			handle_disable_gstreamer, null);
 		router.add_method("/nuvola/password-manager/enable", Drt.ApiFlags.WRITABLE,
 			"Enable Password Manager", handle_enable_password_manager, null);
 		router.add_method("/nuvola/password-manager/disable", Drt.ApiFlags.WRITABLE,
@@ -167,11 +164,6 @@ public class WebExtension: GLib.Object
 			show_error("Error during call of %s: %s".printf(name, e.message));
 		}
 		return func_params;
-	}
-	
-	private Variant? handle_disable_gstreamer(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
-	{
-		return Nuvola.Gstreamer.disable_gstreamer();
 	}
 	
 	private Variant? handle_enable_password_manager(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError

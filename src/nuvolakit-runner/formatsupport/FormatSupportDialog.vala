@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2017 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -67,10 +67,6 @@ public class FormatSupportDialog: Gtk.Dialog
 	public Diorite.Application app {get; construct;}
 	public FormatSupport format_support {get; construct;}
 	public Diorite.Storage storage {get; construct;}
-	public Gtk.Switch flash_warning_switch {get; private set;}
-	public Gtk.Switch mp3_warning_switch {get; private set;}
-	public Gtk.Switch gstreamer_switch {get; private set;}
-	public Gtk.Switch web_plugins_switch {get; private set;}
 	private Gtk.Notebook notebook;
 	
 	public FormatSupportDialog(Diorite.Application app, FormatSupport format_support, Diorite.Storage storage, Gtk.Window? parent)
@@ -88,24 +84,6 @@ public class FormatSupportDialog: Gtk.Dialog
 		plugins_view.row_spacing = 10;
 		plugins_view.column_spacing = 10;
 		plugins_view.orientation = Gtk.Orientation.VERTICAL;
-		
-		web_plugins_switch = new Gtk.Switch();
-		web_plugins_switch.vexpand = web_plugins_switch.hexpand = false;
-		web_plugins_switch.show();
-		label = new Gtk.Label("Load web plugins (Flash)");
-		label.hexpand = true;
-		label.show();
-		plugins_view.attach(label, 0, 0, 1, 1);
-		plugins_view.attach(web_plugins_switch, 1, 0, 1, 1);
-		
-		flash_warning_switch = new Gtk.Switch();
-		flash_warning_switch.vexpand = flash_warning_switch.hexpand = false;
-		flash_warning_switch.show();
-		label = new Gtk.Label("Show Flash support warnings at start-up");
-		label.hexpand = true;
-		label.show();
-		plugins_view.attach(label, 0, 1, 1, 1);
-		plugins_view.attach(flash_warning_switch, 1, 1, 1, 1);
 		
 		var scrolled_window = new Gtk.ScrolledWindow(null, null);
 		scrolled_window.add(plugins_view);
@@ -193,18 +171,10 @@ public class FormatSupportDialog: Gtk.Dialog
 		
 		plugins_view.show();
 		notebook.append_page(scrolled_window, new Gtk.Label("Web Plugins"));
-		mp3_warning_switch = new Gtk.Switch();
-		mp3_warning_switch.vexpand = mp3_warning_switch.hexpand = false;
-		mp3_warning_switch.halign = Gtk.Align.CENTER;
-		mp3_warning_switch.show();
-		gstreamer_switch = new Gtk.Switch();
-		gstreamer_switch.halign = Gtk.Align.CENTER;
-		gstreamer_switch.vexpand = gstreamer_switch.hexpand = false;
-		gstreamer_switch.show();
 		var help_button = new Gtk.Button.with_label("Help");
 		help_button.clicked.connect(() => {app.show_uri(WEB_APP_REQUIREMENTS_HELP_URL);});
 		var audio_detect_script = storage.get_data_file("js/audio.js");
-		var mp3_view = new Mp3View(format_support, mp3_warning_switch, gstreamer_switch, help_button, audio_detect_script);
+		var mp3_view = new Mp3View(format_support, help_button, audio_detect_script);
 		mp3_view.show();
 		notebook.append_page(mp3_view, new Gtk.Label("MP3 format"));
 		notebook.show();
@@ -231,9 +201,7 @@ public class FormatSupportDialog: Gtk.Dialog
 		private AudioPipeline? pipeline = null;
 		private Gtk.Button help_button;
 		
-		public Mp3View(
-			FormatSupport format_support, Gtk.Switch warning_switch, Gtk.Switch gstreamer_switch, Gtk.Button help_button,
-			File? audio_detect_script)
+		public Mp3View(FormatSupport format_support, Gtk.Button help_button, File? audio_detect_script)
 		{
 			GLib.Object(orientation: Gtk.Orientation.VERTICAL);
 			this.format_support = format_support;
@@ -241,18 +209,6 @@ public class FormatSupportDialog: Gtk.Dialog
 			margin = 10;
 			row_spacing = 10;
 			column_spacing = 10;
-			
-			var label = new Gtk.Label("Load GStreamer HTML5 Audio backend");
-			label.hexpand = true;
-			label.show();
-			attach(label, 0, 0, 2, 1);
-			attach(gstreamer_switch, 2, 0, 1, 1);
-			
-			label = new Gtk.Label("Show MP3 format support warnings at start-up");
-			label.hexpand = true;
-			label.show();
-			attach(label, 0, 1, 2, 1);
-			attach(warning_switch, 2, 1, 1, 1);
 			
 			text_view = new Gtk.TextView();
 			text_view.editable = false;

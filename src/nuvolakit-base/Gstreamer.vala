@@ -38,26 +38,4 @@ namespace Nuvola.Gstreamer
 			debug("Unable to init %s: %s", Gst.version_string(), e.message);
 		}
 	}
-	
-	public bool disable_gstreamer()
-	{
-		init_gstreamer();
-		var registry = Gst.Registry.@get();
-		// This is a hack how to make GStreamer non-functional,
-		// remove an essential plugin
-		var plugin = registry.find_plugin("typefindfunctions");
-		if (plugin != null)
-		{
-			registry.remove_plugin(plugin);
-			plugin.ref(); // prevents critical warnings
-			debug("GStreamer has been disabled.");
-			return true;
-		}
-		else
-		{
-			warning("Failed to disable GStreamer");
-			return false;
-		}
-	}
-
 } // namespace Nuvola.Gstreamer

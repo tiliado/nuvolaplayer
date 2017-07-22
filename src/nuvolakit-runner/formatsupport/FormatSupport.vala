@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2017 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -29,7 +29,6 @@ public class FormatSupport: GLib.Object
 {
 	public uint n_flash_plugins { get; private set; default = 0;}
 	public bool mp3_supported { get; private set; default = false;}
-	public bool gstreamer_disabled {get; private set; default = false;}
 	private List<WebPlugin?> web_plugins = null;
 	private string mp3_file;
 	
@@ -40,8 +39,8 @@ public class FormatSupport: GLib.Object
 	
 	public async void check() throws GLib.Error
 	{
-		yield collect_web_plugins();
 		mp3_supported = yield check_mp3(mp3_file, true);
+		yield collect_web_plugins();
 	}
 	
 	public unowned List<WebPlugin?> list_web_plugins()
@@ -52,20 +51,6 @@ public class FormatSupport: GLib.Object
 	public AudioPipeline get_mp3_pipeline()
 	{
 		return new AudioPipeline(mp3_file);
-	}
-	
-	public bool disable_gstreamer()
-	{
-		if (gstreamer_disabled)
-			return true;
-		
-		if (Nuvola.Gstreamer.disable_gstreamer())
-		{
-			gstreamer_disabled = true;
-			return true;
-		}
-		
-		return false;
 	}
 	
 	private async void collect_web_plugins() throws GLib.Error

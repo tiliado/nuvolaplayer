@@ -134,7 +134,7 @@ public class AppRunnerController: Diorite.Application
 		init_web_engine();
 		format_support = new FormatSupportCheck(
 			new FormatSupport(storage.require_data_file("audio/audiotest.mp3").get_path()), this, storage, config,
-			web_engine.web_worker, web_engine, web_app);
+			web_engine, web_app);
 		format_support.check.begin(on_format_support_check_done);
 	}
 	

@@ -32,18 +32,6 @@ public interface WebWorker: GLib.Object, JSExecutor
 	public abstract bool ready {get; set; default = false;}
 	
 	public abstract Variant? call_sync(string name, Variant? params) throws GLib.Error;
-	
-	public void disable_gstreamer()
-	{
-		try
-		{
-			call_sync("/nuvola/webworker/disable-gstreamer", null);
-		}
-		catch (GLib.Error e)
-		{
-			warning("Failed to send message 'disable_gstreamer': %s", e.message);
-		}
-	}
 }
 
 public class RemoteWebWorker: GLib.Object, JSExecutor, WebWorker
