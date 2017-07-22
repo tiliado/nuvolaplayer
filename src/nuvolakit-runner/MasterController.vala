@@ -90,12 +90,13 @@ public class MasterController : Diorite.Application
 	public override void activate()
 	{
 		hold();
-		show_main_window();
-		show_welcome_screen();
 		#if FLATPAK
-		if (!is_desktop_portal_available())
-			quit();
+		if (is_desktop_portal_available())
 		#endif
+		{
+			show_main_window();
+			show_welcome_screen();
+		}
 		release();
 	}
 	
