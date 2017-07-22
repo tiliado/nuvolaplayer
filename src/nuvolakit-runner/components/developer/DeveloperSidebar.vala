@@ -48,7 +48,7 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
 	private Gtk.Label? artist = null;
 	private Gtk.Label? album = null;
 	private Gtk.Label? state = null;
-	private Gtk.Label? rating = null;
+	private Gtk.Entry? rating = null;
 	private SList<Gtk.Widget> action_widgets = null;
 	private HashTable<string, Gtk.RadioButton>? radios = null;
 	private MediaPlayerModel player;
@@ -105,8 +105,13 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
 		label = new HeaderLabel("Rating");
 		label.halign = Gtk.Align.START;
 		grid.add(label);
-		rating = new Gtk.Label(player.rating >= 0.0 ? player.rating.to_string() : "(null)");
+		rating = new Gtk.Entry();
+		rating.input_purpose = Gtk.InputPurpose.NUMBER;
+		rating.text = player.rating.to_string();
 		rating.halign = Gtk.Align.START;
+		rating.secondary_icon_name = "emblem-ok-symbolic";
+		rating.secondary_icon_activatable = true;
+		rating.icon_press.connect(on_rating_icon_pressed);
 		grid.attach_next_to(rating, label, Gtk.PositionType.BOTTOM, 1, 1);
 		set_actions(player.playback_actions);
 		
@@ -184,7 +189,7 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
 			volume_button.value = player.volume;
 			break;
 		case "rating":
-			rating.label = player.rating >= 0.0 ? player.rating.to_string() : "(null)";
+			rating.text = player.rating.to_string();
 			break;
 		case "playback-actions":
 			set_actions(player.playback_actions);
@@ -334,6 +339,16 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
 			var action = actions_reg.get_action("change-volume");
 			if (action != null)
 				action.activate(new Variant.double(volume_button.value));
+		}
+	}
+	
+	private void on_rating_icon_pressed(Gtk.Entry entry, Gtk.EntryIconPosition position, Gdk.Event event)
+	{
+		if (position == Gtk.EntryIconPosition.SECONDARY)
+		{
+			var rating = double.parse(entry.text);
+			if (rating >= 0.0 && rating <= 1.0)
+				player.set_rating(rating);
 		}
 	}
 }

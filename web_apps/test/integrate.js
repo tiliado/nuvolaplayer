@@ -190,16 +190,17 @@ WebApp.update = function()
     
     try
     {
+        // Parse rating
         switch (document.getElementById("rating").innerText || null)
         {
         case "good":
-            track.rating = 1.0;
+            track.rating = 1.0; // five stars
             break;
         case "bad":
-            track.rating = 0.2;
+            track.rating = 0.2; // one star
             break;
         default:
-            track.rating = 0.0;
+            track.rating = 0.0; // zero star
             break;
         }
     }
@@ -325,9 +326,18 @@ WebApp._onActionActivated = function(emitter, name, param)
     }
 }
 
+// Handler for rating
 WebApp._onRatingSet = function(emitter, rating)
 {
-    alert("Rating: " + rating);
+    Nuvola.log("Rating set: {1}", rating);
+    var current = document.getElementById("rating").innerText;
+    if (rating <= 0.4) // 0-2 stars
+        document.getElementById("rating").innerText = current === "bad" ? "-" : "bad";
+    else if (rating >= 0.8) // 4-5 stars
+        document.getElementById("rating").innerText = current === "good" ? "-" : "good";
+    else // three stars
+        throw new Error("Invalid rating: " + rating + ".\n\n" 
+        + "Have you clicked the three-star button? It isn't supported.");
 }
 
 WebApp._onInitializationForm = function(emitter, values, entries)
