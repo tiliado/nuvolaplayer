@@ -82,11 +82,12 @@ public class AppRunnerController: Diorite.Application
 	private uint configure_event_cb_id = 0;
 	private MenuBar menu_bar;
 	private Diorite.Form? init_form = null;
-	private FormatSupportCheck format_support = null;
+	private FormatSupport format_support = null;
 	private Drt.Lst<Component> components = null;
 	private string? api_token = null;
 	private bool use_nuvola_dbus = false;
 	private HashTable<string, Variant>? web_worker_data = null;
+	private StartupWindow? startup_window = null;
 	
 	public AppRunnerController(
 		Diorite.Storage storage, WebApp web_app, WebAppStorage app_storage,
@@ -128,21 +129,51 @@ public class AppRunnerController: Diorite.Application
 	private  void start()
 	{
 		init_settings();
-		init_ipc();
-		init_gui();
-		init_web_engine();
-		format_support = new FormatSupportCheck(
-			new FormatSupport(storage.require_data_file("audio/audiotest.mp3").get_path()), this, storage, config,
-			web_engine, web_app);
-		format_support.check.begin(on_format_support_check_done);
+		format_support = new FormatSupport(storage.require_data_file("audio/audiotest.mp3").get_path());
+		var startup_check = new StartupCheck(web_app, format_support);
+		startup_window = new StartupWindow(this, startup_check);
+		startup_window.present();
+		startup_check.check_desktop_portal_available.begin((o, res) => startup_check.check_desktop_portal_available.end(res));
+		startup_check.check_app_requirements.begin((o, res) => startup_check.check_app_requirements.end(res));
+		startup_check.check_graphics_drivers.begin((o, res) => startup_check.check_graphics_drivers.end(res));
+		startup_check.task_finished.connect_after(on_startup_check_task_finished);
 	}
 	
-	private void on_format_support_check_done(GLib.Object? source, AsyncResult res)
+	private void on_startup_check_task_finished(GLib.Object emitter, string task_name)
 	{
-		/* It is necessary to init WebEngine after format support check because WebKitPluginProcess2
-		 * must not be terminated during plugin discovery process. Issue: tiliado/nuvolaruntime#354 */
-		format_support.check.end(res);
-		web_engine.init();
+		var startup_check = emitter as StartupCheck;
+		assert(startup_check != null);
+		if (startup_check.finished_tasks == 3 && startup_check.running_tasks == 0)
+		{
+			startup_check.task_finished.disconnect(on_startup_check_task_finished);
+			if (startup_check.get_overall_status() == StartupCheck.Status.ERROR)
+			{
+				startup_window.ready_to_continue.connect(on_startup_window_ready_to_continue);
+				startup_check.mark_as_finished();
+			}
+			else
+			{
+				init_ipc(startup_check);
+				startup_window.ready_to_continue.connect(on_startup_window_ready_to_continue);
+				startup_check.mark_as_finished();
+			}
+		}
+	}
+	
+	private void on_startup_window_ready_to_continue(StartupWindow window)
+	{
+		var status = startup_window.model.final_status;
+		startup_window.ready_to_continue.disconnect(on_startup_window_ready_to_continue);
+		startup_window.destroy();
+		startup_window = null;
+		switch (status)
+		{
+		case StartupCheck.Status.WARNING:
+		case StartupCheck.Status.OK:
+			init_gui();
+			init_web_engine();
+			break;
+		}
 	}
 	
 	private void init_settings()
@@ -164,7 +195,7 @@ public class AppRunnerController: Diorite.Application
 		gtk_settings.gtk_application_prefer_dark_theme = config.get_bool(ConfigKey.DARK_THEME);
 	}
 	
-	private void init_ipc()
+	private bool init_ipc(StartupCheck startup_check)
 	{	
 		try
 		{
@@ -182,9 +213,14 @@ public class AppRunnerController: Diorite.Application
 				nuvola_api.get_connection(this.web_app.id, this.dbus_id, out socket, out api_token);
 				if (socket == null)
 				{
-					warning("Master server refused conection.");
-					quit();
-					return;
+					startup_check.nuvola_service_message = (
+						"<b>Nuvola Apps Runtime Service refused connection.</b>\n\n"
+						+ "1. Make sure Nuvola Apps Runtime is installed.\n"
+						+ "2. Launch Nuvola Apps Runtime to find out whether activation"
+						+ " (Premium/Patron account) is required.\n"
+						+ "3. If Nuvola has been updated recently, close all Nuvola Apps and try launching it again.");
+					startup_check.nuvola_service_status = StartupCheck.Status.ERROR;
+					return false;
 				}
 				ipc_bus.connect_master_socket(socket, api_token);
 			}
@@ -197,18 +233,16 @@ public class AppRunnerController: Diorite.Application
 		}
 		catch (GLib.Error e)
 		{
-			warning("Master server error: %s", e.message);
-			if (use_nuvola_dbus)
-				on_show_error(
-					"Failed to connect to Nuvola service",
-					#if FLATPAK
-					"Make sure Nuvola runtime flatpak is installed.\n\n" +
-					#endif
-					"Error message:\n%s".printf(e.message),
-				false
-				);
-			quit();
-			return;
+			startup_check.nuvola_service_message = Markup.printf_escaped(
+				"<b>Failed to connect to Nuvola Apps Runtime Service.</b>\n\n"
+				+ "1. Make sure Nuvola Apps Runtime is installed.\n"
+				+ "2. Launch Nuvola Apps Runtime to find out whether activation"
+				+ " (Premium/Patron account) is required.\n"
+				+ "3. If Nuvola has been updated recently, close all Nuvola Apps and try launching it again.\n\n"
+				+ "<i>Error message: %s</i>", e.message);
+			startup_check.nuvola_service_status = StartupCheck.Status.ERROR;
+			
+			return false;
 		}
 		
 		ipc_bus.router.add_method(IpcApi.CORE_GET_METADATA, Drt.ApiFlags.READABLE|Drt.ApiFlags.PRIVATE,
@@ -221,8 +255,16 @@ public class AppRunnerController: Diorite.Application
 		}
 		catch (GLib.Error e)
 		{
-			error("Communication with master process failed: %s", e.message);
+			startup_check.nuvola_service_message = Markup.printf_escaped(
+				"<b>Communication with Nuvola Apps Runtime Service failed.</b>\n\n"
+				+ "1. Make sure Nuvola Apps Runtime is installed.\n"
+				+ "2. Launch Nuvola Apps Runtime to find out whether activation"
+				+ " (Premium/Patron account) is required.\n"
+				+ "3. If Nuvola has been updated recently, close all Nuvola Apps and try launching it again.\n\n"
+				+ "<i>Error message: %s</i>", e.message);
+			startup_check.nuvola_service_status = StartupCheck.Status.ERROR;
 		}
+		
 		var storage_client = new Diorite.KeyValueStorageClient(ipc_bus.master);
 		master_config = storage_client.get_proxy("master.config");
 		ipc_bus.router.add_method("/nuvola/core/get-component-info", Drt.ApiFlags.READABLE,
@@ -236,13 +278,12 @@ public class AppRunnerController: Diorite.Application
 			new Drt.StringParam("name", true, false, null, "Component name."),
 			new Drt.BoolParam("name", true, false, "Component active state.")
 			});
+		startup_check.nuvola_service_status = StartupCheck.Status.OK;
+		return true;
 	}
 	
 	private void init_gui()
 	{
-		#if FLATPAK
-		Graphics.ensure_gl_extension_mounted(main_window);
-		#endif
 		actions_helper = new ActionsHelper(actions, config);
 		unowned ActionsHelper ah = actions_helper;
 		Diorite.Action[] actions_spec = {
@@ -301,6 +342,10 @@ public class AppRunnerController: Diorite.Application
 		widget.show();
 		web_engine.init_finished.connect(init_app_runner);
 		web_engine.app_runner_ready.connect(load_app);
+		
+		/* It is necessary to init WebEngine after format support check because WebKitPluginProcess2
+		 * must not be terminated during plugin discovery process. Issue: tiliado/nuvolaruntime#354 */
+		web_engine.init();
 	}
 	
 	private void init_app_runner()
@@ -346,10 +391,12 @@ public class AppRunnerController: Diorite.Application
 	
 	public override void activate()
 	{
-		if (main_window == null)
-			start();
-		else
+		if (main_window != null)
 			main_window.present();
+		else if (startup_window != null)
+			startup_window.present();
+		else
+			start();
 	}
 	
 	private void append_actions()
@@ -431,7 +478,7 @@ public class AppRunnerController: Diorite.Application
 		dialog.add_tab("Network", network_settings);
 		dialog.add_tab("Features", new ComponentsManager(components));
 		dialog.add_tab("Website Data", new WebsiteDataManager(WebEngine.get_web_context().get_website_data_manager()));
-		dialog.add_tab("Format Support", new FormatSupportScreen(this, format_support.format_support, storage));
+		dialog.add_tab("Format Support", new FormatSupportScreen(this, format_support, storage));
 		var response = dialog.run();
 		if (response == Gtk.ResponseType.OK)
 		{

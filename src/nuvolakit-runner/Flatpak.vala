@@ -54,5 +54,33 @@ public void check_desktop_portal_available(Cancellable? cancellable = null) thro
     }
 }
 
+public async void check_desktop_portal_available_async(int timeout_ms, Cancellable? cancellable=null) throws GLib.Error
+{
+    var conn = yield Bus.@get(BusType.SESSION, cancellable);
+    const string NAME = "org.freedesktop.portal.Desktop";
+    const string PATH = "/org/freedesktop/portal/desktop";
+    try
+    {
+        yield conn.call(
+            NAME, PATH, "org.freedesktop.portal.OpenURI", "OpenURI",
+                null, null, DBusCallFlags.NONE, timeout_ms, cancellable);
+    }
+    catch (GLib.Error e)
+    {
+        if (!(e is DBusError.INVALID_ARGS))
+            throw e; 
+    }
+    try
+    {
+        yield conn.call(NAME, PATH, "org.freedesktop.portal.ProxyResolver", "Lookup",
+            null, null, DBusCallFlags.NONE, 100, cancellable);
+    }
+    catch (GLib.Error e)
+    {
+        if (!(e is DBusError.INVALID_ARGS))
+            throw e; 
+    }
+}
+
 } // namespace Nuvola.Flatpak
 #endif

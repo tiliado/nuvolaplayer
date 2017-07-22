@@ -42,9 +42,9 @@ public string? get_required_gl_extension()
 	return null;
 }
 
-public bool is_required_gl_extension_mounted()
+public bool is_required_gl_extension_mounted(out string? gl_extension)
 {
-	var gl_extension = get_required_gl_extension();
+	gl_extension = get_required_gl_extension();
 	if (gl_extension == null)
 		return true;
 	else
@@ -53,9 +53,9 @@ public bool is_required_gl_extension_mounted()
 
 public void ensure_gl_extension_mounted(Gtk.Window? parent_window)
 {
-	if (!is_required_gl_extension_mounted())
+	string? gl_extension = null;
+	if (!is_required_gl_extension_mounted(out gl_extension))
 	{
-		var gl_extension = get_required_gl_extension();
 		var dialog = new Gtk.MessageDialog.with_markup(
 			parent_window, Gtk.DialogFlags.MODAL, Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE,
 			("<b><big>Missing Graphics Driver</big></b>\n\n"
