@@ -44,9 +44,6 @@ public class FormatSupportCheck : GLib.Object
 		this.config = config;
 		this.web_engine = web_engine;
 		this.web_app = web_app;
-		
-		web_engine.web_plugins = web_app.traits().flash_required;
-		web_engine.media_source_extension = web_app.traits().mse_required;
 	}
 	
 	public async void check()

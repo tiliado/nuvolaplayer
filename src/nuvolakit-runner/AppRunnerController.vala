@@ -289,6 +289,8 @@ public class AppRunnerController: Diorite.Application
 		WebEngine.init_web_context(app_storage);
 		web_engine = new WebEngine(this, ipc_bus, web_app, app_storage, config, connection, web_worker_data);
 		web_engine.set_user_agent(web_app.user_agent);
+		web_engine.web_plugins = web_app.traits().flash_required;
+		web_engine.media_source_extension = web_app.traits().mse_required;
 		
 		web_engine.init_form.connect(on_init_form);
 		web_engine.notify.connect_after(on_web_engine_notify);
