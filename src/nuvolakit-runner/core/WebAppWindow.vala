@@ -63,7 +63,7 @@ public class WebAppWindow : Diorite.ApplicationWindow
 	
 	private uint sidebar_position_cb_id = 0;
 	
-	private AppRunnerController app;
+	private new unowned AppRunnerController app;
 	
 	public WebAppWindow(AppRunnerController app)
 	{

@@ -33,7 +33,7 @@ public class MasterWindow : Diorite.ApplicationWindow
 	/** Stack for the pages of the main window */
 	public Gtk.Stack stack;
 	private Gtk.StackSwitcher switcher;
-	private unowned MasterController app;
+	private new unowned MasterController app;
 	
 	/**
 	 * Creates new MasterWindow for given app
