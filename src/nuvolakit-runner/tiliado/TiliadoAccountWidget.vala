@@ -41,40 +41,6 @@ public class TiliadoAccountWidget : Gtk.Grid
 	private TiliadoApi2 tiliado;
 	private Drt.Application app;
 	
-	static construct
-	{
-		try
-		{
-			var screen = Gdk.Screen.get_default();
-			var provider = new Gtk.CssProvider();
-			provider.load_from_data("""
-				label.premium,  button.premium, GtkButton.premium, GtkLabel.premium
-				{
-					background: #FFD600;
-					color: #000000;
-					font-weight: bold;
-				}
-				
-				label.premium, GtkLabel.premium
-				{
-					border-radius: 10px;
-					padding: 2px 4px;
-					font-size: 90%;
-				}
-				
-				button.premium:hover, GtkButton.premium:hover
-				{
-					background-color: #E7C200;
-				}
-				""", -1);
-			Gtk.StyleContext.add_provider_for_screen(screen, provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
-		}
-		catch (GLib.Error e)
-		{
-			warning("Failed to load custom CSS: %s", e.message);
-		}
-	}
-	
 	public TiliadoAccountWidget(TiliadoApi2 tiliado, Drt.Application app, Gtk.Orientation orientation,
 		string? cached_user_name, int cached_membership)
 	{
