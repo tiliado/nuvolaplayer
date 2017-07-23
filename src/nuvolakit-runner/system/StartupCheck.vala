@@ -288,10 +288,20 @@ public class StartupCheck : GLib.Object
 		#endif
 		try
 		{
+			const string DRIVER_NOT_FOUND_TEMPLATE = (
+				"%s Driver for '%s' not found. Rendering performance of some web apps may suffer. "
+				#if !FLATPAK
+				+ "Contact your distributor to get help with installation."
+				#else
+				+ "Please <a href=\"https://github.com/tiliado/nuvolaruntime/issues/280\">report your issue</a>"
+				+" so that the driver can be added to Nuvola Runtime flatpak."
+				#endif
+				);
+			
 			var dri2_driver = Graphics.dri2_get_driver_name();
 			if (!Graphics.have_vdpau_driver(dri2_driver))
 			{
-				vdpau_driver_message = Markup.printf_escaped("VDPAU Driver for '%s' not found.", dri2_driver);
+				vdpau_driver_message = Markup.printf_escaped(DRIVER_NOT_FOUND_TEMPLATE, "VDPAU", dri2_driver);
 				vdpau_driver_status = Status.WARNING;
 			}
 			else
@@ -300,7 +310,7 @@ public class StartupCheck : GLib.Object
 			}
 			if (!Graphics.have_vaapi_driver(dri2_driver))
 			{
-				vaapi_driver_message = Markup.printf_escaped("VA-API Driver for '%s' not found.", dri2_driver);
+				vaapi_driver_message = Markup.printf_escaped(DRIVER_NOT_FOUND_TEMPLATE, "VA-API", dri2_driver);
 				vaapi_driver_status = Status.WARNING;
 			}
 			else
