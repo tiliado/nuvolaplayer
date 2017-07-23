@@ -44,7 +44,7 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder
 		try
 		{
 			var data = conn.call_sync(METHOD, new Variant("(s)", action)); 
-			Diorite.MessageListener.check_type_string(data, "ms");
+			Drt.MessageListener.check_type_string(data, "ms");
 			string? keybinding = null;
 			data.get("ms", &keybinding);
 			return keybinding;
@@ -62,7 +62,7 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder
 		try
 		{
 			var data = conn.call_sync(METHOD, new Variant("(sms)", action, keybinding)); 
-			Diorite.MessageListener.check_type_string(data, "b");
+			Drt.MessageListener.check_type_string(data, "b");
 			return data.get_boolean();
 		}
 		catch (GLib.Error e)
@@ -78,7 +78,7 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder
 		try
 		{
 			var data = conn.call_sync(METHOD, new Variant("(s)", action)); 
-			Diorite.MessageListener.check_type_string(data, "b");
+			Drt.MessageListener.check_type_string(data, "b");
 			return data.get_boolean();
 		}
 		catch (GLib.Error e)
@@ -94,7 +94,7 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder
 		try
 		{
 			var data = conn.call_sync(METHOD, new Variant("(s)", action)); 
-			Diorite.MessageListener.check_type_string(data, "b");
+			Drt.MessageListener.check_type_string(data, "b");
 			return data.get_boolean();
 		}
 		catch (GLib.Error e)
@@ -110,7 +110,7 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder
 		try
 		{
 			var data = conn.call_sync(METHOD, new Variant("(s)", keybinding)); 
-			Diorite.MessageListener.check_type_string(data, "ms");
+			Drt.MessageListener.check_type_string(data, "ms");
 			string? action = null;
 			data.get("ms", &action);
 			return action;
@@ -128,7 +128,7 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder
 		try
 		{
 			var data = conn.call_sync(METHOD, new Variant("(s)", keybinding)); 
-			Diorite.MessageListener.check_type_string(data, "b");
+			Drt.MessageListener.check_type_string(data, "b");
 			return data.get_boolean();
 		}
 		catch (GLib.Error e)
@@ -138,7 +138,7 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder
 		}
 	}
 	
-	private Variant? handle_action_activated(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_action_activated(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		var action = params.pop_string();
 		var handled = false;

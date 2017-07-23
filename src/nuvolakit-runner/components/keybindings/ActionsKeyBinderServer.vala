@@ -65,38 +65,38 @@ public class ActionsKeyBinderServer : GLib.Object
 		});
 	}
 	
-	private Variant? handle_get_keybinding(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_get_keybinding(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		var action = params.pop_string();
 		return new Variant("ms", keybinder.get_keybinding(action));
 	}
 	
-	private Variant? handle_set_keybinding(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_set_keybinding(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		var action = params.pop_string();
 		var keybinding = params.pop_string();
 		return new Variant.boolean(keybinder.set_keybinding(action, keybinding));
 	}
 	
-	private Variant? handle_bind(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_bind(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		var action = params.pop_string();
 		return new Variant.boolean(keybinder.bind(action));
 	}
 	
-	private Variant? handle_unbind(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_unbind(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		var action = params.pop_string();
 		return new Variant.boolean(keybinder.unbind(action));
 	}
 	
-	private Variant? handle_get_action(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_get_action(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		var keybinding = params.pop_string();
 		return new Variant("ms", keybinder.get_action(keybinding));
 	}
 	
-	private Variant? handle_is_available(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_is_available(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		var keybinding = params.pop_string();
 		return new Variant.boolean(keybinder.is_available(keybinding));
@@ -111,7 +111,7 @@ public class ActionsKeyBinderServer : GLib.Object
 			try
 			{
 				var response = app_runner.call_sync("/nuvola/actionkeybinder/action-activated", new Variant("(s)", name));
-				if (!Diorite.variant_bool(response, ref handled))
+				if (!Drt.variant_bool(response, ref handled))
 				{
 					warning("Got invalid response from %s instance %s: %s\n", Nuvola.get_app_name(), app_runner.app_id,
 						response == null ? "null" : response.print(true));

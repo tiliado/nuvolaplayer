@@ -22,7 +22,7 @@
 namespace Nuvola
 {
 
-public class WebAppTest: Diorite.TestCase
+public class WebAppTest: Drt.TestCase
 {
 	public void test_construct()
 	{

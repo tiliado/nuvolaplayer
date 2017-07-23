@@ -100,15 +100,15 @@ public class JSApi : GLib.Object
 	 */
 	public const string PREFERENCES_FRAME_ID = "__preferences__";
 	
-	private Diorite.Storage storage;
+	private Drt.Storage storage;
 	private File data_dir;
 	private File config_dir;
-	private Diorite.KeyValueStorage[] key_value_storages;
+	private Drt.KeyValueStorage[] key_value_storages;
 	private uint[] webkit_version;
 	private uint[] libsoup_version;
 	
-	public JSApi(Diorite.Storage storage, File data_dir, File config_dir, Diorite.KeyValueStorage config,
-	Diorite.KeyValueStorage session, uint[] webkit_version, uint[] libsoup_version)
+	public JSApi(Drt.Storage storage, File data_dir, File config_dir, Drt.KeyValueStorage config,
+	Drt.KeyValueStorage session, uint[] webkit_version, uint[] libsoup_version)
 	{
 		this.storage = storage;
 		this.data_dir = data_dir;
@@ -205,7 +205,7 @@ public class JSApi : GLib.Object
 		string meta_json_data;
 		try
 		{
-			meta_json_data = Diorite.System.read_file(meta_json);
+			meta_json_data = Drt.System.read_file(meta_json);
 		}
 		catch (GLib.Error e)
 		{

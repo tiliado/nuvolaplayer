@@ -24,10 +24,10 @@
 
 public class Nuvola.ActionsHelper: GLib.Object, ActionsInterface
 {
-	private Diorite.Actions actions;
+	private Drt.Actions actions;
 	private Config config;
 	
-	public ActionsHelper(Diorite.Actions actions, Config config)
+	public ActionsHelper(Drt.Actions actions, Config config)
 	{
 		this.actions = actions;
 		this.config = config;
@@ -86,7 +86,7 @@ public class Nuvola.ActionsHelper: GLib.Object, ActionsInterface
 	
 	public bool add_action(string group, string scope, string action_name, string? label, string? mnemo_label, string? icon, string? keybinding, Variant? state)
 	{
-		Diorite.Action action;
+		Drt.Action action;
 		if (state == null)
 			action = simple_action(group, scope, action_name, label, mnemo_label, icon, keybinding, null);
 		else
@@ -98,30 +98,30 @@ public class Nuvola.ActionsHelper: GLib.Object, ActionsInterface
 		return !Binding.CONTINUE;
 	}
 	
-	public bool add_radio_action(string group, string scope, string name, Variant state, Diorite.RadioOption[] options)
+	public bool add_radio_action(string group, string scope, string name, Variant state, Drt.RadioOption[] options)
 	{
-		var radio = new Diorite.RadioAction(group, scope, name, null, state, options);
+		var radio = new Drt.RadioAction(group, scope, name, null, state, options);
 		radio.enabled = false;
 		radio.activated.connect(on_custom_action_activated);
 		actions.add_action(radio);
 		return !Binding.CONTINUE;
 	}
 	
-	public Diorite.SimpleAction simple_action(string group, string scope, string name, string? label, string? mnemo_label, string? icon, string? keybinding, owned Diorite.ActionCallback? callback)
+	public Drt.SimpleAction simple_action(string group, string scope, string name, string? label, string? mnemo_label, string? icon, string? keybinding, owned Drt.ActionCallback? callback)
 	{
 		var kbd = config.get_string("nuvola.keybindings." + name) ?? keybinding;
 		if (kbd == "")
 			kbd = null;
-		return new Diorite.SimpleAction(group, scope, name, label, mnemo_label, icon, kbd, (owned) callback);
+		return new Drt.SimpleAction(group, scope, name, label, mnemo_label, icon, kbd, (owned) callback);
 	}
 	
-	public Diorite.ToggleAction toggle_action(string group, string scope, string name, string? label, string? mnemo_label, string? icon, string? keybinding, owned Diorite.ActionCallback? callback, Variant state)
+	public Drt.ToggleAction toggle_action(string group, string scope, string name, string? label, string? mnemo_label, string? icon, string? keybinding, owned Drt.ActionCallback? callback, Variant state)
 	{
 		var kbd = config.get_string("nuvola.keybindings." + name) ?? keybinding;
-		return new Diorite.ToggleAction(group, scope, name, label, mnemo_label, icon, kbd, (owned) callback, state);
+		return new Drt.ToggleAction(group, scope, name, label, mnemo_label, icon, kbd, (owned) callback, state);
 	}
 	
-	private void on_custom_action_activated(Diorite.Action action, Variant? parameter)
+	private void on_custom_action_activated(Drt.Action action, Variant? parameter)
 	{
 		custom_action_activated(action.name, parameter);
 	}
@@ -132,7 +132,7 @@ public class Nuvola.ActionsHelper: GLib.Object, ActionsInterface
 		return Binding.CONTINUE;
 	}
 	
-	public bool list_group_actions(string group, out SList<Diorite.Action> actions)
+	public bool list_group_actions(string group, out SList<Drt.Action> actions)
 	{
 		actions = this.actions.get_group(group);
 		return Binding.CONTINUE;

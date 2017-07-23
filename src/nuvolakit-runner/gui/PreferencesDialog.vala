@@ -30,7 +30,7 @@ public class PreferencesDialog : Gtk.Dialog
 {
 	/// Preferences dialog title
 	private const string TITLE = ("Web App Preferences");
-	private Diorite.Application app;
+	private Drt.Application app;
 	private Gtk.Notebook notebook;
 	
 	/**
@@ -38,7 +38,7 @@ public class PreferencesDialog : Gtk.Dialog
 	 * 
 	 * @param app Application object
 	 */
-	public PreferencesDialog(Diorite.Application app, Gtk.Window? parent, Diorite.Form form)
+	public PreferencesDialog(Drt.Application app, Gtk.Window? parent, Drt.Form form)
 	{
 		this.app = app;
 		

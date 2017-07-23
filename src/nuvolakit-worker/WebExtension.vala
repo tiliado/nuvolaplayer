@@ -78,7 +78,7 @@ public class WebExtension: GLib.Object
 		{
 			error("Runner client error: %s", e.message);
 		}
-		var storage = new Diorite.XdgStorage.for_project(Nuvola.get_app_id());
+		var storage = new Drt.XdgStorage.for_project(Nuvola.get_app_id());
 		
 		/* Use worker_data and free it. */
 		uint[] webkit_version = new uint[3];
@@ -148,7 +148,7 @@ public class WebExtension: GLib.Object
 		this.bridge = bridge;
 	}
 	
-	private Variant? handle_call_function(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_call_function(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		var name = params.pop_string();
 		var func_params = params.pop_variant();
@@ -166,7 +166,7 @@ public class WebExtension: GLib.Object
 		return func_params;
 	}
 	
-	private Variant? handle_enable_password_manager(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_enable_password_manager(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		Idle.add(enable_password_manager_cb);
 		return null;
@@ -181,7 +181,7 @@ public class WebExtension: GLib.Object
 		return false;
 	}
 	
-	private Variant? handle_disable_password_manager(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_disable_password_manager(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		if (login_form_manager != null)
 		{

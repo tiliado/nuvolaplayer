@@ -28,9 +28,9 @@ namespace Nuvola
 public class GlobalKeybindings: GLib.Object
 {
 	public ActionsKeyBinder keybinder {get; private set;}
-	private Diorite.Actions actions;
+	private Drt.Actions actions;
 	
-	public GlobalKeybindings(ActionsKeyBinder keybinder, Diorite.Actions actions)
+	public GlobalKeybindings(ActionsKeyBinder keybinder, Drt.Actions actions)
 	{
 		this.keybinder = keybinder;
 		this.actions = actions;
@@ -42,15 +42,15 @@ public class GlobalKeybindings: GLib.Object
 			update_action(action);
 	}
 	
-	private void update_action(Diorite.Action action)
+	private void update_action(Drt.Action action)
 	{
-		if (!(action is Diorite.RadioAction))
+		if (!(action is Drt.RadioAction))
 			keybinder.bind(action.name);
 	}
 	
-	private void on_action_removed(Diorite.Action action)
+	private void on_action_removed(Drt.Action action)
 	{
-		if (!(action is Diorite.RadioAction))
+		if (!(action is Drt.RadioAction))
 			keybinder.unbind(action.name);
 	}
 	

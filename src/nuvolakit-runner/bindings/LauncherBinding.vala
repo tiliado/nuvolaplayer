@@ -56,31 +56,31 @@ public class Nuvola.LauncherBinding: ModelBinding<LauncherModel>
 			handle_remove_actions, null);
 	}
 	
-	private Variant? handle_set_tooltip(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_set_tooltip(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		model.tooltip = params.pop_string();
 		return null;
 	}
 	
-	private Variant? handle_add_action(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_add_action(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		model.add_action(params.pop_string());
 		return null;
 	}
 	
-	private Variant? handle_remove_action(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_remove_action(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		model.remove_action(params.pop_string());
 		return null;
 	}
 	
-	private Variant? handle_set_actions(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_set_actions(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		model.actions = params.pop_str_list();
 		return null;
 	}
 	
-	private Variant? handle_remove_actions(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_remove_actions(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		model.remove_actions();
 		return null;

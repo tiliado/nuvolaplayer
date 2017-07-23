@@ -37,7 +37,7 @@ public class IpcBus: Drt.ApiBus
         base(bus_name, router ?? new Drt.ApiRouter(), IPC_TIMEOUT);
     }
     
-    public Drt.ApiChannel? connect_master(string bus_name, string? api_token) throws Diorite.IOError
+    public Drt.ApiChannel? connect_master(string bus_name, string? api_token) throws Drt.IOError
     {
 		return_val_if_fail(master == null, null);
         master = connect_channel(bus_name, IPC_TIMEOUT);
@@ -45,7 +45,7 @@ public class IpcBus: Drt.ApiBus
         return master;
     }
     
-    public Drt.ApiChannel? connect_master_socket(Socket socket, string? api_token) throws Diorite.IOError
+    public Drt.ApiChannel? connect_master_socket(Socket socket, string? api_token) throws Drt.IOError
     {
 		return_val_if_fail(master == null, null);
         master = connect_channel_socket(socket, IPC_TIMEOUT);

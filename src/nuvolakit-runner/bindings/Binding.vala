@@ -64,10 +64,10 @@ public abstract class Nuvola.Binding<ObjectType>: GLib.Object
 		active = false;
 	}
 	
-	protected void check_not_empty() throws Diorite.MessageError
+	protected void check_not_empty() throws Drt.MessageError
 	{
 		if (!active)
-			throw new Diorite.MessageError.UNSUPPORTED("Binding %s has no registered components.", name);
+			throw new Drt.MessageError.UNSUPPORTED("Binding %s has no registered components.", name);
 	}
 	
 	protected void bind(string method, Drt.ApiFlags flags, string? description, owned Drt.ApiHandler handler, Drt.ApiParam[]? params)

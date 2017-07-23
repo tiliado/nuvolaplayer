@@ -39,7 +39,7 @@ public class HeaderLabel: Gtk.Label
 
 public class DeveloperSidebar: Gtk.ScrolledWindow
 {
-	private Diorite.Actions? actions_reg;
+	private Drt.Actions? actions_reg;
 	private Gtk.Grid grid;
 	private Gtk.Image? artwork = null;
 	private TimePositionButton time_pos;
@@ -224,8 +224,8 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
 	
 	private void add_action(string full_name)
 	{
-		Diorite.Action action;
-		Diorite.RadioOption option;
+		Drt.Action action;
+		Drt.RadioOption option;
 		string detailed_name;
 		if (actions_reg.find_and_parse_action(full_name, out detailed_name, out action, out option))
 		{
@@ -240,7 +240,7 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
 				critical("Failed to parse '%s': %s", action.scope + "." + detailed_name, e.message);
 				return;
 			}
-			if (action is Diorite.SimpleAction)
+			if (action is Drt.SimpleAction)
 			{
 				var button = new Gtk.Button.with_label(action.label);
 				button.action_name = action_name;
@@ -250,7 +250,7 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
 				action_widgets.prepend(button);
 				grid.add(button);
 			}
-			else if (action is Diorite.ToggleAction)
+			else if (action is Drt.ToggleAction)
 			{
 				var button = new Gtk.CheckButton.with_label(action.label);
 				button.action_name = action_name;
@@ -260,7 +260,7 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
 				action_widgets.prepend(button);
 				grid.add(button);
 			}
-			else if (action is Diorite.RadioAction)
+			else if (action is Drt.RadioAction)
 			{
 				var radio = radios.lookup(action.name);
 				var button = new Gtk.RadioButton.with_label_from_widget(radio, option.label);
@@ -284,8 +284,8 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
 	{
 		var radio = button as Gtk.RadioButton;
 		var full_name = button.get_data<string>("full-name");
-		Diorite.Action action;
-		Diorite.RadioOption option;
+		Drt.Action action;
+		Drt.RadioOption option;
 		string detailed_name;
 		if (actions_reg.find_and_parse_action(full_name, out detailed_name, out action, out option)
 		&& !action.state.equal(option.parameter) && radio.active)
@@ -294,13 +294,13 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
 	
 	private void on_radio_action_changed(GLib.Object o, ParamSpec p)
 	{
-		var action = o as Diorite.RadioAction;
+		var action = o as Drt.RadioAction;
 		var state = action.state;
 		var radio = radios.lookup(action.name);
 		foreach (var item in radio.get_group())
 		{
 			var full_name = item.get_data<string>("full-name");
-			Diorite.RadioOption option;
+			Drt.RadioOption option;
 			if (actions_reg.find_and_parse_action(full_name, null, null, out option))
 			{
 				if (!item.active && state.equal(option.parameter))
@@ -317,8 +317,8 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
 		{
 			radio.clicked.disconnect(on_radio_clicked);
 			var full_name = radio.get_data<string>("full-name");
-			Diorite.Action action;
-			Diorite.RadioOption option;
+			Drt.Action action;
+			Drt.RadioOption option;
 			string detailed_name;
 			if (actions_reg.find_and_parse_action(full_name, out detailed_name, out action, out option))
 				action.notify["state"].disconnect(on_radio_action_changed);

@@ -22,13 +22,13 @@
 namespace Nuvola
 {
 
-public class GraphicsTest: Diorite.TestCase
+public class GraphicsTest: Drt.TestCase
 {
 	public void test_dri2_get_driver_name()
 	{
 		string? name = null;
 		expect_no_error(() => name = Graphics.dri2_get_driver_name(), "driver name");
-		expect_false(Diorite.String.is_empty(name), "driver name not empty");
+		expect_false(Drt.String.is_empty(name), "driver name not empty");
 	}
 	
 	public void test_have_vdpau_driver()

@@ -32,7 +32,7 @@ public class Component: Nuvola.Component
 	private AppRunnerController app;
 	private IpcBus ipc_bus;
 	
-	public Component(AppRunnerController app, Bindings bindings, Diorite.KeyValueStorage config, IpcBus ipc_bus)
+	public Component(AppRunnerController app, Bindings bindings, Drt.KeyValueStorage config, IpcBus ipc_bus)
 	{
 		base("httpremotecontrol", "Remote control over HTTP (experimental)", "Remote media player HTTP interface for control over network.");
 		this.hidden = false;
@@ -95,7 +95,7 @@ public class Component: Nuvola.Component
 			try
 			{
 				var addresses = yield ipc_bus.master.call("/nuvola/httpremotecontrol/get-addresses", null);
-				port = Diorite.variant_to_uint(yield ipc_bus.master.call("/nuvola/httpremotecontrol/get-port", null));
+				port = Drt.variant_to_uint(yield ipc_bus.master.call("/nuvola/httpremotecontrol/get-port", null));
 				return_if_fail(addresses != null);
 				VariantIter iter;
 				string? nm_error;

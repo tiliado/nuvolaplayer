@@ -25,7 +25,7 @@
 namespace Nuvola
 {
 
-public class WebAppWindow : Diorite.ApplicationWindow
+public class WebAppWindow : Drt.ApplicationWindow
 {
 	public Gtk.Grid grid {get; private set;}
 	public Gtk.Overlay overlay {get; private set;}

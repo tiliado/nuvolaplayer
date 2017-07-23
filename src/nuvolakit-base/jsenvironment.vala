@@ -82,7 +82,7 @@ public class JsEnvironment: GLib.Object, JSExecutor
 		string code;
 		try
 		{
-			code = Diorite.System.read_file(file);
+			code = Drt.System.read_file(file);
 		}
 		catch (Error e)
 		{

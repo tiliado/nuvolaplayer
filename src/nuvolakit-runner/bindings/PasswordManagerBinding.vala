@@ -50,7 +50,7 @@ public class PasswordManagerBinding : ModelBinding<PasswordManager>
 		});
 	}
 	
-	private Variant? handle_store_password(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_store_password(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		var hostname = params.pop_string();
 		var username = params.pop_string();
@@ -59,7 +59,7 @@ public class PasswordManagerBinding : ModelBinding<PasswordManager>
 		return null;
 	}
 	
-	private Variant? handle_get_passwords(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_get_passwords(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		var builder = new VariantBuilder(new VariantType("a(sss)"));
 		var passwords = model.get_passwords();

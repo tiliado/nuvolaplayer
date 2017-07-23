@@ -43,9 +43,9 @@ public class Nuvola.MediaPlayer: GLib.Object, Nuvola.MediaPlayerModel
 	public bool can_seek {get; set; default = false;}
 	public bool can_change_volume {get; set; default = false;}
 	public SList<string> playback_actions {get; owned set;}
-	private Diorite.Actions actions;
+	private Drt.Actions actions;
 	
-	public MediaPlayer(Diorite.Actions actions)
+	public MediaPlayer(Drt.Actions actions)
 	{
 		this.actions = actions;
 	}

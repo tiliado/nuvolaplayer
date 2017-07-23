@@ -101,7 +101,7 @@ public abstract class AppRunner : GLib.Object
 	public Variant? call_sync(string name, Variant? params) throws GLib.Error
 	{
 		if (channel == null)
-			throw new Diorite.MessageError.IOERROR("No connected to app runner '%s'.", app_id);
+			throw new Drt.MessageError.IOERROR("No connected to app runner '%s'.", app_id);
 		
 		return channel.call_sync(name, params);
 	}
@@ -109,7 +109,7 @@ public abstract class AppRunner : GLib.Object
 	public async Variant? call_with_dict(string name, Variant? params) throws GLib.Error
 	{
 		if (channel == null)
-			throw new Diorite.MessageError.IOERROR("No connected to app runner '%s'.", app_id);
+			throw new Drt.MessageError.IOERROR("No connected to app runner '%s'.", app_id);
 		
 		return yield channel.call_with_dict(name, params);
 	}
@@ -117,7 +117,7 @@ public abstract class AppRunner : GLib.Object
 	public async Variant? call_full(string method, bool allow_private, string flags, string params_format, Variant? params) throws GLib.Error
 	{
 		if (channel == null)
-			throw new Diorite.MessageError.IOERROR("No connected to app runner '%s'.", app_id);
+			throw new Drt.MessageError.IOERROR("No connected to app runner '%s'.", app_id);
 		
 		return yield channel.call_full(method, allow_private, flags, params_format, params);
 	}
@@ -125,7 +125,7 @@ public abstract class AppRunner : GLib.Object
 	public Variant? call_full_sync(string method, bool allow_private, string flags, string params_format, Variant? params) throws GLib.Error
 	{
 		if (channel == null)
-			throw new Diorite.MessageError.IOERROR("No connected to app runner '%s'.", app_id);
+			throw new Drt.MessageError.IOERROR("No connected to app runner '%s'.", app_id);
 		
 		return channel.call_full_sync(method, allow_private, flags, params_format, params);
 	}
@@ -193,10 +193,10 @@ public class SubprocessAppRunner : AppRunner
 	private void stderr_print_line(string line)
 	{
 		if (line.has_prefix("Worker:") || line.has_prefix("Runner:"))
-			Diorite.Logger.puts(line);
+			Drt.Logger.puts(line);
 		else
-			Diorite.Logger.printf("Runner: %s", line);
-		Diorite.Logger.puts("\n");
+			Drt.Logger.printf("Runner: %s", line);
+		Drt.Logger.puts("\n");
 	}
 	
 	private void on_log_stderr_done(GLib.Object? o, AsyncResult res)

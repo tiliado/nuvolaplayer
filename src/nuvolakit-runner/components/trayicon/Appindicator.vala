@@ -29,7 +29,7 @@ public class Appindicator: GLib.Object
 {
 	public bool visible {get{return indicator != null && indicator.connected;}}
 	private AppRunnerController controller;
-	private Diorite.Actions actions;
+	private Drt.Actions actions;
 	private LauncherModel model;
 	private Gtk.Menu? menu = null;
 	private AppIndicator.Indicator? indicator = null;
@@ -77,7 +77,7 @@ public class Appindicator: GLib.Object
 				if (item != null)
 				{
 					item.activate.disconnect(on_menu_item_activated);
-					var toggle_action =  item.get_data<Diorite.Action?>("diorite_action") as Diorite.ToggleAction;
+					var toggle_action =  item.get_data<Drt.Action?>("diorite_action") as Drt.ToggleAction;
 					if (toggle_action != null)
 						toggle_action.notify["state"].disconnect(on_toggle_action_state_changed);
 				}
@@ -98,17 +98,17 @@ public class Appindicator: GLib.Object
 	
 	private void add_menu_item_for_action(string full_name)
 	{
-		Diorite.Action action = null;
+		Drt.Action action = null;
 		string? detailed_name = null;
-		Diorite.RadioOption? option = null;
+		Drt.RadioOption? option = null;
 		if (!actions.find_and_parse_action(full_name, out detailed_name, out action, out option))
 		{
 			warning("Action %s not found", full_name);
 			return;
 		}
 		Gtk.MenuItem item;
-		var radio_action = action as Diorite.RadioAction;
-		var toggle_action = action as Diorite.ToggleAction;
+		var radio_action = action as Drt.RadioAction;
+		var toggle_action = action as Drt.ToggleAction;
 		if (radio_action != null)
 		{
 			var radio_group = radio_groups[action.name];
@@ -118,7 +118,7 @@ public class Appindicator: GLib.Object
 				radio_groups[action.name] = radio_item;
 				action.notify["state"].connect_after(on_radio_action_state_changed);
 			}
-			radio_item.active = action.state != null && Diorite.variant_equal(action.state, option.parameter);
+			radio_item.active = action.state != null && Drt.variant_equal(action.state, option.parameter);
 			item = radio_item;
 			item.set_data<Variant?>("diorite_action_param", option.parameter);
 		}
@@ -130,7 +130,7 @@ public class Appindicator: GLib.Object
 			item.set_data<Variant?>("diorite_action_param", null);
 			action.notify["state"].connect_after(on_toggle_action_state_changed);
 		}
-		else if (action is Diorite.SimpleAction)
+		else if (action is Drt.SimpleAction)
 		{
 			item = new Gtk.MenuItem.with_label(action.label);
 			item.set_data<Variant?>("diorite_action_param", null);
@@ -142,7 +142,7 @@ public class Appindicator: GLib.Object
 			return;
 		}
 		
-		item.set_data<Diorite.Action?>("diorite_action", action);
+		item.set_data<Drt.Action?>("diorite_action", action);
 		item.activate.connect(on_menu_item_activated);
 		action.bind_property("enabled", item, "sensitive", BindingFlags.DEFAULT|BindingFlags.SYNC_CREATE);
 		item.show();
@@ -155,7 +155,7 @@ public class Appindicator: GLib.Object
 		Gtk.RadioMenuItem item = null;
 		while (iter.next(null, out item))
 		{
-			var action = item.get_data<Diorite.Action?>("diorite_action");
+			var action = item.get_data<Drt.Action?>("diorite_action");
 			action.notify["state"].disconnect(on_radio_action_state_changed);
 			iter.remove();
 		}
@@ -163,26 +163,26 @@ public class Appindicator: GLib.Object
 	
 	private void on_menu_item_activated(Gtk.MenuItem item)
 	{
-		var action = item.get_data<Diorite.Action?>("diorite_action");
+		var action = item.get_data<Drt.Action?>("diorite_action");
 		if (action != null)
 		{
 			var parameter = item.get_data<Variant?>("diorite_action_param");
-			var radio_action = action as Diorite.RadioAction;
-			var toggle_action = action as Diorite.ToggleAction;
-			if (radio_action == null || !Diorite.variant_equal(radio_action.state, parameter))
+			var radio_action = action as Drt.RadioAction;
+			var toggle_action = action as Drt.ToggleAction;
+			if (radio_action == null || !Drt.variant_equal(radio_action.state, parameter))
 				action.activate(parameter);
 			if (toggle_action != null)
 			{
-				item.set_data<Diorite.Action?>("diorite_action", null);
+				item.set_data<Drt.Action?>("diorite_action", null);
 				((Gtk.CheckMenuItem) item).active = action.state.get_boolean();
-				item.set_data<Diorite.Action?>("diorite_action", action);
+				item.set_data<Drt.Action?>("diorite_action", action);
 			}
 		}
 	}
 	
 	private void on_radio_action_state_changed(GLib.Object emitter, ParamSpec p)
 	{
-		var action = emitter as Diorite.RadioAction;
+		var action = emitter as Drt.RadioAction;
 		var state = action.state;
 		unowned SList<Gtk.RadioMenuItem> radios = radio_groups[action.name].get_group();
 		
@@ -193,7 +193,7 @@ public class Appindicator: GLib.Object
 			if (radio.active)
 			{
 				prev_active_radio = radio;
-				prev_active_radio.set_data<Diorite.Action?>("diorite_action", null);
+				prev_active_radio.set_data<Drt.Action?>("diorite_action", null);
 				break;
 			}
 		}
@@ -201,7 +201,7 @@ public class Appindicator: GLib.Object
 		/* Mark the new active radio */
 		foreach (var radio in radios)
 		{
-			if (Diorite.variant_equal(state, radio.get_data<Variant?>("diorite_action_param")))
+			if (Drt.variant_equal(state, radio.get_data<Variant?>("diorite_action_param")))
 			{
 				radio.active = true;
 				break;
@@ -210,21 +210,21 @@ public class Appindicator: GLib.Object
 		
 		/* Restore action to the previously active radio */
 		if (prev_active_radio != null)
-			prev_active_radio.set_data<Diorite.Action?>("diorite_action", action);
+			prev_active_radio.set_data<Drt.Action?>("diorite_action", action);
 	}
 	
 	private void on_toggle_action_state_changed(GLib.Object emitter, ParamSpec p)
 	{
-		var action = emitter as Diorite.ToggleAction;
+		var action = emitter as Drt.ToggleAction;
 		var children = menu.get_children();
 		foreach (var widget in children)
 		{
 			var toggle_item = widget as Gtk.CheckMenuItem;
-			if (toggle_item != null && toggle_item.get_data<Diorite.Action?>("diorite_action") == action)
+			if (toggle_item != null && toggle_item.get_data<Drt.Action?>("diorite_action") == action)
 			{
-				toggle_item.set_data<Diorite.Action?>("diorite_action", null);
+				toggle_item.set_data<Drt.Action?>("diorite_action", null);
 				toggle_item.active = action.state.get_boolean();
-				toggle_item.set_data<Diorite.Action?>("diorite_action", action);
+				toggle_item.set_data<Drt.Action?>("diorite_action", action);
 				break;
 			}
 		}

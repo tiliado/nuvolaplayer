@@ -31,7 +31,7 @@ public class LyricsComponent: Component
 	private AppRunnerController app;
 	private LyricsSidebar? sidebar = null;
 	
-	public LyricsComponent(AppRunnerController app, Bindings bindings, Diorite.KeyValueStorage config)
+	public LyricsComponent(AppRunnerController app, Bindings bindings, Drt.KeyValueStorage config)
 	{
 		base("lyrics", "Lyrics", "Shows lyrics for the current song.");
 		this.bindings = bindings;

@@ -46,7 +46,7 @@ public class Nuvola.NotificationsBinding: ObjectBinding<NotificationsInterface>
 			handle_is_persistence_supported, null);
 	}
 	
-	private Variant? handle_show_notification(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_show_notification(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		check_not_empty();
 		var title = params.pop_string();
@@ -61,7 +61,7 @@ public class Nuvola.NotificationsBinding: ObjectBinding<NotificationsInterface>
 		return null;
 	}
 	
-	private Variant? handle_is_persistence_supported(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_is_persistence_supported(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		check_not_empty();
 		bool supported = false;

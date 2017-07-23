@@ -56,7 +56,7 @@ public class WebEngine : GLib.Object, JSExecutor
 	public WebWorker web_worker {get; private set;}
 	
 	private Config config;
-	private Diorite.KeyValueStorage session;
+	private Drt.KeyValueStorage session;
 	
 	private static WebKit.WebContext? default_context = null;
 	
@@ -126,7 +126,7 @@ public class WebEngine : GLib.Object, JSExecutor
 		var webkit_extension_dir = Nuvola.get_libdir();
 		debug("Nuvola WebKit Extension directory: %s", webkit_extension_dir);
 		web_context.set_web_extensions_directory(webkit_extension_dir);
-		var web_extension_data = Diorite.variant_from_hashtable(worker_data);
+		var web_extension_data = Drt.variant_from_hashtable(worker_data);
 		debug("Nuvola WebKit Extension data: %s", web_extension_data.print(true));
 		web_context.set_web_extensions_initialization_user_data(web_extension_data);
 		
@@ -139,7 +139,7 @@ public class WebEngine : GLib.Object, JSExecutor
 		config.set_default_value(ZOOM_LEVEL_CONF, 1.0);
 		web_view.zoom_level = config.get_double(ZOOM_LEVEL_CONF);
 		web_view.load_changed.connect(on_load_changed);
-		session = new Diorite.KeyValueMap();
+		session = new Drt.KeyValueMap();
 		register_ipc_handlers();
 	}
 	
@@ -441,7 +441,7 @@ public class WebEngine : GLib.Object, JSExecutor
 		}
 		
 		args.get("(s@a{smv}@av)", null, out values, out entries);
-		var values_hashtable = Diorite.variant_to_hashtable(values);
+		var values_hashtable = Drt.variant_to_hashtable(values);
 		if (values_hashtable.size() > 0)
 		{
 			debug("Init form requested");
@@ -525,7 +525,7 @@ public class WebEngine : GLib.Object, JSExecutor
 			});
 	}
 	
-	private Variant? handle_web_worker_ready(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_web_worker_ready(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		if (!web_worker.ready)
 			web_worker.ready = true;
@@ -533,7 +533,7 @@ public class WebEngine : GLib.Object, JSExecutor
 		return null;
 	}
 	
-	private Variant? handle_web_worker_initialized(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_web_worker_initialized(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		var channel = source as Drt.ApiChannel;
 		return_val_if_fail(channel != null, null);
@@ -544,22 +544,22 @@ public class WebEngine : GLib.Object, JSExecutor
 	
 	
 	
-	private Variant? handle_get_data_dir(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_get_data_dir(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		return new Variant.string(web_app.data_dir.get_path());
 	}
 	
-	private Variant? handle_get_user_config_dir(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_get_user_config_dir(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		return new Variant.string(storage.config_dir.get_path());
 	}
 	
-	private Variant? handle_session_has_key(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_session_has_key(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		return new Variant.boolean(session.has_key(params.pop_string()));
 	}
 	
-	private Variant? handle_session_get_value(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_session_get_value(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		var response = session.get_value(params.pop_string());
 		if (response == null)
@@ -567,24 +567,24 @@ public class WebEngine : GLib.Object, JSExecutor
 		return response;
 	}
 	
-	private Variant? handle_session_set_value(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_session_set_value(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		session.set_value(params.pop_string(), params.pop_variant());
 		return null;
 	}
 	
-	private Variant? handle_session_set_default_value(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_session_set_default_value(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		session.set_default_value(params.pop_string(), params.pop_variant());
 		return null;
 	}
 	
-	private Variant? handle_config_has_key(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_config_has_key(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		return new Variant.boolean(config.has_key(params.pop_string()));
 	}
 	
-	private Variant? handle_config_get_value(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_config_get_value(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		var response = config.get_value(params.pop_string());
 		if (response == null)
@@ -592,19 +592,19 @@ public class WebEngine : GLib.Object, JSExecutor
 		return response;
 	}
 	
-	private Variant? handle_config_set_value(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_config_set_value(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		config.set_value(params.pop_string(), params.pop_variant());
 		return null;
 	}
 	
-	private Variant? handle_config_set_default_value(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_config_set_default_value(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		config.set_default_value(params.pop_string(), params.pop_variant());
 		return null;
 	}
 	
-	private Variant? handle_show_error(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_show_error(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		runner_app.show_error("Integration error", params.pop_string());
 		return null;
@@ -660,7 +660,7 @@ public class WebEngine : GLib.Object, JSExecutor
 		}
 	}
 	
-	private Variant? handle_download_file_async(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_download_file_async(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		var uri = params.pop_string();
 		var basename = params.pop_string();
@@ -897,7 +897,7 @@ public class WebEngine : GLib.Object, JSExecutor
 				javascript_enabled = value != null ? value.get_boolean() : false;
 				break;
 			case "userAgent":
-				user_agent = Diorite.variant_to_string(value);
+				user_agent = Drt.variant_to_string(value);
 				break;
 			}
 		}

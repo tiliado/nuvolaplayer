@@ -66,7 +66,7 @@ public class FormatSupport: GLib.Object
 		{
 			var name = plugin.get_name();
 			var is_flash = name.down().strip() == "shockwave flash";
-			var file = yield Diorite.System.resolve_symlink(File.new_for_path(plugin.get_path()), null);
+			var file = yield Drt.System.resolve_symlink(File.new_for_path(plugin.get_path()), null);
 			var path = file.get_path();
 			web_plugins.append({name, plugin.get_path(), plugin.get_description(), true, is_flash});
 			if (!(path in paths))

@@ -29,10 +29,10 @@ namespace Nuvola
 public class UnityLauncherComponent: Component
 {
 	private Bindings bindings;
-	private Diorite.Application app;
+	private Drt.Application app;
 	private UnityLauncher? launcher = null;
 	
-	public UnityLauncherComponent(Diorite.Application app, Bindings bindings, Diorite.KeyValueStorage config)
+	public UnityLauncherComponent(Drt.Application app, Bindings bindings, Drt.KeyValueStorage config)
 	{
 		base("unity_launcher", "Unity Laucher", "Adds quick list (menu) to the icon on Unity Launcher.");
 		this.bindings = bindings;

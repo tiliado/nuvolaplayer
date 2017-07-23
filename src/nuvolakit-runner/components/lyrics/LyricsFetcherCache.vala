@@ -92,7 +92,7 @@ public class LyricsFetcherCache : GLib.Object, LyricsFetcher{
 		try
 		{
 			var cached_file = lyrics_cache.get_child(FILE_FORMAT.printf(fixed_artist, fixed_song));
-			yield Diorite.System.overwrite_file_async(cached_file, lyrics);
+			yield Drt.System.overwrite_file_async(cached_file, lyrics);
 		}
 		catch (GLib.Error e)
 		{

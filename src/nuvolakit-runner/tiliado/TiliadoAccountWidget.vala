@@ -39,7 +39,7 @@ public class TiliadoAccountWidget : Gtk.Grid
 	private Gtk.Label? status_label = null;
 	private Gtk.Grid button_box;
 	private TiliadoApi2 tiliado;
-	private Diorite.Application app;
+	private Drt.Application app;
 	
 	static construct
 	{
@@ -75,7 +75,7 @@ public class TiliadoAccountWidget : Gtk.Grid
 		}
 	}
 	
-	public TiliadoAccountWidget(TiliadoApi2 tiliado, Diorite.Application app, Gtk.Orientation orientation,
+	public TiliadoAccountWidget(TiliadoApi2 tiliado, Drt.Application app, Gtk.Orientation orientation,
 		string? cached_user_name, int cached_membership)
 	{
 		this.tiliado = tiliado;

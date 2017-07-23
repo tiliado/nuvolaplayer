@@ -268,7 +268,7 @@ public class LoginFormManager: GLib.Object
 		prefill(form);
 	}
 	
-	private Variant? handle_prefill_username(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_prefill_username(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		if (context_menu_form != null)
 		{

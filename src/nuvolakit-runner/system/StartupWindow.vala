@@ -28,7 +28,7 @@ namespace Nuvola
 /**
  * Graphical representation of {@link StartupCheck}.
  */
-public class StartupWindow : Diorite.ApplicationWindow
+public class StartupWindow : Drt.ApplicationWindow
 {
 	[Description (nick="XDG Desktop Portal status", blurb="XDG Desktop Portal is required for proxy settings and opening URIs.")]
 	public Gtk.Label xdg_desktop_portal_status {get; set;}

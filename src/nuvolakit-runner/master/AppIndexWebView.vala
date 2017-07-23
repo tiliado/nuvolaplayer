@@ -27,10 +27,10 @@ namespace Nuvola
 	
 public class AppIndexWebView : WebView
 {
-	private unowned Diorite.Application app;
+	private unowned Drt.Application app;
 	private string? root_uri = null;
 	
-	public AppIndexWebView(Diorite.Application app, WebKit.WebContext context)
+	public AppIndexWebView(Drt.Application app, WebKit.WebContext context)
 	{
 		base(context);
 		this.app = app;

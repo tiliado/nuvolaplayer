@@ -29,12 +29,12 @@ public class WelcomeScreen : Gtk.Grid
 {
 	private const string PATRONS_BOX_URI = "https://tiliado.eu/nuvolaplayer/funding/patrons_list_box/";
 	private Gtk.Grid grid;
-	private Diorite.Application app;
+	private Drt.Application app;
 	private WebView web_view;
-	private Diorite.RichTextView welcome_text;
+	private Drt.RichTextView welcome_text;
 	private Gtk.ScrolledWindow scroll;
 	
-	public WelcomeScreen(Diorite.Application app, Diorite.Storage storage)
+	public WelcomeScreen(Drt.Application app, Drt.Storage storage)
 	{
 		this.app = app;
 		
@@ -46,14 +46,14 @@ public class WelcomeScreen : Gtk.Grid
 		var welcome_xml_file = storage.require_data_file("welcome.xml");
 		try
 		{
-			welcome_xml = Diorite.System.read_file(welcome_xml_file);
+			welcome_xml = Drt.System.read_file(welcome_xml_file);
 		}
 		catch (GLib.Error e)
 		{
 			error("Failed to load '%s': %s", welcome_xml_file.get_path(), e.message);
 		}	
 		
-		var buffer = new Diorite.RichTextBuffer();
+		var buffer = new Drt.RichTextBuffer();
 		try
 		{
 			buffer.load(welcome_xml);
@@ -63,7 +63,7 @@ public class WelcomeScreen : Gtk.Grid
 			error("Markup Error in '%s': %s", welcome_xml_file.get_path(), e.message);
 		}
 		
-		welcome_text = new Diorite.RichTextView(buffer);
+		welcome_text = new Drt.RichTextView(buffer);
 		welcome_text.link_opener = show_uri;
 		welcome_text.margin = 18;
 		welcome_text.vexpand = welcome_text.hexpand = true;

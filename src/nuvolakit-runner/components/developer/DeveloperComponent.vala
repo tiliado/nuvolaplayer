@@ -31,7 +31,7 @@ public class DeveloperComponent: Component
 	private AppRunnerController app;
 	private DeveloperSidebar? sidebar = null;
 	
-	public DeveloperComponent(AppRunnerController app, Bindings bindings, Diorite.KeyValueStorage config)
+	public DeveloperComponent(AppRunnerController app, Bindings bindings, Drt.KeyValueStorage config)
 	{
 		base("developer", "Developer's tools", "Enables developer's sidebar ");
 		this.bindings = bindings;

@@ -119,7 +119,7 @@ public int main(string[] args)
 		}
 	}
 	
-	Diorite.Logger.init(log != null ? log : stderr, Args.debug ? GLib.LogLevelFlags.LEVEL_DEBUG
+	Drt.Logger.init(log != null ? log : stderr, Args.debug ? GLib.LogLevelFlags.LEVEL_DEBUG
 	  : (Args.verbose ? GLib.LogLevelFlags.LEVEL_INFO: GLib.LogLevelFlags.LEVEL_WARNING),
 	  true, "Control");
 	
@@ -130,7 +130,7 @@ public int main(string[] args)
 			var master = new Drt.ApiChannel.from_name(1, build_master_ipc_id(), null, 500);
 			
 			var response = master.call_sync("/nuvola/core/get_top_runner", null);
-			Diorite.MessageListener.check_type_string(response, "ms");
+			Drt.MessageListener.check_type_string(response, "ms");
 			response.get("ms", out Args.app);
 			
 			if (Args.app == null || Args.app == "")
@@ -301,7 +301,7 @@ class Control
 		var response = conn.call_sync("/nuvola/actions/activate",
 			new Variant.tuple({new Variant.string(name), parameter}));
 		bool handled = false;
-		if (!Diorite.variant_bool(response, ref handled))
+		if (!Drt.variant_bool(response, ref handled))
 			return quit(2, "Got invalid response from %s instance: %s\n", Nuvola.get_app_name(),
 				response == null ? "null" : response.print(true));
 		if (!handled)
@@ -322,13 +322,13 @@ class Control
 	public int track_info(string? key=null) throws GLib.Error
 	{
 		var response = conn.call_sync("/nuvola/mediaplayer/track-info", null);
-		var title = Diorite.variant_dict_str(response, "title");
-		var artist = Diorite.variant_dict_str(response, "artist");
-		var album = Diorite.variant_dict_str(response, "album");
-		var state = Diorite.variant_dict_str(response, "state");
-		var artwork_location = Diorite.variant_dict_str(response, "artworkLocation");
-		var artwork_file = Diorite.variant_dict_str(response, "artworkFile");
-		var rating = Diorite.variant_dict_double(response, "rating", 0.0);
+		var title = Drt.variant_dict_str(response, "title");
+		var artist = Drt.variant_dict_str(response, "artist");
+		var album = Drt.variant_dict_str(response, "album");
+		var state = Drt.variant_dict_str(response, "state");
+		var artwork_location = Drt.variant_dict_str(response, "artworkLocation");
+		var artwork_file = Drt.variant_dict_str(response, "artworkFile");
+		var rating = Drt.variant_dict_double(response, "rating", 0.0);
 		
 		if (key == null || key == "all")
 		{

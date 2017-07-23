@@ -202,13 +202,13 @@ public class StartupCheck : GLib.Object
 			var flash_plugins = format_support.n_flash_plugins;
 			if (flash_plugins == 0)
 			{
-				Diorite.String.append(ref result_message, "\n",
+				Drt.String.append(ref result_message, "\n",
 					"<b>Flash plugin issue:</b> No Flash Player plugin has been found. Music playback may fail.");
 				result_status = Status.ERROR;
 			}
 			else if (flash_plugins > 1)
 			{
-				Diorite.String.append(ref result_message, "\n",
+				Drt.String.append(ref result_message, "\n",
 					"<b>Flash plugin issue:</b> More Flash Player plugins have been found. Wrong version may be in use.");
 				if (result_status < Status.WARNING)
 					result_status = Status.WARNING;
@@ -230,7 +230,7 @@ public class StartupCheck : GLib.Object
 			string? failed_requirements = null;
 			if (!web_app.check_requirements(format_support, out failed_requirements))
 			{
-				Diorite.String.append(ref result_message, "\n", Markup.printf_escaped(
+				Drt.String.append(ref result_message, "\n", Markup.printf_escaped(
 						"This web app requires certain technologies to function properly but these requirements "
 						+ "have not been satisfied.\n\nFailed requirements: <i>%s</i>\n\n"
 						+ "<a href=\"%s\">Get help with installation</a>",
@@ -240,7 +240,7 @@ public class StartupCheck : GLib.Object
 		}
 		catch (Drt.RequirementError e)
 		{
-			Diorite.String.append(ref result_message, "\n", Markup.printf_escaped(
+			Drt.String.append(ref result_message, "\n", Markup.printf_escaped(
 				"This web app provides invalid metadata about its requirements."
 				+ " Please create a bug report. The error message is: %s\n\n%s",
 				e.message, web_app.requirements));

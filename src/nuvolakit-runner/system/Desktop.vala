@@ -56,11 +56,11 @@ public string? get_desktop_category_name(string id)
 }
 
 
-public void move_old_xdg_dirs(Diorite.Storage old_storage, Diorite.Storage new_storage)
+public void move_old_xdg_dirs(Drt.Storage old_storage, Drt.Storage new_storage)
 {
 	try
 	{
-		Diorite.System.move_dir_if_target_not_found(old_storage.user_config_dir, new_storage.user_config_dir);
+		Drt.System.move_dir_if_target_not_found(old_storage.user_config_dir, new_storage.user_config_dir);
 	}
 	catch (GLib.Error e)
 	{
@@ -68,7 +68,7 @@ public void move_old_xdg_dirs(Diorite.Storage old_storage, Diorite.Storage new_s
 	}
 	try
 	{
-		Diorite.System.move_dir_if_target_not_found(old_storage.user_data_dir, new_storage.user_data_dir);
+		Drt.System.move_dir_if_target_not_found(old_storage.user_data_dir, new_storage.user_data_dir);
 	}
 	catch (GLib.Error e)
 	{
@@ -76,7 +76,7 @@ public void move_old_xdg_dirs(Diorite.Storage old_storage, Diorite.Storage new_s
 	}
 	try
 	{
-		Diorite.System.move_dir_if_target_not_found(old_storage.user_cache_dir, new_storage.user_cache_dir);
+		Drt.System.move_dir_if_target_not_found(old_storage.user_cache_dir, new_storage.user_cache_dir);
 	}
 	catch (GLib.Error e)
 	{

@@ -65,8 +65,8 @@ private int launch_app_runner(File web_app_dir, string? api_token, string[] argv
 	unowned string[] unowned_empty_argv = empty_argv;
 	Gtk.init(ref unowned_empty_argv);
 	
-	var storage = new Diorite.XdgStorage.for_project(Nuvola.get_app_id());
-	move_old_xdg_dirs(new Diorite.XdgStorage.for_project(Nuvola.get_old_id()), storage);
+	var storage = new Drt.XdgStorage.for_project(Nuvola.get_app_id());
+	move_old_xdg_dirs(new Drt.XdgStorage.for_project(Nuvola.get_old_id()), storage);
 	var web_app = new WebApp.from_dir(web_app_dir);
 	var app_storage = new WebAppStorage(
 		  storage.user_config_dir.get_child(WEB_APP_DATA_SUBDIR).get_child(web_app.id),

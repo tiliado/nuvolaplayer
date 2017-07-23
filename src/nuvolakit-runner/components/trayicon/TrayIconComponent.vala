@@ -37,7 +37,7 @@ public class TrayIconComponent: Component
 	private TrayIcon x11_icon = null;
 	private Appindicator appindicator = null;
 	
-	public TrayIconComponent(AppRunnerController controller, Bindings bindings, Diorite.KeyValueStorage config)
+	public TrayIconComponent(AppRunnerController controller, Bindings bindings, Drt.KeyValueStorage config)
 	{
 		base("tray_icon", "Tray Icon", "Small icon with menu shown in the notification area.");
 		this.has_settings = true;

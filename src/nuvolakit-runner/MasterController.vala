@@ -36,7 +36,7 @@ public string build_master_ipc_id()
 	return "N3";
 }
 
-public class MasterController : Diorite.Application
+public class MasterController : Drt.Application
 {
 	private const string APP_STARTED = "/nuvola/core/app-started";
 	private const string APP_EXITED = "/nuvola/core/app-exited";
@@ -52,7 +52,7 @@ public class MasterController : Diorite.Application
 	
 	public MasterWindow? main_window {get; private set; default = null;}
 	public WebAppList? web_app_list {get; private set; default = null;}
-	public Diorite.Storage storage {get; private set; default = null;}
+	public Drt.Storage storage {get; private set; default = null;}
 	public WebAppRegistry? web_app_reg {get; private set; default = null;}
 	public Config config {get; private set; default = null;}
 	private string[] exec_cmd;
@@ -62,7 +62,7 @@ public class MasterController : Diorite.Application
 	private DbusApi? dbus_api = null;
 	private uint dbus_api_id = 0;
 	
-	private Diorite.KeyValueStorageServer storage_server = null;
+	private Drt.KeyValueStorageServer storage_server = null;
 	private ActionsKeyBinderServer actions_key_binder = null;
 	private MediaKeysServer media_keys = null;
 	#if TILIADO_API
@@ -76,7 +76,7 @@ public class MasterController : Diorite.Application
 	private InitState init_state = InitState.NONE;
 	private bool debuging;
 	
-	public MasterController(Diorite.Storage storage, WebAppRegistry? web_app_reg, string[] exec_cmd, bool debuging=false)
+	public MasterController(Drt.Storage storage, WebAppRegistry? web_app_reg, string[] exec_cmd, bool debuging=false)
 	{
 		base(Nuvola.get_app_uid(), Nuvola.get_app_name(), Nuvola.get_dbus_id(), ApplicationFlags.HANDLES_COMMAND_LINE);
 		icon = Nuvola.get_app_icon();
@@ -202,14 +202,14 @@ public class MasterController : Diorite.Application
 				"Emitted when a app has exited.");
 			server.start();
 		}
-		catch (Diorite.IOError e)
+		catch (Drt.IOError e)
 		{
 			warning("Master server error: %s", e.message);
 			quit();
 			return;
 		}
 		
-		storage_server = new Diorite.KeyValueStorageServer(server.api);
+		storage_server = new Drt.KeyValueStorageServer(server.api);
 		storage_server.add_provider("master.config", config);
 		
 		var key_grabber = new XKeyGrabber();
@@ -239,12 +239,12 @@ public class MasterController : Diorite.Application
 		Graphics.ensure_gl_extension_mounted(main_window);
 		#endif
 		
-		Diorite.Action[] actions_spec = {
+		Drt.Action[] actions_spec = {
 		//          Action(group, scope, name, label?, mnemo_label?, icon?, keybinding?, callback?)
-		new Diorite.SimpleAction("main", "app", Actions.HELP, "Help", "_Help", null, "F1", do_help),
-		new Diorite.SimpleAction("main", "app", Actions.ABOUT, "About", "_About", null, null, do_about),
-		new Diorite.SimpleAction("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
-		new Diorite.SimpleAction("main", "win", Actions.START_APP, "Start app", "_Start app", "media-playback-start", "<ctrl>S", do_start_app),
+		new Drt.SimpleAction("main", "app", Actions.HELP, "Help", "_Help", null, "F1", do_help),
+		new Drt.SimpleAction("main", "app", Actions.ABOUT, "About", "_About", null, null, do_about),
+		new Drt.SimpleAction("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
+		new Drt.SimpleAction("main", "win", Actions.START_APP, "Start app", "_Start app", "media-playback-start", "<ctrl>S", do_start_app),
 		};
 		actions.add_actions(actions_spec);
 		
@@ -406,7 +406,7 @@ public class MasterController : Diorite.Application
 		return 0;
 	}
 	
-	private Variant? handle_runner_started(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_runner_started(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		var app_id = params.pop_string();
 		var api_token = params.pop_string();
@@ -415,7 +415,7 @@ public class MasterController : Diorite.Application
 		
 		var channel = source as Drt.ApiChannel;
 		if (channel == null)
-			throw new Diorite.MessageError.REMOTE_ERROR("Failed to connect runner '%s'. %s ", app_id, source.get_type().name());
+			throw new Drt.MessageError.REMOTE_ERROR("Failed to connect runner '%s'. %s ", app_id, source.get_type().name());
 		channel.api_token = api_token;
 		runner.connect_channel(channel);
 		debug("Connected to runner server for '%s'.", app_id);
@@ -423,7 +423,7 @@ public class MasterController : Diorite.Application
 		return new Variant.boolean(true);
 	}
 	
-	private Variant? handle_runner_activated(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_runner_activated(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		var app_id = params.pop_string();
 		var runner = app_runners_map[app_id];
@@ -436,13 +436,13 @@ public class MasterController : Diorite.Application
 		return new Variant.boolean(true);
 	}
 	
-	private Variant? handle_get_top_runner(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_get_top_runner(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		var runner = app_runners.peek_head();
 		return new Variant("ms", runner == null ? null : runner.app_id);
 	}
 	
-	private Variant? handle_list_apps(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_list_apps(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		var builder = new VariantBuilder(new VariantType("aa{sv}"));
 		var keys = app_runners_map.get_keys();
@@ -452,7 +452,7 @@ public class MasterController : Diorite.Application
 		return builder.end();
 	}
 	
-	private Variant? handle_get_app_info(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_get_app_info(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		var app_id = params.pop_string();
 		var app = app_runners_map[app_id];
@@ -564,7 +564,7 @@ public class MasterController : Diorite.Application
 		catch (GLib.Error e)
 		{
 			warning("DBus Activation error: %s", e.message);
-			var dialog = new Diorite.ErrorDialog(
+			var dialog = new Drt.ErrorDialog(
 				"Web App Loading Error",
 				("The web application with id '%s' has not been found.\n\n"
 				+ "DBus Activation has ended with an error:\n%s").printf(app_id, e.message));
@@ -576,7 +576,7 @@ public class MasterController : Diorite.Application
 		var app_meta = web_app_reg.get_app_meta(app_id);
 		if (app_meta == null)
 		{
-			var dialog = new Diorite.ErrorDialog(
+			var dialog = new Drt.ErrorDialog(
 				"Web App Loading Error",
 				"The web application with id '%s' has not been found.".printf(app_id));
 			dialog.run();
@@ -603,7 +603,7 @@ public class MasterController : Diorite.Application
 		catch (GLib.Error e)
 		{
 			warning("Failed to launch app runner for '%s'. %s", app_id, e.message);
-			var dialog = new Diorite.ErrorDialog(
+			var dialog = new Drt.ErrorDialog(
 				"Web App Loading Error",
 				"The web application '%s' has failed to load.".printf(app_meta.name));
 			dialog.run();
@@ -652,7 +652,7 @@ public class MasterController : Diorite.Application
 		catch (GLib.Error e)
 		{
 			warning("Failed to launch app runner for '%s'. %s", app_id, e.message);
-			var dialog = new Diorite.ErrorDialog(
+			var dialog = new Drt.ErrorDialog(
 				"Web App Loading Error",
 				"The web application '%s' has failed to load.".printf(dbus_id));
 			dialog.run();
@@ -707,7 +707,7 @@ public class MasterController : Diorite.Application
 				config.get_string(TILIADO_ACCOUNT_TOKEN_TYPE),
 				config.get_string(TILIADO_ACCOUNT_SCOPE));
 		tiliado = new TiliadoApi2(
-			TILIADO_OAUTH2_CLIENT_ID, Diorite.String.unmask(TILIADO_OAUTH2_CLIENT_SECRET.data),
+			TILIADO_OAUTH2_CLIENT_ID, Drt.String.unmask(TILIADO_OAUTH2_CLIENT_SECRET.data),
 			TILIADO_OAUTH2_API_ENDPOINT, TILIADO_OAUTH2_TOKEN_ENDPOINT, token, "nuvolaplayer");
 		tiliado.notify["token"].connect_after(on_tiliado_api_token_changed);
 		tiliado.notify["user"].connect_after(on_tiliado_api_user_changed);
@@ -834,9 +834,9 @@ public class DbusApi: GLib.Object
 	public void get_connection(string app_id, string dbus_id, out Socket? socket, out string? token) throws GLib.Error
 	{
 		if (controller.start_app_from_dbus(app_id, dbus_id, out token))
-			socket = Diorite.SocketChannel.create_socket_from_name(build_master_ipc_id()).socket;
+			socket = Drt.SocketChannel.create_socket_from_name(build_master_ipc_id()).socket;
 		else
-			throw new Diorite.Error.ACCESS_DENIED("Nuvola refused connection.");
+			throw new Drt.Error.ACCESS_DENIED("Nuvola refused connection.");
 	}
 }
 

@@ -30,7 +30,7 @@ public string? get_required_gl_extension()
 {
 	try
 	{
-		var nvidia_version = Diorite.System.read_file(File.new_for_path("/sys/module/nvidia/version")).strip();
+		var nvidia_version = Drt.System.read_file(File.new_for_path("/sys/module/nvidia/version")).strip();
 		if (nvidia_version != "")
 			return "nvidia-" + nvidia_version.replace(".", "-");
 	}
@@ -134,7 +134,7 @@ public bool have_vdpau_driver(string name)
 		debug("VDPAU driver found: %s", filename);
 		return true;
 	}
-	var libdirs = Diorite.String.split_strip(Environment.get_variable("LD_LIBRARY_PATH"), ":");
+	var libdirs = Drt.String.split_strip(Environment.get_variable("LD_LIBRARY_PATH"), ":");
 	foreach (unowned string libdir in libdirs)
 	{
 		filename = "%s/libvdpau_%s.so".printf(libdir, name);
@@ -161,7 +161,7 @@ public bool have_vaapi_driver(string name)
 		debug("VA-API driver found: %s", filename);
 		return true;
 	}
-	var libdirs = Diorite.String.split_strip(Environment.get_variable("LIBVA_DRIVERS_PATH"), ":");
+	var libdirs = Drt.String.split_strip(Environment.get_variable("LIBVA_DRIVERS_PATH"), ":");
 	foreach (unowned string libdir in libdirs)
 	{
 		filename = "%s/%s_drv_video.so".printf(libdir, name);

@@ -30,10 +30,10 @@ public class AudioScrobblerComponent: Component
 	private const int SCROBBLE_SONG_DELAY = 60;
 	
 	private Bindings bindings;
-	private Diorite.Application app;
+	private Drt.Application app;
 	private Soup.Session connection;
-	private unowned Diorite.KeyValueStorage config;
-	private unowned Diorite.KeyValueStorage global_config;
+	private unowned Drt.KeyValueStorage config;
+	private unowned Drt.KeyValueStorage global_config;
 	private AudioScrobbler? scrobbler = null;
 	private MediaPlayerModel? player = null;
 	private uint scrobble_timeout = 0;
@@ -44,7 +44,7 @@ public class AudioScrobblerComponent: Component
 	private uint track_info_cb_id = 0;
 	
 	public AudioScrobblerComponent(
-		Diorite.Application app, Bindings bindings, Diorite.KeyValueStorage global_config, Diorite.KeyValueStorage config, Soup.Session connection)
+		Drt.Application app, Bindings bindings, Drt.KeyValueStorage global_config, Drt.KeyValueStorage config, Soup.Session connection)
 	{
 		base("scrobbler", "Audio Scrobbler Services", "Integration with audio scrobbling services like Last FM and Libre FM.");
 		this.bindings = bindings;

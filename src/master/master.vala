@@ -84,7 +84,7 @@ public int main(string[] args)
 	}
 	
 	var local_only_args = false;
-	Diorite.Logger.init(stderr, Args.debug ? GLib.LogLevelFlags.LEVEL_DEBUG
+	Drt.Logger.init(stderr, Args.debug ? GLib.LogLevelFlags.LEVEL_DEBUG
 	 : (Args.verbose ? GLib.LogLevelFlags.LEVEL_INFO: GLib.LogLevelFlags.LEVEL_WARNING), true,
 	 "Master");
 	
@@ -106,8 +106,8 @@ public int main(string[] args)
 		error("Master abort requested.");
 	
 	WebAppRegistry? web_app_reg = null;
-	var storage = new Diorite.XdgStorage.for_project(Nuvola.get_app_id());
-	move_old_xdg_dirs(new Diorite.XdgStorage.for_project(Nuvola.get_old_id()), storage);
+	var storage = new Drt.XdgStorage.for_project(Nuvola.get_app_id());
+	move_old_xdg_dirs(new Drt.XdgStorage.for_project(Nuvola.get_old_id()), storage);
 	
 	#if !FLATPAK || !NUVOLA_RUNTIME
 	if (Args.apps_dir == null)

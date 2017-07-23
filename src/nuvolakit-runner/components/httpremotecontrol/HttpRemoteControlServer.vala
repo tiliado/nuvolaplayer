@@ -476,13 +476,13 @@ public class Server: Soup.Server
 		return builder.get_root();
 	}
 	
-	private Variant? handle_register(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_register(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		register_app(params.pop_string());
 		return null;
 	}
 	
-	private Variant? handle_unregister(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_unregister(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		var app_id = params.pop_string();
 		if (!unregister_app(app_id))
@@ -498,7 +498,7 @@ public class Server: Soup.Server
 		return new Variant("(a(ssb)ms)", builder, nm_error);
 	}
 	
-	private Variant? handle_set_address_enabled(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_set_address_enabled(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		var address = params.pop_string();
 		var enabled = params.pop_bool();
@@ -518,12 +518,12 @@ public class Server: Soup.Server
 		return null;
 	}
 	
-	private Variant? handle_get_port(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_get_port(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		return service_port;
 	}
 	
-	private Variant? handle_set_port(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_set_port(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		var port = params.pop_int();
 		if (port != service_port)

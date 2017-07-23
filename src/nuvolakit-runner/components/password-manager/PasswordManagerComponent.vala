@@ -34,7 +34,7 @@ public class PasswordManagerComponent: Component
 	private PasswordManagerBinding? binding = null;
 	private WebEngine engine;
 	
-	public PasswordManagerComponent(Diorite.KeyValueStorage config, IpcBus ipc_bus, WebWorker web_worker, string web_app_id, WebEngine engine)
+	public PasswordManagerComponent(Drt.KeyValueStorage config, IpcBus ipc_bus, WebWorker web_worker, string web_app_id, WebEngine engine)
 	{
 		base("passwordmanager", "Password Manager (Experimental)", "Stores passwords from login forms in a keyring.");
 		this.ipc_bus = ipc_bus;

@@ -64,11 +64,11 @@ const string HTML5_AUDIO_DETECT_HTML = """<!DOCTYPE html>
 
 public class FormatSupportScreen: Gtk.Notebook
 {
-	public Diorite.Application app {get; construct;}
+	public Drt.Application app {get; construct;}
 	public FormatSupport format_support {get; construct;}
-	public Diorite.Storage storage {get; construct;}
+	public Drt.Storage storage {get; construct;}
 	
-	public FormatSupportScreen(Diorite.Application app, FormatSupport format_support, Diorite.Storage storage)
+	public FormatSupportScreen(Drt.Application app, FormatSupport format_support, Drt.Storage storage)
 	{
 		GLib.Object(format_support: format_support, storage: storage, app:app);
 		Gtk.Label label = null;

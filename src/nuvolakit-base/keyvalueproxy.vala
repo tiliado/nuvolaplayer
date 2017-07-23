@@ -25,15 +25,15 @@
 namespace Nuvola
 {
 
-public class KeyValueProxy: GLib.Object, Diorite.KeyValueStorage
+public class KeyValueProxy: GLib.Object, Drt.KeyValueStorage
 {
-	public Drt.Lst<Diorite.PropertyBinding> property_bindings {get; protected set;}
+	public Drt.Lst<Drt.PropertyBinding> property_bindings {get; protected set;}
 	private Drt.ApiChannel channel;
 	private string prefix;
 	
 	public KeyValueProxy(Drt.ApiChannel channel, string prefix)
 	{
-		property_bindings = new Drt.Lst<Diorite.PropertyBinding>();
+		property_bindings = new Drt.Lst<Drt.PropertyBinding>();
 		this.channel = channel;
 		this.prefix = prefix;
 	}

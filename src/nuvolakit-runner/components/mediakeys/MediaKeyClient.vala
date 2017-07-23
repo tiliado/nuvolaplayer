@@ -50,7 +50,7 @@ public class MediaKeysClient : GLib.Object, MediaKeysInterface
 		try
 		{
 			var data = conn.call_sync(METHOD, new Variant("(s)", app_id)); 
-			Diorite.MessageListener.check_type_string(data, "b");
+			Drt.MessageListener.check_type_string(data, "b");
 			managed = data.get_boolean();
 		}
 		catch (GLib.Error e)
@@ -68,7 +68,7 @@ public class MediaKeysClient : GLib.Object, MediaKeysInterface
 		try
 		{
 			var data = conn.call_sync(METHOD, new Variant("(s)", app_id)); 
-			Diorite.MessageListener.check_type_string(data, "b");
+			Drt.MessageListener.check_type_string(data, "b");
 			managed = !data.get_boolean();
 		}
 		catch (GLib.Error e)
@@ -77,7 +77,7 @@ public class MediaKeysClient : GLib.Object, MediaKeysInterface
 		}
 	}
 	
-	private Variant? handle_media_key_pressed(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_media_key_pressed(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		var key = params.pop_string();
 		media_key_pressed(key);

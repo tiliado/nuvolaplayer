@@ -49,7 +49,7 @@ public class MediaKeysServer: GLib.Object
 		});
 	}
 	
-	private Variant? handle_manage(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_manage(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		var app_id = params.pop_string();
 		
@@ -63,7 +63,7 @@ public class MediaKeysServer: GLib.Object
 		return new Variant.boolean(true);
 	}
 	
-	private Variant? handle_unmanage(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_unmanage(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		var app_id = params.pop_string();
 		
@@ -89,7 +89,7 @@ public class MediaKeysServer: GLib.Object
 				try
 				{
 					var response = app_runner.call_sync("/nuvola/mediakeys/media-key-pressed", new Variant("(s)", key));
-					if (!Diorite.variant_bool(response, ref handled))
+					if (!Drt.variant_bool(response, ref handled))
 					{
 						warning("/nuvola/mediakeys/media-key-pressed got invalid response from %s instance %s: %s\n", Nuvola.get_app_name(), app_id,
 							response == null ? "null" : response.print(true));

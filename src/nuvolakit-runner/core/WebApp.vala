@@ -165,7 +165,7 @@ public class WebApp : GLib.Object
 		string metadata;
 		try
 		{
-			metadata = Diorite.System.read_file(metadata_file).strip();
+			metadata = Drt.System.read_file(metadata_file).strip();
 		}
 		catch (GLib.Error e)
 		{
@@ -219,7 +219,7 @@ public class WebApp : GLib.Object
 		if (!meta.get_bool_or("has_desktop_launcher", false))
 			throw new WebAppError.INVALID_METADATA("Web apps without a desktop launcher are no longer supported. Upgrade Nuvola SDK.");
 		var categories = meta.get_string_or("categories");
-		if (Diorite.String.is_empty(categories))
+		if (Drt.String.is_empty(categories))
 		{
 			warning("Empty 'categories' entry for web app '%s'. Using '%s' as a fallback.", id, DEFAULT_CATEGORY);
 			categories = DEFAULT_CATEGORY;
@@ -233,7 +233,7 @@ public class WebApp : GLib.Object
 		
 		this(id, name, maintainer_name, maintainer_link,
 			version_major, version_minor, api_major, api_minor, data_dir,
-			requirements, Diorite.String.semicolon_separated_set(categories, true),
+			requirements, Drt.String.semicolon_separated_set(categories, true),
 			meta.get_int_or("window_width"), meta.get_int_or("window_height"));
 		
 		hidden = meta.get_bool_or("hidden", false);
@@ -337,7 +337,7 @@ public class WebApp : GLib.Object
 				}
 			}
 		}
-		return Diorite.Icons.load_theme_icon({Nuvola.get_app_icon()}, size);
+		return Drt.Icons.load_theme_icon({Nuvola.get_app_icon()}, size);
 	}
 	
 	private Gtk.IconInfo? lookup_theme_icon(int size, Gtk.IconLookupFlags flags=0)

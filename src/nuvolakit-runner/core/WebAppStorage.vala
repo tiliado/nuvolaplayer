@@ -36,9 +36,9 @@ public class WebAppStorage : GLib.Object
 		Object(config_dir: config_dir, data_dir: data_dir, cache_dir: cache_dir);
 		try
 		{
-			Diorite.System.make_dirs(config_dir);
-			Diorite.System.make_dirs(data_dir);
-			Diorite.System.make_dirs(cache_dir);
+			Drt.System.make_dirs(config_dir);
+			Drt.System.make_dirs(data_dir);
+			Drt.System.make_dirs(cache_dir);
 		}
 		catch (GLib.Error e)
 		{
@@ -57,7 +57,7 @@ public class WebAppStorage : GLib.Object
 		var dir = cache_dir.get_child(path);
 		try
 		{
-			Diorite.System.make_dirs(dir);
+			Drt.System.make_dirs(dir);
 		}
 		catch (GLib.Error e)
 		{
@@ -77,7 +77,7 @@ public class WebAppStorage : GLib.Object
 		var dir = data_dir.get_child(path);
 		try
 		{
-			Diorite.System.make_dirs(dir);
+			Drt.System.make_dirs(dir);
 		}
 		catch (GLib.Error e)
 		{

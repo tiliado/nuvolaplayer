@@ -29,13 +29,13 @@ public class MPRISProvider
 {
 	private MediaPlayerModel player;
 	private uint owner_id = 0;
-	private Diorite.Application app;
+	private Drt.Application app;
 	private MPRISApplication? mpris_app = null;
 	private MPRISPlayer? mpris_player = null;
 	private DBusConnection? conn = null;
 	private uint[] registered_objects = new uint[2];
 	
-	public MPRISProvider(Diorite.Application app, MediaPlayerModel player)
+	public MPRISProvider(Drt.Application app, MediaPlayerModel player)
 	{
 		this.player = player;
 		this.app = app;

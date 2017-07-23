@@ -40,7 +40,7 @@ public class Nuvola.MenuBarBinding: ObjectBinding<MenuBarInterface>
 		});
 	}
 	
-	private Variant? handle_menubar_set_menu(GLib.Object source, Drt.ApiParams? params) throws Diorite.MessageError
+	private Variant? handle_menubar_set_menu(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
 	{
 		check_not_empty();
 		var id = params.pop_string();
