@@ -299,6 +299,110 @@ WebApp._onActionActivated = function(emitter, name, param)
     Service integrations can also create [custom Actions](:apps/custom-actions.html) like thumbs
     up/down or star rating.
 
+Track Rating
+------------
+
+Since **Nuvola 3.1**, it is also possible to integrate track rating. If you wish to make your script compatible with
+older versions, use respective [Nuvola.checkVersion](apiref>Nuvola.checkVersion) condition as shown in examples bellow.
+
+In order to provide users with the current rating state, use these API calls:
+
+  * [MediaPlayer.setTrack()](apiref>Nuvola.MediaPlayer.setTrack) method accepts `track.rating` property, which holds
+    track rating as a number in range from `0.0` to `1.0` as in 
+    [the MPRIS/xesam specification](https://www.freedesktop.org/wiki/Specifications/mpris-spec/metadata/#index22h4).
+    This property is ignored in Nuvola < 3.1.
+  * [MediaPlayer.setCanRate()](apiref>Nuvola.MediaPlayer.setCanRate) controls whether
+    it is allowed to change rating remotely or not. This method is not available in Nuvola < 3.1 and results in error.
+  * [MediaPlayer::RatingSet](apiref>Nuvola.MediaPlayer%3A%3ARatingSet) is emitted when rating is changed remotely.
+    This signal is not available in Nuvola < 3.1 and results in error.
+
+It's up to you to decide **how to map the double value to the rating system of your web app**.
+Here are some suggestions:
+
+  * **Percentage rating** is the simplest case mapping the range `0.0-1.0` to percentage 0%-100%.
+  * **Five-star rating** may calculate the number of stars as `stars = rating / 5.0`.
+  * **Thumb up/down rating** is a bit tricky. You can use rating `0.2` for thumb down and `1.0` for thumb up in the
+    `track.rating` property and interpret rating <= `0.41` (0-2 stars) as thumb down and rating >= `0.79` (4-5 stars)
+    as thumb up in the `RatingSet` signal handler.
+    
+
+In this example, a track can be rated as *good* (thumb up) or *bad* (thumb down).
+
+```js
+
+...
+
+// Page is ready for magic
+WebApp._onPageReady = function()
+{
+    // Connect handler for signal ActionActivated
+    Nuvola.actions.connect("ActionActivated", this);
+    
+    // Connect rating handler if supported
+    if (Nuvola.checkVersion && Nuvola.checkVersion(3, 1))  // @API 3.1
+        player.connect("RatingSet", this);
+
+    // Start update routine
+    this.update();
+}
+
+// Extract data from the web page
+WebApp.update = function()
+{
+    var track = {
+        ...
+    }
+
+    ...
+    
+    // Parse rating
+    switch (document.getElementById("rating").innerText || null)
+    {
+    case "good":
+        track.rating = 1.0; // five stars
+        break;
+    case "bad":
+        track.rating = 0.2; // one star
+        break;
+    default:
+        track.rating = 0.0; // zero star
+        break;
+    }
+
+    player.setTrack(track);
+    
+    ...
+    
+    var state = PlaybackState.UNKNOWN;
+    state = ...
+
+    player.setPlaybackState(state);
+    
+    if (Nuvola.checkVersion && Nuvola.checkVersion(3.1))  // @API 3.1
+        player.setCanRate(state !== PlaybackState.UNKNOWN);
+}
+
+...
+
+// Handler for rating
+WebApp._onRatingSet = function(emitter, rating)
+{
+    Nuvola.log("Rating set: {1}", rating);
+    var current = document.getElementById("rating").innerText;
+    if (rating <= 0.4) // 0-2 stars
+        document.getElementById("rating").innerText = current === "bad" ? "-" : "bad";
+    else if (rating >= 0.8) // 4-5 stars
+        document.getElementById("rating").innerText = current === "good" ? "-" : "good";
+    else // three stars
+        throw new Error("Invalid rating: " + rating + ".\n\n" 
+        + "Have you clicked the three-star button? It isn't supported.");
+}
+
+...
+```
+
+![Track Rating](:images/guide/track_rating.png)
+
 Progress bar
 ------------
 
