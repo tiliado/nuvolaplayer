@@ -352,7 +352,7 @@ public class TiliadoAccountWidget : Gtk.Grid
 		logout_button.valign = Gtk.Align.CENTER;
 		logout_button.clicked.connect(on_logout_button_clicked);
 		
-		if (membership == 0)
+		if (membership < TiliadoMembership.BASIC)
 		{
 			show_premium_required();
 			plan_button = new Gtk.Button.with_label("Get Premium");
@@ -416,34 +416,14 @@ public class TiliadoAccountWidget : Gtk.Grid
 
 public class AccountTypeLabel : Gtk.Label
 {
-	
 	public AccountTypeLabel(uint membership)
 	{
 		GLib.Object(
-			label: AccountTypeLabel.get_text_for_membership(membership),
+			label: TiliadoMembership.from_uint(membership).get_label(),
 			halign: Gtk.Align.CENTER, valign: Gtk.Align.CENTER);
 		
-		if (membership > 0)
+		if (membership >= TiliadoMembership.PREMIUM)
 			get_style_context().add_class("premium");
-	}
-		
-	public static string get_text_for_membership(uint membership)
-	{
-		switch (membership)
-		{
-		case TiliadoMembership.NONE:
-			return "Basic account";
-		case TiliadoMembership.PREMIUM:
-			return "★ Premium";
-		case TiliadoMembership.PREMIUM_PLUS:
-			return "★ Premium+";
-		case TiliadoMembership.PATRON:
-			return "★ Patron";
-		case TiliadoMembership.PATRON_PLUS:
-			return "★ Patron+";
-		default:
-			return "☢ Developer";
-		}
 	}
 }
 
@@ -453,12 +433,12 @@ public class AccountTypeButton : Gtk.Button
 	public AccountTypeButton(uint membership)
 	{
 		GLib.Object();
-		var label = new Gtk.Label(AccountTypeLabel.get_text_for_membership(membership));
+		var label = new Gtk.Label(TiliadoMembership.from_uint(membership).get_label());
 		label.hexpand = true;
 		label.halign = Gtk.Align.CENTER;
 		label.show();
 		add(label);
-		if (membership > 0)
+		if (membership >= TiliadoMembership.PREMIUM)
 			get_style_context().add_class("premium");
 	}
 	

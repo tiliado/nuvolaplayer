@@ -283,7 +283,8 @@ public class MasterController : Diorite.Application
 		#if TILIADO_API
 		string? user_name = null;
 		int membership = -1;
-		if (is_tiliado_account_valid(0))
+		// TiliadoMembership.NONE just to check validity of cached data
+		if (is_tiliado_account_valid(TiliadoMembership.NONE))
 		{
 			user_name = config.get_string(TILIADO_ACCOUNT_USER);
 			membership = (int) config.get_int64(TILIADO_ACCOUNT_MEMBERSHIP);
@@ -516,7 +517,7 @@ public class MasterController : Diorite.Application
 	{
 		if (web_app_list.selected_web_app == null)
 			return;
-		if (is_tiliado_account_valid(TiliadoMembership.PREMIUM))
+		if (is_tiliado_account_valid(TiliadoMembership.BASIC))
 		{
 			main_window.hide();
 			start_app(web_app_list.selected_web_app);
@@ -540,7 +541,7 @@ public class MasterController : Diorite.Application
 		}
 		#endif
 	
-		if (!is_tiliado_account_valid(TiliadoMembership.PREMIUM))
+		if (!is_tiliado_account_valid(TiliadoMembership.BASIC))
 		{
 			start_app_after_activation = app_id;
 			activate();

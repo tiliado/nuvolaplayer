@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2016-2017 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -28,11 +28,45 @@ namespace Nuvola
 public enum TiliadoMembership
 {
 	NONE = 0,
-	PREMIUM = 1,
-	PREMIUM_PLUS = 2,
-	PATRON = 3,
-	PATRON_PLUS = 4,
-	DEVELOPER = 5;
+	BASIC = 1,
+	PREMIUM = 2,
+	PREMIUM_PLUS = 3,
+	PATRON = 4,
+	PATRON_PLUS = 5,
+	DEVELOPER = 6;
+	
+	public string get_label()
+	{
+		switch (this)
+		{
+		case NONE:
+			return "No membership";
+		case BASIC:
+			return "Basic account";
+		case PREMIUM:
+			return "★ Premium account";
+		case PREMIUM_PLUS:
+			return "★ Premium+ account";
+		case PATRON:
+			return "★ Patron account";
+		case PATRON_PLUS:
+			return "★ Patron+ account";
+		default:
+			return "☢ Developer account";
+		}
+	}
+	
+	public static TiliadoMembership from_uint(uint level)
+	{
+		return (level > DEVELOPER) ? DEVELOPER : (TiliadoMembership) level;
+	}
+	
+	public static TiliadoMembership from_int(int level)
+	{
+		if (level < 0)
+			level = 0;
+		return from_uint((uint) level);
+	}
 }
 
 #if TILIADO_API
