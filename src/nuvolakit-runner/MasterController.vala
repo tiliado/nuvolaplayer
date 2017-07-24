@@ -132,6 +132,12 @@ public class MasterController : Drt.Application
 		base.dbus_unregister(conn, object_path);
 	}
 	
+	public override void apply_custom_styles(Gdk.Screen screen)
+	{
+		base.apply_custom_styles(screen);
+		Nuvola.Css.apply_custom_styles(screen);
+	}
+	
 	#if FLATPAK
 	private bool is_desktop_portal_available()
 	{
