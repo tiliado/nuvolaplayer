@@ -139,8 +139,14 @@ public class WebEngine : GLib.Object, JSExecutor
 		config.set_default_value(ZOOM_LEVEL_CONF, 1.0);
 		web_view.zoom_level = config.get_double(ZOOM_LEVEL_CONF);
 		web_view.load_changed.connect(on_load_changed);
+		web_view.get_back_forward_list().changed.connect_after(on_back_forward_list_changed);
 		session = new Drt.KeyValueMap();
 		register_ipc_handlers();
+	}
+	
+	~WebEngine()
+	{
+		web_view.get_back_forward_list().changed.disconnect(on_back_forward_list_changed);
 	}
 	
 	public signal void init_finished();
@@ -221,6 +227,8 @@ public class WebEngine : GLib.Object, JSExecutor
 	
 	public void load_app()
 	{
+		can_go_back = web_view.can_go_back();
+		can_go_forward = web_view.can_go_forward();
 		try
 		{
 			var url = env.send_data_request_string("LastPageRequest", "url");
@@ -905,8 +913,6 @@ public class WebEngine : GLib.Object, JSExecutor
 	
 	private void on_uri_changed(GLib.Object o, ParamSpec p)
 	{
-		can_go_back = web_view.can_go_back();
-		can_go_forward = web_view.can_go_forward();
 		var args = new Variant("(sms)", "UriChanged", web_view.uri);
 		try
 		{
@@ -916,6 +922,12 @@ public class WebEngine : GLib.Object, JSExecutor
 		{
 			runner_app.show_error("Integration script error", "The web app integration caused an error: %s".printf(e.message));
 		}
+	}
+	
+	private void on_back_forward_list_changed(WebKit.BackForwardListItem? item_added, void* items_removed)
+	{
+		can_go_back = web_view.can_go_back();
+		can_go_forward = web_view.can_go_forward();
 	}
 	
 	private void on_zoom_level_changed(GLib.Object o, ParamSpec p)

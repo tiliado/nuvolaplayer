@@ -420,6 +420,8 @@ public class AppRunnerController: Drt.Application
 		ah.simple_action("view", "win", Actions.ZOOM_RESET, "Original zoom", null, "zoom-original", "<ctrl>0", web_engine.zoom_reset),
 		};
 		actions.add_actions(actions_spec);
+		actions.get_action(Actions.GO_FORWARD).enabled = web_engine.can_go_forward;
+		actions.get_action(Actions.GO_BACK).enabled = web_engine.can_go_back;
 	}
 	
 	private void do_quit()
