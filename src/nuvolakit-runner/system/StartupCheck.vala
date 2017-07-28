@@ -62,6 +62,14 @@ public class StartupCheck : GLib.Object
 	public StartupCheck.Status final_status {get; private set; default = StartupCheck.Status.UNKNOWN;}
 	[Description (nick="Format support info", blurb="Associated format support information to check web app requirements.")]
 	public FormatSupport format_support {get; construct;}
+	#if TILIADO_API
+	[Description (nick="Tiliado Account status", blurb="Tiliado account is required for premium features.")]
+	public Status tiliado_account_status {get; set; default = Status.UNKNOWN;}
+	[Description (nick="Tiliado Account message", blurb="Null unless the check went wrong.")]
+	public string? tiliado_account_message {get; set; default = null;}
+	[Description (nick="Tiliado activation", blurb="Tiliado account activation.")]
+	public TiliadoActivation activation {get; private set;}
+	#endif
 	[Description (nick="Web App object", blurb="Currently loaded web application")]
 	public WebApp web_app {get; construct;}
 	
@@ -74,6 +82,17 @@ public class StartupCheck : GLib.Object
 	public StartupCheck(WebApp web_app, FormatSupport format_support)
 	{
 		GLib.Object(format_support: format_support, web_app: web_app);
+	}
+	
+	~StartupCheck()
+	{
+		#if TILIADO_API
+		if (activation != null)
+		{
+			activation.activation_finished.disconnect(on_activation_user_changed);
+			activation.user_info_updated.disconnect(on_activation_user_changed);
+		}
+		#endif
 	}
 	
 	/**
@@ -130,7 +149,7 @@ public class StartupCheck : GLib.Object
 		(unowned ParamSpec)[] properties = get_class().list_properties();
 		foreach (weak ParamSpec property in properties)
 		{
-			if (property.name.has_suffix("-status"))
+			if (property.name != "final-status" && property.name.has_suffix("-status"))
 			{
 				Status status = Status.UNKNOWN;
 				this.get(property.name, out status);
@@ -329,6 +348,41 @@ public class StartupCheck : GLib.Object
 		yield Drt.EventLoop.resume_later();
 		task_finished(NAME);
 	}
+	
+	#if TILIADO_API
+	/**
+	 * Check whether sufficient Tiliado account is available.
+	 * 
+	 * The {@link tiliado_account_status} property is populated with the result of this check.
+	 */
+	public async void check_tiliado_account(TiliadoActivation activation)
+	{
+		const string NAME = "Tiliado account";
+		task_started(NAME);
+		tiliado_account_status = Status.IN_PROGRESS;
+		yield Drt.EventLoop.resume_later();
+		this.activation = activation;
+		activation.activation_finished.connect(on_activation_user_changed);
+		activation.user_info_updated.connect(on_activation_user_changed);
+		if (activation.has_user_membership(TiliadoMembership.BASIC))
+			tiliado_account_status = Status.OK;
+		else
+			tiliado_account_status = Status.ERROR;
+		yield Drt.EventLoop.resume_later();
+		task_finished(NAME);
+	}
+	
+	private void on_activation_user_changed(TiliadoApi2.User? user)
+	{
+		warning("on_activation_user_changed, %s", activation.has_user_membership(TiliadoMembership.BASIC).to_string());
+		if (activation.has_user_membership(TiliadoMembership.BASIC))
+			tiliado_account_status = Status.OK;
+		else
+			tiliado_account_status = Status.ERROR;
+		warning("on_activation_user_changed, %s", tiliado_account_status.to_string());
+		mark_as_finished();
+	}
+	#endif
 	
 	/**
 	 * Statuses of {@link StartupCheck}s.

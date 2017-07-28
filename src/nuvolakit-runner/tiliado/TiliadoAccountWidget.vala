@@ -33,18 +33,17 @@ public class TiliadoAccountWidget : Gtk.Grid
 	private Gtk.Button? activate_button;
 	private Gtk.Button? plan_button = null;
 	private Gtk.Button? free_button = null;
-	private Gtk.Button? quit_button = null;
 	private Gtk.Button? cancel_button = null;
 	private Gtk.Button? logout_button = null;
 	private Gtk.Label? status_label = null;
 	private Gtk.Grid button_box;
-	private TiliadoApi2 tiliado;
+	private TiliadoActivation activation;
+	private TiliadoApi2.User? current_user = null;
 	private Drt.Application app;
 	
-	public TiliadoAccountWidget(TiliadoApi2 tiliado, Drt.Application app, Gtk.Orientation orientation,
-		string? cached_user_name, int cached_membership)
+	public TiliadoAccountWidget(TiliadoActivation activation, Drt.Application app, Gtk.Orientation orientation)
 	{
-		this.tiliado = tiliado;
+		this.activation = activation;
 		this.app = app;
 		this.orientation = orientation;
 		button_box = new Gtk.Grid();
@@ -54,9 +53,27 @@ public class TiliadoAccountWidget : Gtk.Grid
 		margin_left = margin_right = 10;
 		row_spacing = column_spacing = 5;
 		
-		if (tiliado.token == null)
+		activation.user_info_updated.connect(on_user_info_updated);
+		activation.activation_started.connect(on_activation_started);
+		activation.activation_failed.connect(on_activation_failed);
+		activation.activation_cancelled.connect(on_activation_cancelled);
+		activation.activation_finished.connect(on_activation_finished);
+		current_user = activation.get_user_info();
+		if (current_user == null)
+		{
 			get_token();
-		else check_user(cached_user_name, cached_membership);
+		}
+		else
+			check_user();
+	}
+	
+	~TiliadoAccountWidget()
+	{
+		activation.user_info_updated.disconnect(on_user_info_updated);
+		activation.activation_started.disconnect(on_activation_started);
+		activation.activation_failed.disconnect(on_activation_failed);
+		activation.activation_cancelled.disconnect(on_activation_cancelled);
+		activation.activation_finished.disconnect(on_activation_finished);
 	}
 	
 	private void show_premium_required()
@@ -96,12 +113,6 @@ public class TiliadoAccountWidget : Gtk.Grid
 		free_button.clicked.connect(on_free_button_clicked);
 		button_box.add(free_button);
 		
-		quit_button = new Gtk.Button.with_label("Quit");
-		quit_button.hexpand = true;
-		quit_button.halign = Gtk.Align.CENTER;
-		quit_button.clicked.connect(on_quit_button_clicked);
-		button_box.add(quit_button);
-		
 		button_box.hexpand = true;
 		button_box.halign = Gtk.Align.CENTER;
 		attach(button_box, 0, 1, 2, 1);
@@ -133,12 +144,6 @@ public class TiliadoAccountWidget : Gtk.Grid
 			button_box.remove(plan_button);
 			plan_button = null;
 		}
-		if (quit_button != null)
-		{
-			quit_button.clicked.disconnect(on_quit_button_clicked);
-			button_box.remove(quit_button);
-			quit_button = null;
-		}
 		if (activate_button != null)
 		{
 			activate_button.clicked.disconnect(on_activate_button_clicked);
@@ -159,13 +164,6 @@ public class TiliadoAccountWidget : Gtk.Grid
 		}
 		foreach (var child in get_children())
 			remove(child);
-	}
-	
-	private void device_code_grant_disconnect()
-	{
-		tiliado.device_code_grant_error.disconnect(on_device_code_grant_error);
-		tiliado.device_code_grant_cancelled.disconnect(on_device_code_grant_cancelled);
-		tiliado.device_code_grant_finished.disconnect(on_device_code_grant_finished);
 	}
 	
 	private void on_activate_button_clicked(Gtk.Button button)
@@ -190,11 +188,7 @@ public class TiliadoAccountWidget : Gtk.Grid
 		cancel_button.show();
 		attach(cancel_button, 1, 3, 1, 1);
 		
-		tiliado.device_code_grant_started.connect(on_device_code_grant_started);
-		tiliado.device_code_grant_error.connect(on_device_code_grant_error);
-		tiliado.device_code_grant_cancelled.connect(on_device_code_grant_cancelled);
-		tiliado.device_code_grant_finished.connect(on_device_code_grant_finished);
-		tiliado.start_device_code_grant(TILIADO_OAUTH2_DEVICE_CODE_ENDPOINT);
+		activation.start_activation();
 	}
 	
 	private void on_free_button_clicked(Gtk.Button button)
@@ -207,58 +201,29 @@ public class TiliadoAccountWidget : Gtk.Grid
 		app.show_uri("https://tiliado.eu/nuvolaplayer/funding/");
 	}
 	
-	private void on_quit_button_clicked(Gtk.Button button)
-	{
-		app.quit();
-	}
-	
 	private void on_cancel_button_clicked(Gtk.Button button)
 	{
-		tiliado.cancel_device_code_grant();
+		activation.cancel_activation();
 	}
 	
 	private void on_logout_button_clicked(Gtk.Button button)
 	{
-		tiliado.token = null;
+		activation.drop_activation();
 		get_token();
 	}
 	
-	private void on_device_code_grant_started(string uri)
+	private void on_activation_started(string uri)
 	{
-		tiliado.device_code_grant_started.disconnect(on_device_code_grant_started);
-		app.show_uri(uri);
+		if (activate_button != null && !activate_button.sensitive)
+			app.show_uri(uri);
 	}
 	
-	private void on_device_code_grant_error(string code, string? message)
+	private void on_activation_failed(string message)
 	{
 		activate_button.sensitive = true;
-		device_code_grant_disconnect();
 		clear_status_row();
-		
-		string detail;
-		switch (code)
-		{
-		case "parse_error":
-		case "response_error":
-			detail = "The server returned a malformed response.";
-			break;
-		case "invalid_client":
-		case "unauthorized_client":
-			detail = "This build of %s is not authorized to use the Tiliado API.".printf(Nuvola.get_app_name());
-			break;
-		case "access_denied":
-			detail = "The authorization request has been dismissed. Please try again.";
-			break;
-		case "expired_token":
-			detail = "The authorization request has expired. Please try again.";
-			break;
-		default:
-			detail = "%s has sent an invalid request.".printf(Nuvola.get_app_name());
-			break;
-			
-		}
 		status_label = new Gtk.Label(null);
-		status_label.set_markup(Markup.printf_escaped("<b>Authorization failed:</b> %s", detail));
+		status_label.set_markup(Markup.printf_escaped("<b>Authorization failed:</b> %s", message));
 		status_label.hexpand = true;
 		status_label.wrap_mode = Pango.WrapMode.WORD_CHAR;
 		status_label.set_line_wrap(true);
@@ -266,51 +231,34 @@ public class TiliadoAccountWidget : Gtk.Grid
 		attach(status_label, 0, 3, 4, 1);
 	}
 	
-	private void on_device_code_grant_cancelled()
+	private void on_activation_cancelled()
 	{
 		activate_button.sensitive = true;
-		device_code_grant_disconnect();
 		clear_status_row();
 	}
 	
-	private void on_device_code_grant_finished(Oauth2Token token)
+	private void on_activation_finished(TiliadoApi2.User? user)
 	{
-		device_code_grant_disconnect();
+		this.current_user = user;
 		check_user();
 	}
 	
-	private void on_get_current_user_done(GLib.Object? o, AsyncResult res)
+	private void on_user_info_updated(TiliadoApi2.User? user)
 	{
-		try
-		{
-			var user = tiliado.fetch_current_user.end(res);
-			check_user(user.name, (int) user.membership);
-		}
-		catch (Oauth2Error e)
-		{
-			clear_all();
-			get_token();
-			warning("OAuth2 Error: %s", e.message);
-			status_label = new Gtk.Label(null);
-			status_label.set_markup("<b>Authorization failed:</b> Failed to fetch user's details.");
-			status_label.hexpand = true;
-			status_label.wrap_mode = Pango.WrapMode.WORD_CHAR;
-			status_label.set_line_wrap(true);
-			status_label.show();
-			attach(status_label, 0, 3, 4, 1);
-		}
+		this.current_user = user;
+		check_user();
 	}
 	
-	private void check_user(string? user_name=null, int membership=-1)
+	private void check_user()
 	{
-		if (user_name == null || membership < 0)
+		var user = this.current_user;
+		if (user == null)
 		{
-			tiliado.fetch_current_user.begin(on_get_current_user_done);
+			get_token();
 			return;
 		}
-	
-		clear_all();
 		
+		clear_all();
 		logout_button = new Gtk.Button.from_icon_name("system-shutdown-symbolic", Gtk.IconSize.BUTTON);
 		logout_button.hexpand = true;
 		logout_button.vexpand = false;
@@ -318,7 +266,7 @@ public class TiliadoAccountWidget : Gtk.Grid
 		logout_button.valign = Gtk.Align.CENTER;
 		logout_button.clicked.connect(on_logout_button_clicked);
 		
-		if (membership < TiliadoMembership.BASIC)
+		if (user.membership < TiliadoMembership.BASIC)
 		{
 			show_premium_required();
 			plan_button = new Gtk.Button.with_label("Get Premium");
@@ -338,19 +286,12 @@ public class TiliadoAccountWidget : Gtk.Grid
 			
 			button_box.add(logout_button);
 			
-			quit_button = new Gtk.Button.with_label("Quit");
-			quit_button.hexpand = false;
-			quit_button.vexpand = false;
-			
-			quit_button.clicked.connect(on_quit_button_clicked);
-			button_box.add(quit_button);
-			
 			button_box.halign = Gtk.Align.CENTER;
 			attach(button_box, 0, 1, 2, 1);
 		}
 		else
 		{
-			var label = new Gtk.Label(user_name);
+			var label = new Gtk.Label(user.name);
 			label.max_width_chars = 15;
 			label.ellipsize = Pango.EllipsizeMode.END;
 			label.lines = 1;
@@ -360,7 +301,7 @@ public class TiliadoAccountWidget : Gtk.Grid
 			label.margin_left = 	15;
 			attach(label, 0, 1, 1, 1);
 			
-			var account_label = new AccountTypeLabel((uint) membership);
+			var account_label = new AccountTypeLabel(TiliadoMembership.from_uint(user.membership));
 			account_label.hexpand = false;
 			account_label.vexpand = false;
 			account_label.halign = Gtk.Align.END;
@@ -382,10 +323,10 @@ public class TiliadoAccountWidget : Gtk.Grid
 
 public class AccountTypeLabel : Gtk.Label
 {
-	public AccountTypeLabel(uint membership)
+	public AccountTypeLabel(TiliadoMembership membership)
 	{
 		GLib.Object(
-			label: TiliadoMembership.from_uint(membership).get_label(),
+			label: membership.get_label(),
 			halign: Gtk.Align.CENTER, valign: Gtk.Align.CENTER);
 		
 		if (membership >= TiliadoMembership.PREMIUM)
@@ -396,10 +337,10 @@ public class AccountTypeLabel : Gtk.Label
 
 public class AccountTypeButton : Gtk.Button
 {
-	public AccountTypeButton(uint membership)
+	public AccountTypeButton(TiliadoMembership membership)
 	{
 		GLib.Object();
-		var label = new Gtk.Label(TiliadoMembership.from_uint(membership).get_label());
+		var label = new Gtk.Label(membership.get_label());
 		label.hexpand = true;
 		label.halign = Gtk.Align.CENTER;
 		label.show();

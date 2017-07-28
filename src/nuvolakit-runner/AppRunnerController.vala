@@ -151,17 +151,24 @@ public class AppRunnerController: Drt.Application
 		assert(startup_check != null);
 		if (startup_check.finished_tasks == 3 && startup_check.running_tasks == 0)
 		{
-			startup_check.task_finished.disconnect(on_startup_check_task_finished);
 			if (startup_check.get_overall_status() == StartupCheck.Status.ERROR)
 			{
+				startup_check.task_finished.disconnect(on_startup_check_task_finished);
 				startup_window.ready_to_continue.connect(on_startup_window_ready_to_continue);
 				startup_check.mark_as_finished();
 			}
 			else
 			{
-				init_ipc(startup_check);
+				startup_check.task_finished.disconnect(on_startup_check_task_finished);
 				startup_window.ready_to_continue.connect(on_startup_window_ready_to_continue);
+				#if !TILIADO_API
+				init_ipc(startup_check);
 				startup_check.mark_as_finished();
+				#else
+				if (init_ipc(startup_check))
+					startup_check.check_tiliado_account.begin(
+						new TiliadoActivationClient(ipc_bus.master), () => startup_check.mark_as_finished());
+				#endif
 			}
 		}
 	}

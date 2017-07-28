@@ -82,6 +82,12 @@ public class TiliadoApi2 : Oauth2Client
 		this.project_id = project_id;
 	}
 	
+	public void drop_token()
+	{
+		token = null;
+		user = null;
+	}
+	
 	public async User fetch_current_user() throws Oauth2Error
 	{
 		var response = yield call("me/");
@@ -161,6 +167,21 @@ public class TiliadoApi2 : Oauth2Client
 		public int[] groups {get; private set;}
 		public uint membership {get; set; default = 0;}
 		
+		public static User? from_variant(Variant? data)
+		{
+			if (data == null || data.get_type_string() != "(imsmsu)")
+				return null;
+			
+			int32 id = 0;
+			string? username = null;
+			string? name = null;
+			uint32 membership = 0;
+			data.@get("(imsmsu)", out id, out username, out name, out membership);
+			var user =  new User((int) id, username, name, true, true, {});
+			user.membership = (uint) membership;
+			return user;
+		}
+		
 		public class User(int id, string? username, string? name, bool is_authenticated, bool is_active, owned int[] groups)
 		{
 			this.id = id;
@@ -171,6 +192,11 @@ public class TiliadoApi2 : Oauth2Client
 			this.groups = (owned) groups;
 		}
 		
+		public bool is_valid()
+		{
+			return is_active && is_authenticated;
+		}
+		
 		public bool has_membership(uint membership)
 		{
 			return this.membership >= membership;
@@ -179,6 +205,11 @@ public class TiliadoApi2 : Oauth2Client
 		public string to_string()
 		{
 			return id == 0 ? "null" : "%s (%s, %d, %u)".printf(name, username, id, membership);
+		}
+		
+		public Variant to_variant()
+		{
+			return new Variant("(imsmsu)", (int32) id, username, name, (uint) membership);
 		}
 	}
 	

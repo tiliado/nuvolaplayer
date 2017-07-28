@@ -40,14 +40,6 @@ public class MasterController : Drt.Application
 {
 	private const string APP_STARTED = "/nuvola/core/app-started";
 	private const string APP_EXITED = "/nuvola/core/app-exited";
-	private const string TILIADO_ACCOUNT_TOKEN_TYPE = "tiliado.account2.token_type";
-	private const string TILIADO_ACCOUNT_ACCESS_TOKEN = "tiliado.account2.access_token";
-	private const string TILIADO_ACCOUNT_REFRESH_TOKEN = "tiliado.account2.refresh_token";
-	private const string TILIADO_ACCOUNT_SCOPE = "tiliado.account2.scope";
-	private const string TILIADO_ACCOUNT_MEMBERSHIP = "tiliado.account2.membership";
-	private const string TILIADO_ACCOUNT_USER = "tiliado.account2.user";
-	private const string TILIADO_ACCOUNT_EXPIRES = "tiliado.account2.expires";
-	private const string TILIADO_ACCOUNT_SIGNATURE = "tiliado.account2.signature";
 	private const string PAGE_WELCOME = "welcome";
 	
 	public MasterWindow? main_window {get; private set; default = null;}
@@ -66,10 +58,9 @@ public class MasterController : Drt.Application
 	private ActionsKeyBinderServer actions_key_binder = null;
 	private MediaKeysServer media_keys = null;
 	#if TILIADO_API
-	private TiliadoApi2? tiliado = null;
+	private TiliadoActivation? activation = null;
 	private TiliadoAccountWidget? tiliado_widget = null;
 	#endif
-	private string? start_app_after_activation = null;
 	#if EXPERIMENTAL
 	private HttpRemoteControl.Server http_remote_control = null;
 	#endif
@@ -173,10 +164,6 @@ public class MasterController : Drt.Application
 		var default_config = new HashTable<string, Variant>(str_hash, str_equal);
 		config = new Config(storage.user_config_dir.get_child("master").get_child("config.json"), default_config);
 		
-		#if TILIADO_API
-		init_tiliado_account();
-		#endif
-		
 		var server_name = build_master_ipc_id();
 		Environment.set_variable("NUVOLA_IPC_MASTER", server_name, true);
 		try
@@ -214,6 +201,10 @@ public class MasterController : Drt.Application
 			quit();
 			return;
 		}
+		
+		#if TILIADO_API
+		init_tiliado_account();
+		#endif
 		
 		storage_server = new Drt.KeyValueStorageServer(server.api);
 		storage_server.add_provider("master.config", config);
@@ -287,15 +278,7 @@ public class MasterController : Drt.Application
 		}
 		
 		#if TILIADO_API
-		string? user_name = null;
-		int membership = -1;
-		// TiliadoMembership.NONE just to check validity of cached data
-		if (is_tiliado_account_valid(TiliadoMembership.NONE))
-		{
-			user_name = config.get_string(TILIADO_ACCOUNT_USER);
-			membership = (int) config.get_int64(TILIADO_ACCOUNT_MEMBERSHIP);
-		}
-		tiliado_widget = new TiliadoAccountWidget(tiliado, this, Gtk.Orientation.HORIZONTAL, user_name, membership);
+		tiliado_widget = new TiliadoAccountWidget(activation, this, Gtk.Orientation.HORIZONTAL);
 		main_window.top_grid.insert_row(1);
 		if (tiliado_widget.full_width)
 			main_window.top_grid.attach(tiliado_widget, 0, 1, 1, 1);
@@ -523,16 +506,8 @@ public class MasterController : Drt.Application
 	{
 		if (web_app_list.selected_web_app == null)
 			return;
-		if (is_tiliado_account_valid(TiliadoMembership.BASIC))
-		{
-			main_window.hide();
-			start_app(web_app_list.selected_web_app);
-			do_quit();
-		}
-		else
-		{
-			start_app_after_activation = web_app_list.selected_web_app;
-		}
+		main_window.hide();
+		start_app(web_app_list.selected_web_app);
 	}
 	
 	private void start_app(string app_id)
@@ -546,14 +521,6 @@ public class MasterController : Drt.Application
 			return;
 		}
 		#endif
-	
-		if (!is_tiliado_account_valid(TiliadoMembership.BASIC))
-		{
-			start_app_after_activation = app_id;
-			activate();
-			release();
-			return;
-		}
 		#if FLATPAK && NUVOLA_RUNTIME
 		try
 		{
@@ -640,12 +607,6 @@ public class MasterController : Drt.Application
 		}
 		#endif
 	
-		if (!is_tiliado_account_valid(TiliadoMembership.PREMIUM))
-		{
-			activate();
-			return false;
-		}
-		
 		hold();
 		AppRunner runner;
 		token = null;
@@ -705,104 +666,17 @@ public class MasterController : Drt.Application
 	private void init_tiliado_account()	
 	{
 		assert(TILIADO_OAUTH2_CLIENT_ID != null && TILIADO_OAUTH2_CLIENT_ID[0] != '\0');
-		Oauth2Token token = null;
-		if (config.has_key(TILIADO_ACCOUNT_ACCESS_TOKEN))
-			token = new Oauth2Token(
-				config.get_string(TILIADO_ACCOUNT_ACCESS_TOKEN),
-				config.get_string(TILIADO_ACCOUNT_REFRESH_TOKEN),
-				config.get_string(TILIADO_ACCOUNT_TOKEN_TYPE),
-				config.get_string(TILIADO_ACCOUNT_SCOPE));
-		tiliado = new TiliadoApi2(
+		var tiliado = new TiliadoApi2(
 			TILIADO_OAUTH2_CLIENT_ID, Drt.String.unmask(TILIADO_OAUTH2_CLIENT_SECRET.data),
-			TILIADO_OAUTH2_API_ENDPOINT, TILIADO_OAUTH2_TOKEN_ENDPOINT, token, "nuvolaplayer");
-		tiliado.notify["token"].connect_after(on_tiliado_api_token_changed);
-		tiliado.notify["user"].connect_after(on_tiliado_api_user_changed);
+			TILIADO_OAUTH2_API_ENDPOINT, TILIADO_OAUTH2_TOKEN_ENDPOINT, null, "nuvolaplayer");
+		activation = new TiliadoActivationManager(tiliado, server, config);
+		if (activation.get_user_info() == null)
+			activation.update_user_info_sync();
 	}
 	
 	public bool is_tiliado_account_valid(TiliadoMembership required_membership)
 	{	
-		var signature = config.get_string(TILIADO_ACCOUNT_SIGNATURE);
-		if (signature == null)
-		{
-			unset_tiliado_user_info();
-			return false;
-		}
-		var expires = config.get_int64(TILIADO_ACCOUNT_EXPIRES);
-		var user_name = config.get_string(TILIADO_ACCOUNT_USER);
-		var	membership = (uint) config.get_int64(TILIADO_ACCOUNT_MEMBERSHIP);
-		if (!tiliado.hmac_sha1_verify_string(concat_tiliado_user_info(user_name, membership, expires), signature))
-		{
-			unset_tiliado_user_info();
-			return false;
-		}
-		
-		return new DateTime.now_utc().to_unix() <= expires && membership >= required_membership;			
-	}
-	
-	private void on_tiliado_api_token_changed(GLib.Object o, ParamSpec p)
-	{
-		var token = tiliado.token;
-		if (token != null)
-		{
-			config.set_value(TILIADO_ACCOUNT_TOKEN_TYPE, token.token_type);
-			config.set_value(TILIADO_ACCOUNT_ACCESS_TOKEN, token.access_token);
-			config.set_value(TILIADO_ACCOUNT_REFRESH_TOKEN, token.refresh_token);
-			config.set_value(TILIADO_ACCOUNT_SCOPE, token.scope);
-		}
-		else
-		{
-			config.unset(TILIADO_ACCOUNT_TOKEN_TYPE);
-			config.unset(TILIADO_ACCOUNT_ACCESS_TOKEN);
-			config.unset(TILIADO_ACCOUNT_REFRESH_TOKEN);
-			config.unset(TILIADO_ACCOUNT_SCOPE);
-			unset_tiliado_user_info();
-		}
-	}
-	
-	private void on_tiliado_api_user_changed(GLib.Object o, ParamSpec p)
-	{
-		var user = tiliado.user;
-		if (user != null)
-		{
-			var expires = new DateTime.now_utc().add_weeks(2).to_unix();
-			set_tiliado_user_info(user.name, user.membership, expires);
-			if (start_app_after_activation != null && is_tiliado_account_valid(TiliadoMembership.PREMIUM))
-			{
-				if (main_window != null)
-				{
-					main_window.hide();
-					do_quit();
-				}
-				start_app(start_app_after_activation);
-				start_app_after_activation = null;
-			}
-		}
-		else
-		{
-			unset_tiliado_user_info();
-		}
-	}
-	
-	private void set_tiliado_user_info(string name, uint membership_rank, int64 expires)
-	{
-		config.set_string(TILIADO_ACCOUNT_USER, name);
-		config.set_int64(TILIADO_ACCOUNT_MEMBERSHIP, (int64) membership_rank);
-		config.set_int64(TILIADO_ACCOUNT_EXPIRES, expires);
-		var signature = tiliado.hmac_sha1_for_string(concat_tiliado_user_info(name, membership_rank, expires));
-		config.set_string(TILIADO_ACCOUNT_SIGNATURE, signature);	
-	}
-	
-	private inline string concat_tiliado_user_info(string name, uint membership_rank, int64 expires)
-	{
-		return "%s:%u:%s".printf(name, membership_rank, expires.to_string());
-	}
-	
-	private void unset_tiliado_user_info()
-	{
-		config.unset(TILIADO_ACCOUNT_USER);
-		config.unset(TILIADO_ACCOUNT_MEMBERSHIP);
-		config.unset(TILIADO_ACCOUNT_EXPIRES);
-		config.unset(TILIADO_ACCOUNT_SIGNATURE);
+		return activation.has_user_membership(required_membership);	
 	}
 	
 	private void on_tiliado_widget_full_width_changed(GLib.Object emitter, ParamSpec p)

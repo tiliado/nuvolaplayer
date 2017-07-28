@@ -54,10 +54,18 @@ public class StartupWindow : Drt.ApplicationWindow
 	public Gtk.Label app_requirements_status {get; set;}
 	[Description (nick="Web App Requirements message", blurb="Null unless the check went wrong.")]
 	public Gtk.Label app_requirements_message {get; set;}
+	#if TILIADO_API
+	public Gtk.Label tiliado_account_status {get; set;}
+	public Gtk.Label tiliado_account_message {get; set;}
+	#endif
 	[Description (nick="Startup checks", blurb="Model for this window.")]
 	public StartupCheck model {get; private set;}
 	private Gtk.ScrolledWindow scroll;
 	private Gtk.Grid grid;
+	private Gtk.Label? header = null;
+	private Gtk.Label? label = null;
+	private Gtk.Button? bottom_button = null;
+	private int grid_line = 2;
 	
 	/**
 	 * Create new StartupWindow
@@ -81,27 +89,39 @@ public class StartupWindow : Drt.ApplicationWindow
 		set_default_size(500, 500);
 		
 		grid = new Gtk.Grid();
+		grid.orientation = Gtk.Orientation.VERTICAL;
 		grid.column_spacing = grid.row_spacing = 10;
 		grid.margin = 15;
 		
-		var line = 0;
-		add_line(ref line, "Web App Requirements", "app_requirements");
-		add_line(ref line, "Nuvola Service", "nuvola_service");
-		add_line(ref line, "XDG Desktop Portal", "xdg_desktop_portal");
-		add_line(ref line, "OpenGL Driver", "opengl_driver");
-		add_line(ref line, "VA-API Driver", "vaapi_driver");
-		add_line(ref line, "VDPAU Driver", "vdpau_driver");
+		add_line(ref grid_line, "Web App Requirements", "app_requirements");
+		add_line(ref grid_line, "Nuvola Service", "nuvola_service");
+		add_line(ref grid_line, "XDG Desktop Portal", "xdg_desktop_portal");
+		add_line(ref grid_line, "OpenGL Driver", "opengl_driver");
+		add_line(ref grid_line, "VA-API Driver", "vaapi_driver");
+		add_line(ref grid_line, "VDPAU Driver", "vdpau_driver");
+		#if TILIADO_API
+		add_line(ref grid_line, "Tiliado Account", "tiliado_account");
+		#endif
 		model.notify.connect_after(on_model_changed);
 		scroll = new Gtk.ScrolledWindow(null, null);
 		scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC);
 		scroll.hexpand = scroll.vexpand = true;
 		scroll.add(grid);
-		top_grid.add(scroll);
+		top_grid.attach(scroll, 0, 2, 1, 1);
 		grid.show();
 		scroll.show();
 		model.finished.connect(on_checks_finished);
+		#if TILIADO_API
+		model.notify["activation"].connect_after(on_model_activation_changed);
+		#endif
 	}
 	
+	~StartupWindow()
+	{
+		#if TILIADO_API
+		model.notify["activation"].disconnect(on_model_activation_changed);
+		#endif
+	}
 	
 	/**
 	 * Emitted when StartupWindow has provided an user with all information
@@ -183,8 +203,24 @@ public class StartupWindow : Drt.ApplicationWindow
 	
 	private void on_checks_finished(StartupCheck.Status final_status)
 	{
-		Gtk.Label? header = null;
-		Gtk.Label? label = null;
+		if (header != null)
+		{
+			header.get_parent().remove(header);
+			header = null;
+		}
+		if (label != null)
+		{
+			label.get_parent().remove(label);
+			label = null;
+		}
+		if (bottom_button != null)
+		{
+			bottom_button.get_parent().remove(bottom_button);
+			bottom_button.clicked.disconnect(on_button_clicked);
+			bottom_button = null;
+		}
+		
+		
 		Gtk.Button? button = null;
 		switch (final_status)
 		{
@@ -204,27 +240,36 @@ public class StartupWindow : Drt.ApplicationWindow
 			break;
 		}
 		
-		header.margin = 15;
+		header.margin = 5;
 		header.show();
-		top_grid.attach_next_to(header, scroll, Gtk.PositionType.TOP, 1, 1);
-		label.margin = 15;
+		grid.attach(header, 0, 0, 2, 1);
+		label.margin = 5;
 		label.halign = Gtk.Align.CENTER;
 		label.show();
-		top_grid.insert_row(1);
-		top_grid.attach_next_to(label, scroll, Gtk.PositionType.TOP, 1, 1);
+		grid.attach(label, 0, 1, 2, 1);
 		if (button != null)
 		{
+			bottom_button = button;
 			button.show();
 			button.vexpand = false;
 			button.hexpand = true;
 			button.clicked.connect(on_button_clicked);
-			top_grid.attach_next_to(button, scroll, Gtk.PositionType.BOTTOM, 1, 1);
+			top_grid.attach(button, 0, 3, 1, 1);
 		}
 		else
 		{
 			ready_to_continue();
 		}
 	}
+	
+	#if TILIADO_API
+	private void on_model_activation_changed(GLib.Object o, ParamSpec p)
+	{
+		var widget = new TiliadoAccountWidget(model.activation, app, Gtk.Orientation.HORIZONTAL);
+		widget.show();
+		grid.attach(widget, 0, grid_line, 2, 1);
+	}
+	#endif
 }
 
 } // namespace Nuvola
