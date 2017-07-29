@@ -1,6 +1,41 @@
 Nuvola Apps Changelog
 =======================
 
+Release 4.6.0 - 29th July, 2017
+-------------------------------
+
+New Features:
+
+  * Start-up system checks run in parallel to decrease start-up time. In case of any problem, only a single dialog is
+    shown instead of multiple error dialogs or info bars.
+  * WebKitGTK+ was upgraded to 2.16.6 fixing many security vulnerabilities and rendering issue.
+  * Media Source Extension (MSE) is enabled in WebKitGTK as well as in Nuvola itself. This applies only to the genuine
+    flatpak builds of Nuvola. MSE is required by some web apps for Flash-free audio/video playback.
+  * New web app: BBC iPlayer by Andrew Stubbs. Note that this script requires MSE and may not work with third-party
+    builds of Nuvola. Issue: tiliado/nuvolaruntime#321
+
+Bug fixes:
+
+  * Graphics.dri2_get_driver_name() now throws error instead of an uncaught critical warning if it cannot connect to
+    X Server.  Issue: tiliado/nuvolaruntime#359
+  * Fixed typo in Nuvola.parseTimeUsec. Issue: tiliado/nuvolaruntime#357
+  * int64 is used for track position to avoid integer overflow. Issue: tiliado/nuvolaruntime#358
+    
+News for Script Maintainers:
+
+  * Developer sidebar can now change track rating.
+  * Media player API documentation was updated with track rating.
+  
+Under the Hood:
+
+  * New dependency: [unit.js](https://github.com/unitjs/unit.js/releases/tag/v2.0.0) 2.0.0
+    (installed as /usr/share/javascript/unitjs/unit.js) is used for JavaScript unit tests
+    (included in the test service - web_apps/test subdirectory).
+  * Added support for org.gnome.SettingsDaemon.MediaKeys D-Bus name.
+    [Upstream ticket](https://bugzilla.gnome.org/show_bug.cgi?id=781326).
+  * The content of format support dialog was moved to Preferences dialog and various toggles were removed.
+  * The content of bindings, models and interfaces directories was merged into components directory. 
+    
 Release 4.5.0 - 24th June, 2017
 -------------------------------
 
