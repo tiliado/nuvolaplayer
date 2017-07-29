@@ -48,18 +48,24 @@ public class TiliadoActivationClient : GLib.Object, TiliadoActivation
 	
 	~TiliadoActivationClient()
 	{
-		unsubscribe.begin((o, res) =>
+		unsubscribe(master_conn);
+		this.master_conn.api_router.notification.disconnect(on_notification_received);
+	}
+	
+	/* Static methods are used not to ref self in destructor which would fail because the ref_cout is already 0. */
+	private static void unsubscribe(Drt.ApiChannel master_conn)
+	{
+		unsubscribe_async.begin(master_conn, (o, res) =>
 		{
 			try
 			{
-				unsubscribe.end(res);
+				unsubscribe_async.end(res);
 			}
 			catch (GLib.Error e)
 			{
 				warning("Failed to unsubscribe to notifications. %s", e.message);
 			}
 		});
-		this.master_conn.api_router.notification.disconnect(on_notification_received);
 	}
 	
 	private async void subscribe() throws GLib.Error
@@ -71,7 +77,7 @@ public class TiliadoActivationClient : GLib.Object, TiliadoActivation
 		yield master_conn.subscribe(TiliadoActivationManager.USER_INFO_UPDATED);
 	}
 	
-	private async void unsubscribe() throws GLib.Error
+	private static async void unsubscribe_async(Drt.ApiChannel master_conn) throws GLib.Error
 	{
 		yield master_conn.unsubscribe(TiliadoActivationManager.ACTIVATION_STARTED);
 		yield master_conn.unsubscribe(TiliadoActivationManager.ACTIVATION_CANCELLED);
