@@ -339,11 +339,19 @@ public class StartupCheck : GLib.Object
 		}
 		catch (Graphics.DriError e)
 		{
-			var msg = Markup.printf_escaped("Failed to get DRI2 driver name. %s", e.message);
-			vdpau_driver_message = msg;
-			vdpau_driver_status = Status.WARNING;
-			vaapi_driver_message = (owned) msg;
-			vaapi_driver_status = Status.WARNING;
+			if (e is Graphics.DriError.NO_X_DISPLAY || e is Graphics.DriError.EXTENSION_QUERY)
+			{
+				vdpau_driver_status = Status.NOT_APPLICABLE;
+				vaapi_driver_status = Status.NOT_APPLICABLE;
+			}
+			else
+			{
+				var msg = Markup.printf_escaped("Failed to get DRI2 driver name. %s", e.message);
+				vdpau_driver_message = msg;
+				vdpau_driver_status = Status.WARNING;
+				vaapi_driver_message = (owned) msg;
+				vaapi_driver_status = Status.WARNING;
+			}
 		}
 		yield Drt.EventLoop.resume_later();
 		task_finished(NAME);

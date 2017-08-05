@@ -26,9 +26,16 @@ public class GraphicsTest: Drt.TestCase
 {
 	public void test_dri2_get_driver_name()
 	{
-		string? name = null;
-		expect_no_error(() => name = Graphics.dri2_get_driver_name(), "driver name");
-		expect_false(Drt.String.is_empty(name), "driver name not empty");
+		try
+		{
+			var name = Graphics.dri2_get_driver_name();
+			expect_false(Drt.String.is_empty(name), "driver name not empty");
+		}
+		catch (Graphics.DriError e)
+		{
+			if (!(e is Graphics.DriError.NO_X_DISPLAY))
+				expectation_failed("Unexpected error: %s %d %s", e.domain.to_string(), e.code, e.message);
+		}
 	}
 	
 	public void test_have_vdpau_driver()

@@ -88,12 +88,12 @@ public errordomain DriError
  */
 public string dri2_get_driver_name() throws DriError
 {
-	var dpy = new X.Display(null);
-	if (dpy == null)
+	var display = Gdk.Display.get_default() as Gdk.X11.Display;
+	if (display == null)
 		throw new DriError.NO_X_DISPLAY("Cannot connect to X display.");
 	int major, minor;
 	string driver;
-	dri2_connect(dpy, out major, out minor, out driver);
+	dri2_connect(display.get_xdisplay(), out major, out minor, out driver);
 	debug("DRI %d.%d; driver %s", major, minor, driver);
 	return driver;
 }
