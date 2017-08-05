@@ -42,8 +42,8 @@ public class GraphicsTest: Drt.TestCase
 	{
 		var name = "i965";
 		var result = Graphics.have_vdpau_driver(name);
-		var expected = FileUtils.test("/usr/lib/libvdpau_i965.so", FileTest.EXISTS)
-		|| FileUtils.test("/app/lib/libvdpau_i965.so", FileTest.EXISTS);
+		var expected = FileUtils.test("/usr/lib/vdpau/libvdpau_i965.so", FileTest.EXISTS)
+		|| FileUtils.test("/app/lib/vdpau/libvdpau_i965.so", FileTest.EXISTS);
 		expect_true(expected == result, "have vdpau driver");
 	}
 	

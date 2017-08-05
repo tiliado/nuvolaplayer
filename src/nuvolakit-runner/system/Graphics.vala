@@ -128,7 +128,7 @@ private void dri2_connect(X.Display dpy, out int major, out int minor, out strin
  */
 public bool have_vdpau_driver(string name)
 {
-	var filename = "/usr/lib/libvdpau_%s.so".printf(name);
+	var filename = "/usr/lib/vdpau/libvdpau_%s.so".printf(name);
 	if (FileUtils.test(filename, FileTest.EXISTS))
 	{
 		debug("VDPAU driver found: %s", filename);
@@ -137,7 +137,7 @@ public bool have_vdpau_driver(string name)
 	var libdirs = Drt.String.split_strip(Environment.get_variable("LD_LIBRARY_PATH"), ":");
 	foreach (unowned string libdir in libdirs)
 	{
-		filename = "%s/libvdpau_%s.so".printf(libdir, name);
+		filename = "%s/vdpau/libvdpau_%s.so".printf(libdir, name);
 		if (FileUtils.test(filename, FileTest.EXISTS))
 		{
 			debug("VDPAU driver found: %s", filename);
