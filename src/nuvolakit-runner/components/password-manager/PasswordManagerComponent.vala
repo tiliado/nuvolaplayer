@@ -27,16 +27,19 @@ namespace Nuvola
 
 public class PasswordManagerComponent: Component
 {
+	#if EXPERIMENTAL
 	private IpcBus ipc_bus;
 	private WebWorker web_worker;
 	private string web_app_id;
 	private PasswordManager? manager = null;
 	private PasswordManagerBinding? binding = null;
 	private WebEngine engine;
+	#endif
 	
 	public PasswordManagerComponent(Drt.KeyValueStorage config, IpcBus ipc_bus, WebWorker web_worker, string web_app_id, WebEngine engine)
 	{
 		base("passwordmanager", "Password Manager (Experimental)", "Stores passwords from login forms in a keyring.");
+		#if EXPERIMENTAL
 		this.ipc_bus = ipc_bus;
 		this.web_worker = web_worker;
 		this.web_app_id = web_app_id;
@@ -45,8 +48,13 @@ public class PasswordManagerComponent: Component
 		enabled_set = true;
 		if (enabled)
 			load();
+		#else
+		available = false;
+		has_settings = true;
+		#endif
 	}
 	
+	#if EXPERIMENTAL
 	protected override bool activate()
 	{
 		manager = new PasswordManager(engine, web_app_id);
@@ -113,6 +121,12 @@ public class PasswordManagerComponent: Component
 			}
 		}
 	}
+	#else
+	public override Gtk.Widget? get_settings()
+	{		
+		return ComponentsManager.create_component_not_available_widget();
+	}
+	#endif
 }
 
 } // namespace Nuvola

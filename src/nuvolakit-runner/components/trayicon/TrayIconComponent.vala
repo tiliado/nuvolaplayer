@@ -22,12 +22,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if APPINDICATOR
 namespace Nuvola
 {
 
 public class TrayIconComponent: Component
 {
+	#if APPINDICATOR
 	private const string NAMESPACE = "component.tray_icon.";
 	public bool always_close_to_tray {get; set; default = false;}
 	public bool use_x11_icon {get; set; default = false;}
@@ -36,11 +36,13 @@ public class TrayIconComponent: Component
 	private Bindings bindings;
 	private TrayIcon x11_icon = null;
 	private Appindicator appindicator = null;
+	#endif
 	
 	public TrayIconComponent(AppRunnerController controller, Bindings bindings, Drt.KeyValueStorage config)
 	{
 		base("tray_icon", "Tray Icon", "Small icon with menu shown in the notification area.");
 		this.has_settings = true;
+		#if APPINDICATOR
 		this.bindings = bindings;
 		this.controller = controller;
 		config.bind_object_property(NAMESPACE, this, "always_close_to_tray")
@@ -54,8 +56,12 @@ public class TrayIconComponent: Component
 		enabled_set = true;
 		if (enabled)
 			load();
+		#else
+		available = false;
+		#endif
 	}
 	
+	#if APPINDICATOR
 	protected override bool activate()
 	{
 		update();
@@ -102,9 +108,15 @@ public class TrayIconComponent: Component
 		if (always_close_to_tray && is_visible())
 			can_quit = false;
 	}
+	#else
+	public override Gtk.Widget? get_settings()
+	{		
+		return ComponentsManager.create_component_not_available_widget();
+	}
+	#endif
 }
 
-
+#if APPINDICATOR
 public class TrayIconSettings : Gtk.Grid
 {
 	private Gtk.Switch close_to_tray_switch;
@@ -168,6 +180,5 @@ public class TrayIconSettings : Gtk.Grid
 		close_to_tray_switch.show();
 	}
 }
-
-} // namespace Nuvola
 #endif
+} // namespace Nuvola

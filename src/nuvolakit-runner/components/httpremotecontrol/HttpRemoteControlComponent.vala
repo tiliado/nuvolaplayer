@@ -22,21 +22,23 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if EXPERIMENTAL
 namespace Nuvola.HttpRemoteControl
 {
 
 public class Component: Nuvola.Component
 {
+	#if EXPERIMENTAL
 	private Bindings bindings;
 	private AppRunnerController app;
 	private IpcBus ipc_bus;
+	#endif
 	
 	public Component(AppRunnerController app, Bindings bindings, Drt.KeyValueStorage config, IpcBus ipc_bus)
 	{
 		base("httpremotecontrol", "Remote control over HTTP (experimental)", "Remote media player HTTP interface for control over network.");
 		this.hidden = false;
 		this.has_settings = true;
+		#if EXPERIMENTAL
 		this.bindings = bindings;
 		this.app = app;
 		this.ipc_bus = ipc_bus;
@@ -44,8 +46,12 @@ public class Component: Nuvola.Component
 		enabled_set = true;
 		if (enabled)
 			load();
+		#else
+		available = false;
+		#endif
 	}
 	
+	#if EXPERIMENTAL
 	public override Gtk.Widget? get_settings()
 	{		
 		return new Settings(app, ipc_bus);
@@ -210,7 +216,12 @@ public class Component: Nuvola.Component
 			app.show_uri("http://%s:%u/mediaplayer".printf(address, port));
 		}
 	}
+	#else
+	public override Gtk.Widget? get_settings()
+	{		
+		return ComponentsManager.create_component_not_available_widget();
+	}
+	#endif
 }
 
 } // namespace Nuvola.HttpRemoteControl
-#endif

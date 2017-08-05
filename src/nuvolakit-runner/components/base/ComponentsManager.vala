@@ -27,6 +27,13 @@ namespace Nuvola
 
 public class ComponentsManager: Gtk.Stack
 {
+	public static Gtk.Widget create_component_not_available_widget()
+	{
+		return Drt.Labels.markup(
+			"Your distributor has not enabled this feature. It is available in <a href=\"%s\">the genuine flatpak "
+			+ "builds of Nuvola Apps Runtime</a> though.", "https://nuvola.tiliado.eu");
+	}
+	
 	public Drt.Lst<Component> components {get; construct;}
 	private SList<Row> rows = null;
 	private Gtk.Grid grid;
@@ -51,6 +58,9 @@ public class ComponentsManager: Gtk.Stack
 		rows = null;
 		foreach (var child in grid.get_children())
 			grid.remove(child);
+		
+		var components = this.components.to_list();
+		components.sort((a, b) => (a.available != b.available) ? (a.available ? -1 : 1) : strcmp(a.name, b.name));
 		
 		var row = 0;
 		foreach (var component in components)
@@ -104,7 +114,17 @@ public class ComponentsManager: Gtk.Stack
 			this.component = component;
 			
 			checkbox = new Gtk.Switch();
-			checkbox.active = component.enabled;
+			if (component.available)
+			{
+				checkbox.active = component.enabled;
+				checkbox.sensitive = true;
+			}
+			else
+			{
+				checkbox.active = false;
+				checkbox.sensitive = false;
+			}
+			
 			checkbox.vexpand = checkbox.hexpand = false;
 			checkbox.halign = checkbox.valign = Gtk.Align.CENTER;
 			component.notify.connect_after(on_notify);
@@ -115,6 +135,7 @@ public class ComponentsManager: Gtk.Stack
 				"<span size='medium'><b>%s</b></span>\n<span foreground='#666666' size='small'>%s</span>",
 				component.name, component.description));
 			label.use_markup = true;
+			label.sensitive = component.available;
 			label.vexpand = false;
 			label.hexpand = true;
 			label.halign = Gtk.Align.START;
@@ -125,10 +146,11 @@ public class ComponentsManager: Gtk.Stack
 			
 			if (component.has_settings)
 			{
-				button = new Gtk.Button.from_icon_name("emblem-system-symbolic", Gtk.IconSize.BUTTON);
+				button = new Gtk.Button.from_icon_name(
+					component.available ? "emblem-system-symbolic" : "dialog-warning-symbolic", Gtk.IconSize.BUTTON);
 				button.vexpand = button.hexpand = false;
 				button.halign = button.valign = Gtk.Align.CENTER;
-				button.sensitive = component.enabled;
+				button.sensitive = component.enabled || !component.available;
 				button.clicked.connect(on_settings_clicked);
 				grid.attach(button, 2, row, 1, 1);
 			}

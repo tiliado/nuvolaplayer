@@ -39,6 +39,7 @@ public abstract class Component: GLib.Object
 	public bool active {get; protected set; default = false;}
 	public bool auto_activate {get; protected set; default = true;}
 	public bool has_settings {get; protected set; default = false;}
+	public bool available {get; protected set; default = true;}
 	
 	public Component(string id, string name, string description)
 	{
@@ -47,7 +48,7 @@ public abstract class Component: GLib.Object
 	
 	public virtual void toggle(bool enabled)
 	{
-		if (this.enabled != enabled)
+		if (available && this.enabled != enabled)
 		{
 			if (enabled)
 			{
@@ -83,7 +84,7 @@ public abstract class Component: GLib.Object
 	
 	public bool toggle_active(bool active)
 	{
-		if (!enabled)
+		if (!available || !enabled)
 			return false;
 		bool result = false;
 		if (this.active != active)
@@ -98,9 +99,15 @@ public abstract class Component: GLib.Object
 		return result;
 	}
 	
-	protected abstract bool activate();
+	protected virtual bool activate()
+	{
+		return false;
+	}
 	
-	protected abstract bool deactivate();
+	protected virtual bool deactivate()
+	{
+		return false;
+	}
 }
 
 } // namespace Nuvola

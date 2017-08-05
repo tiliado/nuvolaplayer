@@ -22,27 +22,35 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if UNITY
+
 namespace Nuvola
 {
 
 public class UnityLauncherComponent: Component
 {
+	#if UNITY
 	private Bindings bindings;
 	private Drt.Application app;
 	private UnityLauncher? launcher = null;
+	#endif
 	
 	public UnityLauncherComponent(Drt.Application app, Bindings bindings, Drt.KeyValueStorage config)
 	{
 		base("unity_launcher", "Unity Laucher", "Adds quick list (menu) to the icon on Unity Launcher.");
+		#if UNITY
 		this.bindings = bindings;
 		this.app = app;
 		config.bind_object_property("component.%s.".printf(id), this, "enabled").set_default(true).update_property();
 		enabled_set = true;
 		if (enabled)
 			load();
+		#else
+		has_settings = true;
+		available = false;
+		#endif
 	}
 	
+	#if UNITY
 	protected override bool activate()
 	{
 		launcher = new UnityLauncher(app, bindings.get_model<LauncherModel>());
@@ -54,7 +62,12 @@ public class UnityLauncherComponent: Component
 		launcher = null;
 		return true;
 	}
+	#else
+	public override Gtk.Widget? get_settings()
+	{		
+		return ComponentsManager.create_component_not_available_widget();
+	}
+	#endif
 }
 
 } // namespace Nuvola
-#endif

@@ -549,25 +549,17 @@ public class AppRunnerController: Drt.Application
 		bindings.add_object(actions_helper);
 		
 		components = new Drt.Lst<Component>();
-		#if APPINDICATOR
 		components.prepend(new TrayIconComponent(this, bindings, config));
-		#endif
-		#if UNITY
 		components.prepend(new UnityLauncherComponent(this, bindings, config));
-		#endif
 		components.prepend(new NotificationsComponent(this, bindings, actions_helper));
 		components.prepend(new MediaKeysComponent(this, bindings, config, ipc_bus.master, web_app.id));
 		
 		bindings.add_object(menu_bar);
 		
-		#if EXPERIMENTAL
 		components.prepend(new PasswordManagerComponent(config, ipc_bus, web_worker, web_app.id, web_engine));
-		#endif
 		components.prepend(new AudioScrobblerComponent(this, bindings, master_config, config, connection.session));
 		components.prepend(new MPRISComponent(this, bindings, config));
-		#if EXPERIMENTAL
 		components.prepend(new HttpRemoteControl.Component(this, bindings, config, ipc_bus));
-		#endif
 		components.prepend(new LyricsComponent(this, bindings, config));
 		components.prepend(new DeveloperComponent(this, bindings, config));
 		components.reverse();
