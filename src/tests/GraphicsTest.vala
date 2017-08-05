@@ -55,6 +55,22 @@ public class GraphicsTest: Drt.TestCase
 		|| FileUtils.test("/app/lib/dri/i965_drv_video.so", FileTest.EXISTS);
 		expect_true(expected == result, "have vaapi driver");
 	}
+	
+	#if FLATPAK
+	public void test_have_vdpau_drivers()
+	{
+		string[] names = {"i965", "i915", "r300", "r600", "radeon", "radeonsi", "nouveau"};
+		foreach (var name in names)
+			expect_true(Graphics.have_vdpau_driver(name), "VDPAU: %s", name);
+	}
+	
+	public void test_have_vaapi_drivers()
+	{
+		string[] names = {"i965", "i915", "r300", "r600", "radeon", "radeonsi", "nouveau"};
+		foreach (var name in names)
+			expect_true(Graphics.have_vaapi_driver(name), "VA-API: %s", name);
+	}
+	#endif
 }
 
 } // namespace Nuvola
