@@ -53,9 +53,6 @@ public class TrayIconComponent: Component
 			.set_default(false).update_property();
 		config.bind_object_property(NAMESPACE, this, "enabled")
 			.set_default(false).update_property();
-		enabled_set = true;
-		if (enabled)
-			load();
 		#else
 		available = false;
 		#endif

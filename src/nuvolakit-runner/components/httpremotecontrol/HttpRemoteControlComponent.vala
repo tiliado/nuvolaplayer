@@ -43,9 +43,6 @@ public class Component: Nuvola.Component
 		this.app = app;
 		this.ipc_bus = ipc_bus;
 		config.bind_object_property("component.httpremotecontrol.", this, "enabled").set_default(false).update_property();
-		enabled_set = true;
-		if (enabled)
-			load();
 		#else
 		available = false;
 		#endif

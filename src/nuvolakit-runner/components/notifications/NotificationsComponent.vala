@@ -40,9 +40,6 @@ public class NotificationsComponent: Component
 		this.actions_helper = actions_helper;
 		this.app = app;
 		app.config.bind_object_property("component.%s.".printf(id), this, "enabled").set_default(true).update_property();
-		enabled_set = true;
-		if (enabled)
-			load();
 	}
 	
 	protected override bool activate()

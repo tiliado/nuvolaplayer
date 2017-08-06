@@ -35,7 +35,7 @@ public abstract class Component: GLib.Object
 	public string description {get; construct;}
 	public bool hidden {get; protected set; default = false;}
 	public bool enabled {get; protected set; default = false;}
-	public bool enabled_set {get; protected set; default = false;}
+	public bool loaded {get; protected set; default = false;}
 	public bool active {get; protected set; default = false;}
 	public bool auto_activate {get; protected set; default = true;}
 	public bool has_settings {get; protected set; default = false;}
@@ -48,19 +48,29 @@ public abstract class Component: GLib.Object
 	
 	public virtual void toggle(bool enabled)
 	{
-		if (available && this.enabled != enabled)
+		if (available)
 		{
 			if (enabled)
 			{
-				message("Load %s %s", id, name);
-				this.enabled = true;
-				load();
+				if (this.enabled != enabled)
+					this.enabled = true;
+				if (!loaded)
+				{
+					message("Load %s %s", id, name);
+					load();
+					loaded = true;
+				}
 			}
 			else
 			{
-				message("Unload %s %s", id, name);
-				unload();
-				this.enabled = false;
+				if (loaded)
+				{
+					message("Unload %s %s", id, name);
+					unload();
+					loaded = false;
+				}
+				if (this.enabled != enabled)
+					this.enabled = false;
 				this.active = false;
 			}
 		}
@@ -69,6 +79,11 @@ public abstract class Component: GLib.Object
 	public virtual Gtk.Widget? get_settings()
 	{
 		return null;
+	}
+	
+	public virtual void auto_load()
+	{
+		toggle(enabled);
 	}
 	
 	protected virtual void load()

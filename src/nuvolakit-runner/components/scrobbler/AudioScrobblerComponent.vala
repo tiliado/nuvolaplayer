@@ -54,10 +54,7 @@ public class AudioScrobblerComponent: Component
 		this.connection = connection;
 		has_settings = true;
 		config.bind_object_property("component.%s.".printf(id), this, "enabled").set_default(true).update_property();
-		enabled_set = true;
 		auto_activate = false;
-		if (enabled)
-			load();
 	}
 	
 	public override Gtk.Widget? get_settings()

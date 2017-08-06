@@ -45,9 +45,6 @@ public class PasswordManagerComponent: Component
 		this.web_app_id = web_app_id;
 		this.engine = engine;
 		config.bind_object_property("component.passwordmanager.", this, "enabled").set_default(false).update_property();
-		enabled_set = true;
-		if (enabled)
-			load();
 		#else
 		available = false;
 		has_settings = true;

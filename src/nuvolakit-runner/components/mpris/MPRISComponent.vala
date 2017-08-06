@@ -37,10 +37,7 @@ public class MPRISComponent: Component
 		this.bindings = bindings;
 		this.app = app;
 		config.bind_object_property("component.mpris.", this, "enabled").set_default(true).update_property();
-		enabled_set = true;
 		auto_activate = false;
-		if (enabled)
-			load();
 	}
 	
 	protected override bool activate()

@@ -566,7 +566,10 @@ public class AppRunnerController: Drt.Application
 		
 		foreach (var component in components)
 		{
-			debug("Component %s (%s) %s", component.id, component.name, component.enabled ? "enabled": "not enabled");
+			if (component.available && component.enabled)
+				component.auto_load();
+			debug("Component %s (%s) %s", component.id, component.name,
+				component.available && component.enabled ? "enabled": "not enabled");
 			component.notify["enabled"].connect_after(on_component_enabled_changed);
 		}
 	}
