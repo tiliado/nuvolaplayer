@@ -48,7 +48,6 @@ public class PasswordManagerComponent: Component
 		config.bind_object_property("component.passwordmanager.", this, "enabled").set_default(false).update_property();
 		#else
 		available = false;
-		has_settings = true;
 		#endif
 	}
 	
@@ -118,11 +117,6 @@ public class PasswordManagerComponent: Component
 				warning("Failed to %s the password manager. %s", enabled ? "enable": "disable", e.message);
 			}
 		}
-	}
-	#else
-	public override Gtk.Widget? get_settings()
-	{		
-		return ComponentsManager.create_component_not_available_widget();
 	}
 	#endif
 }

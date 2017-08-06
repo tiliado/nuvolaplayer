@@ -213,11 +213,6 @@ public class Component: Nuvola.Component
 			app.show_uri("http://%s:%u/mediaplayer".printf(address, port));
 		}
 	}
-	#else
-	public override Gtk.Widget? get_settings()
-	{		
-		return ComponentsManager.create_component_not_available_widget();
-	}
 	#endif
 }
 

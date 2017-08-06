@@ -42,7 +42,6 @@ public class UnityLauncherComponent: Component
 		this.app = app;
 		config.bind_object_property("component.%s.".printf(id), this, "enabled").set_default(true).update_property();
 		#else
-		has_settings = true;
 		available = false;
 		#endif
 	}
@@ -58,11 +57,6 @@ public class UnityLauncherComponent: Component
 	{
 		launcher = null;
 		return true;
-	}
-	#else
-	public override Gtk.Widget? get_settings()
-	{		
-		return ComponentsManager.create_component_not_available_widget();
 	}
 	#endif
 }

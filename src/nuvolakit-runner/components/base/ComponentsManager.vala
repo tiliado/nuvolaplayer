@@ -27,17 +27,11 @@ namespace Nuvola
 
 public class ComponentsManager: Gtk.Stack
 {
-	public static Gtk.Widget create_component_not_available_widget()
-	{
-		return Drt.Labels.markup(
-			"Your distributor has not enabled this feature. It is available in <a href=\"%s\">the genuine flatpak "
-			+ "builds of Nuvola Apps Runtime</a> though.", "https://nuvola.tiliado.eu");
-	}
-	
 	public Drt.Lst<Component> components {get; construct;}
 	private SList<Row> rows = null;
 	private Gtk.Grid grid;
 	private Settings? component_settings = null;
+	private Gtk.Widget component_not_available_widget;
 
 	public ComponentsManager(Drt.Lst<Component> components)
 	{
@@ -45,6 +39,9 @@ public class ComponentsManager: Gtk.Stack
 		grid = new Gtk.Grid();
 		grid.margin = 10;
 		grid.column_spacing = 15;
+		component_not_available_widget = Drt.Labels.markup(
+			"Your distributor has not enabled this feature. It is available in <a href=\"%s\">the genuine flatpak "
+			+ "builds of Nuvola Apps Runtime</a> though.", "https://nuvola.tiliado.eu");
 		refresh();
 		var scroll = new Gtk.ScrolledWindow(null, null);
 		scroll.hexpand = scroll.vexpand = true;
@@ -94,10 +91,17 @@ public class ComponentsManager: Gtk.Stack
 		}
 		else
 		{
-			component_settings = new Settings(this, component);
+			var widget = is_component_available(component)
+			 ? component.get_settings() : component_not_available_widget;
+			component_settings = new Settings(this, component, widget);
 			this.add(component_settings.widget);
 			this.visible_child = component_settings.widget;
 		}
+	}
+	
+	private bool is_component_available(Component component)
+	{
+		return component.available;
 	}
 	
 	[Compact]
@@ -114,7 +118,8 @@ public class ComponentsManager: Gtk.Stack
 			this.component = component;
 			
 			checkbox = new Gtk.Switch();
-			if (component.available)
+			var available = manager.is_component_available(component);
+			if (available)
 			{
 				checkbox.active = component.enabled;
 				checkbox.sensitive = true;
@@ -135,7 +140,7 @@ public class ComponentsManager: Gtk.Stack
 				"<span size='medium'><b>%s</b></span>\n<span foreground='#666666' size='small'>%s</span>",
 				component.name, component.description));
 			label.use_markup = true;
-			label.sensitive = component.available;
+			label.sensitive = available;
 			label.vexpand = false;
 			label.hexpand = true;
 			label.halign = Gtk.Align.START;
@@ -144,13 +149,13 @@ public class ComponentsManager: Gtk.Stack
 			label.set_line_wrap(true);
 			grid.attach(label, 1, row, 1, 1);
 			
-			if (component.has_settings)
+			if (!available || component.has_settings)
 			{
 				button = new Gtk.Button.from_icon_name(
-					component.available ? "emblem-system-symbolic" : "dialog-warning-symbolic", Gtk.IconSize.BUTTON);
+					available ? "emblem-system-symbolic" : "dialog-warning-symbolic", Gtk.IconSize.BUTTON);
 				button.vexpand = button.hexpand = false;
 				button.halign = button.valign = Gtk.Align.CENTER;
-				button.sensitive = component.enabled || !component.available;
+				button.sensitive = component.enabled || !available;
 				button.clicked.connect(on_settings_clicked);
 				grid.attach(button, 2, row, 1, 1);
 			}
@@ -197,13 +202,13 @@ public class ComponentsManager: Gtk.Stack
 		public unowned ComponentsManager manager;
 		public Component component;
 		
-		public Settings(ComponentsManager manager, Component component)
+		public Settings(ComponentsManager manager, Component component, Gtk.Widget? widget)
 		{
 			this.manager = manager;
 			this.component = component;
 			var grid = new Gtk.Grid();
 			grid.column_spacing = grid.row_spacing = grid.margin = 10;
-			widget = grid;
+			this.widget = grid;
 			var button = new Gtk.Button.from_icon_name("go-previous-symbolic", Gtk.IconSize.SMALL_TOOLBAR);
 			button.vexpand = button.hexpand = false;
 			button.valign = button.halign = Gtk.Align.CENTER;
@@ -214,19 +219,18 @@ public class ComponentsManager: Gtk.Stack
 				component.name, component.description);
 			grid.attach(label, 1, 0, 1, 1);
 			
-			var component_widget = component.get_settings();
-			if (component_widget != null)
+			if (widget != null)
 			{
 				var scroll = new Gtk.ScrolledWindow(null, null);
 				scroll.vexpand = scroll.hexpand = true;
-				scroll.add(component_widget);
+				scroll.add(widget);
 				grid.attach(scroll, 0, 1, 2, 1);
 			}
 			else
 			{
 				grid.attach(new Gtk.Label("No settings available"), 0, 1, 2, 1);
 			}
-			widget.show_all();
+			grid.show_all();
 		}
 		
 		private void on_back_clicked()

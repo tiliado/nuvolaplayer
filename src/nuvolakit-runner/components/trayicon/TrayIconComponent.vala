@@ -106,11 +106,6 @@ public class TrayIconComponent: Component
 		if (always_close_to_tray && is_visible())
 			can_quit = false;
 	}
-	#else
-	public override Gtk.Widget? get_settings()
-	{		
-		return ComponentsManager.create_component_not_available_widget();
-	}
 	#endif
 }
 
