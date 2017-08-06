@@ -22,7 +22,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if TILIADO_API
 namespace Nuvola
 {
 
@@ -75,10 +74,9 @@ public interface TiliadoActivation : GLib.Object
 	{
 		var user = get_user_info();
 		if (user == null)
-			return false;
+			return TiliadoMembership.NONE == membership;
 		return user.membership >= membership;
 	}
 }
 
 } // namespace Nuvola
-#endif
