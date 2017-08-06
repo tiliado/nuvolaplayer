@@ -40,6 +40,7 @@ public class PasswordManagerComponent: Component
 	{
 		base("passwordmanager", "Password Manager (Experimental)", "Stores passwords from login forms in a keyring.");
 		#if EXPERIMENTAL
+		this.required_membership = TiliadoMembership.PREMIUM;
 		this.ipc_bus = ipc_bus;
 		this.web_worker = web_worker;
 		this.web_app_id = web_app_id;

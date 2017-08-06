@@ -36,7 +36,7 @@ public class Component: Nuvola.Component
 	public Component(AppRunnerController app, Bindings bindings, Drt.KeyValueStorage config, IpcBus ipc_bus)
 	{
 		base("httpremotecontrol", "Remote control over HTTP (experimental)", "Remote media player HTTP interface for control over network.");
-		this.hidden = false;
+		this.required_membership = TiliadoMembership.PREMIUM_PLUS;
 		this.has_settings = true;
 		#if EXPERIMENTAL
 		this.bindings = bindings;

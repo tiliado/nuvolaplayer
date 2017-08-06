@@ -40,6 +40,7 @@ public abstract class Component: GLib.Object
 	public bool auto_activate {get; protected set; default = true;}
 	public bool has_settings {get; protected set; default = false;}
 	public bool available {get; protected set; default = true;}
+	public TiliadoMembership required_membership {get; protected set; default = TiliadoMembership.NONE;}
 	
 	public Component(string id, string name, string description)
 	{
