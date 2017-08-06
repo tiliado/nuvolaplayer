@@ -29,6 +29,9 @@ namespace Nuvola
 public class TiliadoActivationClient : GLib.Object, TiliadoActivation
 {
 	private Drt.ApiChannel master_conn;
+	private TiliadoApi2.User? cached_user = null;
+	private bool cached_user_set = false;
+	
 	public TiliadoActivationClient(Drt.ApiChannel master_conn)
 	{
 		this.master_conn = master_conn;
@@ -100,20 +103,30 @@ public class TiliadoActivationClient : GLib.Object, TiliadoActivation
 			activation_failed(parameters.get_string());
 			break;
 		case TiliadoActivationManager.ACTIVATION_FINISHED:
-			activation_finished(TiliadoApi2.User.from_variant(parameters));
+			activation_finished(cache_user(TiliadoApi2.User.from_variant(parameters)));
 			break;
 		case TiliadoActivationManager.USER_INFO_UPDATED:
-			user_info_updated(TiliadoApi2.User.from_variant(parameters));
+			user_info_updated(cache_user(TiliadoApi2.User.from_variant(parameters)));
 			break;
 		}
 	}
 	
+	private TiliadoApi2.User? cache_user(TiliadoApi2.User? user)
+	{
+		cached_user_set = true;
+		cached_user = user;
+		return user;
+	}
+	
 	public TiliadoApi2.User? get_user_info()
 	{
+		if (cached_user_set)
+			return cached_user;
+		
 		string METHOD = "/tiliado-activation/get-user-info";
 		try
 		{
-			return TiliadoApi2.User.from_variant(master_conn.call_sync(METHOD, null));
+			return cache_user(TiliadoApi2.User.from_variant(master_conn.call_sync(METHOD, null)));
 		}
 		catch (GLib.Error e)
 		{
