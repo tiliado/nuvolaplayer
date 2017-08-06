@@ -74,7 +74,7 @@ public class JSApi : GLib.Object
 	private const string MAIN_JS = "main.js";
 	private const string META_JSON = "metadata.json";
 	private const string META_PROPERTY = "meta";
-	private const string JS_DIR = "js";
+	public const string JS_DIR = "js";
 	/**
 	 * Name of file with integration script.
 	 */

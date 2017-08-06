@@ -37,12 +37,14 @@ public class WebExtension: GLib.Object
 	private LoginFormManager login_form_manager = null;
 	private unowned WebKit.WebPage page = null;
 	private FrameBridge bridge = null;
+	private Drt.XdgStorage storage;
 	
 	public WebExtension(WebKit.WebExtension extension, Drt.ApiChannel channel, HashTable<string, Variant> worker_data)
 	{
 		this.extension = extension;
 		this.channel = channel;
 		this.worker_data = worker_data;
+		this.storage = new Drt.XdgStorage.for_project(Nuvola.get_app_id());
 		extension.page_created.connect(on_web_page_created);
 		WebKit.ScriptWorld.get_default().window_object_cleared.connect(on_window_object_cleared);
 	}
@@ -78,7 +80,6 @@ public class WebExtension: GLib.Object
 		{
 			error("Runner client error: %s", e.message);
 		}
-		var storage = new Drt.XdgStorage.for_project(Nuvola.get_app_id());
 		
 		/* Use worker_data and free it. */
 		uint[] webkit_version = new uint[3];
@@ -114,6 +115,7 @@ public class WebExtension: GLib.Object
 	
 	private void on_window_object_cleared(WebKit.ScriptWorld world, WebKit.WebPage page, WebKit.Frame frame)
 	{
+		apply_javascript_fixes(world, page, frame);
 		if (page.get_id() != 1)
 		{
 			debug("Ignoring JavaScript environment of a page with id = %s", page.get_id().to_string());
@@ -128,6 +130,39 @@ public class WebExtension: GLib.Object
 			return;
 		
 		init_frame(world, page, frame);
+	}
+	
+	private void apply_javascript_fixes(WebKit.ScriptWorld world, WebKit.WebPage page, WebKit.Frame frame)
+	{
+		unowned JS.GlobalContext context = (JS.GlobalContext) frame.get_javascript_context_for_script_world(world);
+		var env = new JsEnvironment(context, null);
+		const string WEBKITGTK_FIXES_JS = "webkitgtk-fixes.js";
+		File? script = storage.user_data_dir.get_child(JSApi.JS_DIR).get_child(WEBKITGTK_FIXES_JS);
+		if (!script.query_exists())
+		{
+			script = null;
+			foreach (var dir in storage.data_dirs)
+			{
+				script = dir.get_child(JSApi.JS_DIR).get_child(WEBKITGTK_FIXES_JS);
+				if (script.query_exists())
+					break;
+				script = null;
+			}
+		}
+		
+		if (script == null)
+		{
+			warning("Failed to find webkitgtk fixes script '%s'.", WEBKITGTK_FIXES_JS);
+			return;
+		}
+		try
+		{
+			env.execute_script_from_file(script);
+		}
+		catch (JSError e)
+		{
+			warning("Failed to find webkitgtk fixes script '%s':\n%s", script.get_path(), e.message);
+		}
 	}
 	
 	private void init_frame(WebKit.ScriptWorld world, WebKit.WebPage page, WebKit.Frame frame)

@@ -203,52 +203,6 @@ Core.$init = function()
      * @param string name    the name of the component
      */
     this.addSignal("ComponentUnloaded");
-    
-    if (Nuvola.global === window)
-        this._unprefixWebkit(Nuvola.global);
-}
-
-Core._unprefixWebkit = function(window)
-{
-    for (var name in window)
-    {
-        if (name.indexOf("webkit") === 0)
-        {
-            var unprefixed = name.substring(6);
-            if (window[unprefixed] === undefined)
-            {
-                Nuvola.log("Unprefix: {1} -> {2} | {3}", name, unprefixed, "" + window[name]);
-                window[unprefixed] = window[name];
-            }
-        }
-    }
-    
-    var unprefix = ["MediaSource", "AudioContext", "AudioPannerNode", "OfflineAudioContext", "URL"];
-    var size = unprefix.length;
-    for (var i = 0; i < size; i++)
-    {
-        var unprefixed = unprefix[i];
-        var prefixed = "webkit" + unprefixed;
-        if (!window[prefixed])
-        {
-            Nuvola.log("Missing hidden: {1} -> {2} | {3}", prefixed, unprefixed, "" + window[unprefixed]);
-        }
-        else if (!window[unprefixed])
-        {
-            Nuvola.log("Unprefix hidden: {1} -> {2} | {3}", prefixed, unprefixed, "" + window[prefixed]);
-            window[unprefixed] = window[prefixed];
-        }
-    }
-    if (window.MediaSource)
-    {
-        var origMediaSourceIsTypeSupported = window.MediaSource.isTypeSupported;
-        window.MediaSource.isTypeSupported = function(mimeType)
-        {
-            var result = origMediaSourceIsTypeSupported(mimeType);
-            console.log("MediaSource.isTypeSupported('" + mimeType +"') -> " + result);
-            return result;
-        }
-    }
 }
 
 /**
