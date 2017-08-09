@@ -40,9 +40,7 @@ public void webkit_web_extension_initialize(WebKit.WebExtension extension)
 		if (seconds > 0)
 		{
 			warning("WebWorker is going to sleep for %d seconds.", seconds);
-			#if LINUX
 			warning("Run `gdb -p %d` to debug it with gdb.", (int) Posix.getpid());
-			#endif
 			GLib.Thread.usleep(seconds * 1000000);
 			warning("WebWorker is awake.");
 		}
