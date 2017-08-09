@@ -810,6 +810,8 @@ public class WebEngine : GLib.Object, JSExecutor
 			else
 			{
 				runner_app.show_uri(uri);
+				handled = true;
+				load_uri = false;
 			}
 		}
 		if (handled)

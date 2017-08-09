@@ -9,6 +9,7 @@
 	"api_minor": 0,
 	"categories": "AudioVideo;Audio;",
 	"home_url": "nuvola://home.html",
+	"allowed_uri": "^https?://(?!(\\w+\\.)*tiliado\\.eu).+",
 	"hidden": true,
 	"window_width": 2000,
 	"window_height": 2000,
