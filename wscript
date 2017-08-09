@@ -55,6 +55,7 @@ import json
 from waflib.Errors import ConfigurationError
 from waflib import TaskGen, Utils, Errors, Node, Task
 from nuvolamergejs import mergejs as merge_js
+import check_vala_defs
 
 TARGET_DIORITE = str(MIN_DIORITE[0])
 MIN_DIORITE.rsplit(".", 1)[0]
@@ -160,6 +161,31 @@ class mergejs(Task.Task):
 		output = merge_js([i.abspath() for i in self.inputs])
 		self.outputs[0].write(output)
 		return 0 
+
+@TaskGen.feature('checkvaladefs')
+@TaskGen.before_method('process_source', 'process_rule')
+def _checkvaladefs_taskgen(self):
+	source = Utils.to_list(getattr(self, 'source', []))
+	if isinstance(source, Node.Node):
+		source = [source]
+	
+	for i, item in enumerate(source):
+		if isinstance(item, str):
+			source[i] =  self.path.find_resource(item)
+		elif not isinstance(item, Node.Node):
+			raise Errors.WafError('invalid source for %r' % self)
+	
+	task = self.create_task('checkvaladefs', source, None)
+	try:
+		task.definitions = self.definitions.split()
+	except AttributeError:
+		raise Errors.WafError('List of definitions is missing for %r' % self)
+	self.source = []
+
+
+class checkvaladefs(Task.Task):
+	def run(self):
+		return check_vala_defs.run(definitions=self.definitions, files=[i.abspath() for i in self.inputs])
 
 
 # Actions #
@@ -394,6 +420,10 @@ def build(ctx):
 		packages += " appindicator3-0.1"
 		uselib += " APPINDICATOR"
 	
+	ctx(features = "checkvaladefs", source = ctx.path.ant_glob('**/*.vala'),
+		definitions="FLATPAK TILIADO_API WEBKIT_SUPPORTS_MSE GENUINE UNITY APPINDICATOR EXPERIMENTAL NUVOLA_RUNTIME"
+		+ " NUVOLA_ADK NUVOLA_CDK")
+		
 	valalib( 
 		target = ENGINEIO,
 		source_dir = 'engineio-soup/src',
