@@ -68,8 +68,8 @@ Let's look at the example:
         "maintainer_link": "https://github.com/fenryxo",
         "version_major": 1,
         "version_minor": 0,
-        "api_major": 3,
-        "api_minor": 0,
+        "api_major": 4,
+        "api_minor": 6,
         "categories": "AudioVideo;Audio;",
         "requirements": "Feature[Flash] Codec[MP3]",
         "home_url": "nuvola://home.html",
@@ -116,8 +116,7 @@ This file contains several mandatory fields:
 
 `api_major` and `api_minor`
 
-:   A required version of Nuvola Runtime API. It's `3.0` for Nuvola 3.0, `3.1` for Nuvola 3.1 and 4.4,
-    `4.5` for Nuvola 4.5 and `4.x` for Nuvola 4.x (x >= 5). You should update API version only
+:   A required version of Nuvola Runtime API. You should use API >= 4.6. You should update API version only
     if your script doesn't work with older API. For example, if Nuvola Runtime adds a new feature
     into API 4.X that is so essential for your script that it cannot function properly without it,
     you will increase API requirement to 4.X. However, all Nuvola versions with API less
