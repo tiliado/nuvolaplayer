@@ -30,6 +30,8 @@ Media player scripts generally contain these metadata:
   * `"categories": "AudioVideo;Audio;"` - for the launcher to be shown among audio & video applications
   * `"requirements": "Feature[Flash]"` - if your web app requires Flash plugin for media playback
   * `"requirements": "Codec[MP3]"` - if your web app requires HTML5 Audio with MP3 codec for media playback
+  * `"requirements": "Feature[MSE] Codec[MP3]"` - if your web app requires HTML5 Media Source Extension (MSE)
+    with MP3 codec for media playback
   
 
 Integration Script

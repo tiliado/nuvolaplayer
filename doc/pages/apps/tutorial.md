@@ -424,10 +424,8 @@ in `metadata.in.json`. It can contain a space separated list of following requir
   * `WebKitGTK[X.Y.Z]`: The web app doesn't work properly in WebKitGTK < X.Y.Z. While the genuine flatpak
     builds of Nuvola always contain the latest stable release of WebKitGTK, this may not be true for
     unofficial third-party builds.
-  * `Feature[MSE]`: The web app requires Media Source extension for HTML5 Audio playback. *Experimental,
-    not available in stable flatpak builds.*
-  * `Codec[H264]`: The web app requires h264 codec for HTML5 Audio playback. *Experimental,
-    not available in stable flatpak builds.*
+  * `Feature[MSE]`: The web app requires Media Source extension for HTML5 Audio playback.
+  * `Codec[H264]`: The web app requires h264 codec for HTML5 Audio playback.
 
 User Agent Quirks
 -----------------
