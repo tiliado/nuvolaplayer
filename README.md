@@ -103,11 +103,11 @@ Build and Install
 ### Dependencies
 
   * [Python 3](http://python.org) >= 3.4
-  * [Vala](https://wiki.gnome.org/Projects/Vala) >= 0.34.0
+  * [Vala](https://wiki.gnome.org/Projects/Vala) >= 0.36.3
   * [Diorite library](https://github.com/tiliado/diorite) 0.3.x
-  * [glib-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.50.0
-  * [gio-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.50.0
-  * [gobject-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.50.0
+  * [glib-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.52.0
+  * [gio-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.52.0
+  * [gobject-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.52.0
   * [gtk+-3.0](http://www.gtk.org/) >= 3.22.0
   * [gdk-3.0](http://www.gtk.org/) >= 3.22.0
   * [gdk-x11-3.0](http://www.gtk.org/) >= 3.22.0
