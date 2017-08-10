@@ -168,7 +168,7 @@ public class Notifications : GLib.Object, NotificationsInterface, NotificationIn
 		return_if_fail(!running);
 		running = true;
 		Notify.init(app.app_name);
-		unowned List<string> capabilities = Notify.get_server_caps();
+		List<string> capabilities = Notify.get_server_caps();
 		persistence_supported =  capabilities.find_custom("persistence", strcmp) != null;
 		actions_supported =  capabilities.find_custom("actions", strcmp) != null;
 		icons_supported =  capabilities.find_custom("action-icons", strcmp) != null;
