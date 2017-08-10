@@ -389,6 +389,12 @@ def build(ctx):
 			kwargs.setdefault("vala_dir", source_dir)
 		return ctx.program(**kwargs)
 	
+	def patch(source, patch, target):
+		return ctx(
+			rule='patch -i ${SRC[1]} -o ${TGT} ${SRC[0]}',
+			source = [os.path.relpath(source) if source[0] == "/" else source, patch],
+			target = target)
+		
 	#~ print(ctx.env)
 	vala_defines = ctx.env.VALA_DEFINES
 	
@@ -406,7 +412,7 @@ def build(ctx):
 	packages += 'javascriptcoregtk-4.0 libnotify libarchive gtk+-3.0 gdk-3.0 gdk-x11-3.0 x11 posix json-glib-1.0 glib-2.0 gio-2.0'
 	uselib = 'NOTIFY JSCORE LIBARCHIVE DIORITEGTK DIORITEGLIB GTK+ GDK GDKX11 X11 JSON-GLIB GLIB GIO'
 	
-	vapi_dirs = ['vapi', 'engineio-soup/vapi']
+	vapi_dirs = ['build', 'vapi', 'engineio-soup/vapi']
 	env_vapi_dir = os.environ.get("VAPIDIR")
 	if env_vapi_dir:
 		vapi_dirs.extend(os.path.relpath(path) for path in env_vapi_dir.split(":"))
@@ -420,9 +426,11 @@ def build(ctx):
 		packages += " appindicator3-0.1"
 		uselib += " APPINDICATOR"
 	
+	patch('/usr/share/vala-0.36/vapi/glib-2.0.vapi', "vapi/glib-2.0.patch", 'glib-2.0.vapi')
 	ctx(features = "checkvaladefs", source = ctx.path.ant_glob('**/*.vala'),
 		definitions="FLATPAK TILIADO_API WEBKIT_SUPPORTS_MSE GENUINE UNITY APPINDICATOR EXPERIMENTAL NUVOLA_RUNTIME"
 		+ " NUVOLA_ADK NUVOLA_CDK")
+	ctx.add_group()
 		
 	valalib( 
 		target = ENGINEIO,
