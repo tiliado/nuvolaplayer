@@ -394,6 +394,12 @@ def build(ctx):
 			rule='patch -i ${SRC[1]} -o ${TGT} ${SRC[0]}',
 			source = [os.path.relpath(source) if source[0] == "/" else source, patch],
 			target = target)
+	
+	def cp_if_found(source, target):
+		return ctx(
+			rule='cp -v ${SRC} ${TGT}',
+			source = os.path.relpath(source) if source[0] == "/" else source,
+			target = target) if os.path.isfile(source) else None
 		
 	#~ print(ctx.env)
 	vala_defines = ctx.env.VALA_DEFINES
@@ -426,7 +432,10 @@ def build(ctx):
 		packages += " appindicator3-0.1"
 		uselib += " APPINDICATOR"
 	
-	patch('/usr/share/vala-0.36/vapi/glib-2.0.vapi', "vapi/glib-2.0.patch", 'glib-2.0.vapi')
+	for vapi in ("glib-2.0", "webkit2gtk-web-extension-4.0"):
+		patch('/usr/share/vala-0.36/vapi/%s.vapi' % vapi, "vapi/%s.patch" % vapi, '%s.vapi' %  vapi)
+		cp_if_found('/usr/share/vala-0.36/vapi/%s.deps' % vapi, '%s.deps' %  vapi)
+	
 	ctx(features = "checkvaladefs", source = ctx.path.ant_glob('**/*.vala'),
 		definitions="FLATPAK TILIADO_API WEBKIT_SUPPORTS_MSE GENUINE UNITY APPINDICATOR EXPERIMENTAL NUVOLA_RUNTIME"
 		+ " NUVOLA_ADK NUVOLA_CDK")
