@@ -14,7 +14,7 @@ else
 	export NUVOLA_ICON="eu.tiliado.NuvolaCdk"
 	export DATADIR="/app/share"
 	export DIORITE_TESTGEN="$DIORITE_PATH/testgen.py"
-	export GI_TYPELIB_PATH="$DIORITE_PATH/build:$GI_TYPELIB_PATH"
+	export GI_TYPELIB_PATH="$PWD/build:$PWD/build/engineio-soup/src:$DIORITE_PATH/build:$GI_TYPELIB_PATH"
 fi
 
 if [ ! -f web_apps/test/unit.js ]

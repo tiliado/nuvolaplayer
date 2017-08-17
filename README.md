@@ -121,6 +121,7 @@ Build and Install
   * [libdrm](https://dri.freedesktop.org/libdrm/) >= 2.2
   * libuuid
   * libsecret-1 >= 0.16
+  * g-ir-compiler
   * optional unity >= 3.0
   * optional dbusmenu-glib-0.4 >= 0.4
   * optional appindicator3-0.1 >= 0.4

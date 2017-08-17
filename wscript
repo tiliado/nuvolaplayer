@@ -54,6 +54,7 @@ import os
 import json
 from waflib.Errors import ConfigurationError
 from waflib import TaskGen, Utils, Errors, Node, Task
+from waflib.Configure import conf
 from nuvolamergejs import mergejs as merge_js
 import check_vala_defs
 
@@ -127,6 +128,27 @@ def mask(string):
     shift = int(1.0 * os.urandom(1)[0] / 255 * 85 + 15)
     return [shift] + [c + shift for c in string.encode("utf-8")]
 
+@conf
+def gir_compile(ctx, name, lib, dirname=".", merge=None, params=""):
+	if merge:
+		new_gir = ctx.path.find_or_declare(dirname + "/" + name + ".gir")
+		tasks = [
+			ctx(
+				rule='../mergegir.py ${TGT} ${SRC}',
+				source=[ctx.path.find_or_declare(entry) for entry in merge],
+				target=new_gir),
+			ctx(
+				rule='${GIR_COMPILER} ${SRC} --output=${TGT} --shared-library="lib%s.so" %s' % (lib, params),
+				source=new_gir,
+				target=ctx.path.find_or_declare(dirname + "/" + name + ".typelib"),
+				install_path="${LIBDIR}/girepository-1.0")
+		]
+	else:	
+		return ctx(
+		rule='${GIR_COMPILER} ${SRC} --output=${TGT} --shared-library="lib%s.so" %s' % (lib, params),
+			source=ctx.path.find_or_declare(dirname + "/" + name + ".gir"),
+			target=ctx.path.find_or_declare(dirname + "/" + name + ".typelib"),
+			install_path="${LIBDIR}/girepository-1.0")
 
 @TaskGen.feature('mergejs')
 @TaskGen.before_method('process_source', 'process_rule')
@@ -275,6 +297,7 @@ def configure(ctx):
 	# Base deps
 	ctx.load('compiler_c vala')
 	ctx.check_vala(min_version=tuple(int(i) for i in MIN_VALA.split(".")))
+	ctx.find_program('g-ir-compiler', var='GIR_COMPILER')
 	pkgconfig(ctx, 'glib-2.0', 'GLIB', MIN_GLIB)
 	pkgconfig(ctx, 'gio-2.0', 'GIO', MIN_GLIB)
 	pkgconfig(ctx, 'gio-unix-2.0', 'UNIXGIO', MIN_GLIB)
@@ -443,6 +466,7 @@ def build(ctx):
 		
 	valalib( 
 		target = ENGINEIO,
+		gir = "Engineio-1.0",
 		source_dir = 'engineio-soup/src',
 		packages = 'uuid libsoup-2.4 json-glib-1.0', 
 		uselib = 'UUID SOUP JSON-GLIB',
@@ -453,6 +477,7 @@ def build(ctx):
 	
 	valalib(
 		target = NUVOLAKIT_BASE,
+		gir = "NuvolaBase-1.0",
 		source_dir = 'src/nuvolakit-base',
 		packages = packages + ' gstreamer-1.0',
 		uselib = uselib + " GST",
@@ -464,6 +489,7 @@ def build(ctx):
 	
 	valalib(
 		target = NUVOLAKIT_RUNNER,
+		gir = "NuvolaRunner-1.0",
 		source_dir = 'src/nuvolakit-runner',
 		packages = packages + ' webkit2gtk-4.0 javascriptcoregtk-4.0 gstreamer-1.0 libsecret-1 dri2 libdrm',
 		uselib =  uselib + ' JSCORE WEBKIT GST SECRET DRI2 DRM',
@@ -475,6 +501,11 @@ def build(ctx):
 		vapi_dirs = vapi_dirs,
 		vala_target_glib = TARGET_GLIB,
 	)
+	
+	ctx.gir_compile("Engineio-1.0", ENGINEIO, "engineio-soup/src")
+	ctx.gir_compile("Nuvola-1.0", NUVOLAKIT_RUNNER, ".",
+		["src/nuvolakit-base/NuvolaBase-1.0.gir", "src/nuvolakit-runner/NuvolaRunner-1.0.gir"],
+		params="--includedir='engineio-soup/src' --includedir='%s/build'" % os.environ["DIORITE_PATH"])
 
 	valaprog(
 		target = NUVOLA_BIN,
