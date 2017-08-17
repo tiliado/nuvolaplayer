@@ -27,10 +27,10 @@ namespace Nuvola
 
 public class MenuBar: GLib.Object, MenuBarInterface
 {
-	private unowned Drt.Application app;
+	private unowned Drtgtk.Application app;
 	private HashTable<string, SubMenu> menus;
 	
-	public MenuBar(Drt.Application app)
+	public MenuBar(Drtgtk.Application app)
 	{
 		this.app = app;
 		this.menus = new HashTable<string, SubMenu>(str_hash, str_equal);
@@ -69,7 +69,7 @@ public class SubMenu
 		this.actions = actions;
 	}
 	
-	public void append_to_menu(Drt.Actions actions, Menu menu)
+	public void append_to_menu(Drtgtk.Actions actions, Menu menu)
 	{
 		menu.append_submenu(label, actions.build_menu(this.actions, true, false));
 	}

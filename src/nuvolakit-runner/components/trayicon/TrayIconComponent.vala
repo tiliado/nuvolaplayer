@@ -122,14 +122,14 @@ public class TrayIconSettings : Gtk.Grid
 		row_spacing = 10;
 		column_spacing = 10;
 		var line = 0;
-		var label = Drt.Labels.header("Variants");
+		var label = Drtgtk.Labels.header("Variants");
 		label.hexpand = true;
 		label.show();
 		attach(label, 0, line, 2, 1);
 		line++;
 		var bind_flags = BindingFlags.BIDIRECTIONAL|BindingFlags.SYNC_CREATE;
 		
-		label = Drt.Labels.markup("<span size='medium'><b>%s</b></span>", "AppIndicator icon");
+		label = Drtgtk.Labels.markup("<span size='medium'><b>%s</b></span>", "AppIndicator icon");
 		attach(label, 1, line, 1, 1);
 		label.show();
 		appindicator_switch = new Gtk.Switch();
@@ -137,7 +137,7 @@ public class TrayIconSettings : Gtk.Grid
 		attach(appindicator_switch, 0, line, 1, 1);
 		appindicator_switch.show();
 		line++;
-		label = Drt.Labels.markup(
+		label = Drtgtk.Labels.markup(
 			"It should work in Unity, elementaryOS and GNOME (with "
 			+ "<a href=\"https://extensions.gnome.org/extension/615/appindicator-support\">AppIndicator extension</a>)"
 			+ " but does not work in other environments.");
@@ -145,7 +145,7 @@ public class TrayIconSettings : Gtk.Grid
 		label.show();
 		line++;
 		
-		label = Drt.Labels.markup("<span size='medium'><b>%s</b></span>", "Legacy X11 icon");
+		label = Drtgtk.Labels.markup("<span size='medium'><b>%s</b></span>", "Legacy X11 icon");
 		attach(label, 1, line, 1, 1);
 		label.show();
 		x11_icon_switch = new Gtk.Switch();
@@ -153,18 +153,18 @@ public class TrayIconSettings : Gtk.Grid
 		attach(x11_icon_switch, 0, line, 1, 1);
 		x11_icon_switch.show();
 		line++;
-		label = Drt.Labels.plain("It should work in XFCE, LXDE, Mate and GNOME (X11) but does not work in Unity.", true);
+		label = Drtgtk.Labels.plain("It should work in XFCE, LXDE, Mate and GNOME (X11) but does not work in Unity.", true);
 		attach(label, 1, line, 1, 1);
 		label.show();
 		line++;
 		
-		label = Drt.Labels.header("Options");
+		label = Drtgtk.Labels.header("Options");
 		label.hexpand = true;
 		label.show();
 		attach(label, 0, line, 2, 1);
 		line++;
 		
-		label = Drt.Labels.plain("Always close main window to tray icon");
+		label = Drtgtk.Labels.plain("Always close main window to tray icon");
 		attach(label, 1, line, 1, 1);
 		label.show();
 		close_to_tray_switch = new Gtk.Switch();

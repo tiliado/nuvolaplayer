@@ -36,7 +36,7 @@ public string build_master_ipc_id()
 	return "N3";
 }
 
-public class MasterController : Drt.Application
+public class MasterController : Drtgtk.Application
 {
 	private const string APP_STARTED = "/nuvola/core/app-started";
 	private const string APP_EXITED = "/nuvola/core/app-exited";
@@ -236,12 +236,12 @@ public class MasterController : Drt.Application
 		Graphics.ensure_gl_extension_mounted(main_window);
 		#endif
 		
-		Drt.Action[] actions_spec = {
+		Drtgtk.Action[] actions_spec = {
 		//          Action(group, scope, name, label?, mnemo_label?, icon?, keybinding?, callback?)
-		new Drt.SimpleAction("main", "app", Actions.HELP, "Help", "_Help", null, "F1", do_help),
-		new Drt.SimpleAction("main", "app", Actions.ABOUT, "About", "_About", null, null, do_about),
-		new Drt.SimpleAction("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
-		new Drt.SimpleAction("main", "win", Actions.START_APP, "Start app", "_Start app", "media-playback-start", "<ctrl>S", do_start_app),
+		new Drtgtk.SimpleAction("main", "app", Actions.HELP, "Help", "_Help", null, "F1", do_help),
+		new Drtgtk.SimpleAction("main", "app", Actions.ABOUT, "About", "_About", null, null, do_about),
+		new Drtgtk.SimpleAction("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
+		new Drtgtk.SimpleAction("main", "win", Actions.START_APP, "Start app", "_Start app", "media-playback-start", "<ctrl>S", do_start_app),
 		};
 		actions.add_actions(actions_spec);
 		
@@ -537,7 +537,7 @@ public class MasterController : Drt.Application
 		catch (GLib.Error e)
 		{
 			warning("DBus Activation error: %s", e.message);
-			var dialog = new Drt.ErrorDialog(
+			var dialog = new Drtgtk.ErrorDialog(
 				"Web App Loading Error",
 				("The web application with id '%s' has not been found.\n\n"
 				+ "DBus Activation has ended with an error:\n%s").printf(app_id, e.message));
@@ -549,7 +549,7 @@ public class MasterController : Drt.Application
 		var app_meta = web_app_reg.get_app_meta(app_id);
 		if (app_meta == null)
 		{
-			var dialog = new Drt.ErrorDialog(
+			var dialog = new Drtgtk.ErrorDialog(
 				"Web App Loading Error",
 				"The web application with id '%s' has not been found.".printf(app_id));
 			dialog.run();
@@ -576,7 +576,7 @@ public class MasterController : Drt.Application
 		catch (GLib.Error e)
 		{
 			warning("Failed to launch app runner for '%s'. %s", app_id, e.message);
-			var dialog = new Drt.ErrorDialog(
+			var dialog = new Drtgtk.ErrorDialog(
 				"Web App Loading Error",
 				"The web application '%s' has failed to load.".printf(app_meta.name));
 			dialog.run();
@@ -619,7 +619,7 @@ public class MasterController : Drt.Application
 		catch (GLib.Error e)
 		{
 			warning("Failed to launch app runner for '%s'. %s", app_id, e.message);
-			var dialog = new Drt.ErrorDialog(
+			var dialog = new Drtgtk.ErrorDialog(
 				"Web App Loading Error",
 				"The web application '%s' has failed to load.".printf(dbus_id));
 			dialog.run();

@@ -28,7 +28,7 @@ namespace Nuvola
 /**
  * Graphical representation of {@link StartupCheck}.
  */
-public class StartupWindow : Drt.ApplicationWindow
+public class StartupWindow : Drtgtk.ApplicationWindow
 {
 	[Description (nick="XDG Desktop Portal status", blurb="XDG Desktop Portal is required for proxy settings and opening URIs.")]
 	public Gtk.Label xdg_desktop_portal_status {get; set;}
@@ -139,18 +139,18 @@ public class StartupWindow : Drt.ApplicationWindow
 		var prop_status = name.replace("_", "-") + "-status";
 		var prop_msg = name.replace("_", "-") + "-message";
 		model.get(prop_status, out status, prop_msg, out msg);
-		var label = Drt.Labels.header(header);
+		var label = Drtgtk.Labels.header(header);
 		label.show();
 		label.set_line_wrap(false);
 		grid.attach(label, 0, line, 1, 1);
-		label = Drt.Labels.plain(status.get_blurb());
+		label = Drtgtk.Labels.plain(status.get_blurb());
 		label.hexpand = false;
 		label.halign = label.valign = Gtk.Align.CENTER;
 		label.get_style_context().add_class(status.get_badge_class());
 		label.show();
 		grid.attach(label, 1, line, 1, 1);
 		this.set(prop_status, label);
-		label = Drt.Labels.markup(msg);
+		label = Drtgtk.Labels.markup(msg);
 		label.selectable = true;
 		if (msg != null)
 		{
@@ -225,18 +225,18 @@ public class StartupWindow : Drt.ApplicationWindow
 		switch (final_status)
 		{
 		case StartupCheck.Status.ERROR:
-			header = Drt.Labels.header(app.app_name + " cannot start");
-			label = Drt.Labels.markup("<big>Look at the table bellow to find out the reason.</big>");
+			header = Drtgtk.Labels.header(app.app_name + " cannot start");
+			label = Drtgtk.Labels.markup("<big>Look at the table bellow to find out the reason.</big>");
 			button = new Gtk.Button.with_label("Quit");
 			break;
 		case StartupCheck.Status.WARNING:
-			header = Drt.Labels.header("There are a few issues");
-			label = Drt.Labels.markup("<big>You can continue using %s but take a look at the table bellow first.</big>", app.app_name);
+			header = Drtgtk.Labels.header("There are a few issues");
+			label = Drtgtk.Labels.markup("<big>You can continue using %s but take a look at the table bellow first.</big>", app.app_name);
 			button = new Gtk.Button.with_label("Continue");
 			break;
 		case StartupCheck.Status.OK:
-			header = Drt.Labels.header("Everything is OK");
-			label = Drt.Labels.markup("<big>%s will load in a few seconds.</big>", app.app_name);
+			header = Drtgtk.Labels.header("Everything is OK");
+			label = Drtgtk.Labels.markup("<big>%s will load in a few seconds.</big>", app.app_name);
 			break;
 		}
 		

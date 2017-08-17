@@ -48,7 +48,7 @@ public abstract class AudioScrobbler : GLib.Object
 	public bool can_scrobble {get; protected set; default = false;}
 	public bool can_update_now_playing {get; protected set; default = false;}
 	
-	public virtual Gtk.Widget? get_settings(Drt.Application app)
+	public virtual Gtk.Widget? get_settings(Drtgtk.Application app)
 	{
 		return null;
 	}

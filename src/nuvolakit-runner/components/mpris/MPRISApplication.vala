@@ -28,9 +28,9 @@ namespace Nuvola
 [DBus(name = "org.mpris.MediaPlayer2")]
 public class MPRISApplication: GLib.Object
 {
-	private Drt.Application app;
+	private Drtgtk.Application app;
 	
-	public MPRISApplication(Drt.Application app)
+	public MPRISApplication(Drtgtk.Application app)
 	{
 		this.app = app;
 		var desktop_entry = app.desktop_name;

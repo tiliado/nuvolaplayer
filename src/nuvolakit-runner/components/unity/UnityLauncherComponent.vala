@@ -30,11 +30,11 @@ public class UnityLauncherComponent: Component
 {
 	#if UNITY
 	private Bindings bindings;
-	private Drt.Application app;
+	private Drtgtk.Application app;
 	private UnityLauncher? launcher = null;
 	#endif
 	
-	public UnityLauncherComponent(Drt.Application app, Bindings bindings, Drt.KeyValueStorage config)
+	public UnityLauncherComponent(Drtgtk.Application app, Bindings bindings, Drt.KeyValueStorage config)
 	{
 		base("unity_launcher", "Unity Laucher", "Adds quick list (menu) to the icon on Unity Launcher.");
 		#if UNITY

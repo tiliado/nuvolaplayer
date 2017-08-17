@@ -61,7 +61,7 @@ public string build_ui_runner_ipc_id(string web_app_id)
 	return "N3" + web_app_id.replace("_", "");
 }
 
-public class AppRunnerController: Drt.Application
+public class AppRunnerController: Drtgtk.Application
 {
 	public Drt.Storage storage {get; private set;}
 	public Config config {get; protected set; default = null;}
@@ -81,7 +81,7 @@ public class AppRunnerController: Drt.Application
 	private const int MINIMAL_REMEMBERED_WINDOW_SIZE = 300;
 	private uint configure_event_cb_id = 0;
 	private MenuBar menu_bar;
-	private Drt.Form? init_form = null;
+	private Drtgtk.Form? init_form = null;
 	private FormatSupport format_support = null;
 	private Drt.Lst<Component> components = null;
 	private string? api_token = null;
@@ -299,7 +299,7 @@ public class AppRunnerController: Drt.Application
 	{
 		actions_helper = new ActionsHelper(actions, config);
 		unowned ActionsHelper ah = actions_helper;
-		Drt.Action[] actions_spec = {
+		Drtgtk.Action[] actions_spec = {
 		//          Action(group, scope, name, label?, mnemo_label?, icon?, keybinding?, callback?)
 		ah.simple_action("main", "app", Actions.ACTIVATE, "Activate main window", null, null, null, do_activate),
 		ah.simple_action("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
@@ -415,7 +415,7 @@ public class AppRunnerController: Drt.Application
 	private void append_actions()
 	{
 		unowned ActionsHelper ah = actions_helper;
-		Drt.Action[] actions_spec = {
+		Drtgtk.Action[] actions_spec = {
 		ah.simple_action("main", "app", Actions.PREFERENCES, "Preferences", "_Preferences", null, null, do_preferences),
 		ah.toggle_action("main", "win", Actions.TOGGLE_SIDEBAR, "Show sidebar", "Show _sidebar", null, null, do_toggle_sidebar, config.get_value(ConfigKey.WINDOW_SIDEBAR_VISIBLE)),
 		ah.simple_action("go", "app", Actions.GO_HOME, "Home", "_Home", "go-home", "<alt>Home", web_engine.go_home),
@@ -456,15 +456,15 @@ public class AppRunnerController: Drt.Application
 	{
 		var values = new HashTable<string, Variant>(str_hash, str_equal);
 		values.insert(ConfigKey.DARK_THEME, config.get_value(ConfigKey.DARK_THEME));
-		Drt.Form form;
+		Drtgtk.Form form;
 		try
 		{
-			form = Drt.Form.create_from_spec(values, new Variant.tuple({
+			form = Drtgtk.Form.create_from_spec(values, new Variant.tuple({
 				new Variant.tuple({new Variant.string("header"), new Variant.string("Basic settings")}),
 				new Variant.tuple({new Variant.string("bool"), new Variant.string(ConfigKey.DARK_THEME), new Variant.string("Prefer dark theme")})
 			}));
 		}
-		catch (Drt.FormError e)
+		catch (Drtgtk.FormError e)
 		{
 			show_error("Preferences form error",
 				"Preferences form hasn't been shown because of malformed form specification: %s"
@@ -480,7 +480,7 @@ public class AppRunnerController: Drt.Application
 			form.add_values(Drt.variant_to_hashtable(extra_values));
 			form.add_entries(extra_entries);
 		}
-		catch (Drt.FormError e)
+		catch (Drtgtk.FormError e)
 		{
 			show_error("Preferences form error",
 				"Some entries of the Preferences form haven't been shown because of malformed form specification: %s"
@@ -576,7 +576,7 @@ public class AppRunnerController: Drt.Application
 	
 	private void on_fatal_error(string title, string message, bool markup)
 	{
-		var dialog = new Drt.ErrorDialog(
+		var dialog = new Drtgtk.ErrorDialog(
 			title,
 			message + "\n\nThe application has reached an inconsistent state and will quit for that reason.",
 			markup);
@@ -586,7 +586,7 @@ public class AppRunnerController: Drt.Application
 	
 	private void on_show_error(string title, string message, bool markup)
 	{
-		var dialog = new Drt.ErrorDialog(
+		var dialog = new Drtgtk.ErrorDialog(
 			title,
 			message + "\n\nThe application might not function properly.",
 			markup);
@@ -735,7 +735,7 @@ public class AppRunnerController: Drt.Application
 		return new Variant.boolean(false);
 	}
 	
-	private void on_action_changed(Drt.Action action, ParamSpec p)
+	private void on_action_changed(Drtgtk.Action action, ParamSpec p)
 	{
 		if (p.name != "enabled")
 			return;
@@ -829,7 +829,7 @@ public class AppRunnerController: Drt.Application
 		
 		try
 		{
-			init_form = Drt.Form.create_from_spec(values, entries);
+			init_form = Drtgtk.Form.create_from_spec(values, entries);
 			init_form.check_toggles();
 			init_form.expand = true;
 			init_form.valign = init_form.halign = Gtk.Align.CENTER;
@@ -842,7 +842,7 @@ public class AppRunnerController: Drt.Application
 			main_window.grid.add(init_form);
 			init_form.show();
 		}
-		catch (Drt.FormError e)
+		catch (Drtgtk.FormError e)
 		{
 			show_error("Initialization form error",
 				"Initialization form hasn't been shown because of malformed form specification: %s"

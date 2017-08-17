@@ -28,10 +28,10 @@ namespace Nuvola
 public class MPRISComponent: Component
 {
 	private Bindings bindings;
-	private Drt.Application app;
+	private Drtgtk.Application app;
 	private MPRISProvider? mpris = null;
 	
-	public MPRISComponent(Drt.Application app, Bindings bindings, Drt.KeyValueStorage config)
+	public MPRISComponent(Drtgtk.Application app, Bindings bindings, Drt.KeyValueStorage config)
 	{
 		base("mpris", "MPRIS 2", "Remote media player interface used by Unity sound indicator and similar applets.");
 		this.bindings = bindings;

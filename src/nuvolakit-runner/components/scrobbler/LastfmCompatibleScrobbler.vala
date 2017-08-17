@@ -56,7 +56,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
 		notify.connect_after(on_notify);
 	}
 	
-	public override Gtk.Widget? get_settings(Drt.Application app)
+	public override Gtk.Widget? get_settings(Drtgtk.Application app)
 	{
 		return new ScrobblerSettings(this, app);
 	}

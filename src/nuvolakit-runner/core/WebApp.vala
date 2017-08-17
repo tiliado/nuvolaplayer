@@ -337,7 +337,7 @@ public class WebApp : GLib.Object
 				}
 			}
 		}
-		return Drt.Icons.load_theme_icon({Nuvola.get_app_icon()}, size);
+		return Drtgtk.Icons.load_theme_icon({Nuvola.get_app_icon()}, size);
 	}
 	
 	private Gtk.IconInfo? lookup_theme_icon(int size, Gtk.IconLookupFlags flags=0)

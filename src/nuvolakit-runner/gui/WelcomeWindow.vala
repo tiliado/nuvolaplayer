@@ -29,12 +29,12 @@ public class WelcomeScreen : Gtk.Grid
 {
 	private const string PATRONS_BOX_URI = "https://tiliado.eu/nuvolaplayer/funding/patrons_list_box/";
 	private Gtk.Grid grid;
-	private Drt.Application app;
+	private Drtgtk.Application app;
 	private WebView web_view;
-	private Drt.RichTextView welcome_text;
+	private Drtgtk.RichTextView welcome_text;
 	private Gtk.ScrolledWindow scroll;
 	
-	public WelcomeScreen(Drt.Application app, Drt.Storage storage)
+	public WelcomeScreen(Drtgtk.Application app, Drt.Storage storage)
 	{
 		this.app = app;
 		
@@ -53,7 +53,7 @@ public class WelcomeScreen : Gtk.Grid
 			error("Failed to load '%s': %s", welcome_xml_file.get_path(), e.message);
 		}	
 		
-		var buffer = new Drt.RichTextBuffer();
+		var buffer = new Drtgtk.RichTextBuffer();
 		try
 		{
 			buffer.load(welcome_xml);
@@ -63,7 +63,7 @@ public class WelcomeScreen : Gtk.Grid
 			error("Markup Error in '%s': %s", welcome_xml_file.get_path(), e.message);
 		}
 		
-		welcome_text = new Drt.RichTextView(buffer);
+		welcome_text = new Drtgtk.RichTextView(buffer);
 		welcome_text.link_opener = show_uri;
 		welcome_text.margin = 18;
 		welcome_text.vexpand = welcome_text.hexpand = true;

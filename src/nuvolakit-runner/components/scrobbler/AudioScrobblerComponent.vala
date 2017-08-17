@@ -30,7 +30,7 @@ public class AudioScrobblerComponent: Component
 	private const int SCROBBLE_SONG_DELAY = 60;
 	
 	private Bindings bindings;
-	private Drt.Application app;
+	private Drtgtk.Application app;
 	private Soup.Session connection;
 	private unowned Drt.KeyValueStorage config;
 	private unowned Drt.KeyValueStorage global_config;
@@ -44,7 +44,7 @@ public class AudioScrobblerComponent: Component
 	private uint track_info_cb_id = 0;
 	
 	public AudioScrobblerComponent(
-		Drt.Application app, Bindings bindings, Drt.KeyValueStorage global_config, Drt.KeyValueStorage config, Soup.Session connection)
+		Drtgtk.Application app, Bindings bindings, Drt.KeyValueStorage global_config, Drt.KeyValueStorage config, Soup.Session connection)
 	{
 		base("scrobbler", "Audio Scrobbler Services", "Integration with audio scrobbling services like Last FM and Libre FM.");
 		this.bindings = bindings;

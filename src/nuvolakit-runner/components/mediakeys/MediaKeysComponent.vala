@@ -28,12 +28,12 @@ namespace Nuvola
 public class MediaKeysComponent: Component
 {
 	private Bindings bindings;
-	private Drt.Application app;
+	private Drtgtk.Application app;
 	private MediaKeysClient? media_keys = null;
 	private Drt.ApiChannel conn;
 	private string web_app_id;
 	
-	public MediaKeysComponent(Drt.Application app, Bindings bindings, Drt.KeyValueStorage config, Drt.ApiChannel conn, string web_app_id)
+	public MediaKeysComponent(Drtgtk.Application app, Bindings bindings, Drt.KeyValueStorage config, Drt.ApiChannel conn, string web_app_id)
 	{
 		base("mediakeys", "Media keys", "Handles multimedia keys of your keyboard.");
 		this.bindings = bindings;

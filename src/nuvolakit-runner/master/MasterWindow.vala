@@ -28,7 +28,7 @@ namespace Nuvola
 /**
  * Main window of the Nuvola Master process
  */
-public class MasterWindow : Drt.ApplicationWindow
+public class MasterWindow : Drtgtk.ApplicationWindow
 {
 	/** Stack for the pages of the main window */
 	public Gtk.Stack stack;

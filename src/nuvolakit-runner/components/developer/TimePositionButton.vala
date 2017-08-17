@@ -29,7 +29,7 @@ namespace Nuvola
  * Button which shows position inside a time interval and a popover with a slider
  * is shown when the button is clicked.
  */
-public class TimePositionButton: Drt.PopoverButton
+public class TimePositionButton: Drtgtk.PopoverButton
 {
 	public int start_sec {get ; set; default = 0;}
 	public int position_sec {get; set; default = 0;}

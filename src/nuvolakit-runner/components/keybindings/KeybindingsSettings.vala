@@ -27,7 +27,7 @@ namespace Nuvola
 
 public class KeybindingsSettings : Gtk.Grid
 {
-	private Drt.Actions actions_reg;
+	private Drtgtk.Actions actions_reg;
 	private Config config;
 	private ActionsKeyBinder global_keybindings;
 	private Gtk.TreeView view;
@@ -40,7 +40,7 @@ public class KeybindingsSettings : Gtk.Grid
 	 * 
 	 * @param app Application object
 	 */
-	public KeybindingsSettings(Drt.Actions actions_reg, Config config, ActionsKeyBinder global_keybindings)
+	public KeybindingsSettings(Drtgtk.Actions actions_reg, Config config, ActionsKeyBinder global_keybindings)
 	{
 		
 		this.actions_reg = actions_reg;
@@ -77,7 +77,7 @@ public class KeybindingsSettings : Gtk.Grid
 		foreach (var action in actions_reg.list_actions())
 		{
 			var label = action.label;
-			if (action is Drt.RadioAction || label == null)
+			if (action is Drtgtk.RadioAction || label == null)
 				continue;
 			
 			var keybinding = action.keybinding;

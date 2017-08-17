@@ -33,7 +33,7 @@ public class Notification
 	public bool resident {get; private set; default = false;}
 	private Notify.Notification notification = null;
 	private string icon_path = "";
-	private Drt.Action[] actions = {};
+	private Drtgtk.Action[] actions = {};
 	private string desktop_entry;
 	private string category = "";
 	private uint timeout_id = 0;
@@ -55,7 +55,7 @@ public class Notification
 		this.category = category;
 	}
 	
-	public void set_actions(Drt.Action[] actions)
+	public void set_actions(Drtgtk.Action[] actions)
 	{
 		this.actions = actions;
 	}
@@ -208,7 +208,7 @@ public class Notifications : GLib.Object, NotificationsInterface, NotificationIn
 	
 	public bool set_actions(string name, string[] actions)
 	{
-		Drt.Action[] actions_found = {};
+		Drtgtk.Action[] actions_found = {};
 		foreach (var action_name in actions)
 		{
 			var action = app.actions.get_action(action_name);

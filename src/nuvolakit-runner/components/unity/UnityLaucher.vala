@@ -31,13 +31,13 @@ namespace Nuvola
  */
 public class UnityLauncher: GLib.Object
 {
-	private Drt.Application controller;
-	private Drt.Actions actions_reg;
+	private Drtgtk.Application controller;
+	private Drtgtk.Actions actions_reg;
 	private Unity.LauncherEntry dock_item;
 	private LauncherModel model;
 	private SList<ActionAdaptor> adaptors = null;
 	
-	public UnityLauncher(Drt.Application controller, LauncherModel model)
+	public UnityLauncher(Drtgtk.Application controller, LauncherModel model)
 	{
 		this.controller = controller;
 		this.actions_reg = controller.actions;
@@ -87,8 +87,8 @@ public class UnityLauncher: GLib.Object
 	private Dbusmenu.Menuitem? create_menu_item(string action_name)
 	{
 		string? detailed_name = null;
-		Drt.Action? action = null;
-		Drt.RadioOption? option = null;
+		Drtgtk.Action? action = null;
+		Drtgtk.RadioOption? option = null;
 		if (!actions_reg.find_and_parse_action(action_name, out detailed_name, out action, out option))
 		{
 			warning("Action '%s' not found in registry.", action_name);
@@ -114,13 +114,13 @@ public class UnityLauncher: GLib.Object
 		var item = new Dbusmenu.Menuitem();
 		item.property_set(Dbusmenu.MENUITEM_PROP_LABEL, label);
 		item.property_set_bool(Dbusmenu.MENUITEM_PROP_ENABLED, action.enabled);
-		if (action is Drt.ToggleAction)
+		if (action is Drtgtk.ToggleAction)
 		{
 			item.property_set(Dbusmenu.MENUITEM_PROP_TOGGLE_TYPE, Dbusmenu.MENUITEM_TOGGLE_CHECK);
 			item.property_set_int(Dbusmenu.MENUITEM_PROP_TOGGLE_STATE,
 			action.state.get_boolean() ? Dbusmenu.MENUITEM_TOGGLE_STATE_CHECKED : Dbusmenu.MENUITEM_TOGGLE_STATE_UNCHECKED);
 		}
-		else if (action is Drt.RadioAction)
+		else if (action is Drtgtk.RadioAction)
 		{
 			item.property_set(Dbusmenu.MENUITEM_PROP_TOGGLE_TYPE, Dbusmenu.MENUITEM_TOGGLE_RADIO);
 			item.property_set_int(Dbusmenu.MENUITEM_PROP_TOGGLE_STATE,
@@ -144,11 +144,11 @@ public class UnityLauncher: GLib.Object
 
 private class ActionAdaptor
 {
-	private Drt.Action action;
+	private Drtgtk.Action action;
 	private Dbusmenu.Menuitem item;
 	private Variant? parameter;
 	
-	public ActionAdaptor(Drt.Action action, Dbusmenu.Menuitem item, Variant? parameter)
+	public ActionAdaptor(Drtgtk.Action action, Dbusmenu.Menuitem item, Variant? parameter)
 	{
 		this.action = action;
 		this.item = item;

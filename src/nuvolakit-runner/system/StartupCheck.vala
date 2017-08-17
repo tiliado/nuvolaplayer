@@ -458,18 +458,18 @@ public class StartupCheck : GLib.Object
 			switch (this)
 			{
 			case IN_PROGRESS:
-				return Drt.Css.BADGE_INFO;
+				return Drtgtk.Css.BADGE_INFO;
 			case OK:
-				return Drt.Css.BADGE_OK;
+				return Drtgtk.Css.BADGE_OK;
 			case WARNING:
-				return Drt.Css.BADGE_WARNING;
+				return Drtgtk.Css.BADGE_WARNING;
 			case ERROR:
-				return Drt.Css.BADGE_ERROR;
+				return Drtgtk.Css.BADGE_ERROR;
 			case NOT_APPLICABLE:
 			case UNKNOWN:
-				return Drt.Css.BADGE_DEFAULT;
+				return Drtgtk.Css.BADGE_DEFAULT;
 			default:
-				return Drt.Css.BADGE_DEFAULT;
+				return Drtgtk.Css.BADGE_DEFAULT;
 			}
 		}
 		

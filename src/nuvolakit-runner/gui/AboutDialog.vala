@@ -109,7 +109,7 @@ public class AboutDialog: Gtk.Dialog
 		title.column_spacing = 10;
 		title.margin = 10;
 		
-		var pixbuf = Drt.Icons.load_theme_icon({Nuvola.get_app_icon()}, icon_size);
+		var pixbuf = Drtgtk.Icons.load_theme_icon({Nuvola.get_app_icon()}, icon_size);
 		if (pixbuf != null)
 		{
 			img = new Gtk.Image.from_pixbuf(pixbuf);

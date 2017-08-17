@@ -39,7 +39,7 @@ public class ComponentsManager: Gtk.Stack
 		grid = new Gtk.Grid();
 		grid.margin = 10;
 		grid.column_spacing = 15;
-		component_not_available_widget = Drt.Labels.markup(
+		component_not_available_widget = Drtgtk.Labels.markup(
 			"Your distributor has not enabled this feature. It is available in <a href=\"%s\">the genuine flatpak "
 			+ "builds of Nuvola Apps Runtime</a> though.", "https://nuvola.tiliado.eu");
 		refresh();
@@ -214,7 +214,7 @@ public class ComponentsManager: Gtk.Stack
 			button.valign = button.halign = Gtk.Align.CENTER;
 			button.clicked.connect(on_back_clicked);
 			grid.attach(button, 0, 0, 1, 1);
-			var label = Drt.Labels.markup(
+			var label = Drtgtk.Labels.markup(
 				"<span size='medium'><b>%s</b></span>\n<span foreground='#444' size='small'>%s</span>",
 				component.name, component.description);
 			grid.attach(label, 1, 0, 1, 1);
