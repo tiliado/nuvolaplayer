@@ -127,9 +127,13 @@ public string get_libdir()
 	return Environment.get_variable("NUVOLA_LIBDIR") ?? LIBDIR;
 }
 
+private string? app_runner_path;
+ 
 public string get_app_runner_path()
 {
-	return get_libdir() + "/apprunner"; 
+	if (app_runner_path == null)
+		app_runner_path = Environment.get_variable("NUVOLA_APPRUNNER") ?? (get_libdir() + "/apprunner");
+	return app_runner_path;
 }
 
 public string get_welcome_screen_name()

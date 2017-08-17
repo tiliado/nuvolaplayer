@@ -25,6 +25,11 @@
 namespace Nuvola.Startup
 {
 
+public int print_web_app_version_stdout(File web_app_dir)
+{
+	return print_web_app_version(stdout, web_app_dir);
+}
+
 public int print_web_app_version(FileStream output, File web_app_dir)
 {
 	try
