@@ -27,23 +27,71 @@ using Nuvola.JSTools;
 namespace Nuvola
 {
 
-public class WebEngine : GLib.Object, JSExecutor
+public abstract class WebEngine : GLib.Object, JSExecutor {
+	public abstract Gtk.Widget main_web_view {get;}
+	public WebApp web_app {get; protected set;}
+	public WebAppStorage storage {get; protected set;}
+	public bool ready {get; protected set; default = false;}
+	public bool can_go_back {get; protected set; default = false;}
+	public bool can_go_forward {get; protected set; default = false;}
+	public abstract bool web_plugins {get; set;}
+	public abstract bool media_source_extension {get; set;}
+	public WebWorker web_worker {get; protected set;}
+	
+	public WebEngine(WebAppStorage storage)
+	{
+		this.storage = storage;
+	}
+	
+	public signal void init_finished();
+	public signal void web_worker_ready();
+	public signal void app_runner_ready();
+	public signal void init_form(HashTable<string, Variant> values, Variant entries);
+	public signal void show_alert_dialog(ref bool handled, string message);
+	public signal void context_menu(bool whatewer_fixme_in_future);
+	
+	public abstract void early_init(AppRunnerController runner_app, IpcBus ipc_bus, WebApp web_app,
+		Config config, Connection? connection, HashTable<string, Variant> worker_data);
+	
+	public abstract void init();
+	
+	public abstract void init_app_runner();
+	
+	public abstract void load_app();
+	
+	public abstract void go_home();
+	
+	public abstract void apply_network_proxy(Connection connection);
+	
+	public abstract void go_back();
+	
+	public abstract void go_forward();
+	
+	public abstract void reload();
+	
+	public abstract void zoom_in();
+	
+	public abstract void zoom_out();
+	
+	public abstract void zoom_reset();
+	
+	public abstract void set_user_agent(string? user_agent);
+	
+	public abstract void get_preferences(out Variant values, out Variant entries);
+	
+	public abstract void call_function(string name, ref Variant? params) throws GLib.Error;
+}
+
+public class WebkitEngine : WebEngine
 {
 	private const string ZOOM_LEVEL_CONF = "webview.zoom_level";
 	
-	public Gtk.Widget widget {get {return web_view;}}
-	public WebApp web_app {get; private set;}
-	public WebAppStorage storage {get; private set;}
-	public bool ready {get; private set; default = false;}
-	public bool can_go_back {get; private set; default = false;}
-	public bool can_go_forward {get; private set; default = false;}
-	public bool web_plugins
-	{
+	public override Gtk.Widget main_web_view {get {return web_view;}}
+	public override bool web_plugins {
 		get {return web_view.get_settings().enable_plugins;}
 		set {web_view.get_settings().enable_plugins = value;}
 	}
-	public bool media_source_extension
-	{
+	public override bool media_source_extension {
 		get {return web_view.get_settings().enable_mediasource;}
 		set {web_view.get_settings().enable_mediasource = value;}
 	}
@@ -53,15 +101,13 @@ public class WebEngine : GLib.Object, JSExecutor
 	private JsEnvironment? env = null;
 	private JSApi api;
 	private IpcBus ipc_bus = null;
-	public WebWorker web_worker {get; private set;}
-	
 	private Config config;
 	private Drt.KeyValueStorage session;
-	
 	private WebKit.WebContext? default_context = null;
 	
-	public WebEngine(WebAppStorage storage)
+	public WebkitEngine(WebAppStorage storage)
 	{
+		base(storage);
 		var data_manager = (WebKit.WebsiteDataManager) GLib.Object.@new(
 			typeof(WebKit.WebsiteDataManager),
 			"base-cache-directory", storage.create_cache_subdir("webkit").get_path(),
@@ -90,18 +136,21 @@ public class WebEngine : GLib.Object, JSExecutor
 		return WebKit.get_major_version() * 10000 + WebKit.get_minor_version() * 100 + WebKit.get_micro_version(); 
 	}
 	
+	public uint get_version() {
+		return get_webkit_version();
+	}
+	
 	public static bool check_webkit_version(uint min, uint max=0)
 	{
 		var version = get_webkit_version();
  		return version >= min && (max == 0 || version < max);
 	}
 	
-	public void early_init(AppRunnerController runner_app, IpcBus ipc_bus, WebApp web_app,
-		WebAppStorage storage, Config config, Connection? connection, HashTable<string, Variant> worker_data)
+	public override void early_init(AppRunnerController runner_app, IpcBus ipc_bus, WebApp web_app,
+		Config config, Connection? connection, HashTable<string, Variant> worker_data)
 	{
 		this.ipc_bus = ipc_bus;
 		this.runner_app = runner_app;
-		this.storage = storage;
 		this.web_app = web_app;
 		this.config = config;
 		this.web_worker = new RemoteWebWorker(ipc_bus);
@@ -138,26 +187,20 @@ public class WebEngine : GLib.Object, JSExecutor
 		register_ipc_handlers();
 	}
 	
-	~WebEngine()
+	~WebkitEngine()
 	{
 		web_view.get_back_forward_list().changed.disconnect(on_back_forward_list_changed);
 	}
 	
-	public signal void init_finished();
-	public signal void web_worker_ready();
-	public signal void app_runner_ready();
-	public signal void init_form(HashTable<string, Variant> values, Variant entries);
+	public signal void webkit_context_menu(WebKit.ContextMenu menu, Gdk.Event event, WebKit.HitTestResult hit_test_result);
 	
-	public signal void context_menu(WebKit.ContextMenu menu, Gdk.Event event, WebKit.HitTestResult hit_test_result);
 	
-	public signal void show_alert_dialog(ref bool handled, string message);
-	
-	public void init()
+	public override void init()
 	{
 		web_view.load_html("<html><body>A web app will be loaded shortly...</body></html>", WEB_ENGINE_LOADING_URI);
 	}
 	
-	public void init_app_runner()
+	public override void init_app_runner()
 	{
 		if (!ready)
 		{
@@ -219,7 +262,7 @@ public class WebEngine : GLib.Object, JSExecutor
 		return false;
 	}
 	
-	public void load_app()
+	public override void load_app()
 	{
 		can_go_back = web_view.can_go_back();
 		can_go_forward = web_view.can_go_forward();
@@ -241,7 +284,7 @@ public class WebEngine : GLib.Object, JSExecutor
 		go_home();
 	}
 	
-	public void go_home()
+	public override void go_home()
 	{
 		try
 		{
@@ -259,7 +302,7 @@ public class WebEngine : GLib.Object, JSExecutor
 		}
 	}
 	
-	public void apply_network_proxy(Connection connection)
+	public override void apply_network_proxy(Connection connection)
 	{
 		WebKit.NetworkProxyMode proxy_mode;
 		WebKit.NetworkProxySettings? proxy_settings = null;
@@ -310,37 +353,37 @@ public class WebEngine : GLib.Object, JSExecutor
 	
 	
 	
-	public void go_back()
+	public override void go_back()
 	{
 		web_view.go_back();
 	}
 	
-	public void go_forward()
+	public override void go_forward()
 	{
 		web_view.go_forward();
 	}
 	
-	public void reload()
+	public override void reload()
 	{
 		web_view.reload();
 	}
 	
-	public void zoom_in()
+	public override void zoom_in()
 	{
 		web_view.zoom_in();
 	}
 	
-	public void zoom_out()
+	public override void zoom_out()
 	{
 		web_view.zoom_out();
 	}
 	
-	public void zoom_reset()
+	public override void zoom_reset()
 	{
 		web_view.zoom_reset();
 	}
 	
-	public void set_user_agent(string? user_agent)
+	public override void set_user_agent(string? user_agent)
 	{
 		const string APPLE_WEBKIT_VERSION = "604.1";
 		const string SAFARI_VERSION = "11.0";
@@ -408,7 +451,8 @@ public class WebEngine : GLib.Object, JSExecutor
 		}
 		message("User agent set '%s'", settings.user_agent);
 	}
-	public void get_preferences(out Variant values, out Variant entries)
+	
+	public override void get_preferences(out Variant values, out Variant entries)
 	{
 		var args = new Variant("(s@a{sv}@av)", "PreferencesForm", new Variant.array(new VariantType("{sv}"), {}), new Variant.array(VariantType.VARIANT, {}));
 		try
@@ -422,7 +466,7 @@ public class WebEngine : GLib.Object, JSExecutor
 		args.get("(s@a{smv}@av)", null, out values, out entries);
 	}
 
-	public void call_function(string name, ref Variant? params) throws GLib.Error
+	public override void call_function(string name, ref Variant? params) throws GLib.Error
 	{
 		env.call_function(name, ref params);
 	}
@@ -941,7 +985,7 @@ public class WebEngine : GLib.Object, JSExecutor
 	
 	private bool on_context_menu(WebKit.ContextMenu menu, Gdk.Event event, WebKit.HitTestResult hit_test_result)
 	{
-		context_menu(menu, event, hit_test_result);
+		webkit_context_menu(menu, event, hit_test_result);
 		return false;
 	}
 }

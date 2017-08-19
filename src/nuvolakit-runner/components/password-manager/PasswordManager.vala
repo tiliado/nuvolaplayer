@@ -34,9 +34,9 @@ public class PasswordManager
 	private string app_id;
 	private Secret.Schema secret_schema;
 	private HashTable<string, Drt.Lst<LoginCredentials>>? passwords = null;
-	private WebEngine web_engine;
+	private WebkitEngine web_engine;
 	
-	public PasswordManager(WebEngine web_engine, string app_id)
+	public PasswordManager(WebkitEngine web_engine, string app_id)
 	{
 		this.app_id = app_id;
 		secret_schema = new Secret.Schema(
@@ -45,13 +45,13 @@ public class PasswordManager
 			SCHEMA_HOSTNAME, Secret.SchemaAttributeType.STRING,
 			SCHEMA_USERNAME, Secret.SchemaAttributeType.STRING);
 		this.web_engine = web_engine;
-		web_engine.context_menu.connect(on_context_menu);
+		web_engine.webkit_context_menu.connect(on_context_menu);
 	}
 	
 	~PasswordManager()
 	{
 		debug("~PasswordManager");
-		web_engine.context_menu.disconnect(on_context_menu);
+		web_engine.webkit_context_menu.disconnect(on_context_menu);
 	}
 	
 	public signal void prefill_username(int username_index);

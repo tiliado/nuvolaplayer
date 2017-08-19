@@ -33,10 +33,10 @@ public class PasswordManagerComponent: Component
 	private string web_app_id;
 	private PasswordManager? manager = null;
 	private PasswordManagerBinding? binding = null;
-	private WebEngine engine;
+	private WebkitEngine engine;
 	#endif
 	
-	public PasswordManagerComponent(Drt.KeyValueStorage config, IpcBus ipc_bus, WebWorker web_worker, string web_app_id, WebEngine engine)
+	public PasswordManagerComponent(Drt.KeyValueStorage config, IpcBus ipc_bus, WebWorker web_worker, string web_app_id, WebkitEngine engine)
 	{
 		base("passwordmanager", "Password Manager (Experimental)", "Stores passwords from login forms in a keyring.");
 		#if EXPERIMENTAL
