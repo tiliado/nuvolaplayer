@@ -72,7 +72,7 @@ public class StartupCheck : GLib.Object
 	#endif
 	[Description (nick="Web App object", blurb="Currently loaded web application")]
 	public WebApp web_app {get; construct;}
-	public WebkitEngine webkit_engine {get; construct;}
+	public WebkitOptions webkit_options {get; construct;}
 	
 	/**
 	 * Create new StartupCheck object.
@@ -80,9 +80,9 @@ public class StartupCheck : GLib.Object
 	 * @param web_app           Web application to check its requirements.
 	 * @param format_support    Information about supported formats and technologies.
 	 */
-	public StartupCheck(WebApp web_app, FormatSupport format_support, WebkitEngine webkit_engine)
+	public StartupCheck(WebApp web_app, FormatSupport format_support, WebkitOptions webkit_options)
 	{
-		GLib.Object(format_support: format_support, web_app: web_app, webkit_engine: webkit_engine);
+		GLib.Object(format_support: format_support, web_app: web_app, webkit_options: webkit_options);
 	}
 	
 	~StartupCheck()
@@ -213,7 +213,7 @@ public class StartupCheck : GLib.Object
 			result_message = e.message;
 		}
 		
-		if (web_app.traits(webkit_engine).flash_required)
+		if (web_app.traits(webkit_options).flash_required)
 		{
 			unowned List<WebPlugin?> plugins = format_support.list_web_plugins();
 			foreach (unowned WebPlugin plugin in plugins)
@@ -248,7 +248,7 @@ public class StartupCheck : GLib.Object
 		try
 		{
 			string? failed_requirements = null;
-			if (!web_app.check_requirements(format_support, webkit_engine, out failed_requirements))
+			if (!web_app.check_requirements(format_support, webkit_options, out failed_requirements))
 			{
 				Drt.String.append(ref result_message, "\n", Markup.printf_escaped(
 						"This web app requires certain technologies to function properly but these requirements "

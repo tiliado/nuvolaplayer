@@ -70,6 +70,7 @@ public class AppRunnerController: Drtgtk.Application
 	public WebApp web_app {get; protected set;}
 	public WebAppStorage app_storage {get; protected set;}
 	public string dbus_id {get; private set;}
+	private WebkitOptions webkit_options;
 	private WebkitEngine webkit_engine = null;
 	public WebEngine web_engine {get; private set;}
 	public Drt.KeyValueStorage master_config {get; private set;}
@@ -137,9 +138,8 @@ public class AppRunnerController: Drtgtk.Application
 	{
 		init_settings();
 		format_support = new FormatSupport(storage.require_data_file("audio/audiotest.mp3").get_path());
-		webkit_engine = new WebkitEngine(app_storage);
-		web_engine = webkit_engine;
-		var startup_check = new StartupCheck(web_app, format_support, webkit_engine);
+		webkit_options = new WebkitOptions(app_storage);
+		var startup_check = new StartupCheck(web_app, format_support, webkit_options);
 		startup_window = new StartupWindow(this, startup_check);
 		startup_window.present();
 		startup_check.check_desktop_portal_available.begin((o, res) => startup_check.check_desktop_portal_available.end(res));
@@ -342,10 +342,11 @@ public class AppRunnerController: Drtgtk.Application
 	private void init_web_engine()
 	{
 		connection = new Connection(new Soup.Session(), app_storage.cache_dir.get_child("conn"), config);
-		web_engine.early_init(this, ipc_bus, web_app, config, connection, web_worker_data);
+		webkit_engine = new WebkitEngine(webkit_options, this, ipc_bus, web_app, config, connection, web_worker_data);
+		web_engine = webkit_engine;
 		web_engine.set_user_agent(web_app.user_agent);
-		web_engine.web_plugins = web_app.traits(webkit_engine).flash_required;
-		web_engine.media_source_extension = web_app.traits(webkit_engine).mse_required;
+		web_engine.web_plugins = web_app.traits(webkit_options).flash_required;
+		web_engine.media_source_extension = web_app.traits(webkit_options).mse_required;
 		
 		web_engine.init_form.connect(on_init_form);
 		web_engine.notify.connect_after(on_web_engine_notify);
@@ -495,8 +496,8 @@ public class AppRunnerController: Drtgtk.Application
 		dialog.add_tab("Network", network_settings);
 		dialog.add_tab("Features", new ComponentsManager(components));
 		if (webkit_engine != null) {
-			dialog.add_tab("Website Data", new WebsiteDataManager(webkit_engine.get_web_context().get_website_data_manager()));
-			dialog.add_tab("Format Support", new FormatSupportScreen(this, format_support, storage, webkit_engine.get_web_context()));
+			dialog.add_tab("Website Data", new WebsiteDataManager(webkit_options.default_context.get_website_data_manager()));
+			dialog.add_tab("Format Support", new FormatSupportScreen(this, format_support, storage, webkit_options.default_context));
 		}
 		var response = dialog.run();
 		if (response == Gtk.ResponseType.OK)

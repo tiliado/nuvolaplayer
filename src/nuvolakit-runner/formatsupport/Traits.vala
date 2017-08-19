@@ -34,13 +34,13 @@ public class Traits
 	public bool mse_supported {get; private set; default = false;}
 	public bool mse_required {get; private set; default = false;}
 	public uint webkitgtk_required {get; private set; default = 0;}
-	private WebkitEngine? webkit_engine;
+	private WebkitOptions? webkit_options;
 	private string? rule;
 	
-	public Traits(string? rule, WebkitEngine? webkit_engine)
+	public Traits(string? rule, WebkitOptions? webkit_options)
 	{
 		this.rule = rule;
-		this.webkit_engine = webkit_engine;
+		this.webkit_options = webkit_options;
 		#if WEBKIT_SUPPORTS_MSE
 		mse_supported = true;
 		h264_supported = true;
@@ -61,7 +61,7 @@ public class Traits
 	public bool eval_webkitgtk(uint major, uint minor, uint micro)
 	{
 		webkitgtk_required = major * 10000 + minor * 100 + micro;
-		return webkit_engine.get_version() >= webkitgtk_required;
+		return webkit_options.engine_version >= webkitgtk_required;
 	}
 	
 	public bool eval_feature(string name)

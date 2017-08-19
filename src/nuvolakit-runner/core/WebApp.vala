@@ -272,11 +272,11 @@ public class WebApp : GLib.Object
 		return categories.get_values();
 	}
 	
-	public unowned Traits traits(WebkitEngine webkit_engine)
+	public unowned Traits traits(WebkitOptions webkit_options)
 	{
 		if (_traits == null)
 		{
-			_traits = new Traits(requirements, webkit_engine);
+			_traits = new Traits(requirements, webkit_options);
 			try
 			{
 				_traits.eval(null);
@@ -289,9 +289,9 @@ public class WebApp : GLib.Object
 		return _traits;
 	}
 	
-	public bool check_requirements(FormatSupport format_support, WebkitEngine webkit_engine,
+	public bool check_requirements(FormatSupport format_support, WebkitOptions webkit_options,
 									out string? failed_requirements) throws Drt.RequirementError {
-		var traits = this.traits(webkit_engine);
+		var traits = this.traits(webkit_options);
 		traits.set_from_format_support(format_support);
 		debug("Requirements expression: '%s'", requirements);
 		var result = traits.eval(out failed_requirements);

@@ -31,6 +31,7 @@ public abstract class WebEngine : GLib.Object, JSExecutor {
 	public abstract Gtk.Widget main_web_view {get;}
 	public WebApp web_app {get; protected set;}
 	public WebAppStorage storage {get; protected set;}
+	public WebOptions options {get; protected set;}
 	public bool ready {get; protected set; default = false;}
 	public bool can_go_back {get; protected set; default = false;}
 	public bool can_go_forward {get; protected set; default = false;}
@@ -38,9 +39,10 @@ public abstract class WebEngine : GLib.Object, JSExecutor {
 	public abstract bool media_source_extension {get; set;}
 	public WebWorker web_worker {get; protected set;}
 	
-	public WebEngine(WebAppStorage storage)
+	public WebEngine(WebOptions options)
 	{
-		this.storage = storage;
+		this.options = options;
+		this.storage = options.storage;
 	}
 	
 	public signal void init_finished();
@@ -49,9 +51,6 @@ public abstract class WebEngine : GLib.Object, JSExecutor {
 	public signal void init_form(HashTable<string, Variant> values, Variant entries);
 	public signal void show_alert_dialog(ref bool handled, string message);
 	public signal void context_menu(bool whatewer_fixme_in_future);
-	
-	public abstract void early_init(AppRunnerController runner_app, IpcBus ipc_bus, WebApp web_app,
-		Config config, Connection? connection, HashTable<string, Variant> worker_data);
 	
 	public abstract void init();
 	
@@ -97,58 +96,18 @@ public class WebkitEngine : WebEngine
 	}
 	
 	private AppRunnerController runner_app;
+	private WebKit.WebContext web_context;
 	private WebView web_view;
 	private JsEnvironment? env = null;
 	private JSApi api;
 	private IpcBus ipc_bus = null;
 	private Config config;
 	private Drt.KeyValueStorage session;
-	private WebKit.WebContext? default_context = null;
 	
-	public WebkitEngine(WebAppStorage storage)
-	{
-		base(storage);
-		var data_manager = (WebKit.WebsiteDataManager) GLib.Object.@new(
-			typeof(WebKit.WebsiteDataManager),
-			"base-cache-directory", storage.create_cache_subdir("webkit").get_path(),
-			"disk-cache-directory", storage.create_cache_subdir("webcache").get_path(),
-			"offline-application-cache-directory", storage.create_cache_subdir("offline_apps").get_path(),
-			"base-data-directory", storage.create_data_subdir("webkit").get_path(),
-			"local-storage-directory", storage.create_data_subdir("local_storage").get_path(),
-			"indexeddb-directory", storage.create_data_subdir("indexeddb").get_path(),
-			"websql-directory", storage.create_data_subdir("websql").get_path());
-		var web_context =  new WebKit.WebContext.with_website_data_manager(data_manager);
-		web_context.set_favicon_database_directory(storage.create_data_subdir("favicons").get_path());
-		/* Persistence must be set up after WebContext is created! */
-		var cookie_manager = data_manager.get_cookie_manager();
-		cookie_manager.set_persistent_storage(storage.data_dir.get_child("cookies.dat").get_path(),
-			WebKit.CookiePersistentStorage.SQLITE);	
-		default_context = web_context;
-	}
-	
-	public WebKit.WebContext get_web_context()
-	{
-		return default_context;
-	}
-	
-	public static uint get_webkit_version()
-	{
-		return WebKit.get_major_version() * 10000 + WebKit.get_minor_version() * 100 + WebKit.get_micro_version(); 
-	}
-	
-	public uint get_version() {
-		return get_webkit_version();
-	}
-	
-	public static bool check_webkit_version(uint min, uint max=0)
-	{
-		var version = get_webkit_version();
- 		return version >= min && (max == 0 || version < max);
-	}
-	
-	public override void early_init(AppRunnerController runner_app, IpcBus ipc_bus, WebApp web_app,
-		Config config, Connection? connection, HashTable<string, Variant> worker_data)
-	{
+	public WebkitEngine(WebkitOptions web_options, AppRunnerController runner_app, IpcBus ipc_bus,
+			WebApp web_app, Config config, Connection? connection, HashTable<string, Variant> worker_data)	{
+		base(web_options);
+		web_context = web_options.default_context;
 		this.ipc_bus = ipc_bus;
 		this.runner_app = runner_app;
 		this.web_app = web_app;
@@ -165,7 +124,7 @@ public class WebkitEngine : WebEngine
 		
 		if (connection != null)
 			apply_network_proxy(connection);	
-		var web_context = get_web_context();
+		
 		var webkit_extension_dir = Nuvola.get_libdir();
 		debug("Nuvola WebKit Extension directory: %s", webkit_extension_dir);
 		web_context.set_web_extensions_directory(webkit_extension_dir);
@@ -325,7 +284,7 @@ public class WebkitEngine : WebEngine
 			proxy_settings = new WebKit.NetworkProxySettings(proxy_uri, null);
 			break;
 		}
-		get_web_context().set_network_proxy_settings(proxy_mode, proxy_settings);
+		web_context.set_network_proxy_settings(proxy_mode, proxy_settings);
 	}
 		
 	private bool load_uri(string uri)
@@ -728,7 +687,7 @@ public class WebkitEngine : WebEngine
 		catch (GLib.Error e)
 		{
 		}
-		var download = get_web_context().download_uri(uri);
+		var download = web_context.download_uri(uri);
 		download.set_destination(file.get_uri());
 		ulong[] handler_ids = new ulong[2];
 		
