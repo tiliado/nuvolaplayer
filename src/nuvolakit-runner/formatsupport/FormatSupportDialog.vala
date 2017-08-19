@@ -68,7 +68,7 @@ public class FormatSupportScreen: Gtk.Notebook
 	public FormatSupport format_support {get; construct;}
 	public Drt.Storage storage {get; construct;}
 	
-	public FormatSupportScreen(Drtgtk.Application app, FormatSupport format_support, Drt.Storage storage)
+	public FormatSupportScreen(Drtgtk.Application app, FormatSupport format_support, Drt.Storage storage, WebKit.WebContext web_context)
 	{
 		GLib.Object(format_support: format_support, storage: storage, app:app);
 		Gtk.Label label = null;
@@ -100,7 +100,7 @@ public class FormatSupportScreen: Gtk.Notebook
 		{
 			frame = new Gtk.Frame ("<b>Active Flash plugin</b>");
 			(frame.label_widget as Gtk.Label).use_markup = true;
-			var web_view = new WebView(WebEngine.get_web_context());
+			var web_view = new WebView(web_context);
 			web_view.get_settings().allow_file_access_from_file_urls = true;
 			web_view.get_settings().allow_universal_access_from_file_urls = true;
 			frame.add(web_view);
@@ -169,7 +169,7 @@ public class FormatSupportScreen: Gtk.Notebook
 		var help_button = new Gtk.Button.with_label("Help");
 		help_button.clicked.connect(() => {app.show_uri(WEB_APP_REQUIREMENTS_HELP_URL);});
 		var audio_detect_script = storage.get_data_file("js/audio.js");
-		var mp3_view = new Mp3View(format_support, help_button, audio_detect_script);
+		var mp3_view = new Mp3View(format_support, help_button, audio_detect_script, web_context);
 		mp3_view.show();
 		append_page(mp3_view, new Gtk.Label("MP3 format"));
 		show();
@@ -194,7 +194,8 @@ public class FormatSupportScreen: Gtk.Notebook
 		private AudioPipeline? pipeline = null;
 		private Gtk.Button help_button;
 		
-		public Mp3View(FormatSupport format_support, Gtk.Button help_button, File? audio_detect_script)
+		public Mp3View(FormatSupport format_support, Gtk.Button help_button, File? audio_detect_script,
+			WebKit.WebContext web_context)
 		{
 			GLib.Object(orientation: Gtk.Orientation.VERTICAL);
 			this.format_support = format_support;
@@ -228,7 +229,7 @@ public class FormatSupportScreen: Gtk.Notebook
 			{
 				var frame = new Gtk.Frame ("<b>HTML5 Audio Support Status</b>");
 				(frame.label_widget as Gtk.Label).use_markup = true;
-				var web_view = new WebView(WebEngine.get_web_context());
+				var web_view = new WebView(web_context);
 				web_view.get_settings().allow_file_access_from_file_urls = true;
 				web_view.get_settings().allow_universal_access_from_file_urls = true;
 				frame.add(web_view);

@@ -58,13 +58,10 @@ public class WebEngine : GLib.Object, JSExecutor
 	private Config config;
 	private Drt.KeyValueStorage session;
 	
-	private static WebKit.WebContext? default_context = null;
+	private WebKit.WebContext? default_context = null;
 	
-	public static bool init_web_context(WebAppStorage storage)
+	public WebEngine(WebAppStorage storage)
 	{
-		if (default_context != null)
-			return false;
-		
 		var data_manager = (WebKit.WebsiteDataManager) GLib.Object.@new(
 			typeof(WebKit.WebsiteDataManager),
 			"base-cache-directory", storage.create_cache_subdir("webkit").get_path(),
@@ -81,13 +78,10 @@ public class WebEngine : GLib.Object, JSExecutor
 		cookie_manager.set_persistent_storage(storage.data_dir.get_child("cookies.dat").get_path(),
 			WebKit.CookiePersistentStorage.SQLITE);	
 		default_context = web_context;
-		return true;
 	}
 	
-	public static WebKit.WebContext get_web_context()
+	public WebKit.WebContext get_web_context()
 	{
-		if (default_context == null)
-			error("Default context hasn't been set up yet. Call WebEngine.set_up_web_context().");
 		return default_context;
 	}
 	
@@ -102,7 +96,7 @@ public class WebEngine : GLib.Object, JSExecutor
  		return version >= min && (max == 0 || version < max);
 	}
 	
-	public WebEngine(AppRunnerController runner_app, IpcBus ipc_bus, WebApp web_app,
+	public void early_init(AppRunnerController runner_app, IpcBus ipc_bus, WebApp web_app,
 		WebAppStorage storage, Config config, Connection? connection, HashTable<string, Variant> worker_data)
 	{
 		this.ipc_bus = ipc_bus;

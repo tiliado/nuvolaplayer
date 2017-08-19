@@ -53,6 +53,7 @@ public class MasterController : Drtgtk.Application
 	private MasterBus server = null;
 	private DbusApi? dbus_api = null;
 	private uint dbus_api_id = 0;
+	private WebEngine? web_engine = null;
 	
 	private Drt.KeyValueStorageServer storage_server = null;
 	private ActionsKeyBinderServer actions_key_binder = null;
@@ -248,7 +249,7 @@ public class MasterController : Drtgtk.Application
 		set_app_menu_items({Actions.HELP, Actions.ABOUT, Actions.QUIT});
 		
 		var app_storage = new WebAppStorage(storage.user_config_dir, storage.user_data_dir, storage.user_cache_dir);
-		WebEngine.init_web_context(app_storage);
+		web_engine = new WebEngine(app_storage);
 		init_state = InitState.GUI;
 	}
 	
@@ -257,11 +258,11 @@ public class MasterController : Drtgtk.Application
 		init_gui();
 		main_window = new MasterWindow(this);
 		main_window.page_changed.connect(on_master_stack_page_changed);
-		var welcome_screen = new WelcomeScreen(this, storage);
+		var welcome_screen = new WelcomeScreen(this, storage, web_engine.get_web_context());
 		welcome_screen.show();
 		main_window.add_page(welcome_screen, PAGE_WELCOME, "Welcome");
 		#if FLATPAK && !NUVOLA_ADK
-		var app_index_view = new AppIndexWebView(this, WebEngine.get_web_context());
+		var app_index_view = new AppIndexWebView(this, web_engine.get_web_context());
 		app_index_view.load_app_index(Nuvola.REPOSITORY_INDEX, Nuvola.REPOSITORY_ROOT);
 		app_index_view.show();
 		main_window.add_page(app_index_view, "repository", "Repository Index");

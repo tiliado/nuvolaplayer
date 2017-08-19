@@ -34,7 +34,7 @@ public class WelcomeScreen : Gtk.Grid
 	private Drtgtk.RichTextView welcome_text;
 	private Gtk.ScrolledWindow scroll;
 	
-	public WelcomeScreen(Drtgtk.Application app, Drt.Storage storage)
+	public WelcomeScreen(Drtgtk.Application app, Drt.Storage storage, WebKit.WebContext web_context)
 	{
 		this.app = app;
 		
@@ -70,7 +70,7 @@ public class WelcomeScreen : Gtk.Grid
 		welcome_text.motion_notify_event.connect(on_motion_notify);
 		grid.attach(welcome_text, 0, 0, 1, 1);
 		
-		web_view = new WebView(WebEngine.get_web_context());
+		web_view = new WebView(web_context);
 		web_view.add_events(Gdk.EventMask.SCROLL_MASK);
 		web_view.motion_notify_event.connect(on_motion_notify);
 		web_view.scroll_event.connect(on_scroll_event);

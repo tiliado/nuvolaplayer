@@ -339,8 +339,8 @@ public class AppRunnerController: Drtgtk.Application
 	private void init_web_engine()
 	{
 		connection = new Connection(new Soup.Session(), app_storage.cache_dir.get_child("conn"), config);
-		WebEngine.init_web_context(app_storage);
-		web_engine = new WebEngine(this, ipc_bus, web_app, app_storage, config, connection, web_worker_data);
+		web_engine = new WebEngine(app_storage);
+		web_engine.early_init(this, ipc_bus, web_app, app_storage, config, connection, web_worker_data);
 		web_engine.set_user_agent(web_app.user_agent);
 		web_engine.web_plugins = web_app.traits().flash_required;
 		web_engine.media_source_extension = web_app.traits().mse_required;
@@ -492,8 +492,10 @@ public class AppRunnerController: Drtgtk.Application
 		var network_settings = new NetworkSettings(connection);
 		dialog.add_tab("Network", network_settings);
 		dialog.add_tab("Features", new ComponentsManager(components));
-		dialog.add_tab("Website Data", new WebsiteDataManager(WebEngine.get_web_context().get_website_data_manager()));
-		dialog.add_tab("Format Support", new FormatSupportScreen(this, format_support, storage));
+		if (web_engine != null) {
+			dialog.add_tab("Website Data", new WebsiteDataManager(web_engine.get_web_context().get_website_data_manager()));
+			dialog.add_tab("Format Support", new FormatSupportScreen(this, format_support, storage, web_engine.get_web_context()));
+		}
 		var response = dialog.run();
 		if (response == Gtk.ResponseType.OK)
 		{
