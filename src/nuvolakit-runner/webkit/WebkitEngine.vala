@@ -27,60 +27,6 @@ using Nuvola.JSTools;
 namespace Nuvola
 {
 
-public abstract class WebEngine : GLib.Object, JSExecutor {
-	public abstract Gtk.Widget main_web_view {get;}
-	public WebApp web_app {get; protected set;}
-	public WebAppStorage storage {get; protected set;}
-	public WebOptions options {get; protected set;}
-	public bool ready {get; protected set; default = false;}
-	public bool can_go_back {get; protected set; default = false;}
-	public bool can_go_forward {get; protected set; default = false;}
-	public abstract bool web_plugins {get; set;}
-	public abstract bool media_source_extension {get; set;}
-	public WebWorker web_worker {get; protected set;}
-	
-	public WebEngine(WebOptions options)
-	{
-		this.options = options;
-		this.storage = options.storage;
-	}
-	
-	public signal void init_finished();
-	public signal void web_worker_ready();
-	public signal void app_runner_ready();
-	public signal void init_form(HashTable<string, Variant> values, Variant entries);
-	public signal void show_alert_dialog(ref bool handled, string message);
-	public signal void context_menu(bool whatewer_fixme_in_future);
-	
-	public abstract void init();
-	
-	public abstract void init_app_runner();
-	
-	public abstract void load_app();
-	
-	public abstract void go_home();
-	
-	public abstract void apply_network_proxy(Connection connection);
-	
-	public abstract void go_back();
-	
-	public abstract void go_forward();
-	
-	public abstract void reload();
-	
-	public abstract void zoom_in();
-	
-	public abstract void zoom_out();
-	
-	public abstract void zoom_reset();
-	
-	public abstract void set_user_agent(string? user_agent);
-	
-	public abstract void get_preferences(out Variant values, out Variant entries);
-	
-	public abstract void call_function(string name, ref Variant? params) throws GLib.Error;
-}
-
 public class WebkitEngine : WebEngine
 {
 	private const string ZOOM_LEVEL_CONF = "webview.zoom_level";
