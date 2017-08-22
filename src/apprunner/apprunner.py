@@ -59,6 +59,10 @@ def main(argv: List[str]) -> int:
 def start_gui(params, argv, **_):
     from nuvolaruntime.pygi import set_up_requirements
     set_up_requirements()
+
+    from nuvolaruntime.webengine.electron import setup_electron
+    setup_electron()
+
     from gi.repository import GLib, Gio, Drt, Nuvola
 
     Drt.Logger.init_stderr((GLib.LogLevelFlags.LEVEL_DEBUG if params.debug else ( 
