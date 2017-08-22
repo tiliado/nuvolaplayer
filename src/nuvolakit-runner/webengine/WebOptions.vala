@@ -25,6 +25,29 @@
 namespace Nuvola {
 
 public abstract class WebOptions : GLib.Object {
+	private static bool have_default;
+	private static Type? default_options_class = null;
+	
+	public static bool set_default(Type type) {
+		if (!have_default) {
+			default_options_class = type;
+			have_default = true;
+			return true;
+		}
+		return false;
+	}
+	
+	public static Type get_default() {
+		return have_default ? default_options_class : null;
+	}
+	
+	public static WebOptions? create_default(WebAppStorage storage) {
+		if (have_default) {
+			return (WebOptions) GLib.Object.@new(default_options_class, "storage", storage);
+		}		
+		return null;
+	}
+	
 	public WebAppStorage storage {get; construct;}
 	public abstract uint engine_version {get;}
 	
