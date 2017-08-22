@@ -60,34 +60,32 @@ def main(argv: List[str]) -> int:
     try:
         params = parser.parse_args(argv[1:])
     except Exception as e:
-        sys.stderr.write("option parsing failed: %s\n" % e);
-        return 1;
+        sys.stderr.write("option parsing failed: %s\n" % e)
+        return 1
     
     Drt.Logger.init_stderr((GLib.LogLevelFlags.LEVEL_DEBUG if params.debug else ( 
-      GLib.LogLevelFlags.LEVEL_INFO if params.verbose else GLib.LogLevelFlags.LEVEL_WARNING)),
-      True, "Runner");
+        GLib.LogLevelFlags.LEVEL_INFO if params.verbose else GLib.LogLevelFlags.LEVEL_WARNING)),
+        True, "Runner")
     if os.environ.get("NUVOLA_TEST_ABORT") == "runner":
         raise RuntimeError("App runner abort requested.")
     
     print("Python app runner started.")
-    app_dir = Gio.File.new_for_path(params.app_dir);
+    app_dir = Gio.File.new_for_path(params.app_dir)
     if params.version:
-        print("foo")
-        return Nuvola.startup_print_web_app_version_stdout(app_dir);
+        return Nuvola.startup_print_web_app_version_stdout(app_dir)
     
     args = []
     try:
         if params.dbus:
-            return Nuvola.startup_run_web_app_with_dbus_handshake(app_dir, args);
+            return Nuvola.startup_run_web_app_with_dbus_handshake(app_dir, args)
         else:
             code = sys.stdin.readline().strip()
-            print("'%s'" % code)
-            return Nuvola.startup_run_web_app_as_subprocess(app_dir, code, args);
+            return Nuvola.startup_run_web_app_as_subprocess(app_dir, code, args)
     except GLib.Error as e:
-        sys.stderr.write("Failed to load web app!\n");
-        sys.stderr.write("Dir: %s\n" % params.app_dir);
-        sys.stderr.write("Error: %s\n" % e);
-        return 1;
+        sys.stderr.write("Failed to load web app!\n")
+        sys.stderr.write("Dir: %s\n" % params.app_dir)
+        sys.stderr.write("Error: %s\n" % e)
+        return 1
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv))
