@@ -37,6 +37,8 @@ public abstract class WebOptions : GLib.Object {
 		var version = engine_version;
  		return version >= min && (max == 0 || version < max);
 	}
+	
+	public abstract WebEngine create_web_engine();
 }
 
 } // namespace Nuvola

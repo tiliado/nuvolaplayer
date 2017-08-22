@@ -55,6 +55,10 @@ public class WebkitOptions : WebOptions {
 	{
 		return WebKit.get_major_version() * 10000 + WebKit.get_minor_version() * 100 + WebKit.get_micro_version(); 
 	}
+	
+	public override WebEngine create_web_engine() {
+		return new WebkitEngine(this);
+	}
 }
 
 } // namespace Nuvola
