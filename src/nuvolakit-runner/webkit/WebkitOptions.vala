@@ -26,10 +26,13 @@ namespace Nuvola {
 
 public class WebkitOptions : WebOptions {
 	public override uint engine_version {get {return get_webkit_version();}}
-	public WebKit.WebContext default_context{get; private set;}
+	public WebKit.WebContext default_context{get; private set; default = null;}
 	
 	public WebkitOptions(WebAppStorage storage) {
 		base(storage);
+	}
+	
+	construct {
 		var data_manager = (WebKit.WebsiteDataManager) GLib.Object.@new(
 			typeof(WebKit.WebsiteDataManager),
 			"base-cache-directory", storage.create_cache_subdir("webkit").get_path(),

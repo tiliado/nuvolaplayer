@@ -47,10 +47,14 @@ public class WebkitEngine : WebEngine
 	private Config config;
 	private Drt.KeyValueStorage session;
 	
-	public WebkitEngine(WebkitOptions web_options, AppRunnerController runner_app, IpcBus ipc_bus,
-			WebApp web_app, Config config, Connection? connection, HashTable<string, Variant> worker_data)	{
+	public WebkitEngine(WebkitOptions web_options){
 		base(web_options);
 		web_context = web_options.default_context;
+	}
+	
+	public override void early_init(AppRunnerController runner_app, IpcBus ipc_bus,
+			WebApp web_app, Config config, Connection? connection, HashTable<string, Variant> worker_data)	{
+		
 		this.ipc_bus = ipc_bus;
 		this.runner_app = runner_app;
 		this.web_app = web_app;

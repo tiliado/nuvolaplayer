@@ -342,8 +342,9 @@ public class AppRunnerController: Drtgtk.Application
 	private void init_web_engine()
 	{
 		connection = new Connection(new Soup.Session(), app_storage.cache_dir.get_child("conn"), config);
-		webkit_engine = new WebkitEngine(webkit_options, this, ipc_bus, web_app, config, connection, web_worker_data);
+		webkit_engine = new WebkitEngine(webkit_options);
 		web_engine = webkit_engine;
+		web_engine.early_init(this, ipc_bus, web_app, config, connection, web_worker_data);
 		web_engine.set_user_agent(web_app.user_agent);
 		web_engine.set_web_plugins(web_app.traits(webkit_options).flash_required);
 		web_engine.set_media_source_extension(web_app.traits(webkit_options).mse_required);

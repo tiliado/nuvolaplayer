@@ -28,8 +28,8 @@ namespace Nuvola
 public abstract class WebEngine : GLib.Object, JSExecutor {
 	public abstract Gtk.Widget get_main_web_view();
 	public WebApp web_app {get; protected set;}
-	public WebAppStorage storage {get; protected set;}
-	public WebOptions options {get; protected set;}
+	public WebAppStorage storage {get; construct;}
+	public WebOptions options {get; construct;}
 	public bool ready {get; protected set; default = false;}
 	public bool can_go_back {get; protected set; default = false;}
 	public bool can_go_forward {get; protected set; default = false;}
@@ -41,8 +41,7 @@ public abstract class WebEngine : GLib.Object, JSExecutor {
 	
 	public WebEngine(WebOptions options)
 	{
-		this.options = options;
-		this.storage = options.storage;
+		GLib.Object(options: options, storage: options.storage);
 	}
 	
 	public signal void init_finished();
@@ -52,6 +51,9 @@ public abstract class WebEngine : GLib.Object, JSExecutor {
 	public signal void show_alert_dialog(ref bool handled, string message);
 	public signal void context_menu(bool whatewer_fixme_in_future);
 	
+	public abstract void early_init(AppRunnerController runner_app, IpcBus ipc_bus,
+			WebApp web_app, Config config, Connection? connection, HashTable<string, Variant> worker_data);
+			
 	public abstract void init();
 	
 	public abstract void init_app_runner();
