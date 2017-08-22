@@ -4,6 +4,7 @@ export DIORITE_DUPLEX_CHANNEL_FATAL_TIMEOUT="yes"
 export LD_LIBRARY_PATH="build:$LD_LIBRARY_PATH"
 export NUVOLA_ICON="eu.tiliado.Nuvola"
 export DATADIR="/usr/share"
+export PYTHONPATH="$PWD:$PYTHONPATH"
 
 if [ -e /etc/fedora-release ]; then
     export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib64"
