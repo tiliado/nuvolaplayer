@@ -27,15 +27,6 @@ from typing import List
 import os
 import sys
 
-import gi
-gi.require_version('Drt', '1.0')
-gi.require_version('Nuvola', '1.0')
-
-from gi.repository import GLib
-from gi.repository import Gio
-from gi.repository import Drt
-from gi.repository import Nuvola
-
 
 def main(argv: List[str]) -> int:
     parser = ArgumentParser(prog=argv[0])
@@ -62,7 +53,14 @@ def main(argv: List[str]) -> int:
     except Exception as e:
         sys.stderr.write("option parsing failed: %s\n" % e)
         return 1
-    
+    return start_gui(params, [])
+
+
+def start_gui(params, argv, **_):
+    from nuvolaruntime.pygi import set_up_requirements
+    set_up_requirements()
+    from gi.repository import GLib, Gio, Drt, Nuvola
+
     Drt.Logger.init_stderr((GLib.LogLevelFlags.LEVEL_DEBUG if params.debug else ( 
         GLib.LogLevelFlags.LEVEL_INFO if params.verbose else GLib.LogLevelFlags.LEVEL_WARNING)),
         True, "Runner")
@@ -73,14 +71,13 @@ def main(argv: List[str]) -> int:
     app_dir = Gio.File.new_for_path(params.app_dir)
     if params.version:
         return Nuvola.startup_print_web_app_version_stdout(app_dir)
-    
-    args = []
+
     try:
         if params.dbus:
-            return Nuvola.startup_run_web_app_with_dbus_handshake(app_dir, args)
+            return Nuvola.startup_run_web_app_with_dbus_handshake(app_dir, argv)
         else:
             code = sys.stdin.readline().strip()
-            return Nuvola.startup_run_web_app_as_subprocess(app_dir, code, args)
+            return Nuvola.startup_run_web_app_as_subprocess(app_dir, code, argv)
     except GLib.Error as e:
         sys.stderr.write("Failed to load web app!\n")
         sys.stderr.write("Dir: %s\n" % params.app_dir)
