@@ -31,15 +31,12 @@ public class WebkitEngine : WebEngine
 {
 	private const string ZOOM_LEVEL_CONF = "webview.zoom_level";
 	
-	public override Gtk.Widget main_web_view {get {return web_view;}}
-	public override bool web_plugins {
-		get {return web_view.get_settings().enable_plugins;}
-		set {web_view.get_settings().enable_plugins = value;}
-	}
-	public override bool media_source_extension {
-		get {return web_view.get_settings().enable_mediasource;}
-		set {web_view.get_settings().enable_mediasource = value;}
-	}
+	public override Gtk.Widget get_main_web_view(){return web_view;}
+	public override bool get_web_plugins() {return web_view.get_settings().enable_plugins;}
+	public override void set_web_plugins(bool enabled) {web_view.get_settings().enable_plugins = enabled;}
+	
+	public override void set_media_source_extension (bool enabled){web_view.get_settings().enable_mediasource = enabled;}
+	public override bool get_media_source_extension(){return web_view.get_settings().enable_mediasource;}
 	
 	private AppRunnerController runner_app;
 	private WebKit.WebContext web_context;

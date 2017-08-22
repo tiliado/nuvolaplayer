@@ -345,14 +345,14 @@ public class AppRunnerController: Drtgtk.Application
 		webkit_engine = new WebkitEngine(webkit_options, this, ipc_bus, web_app, config, connection, web_worker_data);
 		web_engine = webkit_engine;
 		web_engine.set_user_agent(web_app.user_agent);
-		web_engine.web_plugins = web_app.traits(webkit_options).flash_required;
-		web_engine.media_source_extension = web_app.traits(webkit_options).mse_required;
+		web_engine.set_web_plugins(web_app.traits(webkit_options).flash_required);
+		web_engine.set_media_source_extension(web_app.traits(webkit_options).mse_required);
 		
 		web_engine.init_form.connect(on_init_form);
 		web_engine.notify.connect_after(on_web_engine_notify);
 		web_engine.show_alert_dialog.connect(on_show_alert_dialog);
 		actions.action_changed.connect(on_action_changed);
-		var widget = web_engine.main_web_view;
+		var widget = web_engine.get_main_web_view();
 		widget.hexpand = widget.vexpand = true;
 		main_window.grid.add(widget);
 		widget.show();
@@ -370,7 +370,7 @@ public class AppRunnerController: Drtgtk.Application
 		var gakb = new ActionsKeyBinderClient(ipc_bus.master);
 		global_keybindings = new GlobalKeybindings(gakb, actions);
 		load_extensions();
-		web_engine.main_web_view.hide();
+		web_engine.get_main_web_view().hide();
 		main_window.sidebar.hide();
 		web_engine.init_app_runner();
 	}
@@ -398,7 +398,7 @@ public class AppRunnerController: Drtgtk.Application
 		});
 		main_window.sidebar.notify["visible"].connect_after(on_sidebar_visibility_changed);
 		main_window.sidebar.page_changed.connect(on_sidebar_page_changed);
-		web_engine.main_web_view.show();
+		web_engine.get_main_web_view().show();
 	
 		menu_bar.set_menu("01_go", "_Go", {Actions.GO_HOME, Actions.GO_RELOAD, Actions.GO_BACK, Actions.GO_FORWARD});
 		menu_bar.set_menu("02_view", "_View", {Actions.ZOOM_IN, Actions.ZOOM_OUT, Actions.ZOOM_RESET, "|", Actions.TOGGLE_SIDEBAR});

@@ -26,15 +26,17 @@ namespace Nuvola
 {
 
 public abstract class WebEngine : GLib.Object, JSExecutor {
-	public abstract Gtk.Widget main_web_view {get;}
+	public abstract Gtk.Widget get_main_web_view();
 	public WebApp web_app {get; protected set;}
 	public WebAppStorage storage {get; protected set;}
 	public WebOptions options {get; protected set;}
 	public bool ready {get; protected set; default = false;}
 	public bool can_go_back {get; protected set; default = false;}
 	public bool can_go_forward {get; protected set; default = false;}
-	public abstract bool web_plugins {get; set;}
-	public abstract bool media_source_extension {get; set;}
+	public abstract bool get_web_plugins();
+	public abstract void set_web_plugins(bool enabled);
+	public abstract bool get_media_source_extension();
+	public abstract void set_media_source_extension(bool enabled);
 	public WebWorker web_worker {get; protected set;}
 	
 	public WebEngine(WebOptions options)
