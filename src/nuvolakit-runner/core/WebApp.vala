@@ -84,6 +84,7 @@ public class WebApp : GLib.Object
 	public int api_minor {get; construct; default = 0;}
 	public string? user_agent {get; set; default = null;}
 	public string? requirements {get; construct; default = null;}
+	public string? home_url {get; construct; default = null;}
 	public int window_width {get; construct; default = 0;}
 	public int window_height {get; construct; default = 0;}
 	public File? data_dir {get; construct; default = null;}
@@ -113,7 +114,8 @@ public class WebApp : GLib.Object
 	 **/
 	public WebApp(string id, string name, string maintainer_name, string maintainer_link,
 		int version_major, int version_minor, int api_major, int api_minor, File? data_dir,
-		string? requirements, GenericSet<string>? categories, int window_width, int window_height) throws WebAppError
+		string? requirements, GenericSet<string>? categories, int window_width, int window_height,
+		string? home_url=null) throws WebAppError
 	{
 		if (!WebApp.validate_id(id))
 			throw new WebAppError.INVALID_METADATA("Invalid app id '%s'.", id);
@@ -145,7 +147,7 @@ public class WebApp : GLib.Object
 			version_major: version_major, version_minor: version_minor, api_major: api_major, api_minor: api_minor,
 			data_dir: data_dir, window_width: window_width, window_height: window_height,
 			categories: categories ?? new GenericSet<string>(str_hash, str_equal),
-			requirements: requirements);
+			requirements: requirements, home_url: home_url);
 	}
 	
 	/**
@@ -234,7 +236,8 @@ public class WebApp : GLib.Object
 		this(id, name, maintainer_name, maintainer_link,
 			version_major, version_minor, api_major, api_minor, data_dir,
 			requirements, Drt.String.semicolon_separated_set(categories, true),
-			meta.get_int_or("window_width"), meta.get_int_or("window_height"));
+			meta.get_int_or("window_width"), meta.get_int_or("window_height"),
+			meta.get_string_or("home_url"));
 		
 		hidden = meta.get_bool_or("hidden", false);
 		allow_insecure_content = meta.get_bool_or("allow_insecure_content", false);
