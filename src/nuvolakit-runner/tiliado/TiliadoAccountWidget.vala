@@ -22,7 +22,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if TILIADO_API
 namespace Nuvola
 {
 
@@ -39,9 +38,9 @@ public class TiliadoAccountWidget : Gtk.Grid
 	private Gtk.Grid button_box;
 	private TiliadoActivation activation;
 	private TiliadoApi2.User? current_user = null;
-	private Drt.Application app;
+	private Drtgtk.Application app;
 	
-	public TiliadoAccountWidget(TiliadoActivation activation, Drt.Application app, Gtk.Orientation orientation)
+	public TiliadoAccountWidget(TiliadoActivation activation, Drtgtk.Application app, Gtk.Orientation orientation)
 	{
 		this.activation = activation;
 		this.app = app;
@@ -352,4 +351,3 @@ public class AccountTypeButton : Gtk.Button
 }
 
 } // namespace Nuvola
-#endif

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2017 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -45,6 +45,12 @@ public abstract class Component: GLib.Object
 	public Component(string id, string name, string description)
 	{
 		GLib.Object(id: id, name: name, description: description);
+	}
+	
+	public bool is_membership_ok(TiliadoActivation? activation)
+	{
+		return required_membership == TiliadoMembership.NONE
+			|| activation == null || activation.has_user_membership(required_membership);
 	}
 	
 	public virtual void toggle(bool enabled)

@@ -32,22 +32,34 @@ public class ComponentsManager: Gtk.Stack
 	private Gtk.Grid grid;
 	private Settings? component_settings = null;
 	private Gtk.Widget component_not_available_widget;
+	private TiliadoUserWidget? membership_widget;
+	private TiliadoActivation? tiliado_activation = null;
 
-	public ComponentsManager(Drt.Lst<Component> components)
+	public ComponentsManager(Drtgtk.Application app, Drt.Lst<Component> components, TiliadoActivation? tiliado_activation)
 	{
 		GLib.Object(components: components, transition_type: Gtk.StackTransitionType.SLIDE_LEFT_RIGHT);
+		this.tiliado_activation = tiliado_activation;
 		grid = new Gtk.Grid();
 		grid.margin = 10;
 		grid.column_spacing = 15;
 		component_not_available_widget = Drtgtk.Labels.markup(
 			"Your distributor has not enabled this feature. It is available in <a href=\"%s\">the genuine flatpak "
 			+ "builds of Nuvola Apps Runtime</a> though.", "https://nuvola.tiliado.eu");
+		membership_widget = tiliado_activation != null ? new TiliadoUserWidget(tiliado_activation, app) : null;
 		refresh();
 		var scroll = new Gtk.ScrolledWindow(null, null);
 		scroll.hexpand = scroll.vexpand = true;
 		scroll.add(grid);
 		scroll.show();
 		add_named(scroll, "list");
+		if (tiliado_activation != null)
+			tiliado_activation.user_info_updated.connect(on_user_info_updated);
+	}
+	
+	~ComponentsManager()
+	{
+		if (tiliado_activation != null)
+			tiliado_activation.user_info_updated.disconnect(on_user_info_updated);
 	}
 	
 	public void refresh()
@@ -57,7 +69,11 @@ public class ComponentsManager: Gtk.Stack
 			grid.remove(child);
 		
 		var components = this.components.to_list();
-		components.sort((a, b) => (a.available != b.available) ? (a.available ? -1 : 1) : strcmp(a.name, b.name));
+		components.sort_with_data((a, b) => {
+			var a_available = is_component_available(a);
+			var b_available = is_component_available(b);
+			return (a_available != b_available) ? (a_available ? -1 : 1) : strcmp(a.name, b.name);	
+		});
 		
 		var row = 0;
 		foreach (var component in components)
@@ -91,8 +107,13 @@ public class ComponentsManager: Gtk.Stack
 		}
 		else
 		{
-			var widget = is_component_available(component)
-			 ? component.get_settings() : component_not_available_widget;
+			Gtk.Widget? widget;
+			if (!is_component_membership_ok(component))
+				widget = membership_widget.change_component(component);
+			else if (!is_component_available(component))
+				widget = component_not_available_widget;
+			else
+				widget = component.get_settings();
 			component_settings = new Settings(this, component, widget);
 			this.add(component_settings.widget);
 			this.visible_child = component_settings.widget;
@@ -101,7 +122,24 @@ public class ComponentsManager: Gtk.Stack
 	
 	private bool is_component_available(Component component)
 	{
-		return component.available;
+		/* If component was enabled before sufficient membership was lost, let it be. */
+		return component.enabled || component.available && component.is_membership_ok(tiliado_activation);
+	}
+	
+	private bool is_component_membership_ok(Component component) {
+		return component.enabled || !component.available
+			|| tiliado_activation == null || component.is_membership_ok(tiliado_activation);
+	}
+	
+	private void on_user_info_updated(TiliadoApi2.User? user)
+	{
+		if (component_settings != null
+			&& component_settings.component_widget == membership_widget
+			&& membership_widget.component.is_membership_ok(tiliado_activation))
+		{
+			show_settings(null);
+			refresh();
+		}
 	}
 	
 	[Compact]
@@ -201,11 +239,13 @@ public class ComponentsManager: Gtk.Stack
 		public Gtk.Container widget;
 		public unowned ComponentsManager manager;
 		public Component component;
+		public Gtk.Widget? component_widget;
 		
-		public Settings(ComponentsManager manager, Component component, Gtk.Widget? widget)
+		public Settings(ComponentsManager manager, Component component, Gtk.Widget? component_widget)
 		{
 			this.manager = manager;
 			this.component = component;
+			this.component_widget = component_widget;
 			var grid = new Gtk.Grid();
 			grid.column_spacing = grid.row_spacing = grid.margin = 10;
 			this.widget = grid;
@@ -219,11 +259,11 @@ public class ComponentsManager: Gtk.Stack
 				component.name, component.description);
 			grid.attach(label, 1, 0, 1, 1);
 			
-			if (widget != null)
+			if (component_widget != null)
 			{
 				var scroll = new Gtk.ScrolledWindow(null, null);
 				scroll.vexpand = scroll.hexpand = true;
-				scroll.add(widget);
+				scroll.add(component_widget);
 				grid.attach(scroll, 0, 1, 2, 1);
 			}
 			else

@@ -90,6 +90,7 @@ public class AppRunnerController: Drtgtk.Application
 	private bool use_nuvola_dbus = false;
 	private HashTable<string, Variant>? web_worker_data = null;
 	private StartupWindow? startup_window = null;
+	private TiliadoActivation? tiliado_activation = null;
 	
 	public AppRunnerController(
 		Drt.Storage storage, WebApp web_app, WebAppStorage app_storage,
@@ -169,8 +170,11 @@ public class AppRunnerController: Drtgtk.Application
 				startup_check.mark_as_finished();
 				#else
 				if (init_ipc(startup_check))
+				{
+					tiliado_activation = new TiliadoActivationClient(ipc_bus.master);
 					startup_check.check_tiliado_account.begin(
-						new TiliadoActivationClient(ipc_bus.master), () => startup_check.mark_as_finished());
+						tiliado_activation, () => startup_check.mark_as_finished());
+				}
 				#endif
 			}
 		}
@@ -502,11 +506,12 @@ public class AppRunnerController: Drtgtk.Application
 		dialog.add_tab("Keyboard shortcuts", new KeybindingsSettings(actions, config, global_keybindings.keybinder));
 		var network_settings = new NetworkSettings(connection);
 		dialog.add_tab("Network", network_settings);
-		dialog.add_tab("Features", new ComponentsManager(components));
+		dialog.add_tab("Features", new ComponentsManager(this, components, tiliado_activation));
 		if (webkit_engine != null) {
 			dialog.add_tab("Website Data", new WebsiteDataManager(webkit_options.default_context.get_website_data_manager()));
 			dialog.add_tab("Format Support", new FormatSupportScreen(this, format_support, storage, webkit_options.default_context));
 		}
+		
 		var response = dialog.run();
 		if (response == Gtk.ResponseType.OK)
 		{
@@ -579,6 +584,8 @@ public class AppRunnerController: Drtgtk.Application
 		
 		foreach (var component in components)
 		{
+			if (!component.is_membership_ok(tiliado_activation))
+				component.toggle(false);
 			if (component.available && component.enabled)
 				component.auto_load();
 			debug("Component %s (%s) %s", component.id, component.name,
