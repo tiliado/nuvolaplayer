@@ -12,8 +12,11 @@ const url = require('url')
 let mainWindow
 
 function createWindow () {
+  process.stdin.resume()
+  let wtf = process.stdin.read()
   // Create the browser window.
-  mainWindow = new BrowserWindow({width: 400, height: 400, frame: false, resizable: false, nodeIntegration: false })
+  mainWindow = new BrowserWindow({
+      width: 700, height: 700, frame: false, resizable: false, show: true})
 
   // and load the index.html of the app.
   mainWindow.loadURL(url.format({
@@ -32,13 +35,27 @@ function createWindow () {
     // when you should delete the corresponding element.
     mainWindow = null
   })
+  mainWindow.on('focus', function(){ console.log("focus"); mainWindow.focusOnWebView() })
+  mainWindow.on('blur', function(){ console.log("blur"); mainWindow.focus(); mainWindow.focusOnWebView() })
+
   var xidBuffer = mainWindow.getNativeWindowHandle()
   var xidString = ""
-  for (var i = 0; i < xidBuffer.length; i++){
+  for (var i = 0; i < xidBuffer.length; i++) {
     xidString += ":" + xidBuffer[i];
   }
   process.stdout.write("XID" + xidString + ":\n")
-  mainWindow.show()
+  process.stdout.write("XID" + xidString + ":\n")
+  let size = process.argv.length;
+  for (let i = 0; i < size; i++) {
+    let arg = process.argv[i]
+    process.stdout.write(`electron arg[${i}] = ${arg}\n`)
+    if (arg.startsWith("xURL:")) {
+      mainWindow.loadURL(arg.substring(4))
+      mainWindow.show()
+      mainWindow.focus()
+      mainWindow.focusOnWebView()
+    }
+  }
 }
 
 // This method will be called when Electron has finished

@@ -1,7 +1,7 @@
 from queue import Empty
 
 import sys
-from gi.repository import Nuvola, GLib, GdkX11, Gdk
+from gi.repository import Nuvola, GLib, GdkX11, Gdk, Gtk
 
 from nuvolaruntime.webengine.electron.thread import ElectronThread
 from nuvolaruntime.widgets.windowsocket import WindowSocket
@@ -15,8 +15,9 @@ class ElectronEngine(Nuvola.WebEngine):
     def __init__(self, options):
         super().__init__(options=options, storage=options.get_storage())
         self._web_plugins = False
-        self.socket = WindowSocket()
-        self.electron = ElectronThread(["data/electron/main.js"])
+        self.socket = Gtk.Socket()
+        self.electron = None
+        self.web_app = None
 
     def do_set_media_source_extension(self, enabled: bool):
         pass
@@ -30,6 +31,9 @@ class ElectronEngine(Nuvola.WebEngine):
     def do_early_init(self, runner_app: Nuvola.AppRunnerController, ipc_bus: Nuvola.IpcBus,
                       web_app: Nuvola.WebApp, config: Nuvola.Config, connection: Nuvola.Connection,
                       worker_data: GLib.HashTable):
+        self.web_app = web_app
+        url = 'https://play.google.com/music/'  # self.web_app.get_home_url()
+        self.electron = ElectronThread(["data/electron/main.js", "URL:" + url])
         self.electron.start()
         GLib.timeout_add(10, self._attach_electron_window_cb)
 
@@ -41,9 +45,18 @@ class ElectronEngine(Nuvola.WebEngine):
 
         xid_bytes = bytes([int(s) for s in xid_info.split(b':')[1:-1]])
         xid = int.from_bytes(xid_bytes, sys.byteorder)
-        display = Gdk.Display.get_default()
-        window = GdkX11.X11Window.foreign_new_for_display(display, xid)
-        self.socket.embed_window(window)
+        self.socket.show()
+        self.socket.add_id(xid)
+        self.socket.set_can_focus(True)
+        self.event_box.child_focus(Gtk.DirectionType.TAB_FORWARD)
+        self.socket.grab_focus()
+
+        def key_event(*args):
+            print("KeyPress", args)
+            return Gdk.EVENT_PROPAGATE
+
+        self.socket.connect("key-press-event", key_event)
+
         GLib.timeout_add(10, self._print_electron_stdout_cb)
         return False
 
