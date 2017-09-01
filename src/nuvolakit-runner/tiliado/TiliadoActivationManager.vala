@@ -127,6 +127,7 @@ public class TiliadoActivationManager : GLib.Object, TiliadoActivation
 	public void drop_activation()
 	{
 		tiliado.drop_token();
+		update_user_info();
 	}
 	
 	private Variant? handle_get_user_info(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError

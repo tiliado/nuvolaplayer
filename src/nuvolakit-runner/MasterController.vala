@@ -281,7 +281,8 @@ public class MasterController : Drtgtk.Application
 		
 		#if TILIADO_API
 		tiliado_trial = new TiliadoTrialWidget(activation, this, TiliadoMembership.BASIC);
-			main_window.top_grid.attach(tiliado_trial, 0, 4, 1, 1);
+		main_window.top_grid.attach(tiliado_trial, 0, 4, 1, 1);
+		main_window.header_bar.pack_end(new TiliadoUserAccountWidget(activation));
 		#endif
 	}
 	
