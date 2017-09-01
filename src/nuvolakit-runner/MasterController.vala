@@ -60,7 +60,7 @@ public class MasterController : Drtgtk.Application
 	private MediaKeysServer media_keys = null;
 	#if TILIADO_API
 	private TiliadoActivation? activation = null;
-	private TiliadoAccountWidget? tiliado_widget = null;
+	private TiliadoUserAccountWidget? tiliado_widget = null;
 	private TiliadoTrialWidget? tiliado_trial = null;
 	#endif
 	#if EXPERIMENTAL
@@ -282,7 +282,8 @@ public class MasterController : Drtgtk.Application
 		#if TILIADO_API
 		tiliado_trial = new TiliadoTrialWidget(activation, this, TiliadoMembership.BASIC);
 		main_window.top_grid.attach(tiliado_trial, 0, 4, 1, 1);
-		main_window.header_bar.pack_end(new TiliadoUserAccountWidget(activation));
+		tiliado_widget = new TiliadoUserAccountWidget(activation);
+		main_window.header_bar.pack_end(tiliado_widget);
 		#endif
 	}
 	
@@ -463,7 +464,7 @@ public class MasterController : Drtgtk.Application
 	{
 		main_window.create_toolbar(items);
 		#if TILIADO_API
-		if (tiliado_widget != null && !tiliado_widget.full_width)
+		if (tiliado_widget != null)
 			main_window.header_bar.pack_end(tiliado_widget);
 		#endif
 	}
