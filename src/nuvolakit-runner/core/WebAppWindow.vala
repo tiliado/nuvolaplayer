@@ -96,6 +96,8 @@ public class WebAppWindow : Drtgtk.ApplicationWindow
 		overlay.show_all();
 		sidebar = new Sidebar();
 		paned = new Gtk.Paned(Gtk.Orientation.HORIZONTAL);
+		paned.vexpand = true;
+		paned.valign = Gtk.Align.FILL;
 		paned.pack1(overlay, true, false);
 		paned.pack2(sidebar, false, false);
 		paned.notify["position"].connect_after(on_sidebar_position_changed);

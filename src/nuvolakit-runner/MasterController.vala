@@ -61,6 +61,7 @@ public class MasterController : Drtgtk.Application
 	#if TILIADO_API
 	private TiliadoActivation? activation = null;
 	private TiliadoAccountWidget? tiliado_widget = null;
+	private TiliadoTrialWidget? tiliado_trial = null;
 	#endif
 	#if EXPERIMENTAL
 	private HttpRemoteControl.Server http_remote_control = null;
@@ -279,14 +280,8 @@ public class MasterController : Drtgtk.Application
 		}
 		
 		#if TILIADO_API
-		tiliado_widget = new TiliadoAccountWidget(activation, this, Gtk.Orientation.HORIZONTAL);
-		main_window.top_grid.insert_row(1);
-		if (tiliado_widget.full_width)
-			main_window.top_grid.attach(tiliado_widget, 0, 1, 1, 1);
-		else
-			main_window.header_bar.pack_end(tiliado_widget);
-		tiliado_widget.show();
-		tiliado_widget.notify["full-width"].connect_after(on_tiliado_widget_full_width_changed);
+		tiliado_trial = new TiliadoTrialWidget(activation, this, TiliadoMembership.BASIC);
+			main_window.top_grid.attach(tiliado_trial, 0, 4, 1, 1);
 		#endif
 	}
 	

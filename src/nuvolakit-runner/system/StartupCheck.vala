@@ -87,13 +87,6 @@ public class StartupCheck : GLib.Object
 	
 	~StartupCheck()
 	{
-		#if TILIADO_API
-		if (activation != null)
-		{
-			activation.activation_finished.disconnect(on_activation_user_changed);
-			activation.user_info_updated.disconnect(on_activation_user_changed);
-		}
-		#endif
 	}
 	
 	/**
@@ -371,26 +364,18 @@ public class StartupCheck : GLib.Object
 		tiliado_account_status = Status.IN_PROGRESS;
 		yield Drt.EventLoop.resume_later();
 		this.activation = activation;
-		activation.activation_finished.connect(on_activation_user_changed);
-		activation.user_info_updated.connect(on_activation_user_changed);
-		if (activation.has_user_membership(TiliadoMembership.BASIC))
+		var user = activation.get_user_info();
+		if (user != null) {
+			tiliado_account_message = Markup.printf_escaped("Tiliado account: %s", user.name);
 			tiliado_account_status = Status.OK;
-		else
-			tiliado_account_status = Status.ERROR;
+		} else {
+			tiliado_account_message ="No Tiliado account.";
+			tiliado_account_status = Status.OK;
+		}
 		yield Drt.EventLoop.resume_later();
 		task_finished(NAME);
 	}
 	
-	private void on_activation_user_changed(TiliadoApi2.User? user)
-	{
-		warning("on_activation_user_changed, %s", activation.has_user_membership(TiliadoMembership.BASIC).to_string());
-		if (activation.has_user_membership(TiliadoMembership.BASIC))
-			tiliado_account_status = Status.OK;
-		else
-			tiliado_account_status = Status.ERROR;
-		warning("on_activation_user_changed, %s", tiliado_account_status.to_string());
-		mark_as_finished();
-	}
 	#endif
 	
 	/**

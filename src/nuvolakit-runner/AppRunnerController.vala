@@ -332,6 +332,10 @@ public class AppRunnerController: Drtgtk.Application
 		if (config.get_bool(ConfigKey.WINDOW_MAXIMIZED))
 			main_window.maximize();
 		
+		if (tiliado_activation != null) {
+			var trial_widget = new TiliadoTrialWidget(this.tiliado_activation, this, TiliadoMembership.BASIC);
+			main_window.top_grid.add(trial_widget);
+		}
 		main_window.present();
 		main_window.window_state_event.connect(on_window_state_event);
 		main_window.configure_event.connect(on_configure_event);

@@ -111,16 +111,10 @@ public class StartupWindow : Drtgtk.ApplicationWindow
 		grid.show();
 		scroll.show();
 		model.finished.connect(on_checks_finished);
-		#if TILIADO_API
-		model.notify["activation"].connect_after(on_model_activation_changed);
-		#endif
 	}
 	
 	~StartupWindow()
 	{
-		#if TILIADO_API
-		model.notify["activation"].disconnect(on_model_activation_changed);
-		#endif
 	}
 	
 	/**
@@ -262,14 +256,6 @@ public class StartupWindow : Drtgtk.ApplicationWindow
 		}
 	}
 	
-	#if TILIADO_API
-	private void on_model_activation_changed(GLib.Object o, ParamSpec p)
-	{
-		var widget = new TiliadoAccountWidget(model.activation, app, Gtk.Orientation.HORIZONTAL);
-		widget.show();
-		grid.attach(widget, 0, grid_line, 2, 1);
-	}
-	#endif
 }
 
 } // namespace Nuvola
