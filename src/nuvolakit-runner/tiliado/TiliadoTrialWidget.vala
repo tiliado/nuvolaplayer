@@ -185,7 +185,10 @@ Once your plan is confirmed, you can activate Nuvola with the button bellow.""")
 		failed_view.action_button.clicked.connect(on_failed_action_clicked);
 		stack.add(failed_view);
 		
-		explore_view = new View("Close", null, "Explore Nuvola features", Drtgtk.Labels.markup("We recommend taking a look at a list of Nuvola features to get the most of it."));
+		explore_view = new View("Close", null, "Explore Nuvola features", Drtgtk.Labels.markup(
+		"""<b>Thank you for purchasing Nuvola.</b>
+
+We recommend taking a look at a list of Nuvola features to get the most of it."""));
 		explore_view.back_button.clicked.connect(on_explore_back_clicked);
 		explore_view.action_button.clicked.connect(on_explore_action_clicked);
 		stack.add(explore_view);
