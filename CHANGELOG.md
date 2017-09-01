@@ -1,6 +1,34 @@
 Nuvola Apps Changelog
 =======================
 
+Release 4.7.0 - September 1st, 2017
+--------------------------------
+
+New Features:
+
+  * New web app:  Jupiter Broadcasting by Andrew Stubbs.
+  * The genuine flatpak builds offers free trial and $1/month subscription.
+  * For sake of transparency, preferences dialog shows placeholders for features which were disabled by a distributor.
+
+Bug Fixes:
+
+  * VAAPI/VDPAU checks are not run under Wayland. Issue: tiliado/nuvolaruntime#280 Issue: tiliado/nuvolaruntime#359
+  * URL sandbox was not honoured properly: Issue: tiliado/nuvolaruntime#367
+
+News for Script Maintainers:
+
+  * API 4.6 is required for new scripts.
+
+Under the Hood:
+
+  * Nuvola no longer bundles `*.vapi` files but depends on those of Valac 0.36.3. However, glib-2.0.vapi and
+    webkit2gtk-web-extension-4.0.vapi must be patched to work properly (see `vapi/*.patch`). You may need to
+    modify wscript if you don't use Valac 0.36. Issue: tiliado/nuvolaruntime#369
+  * Valac and GLib dependencies were raised to 0.36.3 and 2.52. Issue: tiliado/nuvolaruntime#369
+  * GIR XML and typelib files are generated. Introduces new dependency on g-ir-compiler.
+  * There was a lot of refactoring to allow usage of Python-GObject and to support multiple web engines in future.
+  * Future warning: Nuvola is likely to introduce dependency on Python 3.6.
+
 Release 4.6.0 - 29th July, 2017
 -------------------------------
 
