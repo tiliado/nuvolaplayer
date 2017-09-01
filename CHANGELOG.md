@@ -1,6 +1,14 @@
 Nuvola Player Changelog
 =======================
 
+Release 3.0.10 - September 1st, 2017
+--------------------------------
+
+This is a maintenance release.
+
+  * Fix high CPU usage under Wayland. Issue: tiliado/nuvolaruntime#364
+  * Mark the series as "obsolete/legacy" instead of "stable".
+
 Release 3.0.9 - July 18, 2017
 -----------------------------
 

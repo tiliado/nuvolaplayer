@@ -30,9 +30,8 @@ private const string WELCOME_TEXT = """
 <p>
   Congratulations! You have installed %1$s.
   <a href="https://tiliado.github.io/nuvolaplayer/documentation/3.0/notes.html">Read release notes</a> to find out what
-  is new.  <b>Nuvola Player 3.0 is the current stable series.</b> New releases 3.0.x receive only bug fixes, but no new
-  features except for compatible service integrations. <b>Do you want something more fresh?</b> Check out
-  <a href="https://tiliado.github.io/nuvolaplayer/documentation/4.html">Nuvola 4.x Rolling Releases</a>.
+  is new.  <b>Nuvola Player 3.0.x is the old obsolete series.</b> Check out
+  <a href="https://tiliado.github.io/nuvolaplayer/documentation/4.html">Nuvola 4.x Rolling Releases</a> instead.
 </p>
 
 <h2>Nuvola 3.0.x End of Life</h2>
