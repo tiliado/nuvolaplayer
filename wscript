@@ -505,7 +505,7 @@ def build(ctx):
 	ctx.gir_compile("Engineio-1.0", ENGINEIO, "engineio-soup/src")
 	ctx.gir_compile("Nuvola-1.0", NUVOLAKIT_RUNNER, ".",
 		["src/nuvolakit-base/NuvolaBase-1.0.gir", "src/nuvolakit-runner/NuvolaRunner-1.0.gir"],
-		params="--includedir='engineio-soup/src' --includedir='%s/build'" % os.environ["DIORITE_PATH"])
+		params="--includedir='engineio-soup/src' --includedir='%s/build'" % os.environ.get("DIORITE_PATH", '.'))
 
 	valaprog(
 		target = NUVOLA_BIN,
