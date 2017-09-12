@@ -22,9 +22,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// http://stackoverflow.com/a/6930376/991303
-var global = Function('return this')() || (0, eval)('this');
-
 /**
  * Global JavaScript Object
  * 

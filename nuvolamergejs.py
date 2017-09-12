@@ -99,7 +99,9 @@ def add_source(output, sources, source):
 		source.merged = True
 
 def merge_sources(sources, main):
-	output = ["'use strict';\n(function(Nuvola)\n{\n"]
+	output = [
+		"var global = (function (){return (function(){return this;}).call(null);})();\n",
+		"(function(Nuvola)\n{\n    'use strict';\n"]
 	
 	main = sources.get(main)
 	if main:
