@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2017 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -38,7 +38,7 @@ var Launcher = $prototype(null);
  */
 Launcher.setTooltip = function(tooltip)
 {
-    Nuvola._callIpcMethodAsync("/nuvola/launcher/set-tooltip", tooltip || "");
+    Nuvola._callIpcMethodAsync("/nuvola/launcher/set-tooltip", [tooltip || ""]);
 }
 
 /**
@@ -53,7 +53,7 @@ Launcher.setTooltip = function(tooltip)
  */
 Launcher.setActions = function(actions)
 {
-    Nuvola._callIpcMethodAsync("/nuvola/launcher/set-actions", actions);
+    Nuvola._callIpcMethodAsync("/nuvola/launcher/set-actions", [actions]);
 }
 
 /**
@@ -71,7 +71,7 @@ Launcher.removeActions = function()
  */
 Launcher.addAction = function(action)
 {
-    Nuvola._callIpcMethodAsync("/nuvola/launcher/add-action", action);
+    Nuvola._callIpcMethodAsync("/nuvola/launcher/add-action", [action]);
 }
 
 /**
@@ -81,7 +81,7 @@ Launcher.addAction = function(action)
  */
 Launcher.removeAction = function(action)
 {
-    Nuvola._callIpcMethodAsync("/nuvola/launcher/remove-action", action);
+    Nuvola._callIpcMethodAsync("/nuvola/launcher/remove-action", [action]);
 }
 
 // export public items

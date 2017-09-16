@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2011-2017 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -136,8 +136,6 @@ public class JSApi : GLib.Object
 	
 	public signal void call_ipc_method_async(string name, Variant? data);
 	public signal void call_ipc_method_sync(string name, Variant? data, ref Variant? result);
-	public signal void call_ipc_method_with_dict_async(string name, Variant? data);
-	public signal void call_ipc_method_with_dict_sync(string name, Variant? data, ref Variant? result);
 	
 	/**
 	 * Creates the main object and injects it to the JavaScript context
@@ -245,8 +243,6 @@ public class JSApi : GLib.Object
 	{
 		{"_callIpcMethodAsync", call_ipc_method_async_func, 0},
 		{"_callIpcMethodSync", call_ipc_method_sync_func, 0},
-		{"_callIpcMethodWithDictAsync", call_ipc_method_with_dict_async_func, 0},
-		{"_callIpcMethodWithDictSync", call_ipc_method_with_dict_sync_func, 0},
 		{"_keyValueStorageHasKey", key_value_storage_has_key_func, 0},
 		{"_keyValueStorageGetValue", key_value_storage_get_value_func, 0},
 		{"_keyValueStorageSetValue", key_value_storage_set_value_func, 0},
@@ -294,15 +290,6 @@ public class JSApi : GLib.Object
 	{
 		return call_ipc_method_func(ctx, function, self, args, out exception, false, 0);
 	}
-	static unowned JS.Value call_ipc_method_with_dict_async_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)
-	{
-		return call_ipc_method_func(ctx, function, self, args, out exception, true, 1);
-	}
-	
-	static unowned JS.Value call_ipc_method_with_dict_sync_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)
-	{
-		return call_ipc_method_func(ctx, function, self, args, out exception, false, 1);
-	}
 	
 	static unowned JS.Value call_ipc_method_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception, bool @async, int type)
 	{
@@ -329,22 +316,13 @@ public class JSApi : GLib.Object
 		}
 		
 		Variant? data = null;
-		if (args.length > 1)
-		{
-			Variant[] tuple = new Variant[args.length - 1];
-			for (var i = 1; i < args.length; i++)
-			{
-				try
-				{
-					tuple[i - 1] = variant_from_value(ctx, args[i]);
-				}
-				catch (JSError e)
-				{
-					exception = create_exception(ctx, "Argument %d: %s".printf(i, e.message));
-					return undefined;
-				}
+		if (args.length > 1) {
+			try {
+				data = variant_from_value(ctx, args[1]);
+			} catch (JSError e) {
+				exception = create_exception(ctx, "Argument %d: %s".printf(1, e.message));
+				return undefined;
 			}
-			data = new Variant.tuple(tuple);
 		}
 		
 		if (@async)
@@ -355,7 +333,7 @@ public class JSApi : GLib.Object
 				Idle.add(() => {js_api.call_ipc_method_async(name, data); return false;});
 				break;
 			case 1:
-				Idle.add(() => {js_api.call_ipc_method_with_dict_async(name, data); return false;});
+				assert_not_reached();
 				break;
 			}
 			return undefined;
@@ -368,7 +346,7 @@ public class JSApi : GLib.Object
 			js_api.call_ipc_method_sync(name, data, ref result);
 			break;
 		case 1:
-			js_api.call_ipc_method_with_dict_sync(name, data, ref result);
+			assert_not_reached();
 			break;
 		}
 		

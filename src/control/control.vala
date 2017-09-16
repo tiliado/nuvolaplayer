@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2017 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -215,7 +215,7 @@ public int main(string[] args)
 
 private int call_api_method(Drt.ApiChannel connection, string[] args, int offset) throws GLib.Error
 {
-	var response = connection.call_with_dict_sync(args[offset], Drt.strv_to_variant_dict(args, offset + 1));
+	var response = connection.call_sync(args[offset], Drt.strv_to_variant_dict(args, offset + 1));
 	if (response != null)
 	{
 		var node = Json.gvariant_serialize(response);

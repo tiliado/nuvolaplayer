@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2017 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -38,7 +38,7 @@ var MenuBar = $prototype(null);
  */
 MenuBar.setMenu = function(id, label, actions)
 {
-    Nuvola._callIpcMethodAsync("/nuvola/menubar/set-menu", id, label, actions);
+    Nuvola._callIpcMethodAsync("/nuvola/menubar/set-menu", [id, label, actions]);
 }
 
 // export public items

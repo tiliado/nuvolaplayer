@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2016-2017 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -253,13 +253,13 @@ public class Server: Soup.Server
 				bool subscribe = true;
 				string? detail = null;
 				var abs_path = "/app/%s/nuvola%s".printf(app_id, path);
-				Drt.ApiNotification.parse_dict_params(abs_path, params, out subscribe, out detail);
+				Drt.ApiNotification.parse_params(abs_path, params, out subscribe, out detail);
 				yield this.subscribe(app_id, app_path, subscribe, detail, socket);
 				return null;
 			}
 			
 			var app = app_runners[app_id];
-			return yield app.call_full("/nuvola" + app_path, false, "rw", "dict", params);
+			return yield app.call_full("/nuvola" + app_path, false, "rw", params);
 		}
 		if (path.has_prefix("/master/"))
 		{
@@ -269,12 +269,12 @@ public class Server: Soup.Server
 				bool subscribe = true;
 				string? detail = null;
 				var abs_path = "/master/nuvola%s".printf(master_path);
-				Drt.ApiNotification.parse_dict_params(abs_path, params, out subscribe, out detail);
+				Drt.ApiNotification.parse_params(abs_path, params, out subscribe, out detail);
 				yield this.subscribe(null, master_path, subscribe, detail, socket);
 				return null;
 			}
 			
-			return bus.call_local_sync_full("/nuvola" + master_path, false, "rw", "dict", params);
+			return bus.call_local_sync_full("/nuvola" + master_path, false, "rw", params);
 		}
 		throw new ChannelError.INVALID_REQUEST("Request '%s' is invalid.", path);
 	}
@@ -382,11 +382,11 @@ public class Server: Soup.Server
 				if (app == null)
 					throw new ChannelError.APP_NOT_FOUND("App with id '%s' doesn't exist or HTTP interface is not enabled.", app_id);
 				
-				yield app.call_full("/nuvola" + path, false, "rws", "dict", params);
+				yield app.call_full("/nuvola" + path, false, "rws", params);
 			}
 			else
 			{
-				bus.call_local_sync_full("/nuvola" + path, false, "rws", "dict", params);
+				bus.call_local_sync_full("/nuvola" + path, false, "rws", params);
 			}
 		}
 	}
@@ -427,7 +427,7 @@ public class Server: Soup.Server
 		var flags = app_request.method == "POST" ? "rw" : "r";
 		var method = "/nuvola/" + app_request.app_path;
 		unowned string? form_data = app_request.method == "POST" ? (string) app_request.body.data : app_request.uri.query;
-		return to_json(app.call_full_sync(method, false, flags, "dict", serialize_params(form_data)));
+		return to_json(app.call_full_sync(method, false, flags, serialize_params(form_data)));
 	}
 	
 	private Json.Node send_local_request(string path, RequestContext request) throws GLib.Error
@@ -437,7 +437,7 @@ public class Server: Soup.Server
 		var flags = msg.method == "POST" ? "rw" : "r";
 		var method = "/nuvola/" + path;
 		unowned string? form_data = msg.method == "POST" ? (string) body.data : msg.uri.query;
-		return to_json(bus.call_local_sync_full(method, false, flags, "dict", serialize_params(form_data)));
+		return to_json(bus.call_local_sync_full(method, false, flags, serialize_params(form_data)));
 	}
 	
 	private Variant? serialize_params(string? form_data)

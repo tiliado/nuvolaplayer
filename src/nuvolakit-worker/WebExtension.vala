@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2017 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -97,8 +97,6 @@ public class WebExtension: GLib.Object
 			new KeyValueProxy(channel, "session"), webkit_version, libsoup_version);
 		js_api.call_ipc_method_async.connect(on_call_ipc_method_async);
 		js_api.call_ipc_method_sync.connect(on_call_ipc_method_sync);
-		js_api.call_ipc_method_with_dict_async.connect(on_call_ipc_method_with_dict_async);
-		js_api.call_ipc_method_with_dict_sync.connect(on_call_ipc_method_with_dict_sync);
 		
 		channel.call.begin("/nuvola/core/web-worker-initialized", null, (o, res) =>
 		{
@@ -258,34 +256,6 @@ public class WebExtension: GLib.Object
 		try
 		{
 			result = channel.call_sync(name, data);
-		}
-		catch (GLib.Error e)
-		{
-			critical("Failed to send message '%s'. %s", name, e.message);
-			result = null;
-		}
-	}
-	
-	private void on_call_ipc_method_with_dict_async(string name, Variant? data)
-	{
-		channel.call_with_dict.begin(name, data, (o, res) =>
-		{
-			try
-			{
-				channel.call.end(res);
-			}
-			catch (GLib.Error e)
-			{
-				critical("Failed to send message '%s'. %s", name, e.message);
-			}
-		});
-	}
-	
-	private void on_call_ipc_method_with_dict_sync(string name, Variant? data, ref Variant? result)
-	{
-		try
-		{
-			result = channel.call_with_dict_sync(name, data);
 		}
 		catch (GLib.Error e)
 		{

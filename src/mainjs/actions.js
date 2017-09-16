@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2017 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -115,7 +115,8 @@ Actions.$init = function()
 Actions.addAction = function(group, scope, name, label, mnemo_label, icon, keybinding, state)
 {
     var state = state !== undefined ? state: null;
-    Nuvola._callIpcMethodAsync("/nuvola/actions/add-action", group, scope, name, label || "", mnemo_label || "", icon || "", keybinding || "", state);
+    Nuvola._callIpcMethodAsync("/nuvola/actions/add-action",
+     [group, scope, name, label || "", mnemo_label || "", icon || "", keybinding || "", state]);
 }
 
 /**
@@ -150,7 +151,7 @@ Actions.addAction = function(group, scope, name, label, mnemo_label, icon, keybi
  */
 Actions.addRadioAction = function(group, scope, name, stateId, options)
 {
-    Nuvola._callIpcMethodAsync("/nuvola/actions/add-radio-action", group, scope, name, stateId, options);
+    Nuvola._callIpcMethodAsync("/nuvola/actions/add-radio-action", [group, scope, name, stateId, options]);
 }
 
 Actions._onActionActivated = function(arg1, action)
@@ -166,7 +167,7 @@ Actions._onActionActivated = function(arg1, action)
  */
 Actions.isEnabled = function(name)
 {
-    return Nuvola._callIpcMethodSync("/nuvola/actions/is-enabled", name);
+    return Nuvola._callIpcMethodSync("/nuvola/actions/is-enabled", [name]);
 }
 
 /**
@@ -180,7 +181,7 @@ Actions.isEnabled = function(name)
  */
 Actions.setEnabled = function(name, enabled)
 {
-    Nuvola._callIpcMethodAsync("/nuvola/actions/set-enabled", name, enabled);
+    Nuvola._callIpcMethodAsync("/nuvola/actions/set-enabled", [name, enabled]);
 }
 
 /**
@@ -229,7 +230,7 @@ Actions.updateEnabledFlags = function(enabledFlags)
  */
 Actions.getState = function(name)
 {
-    return Nuvola._callIpcMethodSync("/nuvola/actions/get-state", name);
+    return Nuvola._callIpcMethodSync("/nuvola/actions/get-state", [name]);
 }
 
 /**
@@ -251,7 +252,7 @@ Actions.getState = function(name)
  */
 Actions.setState = function(name, state)
 {
-    Nuvola._callIpcMethodAsync("/nuvola/actions/set-state", name, state);
+    Nuvola._callIpcMethodAsync("/nuvola/actions/set-state", [name, state]);
 }
 
 /**
@@ -292,7 +293,7 @@ Actions.updateStates = function(states)
  */
 Actions.activate = function(name, parameter)
 {
-    Nuvola._callIpcMethodAsync("/nuvola/actions/activate", name, parameter == null ? null : parameter);
+    Nuvola._callIpcMethodAsync("/nuvola/actions/activate", [name, parameter == null ? null : parameter]);
 }
 
 /**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2017 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -60,7 +60,7 @@ Notification.update = function(title, text, iconName, iconPath, resident)
         this.resident = !!resident;
     
     Nuvola._callIpcMethodAsync("/nuvola/notification/update",
-        this.name, title, text, iconName || "", iconPath || "", !!resident, this.category);
+        [this.name, title, text, iconName || "", iconPath || "", !!resident, this.category]);
 }
 
 /**
@@ -70,7 +70,7 @@ Notification.update = function(title, text, iconName, iconPath, resident)
  */
 Notification.setActions = function(actions)
 {
-    Nuvola._callIpcMethodAsync("/nuvola/notification/set-actions", this.name, actions);
+    Nuvola._callIpcMethodAsync("/nuvola/notification/set-actions", [this.name, actions]);
 }
 
 /**
@@ -78,7 +78,7 @@ Notification.setActions = function(actions)
  */
 Notification.removeActions = function()
 {
-    Nuvola._callIpcMethodAsync("/nuvola/notification/remove-actions", this.name);
+    Nuvola._callIpcMethodAsync("/nuvola/notification/remove-actions", [this.name]);
 }
 
 /**
@@ -88,7 +88,7 @@ Notification.removeActions = function()
  */
 Notification.show = function(force)
 {
-    Nuvola._callIpcMethodAsync("/nuvola/notification/show", this.name, !!force);
+    Nuvola._callIpcMethodAsync("/nuvola/notification/show", [this.name, !!force]);
 }
 
 /**
@@ -130,7 +130,8 @@ Notifications.isPersistenceSupported = function()
  */
 Notifications.showNotification = function(title, text, iconName, iconPath, force, category)
 {
-    Nuvola._callIpcMethodAsync("/nuvola/notifications/show-notification", title, text || "", iconName || "", iconPath || "", !!force, category || "");
+    Nuvola._callIpcMethodAsync("/nuvola/notifications/show-notification",
+        [title, text || "", iconName || "", iconPath || "", !!force, category || ""]);
 }
 
 // export public items

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2017 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -106,28 +106,20 @@ public abstract class AppRunner : GLib.Object
 		return channel.call_sync(name, params);
 	}
 	
-	public async Variant? call_with_dict(string name, Variant? params) throws GLib.Error
+	public async Variant? call_full(string method, bool allow_private, string flags, Variant? params) throws GLib.Error
 	{
 		if (channel == null)
 			throw new Drt.MessageError.IOERROR("No connected to app runner '%s'.", app_id);
 		
-		return yield channel.call_with_dict(name, params);
+		return yield channel.call_full(method, allow_private, flags, params);
 	}
 	
-	public async Variant? call_full(string method, bool allow_private, string flags, string params_format, Variant? params) throws GLib.Error
+	public Variant? call_full_sync(string method, bool allow_private, string flags, Variant? params) throws GLib.Error
 	{
 		if (channel == null)
 			throw new Drt.MessageError.IOERROR("No connected to app runner '%s'.", app_id);
 		
-		return yield channel.call_full(method, allow_private, flags, params_format, params);
-	}
-	
-	public Variant? call_full_sync(string method, bool allow_private, string flags, string params_format, Variant? params) throws GLib.Error
-	{
-		if (channel == null)
-			throw new Drt.MessageError.IOERROR("No connected to app runner '%s'.", app_id);
-		
-		return channel.call_full_sync(method, allow_private, flags, params_format, params);
+		return channel.call_full_sync(method, allow_private, flags, params);
 	}
 	
 	private void on_notification(Drt.ApiRouter router, GLib.Object source, string path, string? detail, Variant? data)
