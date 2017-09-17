@@ -115,7 +115,7 @@ Actions.$init = function()
 Actions.addAction = function(group, scope, name, label, mnemo_label, icon, keybinding, state)
 {
     var state = state !== undefined ? state: null;
-    Nuvola._callIpcMethodAsync("/nuvola/actions/add-action",
+    Nuvola._callIpcMethodVoid("/nuvola/actions/add-action",
      [group, scope, name, label || "", mnemo_label || "", icon || "", keybinding || "", state]);
 }
 
@@ -151,7 +151,7 @@ Actions.addAction = function(group, scope, name, label, mnemo_label, icon, keybi
  */
 Actions.addRadioAction = function(group, scope, name, stateId, options)
 {
-    Nuvola._callIpcMethodAsync("/nuvola/actions/add-radio-action", [group, scope, name, stateId, options]);
+    Nuvola._callIpcMethodVoid("/nuvola/actions/add-radio-action", [group, scope, name, stateId, options]);
 }
 
 Actions._onActionActivated = function(arg1, action)
@@ -181,7 +181,7 @@ Actions.isEnabled = function(name)
  */
 Actions.setEnabled = function(name, enabled)
 {
-    Nuvola._callIpcMethodAsync("/nuvola/actions/set-enabled", [name, enabled]);
+    Nuvola._callIpcMethodVoid("/nuvola/actions/set-enabled", [name, enabled]);
 }
 
 /**
@@ -252,7 +252,7 @@ Actions.getState = function(name)
  */
 Actions.setState = function(name, state)
 {
-    Nuvola._callIpcMethodAsync("/nuvola/actions/set-state", [name, state]);
+    Nuvola._callIpcMethodVoid("/nuvola/actions/set-state", [name, state]);
 }
 
 /**
@@ -293,7 +293,7 @@ Actions.updateStates = function(states)
  */
 Actions.activate = function(name, parameter)
 {
-    Nuvola._callIpcMethodAsync("/nuvola/actions/activate", [name, parameter == null ? null : parameter]);
+    Nuvola._callIpcMethodVoid("/nuvola/actions/activate", [name, parameter == null ? null : parameter]);
 }
 
 /**

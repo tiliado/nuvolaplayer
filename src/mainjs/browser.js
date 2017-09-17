@@ -84,7 +84,7 @@ Browser.downloadFileAsync = function(uri, basename, callback, data)
     if (this._downloadFileAsyncId >= Number.MAX_VALUE - 1)
         this._downloadFileAsyncId = 0;
     this._downloadFileAsyncCallbacks[id] = [callback, data];
-    Nuvola._callIpcMethodAsync("/nuvola/browser/download-file-async", [uri, basename, id]);
+    Nuvola._callIpcMethodVoid("/nuvola/browser/download-file-async", [uri, basename, id]);
 },
 
 Browser._downloadDone = function(id, success, statusCode, statusText, filePath, fileURI)

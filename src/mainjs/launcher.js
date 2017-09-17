@@ -38,7 +38,7 @@ var Launcher = $prototype(null);
  */
 Launcher.setTooltip = function(tooltip)
 {
-    Nuvola._callIpcMethodAsync("/nuvola/launcher/set-tooltip", [tooltip || ""]);
+    Nuvola._callIpcMethodVoid("/nuvola/launcher/set-tooltip", [tooltip || ""]);
 }
 
 /**
@@ -53,7 +53,7 @@ Launcher.setTooltip = function(tooltip)
  */
 Launcher.setActions = function(actions)
 {
-    Nuvola._callIpcMethodAsync("/nuvola/launcher/set-actions", [actions]);
+    Nuvola._callIpcMethodVoid("/nuvola/launcher/set-actions", [actions]);
 }
 
 /**
@@ -61,7 +61,7 @@ Launcher.setActions = function(actions)
  */ 
 Launcher.removeActions = function()
 {
-    Nuvola._callIpcMethodAsync("/nuvola/launcher/remove-actions");
+    Nuvola._callIpcMethodVoid("/nuvola/launcher/remove-actions");
 }
 
 /**
@@ -71,7 +71,7 @@ Launcher.removeActions = function()
  */
 Launcher.addAction = function(action)
 {
-    Nuvola._callIpcMethodAsync("/nuvola/launcher/add-action", [action]);
+    Nuvola._callIpcMethodVoid("/nuvola/launcher/add-action", [action]);
 }
 
 /**
@@ -81,7 +81,7 @@ Launcher.addAction = function(action)
  */
 Launcher.removeAction = function(action)
 {
-    Nuvola._callIpcMethodAsync("/nuvola/launcher/remove-action", [action]);
+    Nuvola._callIpcMethodVoid("/nuvola/launcher/remove-action", [action]);
 }
 
 // export public items

@@ -134,7 +134,7 @@ public class JSApi : GLib.Object
 		return libsoup_version[0] * 10000 + libsoup_version[1] * 100 + libsoup_version[2];
 	}
 	
-	public signal void call_ipc_method_async(string name, Variant? data);
+	public signal void call_ipc_method_void(string name, Variant? data);
 	public signal void call_ipc_method_sync(string name, Variant? data, ref Variant? result);
 	
 	/**
@@ -241,7 +241,7 @@ public class JSApi : GLib.Object
 	 */
 	private const JS.StaticFunction[] static_functions =
 	{
-		{"_callIpcMethodAsync", call_ipc_method_async_func, 0},
+		{"_callIpcMethodVoid", call_ipc_method_void_func, 0},
 		{"_callIpcMethodSync", call_ipc_method_sync_func, 0},
 		{"_keyValueStorageHasKey", key_value_storage_has_key_func, 0},
 		{"_keyValueStorageGetValue", key_value_storage_get_value_func, 0},
@@ -281,18 +281,18 @@ public class JSApi : GLib.Object
 		klass.retain();
 	}
 	
-	static unowned JS.Value call_ipc_method_async_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)
-	{
-		return call_ipc_method_func(ctx, function, self, args, out exception, true, 0);
+	static unowned JS.Value call_ipc_method_void_func(Context ctx, JS.Object function, JS.Object self,
+	JS.Value[] args, out unowned JS.Value exception) {
+		return call_ipc_method_func(ctx, function, self, args, out exception, JsFuncCallType.VOID);
 	}
 	
-	static unowned JS.Value call_ipc_method_sync_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)
-	{
-		return call_ipc_method_func(ctx, function, self, args, out exception, false, 0);
+	static unowned JS.Value call_ipc_method_sync_func(Context ctx, JS.Object function, JS.Object self,
+	JS.Value[] args, out unowned JS.Value exception) {
+		return call_ipc_method_func(ctx, function, self, args, out exception, JsFuncCallType.SYNC);
 	}
 	
-	static unowned JS.Value call_ipc_method_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception, bool @async, int type)
-	{
+	static unowned JS.Value call_ipc_method_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args,
+	out unowned JS.Value exception, JsFuncCallType type) {
 		unowned JS.Value undefined = JS.Value.undefined(ctx);
 		exception = null;
 		if (args.length == 0)
@@ -324,40 +324,21 @@ public class JSApi : GLib.Object
 				return undefined;
 			}
 		}
-		
-		if (@async)
-		{
-			switch (type)
-			{
-			case 0:
-				Idle.add(() => {js_api.call_ipc_method_async(name, data); return false;});
-				break;
-			case 1:
-				assert_not_reached();
-				break;
-			}
+		switch (type) {
+		case JsFuncCallType.VOID:
+			Drt.EventLoop.add_idle(() => {js_api.call_ipc_method_void(name, data); return false;});
 			return undefined;
-		}
-		
-		Variant? result = null;
-		switch (type)
-		{
-		case 0:
+		case JsFuncCallType.SYNC:
+			Variant? result = null;
 			js_api.call_ipc_method_sync(name, data, ref result);
-			break;
-		case 1:
+			try {
+				return value_from_variant(ctx, result);
+			} catch (JSError e) {
+				exception = create_exception(ctx, "Failed to parse response. %s".printf(e.message));
+				return undefined;
+			}
+		default:
 			assert_not_reached();
-			break;
-		}
-		
-		try
-		{
-			return value_from_variant(ctx, result);
-		}
-		catch (JSError e)
-		{
-			exception = create_exception(ctx, "Failed to parse response. %s".printf(e.message));
-			return undefined;
 		}
 	}
 	
@@ -588,6 +569,11 @@ public class JSApi : GLib.Object
 			}
 		}
 		return JS.Value.undefined(ctx);
+	}
+	
+	private enum JsFuncCallType {
+		VOID,
+		SYNC;
 	}
 }
 

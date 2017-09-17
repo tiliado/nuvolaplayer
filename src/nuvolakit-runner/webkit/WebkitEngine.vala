@@ -121,7 +121,7 @@ public class WebkitEngine : WebEngine
 			uint[] libsoup_version = {Soup.get_major_version(), Soup.get_minor_version(), Soup.get_micro_version()};
 			api = new JSApi(
 				runner_app.storage, web_app.data_dir, storage.config_dir, config, session, webkit_version, libsoup_version);
-			api.call_ipc_method_async.connect(on_call_ipc_method_async);
+			api.call_ipc_method_void.connect(on_call_ipc_method_void);
 			api.call_ipc_method_sync.connect(on_call_ipc_method_sync);
 			try
 			{
@@ -547,7 +547,7 @@ public class WebkitEngine : WebEngine
 		request.respond(null);
 	}
 	
-	private void on_call_ipc_method_async(string name, Variant? data) {
+	private void on_call_ipc_method_void(string name, Variant? data) {
 		try {
 			ipc_bus.local.call.begin(name, data, (o, res) => {
 				try {

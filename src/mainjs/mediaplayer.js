@@ -209,7 +209,7 @@ MediaPlayer.setTrackPosition = function(position)
     if (this._trackPosition != position)
     {
         this._trackPosition = position;
-        Nuvola._callIpcMethodAsync("/nuvola/mediaplayer/set-track-position", [position]);
+        Nuvola._callIpcMethodVoid("/nuvola/mediaplayer/set-track-position", [position]);
     }
 }
 
@@ -228,7 +228,7 @@ MediaPlayer.updateVolume = function(volume)
     if (this._volume != volume)
     {
         this._volume = volume;
-        Nuvola._callIpcMethodAsync("/nuvola/mediaplayer/update-volume", [volume]);
+        Nuvola._callIpcMethodVoid("/nuvola/mediaplayer/update-volume", [volume]);
     }
 }
 
@@ -252,7 +252,7 @@ MediaPlayer.setPlaybackState = function(state)
 
 MediaPlayer._setFlag = function(name, state)
 {
-    Nuvola._callIpcMethodAsync("/nuvola/mediaplayer/set-flag", [name, state]);
+    Nuvola._callIpcMethodVoid("/nuvola/mediaplayer/set-flag", [name, state]);
 }
 
 /**
@@ -509,7 +509,7 @@ MediaPlayer._sendDevelInfo = function()
         "playbackActions": this._baseActions.concat(this._extraActions),
         "state": ["unknown", "paused", "playing"][this._state],
     };
-    Nuvola._callIpcMethodAsync("/nuvola/mediaplayer/set-track-info", info);
+    Nuvola._callIpcMethodVoid("/nuvola/mediaplayer/set-track-info", info);
 }
 
 MediaPlayer._onArtworkDownloaded = function(res, changed)

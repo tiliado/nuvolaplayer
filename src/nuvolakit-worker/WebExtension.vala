@@ -95,7 +95,7 @@ public class WebExtension: GLib.Object
 		
 		js_api = new JSApi(storage, data_dir, user_config_dir, new KeyValueProxy(channel, "config"),
 			new KeyValueProxy(channel, "session"), webkit_version, libsoup_version);
-		js_api.call_ipc_method_async.connect(on_call_ipc_method_async);
+		js_api.call_ipc_method_void.connect(on_call_ipc_method_void);
 		js_api.call_ipc_method_sync.connect(on_call_ipc_method_sync);
 		
 		channel.call.begin("/nuvola/core/web-worker-initialized", null, (o, res) =>
@@ -230,29 +230,20 @@ public class WebExtension: GLib.Object
 		}
 	}
 	
-	private void on_call_ipc_method_async(string name, Variant? data)
-	{
-		channel.call.begin(name, data, (o, res) =>
-		{
-			try
-			{
+	private void on_call_ipc_method_void(string name, Variant? data) {
+		channel.call.begin(name, data, (o, res) => {
+			try {
 				channel.call.end(res);
-			}
-			catch (GLib.Error e)
-			{
+			} catch (GLib.Error e) {
 				critical("Failed to send message '%s'. %s", name, e.message);
 			}
 		});
 	}
 	
-	private void on_call_ipc_method_sync(string name, Variant? data, ref Variant? result)
-	{
-		try
-		{
+	private void on_call_ipc_method_sync(string name, Variant? data, ref Variant? result) {
+		try {
 			result = channel.call_sync(name, data);
-		}
-		catch (GLib.Error e)
-		{
+		} catch (GLib.Error e) {
 			critical("Failed to send message '%s'. %s", name, e.message);
 			result = null;
 		}
