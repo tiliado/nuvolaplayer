@@ -24,14 +24,14 @@
 
 public class Nuvola.MenuBarBinding: ObjectBinding<MenuBarInterface>
 {
-	public MenuBarBinding(Drt.ApiRouter router, WebWorker web_worker)
+	public MenuBarBinding(Drt.RpcRouter router, WebWorker web_worker)
 	{
 		base(router, web_worker, "Nuvola.MenuBar");
 	}
 	
 	protected override void bind_methods()
 	{
-		bind("set-menu", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		bind("set-menu", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
 			"Set menu entries.",
 			handle_menubar_set_menu, {
 			new Drt.StringParam("text", true, false, null, "Menu id."),
@@ -40,15 +40,15 @@ public class Nuvola.MenuBarBinding: ObjectBinding<MenuBarInterface>
 		});
 	}
 	
-	private Variant? handle_menubar_set_menu(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_menubar_set_menu(Drt.RpcRequest request) throws Drt.RpcError
 	{
 		check_not_empty();
-		var id = params.pop_string();
-		var label = params.pop_string();
-		var actions = params.pop_strv();
+		var id = request.pop_string();
+		var label = request.pop_string();
+		var actions = request.pop_strv();
 		foreach (var object in objects)
 			if (object.set_menu(id, label, actions))
 				break;
-		return null;
+		request.respond(null);
 	}
 }

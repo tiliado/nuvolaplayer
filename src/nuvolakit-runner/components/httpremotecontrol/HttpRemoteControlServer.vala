@@ -66,29 +66,29 @@ public class Server: Soup.Server
 		addresses = new Drt.Lst<Address>(Address.equals);
 		registered_runners = new GenericSet<string>(str_hash, str_equal);
 		subscribers = new HashTable<string, Drt.Lst<Subscription>>(str_hash, str_equal);
-		bus.router.add_method("/nuvola/httpremotecontrol/register", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		bus.router.add_method("/nuvola/httpremotecontrol/register", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
 			null, handle_register, {
 			new Drt.StringParam("id", true, false)
 		});
-		bus.router.add_method("/nuvola/httpremotecontrol/unregister", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		bus.router.add_method("/nuvola/httpremotecontrol/unregister", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
 			null, handle_unregister, {
 			new Drt.StringParam("id", true, false)
 		});
-		bus.router.add_method("/nuvola/httpremotecontrol/get-addresses", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.READABLE,
+		bus.router.add_method("/nuvola/httpremotecontrol/get-addresses", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
 			null, handle_get_addresses, null);
-		bus.router.add_method("/nuvola/httpremotecontrol/set-address-enabled", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		bus.router.add_method("/nuvola/httpremotecontrol/set-address-enabled", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
 			null, handle_set_address_enabled, {
 			new Drt.StringParam("address", true, false),
 			new Drt.BoolParam("enabled", true, false),
 		});
-		bus.router.add_method("/nuvola/httpremotecontrol/get-port", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.READABLE,
+		bus.router.add_method("/nuvola/httpremotecontrol/get-port", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
 			null, handle_get_port, null);
-		bus.router.add_method("/nuvola/httpremotecontrol/set-port", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		bus.router.add_method("/nuvola/httpremotecontrol/set-port", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
 			null, handle_set_port, {
 			new Drt.IntParam("port", true, false),
 		});
-		bus.router.add_notification(APP_REGISTERED, Drt.ApiFlags.SUBSCRIBE|Drt.ApiFlags.WRITABLE, null);
-		bus.router.add_notification(APP_UNREGISTERED, Drt.ApiFlags.SUBSCRIBE|Drt.ApiFlags.WRITABLE, null);
+		bus.router.add_notification(APP_REGISTERED, Drt.RpcFlags.SUBSCRIBE|Drt.RpcFlags.WRITABLE, null);
+		bus.router.add_notification(APP_UNREGISTERED, Drt.RpcFlags.SUBSCRIBE|Drt.RpcFlags.WRITABLE, null);
 		app.runner_exited.connect(on_runner_exited);
 		bus.router.notification.connect(on_master_notification);
 		var eio_server = new Engineio.Server(this, "/nuvola.io/");
@@ -253,13 +253,13 @@ public class Server: Soup.Server
 				bool subscribe = true;
 				string? detail = null;
 				var abs_path = "/app/%s/nuvola%s".printf(app_id, path);
-				Drt.ApiNotification.parse_params(abs_path, params, out subscribe, out detail);
+				Drt.RpcNotification.parse_params(abs_path, params, out subscribe, out detail);
 				yield this.subscribe(app_id, app_path, subscribe, detail, socket);
 				return null;
 			}
 			
 			var app = app_runners[app_id];
-			return yield app.call_full("/nuvola" + app_path, false, "rw", params);
+			return yield app.call_full("/nuvola" + app_path, params, false, "rw");
 		}
 		if (path.has_prefix("/master/"))
 		{
@@ -269,12 +269,12 @@ public class Server: Soup.Server
 				bool subscribe = true;
 				string? detail = null;
 				var abs_path = "/master/nuvola%s".printf(master_path);
-				Drt.ApiNotification.parse_params(abs_path, params, out subscribe, out detail);
+				Drt.RpcNotification.parse_params(abs_path, params, out subscribe, out detail);
 				yield this.subscribe(null, master_path, subscribe, detail, socket);
 				return null;
 			}
 			
-			return bus.call_local_sync_full("/nuvola" + master_path, false, "rw", params);
+			return bus.local.call_full_sync("/nuvola" + master_path, params, false, "rw");
 		}
 		throw new ChannelError.INVALID_REQUEST("Request '%s' is invalid.", path);
 	}
@@ -382,11 +382,11 @@ public class Server: Soup.Server
 				if (app == null)
 					throw new ChannelError.APP_NOT_FOUND("App with id '%s' doesn't exist or HTTP interface is not enabled.", app_id);
 				
-				yield app.call_full("/nuvola" + path, false, "rws", params);
+				yield app.call_full("/nuvola" + path, params, false, "rws");
 			}
 			else
 			{
-				bus.call_local_sync_full("/nuvola" + path, false, "rws", params);
+				bus.local.call_full_sync("/nuvola" + path, params, false, "rws");
 			}
 		}
 	}
@@ -427,7 +427,7 @@ public class Server: Soup.Server
 		var flags = app_request.method == "POST" ? "rw" : "r";
 		var method = "/nuvola/" + app_request.app_path;
 		unowned string? form_data = app_request.method == "POST" ? (string) app_request.body.data : app_request.uri.query;
-		return to_json(app.call_full_sync(method, false, flags, serialize_params(form_data)));
+		return to_json(app.call_full_sync(method, serialize_params(form_data), false, flags));
 	}
 	
 	private Json.Node send_local_request(string path, RequestContext request) throws GLib.Error
@@ -437,7 +437,7 @@ public class Server: Soup.Server
 		var flags = msg.method == "POST" ? "rw" : "r";
 		var method = "/nuvola/" + path;
 		unowned string? form_data = msg.method == "POST" ? (string) body.data : msg.uri.query;
-		return to_json(bus.call_local_sync_full(method, false, flags, serialize_params(form_data)));
+		return to_json(bus.local.call_full_sync(method, serialize_params(form_data), false, flags));
 	}
 	
 	private Variant? serialize_params(string? form_data)
@@ -476,38 +476,33 @@ public class Server: Soup.Server
 		return builder.get_root();
 	}
 	
-	private Variant? handle_register(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
-	{
-		register_app(params.pop_string());
-		return null;
+	private void handle_register(Drt.RpcRequest request) throws Drt.RpcError {
+		register_app(request.pop_string());
+		request.respond(null);
 	}
 	
-	private Variant? handle_unregister(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
-	{
-		var app_id = params.pop_string();
-		if (!unregister_app(app_id))
+	private void handle_unregister(Drt.RpcRequest request) throws Drt.RpcError {
+		var app_id = request.pop_string();
+		if (!unregister_app(app_id)) {
 			warning("App %s hasn't been registered yet!", app_id);
-		return null;
+		}
+		request.respond(null);
 	}
 	
-	private Variant? handle_get_addresses(GLib.Object source, Drt.ApiParams? params) throws GLib.Error
-	{
+	private void handle_get_addresses(Drt.RpcRequest request) throws GLib.Error {
 		var builder = new VariantBuilder(new VariantType("a(ssb)"));
-		foreach (var addr in addresses)
+		foreach (var addr in addresses) {
 			builder.add("(ssb)", addr.address, addr.name, addr.enabled);
-		return new Variant("(a(ssb)ms)", builder, nm_error);
+		}
+		request.respond(new Variant("(a(ssb)ms)", builder, nm_error));
 	}
 	
-	private Variant? handle_set_address_enabled(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
-	{
-		var address = params.pop_string();
-		var enabled = params.pop_bool();
-		foreach (var addr in this.addresses)
-		{
-			if (addr.address == address)
-			{
-				if (addr.enabled != enabled)
-				{
+	private void handle_set_address_enabled(Drt.RpcRequest request) throws Drt.RpcError {
+		var address = request.pop_string();
+		var enabled = request.pop_bool();
+		foreach (var addr in this.addresses) {
+			if (addr.address == address) {
+				if (addr.enabled != enabled) {
 					addr.enabled = enabled;
 					Idle.add(() => {restart(); return false;});
 				}
@@ -515,27 +510,24 @@ public class Server: Soup.Server
 				break;
 			}
 		}
-		return null;
+		request.respond(null);
 	}
 	
-	private Variant? handle_get_port(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
-	{
-		return service_port;
+	private void handle_get_port(Drt.RpcRequest request) throws Drt.RpcError {
+		request.respond(service_port);
 	}
 	
-	private Variant? handle_set_port(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
-	{
-		var port = params.pop_int();
-		if (port != service_port)
-		{
+	private void handle_set_port(Drt.RpcRequest request) throws Drt.RpcError {
+		var port = request.pop_int();
+		if (port != service_port) {
 			service_port = port;
 			Idle.add(() => {restart(); return false;});
 			app.config.set_int64(PORT_KEY, port);
 		}
-		return null;
+		request.respond(null);
 	}
 	
-	private void on_master_notification(Drt.ApiRouter router, GLib.Object conn, string path, string? detail, Variant? data)
+	private void on_master_notification(Drt.RpcRouter router, GLib.Object conn, string path, string? detail, Variant? data)
 	{
 		if (conn != bus)
 			return;

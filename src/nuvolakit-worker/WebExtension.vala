@@ -28,7 +28,7 @@ namespace Nuvola
 public class WebExtension: GLib.Object
 {
 	private WebKit.WebExtension extension;
-	private Drt.ApiChannel channel;
+	private Drt.RpcChannel channel;
 	private File data_dir;
 	private File user_config_dir;
 	private JSApi js_api;
@@ -39,7 +39,7 @@ public class WebExtension: GLib.Object
 	private FrameBridge bridge = null;
 	private Drt.XdgStorage storage;
 	
-	public WebExtension(WebKit.WebExtension extension, Drt.ApiChannel channel, HashTable<string, Variant> worker_data)
+	public WebExtension(WebKit.WebExtension extension, Drt.RpcChannel channel, HashTable<string, Variant> worker_data)
 	{
 		this.extension = extension;
 		this.channel = channel;
@@ -56,16 +56,16 @@ public class WebExtension: GLib.Object
 	
 	private async void ainit()
 	{
-		var router = channel.api_router;
-		router.add_method("/nuvola/webworker/call-function", Drt.ApiFlags.WRITABLE,
+		var router = channel.router;
+		router.add_method("/nuvola/webworker/call-function", Drt.RpcFlags.WRITABLE,
 			"Call JavaScript function.",
 			handle_call_function, {
 			new Drt.StringParam("name", true, false, null, "Function name."),
 			new Drt.VariantParam("params", true, true, null, "Function parameters.")
 		});
-		router.add_method("/nuvola/password-manager/enable", Drt.ApiFlags.WRITABLE,
+		router.add_method("/nuvola/password-manager/enable", Drt.RpcFlags.WRITABLE,
 			"Enable Password Manager", handle_enable_password_manager, null);
-		router.add_method("/nuvola/password-manager/disable", Drt.ApiFlags.WRITABLE,
+		router.add_method("/nuvola/password-manager/disable", Drt.RpcFlags.WRITABLE,
 			"Disable Password Manager", handle_disable_password_manager, null);
 		
 		Variant response;
@@ -181,28 +181,24 @@ public class WebExtension: GLib.Object
 		this.bridge = bridge;
 	}
 	
-	private Variant? handle_call_function(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
-	{
-		var name = params.pop_string();
-		var func_params = params.pop_variant();
-		try
-		{
-			if (bridge != null)
+	private void handle_call_function(Drt.RpcRequest request) throws Drt.RpcError {
+		var name = request.pop_string();
+		var func_params = request.pop_variant();
+		try {
+			if (bridge != null) {
 				bridge.call_function(name, ref func_params);
-			else
+			} else {
 				warning("Bridge is null");
-		}
-		catch (GLib.Error e)
-		{
+			}
+		} catch (GLib.Error e) {
 			show_error("Error during call of %s: %s".printf(name, e.message));
 		}
-		return func_params;
+		request.respond(func_params);
 	}
 	
-	private Variant? handle_enable_password_manager(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
-	{
+	private void handle_enable_password_manager(Drt.RpcRequest request) throws Drt.RpcError {
 		Idle.add(enable_password_manager_cb);
-		return null;
+		request.respond(null);
 	}
 	
 	private bool enable_password_manager_cb()
@@ -214,14 +210,12 @@ public class WebExtension: GLib.Object
 		return false;
 	}
 	
-	private Variant? handle_disable_password_manager(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
-	{
-		if (login_form_manager != null)
-		{
+	private void handle_disable_password_manager(Drt.RpcRequest request) throws Drt.RpcError {
+		if (login_form_manager != null) {
 			login_form_manager.clear_forms();
 			login_form_manager = null;
 		}
-		return null;
+		request.respond(null);
 	}
 	
 	private void show_error(string message)

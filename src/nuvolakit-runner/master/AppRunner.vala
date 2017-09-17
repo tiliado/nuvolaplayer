@@ -32,7 +32,7 @@ public abstract class AppRunner : GLib.Object
 	public bool connected {get{ return channel != null;}}
 	public bool running {get; protected set; default = false;}
 	protected GenericSet<string> capatibilities;
-	protected Drt.ApiChannel channel = null;
+	protected Drt.RpcChannel channel = null;
 	
 	static construct
 	{
@@ -92,37 +92,37 @@ public abstract class AppRunner : GLib.Object
 	 */
 	public signal void exited();
 	
-	public void connect_channel(Drt.ApiChannel channel)
+	public void connect_channel(Drt.RpcChannel channel)
 	{
 		this.channel = channel;
-		channel.api_router.notification.connect(on_notification);
+		channel.router.notification.connect(on_notification);
 	}
 	
 	public Variant? call_sync(string name, Variant? params) throws GLib.Error
 	{
 		if (channel == null)
-			throw new Drt.MessageError.IOERROR("No connected to app runner '%s'.", app_id);
+			throw new Drt.RpcError.IOERROR("No connected to app runner '%s'.", app_id);
 		
 		return channel.call_sync(name, params);
 	}
 	
-	public async Variant? call_full(string method, bool allow_private, string flags, Variant? params) throws GLib.Error
+	public async Variant? call_full(string method, Variant? params, bool allow_private, string flags) throws GLib.Error
 	{
 		if (channel == null)
-			throw new Drt.MessageError.IOERROR("No connected to app runner '%s'.", app_id);
+			throw new Drt.RpcError.IOERROR("No connected to app runner '%s'.", app_id);
 		
-		return yield channel.call_full(method, allow_private, flags, params);
+		return yield channel.call_full(method, params, allow_private, flags);
 	}
 	
-	public Variant? call_full_sync(string method, bool allow_private, string flags, Variant? params) throws GLib.Error
+	public Variant? call_full_sync(string method, Variant? params, bool allow_private, string flags) throws GLib.Error
 	{
 		if (channel == null)
-			throw new Drt.MessageError.IOERROR("No connected to app runner '%s'.", app_id);
+			throw new Drt.RpcError.IOERROR("No connected to app runner '%s'.", app_id);
 		
-		return channel.call_full_sync(method, allow_private, flags, params);
+		return channel.call_full_sync(method, params, allow_private, flags);
 	}
 	
-	private void on_notification(Drt.ApiRouter router, GLib.Object source, string path, string? detail, Variant? data)
+	private void on_notification(Drt.RpcRouter router, GLib.Object source, string path, string? detail, Variant? data)
 	{
 		if (source == channel)
 			notification(path, detail, data);

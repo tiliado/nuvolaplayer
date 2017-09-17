@@ -30,11 +30,11 @@ public abstract class Nuvola.Binding<ObjectType>: GLib.Object
 	public const bool CONTINUE = false;
 	public string name {get; construct;}
 	public bool active {get; protected set; default = false;}
-	protected Drt.ApiRouter router;
+	protected Drt.RpcRouter router;
 	protected WebWorker web_worker;
 	private SList<string> handlers = null;
 	
-	public Binding(Drt.ApiRouter router, WebWorker web_worker, string name)
+	public Binding(Drt.RpcRouter router, WebWorker web_worker, string name)
 	{
 		GLib.Object(name: name);
 		this.web_worker = web_worker;
@@ -51,33 +51,32 @@ public abstract class Nuvola.Binding<ObjectType>: GLib.Object
 		base.dispose();
 	}
 	
-	protected void unbind_methods()
-	{
-		foreach (var handler in handlers)
-		{
-			if (handler[0] == '/')
+	protected void unbind_methods() {
+		foreach (var handler in handlers) {
+			if (handler[0] == '/') {
 				router.remove_method(handler);
-			else
-				router.remove_handler(handler);
+			} else {
+				assert_not_reached();
+			}
 		}
 		handlers = null;
 		active = false;
 	}
 	
-	protected void check_not_empty() throws Drt.MessageError
+	protected void check_not_empty() throws Drt.RpcError
 	{
 		if (!active)
-			throw new Drt.MessageError.UNSUPPORTED("Binding %s has no registered components.", name);
+			throw new Drt.RpcError.UNSUPPORTED("Binding %s has no registered components.", name);
 	}
 	
-	protected void bind(string method, Drt.ApiFlags flags, string? description, owned Drt.ApiHandler handler, Drt.ApiParam[]? params)
+	protected void bind(string method, Drt.RpcFlags flags, string? description, owned Drt.RpcHandler handler, Drt.RpcParam[]? params)
 	{
 		var path = "/%s.%s".printf(name, method).down().replace(".", "/");
 		router.add_method(path, flags, description, (owned) handler, params);
 		handlers.prepend(path);
 	}
 	
-	protected void add_notification(string method, Drt.ApiFlags flags, string? description)
+	protected void add_notification(string method, Drt.RpcFlags flags, string? description)
 	{
 		var path = "/%s.%s".printf(name, method).down().replace(".", "/");
 		router.add_notification(path, flags, description);
@@ -105,7 +104,7 @@ public abstract class Nuvola.ObjectBinding<ObjectType>: Binding<ObjectType>
 {
 	protected Drt.Lst<ObjectType> objects;
 	
-	public ObjectBinding(Drt.ApiRouter router, WebWorker web_worker, string name)
+	public ObjectBinding(Drt.RpcRouter router, WebWorker web_worker, string name)
 	{
 		base(router, web_worker, name);
 		objects = new Drt.Lst<ObjectType>();
@@ -158,7 +157,7 @@ public abstract class Nuvola.ModelBinding<ModelType>: Binding<ModelType>
 {
 	public ModelType model {get; private set;}
 	
-	public ModelBinding(Drt.ApiRouter router, WebWorker web_worker, string name, ModelType model)
+	public ModelBinding(Drt.RpcRouter router, WebWorker web_worker, string name, ModelType model)
 	{
 		base(router, web_worker, name);
 		this.model = model;

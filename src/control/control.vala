@@ -127,10 +127,10 @@ public int main(string[] args)
 	{
 		try
 		{
-			var master = new Drt.ApiChannel.from_name(1, build_master_ipc_id(), null, 500);
+			var master = new Drt.RpcChannel.from_name(1, build_master_ipc_id(), null, null, 500);
 			
 			var response = master.call_sync("/nuvola/core/get_top_runner", null);
-			Drt.MessageListener.check_type_string(response, "ms");
+			Drt.Rpc.check_type_string(response, "ms");
 			response.get("ms", out Args.app);
 			
 			if (Args.app == null || Args.app == "")
@@ -147,10 +147,10 @@ public int main(string[] args)
 	if (Args.command.length < 1)
 		return quit(1, "Error: No command specified. Type `%s --help` for help.\n", args[0]);
 	
-	Drt.ApiChannel client;
+	Drt.RpcChannel client;
 	try
 	{
-		client = new Drt.ApiChannel.from_name(2, build_ui_runner_ipc_id(Args.app), null, 500);
+		client = new Drt.RpcChannel.from_name(2, build_ui_runner_ipc_id(Args.app), null, null, 500);
 	}
 	catch (GLib.Error e)
 	{
@@ -185,7 +185,7 @@ public int main(string[] args)
 				return quit(1, "Error: No API method specified.\n");
 			try
 			{
-				var master = new Drt.ApiChannel.from_name(1, build_master_ipc_id(), null, 500);
+				var master = new Drt.RpcChannel.from_name(1, build_master_ipc_id(), null, null, 500);
 				return call_api_method(master, Args.command, 1);
 			}
 			catch (GLib.Error e)
@@ -213,7 +213,7 @@ public int main(string[] args)
 	}
 }
 
-private int call_api_method(Drt.ApiChannel connection, string[] args, int offset) throws GLib.Error
+private int call_api_method(Drt.RpcChannel connection, string[] args, int offset) throws GLib.Error
 {
 	var response = connection.call_sync(args[offset], Drt.strv_to_variant_dict(args, offset + 1));
 	if (response != null)
@@ -230,9 +230,9 @@ private int call_api_method(Drt.ApiChannel connection, string[] args, int offset
 	
 class Control
 {
-	private Drt.ApiChannel conn;
+	private Drt.RpcChannel conn;
 	
-	public Control(Drt.ApiChannel conn)
+	public Control(Drt.RpcChannel conn)
 	{
 		this.conn = conn;
 	}

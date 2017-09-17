@@ -28,53 +28,51 @@ namespace Nuvola
 public class MediaKeysServer: GLib.Object
 {
 	private MediaKeysInterface media_keys;
-	private Drt.ApiBus ipc_bus;
+	private Drt.RpcBus ipc_bus;
 	private unowned Queue<AppRunner> app_runners;
 	private GenericSet<string> clients;
 	
-	public MediaKeysServer(MediaKeysInterface media_keys, Drt.ApiBus ipc_bus, Queue<AppRunner> app_runners)
+	public MediaKeysServer(MediaKeysInterface media_keys, Drt.RpcBus ipc_bus, Queue<AppRunner> app_runners)
 	{
 		this.media_keys = media_keys;
 		this.ipc_bus = ipc_bus;
 		this.app_runners = app_runners;
 		clients = new GenericSet<string>(str_hash, str_equal);
 		media_keys.media_key_pressed.connect(on_media_key_pressed);
-		ipc_bus.router.add_method("/nuvola/mediakeys/manage", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		ipc_bus.router.add_method("/nuvola/mediakeys/manage", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
 			null, handle_manage, {
 			new Drt.StringParam("id", true, false)
 		});
-		ipc_bus.router.add_method("/nuvola/mediakeysl/unmanage", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		ipc_bus.router.add_method("/nuvola/mediakeysl/unmanage", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
 			null, handle_unmanage, {
 			new Drt.StringParam("id", true, false)
 		});
 	}
 	
-	private Variant? handle_manage(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
-	{
-		var app_id = params.pop_string();
-		
-		if (app_id in clients)
-			return new Variant.boolean(false);
-		
-		clients.add(app_id);
-		if (clients.length == 1 && !media_keys.managed)
-			media_keys.manage();
-		
-		return new Variant.boolean(true);
+	private void handle_manage(Drt.RpcRequest request) throws Drt.RpcError {
+		var app_id = request.pop_string();
+		if (app_id in clients){
+			request.respond(new Variant.boolean(false));
+		} else {
+			clients.add(app_id);
+			if (clients.length == 1 && !media_keys.managed) {
+				media_keys.manage();
+			}
+			request.respond(new Variant.boolean(true));
+		}
 	}
 	
-	private Variant? handle_unmanage(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
-	{
-		var app_id = params.pop_string();
-		
-		if (!(app_id in clients))
-			return new Variant.boolean(false);
-		
-		clients.remove(app_id);
-		if (clients.length == 0 && media_keys.managed)
-			media_keys.unmanage();
-		
-		return new Variant.boolean(true);
+	private void handle_unmanage(Drt.RpcRequest request) throws Drt.RpcError {
+		var app_id = request.pop_string();
+		if (!(app_id in clients)) {
+			request.respond(new Variant.boolean(false));
+		} else {
+			clients.remove(app_id);
+			if (clients.length == 0 && media_keys.managed) {
+				media_keys.unmanage();
+			}
+			request.respond(new Variant.boolean(true));
+		}
 	}
 	
 	private void on_media_key_pressed(string key)

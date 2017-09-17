@@ -34,16 +34,16 @@ public class LoginFormManager: GLib.Object
 	private WebKit.WebPage page = null;
 	private uint look_up_forms_source_id = 0;
 	private uint look_up_forms_attempts = 0;
-	private Drt.ApiChannel channel;
+	private Drt.RpcChannel channel;
 	private unowned LoginForm context_menu_form = null;
 	
-	public LoginFormManager(Drt.ApiChannel channel)
+	public LoginFormManager(Drt.RpcChannel channel)
 	{
 		credentials = new HashTable<string, Drt.Lst<LoginCredentials>>(str_hash, str_equal);
 		login_forms = new Drt.Lst<LoginForm>();
 		this.channel = channel;
 		request_passwords();
-		channel.api_router.add_method("/nuvola/passwordmanager/prefill-username", Drt.ApiFlags.WRITABLE,
+		channel.router.add_method("/nuvola/passwordmanager/prefill-username", Drt.RpcFlags.WRITABLE,
 			"Prefill username.",
 			handle_prefill_username, {
 				new Drt.IntParam("index", true, null, "Username index.")
@@ -53,7 +53,7 @@ public class LoginFormManager: GLib.Object
 	~LoginFormManager()
 	{
 		debug("~LoginFormManager");
-		channel.api_router.remove_method("/nuvola/passwordmanager/prefill-username");
+		channel.router.remove_method("/nuvola/passwordmanager/prefill-username");
 	}
 	
 	private void request_passwords()
@@ -268,11 +268,11 @@ public class LoginFormManager: GLib.Object
 		prefill(form);
 	}
 	
-	private Variant? handle_prefill_username(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_prefill_username(Drt.RpcRequest request) throws Drt.RpcError
 	{
 		if (context_menu_form != null)
 		{
-			var index = params.pop_int();
+			var index = request.pop_int();
 			var entries = get_credentials(context_menu_form.uri.host, null);
 			if (entries != null)
 			{
@@ -282,7 +282,7 @@ public class LoginFormManager: GLib.Object
 			}
 			context_menu_form = null;
 		}
-		return null;
+		request.respond(null);
 	}
 	
 	public static bool find_login_form_entries(WebKit.DOM.HTMLFormElement form,

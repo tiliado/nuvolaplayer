@@ -27,7 +27,7 @@ namespace Nuvola
 
 public class PasswordManagerBinding : ModelBinding<PasswordManager>
 {
-	public PasswordManagerBinding(Drt.ApiRouter router, WebWorker web_worker, PasswordManager model)
+	public PasswordManagerBinding(Drt.RpcRouter router, WebWorker web_worker, PasswordManager model)
 	{
 		base(router, web_worker, "Nuvola.PasswordManager", model);
 		model.prefill_username.connect(on_prefil_username);
@@ -41,25 +41,25 @@ public class PasswordManagerBinding : ModelBinding<PasswordManager>
 	
 	protected override void bind_methods()
 	{
-		bind("get-passwords", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.READABLE,
+		bind("get-passwords", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
 			"Returns passwords.", handle_get_passwords, null);
-		bind("store-password", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE, null, handle_store_password, {
+		bind("store-password", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE, null, handle_store_password, {
 			new Drt.StringParam("hostname", true, false),
 			new Drt.StringParam("username", true, false),
 			new Drt.StringParam("password", true, false),
 		});
 	}
 	
-	private Variant? handle_store_password(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_store_password(Drt.RpcRequest request) throws Drt.RpcError
 	{
-		var hostname = params.pop_string();
-		var username = params.pop_string();
-		var password = params.pop_string();
+		var hostname = request.pop_string();
+		var username = request.pop_string();
+		var password = request.pop_string();
 		model.store_password.begin(hostname, username, password, null, (o, res) => {model.store_password.end(res);});
-		return null;
+		request.respond(null);
 	}
 	
-	private Variant? handle_get_passwords(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_get_passwords(Drt.RpcRequest request) throws Drt.RpcError
 	{
 		var builder = new VariantBuilder(new VariantType("a(sss)"));
 		var passwords = model.get_passwords();
@@ -72,7 +72,7 @@ public class PasswordManagerBinding : ModelBinding<PasswordManager>
 				foreach (var item in credentials)
 					builder.add("(sss)", hostname, item.username, item.password);
 		}
-		return builder.end();
+		request.respond(builder.end());
 	}
 	
 	private void on_prefil_username(int index)

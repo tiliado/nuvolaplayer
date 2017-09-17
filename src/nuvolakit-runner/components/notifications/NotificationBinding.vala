@@ -24,14 +24,14 @@
 
 public class Nuvola.NotificationBinding: ObjectBinding<NotificationInterface>
 {
-	public NotificationBinding(Drt.ApiRouter router, WebWorker web_worker)
+	public NotificationBinding(Drt.RpcRouter router, WebWorker web_worker)
 	{
 		base(router, web_worker, "Nuvola.Notification");
 	}
 	
 	protected override void bind_methods()
 	{
-		bind("update", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		bind("update", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
 			"Update notification.",
 			handle_update, {
 			new Drt.StringParam("name", true, false, null, "Notification name."),
@@ -42,18 +42,18 @@ public class Nuvola.NotificationBinding: ObjectBinding<NotificationInterface>
 			new Drt.BoolParam("resident", false, false, "Whether the notification is resident."),
 			new Drt.StringParam("category", false, true, null, "Notification category."),
 		});
-		bind("set-actions", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		bind("set-actions", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
 			"Set notification actions.",
 			handle_set_actions, {
 			new Drt.StringParam("name", true, false, null, "Notification name."),
 			new Drt.StringArrayParam("actions", true, null, "Notification actions.")
 		});
-		bind("remove-actions", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		bind("remove-actions", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
 			"Remove notification actions.",
 			handle_remove_actions, {
 			new Drt.StringParam("name", true, false, null, "Notification name.")
 		});
-		bind("show", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		bind("show", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
 			"Show notification.",
 			handle_show, {
 			new Drt.StringParam("name", true, false, null, "Notification name."),
@@ -61,51 +61,51 @@ public class Nuvola.NotificationBinding: ObjectBinding<NotificationInterface>
 		});
 	}
 	
-	private Variant? handle_update(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_update(Drt.RpcRequest request) throws Drt.RpcError
 	{
 		check_not_empty();
-		var name = params.pop_string();
-		var title = params.pop_string();
-		var message = params.pop_string();
-		var icon_name = params.pop_string();
-		var icon_path = params.pop_string();
-		var resident = params.pop_bool();
-		var category = params.pop_string();
+		var name = request.pop_string();
+		var title = request.pop_string();
+		var message = request.pop_string();
+		var icon_name = request.pop_string();
+		var icon_path = request.pop_string();
+		var resident = request.pop_bool();
+		var category = request.pop_string();
 		foreach (var object in objects)
 			if (object.update(name, title, message, icon_name, icon_path, resident, category))
 				break;
-		return null;
+		request.respond(null);
 	}
 	
-	private Variant? handle_set_actions(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_set_actions(Drt.RpcRequest request) throws Drt.RpcError
 	{
 		check_not_empty();
-		var name = params.pop_string();
-		var actions = params.pop_strv();
+		var name = request.pop_string();
+		var actions = request.pop_strv();
 		foreach (var object in objects)
 			if (object.set_actions(name, (owned) actions))
 				break;
-		return null;
+		request.respond(null);
 	}
 	
-	private Variant? handle_remove_actions(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_remove_actions(Drt.RpcRequest request) throws Drt.RpcError
 	{
 		check_not_empty();
-		var name = params.pop_string();
+		var name = request.pop_string();
 		foreach (var object in objects)
 			if (object.remove_actions(name))
 				break;
-		return null;
+		request.respond(null);
 	}
 	
-	private Variant? handle_show(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_show(Drt.RpcRequest request) throws Drt.RpcError
 	{
 		check_not_empty();
-		var name = params.pop_string();
-		var force = params.pop_bool();
+		var name = request.pop_string();
+		var force = request.pop_bool();
 		foreach (var object in objects)
 			if (object.show(name, force))
 				break;
-		return null;
+		request.respond(null);
 	}
 }

@@ -27,17 +27,17 @@ namespace Nuvola
 
 const int IPC_TIMEOUT = 60000;
 
-public class IpcBus: Drt.ApiBus
+public class IpcBus: Drt.RpcBus
 {
-    public Drt.ApiChannel? master {get; private set; default = null;}
-    public Drt.ApiChannel? web_worker {get; private set; default = null;}
+    public Drt.RpcChannel? master {get; private set; default = null;}
+    public Drt.RpcChannel? web_worker {get; private set; default = null;}
     
-    public IpcBus(string bus_name, Drt.ApiRouter? router=null)
+    public IpcBus(string bus_name, Drt.RpcRouter? router=null)
     {
-        base(bus_name, router ?? new Drt.ApiRouter(), IPC_TIMEOUT);
+        base(bus_name, router ?? new Drt.RpcRouter(), IPC_TIMEOUT);
     }
     
-    public Drt.ApiChannel? connect_master(string bus_name, string? api_token) throws Drt.IOError
+    public Drt.RpcChannel? connect_master(string bus_name, string? api_token) throws Drt.IOError
     {
 		return_val_if_fail(master == null, null);
         master = connect_channel(bus_name, IPC_TIMEOUT);
@@ -45,7 +45,7 @@ public class IpcBus: Drt.ApiBus
         return master;
     }
     
-    public Drt.ApiChannel? connect_master_socket(Socket socket, string? api_token) throws Drt.IOError
+    public Drt.RpcChannel? connect_master_socket(Socket socket, string? api_token) throws Drt.IOError
     {
 		return_val_if_fail(master == null, null);
         master = connect_channel_socket(socket, IPC_TIMEOUT);
@@ -53,7 +53,7 @@ public class IpcBus: Drt.ApiBus
         return master;
     }
     
-    public void connect_web_worker(Drt.ApiChannel channel)
+    public void connect_web_worker(Drt.RpcChannel channel)
     {
         web_worker = channel;
     }

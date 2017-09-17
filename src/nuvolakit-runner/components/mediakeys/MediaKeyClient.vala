@@ -29,13 +29,13 @@ public class MediaKeysClient : GLib.Object, MediaKeysInterface
 {
 	public bool managed {get; protected set; default=false;}
 	private string app_id;
-	private Drt.ApiChannel conn;
+	private Drt.RpcChannel conn;
 	
-	public class MediaKeysClient(string app_id, Drt.ApiChannel conn)
+	public class MediaKeysClient(string app_id, Drt.RpcChannel conn)
 	{
 		this.conn = conn;
 		this.app_id = app_id;
-		conn.api_router.add_method("/nuvola/mediakeys/media-key-pressed", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		conn.router.add_method("/nuvola/mediakeys/media-key-pressed", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
 			null, handle_media_key_pressed, {
 			new Drt.StringParam("key", true, false)
 		});
@@ -50,7 +50,7 @@ public class MediaKeysClient : GLib.Object, MediaKeysInterface
 		try
 		{
 			var data = conn.call_sync(METHOD, new Variant("(s)", app_id)); 
-			Drt.MessageListener.check_type_string(data, "b");
+			Drt.Rpc.check_type_string(data, "b");
 			managed = data.get_boolean();
 		}
 		catch (GLib.Error e)
@@ -68,7 +68,7 @@ public class MediaKeysClient : GLib.Object, MediaKeysInterface
 		try
 		{
 			var data = conn.call_sync(METHOD, new Variant("(s)", app_id)); 
-			Drt.MessageListener.check_type_string(data, "b");
+			Drt.Rpc.check_type_string(data, "b");
 			managed = !data.get_boolean();
 		}
 		catch (GLib.Error e)
@@ -77,11 +77,11 @@ public class MediaKeysClient : GLib.Object, MediaKeysInterface
 		}
 	}
 	
-	private Variant? handle_media_key_pressed(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_media_key_pressed(Drt.RpcRequest request) throws Drt.RpcError
 	{
-		var key = params.pop_string();
+		var key = request.pop_string();
 		media_key_pressed(key);
-		return new Variant.boolean(true);
+		request.respond(new Variant.boolean(true));
 	}
 }
 

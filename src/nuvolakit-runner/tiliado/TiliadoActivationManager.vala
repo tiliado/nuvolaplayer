@@ -22,7 +22,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if TILIADO_API
 namespace Nuvola
 {
 
@@ -61,28 +60,28 @@ public class TiliadoActivationManager : GLib.Object, TiliadoActivation
 		tiliado.device_code_grant_cancelled.connect(on_device_code_grant_cancelled);
 		tiliado.device_code_grant_finished.connect(on_device_code_grant_finished);
 		load_cached_data();
-		bus.api.add_method("/tiliado-activation/get-user-info", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.READABLE,
+		bus.api.add_method("/tiliado-activation/get-user-info", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
 			null, handle_get_user_info, null);
-		bus.api.add_method("/tiliado-activation/update-user-info", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.READABLE,
+		bus.api.add_method("/tiliado-activation/update-user-info", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
 			null, handle_update_user_info, null);
-		bus.api.add_method("/tiliado-activation/start-activation", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.READABLE,
+		bus.api.add_method("/tiliado-activation/start-activation", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
 			null, handle_start_activation, null);
-		bus.api.add_method("/tiliado-activation/cancel-activation", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.READABLE,
+		bus.api.add_method("/tiliado-activation/cancel-activation", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
 			null, handle_cancel_activation, null);
-		bus.api.add_method("/tiliado-activation/drop-activation", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.READABLE,
+		bus.api.add_method("/tiliado-activation/drop-activation", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
 			null, handle_drop_activation, null);
-		bus.api.add_method("/tiliado-activation/start_activation", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.READABLE,
+		bus.api.add_method("/tiliado-activation/start_activation", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
 			null, handle_start_activation, null);
 		bus.api.add_notification(
-			ACTIVATION_STARTED,	Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE|Drt.ApiFlags.SUBSCRIBE, null);
+			ACTIVATION_STARTED,	Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE|Drt.RpcFlags.SUBSCRIBE, null);
 		bus.api.add_notification(
-			ACTIVATION_FAILED, Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE|Drt.ApiFlags.SUBSCRIBE, null);
+			ACTIVATION_FAILED, Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE|Drt.RpcFlags.SUBSCRIBE, null);
 		bus.api.add_notification(
-			ACTIVATION_CANCELLED, Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE|Drt.ApiFlags.SUBSCRIBE, null);
+			ACTIVATION_CANCELLED, Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE|Drt.RpcFlags.SUBSCRIBE, null);
 		bus.api.add_notification(
-			ACTIVATION_FINISHED, Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE|Drt.ApiFlags.SUBSCRIBE, null);
+			ACTIVATION_FINISHED, Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE|Drt.RpcFlags.SUBSCRIBE, null);
 		bus.api.add_notification(
-			USER_INFO_UPDATED, Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE|Drt.ApiFlags.SUBSCRIBE, null);
+			USER_INFO_UPDATED, Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE|Drt.RpcFlags.SUBSCRIBE, null);
 	}
 	
 	~TiliadoActivationManager()
@@ -130,34 +129,34 @@ public class TiliadoActivationManager : GLib.Object, TiliadoActivation
 		update_user_info();
 	}
 	
-	private Variant? handle_get_user_info(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_get_user_info(Drt.RpcRequest request) throws Drt.RpcError
 	{
 		var user = get_user_info();
-		return user != null ? user.to_variant() : null;
+		request.respond(user != null ? user.to_variant() : null);
 	}
 	
-	private Variant? handle_update_user_info(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_update_user_info(Drt.RpcRequest request) throws Drt.RpcError
 	{
 		update_user_info();
-		return null;
+		request.respond(null);
 	}
 	
-	private Variant? handle_start_activation(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_start_activation(Drt.RpcRequest request) throws Drt.RpcError
 	{
 		start_activation();
-		return null;
+		request.respond(null);
 	}
 	
-	private Variant? handle_cancel_activation(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_cancel_activation(Drt.RpcRequest request) throws Drt.RpcError
 	{
 		cancel_activation();
-		return null;
+		request.respond(null);
 	}
 	
-	private Variant? handle_drop_activation(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_drop_activation(Drt.RpcRequest request) throws Drt.RpcError
 	{
 		drop_activation();
-		return null;
+		request.respond(null);
 	}
 	
 	private void on_device_code_grant_started(string url)
@@ -196,7 +195,7 @@ public class TiliadoActivationManager : GLib.Object, TiliadoActivation
 	private void on_device_code_grant_cancelled()
 	{
 		activation_cancelled();
-		bus.api.emit(ACTIVATION_CANCELLED);
+		bus.api.emit(ACTIVATION_CANCELLED, null, null);
 	}
 	
 	private void on_device_code_grant_finished(Oauth2Token token)
@@ -234,7 +233,7 @@ public class TiliadoActivationManager : GLib.Object, TiliadoActivation
 		catch (Oauth2Error e)
 		{
 			user_info_updated(null);
-			bus.api.emit(USER_INFO_UPDATED);
+			bus.api.emit(USER_INFO_UPDATED, null, null);
 		}
 	}
 	
@@ -321,4 +320,3 @@ public class TiliadoActivationManager : GLib.Object, TiliadoActivation
 }
 
 } // namespace Nuvola
-#endif

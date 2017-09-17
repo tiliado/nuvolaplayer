@@ -24,65 +24,65 @@
 
 public class Nuvola.LauncherBinding: ModelBinding<LauncherModel>
 {
-	public LauncherBinding(Drt.ApiRouter router, WebWorker web_worker, LauncherModel? model=null)
+	public LauncherBinding(Drt.RpcRouter router, WebWorker web_worker, LauncherModel? model=null)
 	{
 		base(router, web_worker, "Nuvola.Launcher", model ?? new LauncherModel());
 	}
 	
 	protected override void bind_methods()
 	{
-		bind("set-tooltip", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		bind("set-tooltip", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
 			"Set launcher tooltip.",
 			handle_set_tooltip, {
 			new Drt.StringParam("text", true, false, null, "Tooltip text.")
 		});
-		bind("set-actions", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		bind("set-actions", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
 			"Set launcher actions.",
 			handle_set_actions, {
 			new Drt.StringArrayParam("actions", true, null, "Action name.")
 		});
-		bind("add-action", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		bind("add-action", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
 			"Add launcher action.",
 			handle_add_action, {
 			new Drt.StringParam("name", true, false, null, "Action name.")
 		});
-		bind("remove-action", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		bind("remove-action", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
 			"Remove launcher action.",
 			handle_remove_action, {
 			new Drt.StringParam("name", true, false, null, "Action name.")
 		});
-		bind("remove-actions", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		bind("remove-actions", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
 			"Remove all launcher actions.",
 			handle_remove_actions, null);
 	}
 	
-	private Variant? handle_set_tooltip(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_set_tooltip(Drt.RpcRequest request) throws Drt.RpcError
 	{
-		model.tooltip = params.pop_string();
-		return null;
+		model.tooltip = request.pop_string();
+		request.respond(null);
 	}
 	
-	private Variant? handle_add_action(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_add_action(Drt.RpcRequest request) throws Drt.RpcError
 	{
-		model.add_action(params.pop_string());
-		return null;
+		model.add_action(request.pop_string());
+		request.respond(null);
 	}
 	
-	private Variant? handle_remove_action(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_remove_action(Drt.RpcRequest request) throws Drt.RpcError
 	{
-		model.remove_action(params.pop_string());
-		return null;
+		model.remove_action(request.pop_string());
+		request.respond(null);
 	}
 	
-	private Variant? handle_set_actions(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_set_actions(Drt.RpcRequest request) throws Drt.RpcError
 	{
-		model.actions = params.pop_str_list();
-		return null;
+		model.actions = request.pop_str_list();
+		request.respond(null);
 	}
 	
-	private Variant? handle_remove_actions(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_remove_actions(Drt.RpcRequest request) throws Drt.RpcError
 	{
 		model.remove_actions();
-		return null;
+		request.respond(null);
 	}
 }

@@ -27,79 +27,79 @@ namespace Nuvola
 
 public class ActionsKeyBinderServer : GLib.Object
 {
-	private Drt.ApiBus ipc_bus;
+	private Drt.RpcBus ipc_bus;
 	private ActionsKeyBinder keybinder;
 	private unowned Queue<AppRunner> app_runners;
 	
-	public class ActionsKeyBinderServer(Drt.ApiBus ipc_bus, ActionsKeyBinder keybinder, Queue<AppRunner> app_runners)
+	public class ActionsKeyBinderServer(Drt.RpcBus ipc_bus, ActionsKeyBinder keybinder, Queue<AppRunner> app_runners)
 	{
 		this.ipc_bus = ipc_bus;
 		this.keybinder = keybinder;
 		this.app_runners = app_runners;
 		keybinder.action_activated.connect(on_action_activated);
 		var router = ipc_bus.router;
-		router.add_method("/nuvola/actionkeybinder/get-keybinding", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.READABLE,
+		router.add_method("/nuvola/actionkeybinder/get-keybinding", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
 			null, handle_get_keybinding, {
 			new Drt.StringParam("action", true, false)
 		});
-		router.add_method("/nuvola/actionkeybinder/set-keybinding", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		router.add_method("/nuvola/actionkeybinder/set-keybinding", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
 			null, handle_set_keybinding, {
 			new Drt.StringParam("action", true, false),
 			new Drt.StringParam("keybinding", true, true),
 		});
-		router.add_method("/nuvola/actionkeybinder/bind", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		router.add_method("/nuvola/actionkeybinder/bind", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
 			null, handle_bind, {
 			new Drt.StringParam("action", true, false),
 		});
-		router.add_method("/nuvola/actionkeybinder/unbind", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		router.add_method("/nuvola/actionkeybinder/unbind", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
 			null, handle_unbind, {
 			new Drt.StringParam("action", true, false),
 		});
-		router.add_method("/nuvola/actionkeybinder/is-available", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.READABLE,
+		router.add_method("/nuvola/actionkeybinder/is-available", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
 			null, handle_is_available, {
 			new Drt.StringParam("keybinding", true, false),
 		});
-		router.add_method("/nuvola/actionkeybinder/get-action", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.READABLE,
+		router.add_method("/nuvola/actionkeybinder/get-action", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
 			null, handle_get_action, {
 			new Drt.StringParam("keybinding", true, false),
 		});
 	}
 	
-	private Variant? handle_get_keybinding(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_get_keybinding(Drt.RpcRequest request) throws Drt.RpcError
 	{
-		var action = params.pop_string();
-		return new Variant("ms", keybinder.get_keybinding(action));
+		var action = request.pop_string();
+		request.respond(new Variant("ms", keybinder.get_keybinding(action)));
 	}
 	
-	private Variant? handle_set_keybinding(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_set_keybinding(Drt.RpcRequest request) throws Drt.RpcError
 	{
-		var action = params.pop_string();
-		var keybinding = params.pop_string();
-		return new Variant.boolean(keybinder.set_keybinding(action, keybinding));
+		var action = request.pop_string();
+		var keybinding = request.pop_string();
+		request.respond(new Variant.boolean(keybinder.set_keybinding(action, keybinding)));
 	}
 	
-	private Variant? handle_bind(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_bind(Drt.RpcRequest request) throws Drt.RpcError
 	{
-		var action = params.pop_string();
-		return new Variant.boolean(keybinder.bind(action));
+		var action = request.pop_string();
+		request.respond(new Variant.boolean(keybinder.bind(action)));
 	}
 	
-	private Variant? handle_unbind(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_unbind(Drt.RpcRequest request) throws Drt.RpcError
 	{
-		var action = params.pop_string();
-		return new Variant.boolean(keybinder.unbind(action));
+		var action = request.pop_string();
+		request.respond(new Variant.boolean(keybinder.unbind(action)));
 	}
 	
-	private Variant? handle_get_action(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_get_action(Drt.RpcRequest request) throws Drt.RpcError
 	{
-		var keybinding = params.pop_string();
-		return new Variant("ms", keybinder.get_action(keybinding));
+		var keybinding = request.pop_string();
+		request.respond(new Variant("ms", keybinder.get_action(keybinding)));
 	}
 	
-	private Variant? handle_is_available(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_is_available(Drt.RpcRequest request) throws Drt.RpcError
 	{
-		var keybinding = params.pop_string();
-		return new Variant.boolean(keybinder.is_available(keybinding));
+		var keybinding = request.pop_string();
+		request.respond(new Variant.boolean(keybinder.is_available(keybinding)));
 	}
 	
 	private void on_action_activated(string name)

@@ -171,29 +171,29 @@ public class MasterController : Drtgtk.Application
 		try
 		{
 			server = new MasterBus(server_name);
-			server.api.add_method("/nuvola/core/runner-started", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+			server.api.add_method("/nuvola/core/runner-started", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
 				null,
 				handle_runner_started, {
 				new Drt.StringParam("id", true, false, null, "Application id"),
 				new Drt.StringParam("token", true, false, null, "Application token"),
 				});
-			server.api.add_method("/nuvola/core/runner-activated", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+			server.api.add_method("/nuvola/core/runner-activated", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
 				null,
 				handle_runner_activated, {
 				new Drt.StringParam("id", true, false, null, "Application id"),
 				});
-			server.api.add_method("/nuvola/core/get_top_runner", Drt.ApiFlags.READABLE, null, handle_get_top_runner, null);
-			server.api.add_method("/nuvola/core/list_apps", Drt.ApiFlags.READABLE,
+			server.api.add_method("/nuvola/core/get_top_runner", Drt.RpcFlags.READABLE, null, handle_get_top_runner, null);
+			server.api.add_method("/nuvola/core/list_apps", Drt.RpcFlags.READABLE,
 				"Returns information about all installed web apps.",
 				handle_list_apps,  null);
-			server.api.add_method("/nuvola/core/get_app_info", Drt.ApiFlags.READABLE,
+			server.api.add_method("/nuvola/core/get_app_info", Drt.RpcFlags.READABLE,
 				"Returns information about a web app",
 				handle_get_app_info, {
 				new Drt.StringParam("id", true, false, null, "Application id"),
 				});
-			server.api.add_notification(APP_STARTED, Drt.ApiFlags.WRITABLE|Drt.ApiFlags.SUBSCRIBE,
+			server.api.add_notification(APP_STARTED, Drt.RpcFlags.WRITABLE|Drt.RpcFlags.SUBSCRIBE,
 				"Emitted when a new app is launched.");
-			server.api.add_notification(APP_EXITED, Drt.ApiFlags.WRITABLE|Drt.ApiFlags.SUBSCRIBE,
+			server.api.add_notification(APP_EXITED, Drt.RpcFlags.WRITABLE|Drt.RpcFlags.SUBSCRIBE,
 				"Emitted when a app has exited.");
 			server.start();
 		}
@@ -393,26 +393,26 @@ public class MasterController : Drtgtk.Application
 		return 0;
 	}
 	
-	private Variant? handle_runner_started(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_runner_started(Drt.RpcRequest request) throws Drt.RpcError
 	{
-		var app_id = params.pop_string();
-		var api_token = params.pop_string();
+		var app_id = request.pop_string();
+		var api_token = request.pop_string();
 		var runner = app_runners_map[app_id];
 		return_val_if_fail(runner != null, null);
 		
-		var channel = source as Drt.ApiChannel;
+		var channel = request.connection as Drt.RpcChannel;
 		if (channel == null)
-			throw new Drt.MessageError.REMOTE_ERROR("Failed to connect runner '%s'. %s ", app_id, source.get_type().name());
+			throw new Drt.RpcError.REMOTE_ERROR("Failed to connect runner '%s'. %s ", app_id, request.connection.get_type().name());
 		channel.api_token = api_token;
 		runner.connect_channel(channel);
 		debug("Connected to runner server for '%s'.", app_id);
 		server.api.emit(APP_STARTED, app_id, app_id);
-		return new Variant.boolean(true);
+		request.respond(new Variant.boolean(true));
 	}
 	
-	private Variant? handle_runner_activated(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_runner_activated(Drt.RpcRequest request) throws Drt.RpcError
 	{
-		var app_id = params.pop_string();
+		var app_id = request.pop_string();
 		var runner = app_runners_map[app_id];
 		return_val_if_fail(runner != null, false);
 		
@@ -420,30 +420,30 @@ public class MasterController : Drtgtk.Application
 			critical("Runner for '%s' not found in queue.", runner.app_id);
 		
 		app_runners.push_head(runner);
-		return new Variant.boolean(true);
+		request.respond(new Variant.boolean(true));
 	}
 	
-	private Variant? handle_get_top_runner(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_get_top_runner(Drt.RpcRequest request) throws Drt.RpcError
 	{
 		var runner = app_runners.peek_head();
-		return new Variant("ms", runner == null ? null : runner.app_id);
+		request.respond(new Variant("ms", runner == null ? null : runner.app_id));
 	}
 	
-	private Variant? handle_list_apps(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_list_apps(Drt.RpcRequest request) throws Drt.RpcError
 	{
 		var builder = new VariantBuilder(new VariantType("aa{sv}"));
 		var keys = app_runners_map.get_keys();
 		keys.sort(string.collate);
 		foreach (var app_id in keys)
 			builder.add_value(app_runners_map[app_id].query_meta());
-		return builder.end();
+		request.respond(builder.end());
 	}
 	
-	private Variant? handle_get_app_info(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_get_app_info(Drt.RpcRequest request) throws Drt.RpcError
 	{
-		var app_id = params.pop_string();
+		var app_id = request.pop_string();
 		var app = app_runners_map[app_id];
-		return app != null ? app.query_meta() : null;
+		request.respond(app != null ? app.query_meta() : null);
 	}
 	
 	private void on_master_stack_page_changed(Gtk.Widget? page, string? name, string? title)

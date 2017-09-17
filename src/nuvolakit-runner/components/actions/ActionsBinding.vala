@@ -29,14 +29,14 @@
  */
 public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 {
-	public ActionsBinding(Drt.ApiRouter router, WebWorker web_worker)
+	public ActionsBinding(Drt.RpcRouter router, WebWorker web_worker)
 	{
 		base(router, web_worker, "Nuvola.Actions");
 	}
 	
 	protected override void bind_methods()
 	{
-		bind("add-action", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		bind("add-action", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
 			"Add a new action.",
 			handle_add_action, {
 			new Drt.StringParam("group", true, false, null, "Action group"),
@@ -48,7 +48,7 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 			new Drt.StringParam("keybinding", false, true, null, "in-app keyboard shortcut, e.g. `<ctrl>P`."),
 			new Drt.VariantParam("state", false, true, null, "Action state - `null` for simple actions, `true/false` for toggle actions (on/off).")
 		});
-		bind("add-radio-action", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		bind("add-radio-action", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
 			"Add a new action.",
 			handle_add_radio_action, {
 			new Drt.StringParam("group", true, false, null, "Action group"),
@@ -57,38 +57,38 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 			new Drt.VariantParam("state", true, false, null, "Initial state of the action. Must be one of states specified in the `options` array."),
 			new Drt.VarArrayParam("options", true, false, null, "Array of options definition in form [`stateId`, `label`, `mnemo_label`, `icon`, `keybinding`]. The `stateId` is unique identifier (Number or String), other parameters are described in `add-action` method."),
 		});
-		bind("is-enabled", Drt.ApiFlags.READABLE,
+		bind("is-enabled", Drt.RpcFlags.READABLE,
 			"Returns true if action is enabled.",
 			handle_is_action_enabled, {
 			new Drt.StringParam("name", true, false, null, "Action name"),
 		});
-		bind("set-enabled", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		bind("set-enabled", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
 			"Sets whether action is enabled.",
 			handle_action_set_enabled, {
 			new Drt.StringParam("name", true, false, null, "Action name"),
 			new Drt.BoolParam("enabled", true, null, "Enabled state")
 		});
-		bind("get-state", Drt.ApiFlags.READABLE,
+		bind("get-state", Drt.RpcFlags.READABLE,
 			"Returns state of the action.",
 			handle_action_get_state, {
 			new Drt.StringParam("name", true, false, null, "Action name")
 		});
-		bind("set-state", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		bind("set-state", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
 			"Set state of the action.",
 			handle_action_set_state, {
 			new Drt.StringParam("name", true, false, null, "Action name"),
 			new Drt.VariantParam("state", false, true, null, "Action state")
 		});
-		bind("activate", Drt.ApiFlags.WRITABLE,
+		bind("activate", Drt.RpcFlags.WRITABLE,
 			"Activates action",
 			handle_action_activate, {
 			new Drt.StringParam("name", true, false, null, "Action name"),
 			new Drt.VariantParam("parameter", false, true, null, "Action parameter"),
 		});
-		bind("list-groups", Drt.ApiFlags.READABLE,
+		bind("list-groups", Drt.RpcFlags.READABLE,
 			"Lists action groups.",
 			handle_list_groups, null);
-		bind("list-group-actions", Drt.ApiFlags.READABLE,
+		bind("list-group-actions", Drt.RpcFlags.READABLE,
 			"Returns actions of the given group.",
 			handle_list_group_actions, {
 			new Drt.StringParam("name", true, false, null, "Group name")
@@ -105,33 +105,33 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 		object.custom_action_activated.disconnect(on_custom_action_activated);
 	}
 	
-	private Variant? handle_add_action(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_add_action(Drt.RpcRequest request) throws Drt.RpcError
 	{
 		check_not_empty();
-		var group = params.pop_string();
-		var scope = params.pop_string();
-		var action_name = params.pop_string();
-		var label = params.pop_string();
-		var mnemo_label = params.pop_string();
-		var icon = params.pop_string();
-		var keybinding = params.pop_string();
-		var state = params.pop_variant();
+		var group = request.pop_string();
+		var scope = request.pop_string();
+		var action_name = request.pop_string();
+		var label = request.pop_string();
+		var mnemo_label = request.pop_string();
+		var icon = request.pop_string();
+		var keybinding = request.pop_string();
+		var state = request.pop_variant();
 		if (state != null && state.get_type_string() == "mv")
 			state = null;
 		foreach (var object in objects)
 			if (object.add_action(group, scope, action_name, label, mnemo_label, icon, keybinding, state))
 				break;
-		return null;
+		request.respond(null);
 	}
 	
-	private Variant? handle_add_radio_action(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_add_radio_action(Drt.RpcRequest request) throws Drt.RpcError
 	{
 		check_not_empty();
-		var group = params.pop_string();
-		var scope = params.pop_string();
-		var action_name = params.pop_string();
-		var state = params.pop_variant();
-		var options_iter = params.pop_variant_array();
+		var group = request.pop_string();
+		var scope = request.pop_string();
+		var action_name = request.pop_string();
+		var state = request.pop_variant();
+		var options_iter = request.pop_variant_array();
 		string? label = null;
 		string? mnemo_label = null;
 		string? icon = null;
@@ -157,67 +157,67 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 		foreach (var object in objects)
 			if (object.add_radio_action(group, scope, action_name, state, options))
 				break;
-		return null;
+		request.respond(null);
 	}
 	
-	private Variant? handle_is_action_enabled(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_is_action_enabled(Drt.RpcRequest request) throws Drt.RpcError
 	{
 		check_not_empty();
-		string action_name = params.pop_string();
+		string action_name = request.pop_string();
 		bool enabled = false;
 		foreach (var object in objects)
 			if (object.is_enabled(action_name, ref enabled))
 				break;
-		return new Variant.boolean(enabled);
+		request.respond(new Variant.boolean(enabled));
 	}
 	
-	private Variant? handle_action_set_enabled(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_action_set_enabled(Drt.RpcRequest request) throws Drt.RpcError
 	{
 		check_not_empty();
-		var action_name = params.pop_string();
-		var enabled = params.pop_bool();
+		var action_name = request.pop_string();
+		var enabled = request.pop_bool();
 		foreach (var object in objects)
 			if (object.set_enabled(action_name, enabled))
 				break;
-		return null;
+		request.respond(null);
 	}
 	
-	private Variant? handle_action_get_state(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_action_get_state(Drt.RpcRequest request) throws Drt.RpcError
 	{
 		check_not_empty();
-		var action_name = params.pop_string();
+		var action_name = request.pop_string();
 		Variant? state = null;
 		foreach (var object in objects)
 			if (object.get_state(action_name, ref state))
 				break;
-		return state;
+		request.respond(state);
 	}
 	
-	private Variant? handle_action_set_state(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_action_set_state(Drt.RpcRequest request) throws Drt.RpcError
 	{
 		check_not_empty();
-		var action_name = params.pop_string();
-		var state = params.pop_variant();
+		var action_name = request.pop_string();
+		var state = request.pop_variant();
 		foreach (var object in objects)
 			if (object.set_state(action_name, state))
 				break;
-		return null;
+		request.respond(null);
 	}
 	
-	private Variant? handle_action_activate(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_action_activate(Drt.RpcRequest request) throws Drt.RpcError
 	{
 		check_not_empty();
-		string action_name = params.pop_string();
-		Variant? parameter = params.pop_variant();
+		string action_name = request.pop_string();
+		Variant? parameter = request.pop_variant();
 		bool handled = false;
 		foreach (var object in objects)
 			if (handled = object.activate(action_name, parameter))
 				break;
 		
-		return new Variant.boolean(handled);
+		request.respond(new Variant.boolean(handled));
 	}
 	
-	private Variant? handle_list_groups(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_list_groups(Drt.RpcRequest request) throws Drt.RpcError
 	{
 		check_not_empty();
 		var groups_set = new GenericSet<string>(str_hash, str_equal);
@@ -235,13 +235,13 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 		var groups = groups_set.get_values();
 		foreach (var name in groups)
 			builder.add_value(new Variant.string(name));
-		return builder.end();
+		request.respond(builder.end());
 	}
 	
-	private Variant? handle_list_group_actions(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_list_group_actions(Drt.RpcRequest request) throws Drt.RpcError
 	{
 		check_not_empty();
-		var group_name = params.pop_string();
+		var group_name = request.pop_string();
 		var builder = new VariantBuilder(new VariantType("aa{sv}"));
 		foreach (var object in objects)
 		{
@@ -271,7 +271,7 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
 			if (done)
 				break;
 		}
-		return builder.end();
+		request.respond(builder.end());
 	}
 	
 	private void on_custom_action_activated(string name, Variant? parameter)

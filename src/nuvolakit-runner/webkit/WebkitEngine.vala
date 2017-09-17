@@ -401,72 +401,71 @@ public class WebkitEngine : WebEngine
 		return false;
 	}
 	
-	private void register_ipc_handlers()
-	{
+	private void register_ipc_handlers() {
 		assert(ipc_bus != null);
 		var router = ipc_bus.router;
-		router.add_method("/nuvola/core/web-worker-initialized", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		router.add_method("/nuvola/core/web-worker-initialized", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
 			"Notify that the web worker has been initialized.",
 			handle_web_worker_initialized, null);
-		router.add_method("/nuvola/core/web-worker-ready", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		router.add_method("/nuvola/core/web-worker-ready", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
 			"Notify that the web worker is ready.",
 			handle_web_worker_ready, null);
-		router.add_method("/nuvola/core/get-data-dir", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.READABLE,
+		router.add_method("/nuvola/core/get-data-dir", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
 			"Return data directory.",
 			handle_get_data_dir, null);
-		router.add_method("/nuvola/core/get-user-config-dir", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.READABLE,
+		router.add_method("/nuvola/core/get-user-config-dir", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
 			"Return user config directory.",
 			handle_get_user_config_dir, null);
-		router.add_method("/nuvola/core/session-has-key", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.READABLE,
+		router.add_method("/nuvola/core/session-has-key", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
 			"Whether the session has a given key.",
 			handle_session_has_key, {
 			new Drt.StringParam("key", true, false, null, "Session key.")
 		});
-		router.add_method("/nuvola/core/session-get-value", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.READABLE,
+		router.add_method("/nuvola/core/session-get-value", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
 			"Get session value for the given key.",
 			handle_session_get_value, {
 			new Drt.StringParam("key", true, false, null, "Session key.")
 		});
-		router.add_method("/nuvola/core/session-set-value", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		router.add_method("/nuvola/core/session-set-value", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
 			"Set session value for the given key.",
 			handle_session_set_value, {
 			new Drt.StringParam("key", true, false, null, "Session key."),
 			new Drt.VariantParam("value", true, true, null, "Session value.")
 		});
-		router.add_method("/nuvola/core/session-set-default-value", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		router.add_method("/nuvola/core/session-set-default-value", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
 			"Set default session value for the given key.",
 			handle_session_set_default_value, {
 			new Drt.StringParam("key", true, false, null, "Session key."),
 			new Drt.VariantParam("value", true, true, null, "Session value.")
 		});
-		router.add_method("/nuvola/core/config-has-key", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.READABLE,
+		router.add_method("/nuvola/core/config-has-key", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
 			"Whether the config has a given key.",
 			handle_config_has_key, {
 			new Drt.StringParam("key", true, false, null, "Config key.")
 		});
-		router.add_method("/nuvola/core/config-get-value", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.READABLE,
+		router.add_method("/nuvola/core/config-get-value", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
 			"Get config value for the given key.",
 			handle_config_get_value, {
 			new Drt.StringParam("key", true, false, null, "Config key.")
 		});
-		router.add_method("/nuvola/core/config-set-value", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		router.add_method("/nuvola/core/config-set-value", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
 			"Set config value for the given key.",
 			handle_config_set_value, {
 			new Drt.StringParam("key", true, false, null, "Config key."),
 			new Drt.VariantParam("value", true, true, null, "Config value.")
 		});
-		router.add_method("/nuvola/core/config-set-default-value", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		router.add_method("/nuvola/core/config-set-default-value", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
 			"Set default config value for the given key.",
 			handle_config_set_default_value, {
 			new Drt.StringParam("key", true, false, null, "Config key."),
 			new Drt.VariantParam("value", true, true, null, "Config value.")
 		});
-		router.add_method("/nuvola/core/show-error", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		router.add_method("/nuvola/core/show-error", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
 			"Show error message.",
 			handle_show_error, {
 			new Drt.StringParam("text", true, false, null, "Error message.")
 		});
-		router.add_method("/nuvola/browser/download-file-async", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		router.add_method("/nuvola/browser/download-file-async", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
 				"Download file.",
 				handle_download_file_async, {
 				new Drt.StringParam("uri", true, false, null, "File to download."),
@@ -475,121 +474,105 @@ public class WebkitEngine : WebEngine
 			});
 	}
 	
-	private Variant? handle_web_worker_ready(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
-	{
-		if (!web_worker.ready)
+	private void handle_web_worker_ready(Drt.RpcRequest request) throws Drt.RpcError {
+		if (!web_worker.ready) {
 			web_worker.ready = true;
+		}
 		web_worker_ready();
-		return null;
+		request.respond(null);
 	}
 	
-	private Variant? handle_web_worker_initialized(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
-	{
-		var channel = source as Drt.ApiChannel;
+	private void handle_web_worker_initialized(Drt.RpcRequest request) throws Drt.RpcError {
+		var channel = request.connection as Drt.RpcChannel;
 		return_val_if_fail(channel != null, null);
 		ipc_bus.connect_web_worker(channel);
 		Idle.add(web_worker_initialized_cb);
-		return null;
+		request.respond(null);
 	}
 	
-	
-	
-	private Variant? handle_get_data_dir(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
-	{
-		return new Variant.string(web_app.data_dir.get_path());
+	private void handle_get_data_dir(Drt.RpcRequest request) throws Drt.RpcError {
+		request.respond(new Variant.string(web_app.data_dir.get_path()));
 	}
 	
-	private Variant? handle_get_user_config_dir(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
-	{
-		return new Variant.string(storage.config_dir.get_path());
+	private void handle_get_user_config_dir(Drt.RpcRequest request) throws Drt.RpcError {
+		request.respond(new Variant.string(storage.config_dir.get_path()));
 	}
 	
-	private Variant? handle_session_has_key(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
-	{
-		return new Variant.boolean(session.has_key(params.pop_string()));
+	private void handle_session_has_key(Drt.RpcRequest request) throws Drt.RpcError {
+		request.respond(new Variant.boolean(session.has_key(request.pop_string())));
 	}
 	
-	private Variant? handle_session_get_value(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
-	{
-		var response = session.get_value(params.pop_string());
-		if (response == null)
+	private void handle_session_get_value(Drt.RpcRequest request) throws Drt.RpcError {
+		var response = session.get_value(request.pop_string());
+		if (response == null) {
 			response = new Variant("mv", null);
-		return response;
-	}
-	
-	private Variant? handle_session_set_value(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
-	{
-		session.set_value(params.pop_string(), params.pop_variant());
-		return null;
-	}
-	
-	private Variant? handle_session_set_default_value(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
-	{
-		session.set_default_value(params.pop_string(), params.pop_variant());
-		return null;
-	}
-	
-	private Variant? handle_config_has_key(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
-	{
-		return new Variant.boolean(config.has_key(params.pop_string()));
-	}
-	
-	private Variant? handle_config_get_value(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
-	{
-		var response = config.get_value(params.pop_string());
-		if (response == null)
-			response = new Variant("mv", null);
-		return response;
-	}
-	
-	private Variant? handle_config_set_value(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
-	{
-		config.set_value(params.pop_string(), params.pop_variant());
-		return null;
-	}
-	
-	private Variant? handle_config_set_default_value(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
-	{
-		config.set_default_value(params.pop_string(), params.pop_variant());
-		return null;
-	}
-	
-	private Variant? handle_show_error(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
-	{
-		runner_app.show_error("Integration error", params.pop_string());
-		return null;
-	}
-	
-	private void on_call_ipc_method_async(string name, Variant? data)
-	{
-		try
-		{
-			ipc_bus.call_local(name, data);
 		}
-		catch (GLib.Error e)
-		{
+		request.respond(response);
+	}
+	
+	private void handle_session_set_value(Drt.RpcRequest request) throws Drt.RpcError {
+		session.set_value(request.pop_string(), request.pop_variant());
+		request.respond(null);
+	}
+	
+	private void handle_session_set_default_value(Drt.RpcRequest request) throws Drt.RpcError {
+		session.set_default_value(request.pop_string(), request.pop_variant());
+		request.respond(null);
+	}
+	
+	private void handle_config_has_key(Drt.RpcRequest request) throws Drt.RpcError {
+		request.respond(new Variant.boolean(config.has_key(request.pop_string())));
+	}
+	
+	private void handle_config_get_value(Drt.RpcRequest request) throws Drt.RpcError {
+		var response = config.get_value(request.pop_string());
+		if (response == null) {
+			response = new Variant("mv", null);
+		}
+		request.respond(response);
+	}
+	
+	private void handle_config_set_value(Drt.RpcRequest request) throws Drt.RpcError {
+		config.set_value(request.pop_string(), request.pop_variant());
+		request.respond(null);
+	}
+	
+	private void handle_config_set_default_value(Drt.RpcRequest request) throws Drt.RpcError {
+		config.set_default_value(request.pop_string(), request.pop_variant());
+		request.respond(null);
+	}
+	
+	private void handle_show_error(Drt.RpcRequest request) throws Drt.RpcError 	{
+		runner_app.show_error("Integration error", request.pop_string());
+		request.respond(null);
+	}
+	
+	private void on_call_ipc_method_async(string name, Variant? data) {
+		try {
+			ipc_bus.local.call.begin(name, data, (o, res) => {
+				try {
+					ipc_bus.local.call.end(res);	
+				} catch (GLib.Error e) {
+					warning("IPC call error: %s", e.message);
+				}});
+		} catch (GLib.Error e) {
 			critical("Failed to send message '%s'. %s", name, e.message);
 		}
 	}
 	
-	private void on_call_ipc_method_sync(string name, Variant? data, ref Variant? result)
-	{
-		try
-		{
-			result = ipc_bus.call_local(name, data);
-		}
-		catch (GLib.Error e)
-		{
+	private void on_call_ipc_method_sync(string name, Variant? data, ref Variant? result) {
+		try {
+			result = ipc_bus.local.call_sync(name, data);
+		} catch (GLib.Error e) {
 			critical("Failed to send message '%s'. %s", name, e.message);
 			result = null;
 		}
 	}
 	
-	private Variant? handle_download_file_async(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
-	{
-		var uri = params.pop_string();
-		var basename = params.pop_string();
-		var cb_id = params.pop_double();
+	private void handle_download_file_async(Drt.RpcRequest request) throws Drt.RpcError {
+		var uri = request.pop_string();
+		var basename = request.pop_string();
+		var cb_id = request.pop_double();
 
 		var dir = storage.cache_dir.get_child("api-downloads");
 		try
@@ -647,7 +630,7 @@ public class WebkitEngine : WebEngine
 			download.disconnect(handler_ids[1]);
 		});
 		
-		return null;
+		request.respond(null);
 	}
 	
 	private void on_load_changed(WebKit.LoadEvent load_event)

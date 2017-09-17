@@ -27,12 +27,12 @@ namespace Nuvola
 
 public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder
 {
-	private Drt.ApiChannel conn;
+	private Drt.RpcChannel conn;
 	
-	public class ActionsKeyBinderClient(Drt.ApiChannel conn)
+	public class ActionsKeyBinderClient(Drt.RpcChannel conn)
 	{
 		this.conn = conn;
-		conn.api_router.add_method("/nuvola/actionkeybinder/action-activated", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE,
+		conn.router.add_method("/nuvola/actionkeybinder/action-activated", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
 			null, handle_action_activated, {
 			new Drt.StringParam("action", true, false)
 		});
@@ -44,7 +44,7 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder
 		try
 		{
 			var data = conn.call_sync(METHOD, new Variant("(s)", action)); 
-			Drt.MessageListener.check_type_string(data, "ms");
+			Drt.Rpc.check_type_string(data, "ms");
 			string? keybinding = null;
 			data.get("ms", &keybinding);
 			return keybinding;
@@ -62,7 +62,7 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder
 		try
 		{
 			var data = conn.call_sync(METHOD, new Variant("(sms)", action, keybinding)); 
-			Drt.MessageListener.check_type_string(data, "b");
+			Drt.Rpc.check_type_string(data, "b");
 			return data.get_boolean();
 		}
 		catch (GLib.Error e)
@@ -78,7 +78,7 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder
 		try
 		{
 			var data = conn.call_sync(METHOD, new Variant("(s)", action)); 
-			Drt.MessageListener.check_type_string(data, "b");
+			Drt.Rpc.check_type_string(data, "b");
 			return data.get_boolean();
 		}
 		catch (GLib.Error e)
@@ -94,7 +94,7 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder
 		try
 		{
 			var data = conn.call_sync(METHOD, new Variant("(s)", action)); 
-			Drt.MessageListener.check_type_string(data, "b");
+			Drt.Rpc.check_type_string(data, "b");
 			return data.get_boolean();
 		}
 		catch (GLib.Error e)
@@ -110,7 +110,7 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder
 		try
 		{
 			var data = conn.call_sync(METHOD, new Variant("(s)", keybinding)); 
-			Drt.MessageListener.check_type_string(data, "ms");
+			Drt.Rpc.check_type_string(data, "ms");
 			string? action = null;
 			data.get("ms", &action);
 			return action;
@@ -128,7 +128,7 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder
 		try
 		{
 			var data = conn.call_sync(METHOD, new Variant("(s)", keybinding)); 
-			Drt.MessageListener.check_type_string(data, "b");
+			Drt.Rpc.check_type_string(data, "b");
 			return data.get_boolean();
 		}
 		catch (GLib.Error e)
@@ -138,12 +138,12 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder
 		}
 	}
 	
-	private Variant? handle_action_activated(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_action_activated(Drt.RpcRequest request) throws Drt.RpcError
 	{
-		var action = params.pop_string();
+		var action = request.pop_string();
 		var handled = false;
 		action_activated(action, ref handled);
-		return new Variant.boolean(handled);
+		request.respond(new Variant.boolean(handled));
 	}
 }
 

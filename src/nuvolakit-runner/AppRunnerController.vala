@@ -265,7 +265,7 @@ public class AppRunnerController: Drtgtk.Application
 			return false;
 		}
 		
-		ipc_bus.router.add_method(IpcApi.CORE_GET_METADATA, Drt.ApiFlags.READABLE|Drt.ApiFlags.PRIVATE,
+		ipc_bus.router.add_method(IpcApi.CORE_GET_METADATA, Drt.RpcFlags.READABLE|Drt.RpcFlags.PRIVATE,
 			"Get web app metadata.", handle_get_metadata, null);
 		
 		try
@@ -287,12 +287,12 @@ public class AppRunnerController: Drtgtk.Application
 		
 		var storage_client = new Drt.KeyValueStorageClient(ipc_bus.master);
 		master_config = storage_client.get_proxy("master.config");
-		ipc_bus.router.add_method("/nuvola/core/get-component-info", Drt.ApiFlags.READABLE,
+		ipc_bus.router.add_method("/nuvola/core/get-component-info", Drt.RpcFlags.READABLE,
 			"Get info about component.",
 			handle_get_component_info, {
 			new Drt.StringParam("name", true, false, null, "Component name.")
 			});
-		ipc_bus.router.add_method("/nuvola/core/toggle-component-active", Drt.ApiFlags.WRITABLE|Drt.ApiFlags.PRIVATE,
+		ipc_bus.router.add_method("/nuvola/core/toggle-component-active", Drt.RpcFlags.WRITABLE|Drt.RpcFlags.PRIVATE,
 			"Set whether the component is active.",
 			handle_toggle_component_active, {
 			new Drt.StringParam("name", true, false, null, "Component name."),
@@ -714,14 +714,14 @@ public class AppRunnerController: Drtgtk.Application
 		}
 	}
 	
-	private Variant? handle_get_metadata(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_get_metadata(Drt.RpcRequest request) throws Drt.RpcError
 	{
-		return web_app.to_variant();
+		request.respond(web_app.to_variant());
 	}
 	
-	private Variant? handle_get_component_info(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_get_component_info(Drt.RpcRequest request) throws Drt.RpcError
 	{
-		var id = params.pop_string();
+		var id = request.pop_string();
 		if (components != null)
 		{
 			foreach (var component in components)
@@ -733,7 +733,8 @@ public class AppRunnerController: Drtgtk.Application
 					builder.add("{smv}", "found", new Variant.boolean(true));
 					builder.add("{smv}", "loaded", new Variant.boolean(component.enabled));
 					builder.add("{smv}", "active", new Variant.boolean(component.active));
-					return builder.end();
+					request.respond(builder.end());
+					return;
 				}
 			}
 		}
@@ -741,22 +742,24 @@ public class AppRunnerController: Drtgtk.Application
 		builder.add("{smv}", "name", new Variant.string(""));
 		builder.add("{smv}", "found", new Variant.boolean(false));
 		builder.add("{smv}", "loaded", new Variant.boolean(false));
-		return builder.end();
+		request.respond(builder.end());
 	}
 	
-	private Variant? handle_toggle_component_active(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_toggle_component_active(Drt.RpcRequest request) throws Drt.RpcError
 	{
-		var id = params.pop_string();
-		var active = params.pop_bool();
+		var id = request.pop_string();
+		var active = request.pop_bool();
 		if (components != null)
 		{
 			foreach (var component in components)
 			{
-				if (id == component.id)
-					return new Variant.boolean(component.toggle_active(active));
+				if (id == component.id) {
+					request.respond(new Variant.boolean(component.toggle_active(active)));
+					return;
+				}
 			}
 		}
-		return new Variant.boolean(false);
+		request.respond(new Variant.boolean(false));
 	}
 	
 	private void on_action_changed(Drtgtk.Action action, ParamSpec p)
@@ -770,7 +773,7 @@ public class AppRunnerController: Drtgtk.Application
 		}
 		catch (GLib.Error e)
 		{
-			if (e is Drt.MessageError.NOT_READY)
+			if (e is Drt.RpcError.NOT_READY)
 				debug("Communication failed: %s", e.message);
 			else
 				warning("Communication failed: %s", e.message);

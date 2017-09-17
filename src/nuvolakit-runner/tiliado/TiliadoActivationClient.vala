@@ -22,17 +22,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if TILIADO_API
 namespace Nuvola
 {
 
 public class TiliadoActivationClient : GLib.Object, TiliadoActivation
 {
-	private Drt.ApiChannel master_conn;
+	private Drt.RpcChannel master_conn;
 	private TiliadoApi2.User? cached_user = null;
 	private bool cached_user_set = false;
 	
-	public TiliadoActivationClient(Drt.ApiChannel master_conn)
+	public TiliadoActivationClient(Drt.RpcChannel master_conn)
 	{
 		this.master_conn = master_conn;
 		subscribe.begin((o, res) =>
@@ -46,17 +45,17 @@ public class TiliadoActivationClient : GLib.Object, TiliadoActivation
 				warning("Failed to subscribe to notifications. %s", e.message);
 			}
 		});
-		this.master_conn.api_router.notification.connect(on_notification_received);
+		this.master_conn.router.notification.connect(on_notification_received);
 	}
 	
 	~TiliadoActivationClient()
 	{
 		unsubscribe(master_conn);
-		this.master_conn.api_router.notification.disconnect(on_notification_received);
+		this.master_conn.router.notification.disconnect(on_notification_received);
 	}
 	
 	/* Static methods are used not to ref self in destructor which would fail because the ref_cout is already 0. */
-	private static void unsubscribe(Drt.ApiChannel master_conn)
+	private static void unsubscribe(Drt.RpcChannel master_conn)
 	{
 		unsubscribe_async.begin(master_conn, (o, res) =>
 		{
@@ -80,7 +79,7 @@ public class TiliadoActivationClient : GLib.Object, TiliadoActivation
 		yield master_conn.subscribe(TiliadoActivationManager.USER_INFO_UPDATED);
 	}
 	
-	private static async void unsubscribe_async(Drt.ApiChannel master_conn) throws GLib.Error
+	private static async void unsubscribe_async(Drt.RpcChannel master_conn) throws GLib.Error
 	{
 		yield master_conn.unsubscribe(TiliadoActivationManager.ACTIVATION_STARTED);
 		yield master_conn.unsubscribe(TiliadoActivationManager.ACTIVATION_CANCELLED);
@@ -201,4 +200,4 @@ public class TiliadoActivationClient : GLib.Object, TiliadoActivation
 }
 
 } // namespace Nuvola
-#endif
+

@@ -28,24 +28,24 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 	private const string TRACK_POSITION_CHANGED = "track-position-changed";
 	private const string VOLUME_CHANGED = "volume-changed";
 	
-	public MediaPlayerBinding(Drt.ApiRouter router, WebWorker web_worker, MediaPlayerModel model)
+	public MediaPlayerBinding(Drt.RpcRouter router, WebWorker web_worker, MediaPlayerModel model)
 	{
 		base(router, web_worker, "Nuvola.MediaPlayer", model);
 	}
 	
 	protected override void bind_methods()
 	{
-		bind("get-flag", Drt.ApiFlags.READABLE,
+		bind("get-flag", Drt.RpcFlags.READABLE,
 			"Returns boolean state of a particular flag or null if no such flag has been found.",
 			handle_get_flag, {
 			new Drt.StringParam("name", true, false, null, "Flag name, e.g. can-go-next, can-go-previous, can-play, can-pause, can-stop, can-rate"),
 		});
-		bind("set-flag", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE, null, handle_set_flag, {
+		bind("set-flag", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE, null, handle_set_flag, {
 			new Drt.StringParam("name", true, false),
 			new Drt.BoolParam("state", true),
 
 		});
-		bind("set-track-info", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE, null, handle_set_track_info, {
+		bind("set-track-info", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE, null, handle_set_track_info, {
 			new Drt.StringParam("title", false, true),
 			new Drt.StringParam("artist", false, true),
 			new Drt.StringParam("album", false, true),
@@ -56,54 +56,54 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 			new Drt.DoubleParam("length", false, 0.0),
 			new Drt.StringArrayParam("playbackActions", false),
 		});
-		bind("set-track-position", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE, null, handle_set_track_position, {
+		bind("set-track-position", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE, null, handle_set_track_position, {
 			new Drt.DoubleParam("position", false, 0.0)
 
 		});
-		bind("update-volume", Drt.ApiFlags.PRIVATE|Drt.ApiFlags.WRITABLE, null, handle_update_volume, {
+		bind("update-volume", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE, null, handle_update_volume, {
 			new Drt.DoubleParam("volume", false, 1.0)
 
 		});
-		bind("track-info", Drt.ApiFlags.READABLE, "Returns information about currently playing track.",
+		bind("track-info", Drt.RpcFlags.READABLE, "Returns information about currently playing track.",
 			handle_get_track_info, null);
-		bind("volume", Drt.ApiFlags.READABLE, "Returns information about current volume.",
+		bind("volume", Drt.RpcFlags.READABLE, "Returns information about current volume.",
 			handle_get_volume, null);
-		bind("track-position", Drt.ApiFlags.READABLE, "Returns information about current track position.",
+		bind("track-position", Drt.RpcFlags.READABLE, "Returns information about current track position.",
 			handle_get_track_position, null);
-		add_notification(TRACK_INFO_CHANGED, Drt.ApiFlags.WRITABLE|Drt.ApiFlags.SUBSCRIBE,
+		add_notification(TRACK_INFO_CHANGED, Drt.RpcFlags.WRITABLE|Drt.RpcFlags.SUBSCRIBE,
 			"Sends a notification when track info is changed.");
-		add_notification(TRACK_POSITION_CHANGED, Drt.ApiFlags.WRITABLE|Drt.ApiFlags.SUBSCRIBE,
+		add_notification(TRACK_POSITION_CHANGED, Drt.RpcFlags.WRITABLE|Drt.RpcFlags.SUBSCRIBE,
 			"Sends a notification when track position is changed.");
-		add_notification(VOLUME_CHANGED, Drt.ApiFlags.WRITABLE|Drt.ApiFlags.SUBSCRIBE,
+		add_notification(VOLUME_CHANGED, Drt.RpcFlags.WRITABLE|Drt.RpcFlags.SUBSCRIBE,
 			"Sends a notification when volume is changed.");
 		model.set_rating.connect(on_set_rating);
 	}
 	
-	private Variant? handle_set_track_info(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_set_track_info(Drt.RpcRequest request) throws Drt.RpcError
 	{
 		check_not_empty();
-		var title = params.pop_string();
-		var artist = params.pop_string();
-		var album = params.pop_string();
-		var state = params.pop_string();
-		var artwork_location = params.pop_string();
-		var artwork_file = params.pop_string();
-		var rating = params.pop_double();
-		var length = params.pop_double();
+		var title = request.pop_string();
+		var artist = request.pop_string();
+		var album = request.pop_string();
+		var state = request.pop_string();
+		var artwork_location = request.pop_string();
+		var artwork_file = request.pop_string();
+		var rating = request.pop_double();
+		var length = request.pop_double();
 		model.set_track_info(title, artist, album, state, artwork_location, artwork_file, rating, (int64) length);
 		
 		SList<string> playback_actions = null;
-		var actions = params.pop_strv();
+		var actions = request.pop_strv();
 		foreach (var action in actions)
 			playback_actions.prepend(action);
 		playback_actions.reverse();
 		model.playback_actions = (owned) playback_actions;
 		
 		emit(TRACK_INFO_CHANGED);		
-		return new Variant.boolean(true);
+		request.respond(new Variant.boolean(true));
 	}
 	
-	private Variant? handle_get_track_info(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_get_track_info(Drt.RpcRequest request) throws Drt.RpcError
 	{
 		check_not_empty();
 		var builder = new VariantBuilder(new VariantType("a{smv}"));
@@ -114,44 +114,44 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 		builder.add("{smv}", "artworkLocation", Drt.new_variant_string_or_null(model.artwork_location));
 		builder.add("{smv}", "artworkFile", Drt.new_variant_string_or_null(model.artwork_file));
 		builder.add("{smv}", "rating", new Variant.double(model.rating));
-		return builder.end();
+		request.respond(builder.end());
 	}
 	
-	private Variant? handle_set_track_position(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_set_track_position(Drt.RpcRequest request) throws Drt.RpcError
 	{
 		check_not_empty();
-		var position = params.pop_double();
+		var position = request.pop_double();
 		model.track_position = (int64) position;
 		emit(TRACK_POSITION_CHANGED);
-		return new Variant.boolean(true);
+		request.respond(new Variant.boolean(true));
 	}
 	
-	private Variant? handle_get_track_position(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_get_track_position(Drt.RpcRequest request) throws Drt.RpcError
 	{
 		check_not_empty();
-		return new Variant.double((double) model.track_position);
+		request.respond(new Variant.double((double) model.track_position));
 	}
 	
-	private Variant? handle_update_volume(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_update_volume(Drt.RpcRequest request) throws Drt.RpcError
 	{
 		check_not_empty();
-		var volume = params.pop_double();
+		var volume = request.pop_double();
 		model.volume = volume;
 		emit(VOLUME_CHANGED);
-		return new Variant.boolean(true);
+		request.respond(new Variant.boolean(true));
 	}
 	
-	private Variant? handle_get_volume(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_get_volume(Drt.RpcRequest request) throws Drt.RpcError
 	{
 		check_not_empty();
-		return new Variant.double(model.volume);
+		request.respond(new Variant.double(model.volume));
 	}
 	
-	private Variant? handle_set_flag(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_set_flag(Drt.RpcRequest request) throws Drt.RpcError
 	{
 		check_not_empty();
-		var name = params.pop_string();
-		var state = params.pop_bool();
+		var name = request.pop_string();
+		var state = request.pop_bool();
 		bool handled = false;
 		switch (name)
 		{
@@ -172,13 +172,13 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 			warning("Unknown flag '%s'", name);
 			break;
 		}
-		return new Variant.boolean(handled);
+		request.respond(new Variant.boolean(handled));
 	}
 	
-	private Variant? handle_get_flag(GLib.Object source, Drt.ApiParams? params) throws Drt.MessageError
+	private void handle_get_flag(Drt.RpcRequest request) throws Drt.RpcError
 	{
 		check_not_empty();
-		var name = params.pop_string();
+		var name = request.pop_string();
 		switch (name)
 		{
 		case "can-go-next":
@@ -191,10 +191,12 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
 		case "can-change-volume":
 			GLib.Value value = GLib.Value(typeof(bool));
 			model.@get_property(name, ref value);
-			return new Variant.boolean(value.get_boolean());
+			request.respond(new Variant.boolean(value.get_boolean()));
+			break;
 		default:
 			warning("Unknown flag '%s'", name);
-			return null;
+			request.respond(null);
+			break;
 		}
 	}
 	

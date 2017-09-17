@@ -56,7 +56,8 @@ public void webkit_web_extension_initialize_with_user_data(WebKit.WebExtension e
 	var worker_data = Drt.variant_to_hashtable(data);
 	try
 	{
-		var channel = new Drt.ApiChannel.from_name(0, worker_data["RUNNER_BUS_NAME"].dup_string(), worker_data["NUVOLA_API_ROUTER_TOKEN"].dup_string(), 5000);
+		var channel = new Drt.RpcChannel.from_name(0, worker_data["RUNNER_BUS_NAME"].dup_string(), null,
+			worker_data["NUVOLA_API_ROUTER_TOKEN"].dup_string(), 5000);
 		Nuvola.extension = new Nuvola.WebExtension(extension, channel, worker_data); 
 	}
 	catch (GLib.Error e)
