@@ -230,6 +230,7 @@ Actions.updateEnabledFlags = function(enabledFlags)
 /**
  * Get current state of toggle or radio actions.
  * 
+ * @deprecated since Nuvola 4.8. Use async variant instead.
  * @param String name    action name
  * @return current state: ``true/false`` for toggle actions, one of stateId entries of radio actions
  * 
@@ -241,9 +242,31 @@ Actions.updateEnabledFlags = function(enabledFlags)
  * console.log("Number of stars: " + stars);
  * ```
  */
-Actions.getState = function(name)
-{
+Actions.getState = function(name) {
+    Nuvola.log("Actions.getState is deprecated since Nuvola 4.8. Use async variant instead.");
     return Nuvola._callIpcMethodSync("/nuvola/actions/get-state", [name]);
+}
+
+/**
+ * Get current state of toggle or radio actions.
+ * 
+ * @since Nuvola 4.8
+ * @async
+ * @param String name    action name
+ * @return current state: ``true/false`` for toggle actions, one of stateId entries of radio actions
+ * 
+ * ```
+ * Nuvola.actions.getStateAsync("thumbs-up").then(function(state) {
+ *     console.log("Thumbs up is toggled " + (state ? "on" : "off"));
+ * });
+ * 
+ * Nuvola.actions.getStateAsync("rating").then(function(stars) {
+ *     console.log("Number of stars: " + stars);
+ * });
+ * ```
+ */
+Actions.getStateAsync = function(name) {
+    return Nuvola.Async.call("/nuvola/actions/get-state", [name]);
 }
 
 /**
