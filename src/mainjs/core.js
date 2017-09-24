@@ -208,24 +208,52 @@ Core.$init = function()
 /**
  * Returns information about a component
  * 
- * @param id ide of the component
+ * @deprecated since Nuvola 4.8. Use async variant instead.
+ * @param id id of the component
  * @return Object component info
  */
-Core.getComponentInfo = function(id)
-{
+Core.getComponentInfo = function(id) {
+    Nuvola.log("Core.getComponentInfo is deprecated since Nuvola 4.8. Use async variant instead.");
     return Nuvola._callIpcMethodSync("/nuvola/core/get-component-info", [id + ""]);
+}
+
+/**
+ * Returns information about a component
+ * 
+ * @since Nuvola 4.8
+ * @async
+ * @param id id of the component
+ * @return Object component info
+ */
+Core.getComponentInfoAsync = function(id) {
+    return Nuvola.Async.call("/nuvola/core/get-component-info", [id + ""]);
 }
 
 /**
  * Returns whether a component is loaded
  * 
+ * @deprecated since Nuvola 4.8. Use async variant instead.
  * @param id    id of the component
  * @return Boolean true if the component is loaded
  */
-Core.isComponentLoaded = function(id)
-{
+Core.isComponentLoaded = function(id) {
+    Nuvola.log("Core.isComponentLoaded is deprecated since Nuvola 4.8. Use async variant instead.");
     var info = this.getComponentInfo(id);
     return info.loaded;
+}
+
+/**
+ * Returns whether a component is loaded
+ * 
+ * @since Nuvola 4.8
+ * @async
+ * @param id    id of the component
+ * @return Boolean true if the component is loaded
+ */
+Core.isComponentLoadedAsync = function(id) {
+    return this.getComponentInfoAsync(id).then(function(info) {
+        return Promise.resolve(info.loaded);
+    });
 }
 
 /**
@@ -246,13 +274,28 @@ Core.toggleComponentActive = function(id, active)
 /**
  * Returns whether a component is loaded and active
  * 
+ * @deprecated since Nuvola 4.8. Use async variant instead.
  * @param id    id of the component
  * @return Boolean true if the component is active
  */
-Core.isComponentActive = function(id)
-{
+Core.isComponentActive = function(id) {
+    Nuvola.log("Core.isComponentActive is deprecated since Nuvola 4.8. Use async variant instead.");
     var info = this.getComponentInfo(id);
     return info.active;
+}
+
+/**
+ * Returns whether a component is loaded and active
+ * 
+ * @since Nuvola 4.8
+ * @async
+ * @param id    id of the component
+ * @return Boolean true if the component is active
+ */
+Core.isComponentActiveAsync = function(id) {
+    return this.getComponentInfoAsync(id).then(function(info) {
+        return Promise.resolve(info.active);
+    });
 }
 
 // export public items
