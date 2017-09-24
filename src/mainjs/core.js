@@ -263,11 +263,11 @@ Core.isComponentLoadedAsync = function(id) {
  * 
  * @param id id of the component
  * @param Boolean active whether to activate or deactivate the component
- * @return Boolean true if the component has been activated or deactivated
+ * @return Boolean true (since Nuvola 4.8)
  */
-Core.toggleComponentActive = function(id, active)
-{
-    return Nuvola._callIpcMethodSync("/nuvola/core/toggle-component-active", [id + "", !!active]);
+Core.toggleComponentActive = function(id, active) {
+    Nuvola._callIpcMethodVoid("/nuvola/core/toggle-component-active", [id + "", !!active]);
+    return true;
 }
 
 
