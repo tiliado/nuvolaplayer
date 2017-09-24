@@ -564,10 +564,15 @@ MediaPlayer._updateNotification = function()
     }
 }
 
-MediaPlayer._showNotification = function()
-{
-    if (this._notification && (this._state === PlaybackState.PLAYING || Nuvola.notifications.isPersistenceSupported()))
-        this._notification.show();
+MediaPlayer._showNotification = function() {
+    if (this._notification) {
+        var that = this;
+        Nuvola.notifications.isPersistenceSupportedAsync().then(function(supported) {
+            if (that._state === PlaybackState.PLAYING || supported) {
+                that._notification.show();
+            }
+        });
+    }
 }
 
 MediaPlayer._updateMenu = function()

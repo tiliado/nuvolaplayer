@@ -23,6 +23,7 @@
  */
 
 require("prototype");
+require("async");
 
 /**
  * Desktop notification.
@@ -111,11 +112,23 @@ Notifications.getNamedNotification = function(name, resident, category)
 /**
  * Check whether persistence is supported
  * 
+ * @deprecated since Nuvola 4.8. Use async variant instead.
  * @return Boolean true if persistence is supported
  */
-Notifications.isPersistenceSupported = function()
-{
+Notifications.isPersistenceSupported = function() {
+    Nuvola.log("Notifications.isPersistenceSupported is deprecated since Nuvola 4.8. Use async variant instead.");
     return Nuvola._callIpcMethodSync("/nuvola/notifications/is-persistence-supported");
+}
+
+/**
+ * Check whether persistence is supported
+ * 
+ * @since Nuvola 4.8
+ * @async 
+ * @return Boolean true if persistence is supported
+ */
+Notifications.isPersistenceSupportedAsync = function() {
+    return Nuvola.Async.call("/nuvola/notifications/is-persistence-supported");
 }
 
 /**
