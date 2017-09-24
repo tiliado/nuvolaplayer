@@ -350,14 +350,8 @@ Actions.activate = function(name, parameter)
  */
 Actions.bindButton = function(button, name, parameter) {
     this.buttons[name] = button;
-    this.isEnabledAsync(name).then(function(enabled) {
-        button.disabled = !enabled;
-    });
-    
-    var that = this;
-    button.addEventListener('click', function() {
-        that.activate(name, parameter);
-    });
+    this.isEnabledAsync(name).then((enabled) => {button.disabled = !enabled});
+    button.addEventListener('click', () => this.activate(name, parameter));
 }
 
 Actions._onActionEnabledChanged = function(object, name, enabled)

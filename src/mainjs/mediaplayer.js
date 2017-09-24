@@ -422,7 +422,6 @@ MediaPlayer.addExtraActions = function(actions)
 }
 
 MediaPlayer._onInitAppRunner = function(emitter) {
-    var that = this;
     this._appRunner = true;
     Nuvola.launcher.setActions(["quit"]);
     Nuvola.actions.addAction("playback", "win", PlayerAction.PLAY, "Play", null, "media-playback-start", null);
@@ -438,9 +437,7 @@ MediaPlayer._onInitAppRunner = function(emitter) {
     
     Nuvola.core.connect("ComponentLoaded", this);
     Nuvola.core.connect("ComponentUnloaded", this);
-    Nuvola.core.isComponentLoadedAsync(COMPONENT_NOTIFICATIONS).then(function (loaded) {
-        that._toggleNotifications(loaded);
-    });
+    Nuvola.core.isComponentLoadedAsync(COMPONENT_NOTIFICATIONS).then((loaded) => this._toggleNotifications(loaded));
     for (var i = 0; i < COMPONENTS_TO_ACTIVATE.length; i++) {
         this._activateComponent(COMPONENTS_TO_ACTIVATE[i]);
     }
@@ -454,7 +451,6 @@ MediaPlayer._onInitAppRunner = function(emitter) {
 }
 
 MediaPlayer._onInitWebWorker = function(emitter) {
-    var that = this;
     Nuvola.mediaKeys.connect("MediaKeyPressed", this);
     Nuvola.actions.connect("ActionActivated", this);
     Nuvola.core.connect("QuitRequest", this);
@@ -470,9 +466,7 @@ MediaPlayer._onInitWebWorker = function(emitter) {
     
     Nuvola.core.connect("ComponentLoaded", this);
     Nuvola.core.connect("ComponentUnloaded", this);
-    Nuvola.core.isComponentLoadedAsync(COMPONENT_NOTIFICATIONS).then(function (loaded) {
-        that._toggleNotifications(loaded);
-    });
+    Nuvola.core.isComponentLoadedAsync(COMPONENT_NOTIFICATIONS).then((loaded) => this._toggleNotifications(loaded));
 }
 
 MediaPlayer._onActionActivated = function(emitter, name, param)
@@ -570,10 +564,9 @@ MediaPlayer._updateNotification = function()
 
 MediaPlayer._showNotification = function() {
     if (this._notification) {
-        var that = this;
-        Nuvola.notifications.isPersistenceSupportedAsync().then(function(supported) {
-            if (that._state === PlaybackState.PLAYING || supported) {
-                that._notification.show();
+        Nuvola.notifications.isPersistenceSupportedAsync().then((supported) => {
+            if (this._state === PlaybackState.PLAYING || supported) {
+                this._notification.show();
             }
         });
     }
