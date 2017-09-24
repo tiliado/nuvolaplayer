@@ -163,11 +163,24 @@ Actions._onActionActivated = function(arg1, action)
  * Checks whether action is enabled
  * 
  * @param String name    action name
+ * @deprecated since Nuvola 4.8. Use async variant instead.
  * @return true is action is enabled, false otherwise
  */
-Actions.isEnabled = function(name)
-{
+Actions.isEnabled = function(name) {
+    Nuvola.log("Actions.isEnabled is deprecated since Nuvola 4.8. Use async variant instead.");
     return Nuvola._callIpcMethodSync("/nuvola/actions/is-enabled", [name]);
+}
+
+/**
+ * Checks whether action is enabled
+ * 
+ * @since Nuvola 4.8
+ * @async
+ * @param String name    action name
+ * @return true is action is enabled, false otherwise
+ */
+Actions.isEnabledAsync = function(name) {
+    return Nuvola.Async.call("/nuvola/actions/is-enabled", [name]);
 }
 
 /**
@@ -312,14 +325,14 @@ Actions.activate = function(name, parameter)
  * Nuvola.actions.bindButton(navigateBack, Nuvola.BrowserAction.GO_BACK);
  * ```
  */
-Actions.bindButton = function(button, name, parameter)
-{
+Actions.bindButton = function(button, name, parameter) {
     this.buttons[name] = button;
-    button.disabled = !this.isEnabled(name);
+    this.isEnabledAsync(name).then(function(enabled) {
+        button.disabled = !enabled;
+    });
     
     var that = this;
-    button.addEventListener('click', function()
-    {
+    button.addEventListener('click', function() {
         that.activate(name, parameter);
     });
 }
