@@ -97,6 +97,7 @@ public class WebExtension: GLib.Object
 			new KeyValueProxy(channel, "session"), webkit_version, libsoup_version);
 		js_api.call_ipc_method_void.connect(on_call_ipc_method_void);
 		js_api.call_ipc_method_sync.connect(on_call_ipc_method_sync);
+		js_api.call_ipc_method_async.connect(on_call_ipc_method_async);
 		
 		channel.call.begin("/nuvola/core/web-worker-initialized", null, (o, res) =>
 		{
@@ -236,6 +237,17 @@ public class WebExtension: GLib.Object
 				channel.call.end(res);
 			} catch (GLib.Error e) {
 				critical("Failed to send message '%s'. %s", name, e.message);
+			}
+		});
+	}
+	
+	private void on_call_ipc_method_async(JSApi js_api, string name, Variant? data, int id) {
+		channel.call.begin(name, data, (o, res) => {
+			try {
+				var response = channel.call.end(res);
+				js_api.send_async_response(id, response, null);
+			} catch (GLib.Error e) {
+				js_api.send_async_response(id, null, e);
 			}
 		});
 	}

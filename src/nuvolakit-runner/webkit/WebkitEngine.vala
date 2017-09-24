@@ -123,6 +123,7 @@ public class WebkitEngine : WebEngine
 				runner_app.storage, web_app.data_dir, storage.config_dir, config, session, webkit_version, libsoup_version);
 			api.call_ipc_method_void.connect(on_call_ipc_method_void);
 			api.call_ipc_method_sync.connect(on_call_ipc_method_sync);
+			api.call_ipc_method_async.connect(on_call_ipc_method_async);
 			try
 			{
 				api.inject(env);
@@ -554,6 +555,20 @@ public class WebkitEngine : WebEngine
 					ipc_bus.local.call.end(res);	
 				} catch (GLib.Error e) {
 					warning("IPC call error: %s", e.message);
+				}});
+		} catch (GLib.Error e) {
+			critical("Failed to send message '%s'. %s", name, e.message);
+		}
+	}
+	
+	private void on_call_ipc_method_async(JSApi js_api, string name, Variant? data, int id) {
+		try {
+			ipc_bus.local.call.begin(name, data, (o, res) => {
+				try {
+					var response = ipc_bus.local.call.end(res);
+					js_api.send_async_response(id, response, null);
+				} catch (GLib.Error e) {
+					js_api.send_async_response(id, null, e);
 				}});
 		} catch (GLib.Error e) {
 			critical("Failed to send message '%s'. %s", name, e.message);

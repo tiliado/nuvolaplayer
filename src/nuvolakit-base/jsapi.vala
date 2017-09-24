@@ -106,6 +106,7 @@ public class JSApi : GLib.Object
 	private Drt.KeyValueStorage[] key_value_storages;
 	private uint[] webkit_version;
 	private uint[] libsoup_version;
+	private unowned JsEnvironment? env = null;
 	
 	public JSApi(Drt.Storage storage, File data_dir, File config_dir, Drt.KeyValueStorage config,
 	Drt.KeyValueStorage session, uint[] webkit_version, uint[] libsoup_version)
@@ -136,6 +137,16 @@ public class JSApi : GLib.Object
 	
 	public signal void call_ipc_method_void(string name, Variant? data);
 	public signal void call_ipc_method_sync(string name, Variant? data, ref Variant? result);
+	public signal void call_ipc_method_async(string name, Variant? data, int id);
+	
+	public void send_async_response(int id, Variant? response, GLib.Error? error) {
+		if (this.env != null) {
+			var args = new Variant("(imvmv)", (int32) id, response,
+				error == null ? null : new Variant.string(error.message));
+			g_variant_ref(args);
+			env.call_function("Nuvola.Async.respond", ref args);
+		}
+	}
 	
 	/**
 	 * Creates the main object and injects it to the JavaScript context
@@ -144,6 +155,7 @@ public class JSApi : GLib.Object
 	 */
 	public void inject(JsEnvironment env) throws JSError
 	{
+		this.env = null;
 		unowned JS.Context ctx = env.context;
 		if (klass == null)
 			create_class();
@@ -212,6 +224,7 @@ public class JSApi : GLib.Object
 		
 		unowned JS.Value meta = object_from_JSON(ctx, meta_json_data);
 		env.main_object.set_property(ctx, new JS.String(META_PROPERTY), meta);
+		this.env = env;
 	}
 	
 	public void initialize(JsEnvironment env) throws JSError
@@ -243,6 +256,7 @@ public class JSApi : GLib.Object
 	{
 		{"_callIpcMethodVoid", call_ipc_method_void_func, 0},
 		{"_callIpcMethodSync", call_ipc_method_sync_func, 0},
+		{"_callIpcMethodAsync", call_ipc_method_async_func, 0},
 		{"_keyValueStorageHasKey", key_value_storage_has_key_func, 0},
 		{"_keyValueStorageGetValue", key_value_storage_get_value_func, 0},
 		{"_keyValueStorageSetValue", key_value_storage_set_value_func, 0},
@@ -291,6 +305,11 @@ public class JSApi : GLib.Object
 		return call_ipc_method_func(ctx, function, self, args, out exception, JsFuncCallType.SYNC);
 	}
 	
+	static unowned JS.Value call_ipc_method_async_func(Context ctx, JS.Object function, JS.Object self,
+	JS.Value[] args, out unowned JS.Value exception) {
+		return call_ipc_method_func(ctx, function, self, args, out exception, JsFuncCallType.ASYNC);
+	}
+	
 	static unowned JS.Value call_ipc_method_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args,
 	out unowned JS.Value exception, JsFuncCallType type) {
 		unowned JS.Value undefined = JS.Value.undefined(ctx);
@@ -316,7 +335,7 @@ public class JSApi : GLib.Object
 		}
 		
 		Variant? data = null;
-		if (args.length > 1) {
+		if (args.length > 1 && !args[1].is_null(ctx)) {
 			try {
 				data = variant_from_value(ctx, args[1]);
 			} catch (JSError e) {
@@ -327,6 +346,22 @@ public class JSApi : GLib.Object
 		switch (type) {
 		case JsFuncCallType.VOID:
 			Drt.EventLoop.add_idle(() => {js_api.call_ipc_method_void(name, data); return false;});
+			return undefined;
+		case JsFuncCallType.ASYNC:
+			int id = -1;
+			if (args.length > 2) {
+				try {
+					id = (int) Drt.variant_to_double(variant_from_value(ctx, args[2]));
+				} catch (JSError e) {
+					exception = create_exception(ctx, "Argument %d: %s".printf(2, e.message));
+					return undefined;
+				}
+			}
+			if (id <= 0) {
+				exception = create_exception(ctx, "Argument %d: Integer expected (%d).".printf(2, id));
+				return undefined;
+			}
+			Drt.EventLoop.add_idle(() => {js_api.call_ipc_method_async(name, data, id); return false;});
 			return undefined;
 		case JsFuncCallType.SYNC:
 			Variant? result = null;
@@ -573,8 +608,12 @@ public class JSApi : GLib.Object
 	
 	private enum JsFuncCallType {
 		VOID,
-		SYNC;
+		SYNC,
+		ASYNC;
 	}
 }
 
 } // namespace Nuvola
+
+// FIXME
+private extern Variant* g_variant_ref(Variant* variant);
