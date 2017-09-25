@@ -27,7 +27,8 @@ Async.nextPromiseId = 1;
 Async.promises = {}
 Async.MAX_PROMISE_ID = 32767;
 
-Async.add = function (ctx) {
+Async.begin = function (func) {
+	var ctx = {};
 	while (this.promises[this.nextPromiseId]) {
 		if (this.nextPromiseId === this.MAX_PROMISE_ID) {
 			this.nextPromiseId = 1;
@@ -36,15 +37,19 @@ Async.add = function (ctx) {
 		}
 	}
 	this.promises[this.nextPromiseId] = ctx;
-	return this.nextPromiseId;
+	ctx.id = this.nextPromiseId;
+	ctx.promise = new Promise(function(resolve, reject){ctx.resolve = resolve; ctx.reject = reject;});
+	try {
+		func(ctx);
+	} catch (error) {
+		ctx.reject(error);
+		delete this.promises[ctx.id];
+	}
+	return ctx.promise;
 }
 
 Async.call = function(path, params) {
-	var ctx = {};
-	ctx.promise = new Promise(function(resolve, reject){ctx.resolve = resolve; ctx.reject = reject;});
-	ctx.id = this.add(ctx);
-	Nuvola._callIpcMethodAsync(path, params || null, ctx.id);
-	return ctx.promise;
+	return this.begin((ctx) => Nuvola._callIpcMethodAsync(path, params || null, ctx.id));
 }
 
 Async.respond = function(id, response, error) {
