@@ -54,6 +54,19 @@ public class KeyValueProxy: GLib.Object, Drt.KeyValueStorage
 		return false;
 	}
 	
+	public async bool has_key_async(string key) {
+		try {
+			var response = yield channel.call("/nuvola/core/" + prefix + "-has-key", new Variant("(s)", key));
+			if (response.is_of_type(VariantType.BOOLEAN)) {
+				return response.get_boolean();
+			}
+			critical("Invalid response to KeyValueProxy.has_key: %s", response.print(false));
+		} catch (GLib.Error e) {
+			critical("Master client error: %s", e.message);
+		}
+		return false;
+	}
+	
 	public Variant? get_value(string key)
 	{
 		try
@@ -63,6 +76,15 @@ public class KeyValueProxy: GLib.Object, Drt.KeyValueStorage
 		}
 		catch (GLib.Error e)
 		{
+			critical("Master client error: %s", e.message);
+			return null;
+		}
+	}
+	
+	public async Variant? get_value_async(string key) {
+		try	{
+			return yield channel.call("/nuvola/core/"+ prefix + "-get-value", new Variant("(s)", key));
+		} catch (GLib.Error e) {
 			critical("Master client error: %s", e.message);
 			return null;
 		}
@@ -80,6 +102,14 @@ public class KeyValueProxy: GLib.Object, Drt.KeyValueStorage
 		}
 	}
 	
+	protected async void set_value_unboxed_async(string key, Variant? value) {
+		try {
+			yield channel.call("/nuvola/core/" + prefix + "-set-value", new Variant("(smv)", key, value));
+		} catch (GLib.Error e) {
+			critical("Master client error: %s", e.message);
+		}
+	}
+	
 	protected void set_default_value_unboxed(string key, Variant? value)
 	{
 		try
@@ -92,9 +122,22 @@ public class KeyValueProxy: GLib.Object, Drt.KeyValueStorage
 		}
 	}
 	
+	protected async void set_default_value_unboxed_async(string key, Variant? value) {
+		try {
+			yield channel.call("/nuvola/core/" + prefix + "-set-default-value", new Variant("(smv)", key, value));
+		} catch (GLib.Error e) {
+			critical("Master client error: %s", e.message);
+		}
+	}
+	
 	public void unset(string key)
 	{
 		warn_if_reached(); // FIXME
+	}
+	
+	public async void unset_async(string key) {
+		warn_if_reached(); // FIXME
+		yield Drt.EventLoop.resume_later();
 	}
 }
 

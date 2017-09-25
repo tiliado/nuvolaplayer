@@ -265,6 +265,31 @@ public class Config : GLib.Object, Drt.KeyValueStorage
 		}
 		return false;
 	}
+	
+	public async bool has_key_async(string key) {
+		yield Drt.EventLoop.resume_later();
+		return has_key(key);
+	}
+	
+	public async Variant? get_value_async(string key) {
+		yield Drt.EventLoop.resume_later();
+		return get_value(key);
+	}
+	
+	public async void unset_async(string key) {
+		unset(key);
+		yield Drt.EventLoop.resume_later();
+	}
+	
+	protected async void set_value_unboxed_async(string key, Variant? value) {
+		set_value_unboxed(key, value);
+		yield Drt.EventLoop.resume_later();
+	}
+	
+	protected async void set_default_value_unboxed_async(string key, Variant? value) {
+		set_default_value_unboxed(key, value);
+		yield Drt.EventLoop.resume_later();
+	}
 }
 
 } // namespace Nuvola
