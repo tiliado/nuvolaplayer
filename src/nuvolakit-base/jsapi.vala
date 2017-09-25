@@ -257,10 +257,14 @@ public class JSApi : GLib.Object
 		{"_callIpcMethodVoid", call_ipc_method_void_func, 0},
 		{"_callIpcMethodSync", call_ipc_method_sync_func, 0},
 		{"_callIpcMethodAsync", call_ipc_method_async_func, 0},
-		{"_keyValueStorageHasKey", key_value_storage_has_key_func, 0},
-		{"_keyValueStorageGetValue", key_value_storage_get_value_func, 0},
-		{"_keyValueStorageSetValue", key_value_storage_set_value_func, 0},
-		{"_keyValueStorageSetDefaultValue", key_value_storage_set_default_value_func, 0},
+		{"_keyValueStorageHasKey", key_value_storage_has_key_sync_func, 0},
+		{"_keyValueStorageGetValue", key_value_storage_get_value_sync_func, 0},
+		{"_keyValueStorageSetValue", key_value_storage_set_value_sync_func, 0},
+		{"_keyValueStorageSetDefaultValue", key_value_storage_set_default_value_sync_func, 0},
+		{"_keyValueStorageHasKeyAsync", key_value_storage_has_key_async_func, 0},
+		{"_keyValueStorageGetValueAsync", key_value_storage_get_value_async_func, 0},
+		{"_keyValueStorageSetValueAsync", key_value_storage_set_value_async_func, 0},
+		{"_keyValueStorageSetDefaultValueAsync", key_value_storage_set_default_value_async_func, 0},
 		{"_log", log_func, 0},
 		{"_warn", warn_func, 0},
 		{null, null, 0}
@@ -377,184 +381,235 @@ public class JSApi : GLib.Object
 		}
 	}
 	
-	static unowned JS.Value key_value_storage_has_key_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)
-	{
+	static unowned JS.Value key_value_storage_has_key_sync_func(Context ctx, JS.Object function, JS.Object self,
+	JS.Value[] args, out unowned JS.Value exception) {
+		return key_value_storage_has_key_func(ctx, function, self, args, out exception, JsFuncCallType.SYNC);	
+	}
+	
+	static unowned JS.Value key_value_storage_has_key_async_func(Context ctx, JS.Object function, JS.Object self,
+	JS.Value[] args, out unowned JS.Value exception) {
+		return key_value_storage_has_key_func(ctx, function, self, args, out exception, JsFuncCallType.ASYNC);	
+	}
+	
+	static unowned JS.Value key_value_storage_has_key_func(Context ctx, JS.Object function, JS.Object self,
+	JS.Value[] args, out unowned JS.Value exception,  JsFuncCallType type) {
 		unowned JS.Value _false = JS.Value.boolean(ctx, false);
 		exception = null;
-		if (args.length != 2)
-		{
+		if (args.length != (type == JsFuncCallType.ASYNC ? 3 : 2)) {
 			exception = create_exception(ctx, "Two arguments required.");
 			return _false;
 		}
-		
-		if (!args[0].is_number(ctx))
-		{
+		if (!args[0].is_number(ctx)) {
 			exception = create_exception(ctx, "Argument 0 must be a number.");
 			return _false;
 		}
-		
-		int index = (int) args[0].to_number(ctx);
-		
+		int index = (int) args[0].to_number(ctx);		
 		var key = string_or_null(ctx, args[1]);
-		if (key == null)
-		{
+		if (key == null) {
 			exception = create_exception(ctx, "The first argument must be a non-null string");
 			return _false;
 		}
 		
 		var js_api = (self.get_private() as JSApi);
-		if (js_api == null)
-		{
+		if (js_api == null) {
 			exception = create_exception(ctx, "JSApi is null");
 			return _false;
 		}
-		
-		if (js_api.key_value_storages.length <= index)
+		if (js_api.key_value_storages.length <= index) {
+			exception = create_exception(ctx, "Unknown storage.");
 			return _false;
+		}
 		
-		return JS.Value.boolean(ctx, js_api.key_value_storages[index].has_key(key));
+		var storage = js_api.key_value_storages[index];
+		if (type == JsFuncCallType.SYNC) {
+			return JS.Value.boolean(ctx, storage.has_key(key));
+		} else {
+			var id = (int) args[2].to_number(ctx);
+			storage.has_key_async.begin(key, (o, res) => {
+				var result = storage.has_key_async.end(res);
+				js_api.send_async_response(id, result, null);
+			});
+		}
+		return _false;
 	}
 	
-	static unowned JS.Value key_value_storage_get_value_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)
-	{
+	static unowned JS.Value key_value_storage_get_value_sync_func(Context ctx, JS.Object function, JS.Object self,
+	JS.Value[] args, out unowned JS.Value exception) {
+		return key_value_storage_get_value_func(ctx, function, self, args, out exception, JsFuncCallType.SYNC);
+	}
+	
+	static unowned JS.Value key_value_storage_get_value_async_func(Context ctx, JS.Object function, JS.Object self,
+	JS.Value[] args, out unowned JS.Value exception) {
+		return key_value_storage_get_value_func(ctx, function, self, args, out exception, JsFuncCallType.ASYNC);
+	}
+	
+	static unowned JS.Value key_value_storage_get_value_func(Context ctx, JS.Object function, JS.Object self,
+	JS.Value[] args, out unowned JS.Value exception, JsFuncCallType type) {
 		unowned JS.Value undefined = JS.Value.undefined(ctx);
 		exception = null;
-		if (args.length != 2)
-		{
+		if (args.length != (type == JsFuncCallType.ASYNC ? 3 : 2)) {
 			exception = create_exception(ctx, "Two arguments required.");
 			return undefined;
 		}
-		
-		if (!args[0].is_number(ctx))
-		{
+		if (!args[0].is_number(ctx)) {
 			exception = create_exception(ctx, "Argument 0 must be a number.");
 			return undefined;
 		}
-		
 		int index = (int) args[0].to_number(ctx);
 		var key = string_or_null(ctx, args[1]);
-		if (key == null)
-		{
+		if (key == null) {
 			exception = create_exception(ctx, "Argument 1 must be a non-null string");
 			return undefined;
 		}
 		
 		var js_api = (self.get_private() as JSApi);
-		if (js_api == null)
-		{
+		if (js_api == null) {
 			exception = create_exception(ctx, "JSApi is null");
 			return undefined;
 		}
-		
-		if (js_api.key_value_storages.length <= index)
-			return undefined;
-		
-		var value = js_api.key_value_storages[index].get_value(key);
-		if (value == null)
-			return undefined;
-		
-		try
-		{
-			return value_from_variant(ctx, value);
-		}
-		catch (JSError e)
-		{
-			exception = create_exception(ctx, "Failed to convert Variant to JavaScript value. %s".printf(e.message));
-			return undefined;
-		}
-	}
-	
-	static unowned JS.Value key_value_storage_set_value_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)
-	{
-		unowned JS.Value undefined = JS.Value.undefined(ctx);
-		exception = null;
-		if (args.length != 3)
-		{
-			exception = create_exception(ctx, "Three arguments required.");
+		if (js_api.key_value_storages.length <= index) {
+			exception = create_exception(ctx, "Unknown storage.");
 			return undefined;
 		}
 		
-		if (!args[0].is_number(ctx))
-		{
-			exception = create_exception(ctx, "Argument 0 must be a number.");
-			return undefined;
+		var storage = js_api.key_value_storages[index];
+		if (type == JsFuncCallType.SYNC) {
+			var value = storage.get_value(key);
+			try {
+				return value_from_variant(ctx, value);
+			} catch (JSError e) {
+				exception = create_exception(ctx, "Failed to convert Variant to JavaScript value. %s".printf(e.message));
+				return undefined;
+			}
+		} else {
+			var id = (int) args[2].to_number(ctx);
+			storage.get_value_async.begin(key, (o, res) => {
+				var value = storage.get_value_async.end(res);
+				js_api.send_async_response(id, value, null);
+			});
 		}
-		
-		int index = (int) args[0].to_number(ctx);
-		var key = string_or_null(ctx, args[1]);
-		if (key == null)
-		{
-			exception = create_exception(ctx, "Argument 1 must be a non-null string");
-			return undefined;
-		}
-		
-		var js_api = (self.get_private() as JSApi);
-		if (js_api == null)
-		{
-			exception = create_exception(ctx, "JSApi is null");
-			return undefined;
-		}
-		
-		if (js_api.key_value_storages.length <= index)
-			return undefined;
-		
-		try
-		{
-			var value = args[2].is_undefined(ctx) ? null : variant_from_value(ctx, args[2]);
-			js_api.key_value_storages[index].set_value(key, value);
-		}
-		catch (JSError e)
-		{
-			exception = create_exception(ctx, "Failed to convert JavaScript value to Variant. %s".printf(e.message));
-		}
-		
 		return undefined;
 	}
 	
-	static unowned JS.Value key_value_storage_set_default_value_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)
+	static unowned JS.Value key_value_storage_set_value_sync_func(Context ctx, JS.Object function, JS.Object self,
+	JS.Value[] args, out unowned JS.Value exception) {
+		return key_value_storage_set_value_func(ctx, function, self, args, out exception, JsFuncCallType.SYNC);
+	}
+	
+	static unowned JS.Value key_value_storage_set_value_async_func(Context ctx, JS.Object function, JS.Object self,
+	JS.Value[] args, out unowned JS.Value exception) {
+		return key_value_storage_set_value_func(ctx, function, self, args, out exception, JsFuncCallType.ASYNC);
+	}
+	
+	static unowned JS.Value key_value_storage_set_value_func(Context ctx, JS.Object function, JS.Object self,
+	JS.Value[] args, out unowned JS.Value exception, JsFuncCallType type)
 	{
 		unowned JS.Value undefined = JS.Value.undefined(ctx);
 		exception = null;
-		if (args.length != 3)
-		{
-			exception = create_exception(ctx, "Three arguments required.");
+		if (args.length != (type == JsFuncCallType.ASYNC ? 4 : 3)) {
+			exception = create_exception(ctx, "%d arguments required. %d received.".printf(
+				(type == JsFuncCallType.ASYNC ? 4 : 3), args.length));
 			return undefined;
 		}
-		
-		if (!args[0].is_number(ctx))
-		{
+		if (!args[0].is_number(ctx)) {
 			exception = create_exception(ctx, "Argument 0 must be a number.");
 			return undefined;
 		}
-		
 		int index = (int) args[0].to_number(ctx);
 		var key = string_or_null(ctx, args[1]);
-		if (key == null)
-		{
+		if (key == null) {
 			exception = create_exception(ctx, "Argument 1 must be a non-null string");
 			return undefined;
 		}
 		
 		var js_api = (self.get_private() as JSApi);
-		if (js_api == null)
-		{
+		if (js_api == null) {
 			exception = create_exception(ctx, "JSApi is null");
 			return undefined;
 		}
-		
-		if (js_api.key_value_storages.length <= index)
+		if (js_api.key_value_storages.length <= index) {
+			exception = create_exception(ctx, "Unknown storage.");
 			return undefined;
-		
-		try
-		{
-			var value = args[2].is_undefined(ctx) ? null : variant_from_value(ctx, args[2]);
-			js_api.key_value_storages[index].set_default_value(key, value);
 		}
-		catch (JSError e)
-		{
+		
+		Variant? value = null;
+		try {
+			value = args[2].is_undefined(ctx) ? null : variant_from_value(ctx, args[2]);
+		} catch (JSError e) {
 			exception = create_exception(ctx, "Failed to convert JavaScript value to Variant. %s".printf(e.message));
+			return undefined;
+		}
+		var storage = js_api.key_value_storages[index];
+		if (type == JsFuncCallType.SYNC) {
+			storage.set_value(key, value);
+		} else {
+			var id = (int) args[3].to_number(ctx);
+			storage.set_value_async.begin(key, value, (o, res) => {
+				storage.set_value_async.end(res);
+				js_api.send_async_response(id, null, null);
+			});
+		}
+		return undefined;
+	}
+	
+	static unowned JS.Value key_value_storage_set_default_value_sync_func(Context ctx, JS.Object function,
+	JS.Object self, JS.Value[] args, out unowned JS.Value exception) {
+		return key_value_storage_set_default_value_func(
+			ctx, function, self, args, out exception, JsFuncCallType.SYNC);
+	}
+	
+	static unowned JS.Value key_value_storage_set_default_value_async_func(Context ctx, JS.Object function,
+	JS.Object self, JS.Value[] args, out unowned JS.Value exception) {
+		return key_value_storage_set_default_value_func(
+			ctx, function, self, args, out exception, JsFuncCallType.ASYNC);
+	}
+	
+	static unowned JS.Value key_value_storage_set_default_value_func(Context ctx, JS.Object function, JS.Object self,
+	JS.Value[] args, out unowned JS.Value exception, JsFuncCallType type) {
+		unowned JS.Value undefined = JS.Value.undefined(ctx);
+		exception = null;
+		if (args.length != (type == JsFuncCallType.ASYNC ? 4 : 3)) {
+			exception = create_exception(ctx, "%d arguments required. %d received.".printf(
+				(type == JsFuncCallType.ASYNC ? 4 : 3), args.length));
+			return undefined;
+		}
+		if (!args[0].is_number(ctx)) {
+			exception = create_exception(ctx, "Argument 0 must be a number.");
+			return undefined;
+		}
+		int index = (int) args[0].to_number(ctx);
+		var key = string_or_null(ctx, args[1]);
+		if (key == null) {
+			exception = create_exception(ctx, "Argument 1 must be a non-null string");
+			return undefined;
+		}
+		var js_api = (self.get_private() as JSApi);
+		if (js_api == null) {
+			exception = create_exception(ctx, "JSApi is null");
+			return undefined;
+		}
+		if (js_api.key_value_storages.length <= index) {
+			exception = create_exception(ctx, "Unknown storage.");
+			return undefined;
 		}
 		
+		Variant? value = null;
+		try {
+			value = args[2].is_undefined(ctx) ? null : variant_from_value(ctx, args[2]);
+		} catch (JSError e) {
+			exception = create_exception(ctx, "Failed to convert JavaScript value to Variant. %s".printf(e.message));
+			return undefined;
+		}
+		var storage = js_api.key_value_storages[index];
+		if (type == JsFuncCallType.SYNC) {
+			storage.set_default_value(key, value);
+		} else {
+			var id = (int) args[3].to_number(ctx);
+			storage.set_default_value_async.begin(key, value, (o, res) => {
+				storage.set_default_value_async.end(res);
+				js_api.send_async_response(id, null, null);
+			});
+		}
 		return undefined;
 	}
 	

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2017 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -24,6 +24,7 @@
 
 require("prototype");
 require("signals");
+require("async");
 
 /**
  * Prototype object to hold key-value mapping
@@ -65,6 +66,31 @@ KeyValueStorage.setDefault = function(key, value)
 }
 
 /**
+ * Set default value for given key
+ * 
+ * This function should be called only once per key, for example in @link{Core::InitAppRunner} handler.
+ * 
+ * @since Nuvola 4.8
+ * @async
+ * @param String key       the key name
+ * @param Variant value    value of the key
+ * 
+ * ```
+ * WebApp._onInitAppRunner = function(emitter)
+ * {
+ *     Nuvola.WebApp._onInitAppRunner.call(this, emitter);
+ * 
+ *     var ADDRESS = "app.address";
+ *     // Nuvola.config is a KeyValueStorage
+ *     Nuvola.config.setDefaultAsync(ADDRESS, "default").catch(console.log.bind(console));
+ * }
+ * ```
+ */
+KeyValueStorage.setDefaultAsync = function(key, value) {
+    return Nuvola.Async.begin((ctx) => Nuvola._keyValueStorageSetDefaultValueAsync(this.index, key, value, ctx.id));
+}
+
+/**
  * Check whether the storage has given key
  * 
  * @param String key    storage key name
@@ -75,6 +101,20 @@ KeyValueStorage.setDefault = function(key, value)
 KeyValueStorage.hasKey = function(key)
 {
     return Nuvola._keyValueStorageHasKey(this.index, key);
+}
+
+/**
+ * Check whether the storage has given key
+ * 
+ * @since Nuvola 4.8
+ * @async
+ * @param String key    storage key name
+ * @return ``false`` if the storage doesn't contain value for the key
+ *     (even if @link{KeyValueStorage.setDefault|default value has been set}),
+ *     ``true`` otherwise
+ */
+KeyValueStorage.hasKeyAsync = function(key) {
+    return Nuvola.Async.begin((ctx) => Nuvola._keyValueStorageHasKeyAsync(this.index, key, ctx.id));
 }
 
 /**
@@ -93,6 +133,22 @@ KeyValueStorage.get = function(key)
 }
 
 /**
+ * Get value by key name
+ * 
+ * Note that behavior on a key without an assigned value nor @link{KeyValueStorage.setDefault|the default value}
+ * is undefined - it may return *anything* or throw and error. (The current implementation returns string ``"<UNDEFINED>"``
+ * as it helps to identify unwanted manipulation with ``undefined`` value type.)
+ * 
+ * @since Nuvola 4.8
+ * @async
+ * @param String key    key name
+ * @return value set by @link{KeyValueStorage.set} or @link{KeyValueStorage.setDefault} for given key
+ */
+KeyValueStorage.getAsync = function(key) {
+    return Nuvola.Async.begin((ctx) => Nuvola._keyValueStorageGetValueAsync(this.index, key, ctx.id));
+}
+
+/**
  * Set value for given key
  * 
  * @param String key       key name
@@ -103,6 +159,24 @@ KeyValueStorage.set = function(key, value)
     if (Object.prototype.toString.call(value) == "[object Object]")
         throw new Error("Key-value storage is for primitive types only. It is not yet possible to store objects.");
     Nuvola._keyValueStorageSetValue(this.index, key, value);
+}
+
+/**
+ * Set value for given key
+ * 
+ * @since Nuvola 4.8
+ * @async
+ * @param String key       key name
+ * @param Variant value    value of given key
+ */
+KeyValueStorage.setAsync = function(key, value) {
+    return Nuvola.Async.begin((ctx) => {
+        if (Object.prototype.toString.call(value) == "[object Object]") {
+            throw new Error("Key-value storage is for primitive types only. It is not yet possible to store objects.");
+        } else {
+            Nuvola._keyValueStorageSetValueAsync(this.index, key, value, ctx.id);
+        }
+    });
 }
 
 /**
