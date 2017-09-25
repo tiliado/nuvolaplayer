@@ -107,9 +107,10 @@ public class JSApi : GLib.Object
 	private uint[] webkit_version;
 	private uint[] libsoup_version;
 	private unowned JsEnvironment? env = null;
+	private bool warn_on_sync_func;
 	
 	public JSApi(Drt.Storage storage, File data_dir, File config_dir, Drt.KeyValueStorage config,
-	Drt.KeyValueStorage session, uint[] webkit_version, uint[] libsoup_version)
+	Drt.KeyValueStorage session, uint[] webkit_version, uint[] libsoup_version, bool warn_on_sync_func)
 	{
 		this.storage = storage;
 		this.data_dir = data_dir;
@@ -118,6 +119,7 @@ public class JSApi : GLib.Object
 		assert(webkit_version.length >= 3);
 		this.webkit_version = webkit_version;
 		this.libsoup_version = libsoup_version;
+		this.warn_on_sync_func = warn_on_sync_func;
 	}
 	
 	public static bool is_supported(int api_major, int api_minor)
@@ -369,6 +371,7 @@ public class JSApi : GLib.Object
 			return undefined;
 		case JsFuncCallType.SYNC:
 			Variant? result = null;
+			js_api.warn_sync_func(name);
 			js_api.call_ipc_method_sync(name, data, ref result);
 			try {
 				return value_from_variant(ctx, result);
@@ -422,6 +425,7 @@ public class JSApi : GLib.Object
 		
 		var storage = js_api.key_value_storages[index];
 		if (type == JsFuncCallType.SYNC) {
+			js_api.warn_sync_func("key_value_storage_has_key(%d, '%s')".printf(index, key));
 			return JS.Value.boolean(ctx, storage.has_key(key));
 		} else {
 			var id = (int) args[2].to_number(ctx);
@@ -474,6 +478,7 @@ public class JSApi : GLib.Object
 		
 		var storage = js_api.key_value_storages[index];
 		if (type == JsFuncCallType.SYNC) {
+			js_api.warn_sync_func("key_value_storage_get_value(%d, '%s')".printf(index, key));
 			var value = storage.get_value(key);
 			try {
 				return value_from_variant(ctx, value);
@@ -541,6 +546,7 @@ public class JSApi : GLib.Object
 		}
 		var storage = js_api.key_value_storages[index];
 		if (type == JsFuncCallType.SYNC) {
+			js_api.warn_sync_func("key_value_storage_set_value(%d, '%s')".printf(index, key));
 			storage.set_value(key, value);
 		} else {
 			var id = (int) args[3].to_number(ctx);
@@ -602,6 +608,7 @@ public class JSApi : GLib.Object
 		}
 		var storage = js_api.key_value_storages[index];
 		if (type == JsFuncCallType.SYNC) {
+			js_api.warn_sync_func("key_value_storage_set_default_value(%d, '%s')".printf(index, key));
 			storage.set_default_value(key, value);
 		} else {
 			var id = (int) args[3].to_number(ctx);
@@ -659,6 +666,12 @@ public class JSApi : GLib.Object
 			}
 		}
 		return JS.Value.undefined(ctx);
+	}
+	
+	private void warn_sync_func(string message) {
+		if (warn_on_sync_func) {
+			warning("Sync func: %s", message);
+		}
 	}
 	
 	private enum JsFuncCallType {

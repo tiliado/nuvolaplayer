@@ -94,7 +94,7 @@ public class WebExtension: GLib.Object
 		worker_data = null;
 		
 		js_api = new JSApi(storage, data_dir, user_config_dir, new KeyValueProxy(channel, "config"),
-			new KeyValueProxy(channel, "session"), webkit_version, libsoup_version);
+			new KeyValueProxy(channel, "session"), webkit_version, libsoup_version, true);
 		js_api.call_ipc_method_void.connect(on_call_ipc_method_void);
 		js_api.call_ipc_method_sync.connect(on_call_ipc_method_sync);
 		js_api.call_ipc_method_async.connect(on_call_ipc_method_async);
