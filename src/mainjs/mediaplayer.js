@@ -442,9 +442,12 @@ MediaPlayer._onInitAppRunner = function(emitter) {
         this._activateComponent(COMPONENTS_TO_ACTIVATE[i]);
     }
     // Take into account the old BACKGROUND_PLAYBACK value
-    Nuvola.config.setDefault(BACKGROUND_PLAYBACK, true);
-    var defaultOption = RUN_IN_BACKGROUND_OPTIONS[Nuvola.config.get(BACKGROUND_PLAYBACK) ? 1 : 2][0]
-    Nuvola.config.setDefault(RUN_IN_BACKGROUND, defaultOption);
+    Nuvola.config.setDefaultAsync(BACKGROUND_PLAYBACK, true)
+        .then(() => Nuvola.config.getAsync(BACKGROUND_PLAYBACK))
+        .then((enabled) => {
+            var defaultOption = RUN_IN_BACKGROUND_OPTIONS[enabled ? 1 : 2][0];
+            return Nuvola.config.setDefaultAsync(RUN_IN_BACKGROUND, defaultOption);
+        }).catch(console.log.bind(console));
     
     this._updateMenu();
     Nuvola.core.connect("PreferencesForm", this);
@@ -579,6 +582,7 @@ MediaPlayer._updateMenu = function()
 
 MediaPlayer._onQuitRequest = function(emitter, result)
 {
+    // TODO: @async
     var option = Nuvola.config.get(RUN_IN_BACKGROUND);
     if (option == RUN_IN_BACKGROUND_OPTIONS[0][0]
     || option == RUN_IN_BACKGROUND_OPTIONS[1][0] && this._state === PlaybackState.PLAYING)
@@ -589,6 +593,7 @@ MediaPlayer._onQuitRequest = function(emitter, result)
 
 MediaPlayer._onPreferencesForm = function(object, values, entries)
 {
+    // TODO: @async
     values[RUN_IN_BACKGROUND] = Nuvola.config.get(RUN_IN_BACKGROUND);
     entries.push(["label", _("Run in background when window is closed")]);
     for (var i = 0; i < RUN_IN_BACKGROUND_OPTIONS.length; i++)

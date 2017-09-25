@@ -82,6 +82,7 @@ WebApp._onHomePageRequest = function(emitter, result)
  */
 WebApp._onLastPageRequest = function(emitter, request)
 {
+    // TODO: @async
     request.url = Nuvola.config.get(this.LAST_URI) || null;
 }
 
@@ -98,7 +99,7 @@ WebApp._onNavigationRequest = function(object, request)
  */
 WebApp._onUriChanged = function(object, uri)
 {
-    Nuvola.config.set(this.LAST_URI, uri);
+    Nuvola.config.setAsync(this.LAST_URI, uri).catch(console.log.bind(console));
 }
 
 /**
