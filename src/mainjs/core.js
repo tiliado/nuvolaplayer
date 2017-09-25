@@ -251,9 +251,7 @@ Core.isComponentLoaded = function(id) {
  * @return Boolean true if the component is loaded
  */
 Core.isComponentLoadedAsync = function(id) {
-    return this.getComponentInfoAsync(id).then(function(info) {
-        return Promise.resolve(info.loaded);
-    });
+    return this.getComponentInfoAsync(id).then((info) => info.loaded);
 }
 
 /**
@@ -293,9 +291,7 @@ Core.isComponentActive = function(id) {
  * @return Boolean true if the component is active
  */
 Core.isComponentActiveAsync = function(id) {
-    return this.getComponentInfoAsync(id).then(function(info) {
-        return Promise.resolve(info.active);
-    });
+    return this.getComponentInfoAsync(id).then((info) => info.active);
 }
 
 // export public items
