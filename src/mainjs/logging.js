@@ -53,3 +53,13 @@ Nuvola.warn = function(template)
     var message = Nuvola.format.apply(Nuvola, args);
     Nuvola._warn(message);
 }
+
+/**
+ * Log exception to terminal
+ * 
+ * @since Nuvola 4.8
+ * @param Exception e    The exception to log.
+ */
+Nuvola.logException = function(e) {
+   console.log(e);
+}
