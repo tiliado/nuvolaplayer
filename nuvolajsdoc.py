@@ -39,8 +39,8 @@ MODE_CODE = 0
 MODE_DOC = 1
 MODE_SYMBOL = 2
 
-FUNCTION_RE = re.compile(r"^\s*var\s+(\$?\w+(?:\.\$?\w+)*)\s+=\s+function\s*\((.*)\)$")
-METHOD_RE = re.compile(r"^\s*(\$?\w+(?:\.\$?\w+)*)\s+=\s+function\s*\((.*)\)$")
+FUNCTION_RE = re.compile(r"^\s*var\s+(\$?\w+(?:\.\$?\w+)*)\s+=\s+function\s*\((.*)\)\s*\{?$")
+METHOD_RE = re.compile(r"^\s*(\$?\w+(?:\.\$?\w+)*)\s+=\s+function\s*\((.*)\)\s*\{?$")
 PROTOTYPE_RE = re.compile(r"^\s*var\s+(\$?\w+(?:\.\$?\w+)*)\s+=\s+(?:Nuvola\.)?\$prototype\s*\((.*)\);$")
 OBJECT_RE = re.compile(r"^\s*var\s+(\$?\w+(?:\.\$?\w+)*)\s+=\s+\{\s*(?:\};)?$")
 SIGNAL_RE = re.compile(r"^this\.addSignal\s*\((.*)\);$")
