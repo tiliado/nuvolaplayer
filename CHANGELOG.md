@@ -1,6 +1,12 @@
 Nuvola Apps Changelog
 =======================
 
+  * Release announcements for users are posted to [Nuvola News blog](https://medium.com/nuvola-news)
+    and social network channels.
+  * Developers, maintainers and packagers are supposed to subscribe to
+    [Nuvola Devel mailing list](https://groups.google.com/d/forum/nuvola-player-devel)
+    to receive more technical announcements and important information about future development.
+
 Release 4.7.0 - September 1st, 2017
 --------------------------------
 
