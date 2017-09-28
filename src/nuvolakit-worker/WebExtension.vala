@@ -219,16 +219,14 @@ public class WebExtension: GLib.Object
 		request.respond(null);
 	}
 	
-	private void show_error(string message)
-	{
-		try
-		{
-			channel.call_sync("/nuvola/core/show-error", new Variant("(s)", message));
-		}
-		catch (GLib.Error e)
-		{
-			critical("Failed to send error message '%s'. %s", message, e.message);
-		}
+	private void show_error(string message) {
+		channel.call.begin("/nuvola/core/show-error", new Variant("(s)", message), (o, res) => {
+			try {
+				channel.call.end(res);
+			} catch (GLib.Error e) {
+				critical("Failed to send error message '%s'. %s", message, e.message);
+				}
+		});
 	}
 	
 	private void on_call_ipc_method_void(string name, Variant? data) {
