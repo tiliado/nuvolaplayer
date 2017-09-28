@@ -56,26 +56,24 @@ public class LoginFormManager: GLib.Object
 		channel.router.remove_method("/nuvola/passwordmanager/prefill-username");
 	}
 	
-	private void request_passwords()
-	{
-		try
-		{
-			var passwords = channel.call_sync("/nuvola/passwordmanager/get-passwords", null);
-			if (passwords != null)
-			{
-				return_if_fail(passwords.is_of_type(new VariantType("a(sss)")));
-				var iter = passwords.iterator();
-				string hostname = null;
-				string username = null;
-				string password = null;
-				while (iter.next("(sss)", out hostname, out username, out password))
-					add_credentials(hostname, username, password);
+	private void request_passwords() {
+		channel.call.begin("/nuvola/passwordmanager/get-passwords", null, (o, res) => {
+			try {
+				var passwords = channel.call.end(res);
+				if (passwords != null) {
+					return_if_fail(passwords.is_of_type(new VariantType("a(sss)")));
+					var iter = passwords.iterator();
+					string hostname = null;
+					string username = null;
+					string password = null;
+					while (iter.next("(sss)", out hostname, out username, out password)) {
+						add_credentials(hostname, username, password);
+					}
+				}
+			} catch (GLib.Error e) {
+				critical("Failed to get passwords. %s", e.message);
 			}
-		}
-		catch (GLib.Error e)
-		{
-			critical("Failed to get passwords. %s", e.message);
-		}
+		});
 	}
 	
 	public void store_credentials(string hostname, string username, string password)
