@@ -483,6 +483,7 @@ class HtmlPrinter(object):
         returns = doc.pop(DOC_RETURN, None)
         throws = doc.pop(DOC_THROW, None)
         is_async = doc.pop(DOC_ASYNC, None)
+        since = doc.pop(DOC_SINCE, None)
         
         if desc:
             self.process_doc_text("Description", self.join_buffers(desc), buf)
@@ -494,6 +495,8 @@ class HtmlPrinter(object):
                 ' Promise object</a> to resolve the value when it is ready. Read '
                 '<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises">Using '
                 'Promises</a> to learn how to work with them.</p>\n')
+        if since:
+            self.process_doc_since(since, buf)
         if params:
             self.process_doc_params(params, buf)
         
@@ -555,6 +558,18 @@ class HtmlPrinter(object):
         
         buf.append('</ul>\n')
     
+    def process_doc_since(self, items, buf):
+        for item in items:
+            buf.append('<p><b>Available since</b> ')
+            version = ' '.join(s.strip() for s in item)
+            try:
+                version, text = [s.strip() for s in version.split(':', 1)]
+            except ValueError:
+                text = None
+            buf.append(version)
+            if text:
+                buf.append(": " + self.replace_links(text))
+            buf.append("</p>\n")
     
     def link_symbol(self, symbol, text=None):
         canonical = self.tree.get_canonical(symbol)
@@ -584,6 +599,7 @@ DOC_RETURN = "@return"
 DOC_THROW = "@throws"
 DOC_IGNORE = ("@signal", "@mixin", "@enum", "@namespace")
 DOC_ASYNC = "@async"
+DOC_SINCE = "@since"
 
 def parse_doc_comment(doc):
     mode = DOC_DESC
@@ -592,7 +608,7 @@ def parse_doc_comment(doc):
     result[DOC_DESC].append(buf)
     
     for line in doc:
-        for tag in (DOC_PARAM, DOC_RETURN, DOC_THROW, DOC_ASYNC):
+        for tag in (DOC_PARAM, DOC_RETURN, DOC_THROW, DOC_ASYNC, DOC_SINCE):
             if line.startswith(tag):
                 mode = tag
                 buf = [line[len(tag):].strip()]
