@@ -346,9 +346,11 @@ class HtmlPrinter(object):
         html_symbol = escape(symbol)
         html_bare_symbol = escape(self.strip_ns(symbol))
         html_params = escape(node.params)
+        func_type = "async " if node.doc.get(DOC_ASYNC) else ""
         
         index.append('<li><a href="#{0}">{1}</a></li>\n'.format(html_symbol, html_bare_symbol))
-        body.append('<li><small>function</small> <b id="{0}">{0}</b>({1})<br />\n'.format(html_symbol, html_params))
+        body.append('<li><small>{0} function</small> <b id="{1}">{1}</b>({2})<br />\n'.format(
+            func_type, html_symbol, html_params))
         body.extend(self.process_doc(node))
         body.append("</li>\n\n")
     
@@ -358,7 +360,9 @@ class HtmlPrinter(object):
         html_params = escape(node.params)
         
         index.append('<li><a href="#{0}">{1}</a></li>\n'.format(html_symbol, html_name))
-        body.append('<li><small>method</small> <b id="{0}">{1}</b>({2})<br />\n'.format(html_symbol, html_name, html_params))
+        method_type = "async " if node.doc.get(DOC_ASYNC) else ""
+        body.append('<li><small>{0} method</small> <b id="{1}">{2}</b>({3})<br />\n'.format(
+            method_type, html_symbol, html_name, html_params))
         body.extend(self.process_doc(node))
         body.append("</li>\n\n")
         
@@ -478,10 +482,18 @@ class HtmlPrinter(object):
         params = doc.pop(DOC_PARAM, None)
         returns = doc.pop(DOC_RETURN, None)
         throws = doc.pop(DOC_THROW, None)
+        is_async = doc.pop(DOC_ASYNC, None)
         
         if desc:
             self.process_doc_text("Description", self.join_buffers(desc), buf)
         
+        if is_async:
+            buf.append(
+                '<p><b>Asynchronous:</b> This function returns '
+                '<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">a'
+                ' Promise object</a> to resolve the value when it is ready. Read '
+                '<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises">Using '
+                'Promises</a> to learn how to work with them.</p>\n')
         if params:
             self.process_doc_params(params, buf)
         
@@ -571,6 +583,7 @@ DOC_PARAM = "@param"
 DOC_RETURN = "@return"
 DOC_THROW = "@throws"
 DOC_IGNORE = ("@signal", "@mixin", "@enum", "@namespace")
+DOC_ASYNC = "@async"
 
 def parse_doc_comment(doc):
     mode = DOC_DESC
@@ -579,7 +592,7 @@ def parse_doc_comment(doc):
     result[DOC_DESC].append(buf)
     
     for line in doc:
-        for tag in (DOC_PARAM, DOC_RETURN, DOC_THROW):
+        for tag in (DOC_PARAM, DOC_RETURN, DOC_THROW, DOC_ASYNC):
             if line.startswith(tag):
                 mode = tag
                 buf = [line[len(tag):].strip()]
