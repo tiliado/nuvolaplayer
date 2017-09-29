@@ -7,6 +7,50 @@ Nuvola Apps Changelog
     [Nuvola Devel mailing list](https://groups.google.com/d/forum/nuvola-player-devel)
     to receive more technical announcements and important information about future development.
 
+Release 4.8.0 - September 29th, 2017
+--------------------------------
+
+New Features:
+
+  * New script: **Pocket Casts** by Jiří Janoušek. Pocket Casts is the only podcatcher you’ll ever need. Listen to your
+    favorite shows in one place, keep in sync progress across various devices, find great new content with curated
+    featured podcasts, currently trending podcasts and much more. Now also with desktop integration provided by Nuvola.
+  * Updated script: **Groove Music script 2.0** by Joel Cumberland works again in Nuvola after being ported to use Media
+    Source Extension instead of Flash plugin.
+  * Updated script: **Amazon Cloud Player script 5.5** by Andrew Stubbs integrates a track progress bar and volume
+    controls.
+  * Updated script: **Google Play Music script 6.0** by Jiří Janoušek uses new asynchronous API to improve
+    responsiveness and reduce lags, but also drops support for Nuvola 4.7 and older.
+
+Discontinued Features:
+
+  * **Spotify script** is temporarily unsupported until Nuvola is ported to Chromium Embedded framework because
+    Spotify dropped support for WebKit browsers (including Nuvola and Safari).
+  * **Yandex Music** script is currently orphaned and needs a new maintainer. The script is still shipped with
+    Nuvola 4.8 but may be removed in the future unless somebody adopts it. If anyone is interested, please get in touch
+    with me at [Nuvola Devel mailing list](https://groups.google.com/d/forum/nuvola-player-devel).
+
+News for Script Maintainers:
+
+  * Asynchronous variants of various JavaScript API calls were introduced deprecating original synchronous methods.
+    The async methods return
+    [a Promise object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises),
+    which is used to resolve the result of the async operation.
+  * List of async methods: Notifications.isPersistenceSupportedAsync, Actions.isEnabledAsync, Actions.getStateAsync,
+    Core.getComponentInfoAsync, Core.isComponentLoadedAsync, Core.isComponentActiveAsync,
+    KeyValueStorage.setDefaultAsync, KeyValueStorage.hasKeyAsync, KeyValueStorage.getAsync
+    and KeyValueStorage.setAsync.
+  * New function: Nuvola.logException to log exceptions to terminal.
+  * JavaScript API reference now supports new annotations such as "Deprecated since", "Available since" and
+    "asynchronous" function.
+
+Under the Hood:
+
+  * Nuvola uses new IPC API from Diorite 4.8 and replaced a lot of synchronous IPC calls between WebWorker and
+    AppRunner processes with asynchronous variants. This should improve the performance of the WebKit WebProcess,
+    reduce lags and prevent occasional deadlocks. However, scripts must use the newly-introduced async JavaScript API
+    to reach the full potential. Google Play Music is the first one.
+  
 Release 4.7.0 - September 1st, 2017
 --------------------------------
 
