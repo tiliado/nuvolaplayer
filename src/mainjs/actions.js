@@ -163,7 +163,7 @@ Actions._onActionActivated = function(arg1, action)
  * Checks whether action is enabled
  * 
  * @param String name    action name
- * @deprecated since Nuvola 4.8. Use async variant instead.
+ * @deprecated Nuvola 4.8: Use async variant instead.
  * @return true is action is enabled, false otherwise
  */
 Actions.isEnabled = function(name) {
@@ -230,7 +230,7 @@ Actions.updateEnabledFlags = function(enabledFlags)
 /**
  * Get current state of toggle or radio actions.
  * 
- * @deprecated since Nuvola 4.8. Use async variant instead.
+ * @deprecated Nuvola 4.8: Use async variant instead.
  * @param String name    action name
  * @return current state: ``true/false`` for toggle actions, one of stateId entries of radio actions
  * 

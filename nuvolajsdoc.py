@@ -484,6 +484,7 @@ class HtmlPrinter(object):
         throws = doc.pop(DOC_THROW, None)
         is_async = doc.pop(DOC_ASYNC, None)
         since = doc.pop(DOC_SINCE, None)
+        deprecated = doc.pop(DOC_DEPRECATED, None)
         
         if desc:
             self.process_doc_text("Description", self.join_buffers(desc), buf)
@@ -497,6 +498,8 @@ class HtmlPrinter(object):
                 'Promises</a> to learn how to work with them.</p>\n')
         if since:
             self.process_doc_since(since, buf)
+        if deprecated:
+            self.process_doc_deprecated(deprecated, buf)
         if params:
             self.process_doc_params(params, buf)
         
@@ -559,8 +562,14 @@ class HtmlPrinter(object):
         buf.append('</ul>\n')
     
     def process_doc_since(self, items, buf):
+        self.process_doc_version("Available", items, buf)
+            
+    def process_doc_deprecated(self, items, buf):
+        self.process_doc_version("Deprecated", items, buf)
+        
+    def process_doc_version(self, label, items, buf):
         for item in items:
-            buf.append('<p><b>Available since</b> ')
+            buf.append('<p><b>{} since</b> '.format(label))
             version = ' '.join(s.strip() for s in item)
             try:
                 version, text = [s.strip() for s in version.split(':', 1)]
@@ -600,6 +609,7 @@ DOC_THROW = "@throws"
 DOC_IGNORE = ("@signal", "@mixin", "@enum", "@namespace")
 DOC_ASYNC = "@async"
 DOC_SINCE = "@since"
+DOC_DEPRECATED = "@deprecated"
 
 def parse_doc_comment(doc):
     mode = DOC_DESC
@@ -608,7 +618,7 @@ def parse_doc_comment(doc):
     result[DOC_DESC].append(buf)
     
     for line in doc:
-        for tag in (DOC_PARAM, DOC_RETURN, DOC_THROW, DOC_ASYNC, DOC_SINCE):
+        for tag in (DOC_PARAM, DOC_RETURN, DOC_THROW, DOC_ASYNC, DOC_SINCE, DOC_DEPRECATED):
             if line.startswith(tag):
                 mode = tag
                 buf = [line[len(tag):].strip()]

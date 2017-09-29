@@ -208,7 +208,7 @@ Core.$init = function()
 /**
  * Returns information about a component
  * 
- * @deprecated since Nuvola 4.8. Use async variant instead.
+ * @deprecated Nuvola 4.8: Use async variant instead.
  * @param id id of the component
  * @return Object component info
  */
@@ -232,7 +232,7 @@ Core.getComponentInfoAsync = function(id) {
 /**
  * Returns whether a component is loaded
  * 
- * @deprecated since Nuvola 4.8. Use async variant instead.
+ * @deprecated Nuvola 4.8: Use async variant instead.
  * @param id    id of the component
  * @return Boolean true if the component is loaded
  */
@@ -272,7 +272,7 @@ Core.toggleComponentActive = function(id, active) {
 /**
  * Returns whether a component is loaded and active
  * 
- * @deprecated since Nuvola 4.8. Use async variant instead.
+ * @deprecated Nuvola 4.8: Use async variant instead.
  * @param id    id of the component
  * @return Boolean true if the component is active
  */

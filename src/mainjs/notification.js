@@ -112,7 +112,7 @@ Notifications.getNamedNotification = function(name, resident, category)
 /**
  * Check whether persistence is supported
  * 
- * @deprecated since Nuvola 4.8. Use async variant instead.
+ * @deprecated Nuvola 4.8: Use async variant instead.
  * @return Boolean true if persistence is supported
  */
 Notifications.isPersistenceSupported = function() {

@@ -46,6 +46,7 @@ KeyValueStorage.$init = function(index)
  * 
  * This function should be called only once per key, for example in @link{Core::InitAppRunner} handler.
  * 
+ * @deprecated Nuvola 4.8: Use async variant instead.
  * @param String key       the key name
  * @param Variant value    value of the key
  * 
@@ -93,6 +94,7 @@ KeyValueStorage.setDefaultAsync = function(key, value) {
 /**
  * Check whether the storage has given key
  * 
+ * @deprecated Nuvola 4.8: Use async variant instead.
  * @param String key    storage key name
  * @return ``false`` if the storage doesn't contain value for the key
  *     (even if @link{KeyValueStorage.setDefault|default value has been set}),
@@ -124,6 +126,7 @@ KeyValueStorage.hasKeyAsync = function(key) {
  * is undefined - it may return *anything* or throw and error. (The current implementation returns string ``"<UNDEFINED>"``
  * as it helps to identify unwanted manipulation with ``undefined`` value type.)
  * 
+ * @deprecated Nuvola 4.8: Use async variant instead.
  * @param String key    key name
  * @return value set by @link{KeyValueStorage.set} or @link{KeyValueStorage.setDefault} for given key
  */
@@ -151,6 +154,7 @@ KeyValueStorage.getAsync = function(key) {
 /**
  * Set value for given key
  * 
+ * @deprecated Nuvola 4.8: Use async variant instead.
  * @param String key       key name
  * @param Variant value    value of given key
  */
