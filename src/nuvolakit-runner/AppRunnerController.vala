@@ -48,6 +48,7 @@ namespace Actions
 	public const string GO_BACK = "go-back";
 	public const string GO_FORWARD = "go-forward";
 	public const string GO_RELOAD = "go-reload";
+	public const string GO_LOAD_URL = "go-load-url";
 	public const string PREFERENCES = "preferences";
 	public const string TOGGLE_SIDEBAR = "toggle-sidebar";
 	public const string ZOOM_IN = "zoom-in";
@@ -91,6 +92,7 @@ public class AppRunnerController: Drtgtk.Application
 	private HashTable<string, Variant>? web_worker_data = null;
 	private StartupWindow? startup_window = null;
 	private TiliadoActivation? tiliado_activation = null;
+	private URLBar? url_bar = null;
 	
 	public AppRunnerController(
 		Drt.Storage storage, WebApp web_app, WebAppStorage app_storage,
@@ -394,7 +396,9 @@ public class AppRunnerController: Drtgtk.Application
 	private void load_app()
 	{
 		set_app_menu_items({Actions.PREFERENCES, Actions.HELP, Actions.ABOUT, Actions.QUIT});
-		main_window.set_menu_button_items({Actions.ZOOM_IN, Actions.ZOOM_OUT, Actions.ZOOM_RESET, "|", Actions.TOGGLE_SIDEBAR});
+		main_window.set_menu_button_items({
+			Actions.ZOOM_IN, Actions.ZOOM_OUT, Actions.ZOOM_RESET, "|",
+			Actions.TOGGLE_SIDEBAR, "|", Actions.GO_LOAD_URL});
 		main_window.create_toolbar({Actions.GO_BACK, Actions.GO_FORWARD, Actions.GO_RELOAD, Actions.GO_HOME});
 		
 		main_window.sidebar.add_page.connect_after(on_sidebar_page_added);
@@ -441,6 +445,7 @@ public class AppRunnerController: Drtgtk.Application
 		ah.simple_action("go", "app", Actions.GO_BACK, "Back", "_Back", "go-previous", "<alt>Left", web_engine.go_back),
 		ah.simple_action("go", "app", Actions.GO_FORWARD, "Forward", "_Forward", "go-next", "<alt>Right", web_engine.go_forward),
 		ah.simple_action("go", "app", Actions.GO_RELOAD, "Reload", "_Reload", "view-refresh", "<ctrl>R", web_engine.reload),
+		ah.simple_action("go", "app", Actions.GO_LOAD_URL, "Load URL...", null, null, "<ctrl>L", do_load_url),
 		ah.simple_action("view", "win", Actions.ZOOM_IN, "Zoom in", null, "zoom-in", "<ctrl>plus", web_engine.zoom_in),
 		ah.simple_action("view", "win", Actions.ZOOM_OUT, "Zoom out", null, "zoom-out", "<ctrl>minus", web_engine.zoom_out),
 		ah.simple_action("view", "win", Actions.ZOOM_RESET, "Original zoom", null, "zoom-original", "<ctrl>0", web_engine.zoom_reset),
@@ -554,6 +559,34 @@ public class AppRunnerController: Drtgtk.Application
 	private void do_help()
 	{
 		show_uri(Nuvola.HELP_URL);
+	}
+	
+	private void do_load_url() {
+		var url = web_engine.get_url();
+		if (url_bar == null) {
+			url_bar = new URLBar((owned) url);
+		} else {
+			url_bar.url = (owned) url;
+		}
+		var header_bar = main_window.header_bar;
+		if (header_bar.custom_title != url_bar) {
+			url_bar.show();
+			header_bar.custom_title = url_bar;
+			url_bar.response.connect(on_url_bar_response);
+		}
+		url_bar.entry.grab_focus();
+	}
+	
+	private void on_url_bar_response(URLBar bar, bool response) {
+		main_window.header_bar.custom_title = null;
+		url_bar = null;
+		bar.response.disconnect(on_url_bar_response);
+		if (response) {
+			var url = bar.url;
+			if (!Drt.String.is_empty(url)) {
+				web_engine.load_url(url);
+			}
+		}
 	}
 	
 	private void load_extensions()
