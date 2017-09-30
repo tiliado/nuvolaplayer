@@ -80,6 +80,10 @@ public abstract class WebEngine : GLib.Object, JSExecutor {
 	
 	public abstract void get_preferences(out Variant values, out Variant entries);
 	
+	public abstract string? get_url();
+	
+	public abstract void load_url(string url);
+	
 	public virtual void call_function(string name, ref Variant? params) throws GLib.Error {
 		warning("FIXME: how to override JSExecutor in PyGObject?. Call '%s' => %s",
 			name, params == null ? "null" : params.print(false));

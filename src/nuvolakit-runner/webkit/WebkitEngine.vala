@@ -233,7 +233,15 @@ public class WebkitEngine : WebEngine
 		}
 		web_context.set_network_proxy_settings(proxy_mode, proxy_settings);
 	}
-		
+	
+	public override string? get_url() {
+		return web_view != null ? web_view.uri : null;
+	}
+	
+	public override void load_url(string url) {
+		load_uri(url);
+	}
+	
 	private bool load_uri(string uri)
 	{
 		if (uri.has_prefix("http://") || uri.has_prefix("https://"))
