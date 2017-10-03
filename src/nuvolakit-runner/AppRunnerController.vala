@@ -631,14 +631,13 @@ public class AppRunnerController: Drtgtk.Application
 		}
 	}
 	
-	private void on_fatal_error(string title, string message, bool markup)
-	{
+	private void on_fatal_error(string title, string message, bool markup) {
 		var dialog = new Drtgtk.ErrorDialog(
 			title,
 			message + "\n\nThe application has reached an inconsistent state and will quit for that reason.",
 			markup);
-		dialog.present();
-//~ 		dialog.destroy();
+		dialog.run();
+		dialog.destroy();
 	}
 	
 	private void on_show_error(string title, string message, bool markup)
