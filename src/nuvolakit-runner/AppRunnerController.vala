@@ -640,14 +640,16 @@ public class AppRunnerController: Drtgtk.Application
 		dialog.destroy();
 	}
 	
-	private void on_show_error(string title, string message, bool markup)
-	{
+	private void on_show_error(string title, string message, bool markup) {
 		var dialog = new Drtgtk.ErrorDialog(
 			title,
 			message + "\n\nThe application might not function properly.",
 			markup);
-		dialog.present();
-//~ 		dialog.destroy();
+		Idle.add(() => {
+			dialog.run();
+			dialog.destroy();
+			return false;
+		});
 	}
 	
 	private void on_show_warning(string title, string message)
