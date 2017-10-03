@@ -155,7 +155,7 @@ public class JSApi : GLib.Object
 	 * 
 	 * @param env    JavaScript environment to use for injection
 	 */
-	public void inject(JsEnvironment env) throws JSError
+	public void inject(JsEnvironment env, HashTable<string, Variant?>? properties=null) throws JSError
 	{
 		this.env = null;
 		unowned JS.Context ctx = env.context;
@@ -181,6 +181,15 @@ public class JSApi : GLib.Object
 		o_set_number(ctx, main_object, "LIBSOUP_MAJOR", (double) libsoup_version[0]);
 		o_set_number(ctx, main_object, "LIBSOUP_MINOR", (double) libsoup_version[1]);
 		o_set_number(ctx, main_object, "LIBSOUP_MICRO", (double) libsoup_version[2]);
+		
+		if (properties != null) {
+			var iter = HashTableIter<string, Variant?>(properties);
+			unowned string key;
+			unowned Variant? val;
+			while (iter.next(out key, out val)) {
+				main_object.set_property(ctx, new JS.String(key), value_from_variant(ctx, val));
+			}
+		}
 		
 		env.main_object = main_object;
 		main_object.unprotect(ctx);
