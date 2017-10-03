@@ -160,6 +160,7 @@ public class TiliadoTrialWidget : Gtk.Grid {
 		get_plan_view.forward_button.clicked.connect(on_get_plan_forward_clicked);
 		get_plan_view.back_button.clicked.connect(on_get_plan_back_clicked);
 		get_plan_view.action_button.clicked.connect(on_get_plan_action_clicked);
+		get_plan_view.help_button.clicked.connect(on_help_clicked);
 		stack.add(get_plan_view);
 		
 		get_account_view = new View("Back", "I already have Tiliado account", "Get Tiliado account",
@@ -167,6 +168,7 @@ public class TiliadoTrialWidget : Gtk.Grid {
 		get_account_view.forward_button.clicked.connect(on_get_account_forward_clicked);
 		get_account_view.back_button.clicked.connect(on_get_account_back_clicked);
 		get_account_view.action_button.clicked.connect(on_get_account_action_clicked);
+		get_account_view.help_button.clicked.connect(on_help_clicked);
 		stack.add(get_account_view);
 		
 		activate_view = new View("Later", null, "Activate Nuvola", Drtgtk.Labels.markup("""Nuvola developer will contact you on Patreon within two business days to activate your plan.
@@ -174,21 +176,24 @@ public class TiliadoTrialWidget : Gtk.Grid {
 Once your plan is confirmed, you can activate Nuvola with the button bellow."""));
 		activate_view.action_button.clicked.connect(on_activate_action_clicked);
 		activate_view.back_button.clicked.connect(on_activate_back_clicked);
+		activate_view.help_button.clicked.connect(on_help_clicked);
 		stack.add(activate_view);
 		
 		progress_view = new View("Cancel", null, null, Drtgtk.Labels.markup("Activation is in progress. Follow instructions in your web browser."));
 		progress_view.back_button.clicked.connect(on_progress_back_clicked);
+		progress_view.help_button.clicked.connect(on_help_clicked);
 		stack.add(progress_view);
 		
 		failed_view = new View("Cancel", null, "Try again", Drtgtk.Labels.markup(""));
 		failed_view.back_button.clicked.connect(on_failed_back_clicked);
 		failed_view.action_button.clicked.connect(on_failed_action_clicked);
+		failed_view.help_button.clicked.connect(on_help_clicked);
 		stack.add(failed_view);
 		
 		explore_view = new View("Close", null, "Explore Nuvola features", Drtgtk.Labels.markup(
 		"""<b>Thank you for purchasing Nuvola.</b>
 
-We recommend taking a look at a list of Nuvola features to get the most of it."""));
+We recommend taking a look at a list of Nuvola features to get the most of it."""), false);
 		explore_view.back_button.clicked.connect(on_explore_back_clicked);
 		explore_view.action_button.clicked.connect(on_explore_action_clicked);
 		stack.add(explore_view);
@@ -206,18 +211,23 @@ We recommend taking a look at a list of Nuvola features to get the most of it.""
 		get_plan_view.forward_button.clicked.disconnect(on_get_plan_forward_clicked);
 		get_plan_view.back_button.clicked.disconnect(on_get_plan_back_clicked);
 		get_plan_view.action_button.clicked.disconnect(on_get_plan_action_clicked);
+		get_plan_view.help_button.clicked.disconnect(on_help_clicked);
 		get_plan_view = null;
 		get_account_view.forward_button.clicked.disconnect(on_get_account_forward_clicked);
 		get_account_view.back_button.clicked.disconnect(on_get_account_back_clicked);
 		get_account_view.action_button.clicked.disconnect(on_get_account_action_clicked);
+		get_account_view.help_button.clicked.disconnect(on_help_clicked);
 		get_account_view = null;
 		activate_view.action_button.clicked.disconnect(on_activate_action_clicked);
 		activate_view.back_button.clicked.disconnect(on_activate_back_clicked);
+		activate_view.help_button.clicked.disconnect(on_help_clicked);
 		activate_view = null;
 		progress_view.back_button.clicked.disconnect(on_progress_back_clicked);
+		progress_view.help_button.clicked.connect(on_help_clicked);
 		progress_view = null;
 		failed_view.action_button.clicked.disconnect(on_failed_action_clicked);
 		failed_view.back_button.clicked.disconnect(on_failed_back_clicked);
+		failed_view.help_button.clicked.disconnect(on_help_clicked);
 		failed_view = null;
 		explore_view.action_button.clicked.disconnect(on_explore_action_clicked);
 		explore_view.back_button.clicked.disconnect(on_explore_back_clicked);
@@ -227,6 +237,10 @@ We recommend taking a look at a list of Nuvola features to get the most of it.""
 		popover.notify["visible"].disconnect(on_popover_visible_changed);
 		popover.destroy();
 		popover = null;
+	}
+	
+	private void on_help_clicked(Gtk.Button button) {
+		app.show_uri("https://tiliado.github.io/nuvolaplayer/documentation/4/activation.html");
 	}
 	
 	private void on_get_plan_forward_clicked(Gtk.Button button) {
@@ -336,9 +350,11 @@ We recommend taking a look at a list of Nuvola features to get the most of it.""
 		public Gtk.Button? back_button = null;
 		public Gtk.Button? forward_button = null;
 		public Gtk.Button? action_button = null;
+		public Gtk.Button? help_button = null;
 		public Gtk.Label? text_label = null;
 		
-		public View(string? back_label, string? forward_label, string? action_label, Gtk.Label? text_label) {
+		public View(string? back_label, string? forward_label, string? action_label, Gtk.Label? text_label,
+			bool help=true) {
 			hexpand = false;
 			halign = Gtk.Align.FILL;
 			margin = 20;
@@ -363,7 +379,7 @@ We recommend taking a look at a list of Nuvola features to get the most of it.""
 				back_button.vexpand = false;
 				back_button.hexpand = true;
 				back_button.halign = Gtk.Align.START;
-				attach(back_button, 0, 10, 1, 1);
+				attach(back_button, 0, 11, 1, 1);
 				back_button.halign = Gtk.Align.FILL;
 			}
 			if (forward_label != null) {
@@ -373,8 +389,15 @@ We recommend taking a look at a list of Nuvola features to get the most of it.""
 				attach(forward_button, 0, 9, 1, 1);
 				forward_button.halign = Gtk.Align.FILL;
 			}
+			if (help) {
+				help_button = new Gtk.Button.with_label("Help");
+				help_button.vexpand = false;
+				help_button.hexpand = true;
+				attach(help_button, 0, 10, 1, 1);
+				help_button.halign = Gtk.Align.FILL;
+			}
 			
-			var first_button = (action_button ?? forward_button) ?? back_button;
+			var first_button = action_button ?? forward_button ?? help_button ?? back_button;
 			if (first_button != null) {
 				first_button.vexpand = true;
 				first_button.valign = Gtk.Align.END;
