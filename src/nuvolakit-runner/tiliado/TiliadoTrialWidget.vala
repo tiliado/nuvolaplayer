@@ -47,7 +47,7 @@ public class TiliadoTrialWidget : Gtk.Grid {
 		this.activation = activation;
 		this.app = app;
 		no_show_all = true;
-		margin = 15;
+		margin = 5;
 		row_spacing = column_spacing = 5;
 		orientation = Gtk.Orientation.HORIZONTAL;
 		hexpand = true;
@@ -79,7 +79,7 @@ public class TiliadoTrialWidget : Gtk.Grid {
 	private void toggle_trial() {
 		if (!check_user()) {
 			if (purchase_button == null) {
-				var label = Drtgtk.Labels.markup("<b>Free trial period</b>");
+				var label = Drtgtk.Labels.markup("<b>%s free trial</b>", Nuvola.get_app_name());
 				label.halign = Gtk.Align.CENTER;
 				label.hexpand = true;
 				label.vexpand = true;
