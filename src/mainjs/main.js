@@ -30,11 +30,13 @@
  */
 Nuvola.global = global;
 
-try
-{
+try {
     window; // ReferenceError with bare Global Object
-}
-catch (e)
-{
+    Nuvola.checkMSE = function() {
+        if (!window.MediaSource) {
+            throw new Error("Media Source Extension is not supported.")
+        }
+    }
+} catch (e) {
     global.window = null;
 }

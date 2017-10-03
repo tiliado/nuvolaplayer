@@ -487,6 +487,17 @@ public class WebkitEngine : WebEngine
 	private void handle_web_worker_ready(Drt.RpcRequest request) throws Drt.RpcError {
 		if (!web_worker.ready) {
 			web_worker.ready = true;
+			if (get_media_source_extension()) {
+				Drt.EventLoop.add_idle(() => {
+					var args = new Variant.tuple({});
+					try {
+						web_worker.call_function("Nuvola.checkMSE", ref args, true);
+					} catch (GLib.Error e) {
+						runner_app.fatal_error("Initialization error", "Your distributor set the --webkitgtk-supports-mse build flag but your WebKitGTK+ library does not include Media Source Extension.\n\n" + e.message);
+					}
+					return false;
+				});
+			}
 		}
 		web_worker_ready();
 		request.respond(null);
