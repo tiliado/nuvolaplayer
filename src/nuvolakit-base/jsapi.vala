@@ -146,7 +146,7 @@ public class JSApi : GLib.Object
 			var args = new Variant("(imvmv)", (int32) id, response,
 				error == null ? null : new Variant.string(error.message));
 			g_variant_ref(args);
-			env.call_function("Nuvola.Async.respond", ref args);
+			env.call_function("Nuvola.Async.respond", ref args, false);
 		}
 	}
 	

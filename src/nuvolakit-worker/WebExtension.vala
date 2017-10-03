@@ -61,7 +61,8 @@ public class WebExtension: GLib.Object
 			"Call JavaScript function.",
 			handle_call_function, {
 			new Drt.StringParam("name", true, false, null, "Function name."),
-			new Drt.VariantParam("params", true, true, null, "Function parameters.")
+			new Drt.VariantParam("params", true, true, null, "Function parameters."),
+			new Drt.BoolParam("propagate_error", true, true, "Whether to propagate error.")
 		});
 		router.add_method("/nuvola/password-manager/enable", Drt.RpcFlags.WRITABLE,
 			"Enable Password Manager", handle_enable_password_manager, null);
@@ -182,9 +183,10 @@ public class WebExtension: GLib.Object
 		this.bridge = bridge;
 	}
 	
-	private void handle_call_function(Drt.RpcRequest request) throws Drt.RpcError {
+	private void handle_call_function(Drt.RpcRequest request) throws GLib.Error {
 		var name = request.pop_string();
 		var func_params = request.pop_variant();
+		var propagate_error = request.pop_bool();
 		try {
 			if (bridge != null) {
 				bridge.call_function(name, ref func_params);
@@ -192,7 +194,11 @@ public class WebExtension: GLib.Object
 				warning("Bridge is null");
 			}
 		} catch (GLib.Error e) {
-			show_error("Error during call of %s: %s".printf(name, e.message));
+			if (propagate_error) {
+				throw e;
+			} else {
+				show_error("Error during call of %s: %s".printf(name, e.message));
+			}
 		}
 		request.respond(func_params);
 	}

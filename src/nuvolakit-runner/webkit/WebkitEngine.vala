@@ -380,7 +380,7 @@ public class WebkitEngine : WebEngine
 		args.get("(s@a{smv}@av)", null, out values, out entries);
 	}
 
-	public override void call_function(string name, ref Variant? params) throws GLib.Error
+	public override void call_function(string name, ref Variant? params, bool propagate_error=false) throws GLib.Error
 	{
 		env.call_function(name, ref params);
 	}

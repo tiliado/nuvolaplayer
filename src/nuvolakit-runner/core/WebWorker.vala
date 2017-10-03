@@ -53,13 +53,13 @@ public class RemoteWebWorker: GLib.Object, JSExecutor, WebWorker
 		return ipc_bus.web_worker.call_sync(name, params);
 	}
 	
-	public void call_function(string name, ref Variant? params) throws GLib.Error
-	{
-		var data = new Variant("(smv)", name, params);
-		if (ready)
+	public void call_function(string name, ref Variant? params, bool propagate_error=false) throws GLib.Error {
+		var data = new Variant("(smvb)", name, params, propagate_error);
+		if (ready) {
 			params = call_sync("/nuvola/webworker/call-function", data);
-		else
+		} else {
 			debug("Cannot call %s", data.print(false));
+		}
 	}
 }
 
