@@ -33,6 +33,7 @@ public abstract class WebEngine : GLib.Object, JSExecutor {
 	public bool ready {get; protected set; default = false;}
 	public bool can_go_back {get; protected set; default = false;}
 	public bool can_go_forward {get; protected set; default = false;}
+	public bool is_loading { get; protected set; default = false;}
 	public abstract bool get_web_plugins();
 	public abstract void set_web_plugins(bool enabled);
 	public abstract bool get_media_source_extension();

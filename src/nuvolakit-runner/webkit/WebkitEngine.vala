@@ -88,6 +88,7 @@ public class WebkitEngine : WebEngine
 		config.set_default_value(ZOOM_LEVEL_CONF, 1.0);
 		web_view.zoom_level = config.get_double(ZOOM_LEVEL_CONF);
 		web_view.load_changed.connect(on_load_changed);
+		web_view.notify["is-loading"].connect_after(on_is_loading_changed);
 		web_view.get_back_forward_list().changed.connect_after(on_back_forward_list_changed);
 		session = new Drt.KeyValueMap();
 		register_ipc_handlers();
@@ -859,6 +860,10 @@ public class WebkitEngine : WebEngine
 		{
 			runner_app.show_error("Integration script error", "The web app integration caused an error: %s".printf(e.message));
 		}
+	}
+	
+	private void on_is_loading_changed(GLib.Object o, ParamSpec p) {
+		this.is_loading = web_view.is_loading;
 	}
 	
 	private void on_back_forward_list_changed(WebKit.BackForwardListItem? item_added, void* items_removed)
