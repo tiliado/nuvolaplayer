@@ -30,6 +30,7 @@ public class WebAppWindow : Drtgtk.ApplicationWindow
 	public Gtk.Grid grid {get; private set;}
 	public Gtk.Overlay overlay {get; private set;}
 	public Sidebar sidebar {get; private set;}
+	public Drtgtk.HeaderBarTitle headerbar_title {get; private set;}
 	
 	public int sidebar_position
 	{
@@ -70,6 +71,14 @@ public class WebAppWindow : Drtgtk.ApplicationWindow
 		base(app, true);
 		window_state_event.connect(on_window_state_event);
 		title = app.app_name;
+		headerbar_title = new Drtgtk.HeaderBarTitle(title);
+		headerbar_title.show();
+		header_bar.custom_title = headerbar_title;
+		header_bar.notify["custom-title"].connect_after((o, p) => {
+			if (header_bar.custom_title == null) {
+				header_bar.custom_title = headerbar_title;
+			}
+		});
 		try
 		{
 			icon = Gtk.IconTheme.get_default().load_icon(app.icon, 48, 0);

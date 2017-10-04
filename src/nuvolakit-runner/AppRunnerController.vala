@@ -837,15 +837,26 @@ public class AppRunnerController: Drtgtk.Application
 		}
 	}
 	
-	private void on_web_engine_notify(GLib.Object o, ParamSpec p)
-	{
-		switch (p.name)
-		{
+	private void on_web_engine_notify(GLib.Object o, ParamSpec p) {
+		switch (p.name) {
 		case "can-go-forward":
 			actions.get_action(Actions.GO_FORWARD).enabled = web_engine.can_go_forward;
 			break;
 		case "can-go-back":
 			actions.get_action(Actions.GO_BACK).enabled = web_engine.can_go_back;
+			break;
+		case "is-loading":
+			var title_bar = main_window.headerbar_title;
+			if (web_engine.is_loading) {
+				var spinner = new Gtk.Spinner();
+				spinner.start();
+				spinner.show();
+				title_bar.set_start_widget(spinner);
+				title_bar.set_subtitle("loading...");
+			} else {
+				title_bar.set_start_widget(null);
+				title_bar.set_subtitle(null);
+			}
 			break;
 		}
 	}
