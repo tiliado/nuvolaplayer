@@ -130,24 +130,23 @@ private void dri2_connect(X.Display dpy, out int major, out int minor, out strin
  * @param name    The driver name.
  * @return `true` if the corresponding `libvdpau_XXX.so` has been found, false otherwise.
  */
-public bool have_vdpau_driver(string name)
-{
+public bool have_vdpau_driver(string name) {
 	var filename = "/usr/lib/vdpau/libvdpau_%s.so".printf(name);
-	if (FileUtils.test(filename, FileTest.EXISTS))
-	{
+	var paths = new StringBuilder(filename);
+	if (FileUtils.test(filename, FileTest.EXISTS)) {
 		debug("VDPAU driver found: %s", filename);
 		return true;
 	}
 	var libdirs = Drt.String.split_strip(Environment.get_variable("LD_LIBRARY_PATH"), ":");
-	foreach (unowned string libdir in libdirs)
-	{
+	foreach (unowned string libdir in libdirs) {
 		filename = "%s/vdpau/libvdpau_%s.so".printf(libdir, name);
-		if (FileUtils.test(filename, FileTest.EXISTS))
-		{
+		paths.append_c(':').append(filename);
+		if (FileUtils.test(filename, FileTest.EXISTS)) {
 			debug("VDPAU driver found: %s", filename);
 			return true;
 		}
 	}
+	debug("%s: VDPAU driver paths: %s", name, paths.str);
 	return false;
 }
 
@@ -157,24 +156,23 @@ public bool have_vdpau_driver(string name)
  * @param name    The driver name.
  * @return `true` if the corresponding `dri/XXX_dri_video.so` has been found, false otherwise.
  */
-public bool have_vaapi_driver(string name)
-{
+public bool have_vaapi_driver(string name) {
 	var filename = "/usr/lib/dri/%s_drv_video.so".printf(name);
-	if (FileUtils.test(filename, FileTest.EXISTS))
-	{
+	var paths = new StringBuilder(filename);
+	if (FileUtils.test(filename, FileTest.EXISTS)) {
 		debug("VA-API driver found: %s", filename);
 		return true;
 	}
 	var libdirs = Drt.String.split_strip(Environment.get_variable("LIBVA_DRIVERS_PATH"), ":");
-	foreach (unowned string libdir in libdirs)
-	{
+	foreach (unowned string libdir in libdirs) {
 		filename = "%s/%s_drv_video.so".printf(libdir, name);
-		if (FileUtils.test(filename, FileTest.EXISTS))
-		{
+		paths.append_c(':').append(filename);
+		if (FileUtils.test(filename, FileTest.EXISTS)) {
 			debug("VA-API driver found: %s", filename);
 			return true;
 		}
 	}
+	debug("%s: VA-API driver paths: %s", name, paths.str);
 	return false;
 }
 
