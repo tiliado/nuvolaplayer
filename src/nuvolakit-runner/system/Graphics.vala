@@ -30,12 +30,12 @@ public string? get_required_gl_extension() {
 	try {
 		var nvidia_version = Drt.System.read_file(File.new_for_path("/sys/module/nvidia/version")).strip();
 		if (nvidia_version != "") {
-			if (FileUtils.test("/sys/module/i915", FileTest.EXISTS)
-			&& FileUtils.test("/sys/fs/cgroup/pids/system.slice/bumblebeed.service", FileTest.EXISTS)) {
-				return null;  // tiliado/nuvolaruntime#380
-			} else {
-				return "nvidia-" + nvidia_version.replace(".", "-");
-			}
+			var i915 = FileUtils.test("/sys/module/i915", FileTest.EXISTS);
+			var bumblebeed = FileUtils.test("/sys/fs/cgroup/pids/system.slice/bumblebeed.service", FileTest.EXISTS);
+			var ignored = i915 && bumblebeed;  // tiliado/nuvolaruntime#380
+			debug("Nvidia %s, i915 %d, bumblebeed %d => ignored %d",
+				nvidia_version, (int) i915, (int) bumblebeed, (int) ignored);
+			return ignored ? null : "nvidia-" + nvidia_version.replace(".", "-");
 		}	
 	}
 	catch (GLib.Error e) {
