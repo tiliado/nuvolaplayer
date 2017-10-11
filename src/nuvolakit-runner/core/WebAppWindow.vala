@@ -71,7 +71,7 @@ public class WebAppWindow : Drtgtk.ApplicationWindow
 		base(app, true);
 		window_state_event.connect(on_window_state_event);
 		title = app.app_name;
-		headerbar_title = new Drtgtk.HeaderBarTitle(title);
+		headerbar_title = new Drtgtk.HeaderBarTitle(get_titlebar() == header_bar ? title : null);
 		headerbar_title.show();
 		header_bar.custom_title = headerbar_title;
 		header_bar.notify["custom-title"].connect_after((o, p) => {
