@@ -103,7 +103,9 @@ Build and Install
 ### Dependencies
 
   * [Python 3](http://python.org) >= 3.4
-  * [Vala](https://wiki.gnome.org/Projects/Vala) >= 0.36.3
+  * [Vala](https://wiki.gnome.org/Projects/Vala) >= 0.36.3 && < 0.37.
+    If you use Vala >= 0.37, modify `wscript` and check that the `vapi/*.patch`
+    patches still apply cleanly.
   * [Diorite library](https://github.com/tiliado/diorite) 0.3.x
   * [glib-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.52.0
   * [gio-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.52.0
