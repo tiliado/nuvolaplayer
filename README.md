@@ -106,7 +106,7 @@ Build and Install
   * [Vala](https://wiki.gnome.org/Projects/Vala) >= 0.36.3 && < 0.37.
     If you use Vala >= 0.37, modify `wscript` and check that the `vapi/*.patch`
     patches still apply cleanly.
-  * [Diorite library](https://github.com/tiliado/diorite) 0.3.x
+  * [Diorite library](https://github.com/tiliado/diorite) (version number is in sync with Nuvola)
   * [glib-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.52.0
   * [gio-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.52.0
   * [gobject-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.52.0
