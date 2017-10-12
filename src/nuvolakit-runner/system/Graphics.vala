@@ -138,6 +138,11 @@ public bool have_vdpau_driver(string name) {
 		return true;
 	}
 	var libdirs = Drt.String.split_strip(Environment.get_variable("LD_LIBRARY_PATH"), ":");
+	#if FLATPAK
+	// The latest flatpak does not set LD_LIBRARY_PATH anymore.
+	// flatpak/flatpak#1073 tiliado/nuvolaruntime#280
+	libdirs.append("/app/lib");  
+	#endif
 	foreach (unowned string libdir in libdirs) {
 		filename = "%s/vdpau/libvdpau_%s.so".printf(libdir, name);
 		paths.append_c(':').append(filename);
