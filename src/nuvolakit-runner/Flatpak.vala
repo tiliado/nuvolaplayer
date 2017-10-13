@@ -82,5 +82,22 @@ public async void check_desktop_portal_available_async(int timeout_ms, Cancellab
     }
 }
 
+private void clear_fontconfig_cache() {
+    var fontconfig_cache_dir = File.new_for_path(Environment.get_user_cache_dir() + "/fontconfig");
+    var fontconfig_nuvola_tag = fontconfig_cache_dir.get_child("--fontconfig-nuvola-tag-1--");
+    if (!fontconfig_nuvola_tag.query_exists(null)) {
+        debug("Nuvola fontconfig cache tag does not exist. %s", fontconfig_nuvola_tag.get_path());
+        try {
+            if (fontconfig_cache_dir.query_exists(null)) {
+                Drt.System.purge_directory_content(fontconfig_cache_dir, true);
+            }
+            Drt.System.make_dirs(fontconfig_cache_dir);
+            Drt.System.overwrite_file(fontconfig_nuvola_tag, "Nuvola");
+        } catch (GLib.Error e) {
+            warning("Failed to purge fontconfig cache. %s", e.message);
+        }
+    }
+}
+
 } // namespace Nuvola.Flatpak
 #endif
