@@ -723,29 +723,23 @@ public class AppRunnerController: Drtgtk.Application
 		return false;
 	}
 	
-	private void on_component_enabled_changed(GLib.Object object, ParamSpec param)
-	{
+	private void on_component_enabled_changed(GLib.Object object, ParamSpec param) {
 		var component = object as Component;
 		return_if_fail(component != null);
 		var signal_name = component.enabled ? "ComponentLoaded" : "ComponentUnloaded";
 		var payload = new Variant("(sss)", signal_name, component.id, component.name);
-		try
-		{
-			
+		try {
 			web_engine.call_function_sync("Nuvola.core.emit", ref payload);
-		}
-		catch (GLib.Error e)
-		{
+		} catch (GLib.Error e) {
 			warning("Communication with web engine failed: %s", e.message);
 		}
-		try
-		{
-			web_engine.web_worker.call_function_sync("Nuvola.core.emit", ref payload);
-		}
-		catch (GLib.Error e)
-		{
-			warning("Communication with web worker failed: %s", e.message);
-		}
+		web_engine.web_worker.call_function.begin("Nuvola.core.emit", payload, false, (o, res) => {
+			try {
+				web_engine.web_worker.call_function.end(res, null);
+			} catch (GLib.Error e) {
+				warning("Communication with web worker failed: %s", e.message);
+			}
+		});
 	}
 	
 	private void handle_get_metadata(Drt.RpcRequest request) throws Drt.RpcError
@@ -796,44 +790,40 @@ public class AppRunnerController: Drtgtk.Application
 		request.respond(new Variant.boolean(false));
 	}
 	
-	private void on_action_changed(Drtgtk.Action action, ParamSpec p)
-	{
-		if (p.name != "enabled")
+	private void on_action_changed(Drtgtk.Action action, ParamSpec p) {
+		if (p.name != "enabled") {
 			return;
-		try
-		{
-			var payload = new Variant("(ssb)", "ActionEnabledChanged", action.name, action.enabled);
-			web_engine.web_worker.call_function_sync("Nuvola.actions.emit", ref payload);
 		}
-		catch (GLib.Error e)
-		{
-			if (e is Drt.RpcError.NOT_READY)
-				debug("Communication failed: %s", e.message);
-			else
-				warning("Communication failed: %s", e.message);
-		}
+		var payload = new Variant("(ssb)", "ActionEnabledChanged", action.name, action.enabled);
+		web_engine.web_worker.call_function.begin("Nuvola.actions.emit", payload, false, (o, res) => {
+			try {
+				web_engine.web_worker.call_function.end(res, null);
+			} catch (GLib.Error e) {
+				if (e is Drt.RpcError.NOT_READY) {
+					debug("Communication failed: %s", e.message);
+				} else {
+					warning("Communication failed: %s", e.message);
+				}
+			}
+		});
 	}
 	
-	private void on_config_changed(string key, Variant? old_value)
-	{
-		switch (key)
-		{
+	private void on_config_changed(string key, Variant? old_value) {
+		switch (key) {
 		case ConfigKey.DARK_THEME:
 			Gtk.Settings.get_default().gtk_application_prefer_dark_theme = config.get_bool(ConfigKey.DARK_THEME);
 			break;
 		}
 		
-		if (web_engine.web_worker.ready)
-		{
-			try
-			{
-				var payload = new Variant("(ss)", "ConfigChanged", key);
-				web_engine.web_worker.call_function("Nuvola.config.emit", ref payload);
-			}
-			catch (GLib.Error e)
-			{
-				warning("Communication failed: %s", e.message);
-			}
+		if (web_engine.web_worker.ready) {
+			var payload = new Variant("(ss)", "ConfigChanged", key);
+			web_engine.web_worker.call_function.begin("Nuvola.config.emit", payload, false, (o, res) => {
+				try {
+					web_engine.web_worker.call_function.end(res, null);
+				} catch (GLib.Error e) {
+					warning("Communication failed: %s", e.message);
+				}
+			});
 		}
 	}
 	

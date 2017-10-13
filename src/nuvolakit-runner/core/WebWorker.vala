@@ -32,6 +32,11 @@ public interface WebWorker: GLib.Object, JSExecutor
 	public abstract bool ready {get; set; default = false;}
 	
 	public abstract Variant? call_sync(string name, Variant? params) throws GLib.Error;
+	
+	public abstract async Variant? call(string name, Variant? params) throws GLib.Error;
+	
+	public abstract async void call_function(string name, Variant? params, bool propagate_error,
+		out Variant? modified_params) throws GLib.Error;
 }
 
 public class RemoteWebWorker: GLib.Object, JSExecutor, WebWorker
@@ -53,12 +58,31 @@ public class RemoteWebWorker: GLib.Object, JSExecutor, WebWorker
 		return ipc_bus.web_worker.call_sync(name, params);
 	}
 	
+	public async Variant? call(string name, Variant? params) throws GLib.Error {
+		if (ipc_bus.web_worker == null) {
+			throw new Drt.RpcError.NOT_READY("Web worker process is not ready yet");
+		}
+		return yield ipc_bus.web_worker.call(name, params);
+	}
+	
 	public void call_function_sync(string name, ref Variant? params, bool propagate_error=false) throws GLib.Error {
 		var data = new Variant("(smvb)", name, params, propagate_error);
 		if (ready) {
 			params = call_sync("/nuvola/webworker/call-function", data);
 		} else {
 			debug("Cannot call %s", data.print(false));
+		}
+	}
+	
+	public async void call_function(string name, Variant? params, bool propagate_error, out Variant? modified_params)
+	throws GLib.Error {
+		modified_params = null;
+		var data = new Variant("(smvb)", name, params, propagate_error);
+		if (ready) {
+			modified_params = yield call("/nuvola/webworker/call-function", data);
+		} else {
+			debug("Cannot call %s", data.print(false));
+			modified_params = params;
 		}
 	}
 }
