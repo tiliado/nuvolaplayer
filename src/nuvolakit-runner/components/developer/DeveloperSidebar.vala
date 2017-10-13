@@ -92,7 +92,7 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
 		label = new HeaderLabel("Album");
 		label.halign = Gtk.Align.START;
 		grid.add(label);
-		album = new Gtk.Label(player.album);
+		album = new Gtk.Label(player.album ?? "(null)");
 		album.set_line_wrap(true);
 		album.halign = Gtk.Align.START;
 		grid.attach_next_to(album, label, Gtk.PositionType.BOTTOM, 1, 1);
