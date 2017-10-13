@@ -732,7 +732,7 @@ public class AppRunnerController: Drtgtk.Application
 		try
 		{
 			
-			web_engine.call_function("Nuvola.core.emit", ref payload);
+			web_engine.call_function_sync("Nuvola.core.emit", ref payload);
 		}
 		catch (GLib.Error e)
 		{
@@ -740,7 +740,7 @@ public class AppRunnerController: Drtgtk.Application
 		}
 		try
 		{
-			web_engine.web_worker.call_function("Nuvola.core.emit", ref payload);
+			web_engine.web_worker.call_function_sync("Nuvola.core.emit", ref payload);
 		}
 		catch (GLib.Error e)
 		{
@@ -803,7 +803,7 @@ public class AppRunnerController: Drtgtk.Application
 		try
 		{
 			var payload = new Variant("(ssb)", "ActionEnabledChanged", action.name, action.enabled);
-			web_engine.web_worker.call_function("Nuvola.actions.emit", ref payload);
+			web_engine.web_worker.call_function_sync("Nuvola.actions.emit", ref payload);
 		}
 		catch (GLib.Error e)
 		{

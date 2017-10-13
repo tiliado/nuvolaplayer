@@ -28,7 +28,7 @@ namespace Nuvola
 
 public interface JSExecutor: GLib.Object
 {
-	public abstract void call_function(string name, ref Variant? params, bool propagate_error=false) throws GLib.Error;
+	public abstract void call_function_sync(string name, ref Variant? params, bool propagate_error=false) throws GLib.Error;
 	
 	public string? send_data_request_string(string name, string key, string? default_value=null) throws GLib.Error
 	{
@@ -54,7 +54,7 @@ public interface JSExecutor: GLib.Object
 		var builder = new VariantBuilder(new VariantType("a{smv}"));
 		builder.add("{smv}", key, default_value);
 		var args = new Variant("(s@a{smv})", name, builder.end());
-		call_function("Nuvola.core.emit", ref args, false);
+		call_function_sync("Nuvola.core.emit", ref args, false);
 		VariantIter iter = args.iterator();
 		assert(iter.next("s", null));
 		assert(iter.next("a{smv}", &iter));

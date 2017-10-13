@@ -91,7 +91,7 @@ public abstract class Nuvola.Binding<ObjectType>: GLib.Object
 	
 	protected void call_web_worker(string func_name, ref Variant? params) throws GLib.Error
 	{
-		web_worker.call_function(func_name, ref params);
+		web_worker.call_function_sync(func_name, ref params);
 	}
 	
 	~Binding()

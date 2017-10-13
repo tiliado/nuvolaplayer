@@ -138,7 +138,7 @@ public class WebkitEngine : WebEngine
 			try
 			{
 				var args = new Variant("(s)", "InitAppRunner");
-				env.call_function("Nuvola.core.emit", ref args);
+				env.call_function_sync("Nuvola.core.emit", ref args);
 			}
 			catch (GLib.Error e)
 			{
@@ -372,7 +372,7 @@ public class WebkitEngine : WebEngine
 		var args = new Variant("(s@a{sv}@av)", "PreferencesForm", new Variant.array(new VariantType("{sv}"), {}), new Variant.array(VariantType.VARIANT, {}));
 		try
 		{
-			env.call_function("Nuvola.core.emit", ref args);
+			env.call_function_sync("Nuvola.core.emit", ref args);
 		}
 		catch (GLib.Error e)
 		{
@@ -381,9 +381,9 @@ public class WebkitEngine : WebEngine
 		args.get("(s@a{smv}@av)", null, out values, out entries);
 	}
 
-	public override void call_function(string name, ref Variant? params, bool propagate_error=false) throws GLib.Error
+	public override void call_function_sync(string name, ref Variant? params, bool propagate_error=false) throws GLib.Error
 	{
-		env.call_function(name, ref params);
+		env.call_function_sync(name, ref params);
 	}
 	
 	private bool request_init_form()
@@ -393,7 +393,7 @@ public class WebkitEngine : WebEngine
 		var args = new Variant("(s@a{sv}@av)", "InitializationForm", new Variant.array(new VariantType("{sv}"), {}), new Variant.array(VariantType.VARIANT, {}));
 		try
 		{
-			env.call_function("Nuvola.core.emit", ref args);
+			env.call_function_sync("Nuvola.core.emit", ref args);
 		}
 		catch (GLib.Error e)
 		{
@@ -492,7 +492,7 @@ public class WebkitEngine : WebEngine
 				Drt.EventLoop.add_idle(() => {
 					var args = new Variant.tuple({});
 					try {
-						web_worker.call_function("Nuvola.checkMSE", ref args, true);
+						web_worker.call_function_sync("Nuvola.checkMSE", ref args, true);
 					} catch (GLib.Error e) {
 						runner_app.fatal_error("Initialization error", "Your distributor set the --webkitgtk-supports-mse build flag but your WebKitGTK+ library does not include Media Source Extension.\n\n" + e.message);
 					}
@@ -635,7 +635,7 @@ public class WebkitEngine : WebEngine
 			{
 				var payload = new Variant(
 					"(dbusss)", cb_id, true, d.get_response().status_code, d.get_response().status_code.to_string(), file.get_path(), file.get_uri());
-				web_worker.call_function("Nuvola.browser._downloadDone", ref payload);
+				web_worker.call_function_sync("Nuvola.browser._downloadDone", ref payload);
 			}
 			catch (GLib.Error e)
 			{
@@ -656,7 +656,7 @@ public class WebkitEngine : WebEngine
 			{
 				var payload = new Variant(
 					"(dbusss)", cb_id, false, d.get_response().status_code, d.get_response().status_code.to_string(), "", "");
-				web_worker.call_function("Nuvola.browser._downloadDone", ref payload);
+				web_worker.call_function_sync("Nuvola.browser._downloadDone", ref payload);
 			}
 			catch (GLib.Error e)
 			{
@@ -790,7 +790,7 @@ public class WebkitEngine : WebEngine
 		var args = new Variant("(s@a{smv})", "NavigationRequest", builder.end());
 		try
 		{
-			env.call_function("Nuvola.core.emit", ref args);
+			env.call_function_sync("Nuvola.core.emit", ref args);
 		}
 		catch (GLib.Error e)
 		{
@@ -823,7 +823,7 @@ public class WebkitEngine : WebEngine
 		var args = new Variant("(s@a{smv})", "PageSettings", builder.end());
 		try
 		{
-			env.call_function("Nuvola.core.emit", ref args);
+			env.call_function_sync("Nuvola.core.emit", ref args);
 		}
 		catch (GLib.Error e)
 		{
@@ -854,7 +854,7 @@ public class WebkitEngine : WebEngine
 		var args = new Variant("(sms)", "UriChanged", web_view.uri);
 		try
 		{
-			env.call_function("Nuvola.core.emit", ref args);
+			env.call_function_sync("Nuvola.core.emit", ref args);
 		}
 		catch (GLib.Error e)
 		{

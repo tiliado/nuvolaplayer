@@ -111,7 +111,7 @@ public class JsEnvironment: GLib.Object, JSExecutor
 		return value;
 	}
 	
-	public void call_function(string name, ref Variant? args, bool propagate_error) throws GLib.Error
+	public void call_function_sync(string name, ref Variant? args, bool propagate_error) throws GLib.Error
 	{
 		unowned JS.Context ctx = context;
 		string[] names = name.split(".");

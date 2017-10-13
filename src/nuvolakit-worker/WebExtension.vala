@@ -189,7 +189,7 @@ public class WebExtension: GLib.Object
 		var propagate_error = request.pop_bool();
 		try {
 			if (bridge != null) {
-				bridge.call_function(name, ref func_params);
+				bridge.call_function_sync(name, ref func_params);
 			} else {
 				warning("Bridge is null");
 			}
@@ -315,7 +315,7 @@ public class WebExtension: GLib.Object
 			try
 			{
 				var args = new Variant("(s)", "InitWebWorker");
-				bridge.call_function("Nuvola.core.emit", ref args);
+				bridge.call_function_sync("Nuvola.core.emit", ref args);
 			}
 			catch (GLib.Error e)
 			{
