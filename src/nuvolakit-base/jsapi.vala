@@ -145,7 +145,10 @@ public class JSApi : GLib.Object
 		if (this.env != null) {
 			var args = new Variant("(imvmv)", (int32) id, response,
 				error == null ? null : new Variant.string(error.message));
-			g_variant_ref(args);
+			if (response != null) {
+				// FIXME: How are we losing a reference here?
+				g_variant_ref(response);
+			}
 			env.call_function_sync("Nuvola.Async.respond", ref args, false);
 		}
 	}
