@@ -43,9 +43,17 @@ Async.begin = function (func) {
 		func(ctx);
 	} catch (error) {
 		ctx.reject(error);
-		delete this.promises[ctx.id];
+		this.remove(ctx);
 	}
 	return ctx.promise;
+}
+
+Async.remove = function (ctx) {
+	delete this.promises[ctx.id]
+	// Break reference cycles
+	delete ctx.promise
+	delete ctx.reject
+	delete ctx.resolve
 }
 
 Async.call = function(path, params) {
@@ -55,12 +63,12 @@ Async.call = function(path, params) {
 Async.respond = function(id, response, error) {
 	var ctx = this.promises[id];
 	if (ctx) {
-		delete this.promises[id];
 		if (error) {
 			ctx.reject(error);
 		} else {
 			ctx.resolve(response);
 		}
+		this.remove(ctx);
 	} else {
 		throw new Error("Promise " + id + " not found.");
 	}
