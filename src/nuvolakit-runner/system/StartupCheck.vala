@@ -333,7 +333,8 @@ public class StartupCheck : GLib.Object
 		}
 		catch (Graphics.DriError e)
 		{
-			if (e is Graphics.DriError.NO_X_DISPLAY || e is Graphics.DriError.EXTENSION_QUERY)
+			if (e is Graphics.DriError.NO_X_DISPLAY || e is Graphics.DriError.EXTENSION_QUERY
+			|| e is Graphics.DriError.CONNECT)
 			{
 				vdpau_driver_status = Status.NOT_APPLICABLE;
 				vaapi_driver_status = Status.NOT_APPLICABLE;
