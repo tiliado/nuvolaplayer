@@ -22,56 +22,42 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
-namespace Actions
-{
-	public const string START_APP = "start-app";
-	public const string QUIT = "quit";
-}
-
-public string build_master_ipc_id()
-{
+public string build_master_ipc_id() {
 	return "N3";
 }
 
-public class MasterController : Drtgtk.Application
-{
+public class MasterController : Drtgtk.Application {
 	private const string APP_STARTED = "/nuvola/core/app-started";
 	private const string APP_EXITED = "/nuvola/core/app-exited";
-	private const string PAGE_WELCOME = "welcome";
-	
-	public MasterWindow? main_window {get; private set; default = null;}
-	public WebAppList? web_app_list {get; private set; default = null;}
+		
 	public Drt.Storage storage {get; private set; default = null;}
 	public WebAppRegistry? web_app_reg {get; private set; default = null;}
 	public Config config {get; private set; default = null;}
+	public TiliadoActivation? activation {get; private set; default = null;}
+	public bool debuging {get; private set; default = false;}
 	private string[] exec_cmd;
 	private Queue<AppRunner> app_runners = null;
 	private HashTable<string, AppRunner> app_runners_map = null;
 	private MasterBus server = null;
 	private MasterDbusApi? dbus_api = null;
 	private uint dbus_api_id = 0;
-	private WebkitOptions? webkit_options = null;
-	
+	private MasterUserInterface? _ui = null;
 	private Drt.KeyValueStorageServer storage_server = null;
 	private ActionsKeyBinderServer actions_key_binder = null;
 	private MediaKeysServer media_keys = null;
-	#if TILIADO_API
-	private TiliadoActivation? activation = null;
-	private TiliadoUserAccountWidget? tiliado_widget = null;
-	private TiliadoTrialWidget? tiliado_trial = null;
-	#endif
+	
 	#if EXPERIMENTAL
 	private HttpRemoteControl.Server http_remote_control = null;
 	#endif
-	private InitState init_state = InitState.NONE;
-	private bool debuging;
 	
-	public MasterController(Drt.Storage storage, WebAppRegistry? web_app_reg, string[] exec_cmd, bool debuging=false)
-	{
-		base(Nuvola.get_app_uid(), Nuvola.get_app_name(), Nuvola.get_dbus_id(), ApplicationFlags.HANDLES_COMMAND_LINE);
+	private bool initialized = false;
+	
+	public MasterController(Drt.Storage storage, WebAppRegistry? web_app_reg, string[] exec_cmd,
+	bool debuging=false) {
+		base(Nuvola.get_app_uid(), Nuvola.get_app_name(), Nuvola.get_dbus_id(),
+			ApplicationFlags.HANDLES_COMMAND_LINE);
 		icon = Nuvola.get_app_icon();
 		version = Nuvola.get_version();
 		this.storage = storage;
@@ -80,75 +66,136 @@ public class MasterController : Drtgtk.Application
 		this.debuging = debuging;
 	}
 	
+	public signal void runner_exited(AppRunner runner);
+	
 	public override void activate() {
 		hold();
-		show_main_window();
+		get_ui().show_main_window();
 		show_welcome_screen();
 		release();
 	}
 	
-	public void show_main_window(string? page=null)
-	{
-		if (main_window == null)
-			create_main_window();
-		main_window.present();
-		if (page != null)
-			main_window.stack.visible_child_name = page;
-	}
-	
-	public signal void runner_exited(AppRunner runner);
-	
-	public override bool dbus_register(DBusConnection conn, string object_path)
-		throws GLib.Error
-	{
-		if (!base.dbus_register(conn, object_path))
+	public override bool dbus_register(DBusConnection conn, string object_path) throws GLib.Error {
+		if (!base.dbus_register(conn, object_path)) {
 			return false;
-		init_core();
+		}
 		dbus_api = new MasterDbusApi(this);
 		dbus_api_id = conn.register_object(object_path, dbus_api);
 		return true;
 	}
 	
-	public override void dbus_unregister(DBusConnection conn, string object_path)
-	{
-		if (dbus_api_id > 0)
-		{
+	public override void dbus_unregister(DBusConnection conn, string object_path) {
+		if (dbus_api_id > 0) {
 			conn.unregister_object(dbus_api_id);
 			dbus_api_id = 0;
 		}
 		base.dbus_unregister(conn, object_path);
 	}
 	
-	public override void apply_custom_styles(Gdk.Screen screen)
-	{
+	public override void apply_custom_styles(Gdk.Screen screen) {
 		base.apply_custom_styles(screen);
 		Nuvola.Css.apply_custom_styles(screen);
 	}
 	
-	#if FLATPAK
-	private async bool is_desktop_portal_available() {
-		try {
-			yield Drt.Flatpak.check_desktop_portal_available(null);
-			return true;
-		} catch (GLib.Error e) {
-			var dialog = new Gtk.MessageDialog.with_markup(
-				main_window, Gtk.DialogFlags.MODAL, Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE,
-				("<b><big>Failed to connect to XDG Desktop Portal</big></b>\n\n"
-				+ "Make sure the XDG Desktop Portal is installed on your system. "
-				+ "It might be sufficient to install the xdg-desktop-portal and xdg-desktop-portal-gtk "
-				+ "packages. If unsure, follow detailed installation instructions at https://nuvola.tiliado.eu"
-				+ "\n\n%s"), e.message);
-			Timeout.add_seconds(120, () => { dialog.destroy(); return false;});
-			dialog.run();
-			return false;
-		}
+	public override int command_line(ApplicationCommandLine command_line) {
+		hold();
+		var result = handle_command_line(command_line);
+		release();
+		return result;
 	}
-	#endif
 	
-	private void init_core()
-	{
-		if (init_state >= InitState.CORE)
+	private int handle_command_line(ApplicationCommandLine command_line) {
+		string? app_id = null;
+		bool list_apps = false;
+		bool list_apps_json = false;
+		OptionEntry[] options = new OptionEntry[4];
+		options[0] = { "app-id", 'a', 0, OptionArg.STRING, ref app_id, "Web app to run.", "ID" };
+		options[1] = { "list-apps", 'l', 0, OptionArg.NONE, ref list_apps, "List available application.", null };
+		options[2] = { "list-apps-json", 'j', 0, OptionArg.NONE, ref list_apps_json, "List available application (JSON output).", null };
+		options[3] = { null };
+		
+		// We have to make an extra copy of the array, since .parse assumes
+		// that it can remove strings from the array without freeing them.
+		string[] args = command_line.get_arguments();
+		string*[] _args = new string[args.length];
+		for (int i = 0; i < args.length; i++) {
+			_args[i] = args[i];
+		}
+		try {
+			var opt_context = new OptionContext("- " + Nuvola.get_app_name());
+			opt_context.set_help_enabled(true);
+			opt_context.add_main_entries(options, null);
+			unowned string[] tmp = _args;
+			opt_context.parse(ref tmp);
+			_args.length = tmp.length;
+		} catch (OptionError e) {
+			command_line.printerr("option parsing failed: %s\n", e.message);
+			return 1;
+		}
+		
+		if (_args.length >  1) {
+			command_line.printerr("%s", "Too many arguments.\n");
+			return 1;
+		}
+		
+		late_init();
+		
+		if (list_apps || list_apps_json) {
+			var all_apps = web_app_reg.list_web_apps(null);
+			var keys = all_apps.get_keys();
+			keys.sort(strcmp);
+			
+			if (list_apps_json) {
+				var builder = new Drt.JsonBuilder();
+				builder.begin_array();
+				foreach (var key in keys) {
+					builder.begin_object();
+					builder.set_string("id", key);
+					var app = all_apps[key];
+					builder.set_string("name", app.name);
+					builder.set_printf("version", "%d.%d", app.version_major, app.version_minor);
+					builder.set_member("datadir");
+					if (app.data_dir == null) {
+						builder.add_null();
+					} else {
+						builder.add_string(app.data_dir.get_path());
+					}
+					builder.end_object();
+				}
+				builder.end_array();
+				command_line.print_literal(builder.to_pretty_string());
+			} else {
+				var buf = new StringBuilder();
+				foreach (var key in keys) {
+					var app = all_apps[key];
+					string path = app.data_dir == null ? "" : app.data_dir.get_path();
+					buf.append_printf("%s | %s | %d.%d | %s\n",
+						key, app.name, app.version_major, app.version_minor, path);
+				}
+				command_line.print_literal(buf.str);
+			}
+			return 0;
+		}
+		if (app_id != null) {
+			start_app.begin(app_id, (o, res) => start_app.end(res));
+		} else {
+			activate();
+		}
+		return 0;
+	}
+	
+	public unowned MasterUserInterface get_ui() {
+		if (_ui == null) {
+			late_init();
+			_ui = new MasterUserInterface(this);
+		}
+		return _ui;
+	}
+	
+	private void late_init() {
+		if (initialized) {
 			return;
+		}
 		
 		app_runners = new Queue<AppRunner>();
 		app_runners_map = new HashTable<string, AppRunner>(str_hash, str_equal);
@@ -157,8 +204,7 @@ public class MasterController : Drtgtk.Application
 		
 		var server_name = build_master_ipc_id();
 		Environment.set_variable("NUVOLA_IPC_MASTER", server_name, true);
-		try
-		{
+		try {
 			server = new MasterBus(server_name);
 			server.api.add_method("/nuvola/core/runner-started", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
 				null,
@@ -185,17 +231,13 @@ public class MasterController : Drtgtk.Application
 			server.api.add_notification(APP_EXITED, Drt.RpcFlags.WRITABLE|Drt.RpcFlags.SUBSCRIBE,
 				"Emitted when a app has exited.");
 			server.start();
-		}
-		catch (Drt.IOError e)
-		{
+		} catch (Drt.IOError e) {
 			warning("Master server error: %s", e.message);
 			quit();
 			return;
 		}
 		
-		#if TILIADO_API
 		init_tiliado_account();
-		#endif
 		
 		storage_server = new Drt.KeyValueStorageServer(server.api);
 		storage_server.add_provider("master.config", config);
@@ -209,194 +251,26 @@ public class MasterController : Drtgtk.Application
 		storage.assert_data_file("www/engine.io.js");
 		var www_root_dirname = "www";
 		File[] www_roots = {storage.user_data_dir.get_child(www_root_dirname)};
-		foreach (var data_dir in storage.data_dirs)
+		foreach (var data_dir in storage.data_dirs) {
 			www_roots += data_dir.get_child(www_root_dirname);
+		}
 		http_remote_control = new HttpRemoteControl.Server(
 			this, server, app_runners_map, app_runners, www_roots);
 		#endif
-		init_state = InitState.CORE;
+		initialized = true;
 	}
-	
-	private void init_gui()
-	{
-		init_core();
-		if (init_state >= InitState.GUI)
-			return;
 		
-		#if FLATPAK
-		Graphics.ensure_gl_extension_mounted(main_window);
-		#endif
-		
-		Drtgtk.Action[] actions_spec = {
-		//          Action(group, scope, name, label?, mnemo_label?, icon?, keybinding?, callback?)
-		new Drtgtk.SimpleAction("main", "app", Actions.HELP, "Help", "_Help", null, "F1", do_help),
-		new Drtgtk.SimpleAction("main", "app", Actions.ABOUT, "About", "_About", null, null, do_about),
-		new Drtgtk.SimpleAction("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
-		new Drtgtk.SimpleAction("main", "win", Actions.START_APP, "Start app", "_Start app", "media-playback-start", "<ctrl>S", do_start_app),
-		};
-		actions.add_actions(actions_spec);
-		
-		set_app_menu_items({Actions.HELP, Actions.ABOUT, Actions.QUIT});
-		
-		var app_storage = new WebAppStorage(storage.user_config_dir, storage.user_data_dir, storage.user_cache_dir);
-		webkit_options = new WebkitOptions(app_storage);
-		init_state = InitState.GUI;
-	}
-	
-	private void create_main_window()
-	{
-		init_gui();
-		main_window = new MasterWindow(this);
-		main_window.page_changed.connect(on_master_stack_page_changed);
-		var welcome_screen = new WelcomeScreen(this, storage, webkit_options.default_context);
-		welcome_screen.show();
-		main_window.add_page(welcome_screen, PAGE_WELCOME, "Welcome");
-		#if FLATPAK && !NUVOLA_ADK
-		var app_index_view = new AppIndexWebView(this, webkit_options.default_context);
-		app_index_view.load_app_index(Nuvola.REPOSITORY_INDEX, Nuvola.REPOSITORY_ROOT);
-		app_index_view.show();
-		main_window.add_page(app_index_view, "repository", "Repository Index");
-		#endif
-		
-		if (web_app_reg != null)
-		{
-			var model = new WebAppListFilter(new WebAppListModel(web_app_reg), debuging, null);
-			web_app_list = new WebAppList(this, model);
-			main_window.delete_event.connect(on_main_window_delete_event);
-			web_app_list.view.item_activated.connect_after(on_list_item_activated);
-			web_app_list.show();
-			main_window.add_page(web_app_list, "scripts", "Installed Apps");
-		}
-		
-		#if TILIADO_API
-		tiliado_trial = new TiliadoTrialWidget(activation, this, TiliadoMembership.BASIC);
-		main_window.top_grid.attach(tiliado_trial, 0, 4, 1, 1);
-		tiliado_widget = new TiliadoUserAccountWidget(activation);
-		main_window.header_bar.pack_end(tiliado_widget);
-		#endif
-		
-		#if FLATPAK
-		is_desktop_portal_available.begin((o, res) => is_desktop_portal_available.end(res));
-		#endif
-	}
-	
-	private void show_welcome_screen()
-	{
-		if (config.get_string("nuvola.welcome_screen") != get_welcome_screen_name())
-		{
-			show_main_window(PAGE_WELCOME);
-			config.set_string("nuvola.welcome_screen", get_welcome_screen_name());
-		}
-	}
-	
-	public override int command_line(ApplicationCommandLine command_line)
-	{
-		hold();
-		var result = handle_command_line(command_line);
-		release();
-		return result;
-	}
-	
-	private int handle_command_line(ApplicationCommandLine command_line)
-	{
-		string? app_id = null;
-		bool list_apps = false;
-		bool list_apps_json = false;
-		OptionEntry[] options = new OptionEntry[4];
-		options[0] = { "app-id", 'a', 0, OptionArg.STRING, ref app_id, "Web app to run.", "ID" };
-		options[1] = { "list-apps", 'l', 0, OptionArg.NONE, ref list_apps, "List available application.", null };
-		options[2] = { "list-apps-json", 'j', 0, OptionArg.NONE, ref list_apps_json, "List available application (JSON output).", null };
-		options[3] = { null };
-		
-		// We have to make an extra copy of the array, since .parse assumes
-		// that it can remove strings from the array without freeing them.
-		string[] args = command_line.get_arguments();
-		string*[] _args = new string[args.length];
-		for (int i = 0; i < args.length; i++)
-			_args[i] = args[i];
-		
-		try
-		{
-			var opt_context = new OptionContext("- " + Nuvola.get_app_name());
-			opt_context.set_help_enabled(true);
-			opt_context.add_main_entries(options, null);
-			unowned string[] tmp = _args;
-			opt_context.parse(ref tmp);
-			_args.length = tmp.length;
-		}
-		catch (OptionError e)
-		{
-			command_line.printerr("option parsing failed: %s\n", e.message);
-			return 1;
-		}
-		
-		if (_args.length >  1)
-		{
-			command_line.printerr("%s", "Too many arguments.\n");
-			return 1;
-		}
-		
-		init_core();
-		
-		if (list_apps || list_apps_json)
-		{
-			var all_apps = web_app_reg.list_web_apps(null);
-			var keys = all_apps.get_keys();
-			keys.sort(strcmp);
-			
-			if (list_apps_json)
-			{
-				var builder = new Drt.JsonBuilder();
-				builder.begin_array();
-				foreach (var key in keys)
-				{
-					builder.begin_object();
-					builder.set_string("id", key);
-					var app = all_apps[key];
-					builder.set_string("name", app.name);
-					builder.set_printf("version", "%d.%d", app.version_major, app.version_minor);
-					builder.set_member("datadir");
-					if (app.data_dir == null)
-						builder.add_null();
-					else
-						builder.add_string(app.data_dir.get_path());
-					builder.end_object();
-				}
-				builder.end_array();
-				command_line.print_literal(builder.to_pretty_string());
-			}
-			else
-			{
-				var buf = new StringBuilder();
-				foreach (var key in keys)
-				{
-					var app = all_apps[key];
-					string path = app.data_dir == null ? "" : app.data_dir.get_path();
-					buf.append_printf("%s | %s | %d.%d | %s\n",
-						key, app.name, app.version_major, app.version_minor, path);
-				}
-				command_line.print_literal(buf.str);
-			}
-			return 0;
-		}
-		if (app_id != null) {
-			start_app.begin(app_id, (o, res) => start_app.end(res));
-		} else {
-			activate();
-		}
-		return 0;
-	}
-	
-	private void handle_runner_started(Drt.RpcRequest request) throws Drt.RpcError
-	{
+	private void handle_runner_started(Drt.RpcRequest request) throws Drt.RpcError {
 		var app_id = request.pop_string();
 		var api_token = request.pop_string();
 		var runner = app_runners_map[app_id];
 		return_val_if_fail(runner != null, null);
 		
 		var channel = request.connection as Drt.RpcChannel;
-		if (channel == null)
-			throw new Drt.RpcError.REMOTE_ERROR("Failed to connect runner '%s'. %s ", app_id, request.connection.get_type().name());
+		if (channel == null) {
+			throw new Drt.RpcError.REMOTE_ERROR(
+				"Failed to connect runner '%s'. %s ", app_id, request.connection.get_type().name());
+		}
 		channel.api_token = api_token;
 		runner.connect_channel(channel);
 		debug("Connected to runner server for '%s'.", app_id);
@@ -404,27 +278,24 @@ public class MasterController : Drtgtk.Application
 		request.respond(new Variant.boolean(true));
 	}
 	
-	private void handle_runner_activated(Drt.RpcRequest request) throws Drt.RpcError
-	{
+	private void handle_runner_activated(Drt.RpcRequest request) throws Drt.RpcError {
 		var app_id = request.pop_string();
 		var runner = app_runners_map[app_id];
 		return_val_if_fail(runner != null, false);
 		
-		if (!app_runners.remove(runner))
+		if (!app_runners.remove(runner)) {
 			critical("Runner for '%s' not found in queue.", runner.app_id);
-		
+		}
 		app_runners.push_head(runner);
 		request.respond(new Variant.boolean(true));
 	}
 	
-	private void handle_get_top_runner(Drt.RpcRequest request) throws Drt.RpcError
-	{
+	private void handle_get_top_runner(Drt.RpcRequest request) throws Drt.RpcError {
 		var runner = app_runners.peek_head();
 		request.respond(new Variant("ms", runner == null ? null : runner.app_id));
 	}
 	
-	private void handle_list_apps(Drt.RpcRequest request) throws Drt.RpcError
-	{
+	private void handle_list_apps(Drt.RpcRequest request) throws Drt.RpcError {
 		var builder = new VariantBuilder(new VariantType("aa{sv}"));
 		var keys = app_runners_map.get_keys();
 		keys.sort(string.collate);
@@ -433,76 +304,13 @@ public class MasterController : Drtgtk.Application
 		request.respond(builder.end());
 	}
 	
-	private void handle_get_app_info(Drt.RpcRequest request) throws Drt.RpcError
-	{
+	private void handle_get_app_info(Drt.RpcRequest request) throws Drt.RpcError {
 		var app_id = request.pop_string();
 		var app = app_runners_map[app_id];
 		request.respond(app != null ? app.query_meta() : null);
 	}
 	
-	private void on_master_stack_page_changed(Gtk.Widget? page, string? name, string? title)
-	{
-		if (page != null && page == web_app_list)
-		{
-			set_toolbar({Actions.START_APP});
-			reset_menubar().append_submenu("_Apps", actions.build_menu({Actions.START_APP})); // For Unity
-		}
-		else
-		{
-			set_toolbar({});
-			reset_menubar();
-		}
-	}
-	
-	private void set_toolbar(string[] items)
-	{
-		main_window.create_toolbar(items);
-		#if TILIADO_API
-		if (tiliado_widget != null)
-			main_window.header_bar.pack_end(tiliado_widget);
-		#endif
-	}
-	
-	private bool on_main_window_delete_event(Gdk.EventAny event)
-	{
-		do_quit();
-		return true;
-	}
-	
-	private void do_quit()
-	{
-		main_window.hide();
-		remove_window(main_window);
-		main_window.destroy();
-		main_window = null;
-	}
-	
-	private void on_list_item_activated(Gtk.TreePath path)
-	{
-		do_start_app();
-	}
-	
-	private void do_about()
-	{
-		var dialog = new AboutDialog(main_window, null);
-		dialog.run();
-		dialog.destroy();
-	}
-	
-	private void do_help()
-	{
-		show_uri(Nuvola.HELP_URL);
-	}
-	
-	private void do_start_app()
-	{
-		if (web_app_list.selected_web_app == null)
-			return;
-		main_window.hide();
-		start_app.begin(web_app_list.selected_web_app, (o, res) => start_app.end(res));
-	}
-	
-	private async void start_app(string app_id) {
+	public async void start_app(string app_id) {
 		hold();
 		#if FLATPAK && NUVOLA_RUNTIME
 		try {
@@ -574,9 +382,22 @@ public class MasterController : Drtgtk.Application
 		#endif
 	}
 	
+	/**
+	 * Show welcome screen only if criteria are met.
+	 * 
+	 * Otherwise, no welcome screen is shown and the GUI is even not initialized.
+	 */
+	private void show_welcome_screen() {
+		if (config.get_string("nuvola.welcome_screen") != get_welcome_screen_name()) {
+			get_ui().show_main_window(MasterUserInterface.PAGE_WELCOME);
+			config.set_string("nuvola.welcome_screen", get_welcome_screen_name());
+		}
+	}
+	
 	public bool start_app_from_dbus(string app_id, string dbus_id, out string token) {
 		token = null;
 		hold();
+		late_init();
 		AppRunner runner;
 		token = null;
 		debug("Launch app runner for '%s': %s", app_id, dbus_id);
@@ -606,63 +427,31 @@ public class MasterController : Drtgtk.Application
 		return true;
 	}
 	
-	private void on_runner_exited(AppRunner runner)
-	{
+	private void on_runner_exited(AppRunner runner) {
 		debug("Runner exited: %s, was connected: %s", runner.app_id, runner.connected.to_string());
 		runner.exited.disconnect(on_runner_exited);
-		if (!app_runners.remove(runner))
+		if (!app_runners.remove(runner)) {
 			critical("Runner for '%s' not found in queue.", runner.app_id);
-		
-		if (app_runners_map[runner.app_id] == runner)
+		}
+		if (app_runners_map[runner.app_id] == runner) {
 			app_runners_map.remove(runner.app_id);
-		
+		}
 		server.api.emit(APP_EXITED, runner.app_id, runner.app_id);
 		runner_exited(runner);
 		release();
 	}
-	
-	#if !TILIADO_API
-	public bool is_tiliado_account_valid(TiliadoMembership required_membership)
-	{
-		return true;
-	}
-	#endif
-	
-	#if TILIADO_API
-	private void init_tiliado_account()	
-	{
+
+	private void init_tiliado_account() {
+		#if TILIADO_API
 		assert(TILIADO_OAUTH2_CLIENT_ID != null && TILIADO_OAUTH2_CLIENT_ID[0] != '\0');
 		var tiliado = new TiliadoApi2(
 			TILIADO_OAUTH2_CLIENT_ID, Drt.String.unmask(TILIADO_OAUTH2_CLIENT_SECRET.data),
 			TILIADO_OAUTH2_API_ENDPOINT, TILIADO_OAUTH2_TOKEN_ENDPOINT, null, "nuvolaplayer");
 		activation = new TiliadoActivationManager(tiliado, server, config);
-		if (activation.get_user_info() == null)
+		if (activation.get_user_info() == null) {
 			activation.update_user_info_sync();
-	}
-	
-	public bool is_tiliado_account_valid(TiliadoMembership required_membership)
-	{	
-		return activation.has_user_membership(required_membership);	
-	}
-	
-	private void on_tiliado_widget_full_width_changed(GLib.Object emitter, ParamSpec p)
-	{
-		var tiliado_widget = emitter as TiliadoAccountWidget;
-		var parent = tiliado_widget.get_parent();
-		if (parent != null)
-			parent.remove(tiliado_widget);
-		if (tiliado_widget.full_width)
-			main_window.top_grid.attach(tiliado_widget, 0, 1, 1, 1);
-		else
-			main_window.header_bar.pack_end(tiliado_widget);
-	}
-	#endif
-	
-	private enum InitState
-	{
-		NONE,
-		CORE,
-		GUI;
+		}
+		#endif
 	}
 }
 

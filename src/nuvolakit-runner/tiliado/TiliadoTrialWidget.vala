@@ -99,18 +99,6 @@ public class TiliadoTrialWidget : Gtk.Grid {
 		}	
 	}
 	
-	private void show_user_info() {
-		if (current_user != null ) {
-			var label = Drtgtk.Labels.markup("<b>User:</b> %s\n<b>Account:</b> %s",
-				current_user.name, TiliadoMembership.from_uint(current_user.membership).get_label());
-			label.halign = Gtk.Align.CENTER;
-			label.hexpand = true;
-			label.vexpand = true;
-			label.margin_bottom = 10;
-			add(label);
-		}
-	}
-	
 	private void clear_all() {
 		if (purchase_button != null) {
 			purchase_button.clicked.disconnect(on_purchase_button_clicked);
