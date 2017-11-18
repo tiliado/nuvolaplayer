@@ -26,34 +26,6 @@
 namespace Nuvola.Flatpak
 {
 
-public void check_desktop_portal_available(Cancellable? cancellable = null) throws GLib.Error
-{
-    var conn = Bus.get_sync(BusType.SESSION, cancellable);
-    const string NAME = "org.freedesktop.portal.Desktop";
-    const string PATH = "/org/freedesktop/portal/desktop";
-    try
-    {
-        conn.call_sync(
-            NAME, PATH, "org.freedesktop.portal.OpenURI", "OpenURI",
-                null, null, DBusCallFlags.NONE, 60000, cancellable);
-    }
-    catch (GLib.Error e)
-    {
-        if (!(e is DBusError.INVALID_ARGS))
-            throw e; 
-    }
-    try
-    {
-        conn.call_sync(NAME, PATH, "org.freedesktop.portal.ProxyResolver", "Lookup",
-            null, null, DBusCallFlags.NONE, 100, cancellable);
-    }
-    catch (GLib.Error e)
-    {
-        if (!(e is DBusError.INVALID_ARGS))
-            throw e; 
-    }
-}
-
 private void clear_fontconfig_cache() {
     var fontconfig_cache_dir = File.new_for_path(Environment.get_user_cache_dir() + "/fontconfig");
     var fontconfig_nuvola_tag = fontconfig_cache_dir.get_child("--fontconfig-nuvola-tag-1--");

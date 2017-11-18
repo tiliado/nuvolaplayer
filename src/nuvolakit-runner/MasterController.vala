@@ -80,16 +80,10 @@ public class MasterController : Drtgtk.Application
 		this.debuging = debuging;
 	}
 	
-	public override void activate()
-	{
+	public override void activate() {
 		hold();
-		#if FLATPAK
-		if (is_desktop_portal_available())
-		#endif
-		{
-			show_main_window();
-			show_welcome_screen();
-		}
+		show_main_window();
+		show_welcome_screen();
 		release();
 	}
 	
@@ -132,16 +126,11 @@ public class MasterController : Drtgtk.Application
 	}
 	
 	#if FLATPAK
-	private bool is_desktop_portal_available()
-	{
-		
-		try
-		{
-			Flatpak.check_desktop_portal_available(null);
+	private async bool is_desktop_portal_available() {
+		try {
+			yield Drt.Flatpak.check_desktop_portal_available(null);
 			return true;
-		}
-		catch (GLib.Error e)
-		{
+		} catch (GLib.Error e) {
 			var dialog = new Gtk.MessageDialog.with_markup(
 				main_window, Gtk.DialogFlags.MODAL, Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE,
 				("<b><big>Failed to connect to XDG Desktop Portal</big></b>\n\n"
@@ -285,6 +274,10 @@ public class MasterController : Drtgtk.Application
 		tiliado_widget = new TiliadoUserAccountWidget(activation);
 		main_window.header_bar.pack_end(tiliado_widget);
 		#endif
+		
+		#if FLATPAK
+		is_desktop_portal_available.begin((o, res) => is_desktop_portal_available.end(res));
+		#endif
 	}
 	
 	private void show_welcome_screen()
@@ -386,10 +379,11 @@ public class MasterController : Drtgtk.Application
 			}
 			return 0;
 		}
-		if (app_id != null)
-			start_app(app_id);
-		else
+		if (app_id != null) {
+			start_app.begin(app_id, (o, res) => start_app.end(res));
+		} else {
 			activate();
+		}
 		return 0;
 	}
 	
@@ -505,26 +499,16 @@ public class MasterController : Drtgtk.Application
 		if (web_app_list.selected_web_app == null)
 			return;
 		main_window.hide();
-		start_app(web_app_list.selected_web_app);
+		start_app.begin(web_app_list.selected_web_app, (o, res) => start_app.end(res));
 	}
 	
-	private void start_app(string app_id)
-	{
+	private async void start_app(string app_id) {
 		hold();
-		#if FLATPAK
-		if (!is_desktop_portal_available())
-		{
-			release();
-			quit();
-			return;
-		}
-		#endif
 		#if FLATPAK && NUVOLA_RUNTIME
-		try
-		{
+		try {
 			var uid = WebApp.build_uid_from_app_id(app_id);
 			var path = "/" + uid.replace(".", "/");
-			var app_api = Bus.get_proxy_sync<AppDbusIfce>(
+			var app_api = yield Bus.get_proxy<AppDbusIfce>(
 				BusType.SESSION, uid, path,
 				DBusProxyFlags.DO_NOT_CONNECT_SIGNALS|DBusProxyFlags.DO_NOT_LOAD_PROPERTIES);
 			app_api.activate();
@@ -532,8 +516,7 @@ public class MasterController : Drtgtk.Application
 			show_welcome_screen();
 			Timeout.add_seconds(5, () => {release(); return false;});
 		}
-		catch (GLib.Error e)
-		{
+		catch (GLib.Error e) {
 			warning("DBus Activation error: %s", e.message);
 			var dialog = new Drtgtk.ErrorDialog(
 				"Web App Loading Error",
@@ -545,8 +528,7 @@ public class MasterController : Drtgtk.Application
 		}
 		#else		
 		var app_meta = web_app_reg.get_app_meta(app_id);
-		if (app_meta == null)
-		{
+		if (app_meta == null) {
 			var dialog = new Drtgtk.ErrorDialog(
 				"Web App Loading Error",
 				"The web application with id '%s' has not been found.".printf(app_id));
@@ -557,9 +539,9 @@ public class MasterController : Drtgtk.Application
 		}
 		
 		string[] argv = new string[exec_cmd.length + 3];
-		for (var i = 0; i < exec_cmd.length; i++)
+		for (var i = 0; i < exec_cmd.length; i++) {
 			argv[i] = exec_cmd[i];
-		
+		}
 		var j = exec_cmd.length;
 		argv[j++] = "-a";
 		argv[j++] = app_meta.data_dir.get_path();
@@ -567,12 +549,9 @@ public class MasterController : Drtgtk.Application
 		
 		AppRunner runner;
 		debug("Launch app runner for '%s': %s", app_id, string.joinv(" ", argv));
-		try
-		{
+		try {
 			runner = new SubprocessAppRunner(app_id, argv, server.router.hex_token);
-		}
-		catch (GLib.Error e)
-		{
+		} catch (GLib.Error e) {
 			warning("Failed to launch app runner for '%s'. %s", app_id, e.message);
 			var dialog = new Drtgtk.ErrorDialog(
 				"Web App Loading Error",
@@ -586,36 +565,25 @@ public class MasterController : Drtgtk.Application
 		runner.exited.connect(on_runner_exited);
 		app_runners.push_tail(runner);
 		
-		if (app_id in app_runners_map)
+		if (app_id in app_runners_map) {
 			debug("App runner for '%s' is already running.", app_id);
-		else
+		} else {
 			app_runners_map[app_id] = runner;
+		}
 		show_welcome_screen();
 		#endif
 	}
 	
-	public bool start_app_from_dbus(string app_id, string dbus_id, out string token)
-	{
+	public bool start_app_from_dbus(string app_id, string dbus_id, out string token) {
 		token = null;
-		#if FLATPAK
-		if (!is_desktop_portal_available())
-		{
-			quit();
-			return false;
-		}
-		#endif
-	
 		hold();
 		AppRunner runner;
 		token = null;
 		debug("Launch app runner for '%s': %s", app_id, dbus_id);
-		try
-		{
+		try {
 			runner = new DbusAppRunner(app_id, dbus_id, server.router.hex_token);
 			token = server.router.hex_token;
-		}
-		catch (GLib.Error e)
-		{
+		} catch (GLib.Error e) {
 			warning("Failed to launch app runner for '%s'. %s", app_id, e.message);
 			var dialog = new Drtgtk.ErrorDialog(
 				"Web App Loading Error",
@@ -629,11 +597,11 @@ public class MasterController : Drtgtk.Application
 		runner.exited.connect(on_runner_exited);
 		app_runners.push_tail(runner);
 		
-		if (app_id in app_runners_map)
+		if (app_id in app_runners_map) {
 			debug("App runner for '%s' is already running.", app_id);
-		else
+		} else {
 			app_runners_map[app_id] = runner;
-		
+		}
 		show_welcome_screen();
 		return true;
 	}
