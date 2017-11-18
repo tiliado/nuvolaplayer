@@ -51,7 +51,7 @@ public class MasterController : Drtgtk.Application
 	private Queue<AppRunner> app_runners = null;
 	private HashTable<string, AppRunner> app_runners_map = null;
 	private MasterBus server = null;
-	private DbusApi? dbus_api = null;
+	private MasterDbusApi? dbus_api = null;
 	private uint dbus_api_id = 0;
 	private WebkitOptions? webkit_options = null;
 	
@@ -104,7 +104,7 @@ public class MasterController : Drtgtk.Application
 		if (!base.dbus_register(conn, object_path))
 			return false;
 		init_core();
-		dbus_api = new DbusApi(this);
+		dbus_api = new MasterDbusApi(this);
 		dbus_api_id = conn.register_object(object_path, dbus_api);
 		return true;
 	}
@@ -664,33 +664,6 @@ public class MasterController : Drtgtk.Application
 		CORE,
 		GUI;
 	}
-}
-
-
-[DBus(name="eu.tiliado.Nuvola")]
-public class DbusApi: GLib.Object
-{
-	private unowned MasterController controller;
-	
-	public DbusApi(MasterController controller)
-	{
-		this.controller = controller;
-	}
-	
-	public void get_connection(string app_id, string dbus_id, out Socket? socket, out string? token) throws GLib.Error
-	{
-		if (controller.start_app_from_dbus(app_id, dbus_id, out token))
-			socket = Drt.SocketChannel.create_socket_from_name(build_master_ipc_id()).socket;
-		else
-			throw new Drt.Error.ACCESS_DENIED("Nuvola refused connection.");
-	}
-}
-
-
-[DBus(name="eu.tiliado.NuvolaApp")]
-public interface AppDbusIfce: GLib.Object
-{
-	public abstract void activate() throws GLib.Error;
 }
 
 } // namespace Nuvola

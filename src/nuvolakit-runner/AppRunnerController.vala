@@ -228,7 +228,7 @@ public class AppRunnerController: Drtgtk.Application
 			ipc_bus.start();
 			if (use_nuvola_dbus)
 			{
-				var nuvola_api = Bus.get_proxy_sync<DbusIfce>(
+				var nuvola_api = Bus.get_proxy_sync<MasterDbusIfce>(
 					BusType.SESSION, Nuvola.get_dbus_id(), Nuvola.get_dbus_path(),
 					DBusProxyFlags.DO_NOT_CONNECT_SIGNALS|DBusProxyFlags.DO_NOT_LOAD_PROPERTIES);
 				GLib.Socket socket;
@@ -963,30 +963,6 @@ public class AppRunnerController: Drtgtk.Application
 		main_window.show_overlay_alert(text);
 		handled = true;
 	}
-}
-
-
-[DBus(name="eu.tiliado.NuvolaApp")]
-public class AppDbusApi: GLib.Object
-{
-	private unowned AppRunnerController controller;
-	
-	public AppDbusApi(AppRunnerController controller)
-	{
-		this.controller = controller;
-	}
-	
-	public void activate()
-	{
-		Idle.add(() => {controller.activate(); return false;});
-	}
-}
-
-
-[DBus(name="eu.tiliado.Nuvola")]
-public interface DbusIfce: GLib.Object
-{
-	public abstract void get_connection(string app_id, string dbus_id, out GLib.Socket? socket, out string? token) throws GLib.Error;
 }
 
 } // namespace Nuvola
