@@ -9,7 +9,7 @@ else
 	export PKG_CONFIG_PATH="$DIORITE_PATH/build:/app/lib/pkgconfig:$PKG_CONFIG_PATH"
 	export VAPIDIR="$DIORITE_PATH/build"
 	export C_INCLUDE_PATH="$DIORITE_PATH/build"
-	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$DIORITE_PATH/build"
+	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$DIORITE_PATH/build:/app/lib"
 	export LIBRARY_PATH="$DIORITE_PATH/build"
 	export NUVOLA_ICON="eu.tiliado.NuvolaCdk"
 	export DATADIR="/app/share"
