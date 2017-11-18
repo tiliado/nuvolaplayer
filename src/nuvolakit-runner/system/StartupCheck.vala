@@ -161,19 +161,15 @@ public class StartupCheck : GLib.Object
 	 * 
 	 * The {@link xdg_desktop_portal_status} property is populated with the result of this check.
 	 */
-	public async void check_desktop_portal_available()
-	{
+	public async void check_desktop_portal_available() {
 		const string NAME = "XDG Desktop Portal";
 		task_started(NAME);
 		#if FLATPAK
 		xdg_desktop_portal_status = Status.IN_PROGRESS;
-		try
-		{
-			yield Flatpak.check_desktop_portal_available_async(60 * 1000, null);
+		try {
+			yield Drt.Flatpak.check_desktop_portal_available(null);
 			xdg_desktop_portal_status = Status.OK;
-		}
-		catch (GLib.Error e)
-		{
+		} catch (GLib.Error e) {
 			xdg_desktop_portal_message = e.message;
 			xdg_desktop_portal_status = Status.ERROR;
 		}
