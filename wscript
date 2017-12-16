@@ -67,11 +67,8 @@ REVISION_SNAPSHOT = "snapshot"
 def get_git_version():
 	import subprocess
 	if os.path.isdir(".git"):
-		try:
-			output = subprocess.check_output(["git", "describe", "--tags", "--long"])
-			return output.decode("utf-8").strip().split("-")
-		except Exception as e:
-			print(e)
+		output = subprocess.check_output(["git", "describe", "--tags", "--long"])
+		return output.decode("utf-8").strip().split("-")
 	return VERSION, "0", REVISION_SNAPSHOT
 
 def add_version_info(ctx):
