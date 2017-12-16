@@ -25,6 +25,9 @@
 namespace Nuvola
 {
 
+private const string XDG_DESKTOP_PORTAL_SIGSEGV = "GDBus.Error:org.freedesktop.DBus.Error.Spawn.ChildSignaled: " +
+	"Process org.freedesktop.portal.Desktop received signal 11";
+
 /**
  * Class performing a system check on start-up of Nuvola
  */
@@ -170,7 +173,13 @@ public class StartupCheck : GLib.Object
 			yield Drt.Flatpak.check_desktop_portal_available(null);
 			xdg_desktop_portal_status = Status.OK;
 		} catch (GLib.Error e) {
-			xdg_desktop_portal_message = e.message;
+			if (XDG_DESKTOP_PORTAL_SIGSEGV in e.message) {
+				xdg_desktop_portal_message = ("In case you have the 'xdg-desktop-portal-kde' package installed, "
+					+ "uninstall it and install the 'xdg-desktop-portal-gtk' package instead. Error message: "
+					+ e.message);
+			} else {
+				xdg_desktop_portal_message = e.message;
+			}
 			xdg_desktop_portal_status = Status.ERROR;
 		}
 		#else
