@@ -7,6 +7,39 @@ Nuvola Apps Changelog
     [Nuvola Devel mailing list](https://groups.google.com/d/forum/nuvola-player-devel)
     to receive more technical announcements and important information about future development.
 
+Release 4.9.0 - December 17th, 2017
+-------------------------------
+
+Nuvola 4.9.0 is mostly a maintenance release as most of energy is invested in the Chromium port of Nuvola and
+the development of other features has slowed down. The current status of this ambitious effort will be described
+in a separate announcement.
+
+Enhancements:
+
+  * **URL entry widget** was added: Press Ctrl+L or click the *gear menu* button → *Load URL* to display/change
+    the current URL.
+  * Updated script: **Yandex Music 1.5** was adopted by Aleksey Zhidkov and enhanced with an integrated Like button.
+    An album art fix by Alexander Konarev has been also incorporated.
+    Issue: tiliado/nuvola-app-yandex-music#2, tiliado/nuvola-app-yandex-music#10.
+  * Updated script: **SiriusXM 1.4** by Jiří Janoušek. Metadata parsing adapted to recent SiriusXM changes.
+  * Updated script: **BBC iPlayer 1.3** by Andrew Stubbs. Fixed integration of radio shows, added integration of
+    progress bar, volume bar and skip action.
+  * New script: **NPR One 1.0** by Jiří Janoušek.
+  * Page **loading indicator** was added. Issue: tiliado/nuvolaruntime#229
+  * If Bumblebeed is detected, Nuvola assumes that the integrated Intel graphics card is the primary and skips
+    unnecessary checks for an NVidia flatpak driver. Issue: tiliado/nuvolaruntime#380
+  * Various fixes regarding VDPAU & VA-API drivers. Issue: tiliado/nuvolaruntime#380
+
+Under the hood:
+
+  * WebKitGTK >= 2.18.0 is required.
+  * If Nuvola is told that WebKitGTK supports MSE, it checks whether it is so and aborts otherwise.
+    Don't use `--webkitgtk-supports-mse` if it isn't true.
+  * Fixed various memory leaks.
+  * Ongoing optimizations to replace synchronous IPC calls with asynchronous variants.
+  * [ValaCEF project](https://github.com/tiliado/valacef) has been created to provide Nuvola with Vala bindings
+    for Chromium Embedded Framework (CEF).
+
 Release 4.8.0 - September 29th, 2017
 --------------------------------
 
