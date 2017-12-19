@@ -25,11 +25,12 @@
 namespace Nuvola {
 
 public class WebkitOptions : WebOptions {
-	public override uint engine_version {get {return get_webkit_version();}}
+	public override VersionTuple engine_version {get; protected set;}
 	public WebKit.WebContext default_context{get; private set; default = null;}
 	
 	public WebkitOptions(WebAppStorage storage) {
 		base(storage);
+		engine_version = {WebKit.get_major_version(), WebKit.get_minor_version(), WebKit.get_micro_version(), 0};
 	}
 	
 	construct {

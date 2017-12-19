@@ -49,16 +49,15 @@ public abstract class WebOptions : GLib.Object {
 	}
 	
 	public WebAppStorage storage {get; construct;}
-	public abstract uint engine_version {get;}
+	public abstract VersionTuple engine_version {get; protected set;}
 	
 	public WebOptions(WebAppStorage storage) {
 		GLib.Object (storage: storage);
 	}
 	
-	public bool check_engine_version(uint min, uint max=0)
-	{
+	public bool check_engine_version(VersionTuple min, VersionTuple max={0,0,0,0}) {
 		var version = engine_version;
- 		return version >= min && (max == 0 || version < max);
+ 		return version.gte(min) && (max.empty() || version.lt(max));
 	}
 	
 	public abstract WebEngine create_web_engine();

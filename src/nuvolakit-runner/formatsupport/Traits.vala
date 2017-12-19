@@ -58,10 +58,8 @@ public class Traits
 		mp3_supported = format_support.mp3_supported;
 	}
 	
-	public bool eval_webkitgtk(uint major, uint minor, uint micro)
-	{
-		webkitgtk_required = major * 10000 + minor * 100 + micro;
-		return webkit_options.engine_version >= webkitgtk_required;
+	public bool eval_webkitgtk(uint major, uint minor, uint micro) {
+		return webkit_options.engine_version.gte({major, minor, micro, 0});
 	}
 	
 	public bool eval_feature(string name)
