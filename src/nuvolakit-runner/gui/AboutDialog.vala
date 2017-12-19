@@ -43,6 +43,11 @@ public void print_version_info(FileStream output, WebApp? web_app)
 	output.printf("Revision %s\n", Nuvola.get_revision());
 	output.printf("Diorite %s\n", Drt.get_version());
 	output.printf("WebKitGTK %u.%u.%u\n", WebKit.get_major_version(), WebKit.get_minor_version(), WebKit.get_micro_version());
+	#if HAVE_CEF
+	output.printf("Chromium %s\n", Cef.get_chromium_version());
+	#else
+	output.printf("Chromium N/A\n");
+	#endif
 	output.printf("libsoup %u.%u.%u\n", Soup.get_major_version(), Soup.get_minor_version(), Soup.get_micro_version());
 }
 
@@ -156,10 +161,19 @@ public class AboutDialog: Gtk.Dialog
 			WebKit.get_major_version(), WebKit.get_minor_version(), WebKit.get_micro_version()));
 		label.selectable = true;
 		grid.attach(label, 0, 6, 2, 1);
+		label = new Gtk.Label("Web Engine: Chromium " + 
+			#if HAVE_CEF
+			Cef.get_chromium_version()
+			#else
+			"N/A"
+			#endif
+			);
+		label.selectable = true;
+		grid.attach(label, 0, 7, 2, 1);
 		label = new Gtk.Label("Network Library: libsoup %u.%u.%u".printf(
 			Soup.get_major_version(), Soup.get_minor_version(), Soup.get_micro_version()));
 		label.selectable = true;
-		grid.attach(label, 0, 7, 2, 1);
+		grid.attach(label, 0, 78, 2, 1);
 		grid.show_all();
 		box.add(grid);
 	}

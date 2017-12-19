@@ -220,6 +220,7 @@ def options(ctx):
 	ctx.add_option('--noappindicator', action='store_false', default=True, dest='appindicator', help="Don't build functionality dependent on libappindicator")
 	ctx.add_option('--webkitgtk-supports-mse', action='store_true', default=False, dest='webkit_mse',
 		help="Use only if you are absolutely sure that your particular build of the WebKitGTK library supports Media Source Extension (as of 2.15.3, it is disabled by default)")
+	ctx.add_option('--cef', action='store_true', default=False, dest='cef', help="Build experimental CEF backend.")
 
 def configure(ctx):
 	add_version_info(ctx)
@@ -336,6 +337,11 @@ def configure(ctx):
 	if ctx.options.appindicator:
 		pkgconfig(ctx, 'appindicator3-0.1', 'APPINDICATOR', '0.4')
 		vala_def(ctx, "APPINDICATOR")
+	ctx.env.have_cef = ctx.options.cef
+	if ctx.options.cef:
+		pkgconfig(ctx, 'valacef', 'VALACEF', '3.0')
+		pkgconfig(ctx, 'valacefgtk', 'VALACEFGTK', '3.0')
+		vala_def(ctx, "HAVE_CEF")
 	
 	# Define HAVE_WEBKIT_X_YY Vala compiler definitions
 	webkit_version = tuple(int(i) for i in ctx.check_cfg(modversion='webkit2gtk-4.0').split(".")[0:2])
@@ -451,6 +457,9 @@ def build(ctx):
 	if ctx.env.with_appindicator:
 		packages += " appindicator3-0.1"
 		uselib += " APPINDICATOR"
+	if ctx.env.have_cef:
+		packages += " valacef valacefgtk"
+		uselib += " VALACEF VALACEFGTK"
 	
 	for vapi in ("glib-2.0", "webkit2gtk-web-extension-4.0"):
 		patch('/usr/share/vala-0.38/vapi/%s.vapi' % vapi, "vapi/%s.patch" % vapi, '%s.vapi' %  vapi)
@@ -458,7 +467,7 @@ def build(ctx):
 	
 	ctx(features = "checkvaladefs", source = ctx.path.ant_glob('**/*.vala'),
 		definitions="FLATPAK TILIADO_API WEBKIT_SUPPORTS_MSE GENUINE UNITY APPINDICATOR EXPERIMENTAL NUVOLA_RUNTIME"
-		+ " NUVOLA_ADK NUVOLA_CDK")
+		+ " NUVOLA_ADK NUVOLA_CDK HAVE_CEF")
 	ctx.add_group()
 		
 	valalib( 
