@@ -1,4 +1,4 @@
---- /usr/share/vala-0.36/vapi/webkit2gtk-web-extension-4.0.vapi	1970-01-01 01:00:00.000000000 +0100
+--- /usr/share/vala-0.38/vapi/webkit2gtk-web-extension-4.0.vapi	1970-01-01 01:00:00.000000000 +0100
 +++ vapi/webkit2gtk-web-extension-4.0.vapi	2017-08-09 21:37:18.294369745 +0200
 @@ -2599,10 +2599,9 @@
  		[CCode (cheader_filename = "webkit2/webkit-web-extension.h", type_id = "webkit_dom_event_target_get_type ()")]

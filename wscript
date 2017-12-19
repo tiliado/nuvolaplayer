@@ -38,7 +38,7 @@ DEFAULT_HELP_URL = "https://github.com/tiliado/nuvolaplayer/wiki/Unofficial"
 DEFAULT_WEB_APP_REQUIREMENTS_HELP_URL = "https://github.com/tiliado/nuvolaplayer/wiki/Web-App-Requirements"
 
 MIN_DIORITE = "4.9.0"
-MIN_VALA = "0.36.3"
+MIN_VALA = "0.38.4"
 MIN_GLIB = "2.52.0"
 MIN_GTK = "3.22.0"
 LEGACY_WEBKIT = "2.18.0"
@@ -453,8 +453,8 @@ def build(ctx):
 		uselib += " APPINDICATOR"
 	
 	for vapi in ("glib-2.0", "webkit2gtk-web-extension-4.0"):
-		patch('/usr/share/vala-0.36/vapi/%s.vapi' % vapi, "vapi/%s.patch" % vapi, '%s.vapi' %  vapi)
-		cp_if_found('/usr/share/vala-0.36/vapi/%s.deps' % vapi, '%s.deps' %  vapi)
+		patch('/usr/share/vala-0.38/vapi/%s.vapi' % vapi, "vapi/%s.patch" % vapi, '%s.vapi' %  vapi)
+		cp_if_found('/usr/share/vala-0.38/vapi/%s.deps' % vapi, '%s.deps' %  vapi)
 	
 	ctx(features = "checkvaladefs", source = ctx.path.ant_glob('**/*.vala'),
 		definitions="FLATPAK TILIADO_API WEBKIT_SUPPORTS_MSE GENUINE UNITY APPINDICATOR EXPERIMENTAL NUVOLA_RUNTIME"
