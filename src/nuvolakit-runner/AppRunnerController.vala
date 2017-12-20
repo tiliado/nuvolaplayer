@@ -215,6 +215,11 @@ public class AppRunnerController: Drtgtk.Application
 		config = new Config(app_storage.config_dir.get_child("config.json"), default_config);
 		config.changed.connect(on_config_changed);
 		gtk_settings.gtk_application_prefer_dark_theme = config.get_bool(ConfigKey.DARK_THEME);
+		#if HAVE_CEF
+		if (Environment.get_variable("NUVOLA_USE_CEF") == "true") {
+			assert(WebOptions.set_default(typeof(CefOptions)));
+		}
+		#endif
 	}
 	
 	private bool init_ipc(StartupCheck startup_check)
