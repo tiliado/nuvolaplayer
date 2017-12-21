@@ -75,6 +75,7 @@ public class CefEngine : WebEngine {
 		web_view = new CefGtk.WebView(web_context);
 		config.set_default_value(ZOOM_LEVEL_CONF, 0.0);
 		web_view.zoom_level = config.get_double(ZOOM_LEVEL_CONF);
+		web_view.load_started.connect(on_load_started);
 	}
 	
 	~CefEngine() {
@@ -308,6 +309,13 @@ public class CefEngine : WebEngine {
 		}
 		web_worker_ready();
 		request.respond(null);
+	}
+	
+	private void on_load_started(Cef.TransitionType transition) {
+		if (web_worker != null) {
+			debug("Load started");
+			web_worker.ready = false;
+		}
 	}
 	
 	private void on_web_view_notify(GLib.Object? o, ParamSpec param) {
