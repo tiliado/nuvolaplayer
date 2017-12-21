@@ -26,7 +26,7 @@
 namespace Nuvola {
 
 public class CefEngine : WebEngine {
-	private const string ZOOM_LEVEL_CONF = "webview.zoom_level";
+	private const string ZOOM_LEVEL_CONF = "webview.cef_zoom_level";
 	
 	public override Gtk.Widget get_main_web_view(){return web_view;}
 	public override bool get_web_plugins(){return ((CefOptions) options).flash_enabled;}
@@ -68,6 +68,8 @@ public class CefEngine : WebEngine {
 		session = new Drt.KeyValueMap();
 		register_ipc_handlers();
 		web_view = new CefGtk.WebView(web_context);
+		config.set_default_value(ZOOM_LEVEL_CONF, 0.0);
+		web_view.zoom_level = config.get_double(ZOOM_LEVEL_CONF);
 	}
 	
 	~CefEngine() {
@@ -103,6 +105,7 @@ public class CefEngine : WebEngine {
 	public override void init_app_runner() {
 		message("Partially implemented: init_app_runner()");
 		if (!ready) {
+			web_view.notify["zoom-level"].connect(on_zoom_level_changed);
 			env = new JsRuntime();
 			uint[] webkit_version = {
 				WebKit.get_major_version(),
@@ -277,6 +280,10 @@ public class CefEngine : WebEngine {
 		}
 		web_worker_ready();
 		request.respond(null);
+	}
+	
+	private void on_zoom_level_changed(GLib.Object o, ParamSpec p) {
+		config.set_double(ZOOM_LEVEL_CONF, web_view.zoom_level);
 	}
 }
 
