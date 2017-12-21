@@ -1,6 +1,6 @@
 Nuvola.CefRendererExtension nuvola_cef_renderer_extension;
 
-public void init_renderer_extension(CefGtk.RendererContext ctx, Variant?[] parameters) {
+public void init_renderer_extension(CefGtk.RendererContext ctx, int browser_id, Variant?[] parameters) {
     Drt.Logger.init(stderr, GLib.LogLevelFlags.LEVEL_DEBUG, true, "Worker");
     var data = new HashTable<string, Variant>(str_hash, str_equal);
     for (var i = 2; i < parameters.length; i++) {
