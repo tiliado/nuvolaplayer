@@ -105,7 +105,11 @@ public class CefEngine : WebEngine {
 	public override void init_app_runner() {
 		message("Partially implemented: init_app_runner()");
 		if (!ready) {
-			web_view.notify["zoom-level"].connect(on_zoom_level_changed);
+			web_view.notify.connect_after(on_web_view_notify);
+			update_from_web_view("is-loading");
+			update_from_web_view("can-go-back");
+			update_from_web_view("can-go-forward");
+			
 			env = new JsRuntime();
 			uint[] webkit_version = {
 				WebKit.get_major_version(),
@@ -282,9 +286,26 @@ public class CefEngine : WebEngine {
 		request.respond(null);
 	}
 	
-	private void on_zoom_level_changed(GLib.Object o, ParamSpec p) {
-		config.set_double(ZOOM_LEVEL_CONF, web_view.zoom_level);
-	}
+	private void on_web_view_notify(GLib.Object? o, ParamSpec param) {
+        update_from_web_view(param.name);
+    }
+    
+    private void update_from_web_view(string property) {
+        switch (property) {
+		case "zoom-level":
+			config.set_double(ZOOM_LEVEL_CONF, web_view.zoom_level);
+			break;
+        case "is-loading":
+			is_loading = web_view.is_loading;
+            break;
+        case "can-go-back":
+            can_go_back = web_view.can_go_back;
+            break;
+        case "can-go-forward":
+            can_go_forward = web_view.can_go_forward;
+            break;
+        }
+    }
 }
 
 } // namespace Nuvola
