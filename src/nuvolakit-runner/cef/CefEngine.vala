@@ -67,6 +67,8 @@ public class CefEngine : WebEngine {
 		
 		if (connection != null)
 			apply_network_proxy(connection);
+		if (web_app.allow_insecure_content)
+			warning("Not implemented: web_app.allow_insecure_content");
 		
 		session = new Drt.KeyValueMap();
 		register_ipc_handlers();
