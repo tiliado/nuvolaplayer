@@ -65,6 +65,9 @@ public class CefEngine : WebEngine {
 		worker_data["LIBSOUP_MINOR"] = Soup.get_minor_version();
 		worker_data["LIBSOUP_MICRO"] = Soup.get_micro_version();
 		
+		if (connection != null)
+			apply_network_proxy(connection);
+		
 		session = new Drt.KeyValueMap();
 		register_ipc_handlers();
 		web_view = new CefGtk.WebView(web_context);
