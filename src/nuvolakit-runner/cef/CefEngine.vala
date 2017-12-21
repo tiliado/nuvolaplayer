@@ -64,19 +64,52 @@ public class CefEngine : WebEngine {
 		worker_data["LIBSOUP_MINOR"] = Soup.get_minor_version();
 		worker_data["LIBSOUP_MICRO"] = Soup.get_micro_version();
 		
+		session = new Drt.KeyValueMap();
 		web_view = new CefGtk.WebView(web_context);
-		load_uri("https://github.com/tiliado/valacef");
 	}
 	
 	~CefEngine() {
 	}
 	
 	public override void init() {
-		warning("Not implemented: init()");
+		message("Partially implemented: init()");
+		web_worker_initialized_cb();
 	}
 	
 	public override void init_app_runner() {
-		warning("Not implemented: init_app_runner()");
+		message("Partially implemented: init_app_runner()");
+		if (!ready) {
+			env = new JsRuntime();
+			uint[] webkit_version = {
+				WebKit.get_major_version(),
+				WebKit.get_minor_version(),
+				WebKit.get_micro_version()};
+			uint[] libsoup_version = {
+				Soup.get_major_version(),
+				Soup.get_minor_version(),
+				Soup.get_micro_version()};
+			api = new JSApi(
+				runner_app.storage, web_app.data_dir, storage.config_dir, config, session, webkit_version,
+				libsoup_version, false);
+			try {
+				api.inject(env);
+				api.initialize(env);
+			} catch (JSError e) {
+				runner_app.fatal_error("Initialization error", e.message);
+			}
+			try {
+				var args = new Variant("(s)", "InitAppRunner");
+				env.call_function_sync("Nuvola.core.emit", ref args);
+			} catch (GLib.Error e) {
+				runner_app.fatal_error("Initialization error",
+					"%s failed to initialize app runner. Initialization exited with error:\n\n%s".printf(
+					runner_app.app_name, e.message));
+			}
+			debug("App Runner Initialized");
+			ready = true;
+		}
+		debug("App Runner Ready");
+		app_runner_ready();
 	}
 	
 	public override void load_app() {
@@ -173,6 +206,17 @@ public class CefEngine : WebEngine {
 		assert(ipc_bus != null);
 		var router = ipc_bus.router;
 		warning("Not implemented: register_ipc_handlers()");
+	}
+	
+	private bool web_worker_initialized_cb() {
+		if (!web_worker.initialized) {
+			web_worker.initialized = true;
+			debug("Init finished");
+			init_finished();
+		}
+		debug("Web Worker Ready");
+		web_worker_ready();
+		return false;
 	}
 }
 
