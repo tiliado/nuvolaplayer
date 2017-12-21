@@ -144,6 +144,21 @@ public class CefEngine : WebEngine {
 	}
 	
 	public override void load_app() {
+		try {
+			var url = env.send_data_request_string("LastPageRequest", "url");
+			if (url != null) {
+				if (load_uri(url)) {
+					return;
+				} else {
+					runner_app.show_error("Invalid page URL",
+						"The web app integration script has not provided a valid page URL '%s'.".printf(url));
+				}
+			}
+		} catch (GLib.Error e) {
+			runner_app.show_error("Initialization error",
+				("%s failed to retrieve a last visited page from previous session."
+				+ " Initialization exited with error:\n\n%s").printf(runner_app.app_name, e.message));
+		}
 		go_home();
 	}
 	
@@ -151,12 +166,16 @@ public class CefEngine : WebEngine {
 		try {
 			var url = env.send_data_request_string("HomePageRequest", "url");
 			if (url == null) {
-				runner_app.fatal_error("Invalid home page URL", "The web app integration script has provided an empty home page URL.");
+				runner_app.fatal_error("Invalid home page URL",
+					"The web app integration script has provided an empty home page URL.");
 			} else if (!load_uri(url)) {
-				runner_app.fatal_error("Invalid home page URL", "The web app integration script has not provided a valid home page URL '%s'.".printf(url));
+				runner_app.fatal_error("Invalid home page URL",
+					"The web app integration script has not provided a valid home page URL '%s'.".printf(url));
 			}
 		} catch (GLib.Error e) {
-			runner_app.fatal_error("Initialization error", "%s failed to retrieve a home page of  a web app. Initialization exited with error:\n\n%s".printf(runner_app.app_name, e.message));
+			runner_app.fatal_error("Initialization error",
+				"%s failed to retrieve a home page of  a web app. Initialization exited with error:\n\n%s".printf(
+					runner_app.app_name, e.message));
 		}
 	}
 	
@@ -295,6 +314,14 @@ public class CefEngine : WebEngine {
 		case "zoom-level":
 			config.set_double(ZOOM_LEVEL_CONF, web_view.zoom_level);
 			break;
+        case "uri":
+            var args = new Variant("(sms)", "UriChanged", web_view.uri);
+			try {
+				env.call_function_sync("Nuvola.core.emit", ref args);
+			} catch (GLib.Error e) {
+				runner_app.show_error("Integration script error", "The web app integration caused an error: %s".printf(e.message));
+			}
+            break;
         case "is-loading":
 			is_loading = web_view.is_loading;
             break;
