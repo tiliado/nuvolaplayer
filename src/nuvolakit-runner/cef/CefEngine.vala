@@ -42,6 +42,7 @@ public class CefEngine : WebEngine {
 	private IpcBus ipc_bus = null;
 	private Config config;
 	private Drt.KeyValueStorage session;
+	private HashTable<string, Variant> worker_data;
 	
 	public CefEngine(CefOptions web_options) {
 		base(web_options);
@@ -55,7 +56,7 @@ public class CefEngine : WebEngine {
 		this.web_app = web_app;
 		this.config = config;
 		this.web_worker = new RemoteWebWorker(ipc_bus);
-		
+		this.worker_data = worker_data;
 		worker_data["NUVOLA_API_ROUTER_TOKEN"] = ipc_bus.router.hex_token;
 		worker_data["WEBKITGTK_MAJOR"] = WebKit.get_major_version();
 		worker_data["WEBKITGTK_MINOR"] = WebKit.get_minor_version();
@@ -65,6 +66,7 @@ public class CefEngine : WebEngine {
 		worker_data["LIBSOUP_MICRO"] = Soup.get_micro_version();
 		
 		session = new Drt.KeyValueMap();
+		register_ipc_handlers();
 		web_view = new CefGtk.WebView(web_context);
 	}
 	
@@ -72,8 +74,30 @@ public class CefEngine : WebEngine {
 	}
 	
 	public override void init() {
-		message("Partially implemented: init()");
-		web_worker_initialized_cb();
+		if (web_view.is_ready()) {
+			load_extension();
+		} else {
+			web_view.ready.connect(on_web_view_ready);
+		}
+	}
+	
+	private void on_web_view_ready(CefGtk.WebView web_view) {
+		load_extension();
+		web_view.ready.disconnect(on_web_view_ready);
+	}
+	
+	private void load_extension() {
+		var data = worker_data;
+		var size = data.size();
+		var args = new Variant?[2 * size];
+		var iter = HashTableIter<string, Variant>(data);
+		string key = null;
+		Variant val = null;
+		for (var i = 0; i < size && iter.next (out key, out val); i++) {
+			args[2 * i] = new Variant.string(key);
+			args[2 * i + 1] = val;
+		}
+		web_view.load_renderer_extension(Nuvola.get_libdir() + "/libnuvolaruntime-cef-worker.so", args);
 	}
 	
 	public override void init_app_runner() {
@@ -205,7 +229,19 @@ public class CefEngine : WebEngine {
 	private void register_ipc_handlers() {
 		assert(ipc_bus != null);
 		var router = ipc_bus.router;
-		warning("Not implemented: register_ipc_handlers()");
+		message("Partially implemented: register_ipc_handlers()");
+		router.add_method("/nuvola/core/web-worker-initialized", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
+			"Notify that the web worker has been initialized.",
+			handle_web_worker_initialized, null);
+		router.add_method("/nuvola/core/web-worker-ready", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
+			"Notify that the web worker is ready.",
+			handle_web_worker_ready, null);
+		router.add_method("/nuvola/core/get-data-dir", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
+			"Return data directory.",
+			handle_get_data_dir, null);
+		router.add_method("/nuvola/core/get-user-config-dir", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
+			"Return user config directory.",
+			handle_get_user_config_dir, null);
 	}
 	
 	private bool web_worker_initialized_cb() {
@@ -217,6 +253,30 @@ public class CefEngine : WebEngine {
 		debug("Web Worker Ready");
 		web_worker_ready();
 		return false;
+	}
+	
+	private void handle_get_data_dir(Drt.RpcRequest request) throws Drt.RpcError {
+		request.respond(new Variant.string(web_app.data_dir.get_path()));
+	}
+	
+	private void handle_get_user_config_dir(Drt.RpcRequest request) throws Drt.RpcError {
+		request.respond(new Variant.string(storage.config_dir.get_path()));
+	}
+	
+	private void handle_web_worker_initialized(Drt.RpcRequest request) throws Drt.RpcError {
+		var channel = request.connection as Drt.RpcChannel;
+		assert(channel != null);
+		ipc_bus.connect_web_worker(channel);
+		Idle.add(web_worker_initialized_cb);
+		request.respond(null);
+	}
+	
+	private void handle_web_worker_ready(Drt.RpcRequest request) throws Drt.RpcError {
+		if (!web_worker.ready) {
+			web_worker.ready = true;
+		}
+		web_worker_ready();
+		request.respond(null);
 	}
 }
 

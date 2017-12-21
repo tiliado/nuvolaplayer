@@ -435,6 +435,7 @@ def build(ctx):
 	NUVOLAKIT_RUNNER = APPNAME + "-runner"
 	NUVOLAKIT_BASE = APPNAME + "-base"
 	NUVOLAKIT_WORKER = APPNAME + "-worker"
+	NUVOLAKIT_CEF_WORKER = APPNAME + "-cef-worker"
 	NUVOLAKIT_TESTS = APPNAME + "-tests"
 	RUN_NUVOLAKIT_TESTS = "run-" + NUVOLAKIT_TESTS
 	DIORITE_GLIB = 'dioriteglib' + TARGET_DIORITE
@@ -555,6 +556,19 @@ def build(ctx):
 		source_dir = 'src/nuvolakit-worker',
 		packages = "dioriteglib{0} {1} {2}".format(TARGET_DIORITE, 'webkit2gtk-web-extension-4.0', 'javascriptcoregtk-4.0'),
 		uselib = "SOUP DIORITEGLIB DIORITEGTK WEBKITEXT JSCORE",
+		use = [NUVOLAKIT_BASE],
+		vala_defines = vala_defines,
+		cflags = ['-DG_LOG_DOMAIN="Nuvola"'],
+		vapi_dirs = vapi_dirs,
+		vala_target_glib = TARGET_GLIB,
+		install_path = ctx.env.NUVOLA_LIBDIR,
+	)
+	
+	valalib(
+		target = NUVOLAKIT_CEF_WORKER,
+		source_dir = 'src/nuvolakit-cef-worker',
+		packages = "dioriteglib{0} dioritegtk{0} {1} {2} javascriptcoregtk-4.0".format(TARGET_DIORITE, 'valacef', 'valacefgtk'),
+		uselib = "SOUP DIORITEGLIB DIORITEGTK VALACEF VALACEFGTK JSCORE",
 		use = [NUVOLAKIT_BASE],
 		vala_defines = vala_defines,
 		cflags = ['-DG_LOG_DOMAIN="Nuvola"'],
