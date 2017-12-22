@@ -28,7 +28,6 @@ private const string SCRIPT_WRAPPER = """window.__nuvola_func__ = function() {
 window.__nuvola_func__ = null;
 if (this == window) throw Error("Nuvola object is not bound to 'this'.");
 this._callIpcMethodVoid = function(){console.log("_callIpcMethodVoid called!")};
-this.meta = {};
 %s
 ;}
 """;
@@ -141,9 +140,12 @@ public class CefJSApi : GLib.Object {
 			error("Failed load a web app component %s. This probably means the web app integration has not been installed correctly or that component has been accidentally deleted.\n\n%s", META_JSON, e.message);
 		}
 		
-//~ 		unowned JS.Value meta = object_from_JSON(ctx, meta_json_data);
-//~ 		env.main_object.set_property(ctx, new JS.String(META_PROPERTY), meta);
-		
+		string? json_error = null; 
+		var meta = Cef.V8.parse_json(v8_ctx, meta_json_data, out json_error);
+		if (meta == null) {
+			error(json_error);
+		}
+		Cef.V8.set_value(main_object, "meta", meta);
 	}
 	
 	public void integrate(Cef.V8context v8_ctx) {
