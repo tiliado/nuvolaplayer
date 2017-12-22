@@ -9,7 +9,7 @@ public void init_renderer_extension(CefGtk.RendererContext ctx, int browser_id, 
 	try {
 		var channel = new Drt.RpcChannel.from_name(0, data["RUNNER_BUS_NAME"].dup_string(), null,
 			data["NUVOLA_API_ROUTER_TOKEN"].dup_string(), 5000);
-		nuvola_cef_renderer_extension = new Nuvola.CefRendererExtension(ctx, channel, data); 
+		nuvola_cef_renderer_extension = new Nuvola.CefRendererExtension(ctx, browser_id, channel, data); 
 	} catch (GLib.Error e) {
 		error("Failed to connect to app runner. %s", e.message);
 	}

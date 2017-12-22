@@ -2,6 +2,7 @@ namespace Nuvola {
 
 public class CefRendererExtension : GLib.Object {
 	private CefGtk.RendererContext ctx;
+	private int browser_id;
 	private Drt.RpcChannel channel;
 	private File data_dir;
 	private File user_config_dir;
@@ -9,8 +10,10 @@ public class CefRendererExtension : GLib.Object {
 	private HashTable<string, Variant>? worker_data;
 	private Drt.XdgStorage storage;
 	
-	public CefRendererExtension(CefGtk.RendererContext ctx, Drt.RpcChannel channel, HashTable<string, Variant> worker_data) {
+	public CefRendererExtension(CefGtk.RendererContext ctx, int browser_id, Drt.RpcChannel channel,
+	HashTable<string, Variant> worker_data) {
 		this.ctx = ctx;
+		this.browser_id = browser_id;
 		this.channel = channel;
 		this.worker_data = worker_data;
 		this.storage = new Drt.XdgStorage.for_project(Nuvola.get_app_id());
