@@ -9,6 +9,7 @@ public class CefRendererExtension : GLib.Object {
 	private string? api_token = null;
 	private HashTable<string, Variant>? worker_data;
 	private Drt.XdgStorage storage;
+	private CefJSApi js_api;
 	
 	public CefRendererExtension(CefGtk.RendererContext ctx, int browser_id, Drt.RpcChannel channel,
 	HashTable<string, Variant> worker_data) {
@@ -46,6 +47,12 @@ public class CefRendererExtension : GLib.Object {
 		api_token = worker_data["NUVOLA_API_ROUTER_TOKEN"].get_string();
 		worker_data = null;
 		
+		js_api = new CefJSApi(storage, data_dir, user_config_dir, new KeyValueProxy(channel, "config"),
+			new KeyValueProxy(channel, "session"), webkit_version, libsoup_version, true);
+//~ 		js_api.call_ipc_method_void.connect(on_call_ipc_method_void);
+//~ 		js_api.call_ipc_method_sync.connect(on_call_ipc_method_sync);
+//~ 		js_api.call_ipc_method_async.connect(on_call_ipc_method_async);
+		
 		channel.call.begin("/nuvola/core/web-worker-initialized", null, (o, res) => {
 			try {
 				channel.call.end(res);
@@ -53,6 +60,37 @@ public class CefRendererExtension : GLib.Object {
 				error("Runner client error: %s", e.message);
 			}
 		});
+		
+		ctx.js_context_created.connect(on_js_context_created);
+		ctx.js_context_released.connect(on_js_context_released);
+	}
+	
+	private void on_js_context_created(Cef.Browser browser, Cef.Frame frame, Cef.V8context context) {
+		apply_javascript_fixes(browser, frame, context);
+		if (frame.is_main() > 0 && browser.get_identifier() == browser_id) {
+			debug("Got JS context");
+			init_frame(browser, frame, context);
+		}
+	}
+	
+	private void on_js_context_released(Cef.Browser browser, Cef.Frame frame, Cef.V8context context) {
+		if (frame.is_main() > 0 && browser.get_identifier() == browser_id) {
+			debug("Lost JS context");
+			js_api.release_context(context);
+		}
+	}
+	
+	private void apply_javascript_fixes(Cef.Browser browser, Cef.Frame frame, Cef.V8context context) {
+		/* No-op */
+	}
+	
+	private void init_frame(Cef.Browser browser, Cef.Frame frame, Cef.V8context context) {
+		try {
+			js_api.inject(context);
+			js_api.integrate(context);
+		} catch (GLib.Error e) {
+			error("Failed to inject JavaScript API. %s".printf(e.message));
+		}
 	}
 }
 
