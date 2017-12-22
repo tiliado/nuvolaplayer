@@ -27,7 +27,6 @@ namespace Nuvola {
 private const string SCRIPT_WRAPPER = """window.__nuvola_func__ = function() {
 window.__nuvola_func__ = null;
 if (this == window) throw Error("Nuvola object is not bound to 'this'.");
-this._callIpcMethodVoid = function(){console.log("_callIpcMethodVoid called!")};
 %s
 ;}
 """;
@@ -78,6 +77,14 @@ public class CefJSApi : GLib.Object {
 		this.warn_on_sync_func = warn_on_sync_func;
 	}
 	
+	public virtual signal void call_ipc_method_void(string name, Variant? data) {
+		message("call_ipc_method_void('%s', %s)", name, data == null ? "null" : data.print(false));
+	}
+	
+	public virtual signal void call_ipc_method_async(string name, Variant? data, int id) {
+		message("call_ipc_method_async('%s', %s, %d)", name, data == null ? "null" : data.print(false), id);
+	}
+	
 	public bool is_valid() {
 		return v8_ctx != null;
 	}
@@ -108,6 +115,10 @@ public class CefJSApi : GLib.Object {
 		Cef.V8.set_uint(main_object, "LIBSOUP_MAJOR", libsoup_version[0]);
 		Cef.V8.set_uint(main_object, "LIBSOUP_MINOR", libsoup_version[1]);
 		Cef.V8.set_uint(main_object, "LIBSOUP_MICRO", libsoup_version[2]);
+		Cef.V8.set_value(main_object, "_callIpcMethodVoid",
+			CefGtk.Function.create("_callIpcMethodVoid", call_ipc_method_void_func));
+		Cef.V8.set_value(main_object, "_callIpcMethodAsync",
+			CefGtk.Function.create("_callIpcMethodAsync", call_ipc_method_async_func));
 
 		File? main_js = storage.user_data_dir.get_child(JS_DIR).get_child(MAIN_JS);
 		if (!main_js.query_exists()) {
@@ -210,6 +221,56 @@ public class CefJSApi : GLib.Object {
 	
 	public uint get_libsoup_version() {
 		return libsoup_version[0] * 10000 + libsoup_version[1] * 100 + libsoup_version[2];
+	}
+	
+	private void call_ipc_method_void_func(string? name, Cef.V8value? object, Cef.V8value?[] arguments,
+    out Cef.V8value? retval, out string? exception) {
+		call_ipc_method_func(name, object, arguments, out retval, out exception, true);
+	}
+	
+	private void call_ipc_method_async_func(string? name, Cef.V8value? object, Cef.V8value?[] arguments,
+    out Cef.V8value? retval, out string? exception) {
+		call_ipc_method_func(name, object, arguments, out retval, out exception, false);
+	}
+	
+	private void call_ipc_method_func(string? name, Cef.V8value? object, Cef.V8value?[] args,
+    out Cef.V8value? retval, out string? exception, bool is_void) {
+		retval = null;
+		exception = null;
+		if (args.length == 0) {
+			exception = "At least one argument required.";
+			return;
+		}
+		
+		var method = Cef.V8.string_or_null(args[0]);
+		if (method == null) {
+			exception = "The first argument must be a non-null string.";
+			return;
+		}
+		
+		Variant? data = null;
+		if (args.length > 1 && args[1].is_null() == 0) {
+			data = Cef.V8.variant_from_value(args[1], out exception);
+			if (data == null) {
+				return;
+			}
+		}
+		/* Void call */
+		if (is_void) {
+			call_ipc_method_void(method, data);
+			retval = Cef.v8value_create_undefined();
+			return;
+		}
+		/* Async call */
+		int id = -1;
+		if (args.length > 2) {
+			id = Cef.V8.any_int(args[2]);
+		}
+		if (id <= 0) {
+			exception = "Argument %d: Integer expected (%d).".printf(2, id);
+		} else {
+			call_ipc_method_async(method, data, id);
+		}
 	}
 }
 
