@@ -268,6 +268,7 @@ public class CefEngine : WebEngine {
 	public override void call_function_sync(string name, ref Variant? params, bool propagate_error=false)
 	throws GLib.Error {
 		warning("Not implemented: call_function_sync(%s)", name);
+		env.call_function_sync(name, ref params);
 	}
 	
 	private void register_ipc_handlers() {

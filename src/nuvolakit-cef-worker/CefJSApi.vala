@@ -216,6 +216,88 @@ public class CefJSApi : GLib.Object {
         return result;
 	}
 	
+	public void send_async_response(int id, Variant? response, GLib.Error? error) {
+		if (is_valid()) {
+			var args = new Variant("(imvmv)", (int32) id, response,
+				error == null ? null : new Variant.string(error.message));
+			if (response != null) {
+				// FIXME: How are we losing a reference here?
+				g_variant_ref(response);
+			}
+			call_function_sync("Nuvola.Async.respond", ref args, false);
+		}
+	}
+	
+	public void call_function_sync(string name, ref Variant? arguments, bool propagate_error) throws GLib.Error {	
+		GLib.Error? error = null;
+		var args = arguments;
+		var loop = new MainLoop(MainContext.get_thread_default());
+		CefGtk.Task.post(Cef.ThreadId.RENDERER, () => {
+			try {
+				string[] names = name.split(".");
+				Cef.V8value object = main_object;
+				if (object == null) {
+					throw new JSError.NOT_FOUND("Main object not found.'");
+				} 
+				for (var i = 1; i < names.length - 1; i++) {
+					object = Cef.V8.get_object(object, names[i]);
+					if (object == null) {
+						throw new JSError.NOT_FOUND("Attribute '%s' not found.'", names[i]);
+					}
+				}
+				var func = Cef.V8.get_function(object, names[names.length - 1]);
+				if (func == null) {
+					throw new JSError.NOT_FOUND("Attribute '%s' not found.'", names[names.length - 1]);
+				}  
+				Cef.V8value[] params;
+				var size = 0;
+				if (args != null) {
+					assert(args.is_container()); // FIXME
+					size = (int) args.n_children();
+					params = new Cef.V8value[size];
+					int i = 0;
+					foreach (var item in args) {
+						string? exception = null;
+						var param = Cef.V8.value_from_variant(item, out exception);
+						if (param == null) {
+							throw new JSError.WRONG_TYPE(exception);
+						}
+						params[i++] = param;
+					}
+					foreach (var p in params) {
+						p.ref();
+					}
+				} else {
+					params = {};
+				}
+				object.ref();
+				var ret_val = func.execute_function(object, params);
+				if (ret_val == null) {
+					throw new JSError.FUNC_FAILED("Function '%s' failed. %s",
+						name, Cef.V8.format_exception(func.get_exception()));
+				}
+				if (args != null) {
+					Variant[] items = new Variant[size];
+					for (var i = 0; i < size; i++) {
+						string? exception = null;
+						items[i] = Cef.V8.variant_from_value(params[i], out exception);
+						if (exception != null) {
+							throw new JSError.WRONG_TYPE(exception);
+						}
+					}
+					args = new Variant.tuple(items);
+				}
+			} catch (GLib.Error e) {
+				error = e;
+			}
+			loop.quit();
+		});
+		if (error != null) {
+			throw error;
+		}
+		arguments = args;
+	}
+	
 	public uint get_webkit_version() {
 		return webkit_version[0] * 10000 + webkit_version[1] * 100 + webkit_version[2];
 	}
@@ -276,3 +358,6 @@ public class CefJSApi : GLib.Object {
 }
 
 } // namespace Nuvola
+
+// FIXME
+private extern Variant* g_variant_ref(Variant* variant);
