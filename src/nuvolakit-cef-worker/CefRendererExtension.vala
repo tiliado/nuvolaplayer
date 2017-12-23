@@ -1,5 +1,10 @@
 namespace Nuvola {
 
+/* TODO
+ * context menu - password manager
+ * error handling
+ */
+
 public class CefRendererExtension : GLib.Object {
 	private CefGtk.RendererContext ctx;
 	private int browser_id;

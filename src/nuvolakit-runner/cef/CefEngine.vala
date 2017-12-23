@@ -25,6 +25,18 @@
 #if HAVE_CEF
 namespace Nuvola {
 
+/* TODO
+ * web_app.allow_insecure_content
+ * album art download
+ * request filtering
+ * context menu - password manager
+ * JavaScript dialogs
+ * initialization form - request_init_form()
+ * network proxy
+ * user agent string
+ * config & session key-value storage
+ */
+
 public class CefEngine : WebEngine {
 	private const string ZOOM_LEVEL_CONF = "webview.cef_zoom_level";
 	
