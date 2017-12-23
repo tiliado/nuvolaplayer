@@ -359,6 +359,7 @@ def configure(ctx):
 	if tiliado_api.get("enabled", False):
 		vala_def(ctx, "TILIADO_API")
 	
+	vala_def(ctx, "TRUE")
 	ctx.define("NUVOLA_APPNAME", APPNAME)
 	ctx.define("NUVOLA_OLDNAME", "nuvolaplayer3")
 	ctx.define("NUVOLA_NAME", ctx.env.NAME)
@@ -468,7 +469,7 @@ def build(ctx):
 	
 	ctx(features = "checkvaladefs", source = ctx.path.ant_glob('**/*.vala'),
 		definitions="FLATPAK TILIADO_API WEBKIT_SUPPORTS_MSE GENUINE UNITY APPINDICATOR EXPERIMENTAL NUVOLA_RUNTIME"
-		+ " NUVOLA_ADK NUVOLA_CDK HAVE_CEF")
+		+ " NUVOLA_ADK NUVOLA_CDK HAVE_CEF FALSE TRUE")
 	ctx.add_group()
 		
 	valalib( 
