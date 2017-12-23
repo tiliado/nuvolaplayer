@@ -18,6 +18,7 @@ public class CefRendererExtension : GLib.Object {
 	
 	public CefRendererExtension(CefGtk.RendererContext ctx, int browser_id, Drt.RpcChannel channel,
 	HashTable<string, Variant> worker_data) {
+		Assert.on_glib_thread();
 		this.ctx = ctx;
 		this.browser_id = browser_id;
 		this.channel = channel;
@@ -30,10 +31,15 @@ public class CefRendererExtension : GLib.Object {
 	}
 	
 	public void show_error(string err) {
-		error(err);
+		if (currently_on_js_thread()) {
+			ctx.event_loop.add_idle(() => {show_error(err); return false;});
+		} else {
+			error(err);
+		}
 	}
 	
 	private async void ainit() {
+		Assert.on_glib_thread();
 		var router = channel.router;
 		router.add_method("/nuvola/webworker/call-function", Drt.RpcFlags.WRITABLE,
 			"Call JavaScript function.",
@@ -83,6 +89,7 @@ public class CefRendererExtension : GLib.Object {
 	}
 	
 	private void on_js_context_created(Cef.Browser browser, Cef.Frame frame, Cef.V8context context) {
+		Assert.on_js_thread();
 		apply_javascript_fixes(browser, frame, context);
 		if (frame.is_main() > 0 && browser.get_identifier() == browser_id) {
 			debug("Got JS context");
@@ -91,6 +98,7 @@ public class CefRendererExtension : GLib.Object {
 	}
 	
 	private void on_js_context_released(Cef.Browser browser, Cef.Frame frame, Cef.V8context context) {
+		Assert.on_js_thread();
 		if (frame.is_main() > 0 && browser.get_identifier() == browser_id) {
 			debug("Lost JS context");
 			js_api.release_context(context);
@@ -98,26 +106,27 @@ public class CefRendererExtension : GLib.Object {
 	}
 	
 	private void apply_javascript_fixes(Cef.Browser browser, Cef.Frame frame, Cef.V8context context) {
+		Assert.on_js_thread();
 		/* No-op */
 	}
 	
 	private void init_frame(Cef.Browser browser, Cef.Frame frame, Cef.V8context context) {
+		Assert.on_js_thread();
+		context.enter();
 		try {
 			js_api.inject(context);
 			js_api.integrate(context);
+			js_api.acquire_context(context);
 		} catch (GLib.Error e) {
 			error("Failed to inject JavaScript API. %s".printf(e.message));
+		} finally {
+			context.exit();
 		}
-		ctx.event_loop.add_idle(emit_web_worker_ready_cb);
-		try {
-			var args = new Variant("(s)", "InitWebWorker");
-			js_api.call_function_sync("Nuvola.core.emit", ref args, true);
-		} catch (GLib.Error e) {
-			show_error("Failed to inject JavaScript API. %s".printf(e.message));
-		}
+		ctx.event_loop.add_idle(emit_web_worker_ready_and_init_web_worker_cb);
 	}
 	
-	private bool emit_web_worker_ready_cb() {
+	private bool emit_web_worker_ready_and_init_web_worker_cb() {
+		Assert.on_glib_thread();
 		channel.call.begin("/nuvola/core/web-worker-ready", null, (o, res) => {
 			try {
 				channel.call.end(res);
@@ -125,11 +134,19 @@ public class CefRendererExtension : GLib.Object {
 				warning("Runner client error: %s", e.message);
 			}
 		});
+		try {
+			var args = new Variant("(s)", "InitWebWorker");
+			js_api.call_function_sync("Nuvola.core.emit", ref args, true);
+		} catch (GLib.Error e) {
+			show_error("Failed to inject JavaScript API. %s".printf(e.message));
+		}
 		return false;
 	}
 	
 	private void on_call_ipc_method_void(string name, Variant? data) {
+		Assert.on_js_thread();
 		ctx.event_loop.add_idle(() => {
+			Assert.on_glib_thread();
 			channel.call.begin(name, data, (o, res) => {
 				try {
 					channel.call.end(res);
@@ -142,7 +159,9 @@ public class CefRendererExtension : GLib.Object {
 	}
 	
 	private void on_call_ipc_method_async(CefJSApi js_api, string name, Variant? data, int id) {
+		Assert.on_js_thread();
 		ctx.event_loop.add_idle(() => {
+			Assert.on_glib_thread();
 			channel.call.begin(name, data, (o, res) => {
 				try {
 					var response = channel.call.end(res);
@@ -156,23 +175,25 @@ public class CefRendererExtension : GLib.Object {
 	}
 	
 	private void handle_call_function(Drt.RpcRequest request) throws GLib.Error {
+		Assert.on_glib_thread();
 		var name = request.pop_string();
 		var func_params = request.pop_variant();
 		var propagate_error = request.pop_bool();
+		GLib.Error? error = null;
 		try {
-			if (js_api.is_valid()) {
-				js_api.call_function_sync(name, ref func_params, true);
-			} else {
-				warning("CefJSApi is not valid");
-			}
+			js_api.call_function_sync(name, ref func_params, true);
 		} catch (GLib.Error e) {
 			if (propagate_error) {
-				throw e;
+				error = e;
 			} else {
 				show_error("Error during call of %s: %s".printf(name, e.message));
 			}
 		}
-		request.respond(func_params);
+		if (error != null) {
+			request.fail(error);
+		} else {
+			request.respond(func_params);
+		}
 	}
 }
 

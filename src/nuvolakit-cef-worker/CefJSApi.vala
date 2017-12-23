@@ -67,6 +67,7 @@ public class CefJSApi : GLib.Object {
 	
 	public CefJSApi(Drt.Storage storage, File data_dir, File config_dir, Drt.KeyValueStorage config,
 	Drt.KeyValueStorage session, uint[] webkit_version, uint[] libsoup_version, bool warn_on_sync_func) {
+		Assert.on_glib_thread();
 		this.storage = storage;
 		this.data_dir = data_dir;
 		this.config_dir = config_dir;
@@ -78,24 +79,44 @@ public class CefJSApi : GLib.Object {
 	}
 	
 	public virtual signal void call_ipc_method_void(string name, Variant? data) {
+		Assert.on_js_thread();
 		message("call_ipc_method_void('%s', %s)", name, data == null ? "null" : data.print(false));
 	}
 	
 	public virtual signal void call_ipc_method_async(string name, Variant? data, int id) {
+		Assert.on_js_thread();
 		message("call_ipc_method_async('%s', %s, %d)", name, data == null ? "null" : data.print(false), id);
 	}
 	
 	public bool is_valid() {
-		return v8_ctx != null;
+		Assert.on_js_thread();
+		return v8_ctx != null && v8_ctx.is_valid() > 0;
+	}
+	
+	private bool enter_js() {
+		Assert.on_js_thread();
+		if (is_valid()) {
+			v8_ctx.enter();
+			return true;
+		}
+		return false;
+	}
+	
+	private bool exit_js() {
+		Assert.on_js_thread();
+		if (is_valid()) {
+			v8_ctx.exit();
+			return true;
+		}
+		return false;
 	}
 	
 	public void inject(Cef.V8context v8_ctx) {
+		Assert.on_js_thread();
 		if (this.v8_ctx != null) {
-			this.v8_ctx.exit();
 			this.v8_ctx = null;
 		}
-		assert(v8_ctx.is_valid() > 0);
-		v8_ctx.enter();
+		
 		main_object = Cef.v8value_create_object(null, null);
 		main_object.ref();
 		Cef.V8.set_int(main_object, "API_VERSION_MAJOR", API_VERSION_MAJOR);
@@ -135,8 +156,7 @@ public class CefJSApi : GLib.Object {
 		if (main_js == null) {
 			error("Failed to find a core component main.js. This probably means the application has not been installed correctly or that component has been accidentally deleted.");
 		}
-		this.v8_ctx = v8_ctx;
-		if (!execute_script_from_file(main_js)) {
+		if (!execute_script_from_file(v8_ctx, main_js)) {
 			error("Failed to initialize a core component main.js located at '%s'. Initialization exited with error:", main_js.get_path());
 		}
 		
@@ -160,33 +180,41 @@ public class CefJSApi : GLib.Object {
 	}
 	
 	public void integrate(Cef.V8context v8_ctx) {
+		Assert.on_js_thread();
 		var integrate_js = data_dir.get_child(INTEGRATE_JS);
 		if (!integrate_js.query_exists()) {
 			error("Failed to find a web app component %s. This probably means the web app integration has not been installed correctly or that component has been accidentally deleted.", INTEGRATE_JS);
 		}
-		if (!execute_script_from_file(integrate_js)) {
+		if (!execute_script_from_file(v8_ctx, integrate_js)) {
 			error("Failed to initialize a web app component %s located at '%s'. Initialization exited with error:\n\n%s", INTEGRATE_JS, integrate_js.get_path(), "e.message");
 		}
 	}
 	
 	public void release_context(Cef.V8context v8_ctx) {
+		Assert.on_js_thread();
 		if (v8_ctx == this.v8_ctx) {
-			v8_ctx.exit();
 			this.v8_ctx = null;
 		}
 	}
 	
-	public bool execute_script_from_file(File file) {
+	public void acquire_context(Cef.V8context v8_ctx) {
+		Assert.on_js_thread();
+		this.v8_ctx = v8_ctx;
+	}
+	
+	public bool execute_script_from_file(Cef.V8context v8_ctx, File file) {
+		Assert.on_js_thread();
 		string script;
 		try {
 			script = Drt.System.read_file(file);
 		} catch (GLib.Error e) 	{
 			error("Unable to read script %s: %s", file.get_path(), e.message);
 		}
-		return execute_script(script, file.get_uri(), 1);
+		return execute_script(v8_ctx, script, file.get_uri(), 1);
 	}
 	
-	public bool execute_script(string script, string path, int line) {
+	public bool execute_script(Cef.V8context v8_ctx, string script, string path, int line) {
+		Assert.on_js_thread();
 		assert(v8_ctx != null);
         Cef.String _script = {};
         var wrapped_script = SCRIPT_WRAPPER.printf(script).replace("\t", " ");
@@ -217,23 +245,27 @@ public class CefJSApi : GLib.Object {
 	}
 	
 	public void send_async_response(int id, Variant? response, GLib.Error? error) {
-		if (is_valid()) {
-			var args = new Variant("(imvmv)", (int32) id, response,
-				error == null ? null : new Variant.string(error.message));
-			if (response != null) {
-				// FIXME: How are we losing a reference here?
-				g_variant_ref(response);
-			}
-			call_function_sync("Nuvola.Async.respond", ref args, false);
+		Assert.on_glib_thread();
+		var args = new Variant("(imvmv)", (int32) id, response,
+			error == null ? null : new Variant.string(error.message));
+		if (response != null) {
+			// FIXME: How are we losing a reference here?
+			g_variant_ref(response);
 		}
+		call_function_sync("Nuvola.Async.respond", ref args, false);
 	}
 	
-	public void call_function_sync(string name, ref Variant? arguments, bool propagate_error) throws GLib.Error {	
+	public void call_function_sync(string name, ref Variant? arguments, bool propagate_error) throws GLib.Error {
+		Assert.on_glib_thread();
 		GLib.Error? error = null;
 		var args = arguments;
 		var loop = new MainLoop(MainContext.get_thread_default());
 		CefGtk.Task.post(Cef.ThreadId.RENDERER, () => {
+			Assert.on_js_thread();
 			try {
+				if (!enter_js()) {
+					throw new JSError.NO_CONTEXT("JS Context is not valid.");
+				}
 				string[] names = name.split(".");
 				Cef.V8value object = main_object;
 				if (object == null) {
@@ -289,6 +321,8 @@ public class CefJSApi : GLib.Object {
 				}
 			} catch (GLib.Error e) {
 				error = e;
+			} finally {
+				exit_js();
 			}
 			loop.quit();
 		});
@@ -318,6 +352,7 @@ public class CefJSApi : GLib.Object {
 	
 	private void call_ipc_method_func(string? name, Cef.V8value? object, Cef.V8value?[] args,
     out Cef.V8value? retval, out string? exception, bool is_void) {
+		Assert.on_js_thread();
 		retval = null;
 		exception = null;
 		if (args.length == 0) {
