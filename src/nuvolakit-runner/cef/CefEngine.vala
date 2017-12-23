@@ -121,7 +121,6 @@ public class CefEngine : WebEngine {
 	}
 	
 	public override void init_app_runner() {
-		message("Partially implemented: init_app_runner()");
 		if (!ready) {
 			web_view.notify.connect_after(on_web_view_notify);
 			update_from_web_view("is-loading");
@@ -140,6 +139,9 @@ public class CefEngine : WebEngine {
 			api = new JSApi(
 				runner_app.storage, web_app.data_dir, storage.config_dir, config, session, webkit_version,
 				libsoup_version, false);
+			api.call_ipc_method_void.connect(on_call_ipc_method_void);
+			api.call_ipc_method_sync.connect(on_call_ipc_method_sync);
+			api.call_ipc_method_async.connect(on_call_ipc_method_async);
 			try {
 				api.inject(env);
 				api.initialize(env);
@@ -267,7 +269,6 @@ public class CefEngine : WebEngine {
 
 	public override void call_function_sync(string name, ref Variant? params, bool propagate_error=false)
 	throws GLib.Error {
-		warning("Not implemented: call_function_sync(%s)", name);
 		env.call_function_sync(name, ref params);
 	}
 	
@@ -334,6 +335,42 @@ public class CefEngine : WebEngine {
 	private void on_web_view_notify(GLib.Object? o, ParamSpec param) {
         update_from_web_view(param.name);
     }
+    
+    private void on_call_ipc_method_void(string name, Variant? data) {
+		try {
+			ipc_bus.local.call.begin(name, data, (o, res) => {
+				try {
+					ipc_bus.local.call.end(res);	
+				} catch (GLib.Error e) {
+					warning("IPC call error: %s", e.message);
+				}});
+		} catch (GLib.Error e) {
+			critical("Failed to send message '%s'. %s", name, e.message);
+		}
+	}
+	
+	private void on_call_ipc_method_async(JSApi js_api, string name, Variant? data, int id) {
+		try {
+			ipc_bus.local.call.begin(name, data, (o, res) => {
+				try {
+					var response = ipc_bus.local.call.end(res);
+					js_api.send_async_response(id, response, null);
+				} catch (GLib.Error e) {
+					js_api.send_async_response(id, null, e);
+				}});
+		} catch (GLib.Error e) {
+			critical("Failed to send message '%s'. %s", name, e.message);
+		}
+	}
+	
+	private void on_call_ipc_method_sync(string name, Variant? data, ref Variant? result) {
+		try {
+			result = ipc_bus.local.call_sync(name, data);
+		} catch (GLib.Error e) {
+			critical("Failed to send message '%s'. %s", name, e.message);
+			result = null;
+		}
+	}
     
     private void update_from_web_view(string property) {
         switch (property) {
