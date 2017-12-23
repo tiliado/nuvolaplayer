@@ -204,6 +204,7 @@ public class CefJSApi : GLib.Object {
 			var global_object = v8_ctx.get_global();
 			var func = Cef.V8.get_function(global_object, "__nuvola_func__");
 			assert(func != null);
+			main_object.ref();
 			var ret_val = func.execute_function(main_object, {});
 			if (ret_val == null) {
 				result = false;
