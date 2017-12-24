@@ -26,7 +26,11 @@ namespace Nuvola {
 
 public class WebkitOptions : WebOptions {
 	public override VersionTuple engine_version {get; protected set;}
-	public WebKit.WebContext default_context{get; private set; default = null;}
+	public WebKit.WebContext default_context{
+		get {if (_default_context == null) {init();} return _default_context;}
+		private set {_default_context = value;}
+	}
+	private WebKit.WebContext _default_context = null;
 	public bool flash_required {get; private set; default = false;}
 	public bool mse_required {get; private set; default = false;}
 	public bool mse_supported {get; private set; default = false;}
@@ -39,6 +43,9 @@ public class WebkitOptions : WebOptions {
 	
 	construct {
 		engine_version = {WebKit.get_major_version(), WebKit.get_minor_version(), WebKit.get_micro_version(), 0};
+	}
+	
+	private void init() {
 		var data_manager = (WebKit.WebsiteDataManager) GLib.Object.@new(
 			typeof(WebKit.WebsiteDataManager),
 			"base-cache-directory", storage.create_cache_subdir("webkit").get_path(),
