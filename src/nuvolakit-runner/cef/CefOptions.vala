@@ -40,6 +40,10 @@ public class CefOptions : WebOptions {
 		engine_version = VersionTuple.parse(Cef.get_chromium_version());
 	}
 	
+	public override string get_display_name() {
+		return "Chromium " + Cef.get_chromium_version();
+	}
+	
 	public override WebEngine create_web_engine() {
 		if (default_context == null) {
 			CefGtk.init(widevine_enabled, flash_enabled);

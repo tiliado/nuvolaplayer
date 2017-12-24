@@ -53,7 +53,7 @@ public void print_version_info(FileStream output, WebApp? web_app)
 
 public class AboutDialog: Gtk.Dialog
 {
-	public AboutDialog(Gtk.Window? parent, WebApp? web_app)
+	public AboutDialog(Gtk.Window? parent, WebApp? web_app, WebOptions[]? web_options)
 	{
 		GLib.Object(title: "About", transient_for: parent);
 		resizable = false;
@@ -153,27 +153,20 @@ public class AboutDialog: Gtk.Dialog
 		label.use_markup = true;
 		grid.attach(label, 1, 4, 1, 1);
 		
+		var line = 5;
 		label = new Gtk.Label("Diorite: %s".printf(Drt.get_version()));
 		label.selectable = true;
 		label.margin_top = 10;
-		grid.attach(label, 0, 5, 2, 1);
-		label = new Gtk.Label("Web Engine: WebKitGTK %u.%u.%u".printf(
-			WebKit.get_major_version(), WebKit.get_minor_version(), WebKit.get_micro_version()));
-		label.selectable = true;
-		grid.attach(label, 0, 6, 2, 1);
-		label = new Gtk.Label("Web Engine: Chromium " + 
-			#if HAVE_CEF
-			Cef.get_chromium_version()
-			#else
-			"N/A"
-			#endif
-			);
-		label.selectable = true;
-		grid.attach(label, 0, 7, 2, 1);
+		grid.attach(label, 0, line++, 2, 1);
+		foreach (var entry in web_options) {
+			label = new Gtk.Label("Web Engine: " + entry.get_display_name());
+			label.selectable = true;
+			grid.attach(label, 0, line++, 2, 1);
+		}
 		label = new Gtk.Label("Network Library: libsoup %u.%u.%u".printf(
 			Soup.get_major_version(), Soup.get_minor_version(), Soup.get_micro_version()));
 		label.selectable = true;
-		grid.attach(label, 0, 78, 2, 1);
+		grid.attach(label, 0, line++, 2, 1);
 		grid.show_all();
 		box.add(grid);
 	}

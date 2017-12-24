@@ -471,9 +471,8 @@ public class AppRunnerController: Drtgtk.Application
 		activate();
 	}
 	
-	private void do_about()
-	{
-		var dialog = new AboutDialog(main_window, web_app);
+	private void do_about() {
+		var dialog = new AboutDialog(main_window, web_app, {web_options});
 		dialog.run();
 		dialog.destroy();
 	}
