@@ -73,7 +73,6 @@ public class AppRunnerController: Drtgtk.Application
 	public string dbus_id {get; private set;}
 	private WebOptions web_options;
 	private WebkitOptions webkit_options;
-	private WebkitEngine webkit_engine = null;
 	public WebEngine web_engine {get; private set;}
 	public Drt.KeyValueStorage master_config {get; private set;}
 	public Bindings bindings {get; private set;}
@@ -362,10 +361,6 @@ public class AppRunnerController: Drtgtk.Application
 	private void init_web_engine()
 	{
 		web_engine = web_options.create_web_engine();
-		webkit_engine = web_engine as WebkitEngine;
-		if (webkit_engine == null) {
-			webkit_engine = new WebkitEngine(webkit_options);
-		}
 		web_engine.early_init(this, ipc_bus, web_app, config, connection, web_worker_data);
 		web_engine.set_user_agent(web_app.user_agent);
 		web_engine.init_form.connect(on_init_form);
@@ -517,6 +512,7 @@ public class AppRunnerController: Drtgtk.Application
 		var network_settings = new NetworkSettings(connection);
 		dialog.add_tab("Network", network_settings);
 		dialog.add_tab("Features", new ComponentsManager(this, components, tiliado_activation));
+		var webkit_engine = web_engine as WebkitEngine;
 		if (webkit_engine != null) {
 			dialog.add_tab("Website Data", new WebsiteDataManager(webkit_options.default_context.get_website_data_manager()));
 			dialog.add_tab("Format Support", new FormatSupportScreen(this, format_support, storage, webkit_options.default_context));
@@ -612,7 +608,10 @@ public class AppRunnerController: Drtgtk.Application
 		
 		bindings.add_object(menu_bar);
 		
-		components.prepend(new PasswordManagerComponent(config, ipc_bus, web_worker, web_app.id, webkit_engine));
+		var webkit_engine = web_engine as WebkitEngine;
+		if (webkit_engine != null) {
+			components.prepend(new PasswordManagerComponent(config, ipc_bus, web_worker, web_app.id, webkit_engine));
+		}
 		components.prepend(new AudioScrobblerComponent(this, bindings, master_config, config, connection.session));
 		components.prepend(new MPRISComponent(this, bindings, config));
 		components.prepend(new HttpRemoteControl.Component(this, bindings, config, ipc_bus));
