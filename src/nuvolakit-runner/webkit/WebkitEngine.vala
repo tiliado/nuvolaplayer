@@ -32,10 +32,6 @@ public class WebkitEngine : WebEngine
 	private const string ZOOM_LEVEL_CONF = "webview.zoom_level";
 	
 	public override Gtk.Widget get_main_web_view(){return web_view;}
-	private void set_web_plugins(bool enabled) {web_view.get_settings().enable_plugins = enabled;}
-	
-	private void set_media_source_extension (bool enabled){web_view.get_settings().enable_mediasource = enabled;}
-	private bool get_media_source_extension(){return web_view.get_settings().enable_mediasource;}
 	
 	private AppRunnerController runner_app;
 	private WebKit.WebContext web_context;
@@ -45,12 +41,13 @@ public class WebkitEngine : WebEngine
 	private IpcBus ipc_bus = null;
 	private Config config;
 	private Drt.KeyValueStorage session;
+	private unowned WebkitOptions webkit_options;
 	
 	public WebkitEngine(WebkitOptions web_options){
 		base(web_options);
+		this.webkit_options = web_options;
 		web_context = web_options.default_context;
-		set_web_plugins(web_options.flash_required);
-		set_media_source_extension(web_options.mse_required);
+		
 	}
 	
 	public override void early_init(AppRunnerController runner_app, IpcBus ipc_bus,
@@ -86,6 +83,9 @@ public class WebkitEngine : WebEngine
 		web_context.download_started.connect(on_download_started);
 		
 		web_view = new WebView(web_context);
+		var ws = web_view.get_settings();
+		ws.enable_plugins = webkit_options.flash_required;
+		ws.enable_mediasource = webkit_options.mse_required;
 		config.set_default_value(ZOOM_LEVEL_CONF, 1.0);
 		web_view.zoom_level = config.get_double(ZOOM_LEVEL_CONF);
 		web_view.load_changed.connect(on_load_changed);
@@ -489,7 +489,7 @@ public class WebkitEngine : WebEngine
 	private void handle_web_worker_ready(Drt.RpcRequest request) throws Drt.RpcError {
 		if (!web_worker.ready) {
 			web_worker.ready = true;
-			if (get_media_source_extension()) {
+			if (webkit_options.mse_required) {
 				Drt.EventLoop.add_idle(() => {
 					var args = new Variant.tuple({});
 					try {
