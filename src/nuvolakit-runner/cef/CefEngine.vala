@@ -328,7 +328,6 @@ public class CefEngine : WebEngine {
 	private void on_load_started(Cef.TransitionType transition) {
 		if (web_worker != null) {
 			debug("Load started");
-			web_worker.ready = false;
 		}
 	}
 	
