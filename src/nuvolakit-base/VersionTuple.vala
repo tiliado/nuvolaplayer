@@ -49,6 +49,18 @@ public struct VersionTuple {
 	}
 	
 	/**
+	 * Create new version tuple from uint array.
+	 * 
+	 * @param versions    Version numbers as an uint array.
+	 */
+	public VersionTuple.uintv(uint[] versions) {
+		this.major = versions.length > 0 ? versions[0] : 0;
+		this.minor = versions.length > 1 ? versions[1] : 0;
+		this.micro = versions.length > 2 ? versions[2] : 0;
+		this.patch = versions.length > 3 ? versions[3] : 0;
+	}
+	
+	/**
 	 * Create new version tuple from version string.
 	 * 
 	 * @param version    A dot-separated version string.
