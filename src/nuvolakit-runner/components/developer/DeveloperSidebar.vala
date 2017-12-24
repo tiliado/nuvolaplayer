@@ -62,6 +62,15 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
 		grid = new Gtk.Grid();
 		grid.orientation = Gtk.Orientation.VERTICAL;
 		grid.hexpand = grid.vexpand = true;
+		#if HAVE_CEF
+		var cef_web_view = app.web_engine.get_main_web_view() as CefGtk.WebView;
+		if (cef_web_view != null) {
+			var button = new Gtk.Button.with_label("Open Dev Tools");
+			button.get_style_context().add_class("suggested-action");
+			button.clicked.connect(() => cef_web_view.open_developer_tools());
+			grid.add(button);
+		}
+		#endif
 		artwork = new Gtk.Image();
 		clear_artwork(false);
 		grid.add(artwork);
