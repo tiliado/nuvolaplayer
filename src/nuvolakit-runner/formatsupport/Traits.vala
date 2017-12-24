@@ -22,160 +22,81 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
-public class Traits
-{
-	public bool flash_supported {get; private set; default = false;}
-	public bool flash_required {get; private set; default = false;}
-	public bool mp3_supported {get; private set; default = false;}
-	public bool h264_supported {get; private set; default = false;}
-	public bool mse_supported {get; private set; default = false;}
-	public bool mse_required {get; private set; default = false;}
-	public uint webkitgtk_required {get; private set; default = 0;}
-	private WebkitOptions? webkit_options;
-	private string? rule;
+public class RequirementParser : Drt.RequirementParser {
+	private WebOptions web_options;
 	
-	public Traits(string? rule, WebkitOptions? webkit_options)
-	{
-		this.rule = rule;
-		this.webkit_options = webkit_options;
-		#if WEBKIT_SUPPORTS_MSE
-		mse_supported = true;
-		h264_supported = true;
-		#endif
+	public RequirementParser(WebOptions web_options) {
+		this.web_options = web_options;
 	}
 	
-	public bool eval(out string? failed_requirements) throws Drt.RequirementError
-	{
-		return new Parser(this).eval(rule, out failed_requirements);
-	}
-	
-	public void set_from_format_support(FormatSupport format_support)
-	{
-		flash_supported = format_support.n_flash_plugins > 0;
-		mp3_supported = format_support.mp3_supported;
-	}
-	
-	public bool eval_webkitgtk(uint major, uint minor, uint micro) {
-		return webkit_options.engine_version.gte({major, minor, micro, 0});
-	}
-	
-	public bool eval_feature(string name)
-	{
-		switch (name)
-		{
-		case "eme":
-			return false;
-		case "mse":
-			mse_required = true;
-			return mse_supported;
-		case "flash":
-			flash_required = true;
-			return flash_supported;
+	protected override Drt.RequirementState call(int pos, string ident, string? params) {
+		var type = ident.down();
+		Drt.RequirementState result = Drt.RequirementState.UNSUPPORTED;
+		switch (type) {
+		case "codec":
+			result = call_codec(pos, params);
+			break;
+		case "feature":
+			result = call_feature(pos, params);
+			break;
+		case "flashaudiorequired":
+		case "flashaudiopreferred":
+			warning("No longer supported identifier in a format support expression: '%s'.", ident);
+			result = call_feature(pos, "flash");
+			break;
+		case "html5audiorequired":
+		case "html5audiopreferred":
+			warning("No longer supported identifier in a format support expression: '%s'.", ident);
+			result = call_codec(pos, "mp3");
+			break;
 		default:
-			return false;
+			string? error = null;
+			result = web_options.supports_requirement(type, params, out error);
+			if (error != null) {
+				set_eval_error(pos, error);
+			}
+			break;
 		}
+		debug("%s[%s] -> %s ", ident, params, result.to_string());
+		return result;
 	}
 	
-	public bool eval_codec(string name)
-	{
-		switch (name)
-		{
-		case "mp3":
-			return mp3_supported;
-		
-		case "h264":
-			return h264_supported;
-		default:
-			return false;
+	private Drt.RequirementState call_codec(int pos, string? params) {
+		if (params == null) {
+			set_eval_error(pos, "Codec[] needs a codec name as a parameter.");
+			return Drt.RequirementState.ERROR;
 		}
+		var name = params.strip().down();
+		if (name[0] == 0) {
+			set_eval_error(pos, "Codec[] needs a codec name as a parameter.");
+			return Drt.RequirementState.ERROR;
+		}
+		string? error = null;
+		var result = web_options.supports_codec(name, out error);
+		if (error != null) {
+			set_eval_error(pos, error);
+		}
+		return result;
 	}
-
-
-	private class Parser : Drt.RequirementParser
-	{
-		private Traits traits;
-		
-		public Parser(Traits traits)
-		{
-			this.traits = traits;
+	
+	private Drt.RequirementState call_feature(int pos, string? params) {
+		if (params == null) {
+			set_eval_error(pos, "Feature[] needs a feature name as a parameter.");
+			return Drt.RequirementState.ERROR;
 		}
-		
-		protected override bool call(int pos, string ident, string? params)
-		{
-			var ci_ident = ident.down();
-			bool result = false;
-			switch (ci_ident)
-			{
-			case "codec":
-				result = call_codec(pos, params);
-				break;
-			case "webkitgtk":
-				result = call_webkitgtk(pos, params);
-				break;
-			case "feature":
-				result = call_feature(pos, params);
-				break;
-			case "flashaudiorequired":
-			case "flashaudiopreferred":
-				warning("No longer supported identifier in a format support expression: '%s'.", ident);
-				return traits.eval_feature("flash");
-			case "html5audiorequired":
-			case "html5audiopreferred":
-				warning("No longer supported identifier in a format support expression: '%s'.", ident);
-				return traits.eval_codec("mp3");
-			default:
-				warning("Unknown identifier in a format support expression: '%s'.", ident);
-				return false;
-			}
-			debug("%s[%s] -> %s ", ident, params, result.to_string());
-			return result;
+		var name = params.strip().down();
+		if (name[0] == 0) {
+			set_eval_error(pos, "Feature[] needs a feature name as a parameter.");
+			return Drt.RequirementState.ERROR;
 		}
-		
-		private bool call_codec(int pos, string? params)
-		{
-			if (params == null)
-				return set_eval_error(pos, "Codec[] needs a codec name as a parameter.");
-			var name = params.strip().down();
-			if (name[0] == 0)
-				return set_eval_error(pos, "Codec[] needs a codec name as a parameter.");
-			return traits.eval_codec(params.down());
+		string? error = null;
+		var result = web_options.supports_feature(name, out error);
+		if (error != null) {
+			set_eval_error(pos, error);
 		}
-		
-		private bool call_feature(int pos, string? params)
-		{
-			if (params == null)
-				return set_eval_error(pos, "Feature[] needs a feature name as a parameter.");
-			var name = params.strip().down();
-			if (name[0] == 0)
-				return set_eval_error(pos, "Feature[] needs a feature name as a parameter.");
-			return traits.eval_feature(params.down());
-		}
-		
-		private bool call_webkitgtk(int pos, string? params)
-		{
-			if (params == null)
-				return set_eval_error(pos, "WebKitGtk[] needs a version as a parameter.");
-			var param = params.strip().down();
-			if (param[0] == 0)
-				return set_eval_error(pos, "WebKitGtk[] needs a version name as a parameter.");
-			var versions = param.split(".");
-			if (versions.length > 3)
-				return set_eval_error(pos, "WebKitGtk[] received invalid version parameter '%s'.", param);
-			uint[] uint_versions = {0, 0, 0};
-			for (var i = 0; i < versions.length; i++)
-			{
-				var version = int.parse(versions[i]);
-				if (i < 0)
-				return set_eval_error(pos, "WebKitGtk[] received invalid version parameter '%s'.", param);
-				uint_versions[i] = (uint) version;
-			}
-			if (uint_versions[0] == 0)
-				return set_eval_error(pos, "WebKitGtk[] received invalid version parameter '%s'.", param);
-			return traits.eval_webkitgtk(uint_versions[0], uint_versions[1], uint_versions[2]);
-		}
+		return result;
 	}
 }
 

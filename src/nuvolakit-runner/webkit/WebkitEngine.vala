@@ -32,11 +32,10 @@ public class WebkitEngine : WebEngine
 	private const string ZOOM_LEVEL_CONF = "webview.zoom_level";
 	
 	public override Gtk.Widget get_main_web_view(){return web_view;}
-	public override bool get_web_plugins() {return web_view.get_settings().enable_plugins;}
-	public override void set_web_plugins(bool enabled) {web_view.get_settings().enable_plugins = enabled;}
+	private void set_web_plugins(bool enabled) {web_view.get_settings().enable_plugins = enabled;}
 	
-	public override void set_media_source_extension (bool enabled){web_view.get_settings().enable_mediasource = enabled;}
-	public override bool get_media_source_extension(){return web_view.get_settings().enable_mediasource;}
+	private void set_media_source_extension (bool enabled){web_view.get_settings().enable_mediasource = enabled;}
+	private bool get_media_source_extension(){return web_view.get_settings().enable_mediasource;}
 	
 	private AppRunnerController runner_app;
 	private WebKit.WebContext web_context;
@@ -50,6 +49,8 @@ public class WebkitEngine : WebEngine
 	public WebkitEngine(WebkitOptions web_options){
 		base(web_options);
 		web_context = web_options.default_context;
+		set_web_plugins(web_options.flash_required);
+		set_media_source_extension(web_options.mse_required);
 	}
 	
 	public override void early_init(AppRunnerController runner_app, IpcBus ipc_bus,

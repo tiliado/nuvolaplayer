@@ -75,7 +75,7 @@ public class StartupCheck : GLib.Object
 	#endif
 	[Description (nick="Web App object", blurb="Currently loaded web application")]
 	public WebApp web_app {get; construct;}
-	public WebkitOptions webkit_options {get; construct;}
+	public WebOptions web_options {get; construct;}
 	
 	/**
 	 * Create new StartupCheck object.
@@ -83,13 +83,11 @@ public class StartupCheck : GLib.Object
 	 * @param web_app           Web application to check its requirements.
 	 * @param format_support    Information about supported formats and technologies.
 	 */
-	public StartupCheck(WebApp web_app, FormatSupport format_support, WebkitOptions webkit_options)
-	{
-		GLib.Object(format_support: format_support, web_app: web_app, webkit_options: webkit_options);
+	public StartupCheck(WebApp web_app, WebOptions web_options, FormatSupport format_support) {
+		GLib.Object(format_support: format_support, web_app: web_app, web_options: web_options);
 	}
 	
-	~StartupCheck()
-	{
+	~StartupCheck() {
 	}
 	
 	/**
@@ -97,8 +95,7 @@ public class StartupCheck : GLib.Object
 	 * 
 	 * @param name    The name of the check.
 	 */
-	public virtual signal void task_started(string name)
-	{
+	public virtual signal void task_started(string name) {
 		running_tasks++;
 	}
 	
@@ -107,8 +104,7 @@ public class StartupCheck : GLib.Object
 	 * 
 	 * @param name    The name of the check.
 	 */
-	public virtual signal void task_finished(string name)
-	{
+	public virtual signal void task_finished(string name) {
 		running_tasks--;
 		finished_tasks++;
 	}
@@ -126,8 +122,7 @@ public class StartupCheck : GLib.Object
 	 * @return {@link Status.ERROR} if any of checks ended up with {@link Status.ERROR},
 	 * {@link Status.WARNING} if there was any warning, finally {@link Status.OK} otherwise.
 	 */
-	public Status mark_as_finished()
-	{
+	public Status mark_as_finished() {
 		var status = get_overall_status();
 		final_status = status;
 		finished(status);
@@ -140,20 +135,19 @@ public class StartupCheck : GLib.Object
 	 * @return {@link Status.ERROR} if any of checks ended up with {@link Status.ERROR},
 	 * {@link Status.WARNING} if there was any warning, finally {@link Status.OK} otherwise.
 	 */
-	public Status get_overall_status()
-	{
+	public Status get_overall_status() {
 		Status result = Status.OK;
 		(unowned ParamSpec)[] properties = get_class().list_properties();
-		foreach (weak ParamSpec property in properties)
-		{
-			if (property.name != "final-status" && property.name.has_suffix("-status"))
-			{
+		foreach (weak ParamSpec property in properties) {
+			if (property.name != "final-status" && property.name.has_suffix("-status")) {
 				Status status = Status.UNKNOWN;
 				this.get(property.name, out status);
-				if (status == Status.ERROR)
+				if (status == Status.ERROR) {
 					return status;
-				if (status == Status.WARNING)
+				}
+				if (status == Status.WARNING) {
 					result = status;
+				}
 			}
 		}
 		return result;
@@ -194,70 +188,36 @@ public class StartupCheck : GLib.Object
 	 * 
 	 * The {@link app_requirements_status} property is populated with the result of this check.
 	 */
-	public async void check_app_requirements()
-	{
+	public async void check_app_requirements() {
 		const string NAME = "Web App Requirements";
 		task_started(NAME);
 		
 		app_requirements_status = Status.IN_PROGRESS;
 		var result_status = Status.OK;
 		string? result_message = null;
-		try
-		{
+		try {
 			yield format_support.check();
-		}
-		catch (GLib.Error e)
-		{
+		} catch (GLib.Error e) {
 			result_message = e.message;
 		}
 		
-		if (web_app.traits(webkit_options).flash_required)
-		{
-			unowned List<WebPlugin?> plugins = format_support.list_web_plugins();
-			foreach (unowned WebPlugin plugin in plugins)
-				debug("Nuvola.WebPlugin: %s (%s, %s) at %s: %s", plugin.name, plugin.enabled ? "enabled" : "disabled",
-					plugin.is_flash ? "flash" : "not flash", plugin.path, plugin.description);
-			var flash_plugins = format_support.n_flash_plugins;
-			if (flash_plugins == 0)
-			{
-				Drt.String.append(ref result_message, "\n",
-					"<b>Flash plugin issue:</b> No Flash Player plugin has been found. Music playback may fail.");
-				result_status = Status.ERROR;
-			}
-			else if (flash_plugins > 1)
-			{
-				Drt.String.append(ref result_message, "\n",
-					"<b>Flash plugin issue:</b> More Flash Player plugins have been found. Wrong version may be in use.");
-				if (result_status < Status.WARNING)
-					result_status = Status.WARNING;
-			}
+		var webkit_options = web_options as WebkitOptions;
+		if (webkit_options != null) {
+			webkit_options.format_support = format_support;
 		}
-		if (!format_support.mp3_supported)
-			warning("MP3 Audio not supported.");
 		
-		#if WEBKIT_SUPPORTS_MSE
-		debug("MSE supported: yes");
-		#else
-		debug("MSE supported: no");
-		#endif
-		
-		yield Drt.EventLoop.resume_later();
-		
-		try
-		{
-			string? failed_requirements = null;
-			if (!web_app.check_requirements(format_support, webkit_options, out failed_requirements))
-			{
-				Drt.String.append(ref result_message, "\n", Markup.printf_escaped(
-						"This web app requires certain technologies to function properly but these requirements "
-						+ "have not been satisfied.\n\nFailed requirements: <i>%s</i>\n\n"
-						+ "<a href=\"%s\">Get help with installation</a>",
-						failed_requirements ?? "", WEB_APP_REQUIREMENTS_HELP_URL));
-				result_status = Status.ERROR;
+		var parser = new RequirementParser(web_options);
+		try {
+			parser.eval(web_app.requirements);
+			if (parser.n_unsupported + parser.n_unknown > 0) {
+			result_status = Status.ERROR;
+			Drt.String.append(ref result_message, "\n", Markup.printf_escaped(
+				"This web app requires certain technologies to function properly but these requirements "
+				+ "have not been satisfied.\n\nFailed requirements: <i>%s %s</i>\n\n"
+				+ "<a href=\"%s\">Get help with installation</a>",
+				parser.failed_requirements ?? "", parser.unknown_requirements ?? "", WEB_APP_REQUIREMENTS_HELP_URL));
 			}
-		}
-		catch (Drt.RequirementError e)
-		{
+		} catch (Drt.RequirementError e) {
 			Drt.String.append(ref result_message, "\n", Markup.printf_escaped(
 				"This web app provides invalid metadata about its requirements."
 				+ " Please create a bug report. The error message is: %s\n\n%s",
@@ -265,6 +225,15 @@ public class StartupCheck : GLib.Object
 			result_status = Status.ERROR;
 		}
 		
+		var warnings = web_options.get_format_support_warnings();
+		if (warnings.length > 0) {
+			if (result_status < Status.WARNING) {
+				result_status = Status.WARNING;
+			}
+			foreach (unowned string entry in warnings) {
+				Drt.String.append(ref result_message, "\n", entry);
+			}
+		}
 		yield Drt.EventLoop.resume_later();
 		app_requirements_message = (owned) result_message;
 		app_requirements_status = result_status;

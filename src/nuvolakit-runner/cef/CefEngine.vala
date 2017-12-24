@@ -41,10 +41,6 @@ public class CefEngine : WebEngine {
 	private const string ZOOM_LEVEL_CONF = "webview.cef_zoom_level";
 	
 	public override Gtk.Widget get_main_web_view(){return web_view;}
-	public override bool get_web_plugins(){return ((CefOptions) options).flash_enabled;}
-	public override void set_web_plugins(bool enabled){}
-	public override void set_media_source_extension (bool enabled){}
-	public override bool get_media_source_extension(){return true;}
 	
 	private AppRunnerController runner_app;
 	private CefGtk.WebContext web_context;

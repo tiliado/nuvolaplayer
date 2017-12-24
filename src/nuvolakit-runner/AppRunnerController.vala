@@ -71,6 +71,7 @@ public class AppRunnerController: Drtgtk.Application
 	public WebApp web_app {get; protected set;}
 	public WebAppStorage app_storage {get; protected set;}
 	public string dbus_id {get; private set;}
+	private WebOptions web_options;
 	private WebkitOptions webkit_options;
 	private WebkitEngine webkit_engine = null;
 	public WebEngine web_engine {get; private set;}
@@ -137,12 +138,10 @@ public class AppRunnerController: Drtgtk.Application
 		Nuvola.Css.apply_custom_styles(screen);
 	}
 	
-	private  void start()
-	{
+	private  void start() {
 		init_settings();
 		format_support = new FormatSupport(storage.require_data_file("audio/audiotest.mp3").get_path());
-		webkit_options = new WebkitOptions(app_storage);
-		var startup_check = new StartupCheck(web_app, format_support, webkit_options);
+		var startup_check = new StartupCheck(web_app, web_options, format_support);
 		startup_window = new StartupWindow(this, startup_check);
 		startup_window.present();
 		startup_check.check_desktop_portal_available.begin((o, res) => startup_check.check_desktop_portal_available.end(res));
@@ -220,6 +219,12 @@ public class AppRunnerController: Drtgtk.Application
 			assert(WebOptions.set_default(typeof(CefOptions)));
 		}
 		#endif
+		connection = new Connection(new Soup.Session(), app_storage.cache_dir.get_child("conn"), config);
+		if (!WebOptions.set_default(typeof(WebkitOptions))) {
+			warning("Default engine is %s.", WebOptions.get_default().name());
+		}
+		web_options = WebOptions.create_default(app_storage);
+		webkit_options = (web_options as WebkitOptions) ?? new WebkitOptions(app_storage);
 	}
 	
 	private bool init_ipc(StartupCheck startup_check)
@@ -356,11 +361,6 @@ public class AppRunnerController: Drtgtk.Application
 	
 	private void init_web_engine()
 	{
-		connection = new Connection(new Soup.Session(), app_storage.cache_dir.get_child("conn"), config);
-		if (!WebOptions.set_default(typeof(WebkitOptions))) {
-			warning("Default engine is %s.", WebOptions.get_default().name());
-		}
-		var web_options = WebOptions.create_default(app_storage);
 		web_engine = web_options.create_web_engine();
 		webkit_engine = web_engine as WebkitEngine;
 		if (webkit_engine == null) {
@@ -368,9 +368,6 @@ public class AppRunnerController: Drtgtk.Application
 		}
 		web_engine.early_init(this, ipc_bus, web_app, config, connection, web_worker_data);
 		web_engine.set_user_agent(web_app.user_agent);
-		web_engine.set_web_plugins(web_app.traits(webkit_options).flash_required);
-		web_engine.set_media_source_extension(web_app.traits(webkit_options).mse_required);
-		
 		web_engine.init_form.connect(on_init_form);
 		web_engine.notify.connect_after(on_web_engine_notify);
 		web_engine.show_alert_dialog.connect(on_show_alert_dialog);

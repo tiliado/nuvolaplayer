@@ -30,13 +30,14 @@ public class CefOptions : WebOptions {
 	public CefGtk.WebContext default_context{get; private set; default = null;}
 	public bool widevine_enabled {get; set; default = true;}
 	public bool flash_enabled {get; set; default = true;}
+	public bool flash_required {get; private set; default = false;}
 	
 	public CefOptions(WebAppStorage storage) {
 		base(storage);
-		engine_version = VersionTuple.parse(Cef.get_chromium_version());
 	}
 	
 	construct {
+		engine_version = VersionTuple.parse(Cef.get_chromium_version());
 	}
 	
 	public override WebEngine create_web_engine() {
@@ -45,6 +46,70 @@ public class CefOptions : WebOptions {
 			default_context = new CefGtk.WebContext(GLib.Environment.get_user_config_dir() + "/cefium");
 		}
 		return new CefEngine(this);
+	}
+	
+	public override Drt.RequirementState supports_requirement(string type, string? parameter, out string? error) {
+		error = null;
+		switch (type) {
+		case "chromium":
+		case "chrome":
+			if (parameter == null) {
+				return Drt.RequirementState.SUPPORTED;
+			}
+			var param = parameter.strip().down();
+			if (param[0] == 0) {
+				return Drt.RequirementState.SUPPORTED;
+			}
+			var versions = param.split(".");
+			if (versions.length > 4) {
+				error = "%s[] received invalid version parameter '%s'.".printf(type, param);
+				return Drt.RequirementState.ERROR;
+			}
+			uint[] uint_versions = {0, 0, 0, 0};
+			for (var i = 0; i < versions.length; i++) {
+				var version = int.parse(versions[i]);
+				if (i < 0) {
+					error = "%s[] received invalid version parameter '%s'.".printf(type, param);
+					return Drt.RequirementState.ERROR;
+				}
+				uint_versions[i] = (uint) version;
+			}
+			return (engine_version.gte(VersionTuple.uintv(uint_versions))
+				? Drt.RequirementState.SUPPORTED : Drt.RequirementState.UNSUPPORTED);
+		default:
+			return Drt.RequirementState.UNSUPPORTED;
+		}
+	}
+	
+	public override Drt.RequirementState supports_feature(string name, out string? error) {
+		error = null;
+		switch (name) {
+		case "mse":
+			return Drt.RequirementState.SUPPORTED;
+		case "widevine":
+			return Drt.RequirementState.SUPPORTED; // FIXME
+		case "flash":
+			flash_required = true;
+			return Drt.RequirementState.SUPPORTED;  // FIXME
+		default:
+			return Drt.RequirementState.UNSUPPORTED;
+		}
+	}
+	
+	public override Drt.RequirementState supports_codec(string name, out string? error) {
+		error = null;
+		switch (name) {
+		case "mp3":
+		case "h264":
+			return Drt.RequirementState.SUPPORTED;
+		default:
+			return Drt.RequirementState.UNSUPPORTED;
+		}
+	}
+	
+	public override string[] get_format_support_warnings() {
+		string[] warnings = {};
+		return warnings;
 	}
 }
 

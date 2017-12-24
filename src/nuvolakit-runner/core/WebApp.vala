@@ -93,7 +93,6 @@ public class WebApp : GLib.Object
 	public GenericSet<string> categories {get; construct;}
 	private List<IconInfo?> icons = null;
 	private bool icons_set = false;
-	private Traits? _traits = null;
 	
 	/**
 	 * Creates new WebApp metadata object
@@ -275,32 +274,7 @@ public class WebApp : GLib.Object
 		return categories.get_values();
 	}
 	
-	public unowned Traits traits(WebkitOptions webkit_options)
-	{
-		if (_traits == null)
-		{
-			_traits = new Traits(requirements, webkit_options);
-			try
-			{
-				_traits.eval(null);
-			}
-			catch (Drt.RequirementError e)
-			{
-				warning("Failed to parse requirements. %s", e.message);
-			}
-		}
-		return _traits;
-	}
 	
-	public bool check_requirements(FormatSupport format_support, WebkitOptions webkit_options,
-									out string? failed_requirements) throws Drt.RequirementError {
-		var traits = this.traits(webkit_options);
-		traits.set_from_format_support(format_support);
-		debug("Requirements expression: '%s'", requirements);
-		var result = traits.eval(out failed_requirements);
-		debug("Requirements expression: '%s' -> %s; %s", requirements, result.to_string(), failed_requirements);
-		return result;
-	}
 	
 	/**
 	 * Returns icon pixbuf for the given size.

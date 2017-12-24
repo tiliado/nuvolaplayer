@@ -27,13 +27,18 @@ namespace Nuvola {
 public class WebkitOptions : WebOptions {
 	public override VersionTuple engine_version {get; protected set;}
 	public WebKit.WebContext default_context{get; private set; default = null;}
+	public bool flash_required {get; private set; default = false;}
+	public bool mse_required {get; private set; default = false;}
+	public bool mse_supported {get; private set; default = false;}
+	public bool h264_supported {get; private set; default = false;}
+	public FormatSupport format_support {get; set;}
 	
 	public WebkitOptions(WebAppStorage storage) {
 		base(storage);
-		engine_version = {WebKit.get_major_version(), WebKit.get_minor_version(), WebKit.get_micro_version(), 0};
 	}
 	
 	construct {
+		engine_version = {WebKit.get_major_version(), WebKit.get_minor_version(), WebKit.get_micro_version(), 0};
 		var data_manager = (WebKit.WebsiteDataManager) GLib.Object.@new(
 			typeof(WebKit.WebsiteDataManager),
 			"base-cache-directory", storage.create_cache_subdir("webkit").get_path(),
@@ -50,15 +55,111 @@ public class WebkitOptions : WebOptions {
 		cookie_manager.set_persistent_storage(storage.data_dir.get_child("cookies.dat").get_path(),
 			WebKit.CookiePersistentStorage.SQLITE);	
 		default_context = web_context;
+		#if WEBKIT_SUPPORTS_MSE
+		mse_supported = true;
+		h264_supported = true;
+		debug("MSE supported: yes");
+		#else
+		debug("MSE supported: no");
+		#endif
 	}
 	
-	public static uint get_webkit_version()
-	{
+	public static uint get_webkit_version() {
 		return WebKit.get_major_version() * 10000 + WebKit.get_minor_version() * 100 + WebKit.get_micro_version(); 
 	}
 	
 	public override WebEngine create_web_engine() {
 		return new WebkitEngine(this);
+	}
+	
+	public override Drt.RequirementState supports_requirement(string type, string? parameter, out string? error) {
+		error = null;
+		switch (type) {
+		case "webkitgtk":
+			if (parameter == null) {
+				return Drt.RequirementState.SUPPORTED;
+			}
+			var param = parameter.strip().down();
+			if (param[0] == 0) {
+				return Drt.RequirementState.SUPPORTED;
+			}
+			var versions = param.split(".");
+			if (versions.length > 3) {
+				error = "WebKitGtk[] received invalid version parameter '%s'.".printf(param);
+				return Drt.RequirementState.ERROR;
+			}
+			uint[] uint_versions = {0, 0, 0, 0};
+			for (var i = 0; i < versions.length; i++) {
+				var version = int.parse(versions[i]);
+				if (i < 0) {
+					error = "WebKitGtk[] received invalid version parameter '%s'.".printf(param);
+					return Drt.RequirementState.ERROR;
+				}
+				uint_versions[i] = (uint) version;
+			}
+			return (engine_version.gte(VersionTuple.uintv(uint_versions))
+				? Drt.RequirementState.SUPPORTED : Drt.RequirementState.UNSUPPORTED);
+		default:
+			return Drt.RequirementState.UNSUPPORTED;
+		}
+	}
+	
+	public override Drt.RequirementState supports_feature(string name, out string? error) {
+		error = null;
+		switch (name) {
+		case "mse":
+			mse_required = true;
+			return mse_supported ? Drt.RequirementState.SUPPORTED : Drt.RequirementState.UNSUPPORTED;
+		case "flash":
+			flash_required = true;
+			if (format_support == null) {
+				return Drt.RequirementState.UNKNOWN;
+			} else  {
+				unowned List<WebPlugin?> plugins = format_support.list_web_plugins();
+				foreach (unowned WebPlugin plugin in plugins) {
+					debug(
+						"Nuvola.WebPlugin: %s (%s, %s) at %s: %s", plugin.name, plugin.enabled ? "enabled" : "disabled",
+						plugin.is_flash ? "flash" : "not flash", plugin.path, plugin.description);
+				}
+				
+				return (format_support.n_flash_plugins > 0
+					? Drt.RequirementState.SUPPORTED : Drt.RequirementState.UNSUPPORTED);
+			}
+		default:
+			return Drt.RequirementState.UNSUPPORTED;
+		}
+	}
+	
+	public override Drt.RequirementState supports_codec(string name, out string? error) {
+		error = null;
+		switch (name) {
+		case "mp3":
+			if (format_support == null) {
+				return Drt.RequirementState.UNKNOWN;
+			} else if (format_support.mp3_supported) {
+				return Drt.RequirementState.SUPPORTED;
+			} else {
+				warning("MP3 Audio not supported.");
+				return Drt.RequirementState.UNSUPPORTED;
+			}
+		case "h264":
+			return h264_supported ? Drt.RequirementState.SUPPORTED : Drt.RequirementState.UNSUPPORTED;
+		default:
+			return Drt.RequirementState.UNSUPPORTED;
+		}
+	}
+	
+	public override string[] get_format_support_warnings() {
+		string[] warnings = {};
+		if (flash_required) {
+			var flash_plugins = format_support.n_flash_plugins;
+			if (flash_plugins == 0)	{
+				warnings += "<b>Flash plugin issue:</b> No Flash Player plugin has been found. Music playback may fail.";
+			} else if (flash_plugins > 1) {
+				warnings += "<b>Flash plugin issue:</b> More Flash Player plugins have been found. Wrong version may be in use.";
+			}
+		}
+		return warnings;
 	}
 }
 

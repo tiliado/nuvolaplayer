@@ -60,6 +60,11 @@ public abstract class WebOptions : GLib.Object {
  		return version.gte(min) && (max.empty() || version.lt(max));
 	}
 	
+	public abstract Drt.RequirementState supports_requirement(string type, string? parameter, out string? error);
+	public abstract Drt.RequirementState supports_codec(string name, out string? error);
+	public abstract Drt.RequirementState supports_feature(string name, out string? error);
+	public abstract string[] get_format_support_warnings();
+	
 	public abstract WebEngine create_web_engine();
 }
 
