@@ -31,7 +31,6 @@ namespace Nuvola {
  * request filtering
  * context menu - password manager
  * JavaScript dialogs
- * initialization form - request_init_form()
  * network proxy
  * config & session key-value storage
  */
@@ -153,8 +152,10 @@ public class CefEngine : WebEngine {
 			debug("App Runner Initialized");
 			ready = true;
 		}
-		debug("App Runner Ready");
-		app_runner_ready();
+		if (!request_init_form()) {
+			debug("App Runner Ready");
+			app_runner_ready();
+		}
 	}
 	
 	public override void load_app() {
@@ -260,6 +261,31 @@ public class CefEngine : WebEngine {
 	public override void call_function_sync(string name, ref Variant? params, bool propagate_error=false)
 	throws GLib.Error {
 		env.call_function_sync(name, ref params);
+	}
+	
+	private bool request_init_form() {
+		Variant values;
+		Variant entries;
+		var args = new Variant(
+			"(s@a{sv}@av)", "InitializationForm",
+			new Variant.array(new VariantType("{sv}"), {}), new Variant.array(VariantType.VARIANT, {}));
+		try {
+			env.call_function_sync("Nuvola.core.emit", ref args);
+		} catch (GLib.Error e) {
+			runner_app.fatal_error(
+				"Initialization error",
+				"%s failed to crate initialization form. Initialization exited with error:\n\n%s".printf(
+					runner_app.app_name, e.message));
+			return false;
+		}
+		args.get("(s@a{smv}@av)", null, out values, out entries);
+		var values_hashtable = Drt.variant_to_hashtable(values);
+		if (values_hashtable.size() > 0) {
+			debug("Init form requested");
+			init_form(values_hashtable, entries);
+			return true;
+		}
+		return false;
 	}
 	
 	private void register_ipc_handlers() {
