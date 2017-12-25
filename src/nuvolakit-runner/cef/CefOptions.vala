@@ -27,7 +27,7 @@ namespace Nuvola {
 
 public class CefOptions : WebOptions {
 	public override VersionTuple engine_version {get; protected set;}
-	public CefGtk.WebContext default_context{get; private set; default = null;}
+	public CefGtk.WebContext default_context {get; private set; default = null;}
 	public bool widevine_enabled {get; set; default = true;}
 	public bool flash_enabled {get; set; default = true;}
 	public bool flash_required {get; private set; default = false;}
@@ -44,12 +44,12 @@ public class CefOptions : WebOptions {
 		return "Chromium " + Cef.get_chromium_version();
 	}
 	
-	public override WebEngine create_web_engine() {
+	public override WebEngine create_web_engine(WebApp web_app) {
 		if (default_context == null) {
 			CefGtk.init(widevine_enabled, flash_enabled);
 			default_context = new CefGtk.WebContext(GLib.Environment.get_user_config_dir() + "/cefium");
 		}
-		return new CefEngine(this);
+		return new CefEngine(this, web_app);
 	}
 	
 	public override Drt.RequirementState supports_requirement(string type, string? parameter, out string? error) {

@@ -80,8 +80,8 @@ public class WebkitOptions : WebOptions {
 		return WebKit.get_major_version() * 10000 + WebKit.get_minor_version() * 100 + WebKit.get_micro_version(); 
 	}
 	
-	public override WebEngine create_web_engine() {
-		return new WebkitEngine(this);
+	public override WebEngine create_web_engine(WebApp web_app) {
+		return new WebkitEngine(this, web_app);
 	}
 	
 	public override Drt.RequirementState supports_requirement(string type, string? parameter, out string? error) {

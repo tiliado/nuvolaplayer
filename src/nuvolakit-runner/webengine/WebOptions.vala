@@ -66,7 +66,7 @@ public abstract class WebOptions : GLib.Object {
 	public abstract Drt.RequirementState supports_feature(string name, out string? error);
 	public abstract string[] get_format_support_warnings();
 	
-	public abstract WebEngine create_web_engine();
+	public abstract WebEngine create_web_engine(WebApp web_app);
 }
 
 } // namespace Nuvola
