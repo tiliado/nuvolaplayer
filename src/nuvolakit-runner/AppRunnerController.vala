@@ -25,6 +25,8 @@
 namespace Nuvola
 {
 
+private extern const bool CEF_DEFAULT;
+
 namespace ConfigKey
 {
 	public const string WINDOW_X = "nuvola.window.x";
@@ -214,7 +216,8 @@ public class AppRunnerController: Drtgtk.Application
 		config.changed.connect(on_config_changed);
 		gtk_settings.gtk_application_prefer_dark_theme = config.get_bool(ConfigKey.DARK_THEME);
 		#if HAVE_CEF
-		if (Environment.get_variable("NUVOLA_USE_CEF") == "true") {
+		if (Environment.get_variable("NUVOLA_USE_CEF") == "true"
+		|| CEF_DEFAULT && Environment.get_variable("NUVOLA_USE_CEF") != "false") {
 			assert(WebOptions.set_default(typeof(CefOptions)));
 		}
 		#endif

@@ -221,6 +221,7 @@ def options(ctx):
 	ctx.add_option('--webkitgtk-supports-mse', action='store_true', default=False, dest='webkit_mse',
 		help="Use only if you are absolutely sure that your particular build of the WebKitGTK library supports Media Source Extension (as of 2.15.3, it is disabled by default)")
 	ctx.add_option('--cef', action='store_true', default=False, dest='cef', help="Build experimental CEF backend.")
+	ctx.add_option('--cef-default', action='store_true', default=False, dest='cef_default', help="Whether the CEF engine should be default.")
 
 def configure(ctx):
 	add_version_info(ctx)
@@ -337,6 +338,8 @@ def configure(ctx):
 	if ctx.options.appindicator:
 		pkgconfig(ctx, 'appindicator3-0.1', 'APPINDICATOR', '0.4')
 		vala_def(ctx, "APPINDICATOR")
+	if ctx.options.cef_default:
+		ctx.options.cef = True
 	ctx.env.have_cef = ctx.options.cef
 	if ctx.options.cef:
 		pkgconfig(ctx, 'valacef', 'VALACEF', '3.0')
@@ -384,6 +387,7 @@ def configure(ctx):
 	ctx.define("NUVOLA_WEB_APP_REQUIREMENTS_HELP_URL", ctx.env.WEB_APP_REQUIREMENTS_HELP_URL)
 	ctx.define("NUVOLA_HELP_URL", ctx.env.HELP_URL)
 	ctx.define("NUVOLA_LIBDIR", ctx.env.NUVOLA_LIBDIR)
+	ctx.define("NUVOLA_CEF_DEFAULT", int(ctx.options.cef_default))
 	
 	ctx.define('GLIB_VERSION_MAX_ALLOWED', glib_encode_version(MIN_GLIB))
 	ctx.define('GLIB_VERSION_MIN_REQUIRED', glib_encode_version(MIN_GLIB))
