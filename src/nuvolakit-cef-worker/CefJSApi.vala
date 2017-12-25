@@ -152,7 +152,7 @@ public class CefJSApi : GLib.Object {
 		Cef.V8.set_value(main_object, "_keyValueStorageSetDefaultValueAsync",
 			CefGtk.Function.create("_keyValueStorageSetDefaultValueAsync",
 				key_value_storage_set_default_value_async_func));
-			
+		Cef.V8.set_value(main_object, "_log", CefGtk.Function.create("_log", log_func));
 
 		File? main_js = storage.user_data_dir.get_child(JS_DIR).get_child(MAIN_JS);
 		if (!main_js.query_exists()) {
@@ -555,6 +555,25 @@ public class CefJSApi : GLib.Object {
 			});
 			return false;
 		});
+	}
+	
+	private void log_func(string? name, Cef.V8value? object,
+	Cef.V8value?[] args, out Cef.V8value? retval, out string? exception) {
+		Assert.on_js_thread();
+		retval = Cef.v8value_create_undefined();
+		exception = null;
+		for (var i = 0; i < args.length; i++) {
+			if (args[i].is_undefined() == 1) {
+				debug("Nuvola.log: undefined");
+			} else {
+				var val = Cef.V8.variant_from_value( args[i], out exception);
+				if (exception != null) {
+					retval = null;
+					return;
+				}
+				debug("Nuvola.log: %s", val.print(false));
+			}
+		}
 	}
 }
 
