@@ -33,7 +33,6 @@ namespace Nuvola {
  * JavaScript dialogs
  * initialization form - request_init_form()
  * network proxy
- * user agent string
  * config & session key-value storage
  */
 
@@ -244,10 +243,6 @@ public class CefEngine : WebEngine {
 	
 	public override void zoom_reset() {
 		web_view.zoom_reset();
-	}
-	
-	public override void set_user_agent(string? user_agent) {
-		warning("Not implemented: set_user_agent(%s)", user_agent);
 	}
 	
 	public override void get_preferences(out Variant values, out Variant entries) {

@@ -360,7 +360,6 @@ public class AppRunnerController: Drtgtk.Application
 	
 	private void init_web_engine()
 	{
-		web_engine.set_user_agent(web_app.user_agent);
 		web_engine = web_options.create_web_engine(web_app);
 		web_engine.early_init(this, ipc_bus, config, connection, web_worker_data);
 		web_engine.init_form.connect(on_init_form);

@@ -46,7 +46,12 @@ public class CefOptions : WebOptions {
 	
 	public override WebEngine create_web_engine(WebApp web_app) {
 		if (default_context == null) {
-			CefGtk.init(widevine_enabled, flash_enabled);
+			var user_agent = WebOptions.make_user_agent(web_app.user_agent);
+			if (user_agent != null) {
+				user_agent += " Nuvola/" + Nuvola.get_short_version();
+			}
+			var product = "Chrome/%s Nuvola/%s".printf(Cef.get_chromium_version(), Nuvola.get_short_version());
+			CefGtk.init(widevine_enabled, flash_enabled, user_agent, product);
 			default_context = new CefGtk.WebContext(GLib.Environment.get_user_config_dir() + "/cefium");
 		}
 		return new CefEngine(this, web_app);

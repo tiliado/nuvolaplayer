@@ -72,8 +72,6 @@ public abstract class WebEngine : GLib.Object, JSExecutor {
 	
 	public abstract void zoom_reset();
 	
-	public abstract void set_user_agent(string? user_agent);
-	
 	public abstract void get_preferences(out Variant values, out Variant entries);
 	
 	public abstract string? get_url();

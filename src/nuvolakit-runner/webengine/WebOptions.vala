@@ -67,6 +67,59 @@ public abstract class WebOptions : GLib.Object {
 	public abstract string[] get_format_support_warnings();
 	
 	public abstract WebEngine create_web_engine(WebApp web_app);
+	
+	public static string? make_user_agent(string? user_agent) {
+		const string APPLE_WEBKIT_VERSION = "604.1";
+		const string SAFARI_VERSION = "11.0";
+		const string FIREFOX_VERSION = "57.0";
+		const string CHROME_VERSION = "63.0.3239.108";
+		string? agent = null;
+		string? browser = null;
+		string? version = null;	
+		if (user_agent != null) {
+			agent = user_agent.strip();
+			if (agent[0] == '\0')
+				agent = null;
+		}
+		
+		if (agent != null) {
+			var parts = agent.split_set(" \t", 2);
+			browser = parts[0];
+			if (browser != null) {
+				browser = browser.strip();
+				if (browser[0] == '\0') {
+					browser = null;
+				}
+			}
+			version = parts[1];
+			if (version != null) {
+				version = version.strip();
+				if (version[0] == '\0') {
+					version = null;
+				}
+			}
+		}
+		
+		switch (browser) {
+		case "CHROME":
+			var s = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Safari/537.36";
+			agent = s.printf(version ?? CHROME_VERSION);
+			break;
+		case "FIREFOX":
+			var s = "Mozilla/5.0 (X11; Linux x86_64; rv:%1$s) Gecko/20100101 Firefox/%1$s";
+			agent = s.printf(version ?? FIREFOX_VERSION);
+			break;
+		case "SAFARI":
+			var s = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/%1$s (KHTML, like Gecko) Version/%2$s Safari/%1$s";
+			agent = s.printf(APPLE_WEBKIT_VERSION, version ?? SAFARI_VERSION);
+			break;
+		case "WEBKIT":
+			var s = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/%1$s (KHTML, like Gecko) Version/%2$s Safari/%1$s";
+			agent = s.printf(APPLE_WEBKIT_VERSION, version ?? SAFARI_VERSION);
+			break;
+		}
+		return agent;
+	}
 }
 
 } // namespace Nuvola

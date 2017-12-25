@@ -85,6 +85,18 @@ public class WebkitEngine : WebEngine
 		var ws = web_view.get_settings();
 		ws.enable_plugins = webkit_options.flash_required;
 		ws.enable_mediasource = webkit_options.mse_required;
+		
+		var user_agent = WebOptions.make_user_agent(web_app.user_agent);
+		unowned WebKit.Settings settings = web_view.get_settings();
+		if (user_agent == null) {
+			ws.enable_site_specific_quirks = true;
+			ws.set_user_agent_with_application_details("Nuvola", Nuvola.get_short_version());
+		} else {
+			ws.enable_site_specific_quirks = false;
+			ws.user_agent = user_agent + " Nuvola/" + Nuvola.get_short_version();
+		}
+		message("User agent set '%s'", ws.user_agent);
+		
 		config.set_default_value(ZOOM_LEVEL_CONF, 1.0);
 		web_view.zoom_level = config.get_double(ZOOM_LEVEL_CONF);
 		web_view.load_changed.connect(on_load_changed);
@@ -296,75 +308,6 @@ public class WebkitEngine : WebEngine
 	public override void zoom_reset()
 	{
 		web_view.zoom_reset();
-	}
-	
-	public override void set_user_agent(string? user_agent)
-	{
-		const string APPLE_WEBKIT_VERSION = "604.1";
-		const string SAFARI_VERSION = "11.0";
-		const string FIREFOX_VERSION = "52.0";
-		const string CHROME_VERSION = "58.0.3029.81";
-		string? agent = null;
-		string? browser = null;
-		string? version = null;	
-		if (user_agent != null)
-		{
-			agent = user_agent.strip();
-			if (agent[0] == '\0')
-				agent = null;
-		}
-		
-		if (agent != null)
-		{
-			var parts = agent.split_set(" \t", 2);
-			browser = parts[0];
-			if (browser != null)
-			{
-				browser = browser.strip();
-				if (browser[0] == '\0')
-					browser = null;
-			}
-			version = parts[1];
-			if (version != null)
-			{
-				version = version.strip();
-				if (version[0] == '\0')
-					version = null;
-			}
-		}
-		
-		switch (browser)
-		{
-		case "CHROME":
-			var s = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Safari/537.36";
-			agent = s.printf(version ?? CHROME_VERSION);
-			break;
-		case "FIREFOX":
-			var s = "Mozilla/5.0 (X11; Linux x86_64; rv:%1$s) Gecko/20100101 Firefox/%1$s";
-			agent = s.printf(version ?? FIREFOX_VERSION);
-			break;
-		case "SAFARI":
-			var s = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/%1$s (KHTML, like Gecko) Version/%2$s Safari/%1$s";
-			agent = s.printf(APPLE_WEBKIT_VERSION, version ?? SAFARI_VERSION);
-			break;
-		case "WEBKIT":
-			var s = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/%1$s (KHTML, like Gecko) Version/%2$s Safari/%1$s";
-			agent = s.printf(APPLE_WEBKIT_VERSION, version ?? SAFARI_VERSION);
-			break;
-		}
-		
-		unowned WebKit.Settings settings = web_view.get_settings();
-		if (agent == null)
-		{
-			settings.enable_site_specific_quirks = true;
-			settings.set_user_agent_with_application_details("Nuvola", Nuvola.get_short_version());
-		}
-		else
-		{
-			settings.enable_site_specific_quirks = false;
-			settings.user_agent = agent + " Nuvola/" + Nuvola.get_short_version();
-		}
-		message("User agent set '%s'", settings.user_agent);
 	}
 	
 	public override void get_preferences(out Variant values, out Variant entries)
@@ -754,9 +697,6 @@ public class WebkitEngine : WebEngine
 		{
 			if (load_uri)
 			{
-				web_settings.enable_javascript = javascript_enabled;
-				if (user_agent != KEEP_USER_AGENT)
-					set_user_agent(user_agent);
 				decision.use();
 			}
 			else
