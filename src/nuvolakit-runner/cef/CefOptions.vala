@@ -28,8 +28,7 @@ namespace Nuvola {
 public class CefOptions : WebOptions {
 	public override VersionTuple engine_version {get; protected set;}
 	public CefGtk.WebContext default_context {get; private set; default = null;}
-	public bool widevine_enabled {get; set; default = true;}
-	public bool flash_enabled {get; set; default = true;}
+	public bool widevine_required {get; set; default = false;}
 	public bool flash_required {get; private set; default = false;}
 	
 	public CefOptions(WebAppStorage storage) {
@@ -44,16 +43,32 @@ public class CefOptions : WebOptions {
 		return "Chromium " + Cef.get_chromium_version();
 	}
 	
-	public override WebEngine create_web_engine(WebApp web_app) {
+	public override async void gather_format_support_info(WebApp web_app) {
+		init(web_app);
+		var result = CefGtk.get_init_result();
+		var widevine = result.widevine_plugin;
+		if (widevine != null && !widevine.registration_complete) {
+			SourceFunc cb = gather_format_support_info.callback;
+			var handler_id = widevine.notify["registration-complete"].connect_after(() => Idle.add((owned) cb));
+			yield;
+			widevine.disconnect(handler_id);
+		}
+	}
+	
+	public void init(WebApp web_app) {
 		if (default_context == null) {
 			var user_agent = WebOptions.make_user_agent(web_app.user_agent);
 			if (user_agent != null) {
 				user_agent += " Nuvola/" + Nuvola.get_short_version();
 			}
 			var product = "Chrome/%s Nuvola/%s".printf(Cef.get_chromium_version(), Nuvola.get_short_version());
-			CefGtk.init(widevine_enabled, flash_enabled, user_agent, product);
+			CefGtk.init(widevine_required, flash_required, user_agent, product);
 			default_context = new CefGtk.WebContext(GLib.Environment.get_user_config_dir() + "/cefium");
 		}
+	}
+	
+	public override WebEngine create_web_engine(WebApp web_app) {
+		init(web_app);
 		return new CefEngine(this, web_app);
 	}
 	
@@ -96,10 +111,23 @@ public class CefOptions : WebOptions {
 		case "mse":
 			return Drt.RequirementState.SUPPORTED;
 		case "widevine":
-			return Drt.RequirementState.SUPPORTED; // FIXME
+			widevine_required = true;
+			var result = CefGtk.get_init_result();
+			if (result == null) {
+				return Drt.RequirementState.UNKNOWN;
+			}
+			var widevine = result.widevine_plugin;
+			return (widevine != null && widevine.available ?
+				Drt.RequirementState.SUPPORTED : Drt.RequirementState.UNSUPPORTED);
 		case "flash":
 			flash_required = true;
-			return Drt.RequirementState.SUPPORTED;  // FIXME
+			var result = CefGtk.get_init_result();
+			if (result == null) {
+				return Drt.RequirementState.UNKNOWN;
+			}
+			var flash = result.flash_plugin;
+			return (flash != null && flash.available
+				? Drt.RequirementState.SUPPORTED : Drt.RequirementState.UNSUPPORTED);
 		default:
 			return Drt.RequirementState.UNSUPPORTED;
 		}
@@ -118,6 +146,17 @@ public class CefOptions : WebOptions {
 	
 	public override string[] get_format_support_warnings() {
 		string[] warnings = {};
+		var result = CefGtk.get_init_result();
+		if (result != null) {
+			if (result.flash_plugin != null && result.flash_plugin.registration_error != null) {
+				warnings += Markup.printf_escaped("Failed to load Flash plugin: %s",
+					result.flash_plugin.registration_error);
+			}
+			if (result.widevine_plugin != null && result.widevine_plugin.registration_error != null) {
+				warnings += Markup.printf_escaped("Failed to load Widevine plugin: %s",
+					result.widevine_plugin.registration_error);
+			}
+		}
 		return warnings;
 	}
 }

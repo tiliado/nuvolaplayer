@@ -209,13 +209,24 @@ public class StartupCheck : GLib.Object
 		var parser = new RequirementParser(web_options);
 		try {
 			parser.eval(web_app.requirements);
-			if (parser.n_unsupported + parser.n_unknown > 0) {
-			result_status = Status.ERROR;
-			Drt.String.append(ref result_message, "\n", Markup.printf_escaped(
-				"This web app requires certain technologies to function properly but these requirements "
-				+ "have not been satisfied.\n\nFailed requirements: <i>%s %s</i>\n\n"
-				+ "<a href=\"%s\">Get help with installation</a>",
-				parser.failed_requirements ?? "", parser.unknown_requirements ?? "", WEB_APP_REQUIREMENTS_HELP_URL));
+			if (parser.n_unsupported > 0) {
+				result_status = Status.ERROR;
+				Drt.String.append(ref result_message, "\n", Markup.printf_escaped(
+					"This web app requires certain technologies to function properly but these requirements "
+					+ "have not been satisfied.\n\nFailed requirements: <i>%s</i>\n\n"
+					+ "<a href=\"%s\">Get help with installation</a>",
+					parser.failed_requirements ?? "", WEB_APP_REQUIREMENTS_HELP_URL));
+			} else if (parser.n_unknown > 0) {
+				yield web_options.gather_format_support_info(web_app);
+				parser.eval(web_app.requirements);
+				if (parser.n_unsupported + parser.n_unknown > 0) {
+					result_status = Status.ERROR;
+					Drt.String.append(ref result_message, "\n", Markup.printf_escaped(
+						"This web app requires certain technologies to function properly but these requirements "
+						+ "have not been satisfied.\n\nFailed requirements: <i>%s %s</i>\n\n"
+						+ "<a href=\"%s\">Get help with installation</a>",
+						parser.failed_requirements ?? "", parser.unknown_requirements ?? "", WEB_APP_REQUIREMENTS_HELP_URL));
+				}
 			}
 		} catch (Drt.RequirementError e) {
 			Drt.String.append(ref result_message, "\n", Markup.printf_escaped(
@@ -231,7 +242,7 @@ public class StartupCheck : GLib.Object
 				result_status = Status.WARNING;
 			}
 			foreach (unowned string entry in warnings) {
-				Drt.String.append(ref result_message, "\n", entry);
+				Drt.String.append(ref result_message, "\n\n", entry);
 			}
 		}
 		yield Drt.EventLoop.resume_later();
