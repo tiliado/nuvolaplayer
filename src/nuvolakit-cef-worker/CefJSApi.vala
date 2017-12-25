@@ -64,10 +64,13 @@ public class CefJSApi : GLib.Object {
 	private bool warn_on_sync_func;
 	private Cef.V8context? v8_ctx = null;
 	private Cef.V8value? main_object = null;
+	private CefGtk.RenderSideEventLoop event_loop;
 	
-	public CefJSApi(Drt.Storage storage, File data_dir, File config_dir, Drt.KeyValueStorage config,
-	Drt.KeyValueStorage session, uint[] webkit_version, uint[] libsoup_version, bool warn_on_sync_func) {
+	public CefJSApi(CefGtk.RenderSideEventLoop event_loop, Drt.Storage storage, File data_dir, File config_dir,
+	Drt.KeyValueStorage config, Drt.KeyValueStorage session,
+	uint[] webkit_version, uint[] libsoup_version, bool warn_on_sync_func) {
 		Assert.on_glib_thread();
+		this.event_loop = event_loop;
 		this.storage = storage;
 		this.data_dir = data_dir;
 		this.config_dir = config_dir;
@@ -140,6 +143,16 @@ public class CefJSApi : GLib.Object {
 			CefGtk.Function.create("_callIpcMethodVoid", call_ipc_method_void_func));
 		Cef.V8.set_value(main_object, "_callIpcMethodAsync",
 			CefGtk.Function.create("_callIpcMethodAsync", call_ipc_method_async_func));
+		Cef.V8.set_value(main_object, "_keyValueStorageHasKeyAsync",
+			CefGtk.Function.create("_keyValueStorageHasKeyAsync", key_value_storage_has_key_async_func));
+		Cef.V8.set_value(main_object, "_keyValueStorageGetValueAsync",
+			CefGtk.Function.create("_keyValueStorageGetValueAsync", key_value_storage_get_value_async_func));
+		Cef.V8.set_value(main_object, "_keyValueStorageSetValueAsync",
+			CefGtk.Function.create("_keyValueStorageSetValueAsync", key_value_storage_set_value_async_func));
+		Cef.V8.set_value(main_object, "_keyValueStorageSetDefaultValueAsync",
+			CefGtk.Function.create("_keyValueStorageSetDefaultValueAsync",
+				key_value_storage_set_default_value_async_func));
+			
 
 		File? main_js = storage.user_data_dir.get_child(JS_DIR).get_child(MAIN_JS);
 		if (!main_js.query_exists()) {
@@ -389,6 +402,159 @@ public class CefJSApi : GLib.Object {
 		} else {
 			call_ipc_method_async(method, data, id);
 		}
+	}
+	
+	private void key_value_storage_has_key_async_func(string? name, Cef.V8value? object, Cef.V8value?[] args,
+    out Cef.V8value? retval, out string? exception) {
+		Assert.on_js_thread();
+		retval = Cef.v8value_create_undefined();
+		exception = null;
+		if (args.length != 3) {
+			exception = "Three arguments required.";
+			return;
+		}
+		if (args[0].is_int() == 0) {
+			exception = "Argument 0 must be a number.";
+			return;
+		}
+		int index = args[0].get_int_value();		
+		var key = Cef.V8.string_or_null(args[1]);
+		if (key == null) {
+			exception = "The first argument must be a non-null string";
+			return;
+		}
+		if (key_value_storages.length <= index) {
+			exception = "Unknown storage.";
+			return;
+		}
+		
+		var storage = key_value_storages[index];
+		var id = Cef.V8.any_int(args[2]);
+		event_loop.add_idle(() => {
+			storage.has_key_async.begin(key, (o, res) => {
+				var result = storage.has_key_async.end(res);
+				send_async_response(id, result, null);
+			});
+			return false;
+		});
+	}
+	
+	private void key_value_storage_get_value_async_func(string? name, Cef.V8value? object, Cef.V8value?[] args,
+    out Cef.V8value? retval, out string? exception) {
+		Assert.on_js_thread();
+		retval = Cef.v8value_create_undefined();
+		exception = null;
+		
+		if (args.length != 3) {
+			exception = "Three arguments required.";
+			return;
+		}
+		if (args[0].is_int() == 0) {
+			exception = "Argument 0 must be a number.";
+			return;
+		}
+		int index = args[0].get_int_value();		
+		var key = Cef.V8.string_or_null(args[1]);
+		if (key == null) {
+			exception = "The first argument must be a non-null string";
+			return;
+		}
+		if (key_value_storages.length <= index) {
+			exception = "Unknown storage.";
+			return;
+		}
+		
+		var storage = key_value_storages[index];
+		var id = Cef.V8.any_int(args[2]);
+		event_loop.add_idle(() => {
+			storage.get_value_async.begin(key, (o, res) => {
+				var value = storage.get_value_async.end(res);
+				send_async_response(id, value, null);
+			});
+			return false;
+		});
+	}
+	
+	private void key_value_storage_set_value_async_func(string? name, Cef.V8value? object, Cef.V8value?[] args,
+    out Cef.V8value? retval, out string? exception) {
+		Assert.on_js_thread();
+		retval = Cef.v8value_create_undefined();
+		exception = null;
+		
+		if (args.length != 4) {
+			exception = "Four arguments required.";
+			return;
+		}
+		if (args[0].is_int() == 0) {
+			exception = "Argument 0 must be a number.";
+			return;
+		}
+		int index = args[0].get_int_value();		
+		var key = Cef.V8.string_or_null(args[1]);
+		if (key == null) {
+			exception = "The first argument must be a non-null string";
+			return;
+		}
+		if (key_value_storages.length <= index) {
+			exception = "Unknown storage.";
+			return;
+		}
+		
+		Variant? value = args[2].is_undefined() == 1 ? null : Cef.V8.variant_from_value(args[2], out exception);
+		if (exception != null) {
+			return;
+		}
+		
+		var storage = key_value_storages[index];
+		var id = Cef.V8.any_int(args[3]);
+		event_loop.add_idle(() => {
+			storage.set_value_async.begin(key, value, (o, res) => {
+				storage.set_value_async.end(res);
+				send_async_response(id, null, null);
+			});
+			return false;
+		});
+	}
+	
+	private void key_value_storage_set_default_value_async_func(string? name, Cef.V8value? object,
+	Cef.V8value?[] args, out Cef.V8value? retval, out string? exception) {
+		Assert.on_js_thread();
+		retval = Cef.v8value_create_undefined();
+		exception = null;
+		
+		if (args.length != 4) {
+			exception = "Four arguments required.";
+			return;
+		}
+		if (args[0].is_int() == 0) {
+			exception = "Argument 0 must be a number.";
+			return;
+		}
+		int index = args[0].get_int_value();		
+		var key = Cef.V8.string_or_null(args[1]);
+		if (key == null) {
+			exception = "The first argument must be a non-null string";
+			return;
+		}
+		if (key_value_storages.length <= index) {
+			exception = "Unknown storage.";
+			return;
+		}
+		
+		Variant? value = args[2].is_undefined() == 1 ? null : Cef.V8.variant_from_value(args[2], out exception);
+		if (exception != null) {
+			return;
+		}
+		
+		var storage = key_value_storages[index];
+		var id = Cef.V8.any_int(args[3]);
+		event_loop.add_idle(() => {
+			storage.set_default_value_async.begin(key, value, (o, res) => {
+				storage.set_default_value_async.end(res);
+				send_async_response(id, null, null);
+			});
+			return false;
+		});
 	}
 }
 

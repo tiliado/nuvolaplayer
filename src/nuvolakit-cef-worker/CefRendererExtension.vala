@@ -71,8 +71,9 @@ public class CefRendererExtension : GLib.Object {
 		api_token = worker_data["NUVOLA_API_ROUTER_TOKEN"].get_string();
 		worker_data = null;
 		
-		js_api = new CefJSApi(storage, data_dir, user_config_dir, new KeyValueProxy(channel, "config"),
-			new KeyValueProxy(channel, "session"), webkit_version, libsoup_version, true);
+		js_api = new CefJSApi(ctx.event_loop, storage, data_dir, user_config_dir,
+			new KeyValueProxy(channel, "config"), new KeyValueProxy(channel, "session"),
+			webkit_version, libsoup_version, true);
 		js_api.call_ipc_method_void.connect(on_call_ipc_method_void);
 		js_api.call_ipc_method_async.connect(on_call_ipc_method_async);
 		

@@ -32,7 +32,6 @@ namespace Nuvola {
  * context menu - password manager
  * JavaScript dialogs
  * network proxy
- * config & session key-value storage
  */
 
 public class CefEngine : WebEngine {
@@ -304,6 +303,51 @@ public class CefEngine : WebEngine {
 		router.add_method("/nuvola/core/get-user-config-dir", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
 			"Return user config directory.",
 			handle_get_user_config_dir, null);
+		
+		router.add_method("/nuvola/core/session-has-key", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
+			"Whether the session has a given key.",
+			handle_session_has_key, {
+			new Drt.StringParam("key", true, false, null, "Session key.")
+		});
+		router.add_method("/nuvola/core/session-get-value", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
+			"Get session value for the given key.",
+			handle_session_get_value, {
+			new Drt.StringParam("key", true, false, null, "Session key.")
+		});
+		router.add_method("/nuvola/core/session-set-value", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
+			"Set session value for the given key.",
+			handle_session_set_value, {
+			new Drt.StringParam("key", true, false, null, "Session key."),
+			new Drt.VariantParam("value", true, true, null, "Session value.")
+		});
+		router.add_method("/nuvola/core/session-set-default-value", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
+			"Set default session value for the given key.",
+			handle_session_set_default_value, {
+			new Drt.StringParam("key", true, false, null, "Session key."),
+			new Drt.VariantParam("value", true, true, null, "Session value.")
+		});
+		router.add_method("/nuvola/core/config-has-key", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
+			"Whether the config has a given key.",
+			handle_config_has_key, {
+			new Drt.StringParam("key", true, false, null, "Config key.")
+		});
+		router.add_method("/nuvola/core/config-get-value", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
+			"Get config value for the given key.",
+			handle_config_get_value, {
+			new Drt.StringParam("key", true, false, null, "Config key.")
+		});
+		router.add_method("/nuvola/core/config-set-value", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
+			"Set config value for the given key.",
+			handle_config_set_value, {
+			new Drt.StringParam("key", true, false, null, "Config key."),
+			new Drt.VariantParam("value", true, true, null, "Config value.")
+		});
+		router.add_method("/nuvola/core/config-set-default-value", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
+			"Set default config value for the given key.",
+			handle_config_set_default_value, {
+			new Drt.StringParam("key", true, false, null, "Config key."),
+			new Drt.VariantParam("value", true, true, null, "Config value.")
+		});
 	}
 	
 	private bool web_worker_initialized_cb() {
@@ -338,6 +382,50 @@ public class CefEngine : WebEngine {
 			web_worker.ready = true;
 		}
 		web_worker_ready();
+		request.respond(null);
+	}
+	
+	private void handle_session_has_key(Drt.RpcRequest request) throws Drt.RpcError {
+		request.respond(new Variant.boolean(session.has_key(request.pop_string())));
+	}
+	
+	private void handle_session_get_value(Drt.RpcRequest request) throws Drt.RpcError {
+		var response = session.get_value(request.pop_string());
+		if (response == null) {
+			response = new Variant("mv", null);
+		}
+		request.respond(response);
+	}
+	
+	private void handle_session_set_value(Drt.RpcRequest request) throws Drt.RpcError {
+		session.set_value(request.pop_string(), request.pop_variant());
+		request.respond(null);
+	}
+	
+	private void handle_session_set_default_value(Drt.RpcRequest request) throws Drt.RpcError {
+		session.set_default_value(request.pop_string(), request.pop_variant());
+		request.respond(null);
+	}
+	
+	private void handle_config_has_key(Drt.RpcRequest request) throws Drt.RpcError {
+		request.respond(new Variant.boolean(config.has_key(request.pop_string())));
+	}
+	
+	private void handle_config_get_value(Drt.RpcRequest request) throws Drt.RpcError {
+		var response = config.get_value(request.pop_string());
+		if (response == null) {
+			response = new Variant("mv", null);
+		}
+		request.respond(response);
+	}
+	
+	private void handle_config_set_value(Drt.RpcRequest request) throws Drt.RpcError {
+		config.set_value(request.pop_string(), request.pop_variant());
+		request.respond(null);
+	}
+	
+	private void handle_config_set_default_value(Drt.RpcRequest request) throws Drt.RpcError {
+		config.set_default_value(request.pop_string(), request.pop_variant());
 		request.respond(null);
 	}
 	
