@@ -27,7 +27,6 @@ namespace Nuvola {
 
 /* TODO
  * web_app.allow_insecure_content
- * album art download
  * request filtering
  * context menu - password manager
  * JavaScript dialogs
@@ -348,6 +347,14 @@ public class CefEngine : WebEngine {
 			new Drt.StringParam("key", true, false, null, "Config key."),
 			new Drt.VariantParam("value", true, true, null, "Config value.")
 		});
+		
+		router.add_method("/nuvola/browser/download-file-async", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
+			"Download file.",
+			handle_download_file_async, {
+			new Drt.StringParam("uri", true, false, null, "File to download."),
+			new Drt.StringParam("basename", true, false, null, "Basename of the file."),
+			new Drt.DoubleParam("callback-id", true, null, "Callback id.")
+		});
 	}
 	
 	private bool web_worker_initialized_cb() {
@@ -426,6 +433,33 @@ public class CefEngine : WebEngine {
 	
 	private void handle_config_set_default_value(Drt.RpcRequest request) throws Drt.RpcError {
 		config.set_default_value(request.pop_string(), request.pop_variant());
+		request.respond(null);
+	}
+	
+	private void handle_download_file_async(Drt.RpcRequest request) throws Drt.RpcError {
+		var uri = request.pop_string();
+		var basename = request.pop_string();
+		var cb_id = request.pop_double();
+		var dir = storage.cache_dir.get_child("api-downloads");
+		try {
+			dir.make_directory_with_parents();
+		} catch (GLib.Error e) {}
+		var file = dir.get_child(basename);
+		try {
+			file.@delete();
+		} catch (GLib.Error e) {}
+		web_view.download_file.begin(uri, file.get_path(), null, (o, res) => {
+			var result = web_view.download_file.end(res);
+			var status_code = result ? 200 : 404;
+			try {
+				var payload = new Variant(
+					"(dbusss)", cb_id, result, status_code, status_code.to_string(),
+					result ? file.get_path() : "", result ? file.get_uri() : "");
+				web_worker.call_function_sync("Nuvola.browser._downloadDone", ref payload);
+			} catch (GLib.Error e) {
+				warning("Communication failed: %s", e.message);
+			}
+		});
 		request.respond(null);
 	}
 	
