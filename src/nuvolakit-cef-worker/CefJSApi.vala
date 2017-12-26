@@ -83,12 +83,10 @@ public class CefJSApi : GLib.Object {
 	
 	public virtual signal void call_ipc_method_void(string name, Variant? data) {
 		Assert.on_js_thread();
-		message("call_ipc_method_void('%s', %s)", name, data == null ? "null" : data.print(false));
 	}
 	
 	public virtual signal void call_ipc_method_async(string name, Variant? data, int id) {
 		Assert.on_js_thread();
-		message("call_ipc_method_async('%s', %s, %d)", name, data == null ? "null" : data.print(false), id);
 	}
 	
 	public bool is_valid() {
