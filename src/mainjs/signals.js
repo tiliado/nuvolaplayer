@@ -154,6 +154,8 @@ SignalsMixin.emit = function(name, varArgsList)
         var object = handler[0];
         object[handler[1]].apply(object, args);
     }
+    args[0] = name;
+    return args;
 }
 
 Nuvola.SignalsMixin = SignalsMixin;
