@@ -72,6 +72,7 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
 		}
 		#endif
 		artwork = new Gtk.Image();
+		artwork.margin_top = artwork.margin_bottom = 10;
 		clear_artwork(false);
 		grid.add(artwork);
 		time_pos = new TimePositionButton(0, (int)(player.track_length / 1000000), (int)(player.track_position/1000000));
