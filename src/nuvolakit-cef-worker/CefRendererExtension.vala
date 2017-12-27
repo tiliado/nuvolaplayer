@@ -137,7 +137,7 @@ public class CefRendererExtension : GLib.Object {
 		});
 		try {
 			var args = new Variant("(s)", "InitWebWorker");
-			js_api.call_function_sync("Nuvola.core.emit", ref args, true);
+			js_api.call_function_sync("Nuvola.core.emit", args, true);
 		} catch (GLib.Error e) {
 			show_error("Failed to inject JavaScript API. %s".printf(e.message));
 		}
@@ -182,7 +182,7 @@ public class CefRendererExtension : GLib.Object {
 		var propagate_error = request.pop_bool();
 		GLib.Error? error = null;
 		try {
-			js_api.call_function_sync(name, ref func_params, true);
+			func_params = js_api.call_function_sync(name, func_params, true);
 		} catch (GLib.Error e) {
 			if (propagate_error) {
 				error = e;

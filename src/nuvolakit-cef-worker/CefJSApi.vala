@@ -260,13 +260,13 @@ public class CefJSApi : GLib.Object {
 			// FIXME: How are we losing a reference here?
 			g_variant_ref(response);
 		}
-		call_function_sync("Nuvola.Async.respond", ref args, false);
+		call_function_sync("Nuvola.Async.respond", args, false);
 	}
 	
-	public void call_function_sync(string name, ref Variant? arguments, bool propagate_error) throws GLib.Error {
+	public Variant? call_function_sync(string name, Variant? args, bool propagate_error) throws GLib.Error {
 		Assert.on_glib_thread();
 		GLib.Error? error = null;
-		var args = arguments;
+		Variant? result = null;
 		var loop = new MainLoop(MainContext.get_thread_default());
 		CefGtk.Task.post(Cef.ThreadId.RENDERER, () => {
 			Assert.on_js_thread();
@@ -316,16 +316,17 @@ public class CefJSApi : GLib.Object {
 					throw new JSError.FUNC_FAILED("Function '%s' failed. %s",
 						name, Cef.V8.format_exception(func.get_exception()));
 				}
-				if (args != null) {
-					Variant[] items = new Variant[size];
-					for (var i = 0; i < size; i++) {
-						string? exception = null;
-						items[i] = Cef.V8.variant_from_value(params[i], out exception);
-						if (exception != null) {
-							throw new JSError.WRONG_TYPE(exception);
-						}
+				if (args != null && ret_val.is_undefined() == 0) {
+					if (ret_val.is_array() != 0) {
+						int n_items = ret_val.get_array_length();
+						var items = new Variant[n_items];
+						for (int i = 0; i < n_items; i++) {
+				            items[i] = Cef.V8.variant_from_value(ret_val.get_value_byindex(i), null);
+				        }
+						result = new Variant.tuple(items);
+				    } else {
+						result = Cef.V8.variant_from_value(ret_val, null);
 					}
-					args = new Variant.tuple(items);
 				}
 			} catch (GLib.Error e) {
 				error = e;
@@ -337,7 +338,8 @@ public class CefJSApi : GLib.Object {
 		if (error != null) {
 			throw error;
 		}
-		arguments = args;
+		loop.run();
+		return result;
 	}
 	
 	public uint get_webkit_version() {
