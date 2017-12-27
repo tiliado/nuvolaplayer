@@ -470,6 +470,11 @@ MediaPlayer._onInitWebWorker = function(emitter) {
     Nuvola.core.connect("ComponentLoaded", this);
     Nuvola.core.connect("ComponentUnloaded", this);
     Nuvola.core.isComponentLoadedAsync(COMPONENT_NOTIFICATIONS).then((loaded) => this._toggleNotifications(loaded));
+    
+    Nuvola.config.connect("ConfigChanged", this);
+    Nuvola.config.getAsync(RUN_IN_BACKGROUND)
+        .then((value) => {this._runInBackground = value})
+        .catch(console.log.bind(console));
 }
 
 MediaPlayer._onActionActivated = function(emitter, name, param)
@@ -582,8 +587,7 @@ MediaPlayer._updateMenu = function()
 
 MediaPlayer._onQuitRequest = function(emitter, result)
 {
-    // TODO: @async
-    var option = Nuvola.config.get(RUN_IN_BACKGROUND);
+    var option = this._runInBackground;
     if (option == RUN_IN_BACKGROUND_OPTIONS[0][0]
     || option == RUN_IN_BACKGROUND_OPTIONS[1][0] && this._state === PlaybackState.PLAYING)
     {
@@ -661,6 +665,14 @@ MediaPlayer._toggleNotifications = function(enabled)
     else
     {
         this._notification = null;
+    }
+}
+
+MediaPlayer._onConfigChanged = function (emitter, key) {
+    if (key === RUN_IN_BACKGROUND) {
+        Nuvola.config.getAsync(RUN_IN_BACKGROUND)
+        .then((value) => {this._runInBackground = value})
+        .catch(console.log.bind(console));
     }
 }
 
