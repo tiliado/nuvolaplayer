@@ -85,16 +85,21 @@ public class CefEngine : WebEngine {
 	}
 	
 	public override void init() {
-		if (web_view.is_ready()) {
-			load_extension();
-		} else {
-			web_view.ready.connect(on_web_view_ready);
+		var data = worker_data;
+		var size = data.size();
+		var args = new Variant?[2 * size];
+		var iter = HashTableIter<string, Variant>(data);
+		string key = null;
+		Variant val = null;
+		for (var i = 0; i < size && iter.next (out key, out val); i++) {
+			args[2 * i] = new Variant.string(key);
+			args[2 * i + 1] = val;
 		}
-	}
-	
-	private void on_web_view_ready(CefGtk.WebView web_view) {
-		load_extension();
-		web_view.ready.disconnect(on_web_view_ready);
+		var path = Nuvola.get_libdir() + "/libnuvolaruntime-cef-worker.so";
+		web_view.add_autoloaded_renderer_extension(path, args);
+		if (web_view.is_ready()) {
+			web_view.load_renderer_extension(path, args);
+		}
 	}
 	
 	private void load_extension() {
