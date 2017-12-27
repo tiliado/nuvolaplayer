@@ -24,12 +24,8 @@
 
 namespace Nuvola {
 
-private const string SCRIPT_WRAPPER = """window.__nuvola_func__ = function() {
-window.__nuvola_func__ = null;
-if (this == window) throw Error("Nuvola object is not bound to 'this'.");
-%s
-;}
-""";
+private const string SCRIPT_WRAPPER = "window.__nuvola_func__ = function() {" + "window.__nuvola_func__ = null; "
+	+ "if (this == window) throw Error(\"Nuvola object is not bound to 'this'.\"); %s\n;}";
 private extern const int VERSION_MAJOR;
 private extern const int VERSION_MINOR;
 private extern const int VERSION_BUGFIX;
