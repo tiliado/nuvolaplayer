@@ -91,13 +91,15 @@ Browser._downloadDone = function(id, success, statusCode, statusText, filePath, 
 {
     var cb = this._downloadFileAsyncCallbacks[id];
     delete this._downloadFileAsyncCallbacks[id];
-    cb[0]({
-        success: success,
-        statusCode: statusCode,
-        statusText: statusText,
-        filePath: filePath,
-        fileURI: fileURI
-    }, cb[1]);
+    if (cb) {
+        cb[0]({
+            success: success,
+            statusCode: statusCode,
+            statusText: statusText,
+            filePath: filePath,
+            fileURI: fileURI
+        }, cb[1])
+    }
 }
 
 // export public items
