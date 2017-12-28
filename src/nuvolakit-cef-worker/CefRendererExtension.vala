@@ -2,7 +2,6 @@ namespace Nuvola {
 
 /* TODO
  * context menu - password manager
- * error handling
  */
 
 public class CefRendererExtension : GLib.Object {
@@ -27,14 +26,24 @@ public class CefRendererExtension : GLib.Object {
 	}
 	
 	public void init() {
+		Assert.on_glib_thread();
 		ainit.begin((o, res) => {ainit.end(res);});
 	}
 	
-	public void show_error(string err) {
+	public void show_error(string error) {
 		if (currently_on_js_thread()) {
-			ctx.event_loop.add_idle(() => {show_error(err); return false;});
+			ctx.event_loop.add_idle(() => {show_error(error); return false;});
 		} else {
-			error(err);
+			Assert.on_glib_thread();
+			channel.call.begin(
+				"/nuvola/core/show-error", new Variant("(s)", error),
+				(o, res) => {
+				try {
+					channel.call.end(res);
+				} catch (GLib.Error e) {
+					critical("Failed to send error message '%s'. %s", error, e.message);
+				}
+			});
 		}
 	}
 	
@@ -118,12 +127,12 @@ public class CefRendererExtension : GLib.Object {
 			js_api.inject(context);
 			js_api.integrate(context);
 			js_api.acquire_context(context);
+			ctx.event_loop.add_idle(emit_web_worker_ready_and_init_web_worker_cb);
 		} catch (GLib.Error e) {
-			error("Failed to inject JavaScript API. %s".printf(e.message));
+			show_error("Failed to inject JavaScript API. %s".printf(e.message));
 		} finally {
 			context.exit();
 		}
-		ctx.event_loop.add_idle(emit_web_worker_ready_and_init_web_worker_cb);
 	}
 	
 	private bool emit_web_worker_ready_and_init_web_worker_cb() {
@@ -164,11 +173,21 @@ public class CefRendererExtension : GLib.Object {
 		ctx.event_loop.add_idle(() => {
 			Assert.on_glib_thread();
 			channel.call.begin(name, data, (o, res) => {
+				Variant? response = null;
+				GLib.Error? error = null;
 				try {
-					var response = channel.call.end(res);
-					js_api.send_async_response(id, response, null);
+					response = channel.call.end(res);
 				} catch (GLib.Error e) {
-					js_api.send_async_response(id, null, e);
+					error = e;
+				}
+				try {
+					if (error != null) {
+						js_api.send_async_response(id, null, error);
+					} else {
+						js_api.send_async_response(id, response, null);
+					}
+				} catch (GLib.Error e) {
+					critical("Failed to send async response: %s", e.message);
 				}
 			});
 			return false;

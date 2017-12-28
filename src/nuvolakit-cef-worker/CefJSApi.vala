@@ -108,7 +108,7 @@ public class CefJSApi : GLib.Object {
 		return false;
 	}
 	
-	public void inject(Cef.V8context v8_ctx) {
+	public void inject(Cef.V8context v8_ctx) throws JSError{
 		Assert.on_js_thread();
 		if (this.v8_ctx != null) {
 			this.v8_ctx = null;
@@ -162,39 +162,55 @@ public class CefJSApi : GLib.Object {
 		}
 		
 		if (main_js == null) {
-			error("Failed to find a core component main.js. This probably means the application has not been installed correctly or that component has been accidentally deleted.");
+			throw new JSError.INITIALIZATION_FAILED(
+				"Failed to find a core component main.js. This probably means the application has not been"
+				+ " installed correctly or that component has been accidentally deleted.");
 		}
-		if (!execute_script_from_file(v8_ctx, main_js)) {
-			error("Failed to initialize a core component main.js located at '%s'. Initialization exited with error:", main_js.get_path());
+		try {
+			execute_script_from_file(v8_ctx, main_js);
+		} catch (JSError e) {
+			throw new JSError.INITIALIZATION_FAILED(
+				"Failed to initialize a core component main.js located at '%s'. Initialization exited with error: %s",
+				main_js.get_path(), e.message);
 		}
 		
 		var meta_json = data_dir.get_child(META_JSON);
 		if (!meta_json.query_exists()) {
-			error("Failed to find a web app component %s. This probably means the web app integration has not been installed correctly or that component has been accidentally deleted.", META_JSON);
+			throw new JSError.INITIALIZATION_FAILED(
+				"Failed to find a web app component %s. This probably means the web app integration has not been"
+				+ " installed correctly or that component has been accidentally deleted.", META_JSON);
 		}
 		string meta_json_data;
 		try {
 			meta_json_data = Drt.System.read_file(meta_json);
 		} catch (GLib.Error e) {
-			error("Failed load a web app component %s. This probably means the web app integration has not been installed correctly or that component has been accidentally deleted.\n\n%s", META_JSON, e.message);
+			throw new JSError.INITIALIZATION_FAILED(
+				"Failed load a web app component %s. This probably means the web app integration has not been"
+				+ " installed correctly or that component has been accidentally deleted.\n\n%s", META_JSON, e.message);
 		}
 		
 		string? json_error = null; 
 		var meta = Cef.V8.parse_json(v8_ctx, meta_json_data, out json_error);
 		if (meta == null) {
-			error(json_error);
+			throw new JSError.INITIALIZATION_FAILED("Failed to parse metadata.json. %s", json_error);
 		}
 		Cef.V8.set_value(main_object, "meta", meta);
 	}
 	
-	public void integrate(Cef.V8context v8_ctx) {
+	public void integrate(Cef.V8context v8_ctx) throws JSError{
 		Assert.on_js_thread();
 		var integrate_js = data_dir.get_child(INTEGRATE_JS);
 		if (!integrate_js.query_exists()) {
-			error("Failed to find a web app component %s. This probably means the web app integration has not been installed correctly or that component has been accidentally deleted.", INTEGRATE_JS);
+			throw new JSError.INITIALIZATION_FAILED(
+				"Failed to find a web app component %s. This probably means the web app integration has not been"
+				+ " installed correctly or that component has been accidentally deleted.", INTEGRATE_JS);
 		}
-		if (!execute_script_from_file(v8_ctx, integrate_js)) {
-			error("Failed to initialize a web app component %s located at '%s'. Initialization exited with error:\n\n%s", INTEGRATE_JS, integrate_js.get_path(), "e.message");
+		try {
+			execute_script_from_file(v8_ctx, integrate_js);
+		} catch (JSError e) {
+			throw new JSError.INITIALIZATION_FAILED(
+				"Failed to initialize a web app component %s located at '%s'. Initialization exited with error:\n\n%s",
+				INTEGRATE_JS, integrate_js.get_path(), e.message);
 		}
 	}
 	
@@ -210,18 +226,18 @@ public class CefJSApi : GLib.Object {
 		this.v8_ctx = v8_ctx;
 	}
 	
-	public bool execute_script_from_file(Cef.V8context v8_ctx, File file) {
+	public void execute_script_from_file(Cef.V8context v8_ctx, File file) throws JSError {
 		Assert.on_js_thread();
 		string script;
 		try {
 			script = Drt.System.read_file(file);
 		} catch (GLib.Error e) 	{
-			error("Unable to read script %s: %s", file.get_path(), e.message);
+			throw new JSError.READ_ERROR("Unable to read script %s: %s", file.get_path(), e.message);
 		}
-		return execute_script(v8_ctx, script, file.get_uri(), 1);
+		execute_script(v8_ctx, script, file.get_uri(), 1);
 	}
 	
-	public bool execute_script(Cef.V8context v8_ctx, string script, string path, int line) {
+	public void execute_script(Cef.V8context v8_ctx, string script, string path, int line) throws JSError {
 		Assert.on_js_thread();
 		assert(v8_ctx != null);
         Cef.String _script = {};
@@ -234,25 +250,22 @@ public class CefJSApi : GLib.Object {
         Cef.V8exception? exception = null;
         var result = (bool) v8_ctx.eval(&_script, &_path, line, out retval, out exception);
         if (exception != null) {
-			error(Cef.V8.format_exception(exception));
+			throw new JSError.EXCEPTION(Cef.V8.format_exception(exception));
 		}
-		if (result) {
-			var global_object = v8_ctx.get_global();
-			var func = Cef.V8.get_function(global_object, "__nuvola_func__");
-			assert(func != null);
-			main_object.ref();
-			var ret_val = func.execute_function(main_object, {});
-			if (ret_val == null) {
-				result = false;
-				error(Cef.V8.format_exception(func.get_exception()));
-			} else {
-				result = true;
-			}
+		if (!result) {
+			throw new JSError.EXCEPTION("Failed to execute script '%s'.", path);
 		}
-        return result;
+		var global_object = v8_ctx.get_global();
+		var func = Cef.V8.get_function(global_object, "__nuvola_func__");
+		assert(func != null);
+		main_object.ref();
+		var ret_val = func.execute_function(main_object, {});
+		if (ret_val == null) {
+			throw new JSError.EXCEPTION(Cef.V8.format_exception(func.get_exception()));
+		}
 	}
 	
-	public void send_async_response(int id, Variant? response, GLib.Error? error) {
+	public void send_async_response(int id, Variant? response, GLib.Error? error) throws GLib.Error {
 		Assert.on_glib_thread();
 		var args = new Variant("(imvmv)", (int32) id, response,
 			error == null ? null : new Variant.string(error.message));
@@ -430,7 +443,11 @@ public class CefJSApi : GLib.Object {
 		event_loop.add_idle(() => {
 			storage.has_key_async.begin(key, (o, res) => {
 				var result = storage.has_key_async.end(res);
-				send_async_response(id, result, null);
+				try {
+					send_async_response(id, result, null);
+				} catch (GLib.Error e) {
+					critical("Failed to send async response: %s", e.message);
+				}
 			});
 			return false;
 		});
@@ -466,7 +483,11 @@ public class CefJSApi : GLib.Object {
 		event_loop.add_idle(() => {
 			storage.get_value_async.begin(key, (o, res) => {
 				var value = storage.get_value_async.end(res);
-				send_async_response(id, value, null);
+				try {
+					send_async_response(id, value, null);
+				} catch (GLib.Error e) {
+					critical("Failed to send async response: %s", e.message);
+				}
 			});
 			return false;
 		});
@@ -507,7 +528,11 @@ public class CefJSApi : GLib.Object {
 		event_loop.add_idle(() => {
 			storage.set_value_async.begin(key, value, (o, res) => {
 				storage.set_value_async.end(res);
-				send_async_response(id, null, null);
+				try {
+					send_async_response(id, null, null);
+				} catch (GLib.Error e) {
+					critical("Failed to send async response: %s", e.message);
+				}
 			});
 			return false;
 		});
@@ -548,7 +573,11 @@ public class CefJSApi : GLib.Object {
 		event_loop.add_idle(() => {
 			storage.set_default_value_async.begin(key, value, (o, res) => {
 				storage.set_default_value_async.end(res);
-				send_async_response(id, null, null);
+				try {
+					send_async_response(id, null, null);
+				} catch (GLib.Error e) {
+					critical("Failed to send async response: %s", e.message);
+				}
 			});
 			return false;
 		});

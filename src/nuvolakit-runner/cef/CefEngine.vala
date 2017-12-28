@@ -346,6 +346,11 @@ public class CefEngine : WebEngine {
 			new Drt.StringParam("basename", true, false, null, "Basename of the file."),
 			new Drt.DoubleParam("callback-id", true, null, "Callback id.")
 		});
+		router.add_method("/nuvola/core/show-error", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
+			"Show error message.",
+			handle_show_error, {
+			new Drt.StringParam("text", true, false, null, "Error message.")
+		});
 	}
 	
 	private bool web_worker_initialized_cb() {
@@ -451,6 +456,11 @@ public class CefEngine : WebEngine {
 				warning("Communication failed: %s", e.message);
 			}
 		});
+		request.respond(null);
+	}
+	
+	private void handle_show_error(Drt.RpcRequest request) throws Drt.RpcError {
+		runner_app.show_error("Integration error", request.pop_string());
 		request.respond(null);
 	}
 	
