@@ -102,20 +102,6 @@ public class CefEngine : WebEngine {
 		}
 	}
 	
-	private void load_extension() {
-		var data = worker_data;
-		var size = data.size();
-		var args = new Variant?[2 * size];
-		var iter = HashTableIter<string, Variant>(data);
-		string key = null;
-		Variant val = null;
-		for (var i = 0; i < size && iter.next (out key, out val); i++) {
-			args[2 * i] = new Variant.string(key);
-			args[2 * i + 1] = val;
-		}
-		web_view.load_renderer_extension(Nuvola.get_libdir() + "/libnuvolaruntime-cef-worker.so", args);
-	}
-	
 	public override void init_app_runner() {
 		if (!ready) {
 			web_view.notify.connect_after(on_web_view_notify);
