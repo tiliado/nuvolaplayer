@@ -82,12 +82,11 @@ public class WebkitEngine : WebEngine
 		web_context.download_started.connect(on_download_started);
 		
 		web_view = new WebView(web_context);
-		var ws = web_view.get_settings();
+		unowned WebKit.Settings ws = web_view.get_settings();
 		ws.enable_plugins = webkit_options.flash_required;
 		ws.enable_mediasource = webkit_options.mse_required;
 		
 		var user_agent = WebOptions.make_user_agent(web_app.user_agent);
-		unowned WebKit.Settings settings = web_view.get_settings();
 		if (user_agent == null) {
 			ws.enable_site_specific_quirks = true;
 			ws.set_user_agent_with_application_details("Nuvola", Nuvola.get_short_version());
@@ -658,7 +657,6 @@ public class WebkitEngine : WebEngine
 		const string KEEP_USER_AGENT = "KEEP_USER_AGENT";
 		string? user_agent = KEEP_USER_AGENT;
 		ask_page_settings(uri, new_window_override, ref javascript_enabled, ref user_agent);
-		var web_settings = web_view.get_settings();
 		
 		var type = action.get_navigation_type();
 		var user_gesture = action.is_user_gesture();
