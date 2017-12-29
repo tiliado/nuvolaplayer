@@ -89,9 +89,9 @@ public class CefEngine : WebEngine {
 		var size = data.size();
 		var args = new Variant?[2 * size];
 		var iter = HashTableIter<string, Variant>(data);
-		string key = null;
-		Variant val = null;
-		for (var i = 0; i < size && iter.next (out key, out val); i++) {
+		unowned string key = null;
+		unowned Variant val = null;
+		for (var i = 0; i < size && iter.next(out key, out val); i++) {
 			args[2 * i] = new Variant.string(key);
 			args[2 * i + 1] = val;
 		}
