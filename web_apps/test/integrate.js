@@ -119,7 +119,7 @@ WebApp._onPageReady = function()
     try
     {
         document.getElementsByTagName("h1")[0].innerText = Nuvola.format(
-            "Nuvola {1}, WebKitGTK {2}, libsoup {3}", fmtv(Nuvola.VERSION), fmtv(Nuvola.WEBKITGTK_VERSION), fmtv(Nuvola.LIBSOUP_VERSION));
+            "Nuvola {1}, {2}, libsoup {3}", fmtv(Nuvola.VERSION), Nuvola.ENGINE, fmtv(Nuvola.LIBSOUP_VERSION));
     }
     catch (e)
     {
