@@ -95,6 +95,7 @@ public class AppRunnerController: Drtgtk.Application
 	private StartupWindow? startup_window = null;
 	private TiliadoActivation? tiliado_activation = null;
 	private URLBar? url_bar = null;
+	private HashTable<string, Gtk.InfoBar> info_bars;
 	
 	public AppRunnerController(
 		Drt.Storage storage, WebApp web_app, WebAppStorage app_storage,
@@ -111,7 +112,10 @@ public class AppRunnerController: Drtgtk.Application
 		this.app_storage = app_storage;
 		this.api_token = api_token;
 		this.use_nuvola_dbus = use_nuvola_dbus;
+		this.info_bars = new HashTable<string, Gtk.InfoBar>(str_hash, str_equal);
 	}
+	
+	public signal void info_bar_response(string id, int reponse_id);
 	
 	public override bool dbus_register(DBusConnection conn, string object_path)
 		throws GLib.Error
@@ -311,6 +315,13 @@ public class AppRunnerController: Drtgtk.Application
 			handle_toggle_component_active, {
 			new Drt.StringParam("name", true, false, null, "Component name."),
 			new Drt.BoolParam("name", true, false, "Component active state.")
+			});
+		ipc_bus.router.add_method("/nuvola/show-info-bar", Drt.RpcFlags.WRITABLE|Drt.RpcFlags.PRIVATE,
+			"Show info bar.",
+			handle_show_info_bar, {
+			new Drt.StringParam("id", true, false, null, "Info bar id."),
+			new Drt.DoubleParam("type", true, null, "Info bar type."),
+			new Drt.StringParam("name", true, false, null, "Info bar text.")
 			});
 		startup_check.nuvola_service_status = StartupCheck.Status.OK;
 		return true;
@@ -670,6 +681,34 @@ public class AppRunnerController: Drtgtk.Application
 		main_window.info_bars.add(info_bar);
 	}
 	
+	public bool show_info_bar(string id, Gtk.MessageType type, string text) {
+		if (id in info_bars) {
+			return false;
+		}
+		var info_bar = new Gtk.InfoBar();
+		info_bar.set_message_type(type);
+		info_bars[id] = info_bar;
+		info_bar.show_close_button = true;
+		var label = new Gtk.Label(text);
+		label.use_markup = true;
+		label.vexpand = false;
+		label.hexpand = true;
+		label.halign = Gtk.Align.START;
+		label.set_line_wrap(true);
+		(info_bar.get_content_area() as Gtk.Container).add(label);
+		info_bar.show_all();
+		main_window.info_bars.add(info_bar);
+		ulong handler_id = 0;
+		handler_id = info_bar.response.connect((emitter, response_id) => {
+			info_bar_response(id, response_id);
+			emitter.disconnect(handler_id);
+			(emitter.get_parent() as Gtk.Container).remove(emitter);
+			info_bars.remove(id);
+			emitter.destroy();
+		});
+		return true;
+	}
+	
 	private void on_close_warning(Gtk.InfoBar info_bar, int response_id)
 	{
 		(info_bar.get_parent() as Gtk.Container).remove(info_bar);
@@ -790,6 +829,17 @@ public class AppRunnerController: Drtgtk.Application
 			}
 		}
 		request.respond(new Variant.boolean(false));
+	}
+	
+	private void handle_show_info_bar(Drt.RpcRequest request) throws Drt.RpcError {
+		var id = request.pop_string();
+		var type = (int) request.pop_double();
+		var text = request.pop_string();
+		if (type < 0 || type > 3) {
+			throw new Drt.RpcError.INVALID_ARGUMENTS("Info bar type must be >= 0 and <= 3, %d received.", type);
+		} else {
+			request.respond(show_info_bar(id, (Gtk.MessageType) type, text));
+		}
 	}
 	
 	private void on_action_changed(Drtgtk.Action action, ParamSpec p) {
