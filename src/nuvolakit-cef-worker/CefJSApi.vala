@@ -108,7 +108,7 @@ public class CefJSApi : GLib.Object {
 		return false;
 	}
 	
-	public void inject(Cef.V8context v8_ctx) throws JSError{
+	public void inject(Cef.V8context v8_ctx, HashTable<string, Variant?>? properties=null) throws JSError{
 		Assert.on_js_thread();
 		if (this.v8_ctx != null) {
 			this.v8_ctx = null;
@@ -133,6 +133,16 @@ public class CefJSApi : GLib.Object {
 		Cef.V8.set_uint(main_object, "LIBSOUP_MAJOR", libsoup_version[0]);
 		Cef.V8.set_uint(main_object, "LIBSOUP_MINOR", libsoup_version[1]);
 		Cef.V8.set_uint(main_object, "LIBSOUP_MICRO", libsoup_version[2]);
+		
+		if (properties != null) {
+			var iter = HashTableIter<string, Variant?>(properties);
+			unowned string key;
+			unowned Variant? val;
+			while (iter.next(out key, out val)) {
+				Cef.V8.set_value(main_object, key, Cef.V8.value_from_variant(val, null));
+			}
+		}
+		
 		Cef.V8.set_value(main_object, "_callIpcMethodVoid",
 			CefGtk.Function.create("_callIpcMethodVoid", call_ipc_method_void_func));
 		Cef.V8.set_value(main_object, "_callIpcMethodAsync",
