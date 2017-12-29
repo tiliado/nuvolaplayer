@@ -97,9 +97,6 @@ public class CefEngine : WebEngine {
 		}
 		var path = Nuvola.get_libdir() + "/libnuvolaruntime-cef-worker.so";
 		web_view.add_autoloaded_renderer_extension(path, args);
-		if (web_view.is_ready()) {
-			web_view.load_renderer_extension(path, args);
-		}
 	}
 	
 	public override void init_app_runner() {
