@@ -43,6 +43,10 @@ public class CefOptions : WebOptions {
 		return "Chromium " + Cef.get_chromium_version();
 	}
 	
+	public override string get_name() {
+		return "Chromium";
+	}
+	
 	public override async void gather_format_support_info(WebApp web_app) {
 		init(web_app);
 		var result = CefGtk.get_init_result();

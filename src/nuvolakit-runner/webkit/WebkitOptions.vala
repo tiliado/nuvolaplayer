@@ -50,6 +50,10 @@ public class WebkitOptions : WebOptions {
 			WebKit.get_major_version(), WebKit.get_minor_version(), WebKit.get_micro_version());
 	}
 	
+	public override string get_name() {
+		return "WebKitGTK";
+	}
+	
 	private void init() {
 		var data_manager = (WebKit.WebsiteDataManager) GLib.Object.@new(
 			typeof(WebKit.WebsiteDataManager),

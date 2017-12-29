@@ -64,6 +64,7 @@ public abstract class WebOptions : GLib.Object {
 	}
 	
 	public abstract string get_name_version();
+	public abstract string get_name();
 	public abstract Drt.RequirementState supports_requirement(string type, string? parameter, out string? error);
 	public abstract Drt.RequirementState supports_codec(string name, out string? error);
 	public abstract Drt.RequirementState supports_feature(string name, out string? error);
