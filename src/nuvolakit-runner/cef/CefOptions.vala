@@ -39,7 +39,7 @@ public class CefOptions : WebOptions {
 		engine_version = VersionTuple.parse(Cef.get_chromium_version());
 	}
 	
-	public override string get_display_name() {
+	public override string get_name_version() {
 		return "Chromium " + Cef.get_chromium_version();
 	}
 	

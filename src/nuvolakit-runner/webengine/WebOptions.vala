@@ -63,7 +63,7 @@ public abstract class WebOptions : GLib.Object {
  		return version.gte(min) && (max.empty() || version.lt(max));
 	}
 	
-	public abstract string get_display_name();
+	public abstract string get_name_version();
 	public abstract Drt.RequirementState supports_requirement(string type, string? parameter, out string? error);
 	public abstract Drt.RequirementState supports_codec(string name, out string? error);
 	public abstract Drt.RequirementState supports_feature(string name, out string? error);

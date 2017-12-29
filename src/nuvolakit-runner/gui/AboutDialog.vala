@@ -159,7 +159,7 @@ public class AboutDialog: Gtk.Dialog
 		label.margin_top = 10;
 		grid.attach(label, 0, line++, 2, 1);
 		foreach (var entry in web_options) {
-			label = new Gtk.Label("Web Engine: " + entry.get_display_name());
+			label = new Gtk.Label("Web Engine: " + entry.get_name_version());
 			label.selectable = true;
 			grid.attach(label, 0, line++, 2, 1);
 		}

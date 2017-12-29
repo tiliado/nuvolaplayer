@@ -45,7 +45,7 @@ public class WebkitOptions : WebOptions {
 		engine_version = {WebKit.get_major_version(), WebKit.get_minor_version(), WebKit.get_micro_version(), 0};
 	}
 	
-	public override string get_display_name() {
+	public override string get_name_version() {
 		return "WebKitGTK %u.%u.%u".printf(
 			WebKit.get_major_version(), WebKit.get_minor_version(), WebKit.get_micro_version());
 	}
