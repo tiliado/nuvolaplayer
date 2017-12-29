@@ -121,8 +121,9 @@ public class CefEngine : WebEngine {
 			api.call_ipc_method_void.connect(on_call_ipc_method_void);
 			api.call_ipc_method_sync.connect(on_call_ipc_method_sync);
 			api.call_ipc_method_async.connect(on_call_ipc_method_async);
+			
 			try {
-				api.inject(env);
+				api.inject(env, Utils.extract_js_properties(worker_data));
 				api.initialize(env);
 			} catch (JSError e) {
 				runner_app.fatal_error("Initialization error", e.message);

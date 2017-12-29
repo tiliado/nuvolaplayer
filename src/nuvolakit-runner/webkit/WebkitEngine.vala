@@ -42,6 +42,7 @@ public class WebkitEngine : WebEngine
 	private Config config;
 	private Drt.KeyValueStorage session;
 	private unowned WebkitOptions webkit_options;
+	private HashTable<string, Variant> worker_data;
 	
 	public WebkitEngine(WebkitOptions web_options, WebApp web_app){
 		base(web_options, web_app);
@@ -57,6 +58,7 @@ public class WebkitEngine : WebEngine
 		this.runner_app = runner_app;
 		this.config = config;
 		this.web_worker = new RemoteWebWorker(ipc_bus);
+		this.worker_data = worker_data;
 		
 		worker_data["NUVOLA_API_ROUTER_TOKEN"] = ipc_bus.router.hex_token;
 		worker_data["WEBKITGTK_MAJOR"] = WebKit.get_major_version();
@@ -137,9 +139,10 @@ public class WebkitEngine : WebEngine
 			api.call_ipc_method_void.connect(on_call_ipc_method_void);
 			api.call_ipc_method_sync.connect(on_call_ipc_method_sync);
 			api.call_ipc_method_async.connect(on_call_ipc_method_async);
+			
 			try
 			{
-				api.inject(env);
+				api.inject(env, Utils.extract_js_properties(worker_data));
 				api.initialize(env);
 			}
 			catch (JSError e)

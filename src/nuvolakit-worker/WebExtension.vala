@@ -34,6 +34,7 @@ public class WebExtension: GLib.Object
 	private JSApi js_api;
 	private string? api_token = null;
 	private HashTable<string, Variant>? worker_data;
+	private HashTable<string, Variant>? js_properties;
 	private LoginFormManager login_form_manager = null;
 	private unowned WebKit.WebPage page = null;
 	private FrameBridge bridge = null;
@@ -92,6 +93,7 @@ public class WebExtension: GLib.Object
 		libsoup_version[1] = worker_data["LIBSOUP_MINOR"].get_uint32();
 		libsoup_version[2] = worker_data["LIBSOUP_MICRO"].get_uint32();
 		api_token = worker_data["NUVOLA_API_ROUTER_TOKEN"].get_string();
+		js_properties = Utils.extract_js_properties(worker_data);
 		worker_data = null;
 		
 		js_api = new JSApi(storage, data_dir, user_config_dir, new KeyValueProxy(channel, "config"),
@@ -173,7 +175,7 @@ public class WebExtension: GLib.Object
 		var bridge = new FrameBridge(frame, context);
 		try
 		{
-			js_api.inject(bridge);
+			js_api.inject(bridge, js_properties);
 			js_api.integrate(bridge);
 		}
 		catch (GLib.Error e)

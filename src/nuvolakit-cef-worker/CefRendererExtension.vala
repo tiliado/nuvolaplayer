@@ -12,6 +12,7 @@ public class CefRendererExtension : GLib.Object {
 	private File user_config_dir;
 	private string? api_token = null;
 	private HashTable<string, Variant>? worker_data;
+	private HashTable<string, Variant>? js_properties;
 	private Drt.XdgStorage storage;
 	private CefJSApi js_api;
 	
@@ -78,6 +79,7 @@ public class CefRendererExtension : GLib.Object {
 		libsoup_version[1] = (uint) worker_data["LIBSOUP_MINOR"].get_int64();
 		libsoup_version[2] = (uint) worker_data["LIBSOUP_MICRO"].get_int64();
 		api_token = worker_data["NUVOLA_API_ROUTER_TOKEN"].get_string();
+		js_properties = Utils.extract_js_properties(worker_data);
 		worker_data = null;
 		
 		js_api = new CefJSApi(ctx.event_loop, storage, data_dir, user_config_dir,
@@ -124,7 +126,7 @@ public class CefRendererExtension : GLib.Object {
 		Assert.on_js_thread();
 		context.enter();
 		try {
-			js_api.inject(context);
+			js_api.inject(context, js_properties);
 			js_api.integrate(context);
 			js_api.acquire_context(context);
 			ctx.event_loop.add_idle(emit_web_worker_ready_and_init_web_worker_cb);
