@@ -124,6 +124,7 @@ Build and Install
   * libuuid
   * libsecret-1 >= 0.16
   * g-ir-compiler
+  * [ValaCEF](https://github.com/tiliado/valacef) or configure with `--no-cef`
   * unity >= 3.0 or configure with `--no-unity`
   * dbusmenu-glib-0.4 >= 0.4 or configure with `--no-appindicator`
   * appindicator3-0.1 >= 0.4 or configure with `--no-appindicator`

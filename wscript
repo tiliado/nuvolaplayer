@@ -231,8 +231,8 @@ def options(ctx):
 		'--webkitgtk-supports-mse', action='store_true', default=False, dest='webkit_mse',
 		help="Use only if you are absolutely sure that your particular build of the WebKitGTK library supports Media Source Extension (as of 2.15.3, it is disabled by default)")
 	ctx.add_option(
-		'--cef', action='store_true', default=False, dest='cef',
-		help="Build experimental CEF backend.")
+		'--no-cef', action='store_false', default=True, dest='cef',
+		help="Don't build experimental CEF backend depending on ValaCEF.")
 	ctx.add_option(
 		'--cef-default', action='store_true', default=False, dest='cef_default',
 		help="Whether the CEF engine should be default.")
@@ -354,7 +354,7 @@ def configure(ctx):
 	if ctx.options.cef_default:
 		ctx.options.cef = True
 	ctx.env.have_cef = ctx.options.cef
-	if ctx.options.cef:
+	if ctx.env.have_cef:
 		pkgconfig(ctx, 'valacef', 'VALACEF', '3.0')
 		pkgconfig(ctx, 'valacefgtk', 'VALACEFGTK', '3.0')
 		vala_def(ctx, "HAVE_CEF")
