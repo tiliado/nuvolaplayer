@@ -73,6 +73,7 @@ public class AppRunnerController: Drtgtk.Application
 	public WebApp web_app {get; protected set;}
 	public WebAppStorage app_storage {get; protected set;}
 	public string dbus_id {get; private set;}
+	private WebOptions[] available_web_options;
 	private WebOptions web_options;
 	private WebkitOptions webkit_options;
 	public WebEngine web_engine {get; private set;}
@@ -146,11 +147,11 @@ public class AppRunnerController: Drtgtk.Application
 	private  void start() {
 		init_settings();
 		format_support = new FormatSupport(storage.require_data_file("audio/audiotest.mp3").get_path());
-		var startup_check = new StartupCheck(web_app, web_options, format_support);
+		var startup_check = new StartupCheck(web_app, format_support);
 		startup_window = new StartupWindow(this, startup_check);
 		startup_window.present();
 		startup_check.check_desktop_portal_available.begin((o, res) => startup_check.check_desktop_portal_available.end(res));
-		startup_check.check_app_requirements.begin((o, res) => startup_check.check_app_requirements.end(res));
+		startup_check.check_app_requirements.begin(available_web_options, (o, res) => startup_check.check_app_requirements.end(res));
 		startup_check.check_graphics_drivers.begin((o, res) => startup_check.check_graphics_drivers.end(res));
 		startup_check.task_finished.connect_after(on_startup_check_task_finished);
 	}
@@ -186,20 +187,19 @@ public class AppRunnerController: Drtgtk.Application
 		}
 	}
 	
-	private void on_startup_window_ready_to_continue(StartupWindow window)
-	{
+	private void on_startup_window_ready_to_continue(StartupWindow window) {
 		var status = startup_window.model.final_status;
 		startup_window.ready_to_continue.disconnect(on_startup_window_ready_to_continue);
-		startup_window.destroy();
-		startup_window = null;
-		switch (status)
-		{
+		switch (status) {
 		case StartupCheck.Status.WARNING:
 		case StartupCheck.Status.OK:
+			web_options = startup_window.model.web_options;
 			init_gui();
 			init_web_engine();
 			break;
 		}
+		startup_window.destroy();
+		startup_window = null;
 	}
 	
 	private void init_settings()
@@ -219,18 +219,22 @@ public class AppRunnerController: Drtgtk.Application
 		config = new Config(app_storage.config_dir.get_child("config.json"), default_config);
 		config.changed.connect(on_config_changed);
 		gtk_settings.gtk_application_prefer_dark_theme = config.get_bool(ConfigKey.DARK_THEME);
+		
 		#if HAVE_CEF
 		if (Environment.get_variable("NUVOLA_USE_CEF") == "true"
 		|| CEF_DEFAULT && Environment.get_variable("NUVOLA_USE_CEF") != "false") {
-			assert(WebOptions.set_default(typeof(CefOptions)));
+			available_web_options = {
+				WebOptions.create(typeof(CefOptions), app_storage),
+				WebOptions.create(typeof(WebkitOptions), app_storage)};
+		} else {
+			available_web_options = {
+				WebOptions.create(typeof(WebkitOptions), app_storage),
+				WebOptions.create(typeof(CefOptions), app_storage)};
 		}
+		#else
+		available_web_options = {WebOptions.create(typeof(WebkitOptions), app_storage)};
 		#endif
 		connection = new Connection(new Soup.Session(), app_storage.cache_dir.get_child("conn"), config);
-		if (!WebOptions.set_default(typeof(WebkitOptions))) {
-			warning("Default engine is %s.", WebOptions.get_default().name());
-		}
-		web_options = WebOptions.create_default(app_storage);
-		webkit_options = (web_options as WebkitOptions) ?? new WebkitOptions(app_storage);
 	}
 	
 	private bool init_ipc(StartupCheck startup_check)
@@ -373,6 +377,8 @@ public class AppRunnerController: Drtgtk.Application
 	}
 	
 	private void init_web_engine() {
+		webkit_options = (web_options as WebkitOptions) ?? new WebkitOptions(app_storage);
+		available_web_options = null;
 		web_engine = web_options.create_web_engine(web_app);
 		if (web_options.get_name() == "Chromium") {
 			show_info_bar("engine-warning", Gtk.MessageType.WARNING,

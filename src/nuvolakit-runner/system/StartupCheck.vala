@@ -75,7 +75,7 @@ public class StartupCheck : GLib.Object
 	#endif
 	[Description (nick="Web App object", blurb="Currently loaded web application")]
 	public WebApp web_app {get; construct;}
-	public WebOptions web_options {get; construct;}
+	public WebOptions? web_options {get; private set; default = null;}
 	
 	/**
 	 * Create new StartupCheck object.
@@ -83,8 +83,8 @@ public class StartupCheck : GLib.Object
 	 * @param web_app           Web application to check its requirements.
 	 * @param format_support    Information about supported formats and technologies.
 	 */
-	public StartupCheck(WebApp web_app, WebOptions web_options, FormatSupport format_support) {
-		GLib.Object(format_support: format_support, web_app: web_app, web_options: web_options);
+	public StartupCheck(WebApp web_app, FormatSupport format_support) {
+		GLib.Object(format_support: format_support, web_app: web_app);
 	}
 	
 	~StartupCheck() {
@@ -188,12 +188,11 @@ public class StartupCheck : GLib.Object
 	 * 
 	 * The {@link app_requirements_status} property is populated with the result of this check.
 	 */
-	public async void check_app_requirements() {
+	public async void check_app_requirements(WebOptions[] available_web_options) {
 		const string NAME = "Web App Requirements";
 		task_started(NAME);
 		
 		app_requirements_status = Status.IN_PROGRESS;
-		var result_status = Status.OK;
 		string? result_message = null;
 		try {
 			yield format_support.check();
@@ -201,54 +200,98 @@ public class StartupCheck : GLib.Object
 			result_message = e.message;
 		}
 		
-		var webkit_options = web_options as WebkitOptions;
-		if (webkit_options != null) {
-			webkit_options.format_support = format_support;
+		var n_options = available_web_options.length;
+		assert(n_options > 0);
+		var checks = new WebOptionsCheck[n_options];
+		for (var i = 0; i < n_options; i++) {
+			var webkit_options = available_web_options[i] as WebkitOptions;
+			if (webkit_options != null) {
+				webkit_options.format_support = format_support;
+			}
+			checks[i] = new WebOptionsCheck(available_web_options[i], web_app);
 		}
 		
-		var parser = new RequirementParser(web_options);
-		try {
-			parser.eval(web_app.requirements);
-			if (parser.n_unsupported > 0) {
-				result_status = Status.ERROR;
+		/* The first pass: Perform requirements check for all web engines and asses the results. */
+		var n_engines_without_unsupported = 0;
+		foreach (var check in checks) {
+			try {
+				debug("Checking requirements with %s", check.web_options.get_name_version());
+				check.check_requirements();
+				if (check.parser.n_unsupported == 0) {
+					n_engines_without_unsupported++;
+				}
+			} catch (Drt.RequirementError e) {
 				Drt.String.append(ref result_message, "\n", Markup.printf_escaped(
-					"This web app requires certain technologies to function properly but these requirements "
-					+ "have not been satisfied.\n\nFailed requirements: <i>%s</i>\n\n"
-					+ "<a href=\"%s\">Get help with installation</a>",
-					parser.failed_requirements ?? "", WEB_APP_REQUIREMENTS_HELP_URL));
-			} else if (parser.n_unknown > 0) {
-				yield web_options.gather_format_support_info(web_app);
-				parser.eval(web_app.requirements);
-				if (parser.n_unsupported + parser.n_unknown > 0) {
-					result_status = Status.ERROR;
-					Drt.String.append(ref result_message, "\n", Markup.printf_escaped(
-						"This web app requires certain technologies to function properly but these requirements "
-						+ "have not been satisfied.\n\nFailed requirements: <i>%s %s</i>\n\n"
-						+ "<a href=\"%s\">Get help with installation</a>",
-						parser.failed_requirements ?? "", parser.unknown_requirements ?? "", WEB_APP_REQUIREMENTS_HELP_URL));
+					"This web app provides invalid metadata about its requirements."
+					+ " Please create a bug report. The error message is: %s\n\n%s",
+					e.message, check.web_app.requirements));
+				check_app_requirements_finished(Status.ERROR, (owned) result_message, available_web_options);
+				return;
+			}
+		}
+		
+		/* If there is no engine without an unsupported requirement, abort early. */
+		if (n_engines_without_unsupported == 0) {
+			Drt.String.append(ref result_message, "\n", Markup.printf_escaped(
+				"This web app requires certain technologies to function properly but these requirements "
+				+ "have not been satisfied.\n\nFailed requirements: <i>%s</i>\n\n"
+				+ "<a href=\"%s\">Get help with installation</a>",
+				checks[0].parser.failed_requirements ?? "", WEB_APP_REQUIREMENTS_HELP_URL));
+			check_app_requirements_finished(Status.ERROR, (owned) result_message, available_web_options);
+			return;
+		}
+		
+		/* Select the first engine which satisfies requirements. */
+		foreach (var check in checks) {
+			if (check.parser.n_unsupported == 0) {
+				if (check.parser.n_unknown > 0) {
+					yield check.web_options.gather_format_support_info(check.web_app);
+					try {
+						debug("Checking requirements with %s", check.web_options.get_name_version());
+						check.check_requirements();
+					} catch (Drt.RequirementError e) {
+						Drt.String.append(ref result_message, "\n", Markup.printf_escaped(
+							"This web app provides invalid metadata about its requirements."
+							+ " Please create a bug report. The error message is: %s\n\n%s",
+							e.message, check.web_app.requirements));
+						check_app_requirements_finished(Status.ERROR, (owned) result_message, available_web_options);
+						return;
+					}
+				}
+				if (check.parser.n_unsupported + check.parser.n_unknown == 0) {
+					this.web_options = check.web_options;
+					check_app_requirements_finished(Status.OK, (owned) result_message, available_web_options);
+					return;
 				}
 			}
-		} catch (Drt.RequirementError e) {
-			Drt.String.append(ref result_message, "\n", Markup.printf_escaped(
-				"This web app provides invalid metadata about its requirements."
-				+ " Please create a bug report. The error message is: %s\n\n%s",
-				e.message, web_app.requirements));
-			result_status = Status.ERROR;
 		}
 		
-		var warnings = web_options.get_format_support_warnings();
-		if (warnings.length > 0) {
-			if (result_status < Status.WARNING) {
-				result_status = Status.WARNING;
-			}
-			foreach (unowned string entry in warnings) {
-				Drt.String.append(ref result_message, "\n\n", entry);
+		/* No engine satisfies requirements */
+		Drt.String.append(ref result_message, "\n", Markup.printf_escaped(
+			"This web app requires certain technologies to function properly but these requirements "
+			+ "have not been satisfied.\n\nFailed requirements: <i>%s %s</i>\n\n"
+			+ "<a href=\"%s\">Get help with installation</a>",
+			checks[0].parser.failed_requirements ?? "", checks[0].parser.unknown_requirements ?? "",
+			WEB_APP_REQUIREMENTS_HELP_URL));
+		check_app_requirements_finished(Status.ERROR, (owned) result_message, available_web_options);
+	}
+	
+	private void check_app_requirements_finished(Status status, owned string? message, WebOptions[] web_options) {
+		var msg = (owned) message;
+		foreach (var web_opt in web_options) {
+			var warnings = web_opt.get_format_support_warnings();
+			if (warnings.length > 0) {
+				if (status < Status.WARNING) {
+					status = Status.WARNING;
+				}
+				foreach (unowned string entry in warnings) {
+					Drt.String.append(ref msg, "\n\n", "%s: %s".printf(web_opt.get_name(), entry));
+				}
 			}
 		}
-		yield Drt.EventLoop.resume_later();
-		app_requirements_message = (owned) result_message;
-		app_requirements_status = result_status;
-		task_finished(NAME);
+		app_requirements_message = (owned) msg;
+		app_requirements_status = status;
+		task_finished("Web App Requirements");
 	}
 	
 	/**
@@ -448,6 +491,22 @@ public class StartupCheck : GLib.Object
 		public static Status[] all()
 		{
 			return {UNKNOWN, NOT_APPLICABLE, IN_PROGRESS, OK, WARNING, ERROR};
+		}
+	}
+	
+	private class WebOptionsCheck {
+		public WebOptions web_options;
+		public RequirementParser parser;
+		public WebApp web_app;
+		
+		public WebOptionsCheck(WebOptions web_options, WebApp web_app) {
+			this.web_options = web_options;
+			this.parser = new RequirementParser(web_options);
+			this.web_app = web_app;
+		}
+		
+		public void check_requirements() throws Drt.RequirementError {
+			parser.eval(web_app.requirements);
 		}
 	}
 }
