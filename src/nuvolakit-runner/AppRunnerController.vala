@@ -482,13 +482,13 @@ public class AppRunnerController: Drtgtk.Application
 		actions.get_action(Actions.GO_BACK).enabled = web_engine.can_go_back;
 	}
 	
-	private void do_quit()
-	{
+	private void do_quit() {
 		var windows = Gtk.Window.list_toplevels();
-		foreach (var window in windows)
+		foreach (var window in windows) {
 			window.hide();
+		}
+		Timeout.add(50, () => {quit(); return false;});
 		Timeout.add_seconds(10, () => {warning("Force quit after timeout."); GLib.Process.exit(0);});
-		quit();
 	}
 	
 	private void do_activate()
