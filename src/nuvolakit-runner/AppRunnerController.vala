@@ -146,6 +146,7 @@ public class AppRunnerController: Drtgtk.Application
 	
 	private  void start() {
 		init_settings();
+		init_base_actions();
 		format_support = new FormatSupport(storage.require_data_file("audio/audiotest.mp3").get_path());
 		var startup_check = new StartupCheck(web_app, format_support);
 		startup_window = new StartupWindow(this, startup_check);
@@ -235,6 +236,20 @@ public class AppRunnerController: Drtgtk.Application
 		available_web_options = {WebOptions.create(typeof(WebkitOptions), app_storage)};
 		#endif
 		connection = new Connection(new Soup.Session(), app_storage.cache_dir.get_child("conn"), config);
+	}
+	
+	private void init_base_actions() {
+		actions_helper = new ActionsHelper(actions, config);
+		unowned ActionsHelper ah = actions_helper;
+		Drtgtk.Action[] actions_spec = {
+		//          Action(group, scope, name, label?, mnemo_label?, icon?, keybinding?, callback?)
+		ah.simple_action("main", "app", Actions.ACTIVATE, "Activate main window", null, null, null, do_activate),
+		ah.simple_action("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
+		ah.simple_action("main", "app", Actions.ABOUT, "About", "_About", null, null, do_about),
+		ah.simple_action("main", "app", Actions.HELP, "Help", "_Help", null, "F1", do_help),
+		};
+		actions.add_actions(actions_spec);
+		set_app_menu_items({Actions.HELP, Actions.ABOUT, Actions.QUIT});
 	}
 	
 	private bool init_ipc(StartupCheck startup_check)
@@ -331,36 +346,24 @@ public class AppRunnerController: Drtgtk.Application
 		return true;
 	}
 	
-	private void init_gui()
-	{
-		actions_helper = new ActionsHelper(actions, config);
-		unowned ActionsHelper ah = actions_helper;
-		Drtgtk.Action[] actions_spec = {
-		//          Action(group, scope, name, label?, mnemo_label?, icon?, keybinding?, callback?)
-		ah.simple_action("main", "app", Actions.ACTIVATE, "Activate main window", null, null, null, do_activate),
-		ah.simple_action("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
-		ah.simple_action("main", "app", Actions.ABOUT, "About", "_About", null, null, do_about),
-		ah.simple_action("main", "app", Actions.HELP, "Help", "_Help", null, "F1", do_help),
-		};
-		actions.add_actions(actions_spec);
-				
+	private void init_gui() {
 		menu_bar = new MenuBar(this);
 		menu_bar.update();
-		set_app_menu_items({Actions.HELP, Actions.ABOUT, Actions.QUIT});
-		
 		main_window = new WebAppWindow(this);
 		main_window.can_destroy.connect(on_can_quit);
 		var x = (int) config.get_int64(ConfigKey.WINDOW_X);
 		var y = (int) config.get_int64(ConfigKey.WINDOW_Y);
-		if (x >= 0 && y >= 0)
+		if (x >= 0 && y >= 0) {
 			main_window.move(x, y);
+		}
 		var win_width = (int) config.get_int64(ConfigKey.WINDOW_WIDTH);
 		var win_height = (int) config.get_int64(ConfigKey.WINDOW_HEIGHT);
-		if (win_width > MINIMAL_REMEMBERED_WINDOW_SIZE && win_height > MINIMAL_REMEMBERED_WINDOW_SIZE)
+		if (win_width > MINIMAL_REMEMBERED_WINDOW_SIZE && win_height > MINIMAL_REMEMBERED_WINDOW_SIZE) {
 			main_window.resize(win_width, win_height);
-		if (config.get_bool(ConfigKey.WINDOW_MAXIMIZED))
+		}
+		if (config.get_bool(ConfigKey.WINDOW_MAXIMIZED)) {
 			main_window.maximize();
-		
+		}
 		if (tiliado_activation != null) {
 			var trial_widget = new TiliadoTrialWidget(this.tiliado_activation, this, TiliadoMembership.BASIC);
 			main_window.top_grid.add(trial_widget);
@@ -370,7 +373,6 @@ public class AppRunnerController: Drtgtk.Application
 		main_window.configure_event.connect(on_configure_event);
 		main_window.notify["is-active"].connect_after(on_window_is_active_changed);
 		main_window.sidebar.hide();
-		
 		fatal_error.connect(on_fatal_error);
 		show_error.connect(on_show_error);
 		show_warning.connect(on_show_warning);
