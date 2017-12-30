@@ -124,9 +124,9 @@ Build and Install
   * libuuid
   * libsecret-1 >= 0.16
   * g-ir-compiler
-  * optional unity >= 3.0
-  * optional dbusmenu-glib-0.4 >= 0.4
-  * optional appindicator3-0.1 >= 0.4
+  * unity >= 3.0 or configure with `--no-unity`
+  * dbusmenu-glib-0.4 >= 0.4 or configure with `--no-appindicator`
+  * appindicator3-0.1 >= 0.4 or configure with `--no-appindicator`
   * optional [engine.io-client](https://github.com/socketio/engine.io-client) >= 3.1.0
     (installed as /usr/share/javascript/engine.io-client/engine.io.js)
   * optional [unit.js](https://github.com/unitjs/unit.js/releases/tag/v2.0.0) 2.0.0
@@ -146,7 +146,8 @@ To find out what build parameters can be set run ./waf --help
 
 ### Build
 
-    $ ./waf configure [--prefix=...] [--libdir=...] [--branding=...] [--noopt] [--nodebug] [--nounity] [--noappindicator]
+    $ ./waf --help
+    $ ./waf configure [--prefix=...] [--libdir=...] [--branding=...] [--no-...]
     $ ./waf build
 
 ### Install

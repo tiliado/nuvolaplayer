@@ -212,16 +212,30 @@ class checkvaladefs(Task.Task):
 
 def options(ctx):
 	ctx.load('compiler_c vala')
-	ctx.add_option('--jsdir', type=str, default=None, help="Path to JavaScript modules [DATADIR/javascript].")
-	ctx.add_option('--branding', type=str, default="default", help="Branding profile to load.")
-	ctx.add_option('--noopt', action='store_true', default=False, dest='noopt', help="Turn off compiler optimizations")
-	ctx.add_option('--nodebug', action='store_false', default=True, dest='debug', help="Turn off debugging symbols")
-	ctx.add_option('--nounity', action='store_false', default=True, dest='unity', help="Don't build Unity features.")
-	ctx.add_option('--noappindicator', action='store_false', default=True, dest='appindicator', help="Don't build functionality dependent on libappindicator")
-	ctx.add_option('--webkitgtk-supports-mse', action='store_true', default=False, dest='webkit_mse',
+	ctx.add_option(
+		'--jsdir', type=str, default=None,
+		help="Path to JavaScript modules [DATADIR/javascript].")
+	ctx.add_option(
+		'--branding', type=str, default="default",
+		help="Branding profile to load.")
+	ctx.add_option(
+		'--no-debug-symbols', action='store_false', default=True, dest='debug',
+		help="Turn off debugging symbols for gdb.")
+	ctx.add_option(
+		'--no-unity', action='store_false', default=True, dest='unity',
+		help="Don't build Unity features depending on libunity.")
+	ctx.add_option(
+		'--no-appindicator', action='store_false', default=True, dest='appindicator',
+		help="Don't build functionality dependent on libappindicator.")
+	ctx.add_option(
+		'--webkitgtk-supports-mse', action='store_true', default=False, dest='webkit_mse',
 		help="Use only if you are absolutely sure that your particular build of the WebKitGTK library supports Media Source Extension (as of 2.15.3, it is disabled by default)")
-	ctx.add_option('--cef', action='store_true', default=False, dest='cef', help="Build experimental CEF backend.")
-	ctx.add_option('--cef-default', action='store_true', default=False, dest='cef_default', help="Whether the CEF engine should be default.")
+	ctx.add_option(
+		'--cef', action='store_true', default=False, dest='cef',
+		help="Build experimental CEF backend.")
+	ctx.add_option(
+		'--cef-default', action='store_true', default=False, dest='cef_default',
+		help="Whether the CEF engine should be default.")
 
 def configure(ctx):
 	add_version_info(ctx)
@@ -239,8 +253,7 @@ def configure(ctx):
 		path = path.strip()
 		if path:
 			ctx.env.append_unique('LIBPATH', path)
-	if not ctx.options.noopt:
-		ctx.env.append_unique('CFLAGS', '-O2')
+	ctx.env.append_unique('CFLAGS', '-O2')
 	if ctx.options.debug:
 		ctx.env.append_unique('CFLAGS', '-g3')
 	
