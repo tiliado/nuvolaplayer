@@ -79,12 +79,7 @@ public class CefEngine : WebEngine {
 		config.set_default_value(ZOOM_LEVEL_CONF, 0.0);
 		web_view.zoom_level = config.get_double(ZOOM_LEVEL_CONF);
 		web_view.load_started.connect(on_load_started);
-	}
-	
-	~CefEngine() {
-	}
-	
-	public override void init() {
+		
 		var data = worker_data;
 		var size = data.size();
 		var args = new Variant?[2 * size];
@@ -97,6 +92,14 @@ public class CefEngine : WebEngine {
 		}
 		var path = Nuvola.get_libdir() + "/libnuvolaruntime-cef-worker.so";
 		web_view.add_autoloaded_renderer_extension(path, args);
+	}
+	
+	~CefEngine() {
+	}
+	
+	public override void init() {
+		
+		web_view.load_html("<html><body>A web app will be loaded shortly...</body><script>window.title = \"\";</script></html>", WEB_ENGINE_LOADING_URI);
 	}
 	
 	public override void init_app_runner() {

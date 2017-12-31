@@ -358,10 +358,10 @@ public class CefJSApi : GLib.Object {
 			}
 			loop.quit();
 		});
+		loop.run();
 		if (error != null) {
 			throw error;
 		}
-		loop.run();
 		return result;
 	}
 	

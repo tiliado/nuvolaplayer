@@ -18,15 +18,17 @@ public class CefRendererExtension : GLib.Object {
 	
 	public CefRendererExtension(CefGtk.RendererContext ctx, int browser_id, Drt.RpcChannel channel,
 	HashTable<string, Variant> worker_data) {
-		Assert.on_glib_thread();
+		Assert.on_js_thread();
 		this.ctx = ctx;
 		this.browser_id = browser_id;
 		this.channel = channel;
 		this.worker_data = worker_data;
 		this.storage = new Drt.XdgStorage.for_project(Nuvola.get_app_id());
+		ctx.js_context_created.connect(on_js_context_created);
+		ctx.js_context_released.connect(on_js_context_released);
 	}
 	
-	public void init() {
+	private void init() {
 		Assert.on_glib_thread();
 		ainit.begin((o, res) => {ainit.end(res);});
 	}
@@ -62,8 +64,10 @@ public class CefRendererExtension : GLib.Object {
 		Variant response;
 		try {
 			response = yield channel.call("/nuvola/core/get-data-dir", null);
+			Assert.on_glib_thread();
 			data_dir = File.new_for_path(response.get_string());
 			response = yield channel.call("/nuvola/core/get-user-config-dir", null);
+			Assert.on_glib_thread();
 			user_config_dir = File.new_for_path(response.get_string());
 		} catch (GLib.Error e) 	{
 			error("Runner client error: %s", e.message);
@@ -81,7 +85,7 @@ public class CefRendererExtension : GLib.Object {
 		api_token = worker_data["NUVOLA_API_ROUTER_TOKEN"].get_string();
 		js_properties = Utils.extract_js_properties(worker_data);
 		worker_data = null;
-		
+		Assert.on_glib_thread();
 		js_api = new CefJSApi(ctx.event_loop, storage, data_dir, user_config_dir,
 			new KeyValueProxy(channel, "config"), new KeyValueProxy(channel, "session"),
 			webkit_version, libsoup_version, true);
@@ -90,14 +94,12 @@ public class CefRendererExtension : GLib.Object {
 		
 		channel.call.begin("/nuvola/core/web-worker-initialized", null, (o, res) => {
 			try {
+				Assert.on_glib_thread();
 				channel.call.end(res);
 			} catch (GLib.Error e) {
 				error("Runner client error: %s", e.message);
 			}
 		});
-		
-		ctx.js_context_created.connect(on_js_context_created);
-		ctx.js_context_released.connect(on_js_context_released);
 	}
 	
 	private void on_js_context_created(Cef.Browser browser, Cef.Frame frame, Cef.V8context context) {
@@ -124,16 +126,20 @@ public class CefRendererExtension : GLib.Object {
 	
 	private void init_frame(Cef.Browser browser, Cef.Frame frame, Cef.V8context context) {
 		Assert.on_js_thread();
-		context.enter();
-		try {
-			js_api.inject(context, js_properties);
-			js_api.integrate(context);
-			js_api.acquire_context(context);
-			ctx.event_loop.add_idle(emit_web_worker_ready_and_init_web_worker_cb);
-		} catch (GLib.Error e) {
-			show_error("Failed to inject JavaScript API. %s".printf(e.message));
-		} finally {
-			context.exit();
+		if (WEB_ENGINE_LOADING_URI == frame.get_url()) {
+			ctx.event_loop.add_idle(() => {init(); return false;});
+		} else {
+			context.enter();
+			try {
+				js_api.inject(context, js_properties);
+				js_api.integrate(context);
+				js_api.acquire_context(context);
+				ctx.event_loop.add_idle(emit_web_worker_ready_and_init_web_worker_cb);
+			} catch (GLib.Error e) {
+				show_error("Failed to inject JavaScript API. %s".printf(e.message));
+			} finally {
+				context.exit();
+			}
 		}
 	}
 	
