@@ -380,7 +380,6 @@ public class AppRunnerController: Drtgtk.Application
 	
 	private void init_web_engine() {
 		webkit_options = (web_options as WebkitOptions) ?? new WebkitOptions(app_storage);
-		available_web_options = null;
 		web_engine = web_options.create_web_engine(web_app);
 		if (web_options.get_name() == "Chromium") {
 			show_info_bar("engine-warning", Gtk.MessageType.WARNING,
@@ -489,6 +488,12 @@ public class AppRunnerController: Drtgtk.Application
 		}
 		Timeout.add(50, () => {quit(); return false;});
 		Timeout.add_seconds(10, () => {warning("Force quit after timeout."); GLib.Process.exit(0);});
+	}
+	
+	public void shutdown_engines() {
+		foreach (var opt in available_web_options) {
+			opt.shutdown();
+		}
 	}
 	
 	private void do_activate()

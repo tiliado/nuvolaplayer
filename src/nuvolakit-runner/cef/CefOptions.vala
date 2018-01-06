@@ -76,6 +76,10 @@ public class CefOptions : WebOptions {
 		return new CefEngine(this, web_app);
 	}
 	
+	public override void shutdown() {
+		CefGtk.shutdown();
+	}
+	
 	public override Drt.RequirementState supports_requirement(string type, string? parameter, out string? error) {
 		error = null;
 		switch (type) {

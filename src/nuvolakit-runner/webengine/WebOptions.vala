@@ -53,6 +53,10 @@ public abstract class WebOptions : GLib.Object {
 	
 	public abstract WebEngine create_web_engine(WebApp web_app);
 	
+	public virtual void shutdown() {
+		
+	}
+	
 	public static string? make_user_agent(string? user_agent) {
 		const string APPLE_WEBKIT_VERSION = "604.1";
 		const string SAFARI_VERSION = "11.0";
