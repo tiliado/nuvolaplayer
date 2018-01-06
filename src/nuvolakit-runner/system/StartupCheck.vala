@@ -300,8 +300,7 @@ public class StartupCheck : GLib.Object
 	 * The {@link opengl_driver_status}, {@link vaapi_driver_status} and {@link vdpau_driver_status}
 	 * properties are populated with the result of this check.
 	 */
-	public async void check_graphics_drivers()
-	{
+	public async void check_graphics_drivers() {
 		const string NAME = "Graphics drivers";
 		task_started(NAME);
 		opengl_driver_status = Status.IN_PROGRESS;
@@ -312,70 +311,22 @@ public class StartupCheck : GLib.Object
 		
 		#if FLATPAK
 		string? gl_extension = null;
-		if (!Graphics.is_required_gl_extension_mounted(out gl_extension))
-		{
+		if (!Graphics.is_required_gl_extension_mounted(out gl_extension)) {
 			opengl_driver_message = Markup.printf_escaped(
 				"Graphics driver '%s' for Flatpak has not been found on your system. Please consult "
 				+ "<a href=\"https://github.com/tiliado/nuvolaruntime/wiki/Graphics-Drivers\">documentation"
 				+ " on graphics drivers</a> to get help with installation.", gl_extension);
 			opengl_driver_status = Status.ERROR;
-		}
-		else
-		{
+		} else {
 			opengl_driver_status = Status.OK;
 		}
 		#else
-			opengl_driver_status = Status.NOT_APPLICABLE;
+		opengl_driver_status = Status.NOT_APPLICABLE;
 		#endif
-		try
-		{
-			const string DRIVER_NOT_FOUND_TEMPLATE = (
-				"%s Driver for '%s' not found. Rendering performance of some web apps may suffer. "
-				#if !FLATPAK
-				+ "Contact your distributor to get help with installation."
-				#else
-				+ "Please <a href=\"https://github.com/tiliado/nuvolaruntime/issues/280\">report your issue</a>"
-				+" so that the driver can be added to Nuvola Runtime flatpak."
-				#endif
-				);
+		
+		vdpau_driver_status = Status.NOT_APPLICABLE;
+		vaapi_driver_status = Status.NOT_APPLICABLE;
 			
-			var dri2_driver = Graphics.dri2_get_driver_name();
-			if (!Graphics.have_vdpau_driver(dri2_driver))
-			{
-				vdpau_driver_message = Markup.printf_escaped(DRIVER_NOT_FOUND_TEMPLATE, "VDPAU", dri2_driver);
-				vdpau_driver_status = Status.WARNING;
-			}
-			else
-			{
-				vdpau_driver_status = Status.OK;
-			}
-			if (!Graphics.have_vaapi_driver(dri2_driver))
-			{
-				vaapi_driver_message = Markup.printf_escaped(DRIVER_NOT_FOUND_TEMPLATE, "VA-API", dri2_driver);
-				vaapi_driver_status = Status.WARNING;
-			}
-			else
-			{
-				vaapi_driver_status = Status.OK;
-			}
-		}
-		catch (Graphics.DriError e)
-		{
-			if (e is Graphics.DriError.NO_X_DISPLAY || e is Graphics.DriError.EXTENSION_QUERY
-			|| e is Graphics.DriError.CONNECT)
-			{
-				vdpau_driver_status = Status.NOT_APPLICABLE;
-				vaapi_driver_status = Status.NOT_APPLICABLE;
-			}
-			else
-			{
-				var msg = Markup.printf_escaped("Failed to get DRI2 driver name. %s", e.message);
-				vdpau_driver_message = msg;
-				vdpau_driver_status = Status.WARNING;
-				vaapi_driver_message = (owned) msg;
-				vaapi_driver_status = Status.WARNING;
-			}
-		}
 		yield Drt.EventLoop.resume_later();
 		task_finished(NAME);
 	}
