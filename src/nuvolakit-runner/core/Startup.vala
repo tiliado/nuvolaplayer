@@ -65,10 +65,6 @@ private int launch_app_runner(File web_app_dir, string? api_token, string[] argv
 	 */
 	Environment.set_variable("GDK_BACKEND", "x11", true);
 	
-	#if FLATPAK
-	Flatpak.clear_fontconfig_cache();
-	#endif
-	
 	// Init GTK early to have be able to use Gtk.IconTheme stuff
 	string[] empty_argv = {};
 	unowned string[] unowned_empty_argv = empty_argv;
