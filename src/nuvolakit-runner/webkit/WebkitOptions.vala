@@ -43,6 +43,13 @@ public class WebkitOptions : WebOptions {
 	
 	construct {
 		engine_version = {WebKit.get_major_version(), WebKit.get_minor_version(), WebKit.get_micro_version(), 0};
+		#if WEBKIT_SUPPORTS_MSE
+		mse_supported = true;
+		h264_supported = true;
+		debug("MSE supported: yes");
+		#else
+		debug("MSE supported: no");
+		#endif
 	}
 	
 	public override string get_name_version() {
@@ -71,13 +78,6 @@ public class WebkitOptions : WebOptions {
 		cookie_manager.set_persistent_storage(storage.data_dir.get_child("cookies.dat").get_path(),
 			WebKit.CookiePersistentStorage.SQLITE);	
 		default_context = web_context;
-		#if WEBKIT_SUPPORTS_MSE
-		mse_supported = true;
-		h264_supported = true;
-		debug("MSE supported: yes");
-		#else
-		debug("MSE supported: no");
-		#endif
 	}
 	
 	public static uint get_webkit_version() {
