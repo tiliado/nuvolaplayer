@@ -197,7 +197,7 @@ public class CefEngine : WebEngine {
 	}
 	
 	private bool load_uri(string uri) {
-		if (uri.has_prefix("http://") || uri.has_prefix("https://")) {
+		if (uri.has_prefix("http://") || uri.has_prefix("https://") || uri.has_prefix("chrome://")) {
 			web_view.load_uri(uri);
 			return true;
 		}
