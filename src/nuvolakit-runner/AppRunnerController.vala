@@ -97,6 +97,7 @@ public class AppRunnerController: Drtgtk.Application
 	private TiliadoActivation? tiliado_activation = null;
 	private URLBar? url_bar = null;
 	private HashTable<string, Gtk.InfoBar> info_bars;
+	private MainLoopAdaptor? mainloop = null;
 	
 	public AppRunnerController(
 		Drt.Storage storage, WebApp web_app, WebAppStorage app_storage,
@@ -486,13 +487,49 @@ public class AppRunnerController: Drtgtk.Application
 		foreach (var window in windows) {
 			window.hide();
 		}
-		Timeout.add(50, () => {quit(); return false;});
+		Timeout.add(50, () => {quit_mainloop(); quit(); return false;});
 		Timeout.add_seconds(10, () => {warning("Force quit after timeout."); GLib.Process.exit(0);});
 	}
 	
 	public void shutdown_engines() {
 		foreach (var opt in available_web_options) {
 			opt.shutdown();
+		}
+	}
+	
+	public override void startup() {
+		base.startup();
+		var source = new IdleSource();
+		source.set_callback(() => {
+	        run_mainloop();
+	        return false;
+		});
+		source.set_priority(GLib.Priority.HIGH);
+		source.set_can_recurse(false);
+		source.attach(MainContext.ref_thread_default());
+	}
+	
+	public override void run_mainloop() {
+		if (mainloop == null) {
+			mainloop = new GlibMainLoopAdaptor();
+		}
+		while (mainloop != null) {
+			mainloop.run();
+			mainloop = mainloop.get_replacement();
+		}
+	}
+	
+	public override void quit_mainloop() {
+		if (mainloop != null) {
+			mainloop.quit();
+		}
+	}
+	
+	public void replace_mainloop(MainLoopAdaptor replacement) {
+		if (mainloop == null) {
+			mainloop = replacement;
+		} else {
+			mainloop.replace(replacement);
 		}
 	}
 	

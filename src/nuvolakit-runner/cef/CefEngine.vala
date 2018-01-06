@@ -68,6 +68,8 @@ public class CefEngine : WebEngine {
 		worker_data["LIBSOUP_MINOR"] = Soup.get_minor_version();
 		worker_data["LIBSOUP_MICRO"] = Soup.get_micro_version();
 		
+		runner_app.replace_mainloop(new CefMainLoopAdaptor());
+		
 		if (connection != null)
 			apply_network_proxy(connection);
 		if (web_app.allow_insecure_content)
