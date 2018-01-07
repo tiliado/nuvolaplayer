@@ -236,6 +236,10 @@ def options(ctx):
 	ctx.add_option(
 		'--cef-default', action='store_true', default=False, dest='cef_default',
 		help="Whether the CEF engine should be default.")
+	
+	ctx.add_option(
+		'--nuvola-lite', action='store_true', default=False, dest='nuvola_lite',
+		help="Lite version of Nuvola.")
 
 def configure(ctx):
 	add_version_info(ctx)
@@ -300,6 +304,9 @@ def configure(ctx):
 		vala_def(ctx, "NUVOLA_RUNTIME")
 		ctx.env.UNIQUE_NAME = "eu.tiliado.Nuvola"
 	ctx.env.ICON_NAME = ctx.env.UNIQUE_NAME
+	ctx.env.NUVOLA_LITE = ctx.options.nuvola_lite
+	if ctx.env.NUVOLA_LITE:
+		vala_def(ctx, "NUVOLA_LITE")
 	
 	# Flatpak
 	if ctx.env.FLATPAK:
@@ -342,13 +349,13 @@ def configure(ctx):
 	ctx.env.WEBKIT_MSE = ctx.options.webkit_mse
 	if ctx.options.webkit_mse:
 		vala_def(ctx, "WEBKIT_SUPPORTS_MSE")
-	ctx.env.with_unity = ctx.options.unity
-	if ctx.options.unity:
+	ctx.env.with_unity = ctx.options.unity and not ctx.env.NUVOLA_LITE
+	if ctx.env.with_unity:
 		pkgconfig(ctx, 'unity', 'UNITY', '3.0')
 		pkgconfig(ctx, 'dbusmenu-glib-0.4', 'DBUSMENU', '0.4')
 		vala_def(ctx, "UNITY")
-	ctx.env.with_appindicator = ctx.options.appindicator
-	if ctx.options.appindicator:
+	ctx.env.with_appindicator = ctx.options.appindicator and not ctx.env.NUVOLA_LITE
+	if ctx.env.with_appindicator:
 		pkgconfig(ctx, 'appindicator3-0.1', 'APPINDICATOR', '0.4')
 		vala_def(ctx, "APPINDICATOR")
 	if ctx.options.cef_default:
@@ -370,7 +377,7 @@ def configure(ctx):
 	ctx.env.GENUINE = genuine
 	if genuine:
 		vala_def(ctx, "GENUINE")
-	if any((ctx.env.GENUINE, ctx.env.CDK, ctx.env.ADK)):
+	if any((ctx.env.GENUINE, ctx.env.CDK, ctx.env.ADK)) and not ctx.env.NUVOLA_LITE:
 		vala_def(ctx, "EXPERIMENTAL")
 	if tiliado_api.get("enabled", False):
 		vala_def(ctx, "TILIADO_API")
@@ -486,7 +493,7 @@ def build(ctx):
 	
 	ctx(features = "checkvaladefs", source = ctx.path.ant_glob('**/*.vala'),
 		definitions="FLATPAK TILIADO_API WEBKIT_SUPPORTS_MSE GENUINE UNITY APPINDICATOR EXPERIMENTAL NUVOLA_RUNTIME"
-		+ " NUVOLA_ADK NUVOLA_CDK HAVE_CEF FALSE TRUE")
+		+ " NUVOLA_ADK NUVOLA_CDK HAVE_CEF FALSE TRUE NUVOLA_LITE")
 	ctx.add_group()
 		
 	valalib( 

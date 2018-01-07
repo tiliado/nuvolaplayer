@@ -42,9 +42,15 @@ public class ComponentsManager: Gtk.Stack
 		grid = new Gtk.Grid();
 		grid.margin = 10;
 		grid.column_spacing = 15;
+		#if !NUVOLA_LITE
 		component_not_available_widget = Drtgtk.Labels.markup(
 			"Your distributor has not enabled this feature. It is available in <a href=\"%s\">the genuine flatpak "
 			+ "builds of Nuvola Apps Runtime</a> though.", "https://nuvola.tiliado.eu");
+		#else
+		component_not_available_widget = Drtgtk.Labels.markup(
+			"This feature is not yet available in Nuvola Apps <i>snap packages</i>. You may switch to <a href=\"%s\">"
+			+ "the genuine <i>flatpak</i> builds of Nuvola Apps Runtime</a> instead.", "https://nuvola.tiliado.eu");
+		#endif
 		membership_widget = tiliado_activation != null ? new TiliadoUserWidget(tiliado_activation, app) : null;
 		refresh();
 		var scroll = new Gtk.ScrolledWindow(null, null);

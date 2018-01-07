@@ -77,13 +77,13 @@ public class AppRunnerController: Drtgtk.Application
 	private WebOptions web_options;
 	private WebkitOptions webkit_options;
 	public WebEngine web_engine {get; private set;}
-	public Drt.KeyValueStorage master_config {get; private set;}
+	public Drt.KeyValueStorage? master_config {get; private set;}
 	public Bindings bindings {get; private set;}
 	public IpcBus ipc_bus {get; private set; default=null;}
 	public ActionsHelper actions_helper {get; private set; default = null;}
 	private AppDbusApi? dbus_api = null;
 	private uint dbus_api_id = 0;
-	private GlobalKeybindings global_keybindings;
+	private GlobalKeybindings? global_keybindings;
 	private const int MINIMAL_REMEMBERED_WINDOW_SIZE = 300;
 	private uint configure_event_cb_id = 0;
 	private MenuBar menu_bar;
@@ -262,6 +262,7 @@ public class AppRunnerController: Drtgtk.Application
 			web_worker_data["RUNNER_BUS_NAME"] = bus_name;
 			ipc_bus = new IpcBus(bus_name);
 			ipc_bus.start();
+			#if !NUVOLA_LITE
 			if (use_nuvola_dbus)
 			{
 				var nuvola_api = Bus.get_proxy_sync<MasterDbusIfce>(
@@ -301,6 +302,7 @@ public class AppRunnerController: Drtgtk.Application
 				assert(bus_name != null);
 				ipc_bus.connect_master(bus_name, api_token);
 			}
+			#endif
 		}
 		catch (GLib.Error e)
 		{
@@ -318,6 +320,7 @@ public class AppRunnerController: Drtgtk.Application
 		ipc_bus.router.add_method(IpcApi.CORE_GET_METADATA, Drt.RpcFlags.READABLE|Drt.RpcFlags.PRIVATE,
 			"Get web app metadata.", handle_get_metadata, null);
 		
+		#if !NUVOLA_LITE
 		try
 		{
 			var response = ipc_bus.master.call_sync("/nuvola/core/runner-started", new Variant("(ss)", web_app.id, ipc_bus.router.hex_token));
@@ -335,6 +338,11 @@ public class AppRunnerController: Drtgtk.Application
 		
 		var storage_client = new Drt.KeyValueStorageClient(ipc_bus.master);
 		master_config = storage_client.get_proxy("master.config");
+		startup_check.nuvola_service_status = StartupCheck.Status.OK;
+		#else
+		startup_check.nuvola_service_status = StartupCheck.Status.NOT_APPLICABLE;
+		#endif
+		
 		ipc_bus.router.add_method("/nuvola/core/get-component-info", Drt.RpcFlags.READABLE,
 			"Get info about component.",
 			handle_get_component_info, {
@@ -353,7 +361,7 @@ public class AppRunnerController: Drtgtk.Application
 			new Drt.DoubleParam("type", true, null, "Info bar type."),
 			new Drt.StringParam("name", true, false, null, "Info bar text.")
 			});
-		startup_check.nuvola_service_status = StartupCheck.Status.OK;
+		
 		return true;
 	}
 	
@@ -422,8 +430,10 @@ public class AppRunnerController: Drtgtk.Application
 	private void init_app_runner()
 	{
 		append_actions();
+		#if !NUVOLA_LITE
 		var gakb = new ActionsKeyBinderClient(ipc_bus.master);
 		global_keybindings = new GlobalKeybindings(gakb, actions);
+		#endif
 		load_extensions();
 		web_engine.get_main_web_view().hide();
 		main_window.sidebar.hide();
@@ -590,7 +600,8 @@ public class AppRunnerController: Drtgtk.Application
 		}
 		
 		var dialog = new PreferencesDialog(this, main_window, form);
-		dialog.add_tab("Keyboard shortcuts", new KeybindingsSettings(actions, config, global_keybindings.keybinder));
+		dialog.add_tab("Keyboard shortcuts", new KeybindingsSettings(
+			actions, config, global_keybindings != null ? global_keybindings.keybinder : null));
 		var network_settings = new NetworkSettings(connection);
 		dialog.add_tab("Network", network_settings);
 		dialog.add_tab("Features", new ComponentsManager(this, components, tiliado_activation));
@@ -694,7 +705,7 @@ public class AppRunnerController: Drtgtk.Application
 		if (webkit_engine != null) {
 			components.prepend(new PasswordManagerComponent(config, ipc_bus, web_worker, web_app.id, webkit_engine));
 		}
-		components.prepend(new AudioScrobblerComponent(this, bindings, master_config, config, connection.session));
+		components.prepend(new AudioScrobblerComponent(this, bindings, master_config ?? config, config, connection.session));
 		components.prepend(new MPRISComponent(this, bindings, config));
 		components.prepend(new HttpRemoteControl.Component(this, bindings, config, ipc_bus));
 		components.prepend(new LyricsComponent(this, bindings, config));
@@ -795,6 +806,7 @@ public class AppRunnerController: Drtgtk.Application
 		if (!main_window.is_active)
 			return;
 		
+		#if !NUVOLA_LITE
 		try
 		{
 			var response = ipc_bus.master.call_sync("/nuvola/core/runner-activated", new Variant("(s)", web_app.id));
@@ -804,6 +816,7 @@ public class AppRunnerController: Drtgtk.Application
 		{
 			critical("Communication with master process failed: %s", e.message);
 		}
+		#endif
 	}
 	
 	private bool on_configure_event(Gdk.EventConfigure event)

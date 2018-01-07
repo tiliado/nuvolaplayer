@@ -40,7 +40,7 @@ public class KeybindingsSettings : Gtk.Grid
 	 * 
 	 * @param app Application object
 	 */
-	public KeybindingsSettings(Drtgtk.Actions actions_reg, Config config, ActionsKeyBinder global_keybindings)
+	public KeybindingsSettings(Drtgtk.Actions actions_reg, Config config, ActionsKeyBinder? global_keybindings)
 	{
 		
 		this.actions_reg = actions_reg;
@@ -61,6 +61,9 @@ public class KeybindingsSettings : Gtk.Grid
 		info_bar.no_show_all = true;
 		attach(info_bar, 0, 0, 1, 1);
 		var info_text = "Double click a keyboard shortcut and then press a new one to change it or the backspace key to delete it.";
+		if (global_keybindings == null) {
+			info_text += "\n\nGlobal keyboard shortcuts are not available in Nuvola snap packages.";
+		}
 		var info_label = new Gtk.Label(info_text);
 		info_label.margin = 10;
 		info_label.wrap = true;
@@ -93,7 +96,7 @@ public class KeybindingsSettings : Gtk.Grid
 				accel_mods = 0;
 			}
 
-			keybinding = global_keybindings.get_keybinding(action.name);
+			keybinding = global_keybindings != null ? global_keybindings.get_keybinding(action.name) : null;
 			uint glob_accel_key;
 			Gdk.ModifierType glob_accel_mods;
 			if (keybinding != null)
@@ -122,13 +125,14 @@ public class KeybindingsSettings : Gtk.Grid
 		accel_cell.accel_cleared.connect(on_accel_cleared);
 		view.insert_column_with_attributes(-1, "Shortcut", accel_cell, "accel-key", 2, "accel-mods", 3);
 		
-		accel_cell = new Gtk.CellRendererAccel();
-		accel_cell.editable = true;
-		accel_cell.accel_mode = Gtk.CellRendererAccelMode.GTK;
-		accel_cell.accel_edited.connect(on_glob_accel_edited);
-		accel_cell.accel_cleared.connect(on_glob_accel_cleared);
-		view.insert_column_with_attributes(-1, "Global Shortcut", accel_cell, "accel-key", 4, "accel-mods", 5);
-		
+		if (global_keybindings != null) {
+			accel_cell = new Gtk.CellRendererAccel();
+			accel_cell.editable = true;
+			accel_cell.accel_mode = Gtk.CellRendererAccelMode.GTK;
+			accel_cell.accel_edited.connect(on_glob_accel_edited);
+			accel_cell.accel_cleared.connect(on_glob_accel_cleared);
+			view.insert_column_with_attributes(-1, "Global Shortcut", accel_cell, "accel-key", 4, "accel-mods", 5);
+		}
 		scroll.vexpand = scroll.hexpand = true;
 		scroll.add(view);
 		show();
@@ -167,6 +171,7 @@ public class KeybindingsSettings : Gtk.Grid
 	
 	private void on_glob_accel_edited(string path_string, uint accel_key, Gdk.ModifierType accel_mods, uint hardware_keycode)
 	{
+		assert(global_keybindings != null);
 		var keybinding = Gtk.accelerator_name(accel_key, accel_mods);
 		var path = new Gtk.TreePath.from_string(path_string);
 		Gtk.TreeIter iter;
@@ -192,6 +197,7 @@ public class KeybindingsSettings : Gtk.Grid
 	
 	private void on_glob_accel_cleared(string path_string)
 	{
+		assert(global_keybindings != null);
 		var path = new Gtk.TreePath.from_string(path_string);
 		Gtk.TreeIter iter;
 		model.get_iter(out iter, path);
