@@ -535,6 +535,16 @@ public class CefEngine : WebEngine {
         case "can-go-forward":
             can_go_forward = web_view.can_go_forward;
             break;
+        case "fullscreen":
+			var window = web_view.get_toplevel() as Gtk.Window;
+			if (window != null) {
+	            if (web_view.fullscreen) {
+	                window.fullscreen();
+	            } else {
+	                window.unfullscreen();
+	            }
+			}
+            break;
         }
     }
 }

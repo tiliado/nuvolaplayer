@@ -31,6 +31,7 @@ public class WebAppWindow : Drtgtk.ApplicationWindow
 	public Gtk.Overlay overlay {get; private set;}
 	public Sidebar sidebar {get; private set;}
 	public Drtgtk.HeaderBarTitle headerbar_title {get; private set;}
+	public bool is_fullscreen {get; private set; default = false;}
 	
 	public int sidebar_position
 	{
@@ -167,6 +168,15 @@ public class WebAppWindow : Drtgtk.ApplicationWindow
 	private bool on_window_state_event(Gdk.EventWindowState event)
 	{
 		maximized = (event.new_window_state & Gdk.WindowState.MAXIMIZED) != 0;
+		var fullscreen = (event.new_window_state & Gdk.WindowState.FULLSCREEN) != 0;
+		if (this.is_fullscreen != fullscreen) {
+			if (fullscreen) {
+				header_bar.hide();
+			} else {
+				header_bar.show();
+			}
+			this.is_fullscreen = fullscreen;
+		}
 		return false;
 	}
 	
