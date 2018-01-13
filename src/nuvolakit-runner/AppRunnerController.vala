@@ -268,15 +268,28 @@ public class AppRunnerController: Drtgtk.Application
 					BusType.SESSION, Nuvola.get_dbus_id(), Nuvola.get_dbus_path(),
 					DBusProxyFlags.DO_NOT_CONNECT_SIGNALS|DBusProxyFlags.DO_NOT_LOAD_PROPERTIES);
 				GLib.Socket socket;
-				nuvola_api.get_connection(this.web_app.id, this.dbus_id, out socket, out api_token);
+				var allowed_timeouts = 10;
+				while (true) {
+					try {
+						// TODO: @async
+						nuvola_api.get_connection(this.web_app.id, this.dbus_id, out socket, out api_token);
+						break;
+					} catch (GLib.IOError e) {
+						if (allowed_timeouts < 1 || !(e is GLib.IOError.TIMED_OUT)) {
+							throw e;
+						} else {
+							allowed_timeouts--;
+							warning("Nuvola.get_connection() timed out. Attempts left: %d", allowed_timeouts);
+						}
+					}
+				}
+				
 				if (socket == null)
 				{
 					startup_check.nuvola_service_message = (
 						"<b>Nuvola Apps Runtime Service refused connection.</b>\n\n"
 						+ "1. Make sure Nuvola Apps Runtime is installed.\n"
-						+ "2. Launch Nuvola Apps Runtime to find out whether activation"
-						+ " (Premium/Patron account) is required.\n"
-						+ "3. If Nuvola has been updated recently, close all Nuvola Apps and try launching it again.");
+						+ "2. If Nuvola has been updated recently, close all Nuvola Apps and try launching it again.");
 					startup_check.nuvola_service_status = StartupCheck.Status.ERROR;
 					return false;
 				}
@@ -294,9 +307,8 @@ public class AppRunnerController: Drtgtk.Application
 			startup_check.nuvola_service_message = Markup.printf_escaped(
 				"<b>Failed to connect to Nuvola Apps Runtime Service.</b>\n\n"
 				+ "1. Make sure Nuvola Apps Runtime is installed.\n"
-				+ "2. Launch Nuvola Apps Runtime to find out whether activation"
-				+ " (Premium/Patron account) is required.\n"
-				+ "3. If Nuvola has been updated recently, close all Nuvola Apps and try launching it again.\n\n"
+				+ "2. If Nuvola has been installed or updated recently,"
+				+ " close all Nuvola Apps and try launching it again.\n\n"
 				+ "<i>Error message: %s</i>", e.message);
 			startup_check.nuvola_service_status = StartupCheck.Status.ERROR;
 			
@@ -316,9 +328,7 @@ public class AppRunnerController: Drtgtk.Application
 			startup_check.nuvola_service_message = Markup.printf_escaped(
 				"<b>Communication with Nuvola Apps Runtime Service failed.</b>\n\n"
 				+ "1. Make sure Nuvola Apps Runtime is installed.\n"
-				+ "2. Launch Nuvola Apps Runtime to find out whether activation"
-				+ " (Premium/Patron account) is required.\n"
-				+ "3. If Nuvola has been updated recently, close all Nuvola Apps and try launching it again.\n\n"
+				+ "2. If Nuvola has been updated recently, close all Nuvola Apps and try launching it again.\n\n"
 				+ "<i>Error message: %s</i>", e.message);
 			startup_check.nuvola_service_status = StartupCheck.Status.ERROR;
 		}
