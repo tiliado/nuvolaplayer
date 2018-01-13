@@ -187,21 +187,22 @@ Nuvola.parseTimeUsec = function(time)
     if (time * 1 === time)
         return time;
     var parts = time.split(":");
+    var sign = parts[0] * 1 < 0 ? -1 : 1;
     var seconds = 0;
     var item = parts.pop();
     if (item !== undefined)
     {
-        seconds = 1 * item;
+        seconds = Math.abs(1 * item);
         item = parts.pop();
         if (item !== undefined)
         {
-            seconds += 60 * item;
+            seconds += Math.abs(60 * item);
             item = parts.pop();
             if (item !== undefined)
-                seconds += 60 * 60 * item;
+                seconds += Math.abs(60 * 60 * item);
         }
     }
-    return seconds !== NaN ? seconds * 1000 * 1000 : 0;
+    return seconds !== NaN ? sign * seconds * 1000 * 1000 : 0;
     
 }
 
