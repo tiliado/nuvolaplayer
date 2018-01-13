@@ -36,7 +36,7 @@ public class DeveloperComponent: Component
 		base("developer", "Developer's tools", "Enables developer's sidebar ");
 		this.bindings = bindings;
 		this.app = app;
-		config.bind_object_property("component.%s.".printf(id), this, "enabled").set_default(true).update_property();
+		config.bind_object_property("component.%s.".printf(id), this, "enabled").set_default(false).update_property();
 	}
 	
 	protected override bool activate()
