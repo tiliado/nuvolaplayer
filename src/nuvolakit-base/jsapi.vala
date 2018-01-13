@@ -124,7 +124,8 @@ public class JSApi : GLib.Object
 	
 	public static bool is_supported(int api_major, int api_minor)
 	{
-		return api_major >= 3 && api_major * 100 + api_minor <= API_VERSION;
+		var api_version = API_VERSION_MAJOR * 100 + API_VERSION_MINOR + (VERSION_BUGFIX > 0 ? 1 : 0);
+		return api_major >= 3 && api_major * 100 + api_minor <= api_version;
 	}
 	
 	public uint get_webkit_version()
