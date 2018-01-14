@@ -71,7 +71,6 @@ public class MasterController : Drtgtk.Application {
 	public override void activate() {
 		hold();
 		get_ui().show_main_window();
-		show_welcome_screen();
 		release();
 	}
 	
@@ -321,7 +320,6 @@ public class MasterController : Drtgtk.Application {
 				DBusProxyFlags.DO_NOT_CONNECT_SIGNALS|DBusProxyFlags.DO_NOT_LOAD_PROPERTIES);
 			app_api.activate();
 			debug("DBus activation of %s succeeded.", uid);
-			show_welcome_screen();
 			Timeout.add_seconds(5, () => {release(); return false;});
 		}
 		catch (GLib.Error e) {
@@ -378,20 +376,7 @@ public class MasterController : Drtgtk.Application {
 		} else {
 			app_runners_map[app_id] = runner;
 		}
-		show_welcome_screen();
 		#endif
-	}
-	
-	/**
-	 * Show welcome screen only if criteria are met.
-	 * 
-	 * Otherwise, no welcome screen is shown and the GUI is even not initialized.
-	 */
-	private void show_welcome_screen() {
-		if (config.get_string("nuvola.welcome_screen") != get_welcome_screen_name()) {
-			get_ui().show_main_window(MasterUserInterface.PAGE_WELCOME);
-			config.set_string("nuvola.welcome_screen", get_welcome_screen_name());
-		}
 	}
 	
 	public bool start_app_from_dbus(string app_id, string dbus_id, out string token) {
@@ -423,7 +408,6 @@ public class MasterController : Drtgtk.Application {
 		} else {
 			app_runners_map[app_id] = runner;
 		}
-		show_welcome_screen();
 		return true;
 	}
 	

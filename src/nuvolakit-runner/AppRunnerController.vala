@@ -52,6 +52,7 @@ namespace Actions
 	public const string GO_RELOAD = "go-reload";
 	public const string GO_LOAD_URL = "go-load-url";
 	public const string PREFERENCES = "preferences";
+	public const string WELCOME = "welcome";
 	public const string TOGGLE_SIDEBAR = "toggle-sidebar";
 	public const string ZOOM_IN = "zoom-in";
 	public const string ZOOM_OUT = "zoom-out";
@@ -98,6 +99,7 @@ public class AppRunnerController: Drtgtk.Application
 	private URLBar? url_bar = null;
 	private HashTable<string, Gtk.InfoBar> info_bars;
 	private MainLoopAdaptor? mainloop = null;
+	private WelcomeDialog? welcome_dialog = null;
 	
 	public AppRunnerController(
 		Drt.Storage storage, WebApp web_app, WebAppStorage app_storage,
@@ -247,6 +249,7 @@ public class AppRunnerController: Drtgtk.Application
 		ah.simple_action("main", "app", Actions.ACTIVATE, "Activate main window", null, null, null, do_activate),
 		ah.simple_action("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
 		ah.simple_action("main", "app", Actions.ABOUT, "About", "_About", null, null, do_about),
+		ah.simple_action("main", "app", Actions.WELCOME, "Welcome screen", null, null, null, do_show_welcome_dialog),
 		ah.simple_action("main", "app", Actions.HELP, "Help", "_Help", null, "F1", do_help),
 		};
 		actions.add_actions(actions_spec);
@@ -425,6 +428,7 @@ public class AppRunnerController: Drtgtk.Application
 		/* It is necessary to init WebEngine after format support check because WebKitPluginProcess2
 		 * must not be terminated during plugin discovery process. Issue: tiliado/nuvolaruntime#354 */
 		web_engine.init();
+		show_welcome_screen();
 	}
 	
 	private void init_app_runner()
@@ -442,7 +446,7 @@ public class AppRunnerController: Drtgtk.Application
 	
 	private void load_app()
 	{
-		set_app_menu_items({Actions.PREFERENCES, Actions.HELP, Actions.ABOUT, Actions.QUIT});
+		set_app_menu_items({Actions.PREFERENCES, Actions.HELP, Actions.WELCOME, Actions.ABOUT, Actions.QUIT});
 		main_window.set_menu_button_items({
 			Actions.ZOOM_IN, Actions.ZOOM_OUT, Actions.ZOOM_RESET, "|",
 			Actions.TOGGLE_SIDEBAR, "|", Actions.GO_LOAD_URL});
@@ -634,6 +638,34 @@ public class AppRunnerController: Drtgtk.Application
 			}
 		}
 		// Don't destroy dialog before form data are retrieved
+		dialog.destroy();
+	}
+	
+	private void do_show_welcome_dialog() {
+		if (welcome_dialog == null) {
+			var welcome_screen = new WelcomeScreen(this, storage, webkit_options.default_context);
+			welcome_dialog = new WelcomeDialog(main_window, welcome_screen);
+			welcome_dialog.response.connect(on_dialog_response);
+		}
+		welcome_dialog.present();
+	}
+	
+	/**
+	 * Show welcome screen only if criteria are met.
+	 */
+	private void show_welcome_screen() {
+		var config = this.master_config ?? this.config;
+		if (config.get_string("nuvola.welcome_screen") != get_welcome_screen_name()) {
+			do_show_welcome_dialog();
+			config.set_string("nuvola.welcome_screen", get_welcome_screen_name());
+		}
+	}
+	
+	private void on_dialog_response(Gtk.Dialog dialog, int response_id) {
+		if (dialog == welcome_dialog) {
+			welcome_dialog = null;
+		}
+		dialog.response.disconnect(on_dialog_response);
 		dialog.destroy();
 	}
 	
