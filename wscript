@@ -493,8 +493,14 @@ def build(ctx):
 		uselib += " VALACEF VALACEFGTK"
 	
 	for vapi in ("glib-2.0", "webkit2gtk-web-extension-4.0"):
-		patch('/usr/share/vala-0.38/vapi/%s.vapi' % vapi, "vapi/%s.patch" % vapi, '%s.vapi' %  vapi)
-		cp_if_found('/usr/share/vala-0.38/vapi/%s.deps' % vapi, '%s.deps' %  vapi)
+		vapi_dir = '/usr/share/vala-0.38/vapi'
+		for d in vapi_dirs:
+			if d not in ("vapi", "build") and os.path.isfile("%s/%s.vapi" % (d, vapi)):
+				vapi_dir = d
+				break
+		
+		patch("%s/%s.vapi" % (vapi_dir, vapi), "vapi/%s.patch" % vapi, '%s.vapi' %  vapi)
+		cp_if_found("%s/%s.deps" % (vapi_dir, vapi), '%s.deps' %  vapi)
 	
 	ctx(features = "checkvaladefs", source = ctx.path.ant_glob('**/*.vala'),
 		definitions="FLATPAK TILIADO_API WEBKIT_SUPPORTS_MSE GENUINE UNITY APPINDICATOR EXPERIMENTAL NUVOLA_RUNTIME"
