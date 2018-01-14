@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2018 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: 
@@ -149,7 +149,7 @@ public class AboutDialog: Gtk.Dialog
 		label.selectable = true;
 		grid.attach(label, 1, 3, 1, 1);
 		grid.attach(new Gtk.Label("Copyright"), 0, 4, 1, 1);
-		label = new Gtk.Label(Markup.printf_escaped("© 2011-2017 <a href=\"%s\">%s</a>", "https://github.com/fenryxo", "Jiří Janoušek"));
+		label = new Gtk.Label(Markup.printf_escaped("© 2011-2018 <a href=\"%s\">%s</a>", "https://github.com/fenryxo", "Jiří Janoušek"));
 		label.use_markup = true;
 		grid.attach(label, 1, 4, 1, 1);
 		

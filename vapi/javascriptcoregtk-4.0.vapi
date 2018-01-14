@@ -1,7 +1,7 @@
 /*
 Manually created, incomplete, buggy
 
-Copyright 2011 Jiří Janoušek <janousek.jiri@gmail.com>
+Copyright 2011-2018 Jiří Janoušek <janousek.jiri@gmail.com>
 
 */
 [CCode (lower_case_cprefix = "JS", cheader_filename = "JavaScriptCore/JavaScript.h")]

@@ -20,6 +20,6 @@ Missing features
 Copyright
 ---------
 
-  * Copyright 2016 Jiří Janoušek <janousek.jiri@gmail.com> - the Vala/libsoup port
   * Copyright 2014 Guillermo Rauch <guillermo@learnboost.com> - the original JavaScript library
+  * Copyright 2016-2018 Jiří Janoušek <janousek.jiri@gmail.com> - the Vala/libsoup port
   * License: [MIT](./LICENSE)

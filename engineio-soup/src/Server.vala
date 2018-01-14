@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2016-2018 Jiří Janoušek <janousek.jiri@gmail.com>
  * -> Engine.io-soup - the Vala/libsoup port of the Engine.io library
  *
  * Copyright 2014 Guillermo Rauch <guillermo@learnboost.com>
