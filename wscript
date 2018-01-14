@@ -236,10 +236,11 @@ def options(ctx):
 	ctx.add_option(
 		'--cef-default', action='store_true', default=False, dest='cef_default',
 		help="Whether the CEF engine should be default.")
-	
 	ctx.add_option(
 		'--nuvola-lite', action='store_true', default=False, dest='nuvola_lite',
 		help="Lite version of Nuvola.")
+	ctx.add_option(
+		'--no-gir', action='store_false', default=True, dest='build_gir', help="Don't build GIR.")
 
 def configure(ctx):
 	add_version_info(ctx)
@@ -316,7 +317,7 @@ def configure(ctx):
 	# Base deps
 	ctx.load('compiler_c vala')
 	ctx.check_vala(min_version=tuple(int(i) for i in MIN_VALA.split(".")))
-	ctx.find_program('g-ir-compiler', var='GIR_COMPILER')
+	
 	pkgconfig(ctx, 'glib-2.0', 'GLIB', MIN_GLIB)
 	pkgconfig(ctx, 'gio-2.0', 'GIO', MIN_GLIB)
 	pkgconfig(ctx, 'gio-unix-2.0', 'UNIXGIO', MIN_GLIB)
@@ -338,6 +339,10 @@ def configure(ctx):
 	pkgconfig(ctx, 'libsoup-2.4', 'SOUP', '0') # Engine.io
 	pkgconfig(ctx, 'dri2', 'DRI2', '1.0')
 	pkgconfig(ctx, 'libdrm', 'DRM', '2.2')
+	
+	ctx.env.BUILD_GIR = ctx.options.build_gir
+	if ctx.env.BUILD_GIR:
+		ctx.find_program('g-ir-compiler', var='GIR_COMPILER')
 	
 	# For tests
 	ctx.find_program("diorite-testgen{}".format(TARGET_DIORITE), var="DIORITE_TESTGEN")
@@ -534,10 +539,11 @@ def build(ctx):
 		vala_target_glib = TARGET_GLIB,
 	)
 	
-	ctx.gir_compile("Engineio-1.0", ENGINEIO, "engineio-soup/src")
-	ctx.gir_compile("Nuvola-1.0", NUVOLAKIT_RUNNER, ".",
-		["src/nuvolakit-base/NuvolaBase-1.0.gir", "src/nuvolakit-runner/NuvolaRunner-1.0.gir"],
-		params="--includedir='engineio-soup/src' --includedir='%s/build'" % os.environ.get("DIORITE_PATH", '.'))
+	if ctx.env.BUILD_GIR:
+		ctx.gir_compile("Engineio-1.0", ENGINEIO, "engineio-soup/src")
+		ctx.gir_compile("Nuvola-1.0", NUVOLAKIT_RUNNER, ".",
+			["src/nuvolakit-base/NuvolaBase-1.0.gir", "src/nuvolakit-runner/NuvolaRunner-1.0.gir"],
+			params="--includedir='engineio-soup/src' --includedir='%s/build'" % os.environ.get("DIORITE_PATH", '.'))
 
 	valaprog(
 		target = NUVOLA_BIN,
