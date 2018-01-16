@@ -70,6 +70,7 @@ public class WelcomeScreen : Gtk.Grid
 		welcome_text.motion_notify_event.connect(on_motion_notify);
 		grid.attach(welcome_text, 0, 0, 1, 1);
 		
+		#if !NUVOLA_LITE
 		web_view = new WebView(web_context);
 		web_view.add_events(Gdk.EventMask.SCROLL_MASK);
 		web_view.motion_notify_event.connect(on_motion_notify);
@@ -82,6 +83,7 @@ public class WelcomeScreen : Gtk.Grid
 		web_view.vexpand = true;
 		web_view.set_size_request(275, -1);
 		grid.attach(web_view, 1, 0, 1, 1);
+		#endif
 		
 		scroll = new Gtk.ScrolledWindow(null, null);
 		scroll.add(grid);
@@ -100,6 +102,7 @@ public class WelcomeScreen : Gtk.Grid
 	
 	private bool on_motion_notify(Gtk.Widget widget, Gdk.EventMotion event)
 	{
+		#if !NUVOLA_LITE
 		if (!widget.has_focus)
 		{
 			/* The focus grab is necessary for a WebView in a ScrolledWindow as it jumps on click otherwise.
@@ -110,9 +113,11 @@ public class WelcomeScreen : Gtk.Grid
 			widget.grab_focus();
 			adjustment.value = position;
 		}
+		#endif
 		return false;
 	}
 	
+	#if !NUVOLA_LITE
 	private void on_load_changed(WebKit.WebView view, WebKit.LoadEvent event)
 	{
 		if (event == WebKit.LoadEvent.FINISHED)
@@ -147,12 +152,14 @@ public class WelcomeScreen : Gtk.Grid
 			debug("JavaScript error: %s", e.message);
 		}
 	}
+	#endif
 	
 	private void show_uri(string uri)
 	{
 		app.show_uri(uri);
 	}
 	
+	#if !NUVOLA_LITE
 	private bool decide_navigation_policy(bool new_window, WebKit.NavigationPolicyDecision decision)
 	{
 		var uri = decision.navigation_action.get_request().uri;
@@ -177,6 +184,7 @@ public class WelcomeScreen : Gtk.Grid
 			return false;
 		}
 	}
+	#endif
 }
 
 } // namespace Nuvola
