@@ -34,7 +34,7 @@ namespace Nuvola {
  */
 
 public class CefEngine : WebEngine {
-	private const string ZOOM_LEVEL_CONF = "webview.cef_zoom_level";
+	private const string ZOOM_LEVEL_CONF = "webview.zoom_level";
 	
 	public override Gtk.Widget get_main_web_view(){return web_view;}
 	
