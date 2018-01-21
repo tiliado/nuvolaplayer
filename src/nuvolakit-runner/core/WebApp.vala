@@ -90,6 +90,7 @@ public class WebApp : GLib.Object
 	public File? data_dir {get; construct; default = null;}
 	public bool hidden {get; set; default = false;}	
 	public bool allow_insecure_content {get; set; default = false;}
+	public double scale_factor {get; set; default = 0.0;}
 	public GenericSet<string> categories {get; construct;}
 	private List<IconInfo?> icons = null;
 	private bool icons_set = false;

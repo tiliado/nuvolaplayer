@@ -154,6 +154,7 @@ public class AppRunnerController: Drtgtk.Application
 		var startup_check = new StartupCheck(web_app, format_support);
 		startup_window = new StartupWindow(this, startup_check);
 		startup_window.present();
+		web_app.scale_factor = startup_window.scale_factor * 1.0;
 		startup_check.check_desktop_portal_available.begin((o, res) => startup_check.check_desktop_portal_available.end(res));
 		startup_check.check_app_requirements.begin(available_web_options, (o, res) => startup_check.check_app_requirements.end(res));
 		startup_check.check_graphics_drivers.begin((o, res) => startup_check.check_graphics_drivers.end(res));

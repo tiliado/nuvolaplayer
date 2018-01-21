@@ -66,7 +66,7 @@ public class CefOptions : WebOptions {
 				user_agent += " Nuvola/" + Nuvola.get_short_version();
 			}
 			var product = "Chrome/%s Nuvola/%s".printf(Cef.get_chromium_version(), Nuvola.get_short_version());
-			CefGtk.init(widevine_required, flash_required, user_agent, product);
+			CefGtk.init(web_app.scale_factor, widevine_required, flash_required, user_agent, product);
 			default_context = new CefGtk.WebContext(storage.create_data_subdir("cef").get_path());
 		}
 	}
