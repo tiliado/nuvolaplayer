@@ -179,4 +179,8 @@ build_js_doc()
     while true; do inotifywait -e delete -e create -e modify -r src/mainjs doc/theme/templates/jsdoc.html; sleep 1; ./nuvolajsdoc.py; done
 }
 
+echo "--- Limits ---"
 ulimit -c unlimited
+ulimit -a
+echo "--- Core dump pattern ---"
+echo "'`cat /proc/sys/kernel/core_pattern`'"
