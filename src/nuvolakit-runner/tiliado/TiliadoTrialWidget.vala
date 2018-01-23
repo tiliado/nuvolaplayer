@@ -152,16 +152,17 @@ public class TiliadoTrialWidget : Gtk.Grid {
 		stack.add(get_plan_view);
 		
 		get_account_view = new View("Back", "I already have Tiliado account", "Get Tiliado account",
-			Drtgtk.Labels.markup("""Create a Tiliado account which will be linked with Nuvola to verify your membership."""));
+			Drtgtk.Labels.markup("""Create a Tiliado account which will be linked to your Gumroad account to verify your membership."""));
 		get_account_view.forward_button.clicked.connect(on_get_account_forward_clicked);
 		get_account_view.back_button.clicked.connect(on_get_account_back_clicked);
 		get_account_view.action_button.clicked.connect(on_get_account_action_clicked);
 		get_account_view.help_button.clicked.connect(on_help_clicked);
 		stack.add(get_account_view);
 		
-		activate_view = new View("Later", null, "Activate Nuvola", Drtgtk.Labels.markup("""Nuvola developer will contact you on Patreon within two business days to activate your plan.
+		activate_view = new View("Later", null, "Activate Nuvola",
+			Drtgtk.Labels.markup("""<b>Gumroad should have sent you an email with instructions. Please read them carefully.</b>
 
-Once your plan is confirmed, you can activate Nuvola with the button bellow."""));
+Once a Nuvola developer confirms that your Gumroad and Tiliado accounts were linked, you can activate Nuvola with the button below."""));
 		activate_view.action_button.clicked.connect(on_activate_action_clicked);
 		activate_view.back_button.clicked.connect(on_activate_back_clicked);
 		activate_view.help_button.clicked.connect(on_help_clicked);
