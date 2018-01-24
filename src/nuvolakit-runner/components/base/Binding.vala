@@ -2,14 +2,14 @@
  * Copyright 2014-2018 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met: 
- * 
+ * modification, are permitted provided that the following conditions are met:
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
+ *    list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution. 
- * 
+ *    and/or other materials provided with the distribution.
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -24,145 +24,145 @@
 
 public abstract class Nuvola.Binding<ObjectType>: GLib.Object
 {
-	/**
-	 * Return value to continue propagation of binding handlers.
-	 */
-	public const bool CONTINUE = false;
-	public string name {get; construct;}
-	public bool active {get; protected set; default = false;}
-	protected Drt.RpcRouter router;
-	protected WebWorker web_worker;
-	private SList<string> handlers = null;
-	
-	public Binding(Drt.RpcRouter router, WebWorker web_worker, string name)
-	{
-		GLib.Object(name: name);
-		this.web_worker = web_worker;
-		this.router = router;
-	}
-	
-	protected virtual void bind_methods()
-	{
-	}
-	
-	public override void dispose()
-	{
-		unbind_methods();
-		base.dispose();
-	}
-	
-	protected void unbind_methods() {
-		foreach (var handler in handlers) {
-			if (handler[0] == '/') {
-				router.remove_method(handler);
-			} else {
-				assert_not_reached();
-			}
-		}
-		handlers = null;
-		active = false;
-	}
-	
-	protected void check_not_empty() throws Drt.RpcError
-	{
-		if (!active)
-			throw new Drt.RpcError.UNSUPPORTED("Binding %s has no registered components.", name);
-	}
-	
-	protected void bind(string method, Drt.RpcFlags flags, string? description, owned Drt.RpcHandler handler, Drt.RpcParam[]? params)
-	{
-		var path = "/%s.%s".printf(name, method).down().replace(".", "/");
-		router.add_method(path, flags, description, (owned) handler, params);
-		handlers.prepend(path);
-	}
-	
-	protected void add_notification(string method, Drt.RpcFlags flags, string? description)
-	{
-		var path = "/%s.%s".printf(name, method).down().replace(".", "/");
-		router.add_notification(path, flags, description);
-		handlers.prepend(path);
-	}
-	
-	protected void emit(string notification, string? detail=null, Variant? data=null)
-	{
-		var path = "/%s.%s".printf(name, notification).down().replace(".", "/");
-		router.emit(path, detail, data);
-	}
-	
-	protected void call_web_worker(string func_name, ref Variant? params) throws GLib.Error
-	{
-		warning("Call Web Worker sync: %s", func_name);
-		web_worker.call_function_sync(func_name, ref params);
-	}
-	
-	~Binding()
-	{
-		unbind_methods();
-	}
+    /**
+     * Return value to continue propagation of binding handlers.
+     */
+    public const bool CONTINUE = false;
+    public string name {get; construct;}
+    public bool active {get; protected set; default = false;}
+    protected Drt.RpcRouter router;
+    protected WebWorker web_worker;
+    private SList<string> handlers = null;
+
+    public Binding(Drt.RpcRouter router, WebWorker web_worker, string name)
+    {
+        GLib.Object(name: name);
+        this.web_worker = web_worker;
+        this.router = router;
+    }
+
+    protected virtual void bind_methods()
+    {
+    }
+
+    public override void dispose()
+    {
+        unbind_methods();
+        base.dispose();
+    }
+
+    protected void unbind_methods() {
+        foreach (var handler in handlers) {
+            if (handler[0] == '/') {
+                router.remove_method(handler);
+            } else {
+                assert_not_reached();
+            }
+        }
+        handlers = null;
+        active = false;
+    }
+
+    protected void check_not_empty() throws Drt.RpcError
+    {
+        if (!active)
+            throw new Drt.RpcError.UNSUPPORTED("Binding %s has no registered components.", name);
+    }
+
+    protected void bind(string method, Drt.RpcFlags flags, string? description, owned Drt.RpcHandler handler, Drt.RpcParam[]? params)
+    {
+        var path = "/%s.%s".printf(name, method).down().replace(".", "/");
+        router.add_method(path, flags, description, (owned) handler, params);
+        handlers.prepend(path);
+    }
+
+    protected void add_notification(string method, Drt.RpcFlags flags, string? description)
+    {
+        var path = "/%s.%s".printf(name, method).down().replace(".", "/");
+        router.add_notification(path, flags, description);
+        handlers.prepend(path);
+    }
+
+    protected void emit(string notification, string? detail=null, Variant? data=null)
+    {
+        var path = "/%s.%s".printf(name, notification).down().replace(".", "/");
+        router.emit(path, detail, data);
+    }
+
+    protected void call_web_worker(string func_name, ref Variant? params) throws GLib.Error
+    {
+        warning("Call Web Worker sync: %s", func_name);
+        web_worker.call_function_sync(func_name, ref params);
+    }
+
+    ~Binding()
+    {
+        unbind_methods();
+    }
 }
 
 public abstract class Nuvola.ObjectBinding<ObjectType>: Binding<ObjectType>
 {
-	protected Drt.Lst<ObjectType> objects;
-	
-	public ObjectBinding(Drt.RpcRouter router, WebWorker web_worker, string name)
-	{
-		base(router, web_worker, name);
-		objects = new Drt.Lst<ObjectType>();
-	}
-	
-	public bool add(GLib.Object object)
-	{
-		if (!(object is ObjectType))
-			return false;
-		
-		objects.prepend(object);
-		if (objects.length == 1)
-		{
-			bind_methods();
-			active = true;
-		}
-		object_added((ObjectType) object);
-		return true;
-	}
-	
-	public bool remove(GLib.Object object)
-	{
-		if (!(object is ObjectType))
-			return false;
-		
-		objects.remove((ObjectType) object);
-		if (objects.length == 0)
-			unbind_methods();
-		
-		object_removed((ObjectType) object);
-		return true;
-	}
-	
-	protected virtual void object_added(ObjectType object)
-	{
-	}
-	
-	protected virtual void object_removed(ObjectType object)
-	{
-	}
+    protected Drt.Lst<ObjectType> objects;
+
+    public ObjectBinding(Drt.RpcRouter router, WebWorker web_worker, string name)
+    {
+        base(router, web_worker, name);
+        objects = new Drt.Lst<ObjectType>();
+    }
+
+    public bool add(GLib.Object object)
+    {
+        if (!(object is ObjectType))
+            return false;
+
+        objects.prepend(object);
+        if (objects.length == 1)
+        {
+            bind_methods();
+            active = true;
+        }
+        object_added((ObjectType) object);
+        return true;
+    }
+
+    public bool remove(GLib.Object object)
+    {
+        if (!(object is ObjectType))
+            return false;
+
+        objects.remove((ObjectType) object);
+        if (objects.length == 0)
+            unbind_methods();
+
+        object_removed((ObjectType) object);
+        return true;
+    }
+
+    protected virtual void object_added(ObjectType object)
+    {
+    }
+
+    protected virtual void object_removed(ObjectType object)
+    {
+    }
 }
 
 /**
  * Binding of model object.
- * 
+ *
  * Model object should only store and manipulate with data, but not to expose them in user interface, because
  * view objects that use a particular model as data source are responsible for that.
  */
 public abstract class Nuvola.ModelBinding<ModelType>: Binding<ModelType>
 {
-	public ModelType model {get; private set;}
-	
-	public ModelBinding(Drt.RpcRouter router, WebWorker web_worker, string name, ModelType model)
-	{
-		base(router, web_worker, name);
-		this.model = model;
-		bind_methods();
-		active = true;
-	}
+    public ModelType model {get; private set;}
+
+    public ModelBinding(Drt.RpcRouter router, WebWorker web_worker, string name, ModelType model)
+    {
+        base(router, web_worker, name);
+        this.model = model;
+        bind_methods();
+        active = true;
+    }
 }

@@ -2,14 +2,14 @@
  * Copyright 2014-2018 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met: 
- * 
+ * modification, are permitted provided that the following conditions are met:
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
+ *    list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution. 
- * 
+ *    and/or other materials provided with the distribution.
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -22,69 +22,68 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
 public class WebAppStorage : GLib.Object
 {
-	public File config_dir {get; construct;}
-	public File data_dir {get; construct;}
-	public File cache_dir {get; construct;}
-	
-	public WebAppStorage(File config_dir, File data_dir, File cache_dir)
-	{
-		Object(config_dir: config_dir, data_dir: data_dir, cache_dir: cache_dir);
-		try
-		{
-			Drt.System.make_dirs(config_dir);
-			Drt.System.make_dirs(data_dir);
-			Drt.System.make_dirs(cache_dir);
-		}
-		catch (GLib.Error e)
-		{
-			error("Failed to create directory. %s", e.message);
-		}
-	}
-	
-	/**
-	 * Returns the default path of cache subdir with given name, create it if it doesn't exist.
-	 * 
-	 * @param path    Subdirectory path.
-	 * @return cache subdirectory
-	 */
-	public File create_cache_subdir(string path)
-	{
-		var dir = cache_dir.get_child(path);
-		try
-		{
-			Drt.System.make_dirs(dir);
-		}
-		catch (GLib.Error e)
-		{
-			warning("Failed to create directory '%s'. %s", dir.get_path(), e.message);
-		}
-		return dir;
-	}
-	
-	/**
-	 * Returns the default path of data subdir with given name, create it if it doesn't exist.
-	 * 
-	 * @param path    Subdirectory path.
-	 * @return data subdirectory
-	 */
-	public File create_data_subdir(string path)
-	{
-		var dir = data_dir.get_child(path);
-		try
-		{
-			Drt.System.make_dirs(dir);
-		}
-		catch (GLib.Error e)
-		{
-			warning("Failed to create directory '%s'. %s", dir.get_path(), e.message);
-		}
-		return dir;
-	}
+    public File config_dir {get; construct;}
+    public File data_dir {get; construct;}
+    public File cache_dir {get; construct;}
+
+    public WebAppStorage(File config_dir, File data_dir, File cache_dir)
+    {
+        Object(config_dir: config_dir, data_dir: data_dir, cache_dir: cache_dir);
+        try
+        {
+            Drt.System.make_dirs(config_dir);
+            Drt.System.make_dirs(data_dir);
+            Drt.System.make_dirs(cache_dir);
+        }
+        catch (GLib.Error e)
+        {
+            error("Failed to create directory. %s", e.message);
+        }
+    }
+
+    /**
+     * Returns the default path of cache subdir with given name, create it if it doesn't exist.
+     *
+     * @param path    Subdirectory path.
+     * @return cache subdirectory
+     */
+    public File create_cache_subdir(string path)
+    {
+        var dir = cache_dir.get_child(path);
+        try
+        {
+            Drt.System.make_dirs(dir);
+        }
+        catch (GLib.Error e)
+        {
+            warning("Failed to create directory '%s'. %s", dir.get_path(), e.message);
+        }
+        return dir;
+    }
+
+    /**
+     * Returns the default path of data subdir with given name, create it if it doesn't exist.
+     *
+     * @param path    Subdirectory path.
+     * @return data subdirectory
+     */
+    public File create_data_subdir(string path)
+    {
+        var dir = data_dir.get_child(path);
+        try
+        {
+            Drt.System.make_dirs(dir);
+        }
+        catch (GLib.Error e)
+        {
+            warning("Failed to create directory '%s'. %s", dir.get_path(), e.message);
+        }
+        return dir;
+    }
 }
 
 }

@@ -2,14 +2,14 @@
  * Copyright 2014-2018 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met: 
- * 
+ * modification, are permitted provided that the following conditions are met:
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
+ *    list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution. 
- * 
+ *    and/or other materials provided with the distribution.
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -24,50 +24,50 @@
 
 public class Nuvola.NotificationsBinding: ObjectBinding<NotificationsInterface>
 {
-	public NotificationsBinding(Drt.RpcRouter router, WebWorker web_worker)
-	{
-		base(router, web_worker, "Nuvola.Notifications");
-	}
-	
-	protected override void bind_methods()
-	{
-		bind("show-notification", Drt.RpcFlags.WRITABLE,
-			"Show notification.",
-			handle_show_notification, {
-			new Drt.StringParam("title", true, false, null, "Notification title."),
-			new Drt.StringParam("message", true, false, null, "Notification message."),
-			new Drt.StringParam("icon-name", false, true, null, "Notification icon name."),
-			new Drt.StringParam("icon-path", false, true, null, "Notification icon path."),
-			new Drt.BoolParam("force", false, false, "Make sure the notification is shown."),
-			new Drt.StringParam("category", true, false, null, "Notification category.")
-		});
-		bind("is-persistence-supported", Drt.RpcFlags.READABLE,
-			"returns true if persistence is supported.",
-			handle_is_persistence_supported, null);
-	}
-	
-	private void handle_show_notification(Drt.RpcRequest request) throws Drt.RpcError
-	{
-		check_not_empty();
-		var title = request.pop_string();
-		var message = request.pop_string();
-		var icon_name = request.pop_string();
-		var icon_path = request.pop_string();
-		var force = request.pop_bool();
-		var category = request.pop_string();
-		foreach (var object in objects)
-			if (object.show_anonymous(title, message, icon_name, icon_path, force, category))
-				break;
-		request.respond(null);
-	}
-	
-	private void handle_is_persistence_supported(Drt.RpcRequest request) throws Drt.RpcError
-	{
-		check_not_empty();
-		bool supported = false;
-		foreach (var object in objects)
-			if (object.is_persistence_supported(ref supported))
-				break;
-		request.respond(new Variant.boolean(supported));
-	}
+    public NotificationsBinding(Drt.RpcRouter router, WebWorker web_worker)
+    {
+        base(router, web_worker, "Nuvola.Notifications");
+    }
+
+    protected override void bind_methods()
+    {
+        bind("show-notification", Drt.RpcFlags.WRITABLE,
+            "Show notification.",
+            handle_show_notification, {
+            new Drt.StringParam("title", true, false, null, "Notification title."),
+            new Drt.StringParam("message", true, false, null, "Notification message."),
+            new Drt.StringParam("icon-name", false, true, null, "Notification icon name."),
+            new Drt.StringParam("icon-path", false, true, null, "Notification icon path."),
+            new Drt.BoolParam("force", false, false, "Make sure the notification is shown."),
+            new Drt.StringParam("category", true, false, null, "Notification category.")
+        });
+        bind("is-persistence-supported", Drt.RpcFlags.READABLE,
+            "returns true if persistence is supported.",
+            handle_is_persistence_supported, null);
+    }
+
+    private void handle_show_notification(Drt.RpcRequest request) throws Drt.RpcError
+    {
+        check_not_empty();
+        var title = request.pop_string();
+        var message = request.pop_string();
+        var icon_name = request.pop_string();
+        var icon_path = request.pop_string();
+        var force = request.pop_bool();
+        var category = request.pop_string();
+        foreach (var object in objects)
+            if (object.show_anonymous(title, message, icon_name, icon_path, force, category))
+                break;
+        request.respond(null);
+    }
+
+    private void handle_is_persistence_supported(Drt.RpcRequest request) throws Drt.RpcError
+    {
+        check_not_empty();
+        bool supported = false;
+        foreach (var object in objects)
+            if (object.is_persistence_supported(ref supported))
+                break;
+        request.respond(new Variant.boolean(supported));
+    }
 }

@@ -2,14 +2,14 @@
  * Copyright 2016-2018 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met: 
- * 
+ * modification, are permitted provided that the following conditions are met:
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
+ *    list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution. 
- * 
+ *    and/or other materials provided with the distribution.
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -22,8 +22,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
 const int IPC_TIMEOUT = 60000;
 
@@ -31,28 +30,28 @@ public class IpcBus: Drt.RpcBus
 {
     public Drt.RpcChannel? master {get; private set; default = null;}
     public Drt.RpcChannel? web_worker {get; private set; default = null;}
-    
+
     public IpcBus(string bus_name, Drt.RpcRouter? router=null)
     {
         base(bus_name, router ?? new Drt.RpcRouter(), IPC_TIMEOUT);
     }
-    
+
     public Drt.RpcChannel? connect_master(string bus_name, string? api_token) throws Drt.IOError
     {
-		return_val_if_fail(master == null, null);
+        return_val_if_fail(master == null, null);
         master = connect_channel(bus_name, IPC_TIMEOUT);
         master.api_token = api_token;
         return master;
     }
-    
+
     public Drt.RpcChannel? connect_master_socket(Socket socket, string? api_token) throws Drt.IOError
     {
-		return_val_if_fail(master == null, null);
+        return_val_if_fail(master == null, null);
         master = connect_channel_socket(socket, IPC_TIMEOUT);
         master.api_token = api_token;
         return master;
     }
-    
+
     public void connect_web_worker(Drt.RpcChannel channel)
     {
         web_worker = channel;

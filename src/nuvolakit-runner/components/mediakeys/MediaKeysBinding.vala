@@ -2,14 +2,14 @@
  * Copyright 2014-2018 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met: 
- * 
+ * modification, are permitted provided that the following conditions are met:
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
+ *    list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution. 
- * 
+ *    and/or other materials provided with the distribution.
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -24,31 +24,31 @@
 
 public class Nuvola.MediaKeysBinding: ObjectBinding<MediaKeysInterface>
 {
-	public MediaKeysBinding(Drt.RpcRouter server, WebWorker web_worker)
-	{
-		base(server, web_worker, "Nuvola.MediaKey");
-	}
-	
-	protected override void object_added(MediaKeysInterface object)
-	{
-		object.media_key_pressed.connect(on_media_key_pressed);
-	}
-	
-	protected override void object_removed(MediaKeysInterface object)
-	{
-		object.media_key_pressed.disconnect(on_media_key_pressed);
-	}
-	
-	private void on_media_key_pressed(string key)
-	{
-		try
-		{
-			var payload = new Variant("(ss)", "MediaKeyPressed", key);
-			call_web_worker("Nuvola.mediaKeys.emit", ref payload);
-		}
-		catch (GLib.Error e)
-		{
-			warning("Communication failed: %s", e.message);
-		}
-	}
+    public MediaKeysBinding(Drt.RpcRouter server, WebWorker web_worker)
+    {
+        base(server, web_worker, "Nuvola.MediaKey");
+    }
+
+    protected override void object_added(MediaKeysInterface object)
+    {
+        object.media_key_pressed.connect(on_media_key_pressed);
+    }
+
+    protected override void object_removed(MediaKeysInterface object)
+    {
+        object.media_key_pressed.disconnect(on_media_key_pressed);
+    }
+
+    private void on_media_key_pressed(string key)
+    {
+        try
+        {
+            var payload = new Variant("(ss)", "MediaKeyPressed", key);
+            call_web_worker("Nuvola.mediaKeys.emit", ref payload);
+        }
+        catch (GLib.Error e)
+        {
+            warning("Communication failed: %s", e.message);
+        }
+    }
 }

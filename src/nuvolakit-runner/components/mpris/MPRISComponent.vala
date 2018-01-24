@@ -2,14 +2,14 @@
  * Copyright 2014-2018 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met: 
- * 
+ * modification, are permitted provided that the following conditions are met:
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
+ *    list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution. 
- * 
+ *    and/or other materials provided with the distribution.
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -27,32 +27,32 @@ namespace Nuvola
 
 public class MPRISComponent: Component
 {
-	private Bindings bindings;
-	private Drtgtk.Application app;
-	private MPRISProvider? mpris = null;
-	
-	public MPRISComponent(Drtgtk.Application app, Bindings bindings, Drt.KeyValueStorage config)
-	{
-		base("mpris", "MPRIS 2", "Remote media player interface used by Unity sound indicator and similar applets.");
-		this.bindings = bindings;
-		this.app = app;
-		config.bind_object_property("component.mpris.", this, "enabled").set_default(true).update_property();
-		auto_activate = false;
-	}
-	
-	protected override bool activate()
-	{
-		mpris = new MPRISProvider(app, bindings.get_model<MediaPlayerModel>());
-		mpris.start();
-		return true;
-	}
-	
-	protected override bool deactivate()
-	{
-		mpris.stop();
-		mpris = null;
-		return true;
-	}
+    private Bindings bindings;
+    private Drtgtk.Application app;
+    private MPRISProvider? mpris = null;
+
+    public MPRISComponent(Drtgtk.Application app, Bindings bindings, Drt.KeyValueStorage config)
+    {
+        base("mpris", "MPRIS 2", "Remote media player interface used by Unity sound indicator and similar applets.");
+        this.bindings = bindings;
+        this.app = app;
+        config.bind_object_property("component.mpris.", this, "enabled").set_default(true).update_property();
+        auto_activate = false;
+    }
+
+    protected override bool activate()
+    {
+        mpris = new MPRISProvider(app, bindings.get_model<MediaPlayerModel>());
+        mpris.start();
+        return true;
+    }
+
+    protected override bool deactivate()
+    {
+        mpris.stop();
+        mpris = null;
+        return true;
+    }
 }
 
 } // namespace Nuvola

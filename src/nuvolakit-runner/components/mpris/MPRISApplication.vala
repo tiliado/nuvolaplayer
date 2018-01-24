@@ -2,14 +2,14 @@
  * Copyright 2014-2018 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met: 
- * 
+ * modification, are permitted provided that the following conditions are met:
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
+ *    list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution. 
- * 
+ *    and/or other materials provided with the distribution.
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -28,36 +28,36 @@ namespace Nuvola
 [DBus(name = "org.mpris.MediaPlayer2")]
 public class MPRISApplication: GLib.Object
 {
-	private Drtgtk.Application app;
-	
-	public MPRISApplication(Drtgtk.Application app)
-	{
-		this.app = app;
-		var desktop_entry = app.desktop_name;
-		this.desktop_entry = desktop_entry[0:desktop_entry.length - 8];
-	}
-	
-	/* Properties: http://www.mpris.org/2.1/spec/Root_Node.html#properties */
-	public bool can_quit {get{return true;}}
-	public bool can_raise {get{ return true;}}
-	public bool has_track_list {get{return false;}}
-	public string identity {get{ return app.app_name;}}
-	public string desktop_entry {get; private set;}
-	public string[] supported_uri_schemes {owned get{return {};}}
-	public string[] supported_mime_types{owned get{return {};}}
-	
-	/* Extra properties */
-	public int nuvola_version {get{return Nuvola.get_encoded_version();}}
-	
-	public void raise()
-	{
-		app.activate();
-	}
-	
-	public void quit()
-	{
-		app.quit();
-	}
+    private Drtgtk.Application app;
+
+    public MPRISApplication(Drtgtk.Application app)
+    {
+        this.app = app;
+        var desktop_entry = app.desktop_name;
+        this.desktop_entry = desktop_entry[0:desktop_entry.length - 8];
+    }
+
+    /* Properties: http://www.mpris.org/2.1/spec/Root_Node.html#properties */
+    public bool can_quit {get{return true;}}
+    public bool can_raise {get{ return true;}}
+    public bool has_track_list {get{return false;}}
+    public string identity {get{ return app.app_name;}}
+    public string desktop_entry {get; private set;}
+    public string[] supported_uri_schemes {owned get{return {};}}
+    public string[] supported_mime_types{owned get{return {};}}
+
+    /* Extra properties */
+    public int nuvola_version {get{return Nuvola.get_encoded_version();}}
+
+    public void raise()
+    {
+        app.activate();
+    }
+
+    public void quit()
+    {
+        app.quit();
+    }
 }
 
 } // namespace Nuvola

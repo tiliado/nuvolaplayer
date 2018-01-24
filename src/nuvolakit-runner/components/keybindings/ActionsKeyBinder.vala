@@ -2,14 +2,14 @@
  * Copyright 2014-2018 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met: 
- * 
+ * modification, are permitted provided that the following conditions are met:
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
+ *    list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution. 
- * 
+ *    and/or other materials provided with the distribution.
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -27,13 +27,13 @@ namespace Nuvola
 
 public interface ActionsKeyBinder: GLib.Object
 {
-	public signal void action_activated(string action, ref bool handled);
-	public abstract string? get_keybinding(string name);
-	public abstract bool set_keybinding(string name, string? keybinding);
-	public abstract bool bind(string name);
-	public abstract bool unbind(string name);
-	public abstract bool is_available(string keybinding);
-	public abstract string? get_action(string keybinding);
+    public signal void action_activated(string action, ref bool handled);
+    public abstract string? get_keybinding(string name);
+    public abstract bool set_keybinding(string name, string? keybinding);
+    public abstract bool bind(string name);
+    public abstract bool unbind(string name);
+    public abstract bool is_available(string keybinding);
+    public abstract string? get_action(string keybinding);
 }
 
 } // namespace Nuvola

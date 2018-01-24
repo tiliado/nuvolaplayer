@@ -2,14 +2,14 @@
  * Copyright 2014-2018 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met: 
- * 
+ * modification, are permitted provided that the following conditions are met:
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
+ *    list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution. 
- * 
+ *    and/or other materials provided with the distribution.
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -23,50 +23,49 @@
  */
 
 
-namespace Nuvola
-{
+namespace Nuvola {
 
 public interface JSExecutor: GLib.Object
 {
-	public abstract void call_function_sync(string name, ref Variant? params, bool propagate_error=false) throws GLib.Error;
-	
-	public string? send_data_request_string(string name, string key, string? default_value=null) throws GLib.Error
-	{
-		var default_variant = default_value == null ? null : new Variant.string(default_value);
-		var variant = send_data_request_variant(name, key, default_variant);
-		if (variant == null || !variant.is_of_type(VariantType.STRING))
-			return null;
-		var result = variant.get_string();
-		
-		return result != "" ? result : null;
-	}
-	
-	public bool send_data_request_bool(string name, string key, bool default_value) throws GLib.Error
-	{
-		var variant = send_data_request_variant(name, key, new Variant.boolean(default_value));
-		if (variant == null || !variant.is_of_type(VariantType.BOOLEAN))
-			return default_value;
-		return variant.get_boolean();
-	}
-	
-	private Variant? send_data_request_variant(string name, string key, Variant? default_value=null)
-	throws GLib.Error {
-		var builder = new VariantBuilder(new VariantType("a{smv}"));
-		builder.add("{smv}", key, default_value);
-		var args = new Variant("(s@a{smv})", name, builder.end());
-		call_function_sync("Nuvola.core.emit", ref args, false);
-		VariantIter iter = args.iterator();
-		assert(iter.next("s", null));
-		assert(iter.next("a{smv}", &iter));
-		string dict_key = null;
-		Variant value = null;
-		while (iter.next("{smv}", &dict_key, &value)) {
-			if (dict_key == key) {
-				return value;
-			}
-		}
-		return null;
-	}
+    public abstract void call_function_sync(string name, ref Variant? params, bool propagate_error=false) throws GLib.Error;
+
+    public string? send_data_request_string(string name, string key, string? default_value=null) throws GLib.Error
+    {
+        var default_variant = default_value == null ? null : new Variant.string(default_value);
+        var variant = send_data_request_variant(name, key, default_variant);
+        if (variant == null || !variant.is_of_type(VariantType.STRING))
+            return null;
+        var result = variant.get_string();
+
+        return result != "" ? result : null;
+    }
+
+    public bool send_data_request_bool(string name, string key, bool default_value) throws GLib.Error
+    {
+        var variant = send_data_request_variant(name, key, new Variant.boolean(default_value));
+        if (variant == null || !variant.is_of_type(VariantType.BOOLEAN))
+            return default_value;
+        return variant.get_boolean();
+    }
+
+    private Variant? send_data_request_variant(string name, string key, Variant? default_value=null)
+    throws GLib.Error {
+        var builder = new VariantBuilder(new VariantType("a{smv}"));
+        builder.add("{smv}", key, default_value);
+        var args = new Variant("(s@a{smv})", name, builder.end());
+        call_function_sync("Nuvola.core.emit", ref args, false);
+        VariantIter iter = args.iterator();
+        assert(iter.next("s", null));
+        assert(iter.next("a{smv}", &iter));
+        string dict_key = null;
+        Variant value = null;
+        while (iter.next("{smv}", &dict_key, &value)) {
+            if (dict_key == key) {
+                return value;
+            }
+        }
+        return null;
+    }
 }
 
 } // namespace Nuvola

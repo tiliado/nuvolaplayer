@@ -2,14 +2,14 @@
  * Copyright 2016-2018 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met: 
- * 
+ * modification, are permitted provided that the following conditions are met:
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
+ *    list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution. 
- * 
+ *    and/or other materials provided with the distribution.
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -27,65 +27,65 @@ namespace Nuvola
 
 public class PasswordManagerBinding : ModelBinding<PasswordManager>
 {
-	public PasswordManagerBinding(Drt.RpcRouter router, WebWorker web_worker, PasswordManager model)
-	{
-		base(router, web_worker, "Nuvola.PasswordManager", model);
-		model.prefill_username.connect(on_prefil_username);
-	}
-	
-	~PasswordManagerBinding()
-	{
-		debug("~PasswordManagerBinding");
-		model.prefill_username.disconnect(on_prefil_username);
-	}
-	
-	protected override void bind_methods()
-	{
-		bind("get-passwords", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
-			"Returns passwords.", handle_get_passwords, null);
-		bind("store-password", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE, null, handle_store_password, {
-			new Drt.StringParam("hostname", true, false),
-			new Drt.StringParam("username", true, false),
-			new Drt.StringParam("password", true, false),
-		});
-	}
-	
-	private void handle_store_password(Drt.RpcRequest request) throws Drt.RpcError
-	{
-		var hostname = request.pop_string();
-		var username = request.pop_string();
-		var password = request.pop_string();
-		model.store_password.begin(hostname, username, password, null, (o, res) => {model.store_password.end(res);});
-		request.respond(null);
-	}
-	
-	private void handle_get_passwords(Drt.RpcRequest request) throws Drt.RpcError
-	{
-		var builder = new VariantBuilder(new VariantType("a(sss)"));
-		var passwords = model.get_passwords();
-		if (passwords != null)
-		{
-			var iter = HashTableIter<string, Drt.Lst<LoginCredentials>>(passwords);
-			string hostname = null;
-			Drt.Lst<LoginCredentials> credentials = null;
-			while (iter.next(out hostname, out credentials))
-				foreach (var item in credentials)
-					builder.add("(sss)", hostname, item.username, item.password);
-		}
-		request.respond(builder.end());
-	}
-	
-	private void on_prefil_username(int index)
-	{
-		try
-		{
-			web_worker.call_sync("/nuvola/passwordmanager/prefill-username", new Variant("(i)", index));
-		}
-		catch (GLib.Error e)
-		{
-			warning("Request to prefill username %d failed. %s", index, e.message);
-		}
-	}
+    public PasswordManagerBinding(Drt.RpcRouter router, WebWorker web_worker, PasswordManager model)
+    {
+        base(router, web_worker, "Nuvola.PasswordManager", model);
+        model.prefill_username.connect(on_prefil_username);
+    }
+
+    ~PasswordManagerBinding()
+    {
+        debug("~PasswordManagerBinding");
+        model.prefill_username.disconnect(on_prefil_username);
+    }
+
+    protected override void bind_methods()
+    {
+        bind("get-passwords", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
+            "Returns passwords.", handle_get_passwords, null);
+        bind("store-password", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE, null, handle_store_password, {
+            new Drt.StringParam("hostname", true, false),
+            new Drt.StringParam("username", true, false),
+            new Drt.StringParam("password", true, false),
+        });
+    }
+
+    private void handle_store_password(Drt.RpcRequest request) throws Drt.RpcError
+    {
+        var hostname = request.pop_string();
+        var username = request.pop_string();
+        var password = request.pop_string();
+        model.store_password.begin(hostname, username, password, null, (o, res) => {model.store_password.end(res);});
+        request.respond(null);
+    }
+
+    private void handle_get_passwords(Drt.RpcRequest request) throws Drt.RpcError
+    {
+        var builder = new VariantBuilder(new VariantType("a(sss)"));
+        var passwords = model.get_passwords();
+        if (passwords != null)
+        {
+            var iter = HashTableIter<string, Drt.Lst<LoginCredentials>>(passwords);
+            string hostname = null;
+            Drt.Lst<LoginCredentials> credentials = null;
+            while (iter.next(out hostname, out credentials))
+                foreach (var item in credentials)
+                    builder.add("(sss)", hostname, item.username, item.password);
+        }
+        request.respond(builder.end());
+    }
+
+    private void on_prefil_username(int index)
+    {
+        try
+        {
+            web_worker.call_sync("/nuvola/passwordmanager/prefill-username", new Variant("(i)", index));
+        }
+        catch (GLib.Error e)
+        {
+            warning("Request to prefill username %d failed. %s", index, e.message);
+        }
+    }
 }
 
 } // namespace Nuvola

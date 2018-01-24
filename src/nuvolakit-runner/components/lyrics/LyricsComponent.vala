@@ -2,14 +2,14 @@
  * Copyright 2015-2018 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met: 
- * 
+ * modification, are permitted provided that the following conditions are met:
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
+ *    list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution. 
- * 
+ *    and/or other materials provided with the distribution.
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -27,44 +27,44 @@ namespace Nuvola
 
 public class LyricsComponent: Component
 {
-	#if !NUVOLA_LITE
-	private Bindings bindings;
-	private AppRunnerController app;
-	private LyricsSidebar? sidebar = null;
-	#endif
-	
-	public LyricsComponent(AppRunnerController app, Bindings bindings, Drt.KeyValueStorage config)
-	{
-		base("lyrics", "Lyrics", "Shows lyrics for the current song.");
-		#if !NUVOLA_LITE
-		this.bindings = bindings;
-		this.app = app;
-		config.bind_object_property("component.%s.".printf(id), this, "enabled").set_default(true).update_property();
-		auto_activate = false;
-		#else
-		available = false;
-		#endif
-	}
-	
-	#if !NUVOLA_LITE
-	protected override bool activate()
-	{
-		SList<LyricsFetcher> fetchers = null;
-		fetchers.append(new LyricsFetcherCache(app.storage.get_cache_path("lyrics")));
-		fetchers.append(new AZLyricsFetcher(app.connection.session));
-		var provider = new LyricsProvider(bindings.get_model<MediaPlayerModel>(), (owned) fetchers);
-		sidebar = new LyricsSidebar(app, provider);
-		app.main_window.sidebar.add_page("lyricssidebar", _("Lyrics"), sidebar);
-		return true;
-	}
-	
-	protected override bool deactivate()
-	{
-		app.main_window.sidebar.remove_page(sidebar);
-		sidebar = null;
-		return true;
-	}
-	#endif
+    #if !NUVOLA_LITE
+    private Bindings bindings;
+    private AppRunnerController app;
+    private LyricsSidebar? sidebar = null;
+    #endif
+
+    public LyricsComponent(AppRunnerController app, Bindings bindings, Drt.KeyValueStorage config)
+    {
+        base("lyrics", "Lyrics", "Shows lyrics for the current song.");
+        #if !NUVOLA_LITE
+        this.bindings = bindings;
+        this.app = app;
+        config.bind_object_property("component.%s.".printf(id), this, "enabled").set_default(true).update_property();
+        auto_activate = false;
+        #else
+        available = false;
+        #endif
+    }
+
+    #if !NUVOLA_LITE
+    protected override bool activate()
+    {
+        SList<LyricsFetcher> fetchers = null;
+        fetchers.append(new LyricsFetcherCache(app.storage.get_cache_path("lyrics")));
+        fetchers.append(new AZLyricsFetcher(app.connection.session));
+        var provider = new LyricsProvider(bindings.get_model<MediaPlayerModel>(), (owned) fetchers);
+        sidebar = new LyricsSidebar(app, provider);
+        app.main_window.sidebar.add_page("lyricssidebar", _("Lyrics"), sidebar);
+        return true;
+    }
+
+    protected override bool deactivate()
+    {
+        app.main_window.sidebar.remove_page(sidebar);
+        sidebar = null;
+        return true;
+    }
+    #endif
 }
 
 } // namespace Nuvola

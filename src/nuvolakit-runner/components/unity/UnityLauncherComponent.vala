@@ -2,14 +2,14 @@
  * Copyright 2014-2018 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met: 
- * 
+ * modification, are permitted provided that the following conditions are met:
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
+ *    list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution. 
- * 
+ *    and/or other materials provided with the distribution.
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -23,42 +23,41 @@
  */
 
 
-namespace Nuvola
-{
+namespace Nuvola {
 
 public class UnityLauncherComponent: Component
 {
-	#if UNITY
-	private Bindings bindings;
-	private Drtgtk.Application app;
-	private UnityLauncher? launcher = null;
-	#endif
-	
-	public UnityLauncherComponent(Drtgtk.Application app, Bindings bindings, Drt.KeyValueStorage config)
-	{
-		base("unity_launcher", "Unity Laucher", "Adds quick list (menu) to the icon on Unity Launcher.");
-		#if UNITY
-		this.bindings = bindings;
-		this.app = app;
-		config.bind_object_property("component.%s.".printf(id), this, "enabled").set_default(true).update_property();
-		#else
-		available = false;
-		#endif
-	}
-	
-	#if UNITY
-	protected override bool activate()
-	{
-		launcher = new UnityLauncher(app, bindings.get_model<LauncherModel>());
-		return true;
-	}
-	
-	protected override bool deactivate()
-	{
-		launcher = null;
-		return true;
-	}
-	#endif
+    #if UNITY
+    private Bindings bindings;
+    private Drtgtk.Application app;
+    private UnityLauncher? launcher = null;
+    #endif
+
+    public UnityLauncherComponent(Drtgtk.Application app, Bindings bindings, Drt.KeyValueStorage config)
+    {
+        base("unity_launcher", "Unity Laucher", "Adds quick list (menu) to the icon on Unity Launcher.");
+        #if UNITY
+        this.bindings = bindings;
+        this.app = app;
+        config.bind_object_property("component.%s.".printf(id), this, "enabled").set_default(true).update_property();
+        #else
+        available = false;
+        #endif
+    }
+
+    #if UNITY
+    protected override bool activate()
+    {
+        launcher = new UnityLauncher(app, bindings.get_model<LauncherModel>());
+        return true;
+    }
+
+    protected override bool deactivate()
+    {
+        launcher = null;
+        return true;
+    }
+    #endif
 }
 
 } // namespace Nuvola

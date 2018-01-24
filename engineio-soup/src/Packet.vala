@@ -26,23 +26,23 @@ namespace Engineio
 
 public enum PacketType
 {
-	OPEN, CLOSE, PING, PONG, MESSAGE, UPGRADE, NOOP;
+    OPEN, CLOSE, PING, PONG, MESSAGE, UPGRADE, NOOP;
 }
 
 public class Packet
 {
-	public PacketType type;
-	public string? str_data;
-	public Bytes? bin_data;
-	public bool compress;
-	
-	public Packet(PacketType type, string? str_data, Bytes? bin_data, bool compress=false)
-	{
-		this.type = type;
-		this.str_data = str_data;
-		this.bin_data = bin_data;
-		this.compress = compress;
-	}
+    public PacketType type;
+    public string? str_data;
+    public Bytes? bin_data;
+    public bool compress;
+
+    public Packet(PacketType type, string? str_data, Bytes? bin_data, bool compress=false)
+    {
+        this.type = type;
+        this.str_data = str_data;
+        this.bin_data = bin_data;
+        this.compress = compress;
+    }
 }
 
 } // namespace Engineio

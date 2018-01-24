@@ -26,51 +26,51 @@ namespace Engineio
 
 public class Channel: GLib.Object
 {
-	public Server server {get; private set;}
-	private SList<Socket> clients = null;
-	
-	public Channel(Server server)
-	{
-		this.server = server;
-		server.connection.connect(on_server_connection);
-	}
-	
-	private void on_server_connection(Engineio.Server server, Engineio.Socket socket)
-	{
-		clients.prepend(socket);
-		socket.message_received.connect(on_message_received);
-	}
-	
-	private void on_message_received(Engineio.Socket socket, string msg)
-	{
-		MessageType type;
-		int id;
-		string method;
-		Json.Node? data = null;
-		if (!deserialize_message(msg, out type, out id, out method, out data))
-		{
-			warning("Failed to deserialize message: %s", msg);
-			return;
-		}
-		switch (type)
-		{
-			case MessageType.REQUEST:
-			case MessageType.SUBSCRIBE:
-				handle_request.begin(socket, type, id, method, data, (o, res) => {handle_request.end(res);});
-				break;
-			default:
-				warning("Other message types unsupported: %s", type.to_string());
-				break;
-		}
-	}
-	
-	protected virtual async void handle_request(Engineio.Socket socket, MessageType type, int id, string method, Json.Node? node)
-	{
-		Idle.add(handle_request.callback);
-		yield;
-		var msg = serialize_message(MessageType.RESPONSE, id, method, node);
-		socket.send_message(msg);
-	}
+    public Server server {get; private set;}
+    private SList<Socket> clients = null;
+
+    public Channel(Server server)
+    {
+        this.server = server;
+        server.connection.connect(on_server_connection);
+    }
+
+    private void on_server_connection(Engineio.Server server, Engineio.Socket socket)
+    {
+        clients.prepend(socket);
+        socket.message_received.connect(on_message_received);
+    }
+
+    private void on_message_received(Engineio.Socket socket, string msg)
+    {
+        MessageType type;
+        int id;
+        string method;
+        Json.Node? data = null;
+        if (!deserialize_message(msg, out type, out id, out method, out data))
+        {
+            warning("Failed to deserialize message: %s", msg);
+            return;
+        }
+        switch (type)
+        {
+            case MessageType.REQUEST:
+            case MessageType.SUBSCRIBE:
+                handle_request.begin(socket, type, id, method, data, (o, res) => {handle_request.end(res);});
+                break;
+            default:
+                warning("Other message types unsupported: %s", type.to_string());
+                break;
+        }
+    }
+
+    protected virtual async void handle_request(Engineio.Socket socket, MessageType type, int id, string method, Json.Node? node)
+    {
+        Idle.add(handle_request.callback);
+        yield;
+        var msg = serialize_message(MessageType.RESPONSE, id, method, node);
+        socket.send_message(msg);
+    }
 }
 
 } // namespace Engineio

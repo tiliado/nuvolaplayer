@@ -26,57 +26,57 @@ namespace Engineio
 
 public class Response
 {
-	public HashTable<string, string> headers {get; private set;}
-	public Soup.Message? msg {get; private set;}
-	public uint status_code {get; set;}
-	private Soup.Server? server;
-	
-	
-	public Response(Soup.Server server, Soup.Message msg)
-	{
-		this.server = server;
-		this.msg = msg;
-		this.status_code = 500;
-		headers = new HashTable<string, string>(str_hash, str_equal);
-		server.pause_message(msg);
-	}
-	
-	public void reset(Soup.Server server, Soup.Message msg)
-	{
-		this.server = server;
-		this.msg = msg;
-		this.status_code = 500;
-		headers.remove_all();
-		server.pause_message(msg);
-	}
-	
-	public void end_bytes(owned Bytes data)
-	{
-		uint8[] buffer = Bytes.unref_to_data((owned) data);
-		end((owned) buffer);
-	}
-	
-	public void end_string(owned string data)
-	{
-		end(data.data);
-	}
-	
-	public void end(owned uint8[]? buffer=null)
-	{
-		return_if_fail(msg != null);
-		unowned string header;
-		unowned string value;
-		var iter = HashTableIter<string, string>(headers);
-		while (iter.next(out header, out value))
-			msg.response_headers.replace(header, value);
-		if (buffer != null)
-			msg.response_body.append_take((owned) buffer);
-		msg.status_code = status_code;
-		server.unpause_message(msg);
-		headers.remove_all();
-		server = null;
-		msg = null;
-	}
+    public HashTable<string, string> headers {get; private set;}
+    public Soup.Message? msg {get; private set;}
+    public uint status_code {get; set;}
+    private Soup.Server? server;
+
+
+    public Response(Soup.Server server, Soup.Message msg)
+    {
+        this.server = server;
+        this.msg = msg;
+        this.status_code = 500;
+        headers = new HashTable<string, string>(str_hash, str_equal);
+        server.pause_message(msg);
+    }
+
+    public void reset(Soup.Server server, Soup.Message msg)
+    {
+        this.server = server;
+        this.msg = msg;
+        this.status_code = 500;
+        headers.remove_all();
+        server.pause_message(msg);
+    }
+
+    public void end_bytes(owned Bytes data)
+    {
+        uint8[] buffer = Bytes.unref_to_data((owned) data);
+        end((owned) buffer);
+    }
+
+    public void end_string(owned string data)
+    {
+        end(data.data);
+    }
+
+    public void end(owned uint8[]? buffer=null)
+    {
+        return_if_fail(msg != null);
+        unowned string header;
+        unowned string value;
+        var iter = HashTableIter<string, string>(headers);
+        while (iter.next(out header, out value))
+            msg.response_headers.replace(header, value);
+        if (buffer != null)
+            msg.response_body.append_take((owned) buffer);
+        msg.status_code = status_code;
+        server.unpause_message(msg);
+        headers.remove_all();
+        server = null;
+        msg = null;
+    }
 }
 
 } // namespace Engineio

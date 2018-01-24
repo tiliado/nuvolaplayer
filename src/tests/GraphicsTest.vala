@@ -1,4 +1,4 @@
-/* 
+/*
  * Author: Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * To the extent possible under law, author has waived all
@@ -15,62 +15,61 @@
  * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  * Tests are under public domain because they might contain useful sample code.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
 public class GraphicsTest: Drt.TestCase
 {
-	public void test_dri2_get_driver_name()
-	{
-		try
-		{
-			var name = Graphics.dri2_get_driver_name();
-			expect_false(Drt.String.is_empty(name), "driver name not empty");
-		}
-		catch (Graphics.DriError e)
-		{
-			if (!(e is Graphics.DriError.NO_X_DISPLAY))
-				expectation_failed("Unexpected error: %s %d %s", e.domain.to_string(), e.code, e.message);
-		}
-	}
-	
-	public void test_have_vdpau_driver()
-	{
-		var name = "i965";
-		var result = Graphics.have_vdpau_driver(name);
-		var expected = FileUtils.test("/usr/lib/vdpau/libvdpau_i965.so", FileTest.EXISTS)
-		|| FileUtils.test("/app/lib/vdpau/libvdpau_i965.so", FileTest.EXISTS);
-		expect_true(expected == result, "have vdpau driver");
-	}
-	
-	public void test_have_vaapi_driver()
-	{
-		var name = "i965";
-		var result = Graphics.have_vaapi_driver(name);
-		var expected = FileUtils.test("/usr/lib/drv/i965_drv_video.so", FileTest.EXISTS)
-		|| FileUtils.test("/app/lib/dri/i965_drv_video.so", FileTest.EXISTS);
-		expect_true(expected == result, "have vaapi driver");
-	}
-	
-	#if FLATPAK
-	public void test_have_vdpau_drivers()
-	{
-		string[] names = {"i965", "i915", "r300", "r600", "radeon", "radeonsi", "nouveau"};
-		foreach (var name in names)
-			expect_true(Graphics.have_vdpau_driver(name), "VDPAU: %s", name);
-	}
-	
-	public void test_have_vaapi_drivers()
-	{
-		string[] names = {"i965", "i915", "r300", "r600", "radeon", "radeonsi", "nouveau"};
-		foreach (var name in names)
-			expect_true(Graphics.have_vaapi_driver(name), "VA-API: %s", name);
-	}
-	#endif
+    public void test_dri2_get_driver_name()
+    {
+        try
+        {
+            var name = Graphics.dri2_get_driver_name();
+            expect_false(Drt.String.is_empty(name), "driver name not empty");
+        }
+        catch (Graphics.DriError e)
+        {
+            if (!(e is Graphics.DriError.NO_X_DISPLAY))
+                expectation_failed("Unexpected error: %s %d %s", e.domain.to_string(), e.code, e.message);
+        }
+    }
+
+    public void test_have_vdpau_driver()
+    {
+        var name = "i965";
+        var result = Graphics.have_vdpau_driver(name);
+        var expected = FileUtils.test("/usr/lib/vdpau/libvdpau_i965.so", FileTest.EXISTS)
+        || FileUtils.test("/app/lib/vdpau/libvdpau_i965.so", FileTest.EXISTS);
+        expect_true(expected == result, "have vdpau driver");
+    }
+
+    public void test_have_vaapi_driver()
+    {
+        var name = "i965";
+        var result = Graphics.have_vaapi_driver(name);
+        var expected = FileUtils.test("/usr/lib/drv/i965_drv_video.so", FileTest.EXISTS)
+        || FileUtils.test("/app/lib/dri/i965_drv_video.so", FileTest.EXISTS);
+        expect_true(expected == result, "have vaapi driver");
+    }
+
+    #if FLATPAK
+    public void test_have_vdpau_drivers()
+    {
+        string[] names = {"i965", "i915", "r300", "r600", "radeon", "radeonsi", "nouveau"};
+        foreach (var name in names)
+            expect_true(Graphics.have_vdpau_driver(name), "VDPAU: %s", name);
+    }
+
+    public void test_have_vaapi_drivers()
+    {
+        string[] names = {"i965", "i915", "r300", "r600", "radeon", "radeonsi", "nouveau"};
+        foreach (var name in names)
+            expect_true(Graphics.have_vaapi_driver(name), "VA-API: %s", name);
+    }
+    #endif
 }
 
 } // namespace Nuvola

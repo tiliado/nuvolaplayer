@@ -2,14 +2,14 @@
  * Copyright 2014-2018 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met: 
- * 
+ * modification, are permitted provided that the following conditions are met:
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
+ *    list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution. 
- * 
+ *    and/or other materials provided with the distribution.
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -22,64 +22,63 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
 public class WebAppListModel : Gtk.ListStore
 {
-	private WebAppRegistry web_app_reg;
-	
-	public enum Pos
-	{
-		ID, NAME, ICON, VERSION, MAINTAINER_NAME, MAINTAINER_LINK, META;
-	}
-	
-	public WebAppListModel(WebAppRegistry web_app_reg)
-	{
-		Object();
-		this.web_app_reg = web_app_reg;
-		
-		set_column_types({
-			typeof(string),  // id
-			typeof(string),  // name
-			typeof(Gdk.Pixbuf),  // icon
-			typeof(string),  // version
-			typeof(string),  // maintainer_name
-			typeof(string),  // maintainer_link
-			typeof(WebApp) // meta
-			});
-		load();
-	}
-	
-	public void reload()
-	{
-		clear();
-		load();
-	}
-	
-	public void append_web_app(WebApp web_app, Gdk.Pixbuf? icon)
-	{
-		Gtk.TreeIter iter;
-		append(out iter);
-		@set(iter,
-			Pos.ID, web_app.id,
-			Pos.NAME, web_app.name,
-			Pos.ICON, icon,
-			Pos.VERSION, "%d.%d".printf(web_app.version_major, web_app.version_minor),
-			Pos.MAINTAINER_NAME, web_app.maintainer_name,
-			Pos.MAINTAINER_LINK, web_app.maintainer_link,
-			Pos.META, web_app,
-			-1);
-	}
-	
-	private void load()
-	{
-		var web_apps_map = web_app_reg.list_web_apps();
-		var web_apps = web_apps_map.get_values();
-		web_apps.sort(WebApp.cmp_by_name);
-		foreach (var web_app in web_apps)
-				append_web_app(web_app, web_app.get_icon_pixbuf(WebAppListView.ICON_SIZE));
-	}
+    private WebAppRegistry web_app_reg;
+
+    public enum Pos
+    {
+        ID, NAME, ICON, VERSION, MAINTAINER_NAME, MAINTAINER_LINK, META;
+    }
+
+    public WebAppListModel(WebAppRegistry web_app_reg)
+    {
+        Object();
+        this.web_app_reg = web_app_reg;
+
+        set_column_types({
+            typeof(string),  // id
+            typeof(string),  // name
+            typeof(Gdk.Pixbuf),  // icon
+            typeof(string),  // version
+            typeof(string),  // maintainer_name
+            typeof(string),  // maintainer_link
+            typeof(WebApp) // meta
+            });
+        load();
+    }
+
+    public void reload()
+    {
+        clear();
+        load();
+    }
+
+    public void append_web_app(WebApp web_app, Gdk.Pixbuf? icon)
+    {
+        Gtk.TreeIter iter;
+        append(out iter);
+        @set(iter,
+            Pos.ID, web_app.id,
+            Pos.NAME, web_app.name,
+            Pos.ICON, icon,
+            Pos.VERSION, "%d.%d".printf(web_app.version_major, web_app.version_minor),
+            Pos.MAINTAINER_NAME, web_app.maintainer_name,
+            Pos.MAINTAINER_LINK, web_app.maintainer_link,
+            Pos.META, web_app,
+            -1);
+    }
+
+    private void load()
+    {
+        var web_apps_map = web_app_reg.list_web_apps();
+        var web_apps = web_apps_map.get_values();
+        web_apps.sort(WebApp.cmp_by_name);
+        foreach (var web_app in web_apps)
+                append_web_app(web_app, web_app.get_icon_pixbuf(WebAppListView.ICON_SIZE));
+    }
 }
 
 } // namespace Nuvola

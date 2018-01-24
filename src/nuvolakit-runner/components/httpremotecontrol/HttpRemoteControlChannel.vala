@@ -2,14 +2,14 @@
  * Copyright 2016-2018 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met: 
- * 
+ * modification, are permitted provided that the following conditions are met:
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
+ *    list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution. 
- * 
+ *    and/or other materials provided with the distribution.
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -36,16 +36,16 @@ public errordomain ChannelError
 public class Channel: Engineio.Channel
 {
     private unowned Server http_server;
-    
+
     public Channel(Engineio.Server eio_server, Server http_server)
     {
         base(eio_server);
         this.http_server = http_server;
     }
-    
+
     protected override async void handle_request(Engineio.Socket socket, Engineio.MessageType type, int id, string method, Json.Node? node)
-	{
-		Variant? params = null;
+    {
+        Variant? params = null;
         string status;
         Json.Node? result = null;
         try
@@ -61,7 +61,7 @@ public class Channel: Engineio.Channel
                     throw new ChannelError.PARSE_ERROR("Failed to parse JSON params: %s. Ensure you have passed an object/mapping/dictionary.", e.message);
                 }
             }
-            
+
             var variant_result = yield http_server.handle_eio_request(socket, type, method, params);
             if (variant_result == null || !variant_result.get_type().is_subtype_of(VariantType.DICTIONARY))
             {
@@ -84,13 +84,13 @@ public class Channel: Engineio.Channel
             builder.add("{sv}", "error", new Variant.int32(e.code));
             builder.add("{sv}", "message", new Variant.string(e.message));
             builder.add("{sv}", "quark", new Variant.string(e.domain.to_string()));
-			result = Json.gvariant_serialize(builder.end());
+            result = Json.gvariant_serialize(builder.end());
         }
-        
-		var msg = Engineio.serialize_message(Engineio.MessageType.RESPONSE, id, status, result);
-		socket.send_message(msg);
-	}
-    
+
+        var msg = Engineio.serialize_message(Engineio.MessageType.RESPONSE, id, status, result);
+        socket.send_message(msg);
+    }
+
     public void send_notification(Engineio.Socket socket, string path, Variant? data)
     {
         Json.Node? result = null;
@@ -107,7 +107,7 @@ public class Channel: Engineio.Channel
             result = Json.gvariant_serialize(data);
         }
         var msg = Engineio.serialize_message(Engineio.MessageType.NOTIFICATION, 0, path, result);
-		socket.send_message(msg);
+        socket.send_message(msg);
     }
 }
 } // namespace Nuvola.HttpRemoteControl

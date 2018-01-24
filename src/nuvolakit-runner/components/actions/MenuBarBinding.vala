@@ -2,14 +2,14 @@
  * Copyright 2014-2018 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met: 
- * 
+ * modification, are permitted provided that the following conditions are met:
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
+ *    list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution. 
- * 
+ *    and/or other materials provided with the distribution.
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -24,31 +24,31 @@
 
 public class Nuvola.MenuBarBinding: ObjectBinding<MenuBarInterface>
 {
-	public MenuBarBinding(Drt.RpcRouter router, WebWorker web_worker)
-	{
-		base(router, web_worker, "Nuvola.MenuBar");
-	}
-	
-	protected override void bind_methods()
-	{
-		bind("set-menu", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
-			"Set menu entries.",
-			handle_menubar_set_menu, {
-			new Drt.StringParam("text", true, false, null, "Menu id."),
-			new Drt.StringParam("label", true, false, null, "Menu label."),
-			new Drt.StringArrayParam("actions", true, null, "Menu actions.")
-		});
-	}
-	
-	private void handle_menubar_set_menu(Drt.RpcRequest request) throws Drt.RpcError
-	{
-		check_not_empty();
-		var id = request.pop_string();
-		var label = request.pop_string();
-		var actions = request.pop_strv();
-		foreach (var object in objects)
-			if (object.set_menu(id, label, actions))
-				break;
-		request.respond(null);
-	}
+    public MenuBarBinding(Drt.RpcRouter router, WebWorker web_worker)
+    {
+        base(router, web_worker, "Nuvola.MenuBar");
+    }
+
+    protected override void bind_methods()
+    {
+        bind("set-menu", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
+            "Set menu entries.",
+            handle_menubar_set_menu, {
+            new Drt.StringParam("text", true, false, null, "Menu id."),
+            new Drt.StringParam("label", true, false, null, "Menu label."),
+            new Drt.StringArrayParam("actions", true, null, "Menu actions.")
+        });
+    }
+
+    private void handle_menubar_set_menu(Drt.RpcRequest request) throws Drt.RpcError
+    {
+        check_not_empty();
+        var id = request.pop_string();
+        var label = request.pop_string();
+        var actions = request.pop_strv();
+        foreach (var object in objects)
+            if (object.set_menu(id, label, actions))
+                break;
+        request.respond(null);
+    }
 }
