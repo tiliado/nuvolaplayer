@@ -38,8 +38,8 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
         bind("get-flag", Drt.RpcFlags.READABLE,
             "Returns boolean state of a particular flag or null if no such flag has been found.",
             handle_get_flag, {
-            new Drt.StringParam("name", true, false, null, "Flag name, e.g. can-go-next, can-go-previous, can-play, can-pause, can-stop, can-rate"),
-        });
+                new Drt.StringParam("name", true, false, null, "Flag name, e.g. can-go-next, can-go-previous, can-play, can-pause, can-stop, can-rate"),
+            });
         bind("set-flag", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE, null, handle_set_flag, {
             new Drt.StringParam("name", true, false),
             new Drt.BoolParam("state", true),
@@ -95,7 +95,7 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
         SList<string> playback_actions = null;
         var actions = request.pop_strv();
         foreach (var action in actions)
-            playback_actions.prepend(action);
+        playback_actions.prepend(action);
         playback_actions.reverse();
         model.playback_actions = (owned) playback_actions;
 

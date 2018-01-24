@@ -34,10 +34,10 @@ public class Nuvola.MenuBarBinding: ObjectBinding<MenuBarInterface>
         bind("set-menu", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             "Set menu entries.",
             handle_menubar_set_menu, {
-            new Drt.StringParam("text", true, false, null, "Menu id."),
-            new Drt.StringParam("label", true, false, null, "Menu label."),
-            new Drt.StringArrayParam("actions", true, null, "Menu actions.")
-        });
+                new Drt.StringParam("text", true, false, null, "Menu id."),
+                new Drt.StringParam("label", true, false, null, "Menu label."),
+                new Drt.StringArrayParam("actions", true, null, "Menu actions.")
+            });
     }
 
     private void handle_menubar_set_menu(Drt.RpcRequest request) throws Drt.RpcError
@@ -47,8 +47,8 @@ public class Nuvola.MenuBarBinding: ObjectBinding<MenuBarInterface>
         var label = request.pop_string();
         var actions = request.pop_strv();
         foreach (var object in objects)
-            if (object.set_menu(id, label, actions))
-                break;
+        if (object.set_menu(id, label, actions))
+        break;
         request.respond(null);
     }
 }

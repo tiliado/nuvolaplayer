@@ -69,8 +69,8 @@ public class PasswordManagerBinding : ModelBinding<PasswordManager>
             string hostname = null;
             Drt.Lst<LoginCredentials> credentials = null;
             while (iter.next(out hostname, out credentials))
-                foreach (var item in credentials)
-                    builder.add("(sss)", hostname, item.username, item.password);
+            foreach (var item in credentials)
+            builder.add("(sss)", hostname, item.username, item.password);
         }
         request.respond(builder.end());
     }

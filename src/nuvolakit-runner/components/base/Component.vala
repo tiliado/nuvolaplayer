@@ -49,8 +49,8 @@ public abstract class Component: GLib.Object
 
     public bool is_membership_ok(TiliadoActivation? activation)
     {
-        return required_membership == TiliadoMembership.NONE
-            || activation == null || activation.has_user_membership(required_membership);
+        return (required_membership == TiliadoMembership.NONE
+        || activation == null || activation.has_user_membership(required_membership));
     }
 
     public virtual void toggle(bool enabled)
@@ -60,7 +60,7 @@ public abstract class Component: GLib.Object
             if (enabled)
             {
                 if (this.enabled != enabled)
-                    this.enabled = true;
+                this.enabled = true;
                 if (!loaded)
                 {
                     message("Load %s %s", id, name);
@@ -77,7 +77,7 @@ public abstract class Component: GLib.Object
                     loaded = false;
                 }
                 if (this.enabled != enabled)
-                    this.enabled = false;
+                this.enabled = false;
                 this.active = false;
             }
         }
@@ -96,7 +96,7 @@ public abstract class Component: GLib.Object
     protected virtual void load()
     {
         if (auto_activate)
-            toggle_active(true);
+        toggle_active(true);
     }
 
     protected virtual void unload()
@@ -107,17 +107,17 @@ public abstract class Component: GLib.Object
     public bool toggle_active(bool active)
     {
         if (!available || !enabled)
-            return false;
+        return false;
         bool result = false;
         if (this.active != active)
         {
             message("%s: %s %s", active ? "Activate" : "Deactivate", id, name);
             result = active ? activate() : deactivate();
             if (!result)
-                warning("Failed to %s: %s %s", active ? "activate" : "deactivate", id, name);
+            warning("Failed to %s: %s %s", active ? "activate" : "deactivate", id, name);
         }
         if (result)
-            this.active = active;
+        this.active = active;
         return result;
     }
 

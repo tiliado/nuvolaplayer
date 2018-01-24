@@ -60,7 +60,7 @@ public class GlobalActionsKeyBinder : GLib.Object, ActionsKeyBinder
         if (result)
         {
             if (keybinding != null)
-                keybindings[keybinding] = action;
+            keybindings[keybinding] = action;
             config.set_string(CONF_PREFIX + action, keybinding);
         }
         return result;
@@ -70,11 +70,11 @@ public class GlobalActionsKeyBinder : GLib.Object, ActionsKeyBinder
     {
         var keybinding = get_keybinding(action);
         if (keybinding == null)
-            return true;
+        return true;
 
         var bound_action = keybindings[keybinding];
         if (bound_action == action)
-            return true;
+        return true;
 
         if (bound_action != null)
         {
@@ -97,7 +97,7 @@ public class GlobalActionsKeyBinder : GLib.Object, ActionsKeyBinder
     {
         var keybinding = get_keybinding(action);
         if (keybinding == null)
-            return true;
+        return true;
 
         var bound_action = keybindings[keybinding];
         if (bound_action != action)
@@ -132,7 +132,7 @@ public class GlobalActionsKeyBinder : GLib.Object, ActionsKeyBinder
         var name = keybindings[accelerator];
         bool handled = false;
         if (name != null)
-            action_activated(name, ref handled);
+        action_activated(name, ref handled);
     }
 }
 

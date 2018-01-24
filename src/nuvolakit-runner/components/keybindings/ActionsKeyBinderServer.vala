@@ -40,29 +40,29 @@ public class ActionsKeyBinderServer : GLib.Object
         var router = ipc_bus.router;
         router.add_method("/nuvola/actionkeybinder/get-keybinding", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
             null, handle_get_keybinding, {
-            new Drt.StringParam("action", true, false)
-        });
+                new Drt.StringParam("action", true, false)
+            });
         router.add_method("/nuvola/actionkeybinder/set-keybinding", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             null, handle_set_keybinding, {
-            new Drt.StringParam("action", true, false),
-            new Drt.StringParam("keybinding", true, true),
-        });
+                new Drt.StringParam("action", true, false),
+                new Drt.StringParam("keybinding", true, true),
+            });
         router.add_method("/nuvola/actionkeybinder/bind", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             null, handle_bind, {
-            new Drt.StringParam("action", true, false),
-        });
+                new Drt.StringParam("action", true, false),
+            });
         router.add_method("/nuvola/actionkeybinder/unbind", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             null, handle_unbind, {
-            new Drt.StringParam("action", true, false),
-        });
+                new Drt.StringParam("action", true, false),
+            });
         router.add_method("/nuvola/actionkeybinder/is-available", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
             null, handle_is_available, {
-            new Drt.StringParam("keybinding", true, false),
-        });
+                new Drt.StringParam("keybinding", true, false),
+            });
         router.add_method("/nuvola/actionkeybinder/get-action", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
             null, handle_get_action, {
-            new Drt.StringParam("keybinding", true, false),
-        });
+                new Drt.StringParam("keybinding", true, false),
+            });
     }
 
     private void handle_get_keybinding(Drt.RpcRequest request) throws Drt.RpcError
@@ -129,7 +129,7 @@ public class ActionsKeyBinderServer : GLib.Object
         }
 
         if (!handled)
-            warning("Action %s was not handled by any app runner.", name);
+        warning("Action %s was not handled by any app runner.", name);
     }
 }
 

@@ -54,7 +54,7 @@ public class Connection : GLib.Object
         yield;
 
         if (msg.status_code < 200 && msg.status_code >= 300)
-            return false;
+        return false;
 
         unowned Soup.MessageBody body = msg.response_body;
         var dir = local_file.get_parent();
@@ -109,7 +109,7 @@ public class Connection : GLib.Object
         if (type != NetworkProxyType.SYSTEM)
         {
             if (host == null || host == "")
-                host = "127.0.0.1";
+            host = "127.0.0.1";
             switch (type)
             {
             case NetworkProxyType.HTTP:

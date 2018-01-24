@@ -621,6 +621,15 @@ def build(ctx):
         vala_target_glib = TARGET_GLIB,
         checks=VALALINT_CHECKS
     )
+    valalint(
+        source_dir = 'src/nuvolakit-runner',
+        packages = packages + ' webkit2gtk-4.0 javascriptcoregtk-4.0 gstreamer-1.0 libsecret-1 dri2 libdrm',
+        vala_defines = vala_defines,
+        defines = ['G_LOG_DOMAIN="Nuvola"'],
+        vapi_dirs = vapi_dirs,
+        vala_target_glib = TARGET_GLIB,
+        checks=VALALINT_CHECKS
+    )
 
     ctx.add_group()
 

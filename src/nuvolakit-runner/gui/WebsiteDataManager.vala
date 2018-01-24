@@ -55,8 +55,8 @@ public class WebsiteDataManager: Gtk.Grid
         data_types = {
             WebKit.WebsiteDataTypes.COOKIES,
             WebKit.WebsiteDataTypes.MEMORY_CACHE|WebKit.WebsiteDataTypes.DISK_CACHE
-                |WebKit.WebsiteDataTypes.OFFLINE_APPLICATION_CACHE|WebKit.WebsiteDataTypes.SESSION_STORAGE
-                |WebKit.WebsiteDataTypes.PLUGIN_DATA,
+            |WebKit.WebsiteDataTypes.OFFLINE_APPLICATION_CACHE|WebKit.WebsiteDataTypes.SESSION_STORAGE
+            |WebKit.WebsiteDataTypes.PLUGIN_DATA,
             WebKit.WebsiteDataTypes.INDEXEDDB_DATABASES,
             WebKit.WebsiteDataTypes.WEBSQL_DATABASES,
             WebKit.WebsiteDataTypes.LOCAL_STORAGE,
@@ -86,8 +86,8 @@ public class WebsiteDataManager: Gtk.Grid
 
         WebKit.WebsiteDataTypes data_to_clear = 0;
         for (var i = 0; i < check_buttons.length; i++)
-            if (check_buttons[i].active)
-                data_to_clear |= data_types[i];
+        if (check_buttons[i].active)
+        data_to_clear |= data_types[i];
         if (data_to_clear != 0)
         {
             clear_button.sensitive = false;

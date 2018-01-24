@@ -56,7 +56,7 @@ public class PreferencesDialog : Gtk.Dialog
         set_default_size(650, 500);
 
         if (parent != null)
-            set_transient_for(parent);
+        set_transient_for(parent);
         modal = true;
 
         add_buttons("Cancel", Gtk.ResponseType.CLOSE, "Save changes", Gtk.ResponseType.OK);

@@ -41,12 +41,12 @@ public class MediaKeysServer: GLib.Object
         media_keys.media_key_pressed.connect(on_media_key_pressed);
         ipc_bus.router.add_method("/nuvola/mediakeys/manage", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             null, handle_manage, {
-            new Drt.StringParam("id", true, false)
-        });
+                new Drt.StringParam("id", true, false)
+            });
         ipc_bus.router.add_method("/nuvola/mediakeysl/unmanage", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             null, handle_unmanage, {
-            new Drt.StringParam("id", true, false)
-        });
+                new Drt.StringParam("id", true, false)
+            });
     }
 
     private void handle_manage(Drt.RpcRequest request) throws Drt.RpcError {
@@ -99,12 +99,12 @@ public class MediaKeysServer: GLib.Object
                 }
 
                 if (handled)
-                    break;
+                break;
             }
         }
 
         if (!handled)
-            warning("MediaKey %s was not handled by any app runner.", key);
+        warning("MediaKey %s was not handled by any app runner.", key);
     }
 }
 

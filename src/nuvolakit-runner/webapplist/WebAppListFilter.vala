@@ -42,9 +42,9 @@ public class WebAppListFilter : Gtk.TreeModelFilter
         model.get(iter, WebAppListModel.Pos.META, out web_app);
         assert(web_app != null);
         if (!show_hidden && web_app.hidden)
-            return false;
+        return false;
         if (category == null)
-            return true;
+        return true;
         return web_app.in_category(category);
     }
 

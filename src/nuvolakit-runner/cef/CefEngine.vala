@@ -54,7 +54,7 @@ public class CefEngine : WebEngine {
     }
 
     public override void early_init(AppRunnerController runner_app, IpcBus ipc_bus,
-    Config config, Connection? connection, HashTable<string, Variant> worker_data)  {
+        Config config, Connection? connection, HashTable<string, Variant> worker_data)  {
         this.ipc_bus = ipc_bus;
         this.runner_app = runner_app;
         this.config = config;
@@ -71,9 +71,9 @@ public class CefEngine : WebEngine {
         runner_app.replace_mainloop(new CefMainLoopAdaptor());
 
         if (connection != null)
-            apply_network_proxy(connection);
+        apply_network_proxy(connection);
         if (web_app.allow_insecure_content)
-            warning("Not implemented: web_app.allow_insecure_content");
+        warning("Not implemented: web_app.allow_insecure_content");
 
         session = new Drt.KeyValueMap();
         register_ipc_handlers();
@@ -139,7 +139,7 @@ public class CefEngine : WebEngine {
             } catch (GLib.Error e) {
                 runner_app.fatal_error("Initialization error",
                     "%s failed to initialize app runner. Initialization exited with error:\n\n%s".printf(
-                    runner_app.app_name, e.message));
+                        runner_app.app_name, e.message));
             }
             debug("App Runner Initialized");
             ready = true;
@@ -164,7 +164,7 @@ public class CefEngine : WebEngine {
         } catch (GLib.Error e) {
             runner_app.show_error("Initialization error",
                 ("%s failed to retrieve a last visited page from previous session."
-                + " Initialization exited with error:\n\n%s").printf(runner_app.app_name, e.message));
+                    + " Initialization exited with error:\n\n%s").printf(runner_app.app_name, e.message));
         }
         go_home();
     }
@@ -300,60 +300,60 @@ public class CefEngine : WebEngine {
         router.add_method("/nuvola/core/session-has-key", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
             "Whether the session has a given key.",
             handle_session_has_key, {
-            new Drt.StringParam("key", true, false, null, "Session key.")
-        });
+                new Drt.StringParam("key", true, false, null, "Session key.")
+            });
         router.add_method("/nuvola/core/session-get-value", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
             "Get session value for the given key.",
             handle_session_get_value, {
-            new Drt.StringParam("key", true, false, null, "Session key.")
-        });
+                new Drt.StringParam("key", true, false, null, "Session key.")
+            });
         router.add_method("/nuvola/core/session-set-value", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             "Set session value for the given key.",
             handle_session_set_value, {
-            new Drt.StringParam("key", true, false, null, "Session key."),
-            new Drt.VariantParam("value", true, true, null, "Session value.")
-        });
+                new Drt.StringParam("key", true, false, null, "Session key."),
+                new Drt.VariantParam("value", true, true, null, "Session value.")
+            });
         router.add_method("/nuvola/core/session-set-default-value", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             "Set default session value for the given key.",
             handle_session_set_default_value, {
-            new Drt.StringParam("key", true, false, null, "Session key."),
-            new Drt.VariantParam("value", true, true, null, "Session value.")
-        });
+                new Drt.StringParam("key", true, false, null, "Session key."),
+                new Drt.VariantParam("value", true, true, null, "Session value.")
+            });
         router.add_method("/nuvola/core/config-has-key", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
             "Whether the config has a given key.",
             handle_config_has_key, {
-            new Drt.StringParam("key", true, false, null, "Config key.")
-        });
+                new Drt.StringParam("key", true, false, null, "Config key.")
+            });
         router.add_method("/nuvola/core/config-get-value", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
             "Get config value for the given key.",
             handle_config_get_value, {
-            new Drt.StringParam("key", true, false, null, "Config key.")
-        });
+                new Drt.StringParam("key", true, false, null, "Config key.")
+            });
         router.add_method("/nuvola/core/config-set-value", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             "Set config value for the given key.",
             handle_config_set_value, {
-            new Drt.StringParam("key", true, false, null, "Config key."),
-            new Drt.VariantParam("value", true, true, null, "Config value.")
-        });
+                new Drt.StringParam("key", true, false, null, "Config key."),
+                new Drt.VariantParam("value", true, true, null, "Config value.")
+            });
         router.add_method("/nuvola/core/config-set-default-value", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             "Set default config value for the given key.",
             handle_config_set_default_value, {
-            new Drt.StringParam("key", true, false, null, "Config key."),
-            new Drt.VariantParam("value", true, true, null, "Config value.")
-        });
+                new Drt.StringParam("key", true, false, null, "Config key."),
+                new Drt.VariantParam("value", true, true, null, "Config value.")
+            });
 
         router.add_method("/nuvola/browser/download-file-async", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             "Download file.",
             handle_download_file_async, {
-            new Drt.StringParam("uri", true, false, null, "File to download."),
-            new Drt.StringParam("basename", true, false, null, "Basename of the file."),
-            new Drt.DoubleParam("callback-id", true, null, "Callback id.")
-        });
+                new Drt.StringParam("uri", true, false, null, "File to download."),
+                new Drt.StringParam("basename", true, false, null, "Basename of the file."),
+                new Drt.DoubleParam("callback-id", true, null, "Callback id.")
+            });
         router.add_method("/nuvola/core/show-error", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             "Show error message.",
             handle_show_error, {
-            new Drt.StringParam("text", true, false, null, "Error message.")
-        });
+                new Drt.StringParam("text", true, false, null, "Error message.")
+            });
     }
 
     private bool web_worker_initialized_cb() {

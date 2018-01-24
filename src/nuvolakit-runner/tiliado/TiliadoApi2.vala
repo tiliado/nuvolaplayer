@@ -63,7 +63,7 @@ public enum TiliadoMembership
     public static TiliadoMembership from_int(int level)
     {
         if (level < 0)
-            level = 0;
+        level = 0;
         return from_uint((uint) level);
     }
 }
@@ -97,7 +97,7 @@ public class TiliadoApi2 : Oauth2Client
         }
         int[] groups;
         if (!response.get_int_array("groups", out groups))
-            groups = {};
+        groups = {};
         var user = new User(
             response.get_int_or("id", 0),
             response.get_string_or("username", null),
@@ -106,7 +106,7 @@ public class TiliadoApi2 : Oauth2Client
             response.get_bool_or("is_active", false),
             (owned) groups);
         if (project_id != null)
-            yield set_account_membership(user, project_id);
+        yield set_account_membership(user, project_id);
         this.user = user;
         return user;
     }
@@ -136,7 +136,7 @@ public class TiliadoApi2 : Oauth2Client
         var response = yield call("projects/projects/%s".printf(id));
         int[] groups;
         if (!response.get_int_array("patron_groups", out groups))
-            groups = {};
+        groups = {};
         return new Project(
             response.get_string_or("id", id),
             response.get_string_or("name", id),
@@ -148,7 +148,7 @@ public class TiliadoApi2 : Oauth2Client
         var response = yield call("auth/groups/%d".printf(id));
         int[] groups;
         if (!response.get_int_array("patron_groups", out groups))
-            groups = {};
+        groups = {};
         return new Group(
             response.get_int_or("id", id),
             response.get_string_or("name", id.to_string()),
@@ -168,7 +168,7 @@ public class TiliadoApi2 : Oauth2Client
         public static User? from_variant(Variant? data)
         {
             if (data == null || data.get_type_string() != "(imsmsu)")
-                return null;
+            return null;
 
             int32 id = 0;
             string? username = null;

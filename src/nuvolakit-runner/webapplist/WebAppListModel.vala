@@ -46,7 +46,7 @@ public class WebAppListModel : Gtk.ListStore
             typeof(string),  // maintainer_name
             typeof(string),  // maintainer_link
             typeof(WebApp) // meta
-            });
+        });
         load();
     }
 
@@ -77,7 +77,7 @@ public class WebAppListModel : Gtk.ListStore
         var web_apps = web_apps_map.get_values();
         web_apps.sort(WebApp.cmp_by_name);
         foreach (var web_app in web_apps)
-                append_web_app(web_app, web_app.get_icon_pixbuf(WebAppListView.ICON_SIZE));
+        append_web_app(web_app, web_app.get_icon_pixbuf(WebAppListView.ICON_SIZE));
     }
 }
 

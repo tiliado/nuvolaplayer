@@ -48,9 +48,9 @@ public class XKeyGrabber: GLib.Object
         keybindings = new HashTable<string, uint>(str_hash, str_equal);
         var display = Gdk.Display.get_default();
         if (display != null)
-            setup_display(display);
+        setup_display(display);
         else
-            Gdk.DisplayManager.get().display_opened.connect(setup_display);
+        Gdk.DisplayManager.get().display_opened.connect(setup_display);
     }
 
     public signal void keybinding_pressed(string accelerator, uint32 time);
@@ -65,7 +65,7 @@ public class XKeyGrabber: GLib.Object
         if (is_grabbed(accelerator))
         {
             if (!allow_multiple)
-                return false;
+            return false;
 
             var count = keybindings[accelerator] + 1;
             keybindings[accelerator] = count;
@@ -74,7 +74,7 @@ public class XKeyGrabber: GLib.Object
         }
 
         if (!grab_ungrab(true, accelerator))
-            return false;
+        return false;
 
         keybindings[accelerator] = 1;
         debug("Grabbed %s, count %d", accelerator, 1);
@@ -84,7 +84,7 @@ public class XKeyGrabber: GLib.Object
     public bool ungrab(string accelerator)
     {
         if (!is_grabbed(accelerator))
-            return false;
+        return false;
 
         var count = keybindings[accelerator] - 1;
         if (count > 0)
@@ -95,7 +95,7 @@ public class XKeyGrabber: GLib.Object
         }
 
         if (!grab_ungrab(false, accelerator))
-            return false;
+        return false;
 
         keybindings.remove(accelerator);
         debug("Ungrabbed %s, count %u", accelerator, count);
@@ -134,9 +134,9 @@ public class XKeyGrabber: GLib.Object
         foreach (Gdk.ModifierType lock_modifier in lock_modifiers)
         {
             if (grab)
-                display.grab_key(keycode, modifiers|lock_modifier, xid, false, X.GrabMode.Async, X.GrabMode.Async);
+            display.grab_key(keycode, modifiers|lock_modifier, xid, false, X.GrabMode.Async, X.GrabMode.Async);
             else
-                display.ungrab_key(keycode, modifiers|lock_modifier, xid);
+            display.ungrab_key(keycode, modifiers|lock_modifier, xid);
         }
 
         Gdk.flush();
@@ -161,13 +161,13 @@ public class XKeyGrabber: GLib.Object
             event_mods &= Gtk.accelerator_get_default_mod_mask();
             /* SUPER + HYPER => SUPER */
             if ((event_mods & (Gdk.ModifierType.SUPER_MASK | Gdk.ModifierType.HYPER_MASK)) != 0)
-                event_mods &= ~Gdk.ModifierType.HYPER_MASK;
+            event_mods &= ~Gdk.ModifierType.HYPER_MASK;
 
             var accelerator = Gtk.accelerator_name(keyval, event_mods);
             if (is_grabbed(accelerator))
-                keybinding_pressed(accelerator, gdk_event.get_time());
+            keybinding_pressed(accelerator, gdk_event.get_time());
             else
-                warning("Unknown keybinding %s", accelerator);
+            warning("Unknown keybinding %s", accelerator);
         }
         return Gdk.FilterReturn.CONTINUE;
     }

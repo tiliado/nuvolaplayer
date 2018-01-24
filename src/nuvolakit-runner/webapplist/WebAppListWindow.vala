@@ -114,7 +114,7 @@ public class WebAppList : Gtk.Grid
         var items = view.get_selected_items();
         Gtk.TreePath? path = null;
         foreach (var my_path in items)
-            path = my_path;
+        path = my_path;
 
         if (path == null)
         {
@@ -151,7 +151,7 @@ public class WebAppList : Gtk.Grid
         app_version.label = version;
         app_name.label = name;
         app_maintainer.label = "<a href=\"%s\">%s</a>".printf(
-        Markup.escape_text(maintainer_link), Markup.escape_text(maintainer_name));
+            Markup.escape_text(maintainer_link), Markup.escape_text(maintainer_name));
         details.show();
         app.actions.get_action(Actions.START_APP).enabled = true;
     }

@@ -42,7 +42,7 @@ public class MenuBar: GLib.Object, MenuBarInterface
         var submenus = menus.get_keys();
         submenus.sort(strcmp);
         foreach (var submenu in submenus)
-            menus[submenu].append_to_menu(app.actions, menubar);
+        menus[submenu].append_to_menu(app.actions, menubar);
     }
 
     public void set_submenu(string id, SubMenu submenu)

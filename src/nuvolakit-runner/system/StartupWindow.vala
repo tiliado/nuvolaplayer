@@ -166,7 +166,7 @@ public class StartupWindow : Drtgtk.ApplicationWindow
             label.label = status.get_blurb();
             var styles = label.get_style_context();
             foreach (var item in StartupCheck.Status.all())
-                styles.remove_class(item.get_badge_class());
+            styles.remove_class(item.get_badge_class());
             styles.add_class(status.get_badge_class());
         }
         else if (param.name.has_suffix("-message"))

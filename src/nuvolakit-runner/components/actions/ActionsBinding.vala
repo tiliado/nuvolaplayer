@@ -39,60 +39,60 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
         bind("add-action", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             "Add a new action.",
             handle_add_action, {
-            new Drt.StringParam("group", true, false, null, "Action group"),
-            new Drt.StringParam("scope", true, false, null, "Action scope, use `win` for window-specific actions (preferred) or `app` for app-specific actions."),
-            new Drt.StringParam("name", true, false, null, "Action name, should be in `dash-separated-lower-case`, e.g. `toggle-play`."),
-            new Drt.StringParam("label", false, true, null, "Action label shown in user interface, e.g. `Play`."),
-            new Drt.StringParam("mnemo_label", false, true, null, "Action label shown in user interface with keyboard navigation using Alt key and letter prefixed with underscore, e.g. Alt+p for `_Play`."),
-            new Drt.StringParam("icon", false, true, null, "Icon name for action."),
-            new Drt.StringParam("keybinding", false, true, null, "in-app keyboard shortcut, e.g. `<ctrl>P`."),
-            new Drt.VariantParam("state", false, true, null, "Action state - `null` for simple actions, `true/false` for toggle actions (on/off).")
-        });
+                new Drt.StringParam("group", true, false, null, "Action group"),
+                new Drt.StringParam("scope", true, false, null, "Action scope, use `win` for window-specific actions (preferred) or `app` for app-specific actions."),
+                new Drt.StringParam("name", true, false, null, "Action name, should be in `dash-separated-lower-case`, e.g. `toggle-play`."),
+                new Drt.StringParam("label", false, true, null, "Action label shown in user interface, e.g. `Play`."),
+                new Drt.StringParam("mnemo_label", false, true, null, "Action label shown in user interface with keyboard navigation using Alt key and letter prefixed with underscore, e.g. Alt+p for `_Play`."),
+                new Drt.StringParam("icon", false, true, null, "Icon name for action."),
+                new Drt.StringParam("keybinding", false, true, null, "in-app keyboard shortcut, e.g. `<ctrl>P`."),
+                new Drt.VariantParam("state", false, true, null, "Action state - `null` for simple actions, `true/false` for toggle actions (on/off).")
+            });
         bind("add-radio-action", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             "Add a new action.",
             handle_add_radio_action, {
-            new Drt.StringParam("group", true, false, null, "Action group"),
-            new Drt.StringParam("scope", true, false, null, "Action scope, use `win` for window-specific actions (preferred) or `app` for app-specific actions."),
-            new Drt.StringParam("name", true, false, null, "Action name, should be in `dash-separated-lower-case`, e.g. `toggle-play`."),
-            new Drt.VariantParam("state", true, false, null, "Initial state of the action. Must be one of states specified in the `options` array."),
-            new Drt.VarArrayParam("options", true, false, null, "Array of options definition in form [`stateId`, `label`, `mnemo_label`, `icon`, `keybinding`]. The `stateId` is unique identifier (Number or String), other parameters are described in `add-action` method."),
-        });
+                new Drt.StringParam("group", true, false, null, "Action group"),
+                new Drt.StringParam("scope", true, false, null, "Action scope, use `win` for window-specific actions (preferred) or `app` for app-specific actions."),
+                new Drt.StringParam("name", true, false, null, "Action name, should be in `dash-separated-lower-case`, e.g. `toggle-play`."),
+                new Drt.VariantParam("state", true, false, null, "Initial state of the action. Must be one of states specified in the `options` array."),
+                new Drt.VarArrayParam("options", true, false, null, "Array of options definition in form [`stateId`, `label`, `mnemo_label`, `icon`, `keybinding`]. The `stateId` is unique identifier (Number or String), other parameters are described in `add-action` method."),
+            });
         bind("is-enabled", Drt.RpcFlags.READABLE,
             "Returns true if action is enabled.",
             handle_is_action_enabled, {
-            new Drt.StringParam("name", true, false, null, "Action name"),
-        });
+                new Drt.StringParam("name", true, false, null, "Action name"),
+            });
         bind("set-enabled", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             "Sets whether action is enabled.",
             handle_action_set_enabled, {
-            new Drt.StringParam("name", true, false, null, "Action name"),
-            new Drt.BoolParam("enabled", true, null, "Enabled state")
-        });
+                new Drt.StringParam("name", true, false, null, "Action name"),
+                new Drt.BoolParam("enabled", true, null, "Enabled state")
+            });
         bind("get-state", Drt.RpcFlags.READABLE,
             "Returns state of the action.",
             handle_action_get_state, {
-            new Drt.StringParam("name", true, false, null, "Action name")
-        });
+                new Drt.StringParam("name", true, false, null, "Action name")
+            });
         bind("set-state", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             "Set state of the action.",
             handle_action_set_state, {
-            new Drt.StringParam("name", true, false, null, "Action name"),
-            new Drt.VariantParam("state", false, true, null, "Action state")
-        });
+                new Drt.StringParam("name", true, false, null, "Action name"),
+                new Drt.VariantParam("state", false, true, null, "Action state")
+            });
         bind("activate", Drt.RpcFlags.WRITABLE,
             "Activates action",
             handle_action_activate, {
-            new Drt.StringParam("name", true, false, null, "Action name"),
-            new Drt.VariantParam("parameter", false, true, null, "Action parameter"),
-        });
+                new Drt.StringParam("name", true, false, null, "Action name"),
+                new Drt.VariantParam("parameter", false, true, null, "Action parameter"),
+            });
         bind("list-groups", Drt.RpcFlags.READABLE,
             "Lists action groups.",
             handle_list_groups, null);
         bind("list-group-actions", Drt.RpcFlags.READABLE,
             "Returns actions of the given group.",
             handle_list_group_actions, {
-            new Drt.StringParam("name", true, false, null, "Group name")
-        });
+                new Drt.StringParam("name", true, false, null, "Group name")
+            });
     }
 
     protected override void object_added(ActionsInterface object)
@@ -117,10 +117,10 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
         var keybinding = request.pop_string();
         var state = request.pop_variant();
         if (state != null && state.get_type_string() == "mv")
-            state = null;
+        state = null;
         foreach (var object in objects)
-            if (object.add_action(group, scope, action_name, label, mnemo_label, icon, keybinding, state))
-                break;
+        if (object.add_action(group, scope, action_name, label, mnemo_label, icon, keybinding, state))
+        break;
         request.respond(null);
     }
 
@@ -155,8 +155,8 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
             options[i++] = new Drtgtk.RadioOption(parameter, label, mnemo_label, icon, keybinding);
         }
         foreach (var object in objects)
-            if (object.add_radio_action(group, scope, action_name, state, options))
-                break;
+        if (object.add_radio_action(group, scope, action_name, state, options))
+        break;
         request.respond(null);
     }
 
@@ -166,8 +166,8 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
         string action_name = request.pop_string();
         bool enabled = false;
         foreach (var object in objects)
-            if (object.is_enabled(action_name, ref enabled))
-                break;
+        if (object.is_enabled(action_name, ref enabled))
+        break;
         request.respond(new Variant.boolean(enabled));
     }
 
@@ -177,8 +177,8 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
         var action_name = request.pop_string();
         var enabled = request.pop_bool();
         foreach (var object in objects)
-            if (object.set_enabled(action_name, enabled))
-                break;
+        if (object.set_enabled(action_name, enabled))
+        break;
         request.respond(null);
     }
 
@@ -188,8 +188,8 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
         var action_name = request.pop_string();
         Variant? state = null;
         foreach (var object in objects)
-            if (object.get_state(action_name, ref state))
-                break;
+        if (object.get_state(action_name, ref state))
+        break;
         request.respond(state);
     }
 
@@ -199,8 +199,8 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
         var action_name = request.pop_string();
         var state = request.pop_variant();
         foreach (var object in objects)
-            if (object.set_state(action_name, state))
-                break;
+        if (object.set_state(action_name, state))
+        break;
         request.respond(null);
     }
 
@@ -211,8 +211,8 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
         Variant? parameter = request.pop_variant();
         bool handled = false;
         foreach (var object in objects)
-            if (handled = object.activate(action_name, parameter))
-                break;
+        if (handled = object.activate(action_name, parameter))
+        break;
 
         request.respond(new Variant.boolean(handled));
     }
@@ -226,15 +226,15 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
             List<unowned string> groups_list;
             var done = object.list_groups(out groups_list);
             foreach (var group in groups_list)
-                groups_set.add(group);
+            groups_set.add(group);
 
             if (done)
-                break;
+            break;
         }
         var builder = new VariantBuilder(new VariantType ("as"));
         var groups = groups_set.get_values();
         foreach (var name in groups)
-            builder.add_value(new Variant.string(name));
+        builder.add_value(new Variant.string(name));
         request.respond(builder.end());
     }
 
@@ -269,7 +269,7 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
                 builder.close();
             }
             if (done)
-                break;
+            break;
         }
         request.respond(builder.end());
     }

@@ -68,7 +68,7 @@ public class WebApp : GLib.Object
         {
             buffer.append_c(part[0].toupper());
             if (part.length > 1)
-                buffer.append(part.substring(1));
+            buffer.append(part.substring(1));
         }
         return buffer.str;
     }
@@ -117,30 +117,30 @@ public class WebApp : GLib.Object
         string? home_url=null) throws WebAppError
     {
         if (!WebApp.validate_id(id))
-            throw new WebAppError.INVALID_METADATA("Invalid app id '%s'.", id);
+        throw new WebAppError.INVALID_METADATA("Invalid app id '%s'.", id);
         if (name == "")
-            throw new WebAppError.INVALID_METADATA("Empty 'name' entry");
+        throw new WebAppError.INVALID_METADATA("Empty 'name' entry");
         if (version_major <= 0)
-            throw new WebAppError.INVALID_METADATA("Major version must be greater than zero");
+        throw new WebAppError.INVALID_METADATA("Major version must be greater than zero");
         if (version_minor < 0)
-            throw new WebAppError.INVALID_METADATA("Minor version must be greater or equal to zero");
+        throw new WebAppError.INVALID_METADATA("Minor version must be greater or equal to zero");
         if (api_major <= 0)
-            throw new WebAppError.INVALID_METADATA("Major api_version must be greater than zero");
+        throw new WebAppError.INVALID_METADATA("Major api_version must be greater than zero");
         if (api_minor < 0)
-            throw new WebAppError.INVALID_METADATA("Minor api_version must be greater or equal to zero");
+        throw new WebAppError.INVALID_METADATA("Minor api_version must be greater or equal to zero");
         if (!JSApi.is_supported(api_major, api_minor))
-            throw new WebAppError.INVALID_METADATA(
-                "Requested unsupported NuvolaKit API '%d.%d'.".printf(api_major, api_minor));
+        throw new WebAppError.INVALID_METADATA(
+            "Requested unsupported NuvolaKit API '%d.%d'.".printf(api_major, api_minor));
         if (maintainer_name == "")
-            throw new WebAppError.INVALID_METADATA("Empty 'maintainer_name' entry");
+        throw new WebAppError.INVALID_METADATA("Empty 'maintainer_name' entry");
         if (!maintainer_link.has_prefix("http://")
         &&  !maintainer_link.has_prefix("https://")
         &&  !maintainer_link.has_prefix("mailto:"))
-            throw new WebAppError.INVALID_METADATA("Empty or invalid 'maintainer_link' entry: '%s'", maintainer_link);
+        throw new WebAppError.INVALID_METADATA("Empty or invalid 'maintainer_link' entry: '%s'", maintainer_link);
         if (window_width < 0)
-            throw new WebAppError.INVALID_METADATA("Property window_width must be greater or equal to zero");
+        throw new WebAppError.INVALID_METADATA("Property window_width must be greater or equal to zero");
         if (window_height < 0)
-            throw new WebAppError.INVALID_METADATA("Property window_height must be greater or equal to zero");
+        throw new WebAppError.INVALID_METADATA("Property window_height must be greater or equal to zero");
 
         GLib.Object(id: id, name: name, maintainer_name: maintainer_name, maintainer_link: maintainer_link,
             version_major: version_major, version_minor: version_minor, api_major: api_major, api_minor: api_minor,
@@ -157,11 +157,11 @@ public class WebApp : GLib.Object
     public WebApp.from_dir(File dir) throws WebAppError
     {
         if (dir.query_file_type(0) != FileType.DIRECTORY)
-            throw new WebAppError.LOADING_FAILED(@"$(dir.get_path()) is not a directory");
+        throw new WebAppError.LOADING_FAILED(@"$(dir.get_path()) is not a directory");
 
         var metadata_file = dir.get_child(METADATA_FILENAME);
         if (metadata_file.query_file_type(0) != FileType.REGULAR)
-            throw new WebAppError.LOADING_FAILED(@"$(metadata_file.get_path()) is not a file");
+        throw new WebAppError.LOADING_FAILED(@"$(metadata_file.get_path()) is not a file");
 
         string metadata;
         try
@@ -195,30 +195,30 @@ public class WebApp : GLib.Object
 
         string id;
         if (!meta.get_string("id", out id))
-            throw new WebAppError.INVALID_METADATA("The id key is missing or is not a string.");
+        throw new WebAppError.INVALID_METADATA("The id key is missing or is not a string.");
         string name;
         if (!meta.get_string("name", out name))
-            throw new WebAppError.INVALID_METADATA("The name key is missing or is not a string.");
+        throw new WebAppError.INVALID_METADATA("The name key is missing or is not a string.");
         string maintainer_name;
         if (!meta.get_string("maintainer_name", out maintainer_name))
-            throw new WebAppError.INVALID_METADATA("The maintainer_name key is missing or is not a string.");
+        throw new WebAppError.INVALID_METADATA("The maintainer_name key is missing or is not a string.");
         string maintainer_link;
         if (!meta.get_string("maintainer_link", out maintainer_link))
-            throw new WebAppError.INVALID_METADATA("The maintainer_link key is missing or is not a string.");
+        throw new WebAppError.INVALID_METADATA("The maintainer_link key is missing or is not a string.");
         int version_major;
         if (!meta.get_int("version_major", out version_major))
-            throw new WebAppError.INVALID_METADATA("The version_major key is missing or is not an integer.");
+        throw new WebAppError.INVALID_METADATA("The version_major key is missing or is not an integer.");
         int version_minor;
         if (!meta.get_int("version_minor", out version_minor))
-            throw new WebAppError.INVALID_METADATA("The version_minor key is missing or is not an integer.");
+        throw new WebAppError.INVALID_METADATA("The version_minor key is missing or is not an integer.");
         int api_major;
         if (!meta.get_int("api_major", out api_major))
-            throw new WebAppError.INVALID_METADATA("The api_major key is missing or is not an integer.");
+        throw new WebAppError.INVALID_METADATA("The api_major key is missing or is not an integer.");
         int api_minor;
         if (!meta.get_int("api_minor", out api_minor))
-            throw new WebAppError.INVALID_METADATA("The api_minor key is missing or is not an integer.");
+        throw new WebAppError.INVALID_METADATA("The api_minor key is missing or is not an integer.");
         if (!meta.get_bool_or("has_desktop_launcher", false))
-            throw new WebAppError.INVALID_METADATA("Web apps without a desktop launcher are no longer supported. Upgrade Nuvola SDK.");
+        throw new WebAppError.INVALID_METADATA("Web apps without a desktop launcher are no longer supported. Upgrade Nuvola SDK.");
         var categories = meta.get_string_or("categories");
         if (Drt.String.is_empty(categories))
         {
@@ -306,7 +306,7 @@ public class WebApp : GLib.Object
                 {
                     var pixbuf =  new Gdk.Pixbuf.from_file_at_scale(icon.path, size, size, false);
                     if (pixbuf != null)
-                        return pixbuf;
+                    return pixbuf;
                 }
                 catch (GLib.Error e)
                 {
@@ -321,21 +321,21 @@ public class WebApp : GLib.Object
     {
         /* Any large icon requested */
         if (size <= 0)
-            size = 1024;
+        size = 1024;
         /* Avoid use of SVG icon for small icon sizes because of a too large borders for this icon sizes */
         else if (size <= 32)
-            flags |= Gtk.IconLookupFlags.NO_SVG;
+        flags |= Gtk.IconLookupFlags.NO_SVG;
 
         var icon = Gtk.IconTheme.get_default().lookup_icon(get_icon_name(), size, flags);
         if (icon == null)
-            debug("Theme icon %s %d not found.", get_icon_name(), size);
+        debug("Theme icon %s %d not found.", get_icon_name(), size);
         return icon;
     }
 
     private void lookup_icons(bool refresh=false)
     {
         if (data_dir == null || icons_set && !refresh)
-            return;
+        return;
 
         icons = null;
         var icons_dir = data_dir.get_child("icons");
@@ -350,7 +350,7 @@ public class WebApp : GLib.Object
                 var path = icons_dir.get_child(file_info.get_name()).get_path();
                 var format = Gdk.Pixbuf.get_file_info(path, out width, out height);
                 if (format == null)
-                    continue;
+                continue;
 
                 var size = path.has_suffix(".svg") ? 0 : int.min(width, height);
                 icons.prepend({path, size});
@@ -359,7 +359,7 @@ public class WebApp : GLib.Object
         catch (GLib.Error e)
         {
             if (!(e is GLib.IOError.NOT_FOUND))
-                warning("Enumeration of icons failed (%s): %s", icons_dir.get_path(), e.message);
+            warning("Enumeration of icons failed (%s): %s", icons_dir.get_path(), e.message);
         }
 
         icons.sort(IconInfo.compare);
@@ -392,11 +392,11 @@ public class WebApp : GLib.Object
             return_val_if_fail(icon1 != null && icon2 != null, 0);
 
             if (icon1.size == icon2.size)
-                return 0;
+            return 0;
             if (icon1.size <= 0)
-                return 1;
+            return 1;
             if (icon2.size <= 0)
-                return -1;
+            return -1;
 
             return icon1.size - icon2.size;
         }

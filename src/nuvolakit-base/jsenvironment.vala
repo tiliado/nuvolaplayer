@@ -132,7 +132,7 @@ public class JsEnvironment: GLib.Object, JSExecutor
         throw new JSError.WRONG_TYPE("'%s' is not a function.'", name);
 
         //~         debug("Args before: %s", args.print(true));
-            (unowned JS.Value)[] params;
+        (unowned JS.Value)[] params;
         var size = 0;
         if (args != null)
         {

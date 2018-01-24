@@ -121,10 +121,10 @@ public class AppRunnerController: Drtgtk.Application
     public signal void info_bar_response(string id, int reponse_id);
 
     public override bool dbus_register(DBusConnection conn, string object_path)
-        throws GLib.Error
+    throws GLib.Error
     {
         if (!base.dbus_register(conn, object_path))
-            return false;
+        return false;
         dbus_api = new AppDbusApi(this);
         dbus_api_id = conn.register_object(object_path, dbus_api);
         return true;
@@ -245,12 +245,12 @@ public class AppRunnerController: Drtgtk.Application
         actions_helper = new ActionsHelper(actions, config);
         unowned ActionsHelper ah = actions_helper;
         Drtgtk.Action[] actions_spec = {
-        //          Action(group, scope, name, label?, mnemo_label?, icon?, keybinding?, callback?)
-        ah.simple_action("main", "app", Actions.ACTIVATE, "Activate main window", null, null, null, do_activate),
-        ah.simple_action("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
-        ah.simple_action("main", "app", Actions.ABOUT, "About", "_About", null, null, do_about),
-        ah.simple_action("main", "app", Actions.WELCOME, "Welcome screen", null, null, null, do_show_welcome_dialog),
-        ah.simple_action("main", "app", Actions.HELP, "Help", "_Help", null, "F1", do_help),
+            //          Action(group, scope, name, label?, mnemo_label?, icon?, keybinding?, callback?)
+            ah.simple_action("main", "app", Actions.ACTIVATE, "Activate main window", null, null, null, do_activate),
+            ah.simple_action("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
+            ah.simple_action("main", "app", Actions.ABOUT, "About", "_About", null, null, do_about),
+            ah.simple_action("main", "app", Actions.WELCOME, "Welcome screen", null, null, null, do_show_welcome_dialog),
+            ah.simple_action("main", "app", Actions.HELP, "Help", "_Help", null, "F1", do_help),
         };
         actions.add_actions(actions_spec);
         set_app_menu_items({Actions.HELP, Actions.ABOUT, Actions.QUIT});
@@ -349,20 +349,20 @@ public class AppRunnerController: Drtgtk.Application
         ipc_bus.router.add_method("/nuvola/core/get-component-info", Drt.RpcFlags.READABLE,
             "Get info about component.",
             handle_get_component_info, {
-            new Drt.StringParam("name", true, false, null, "Component name.")
+                new Drt.StringParam("name", true, false, null, "Component name.")
             });
         ipc_bus.router.add_method("/nuvola/core/toggle-component-active", Drt.RpcFlags.WRITABLE|Drt.RpcFlags.PRIVATE,
             "Set whether the component is active.",
             handle_toggle_component_active, {
-            new Drt.StringParam("name", true, false, null, "Component name."),
-            new Drt.BoolParam("name", true, false, "Component active state.")
+                new Drt.StringParam("name", true, false, null, "Component name."),
+                new Drt.BoolParam("name", true, false, "Component active state.")
             });
         ipc_bus.router.add_method("/nuvola/show-info-bar", Drt.RpcFlags.WRITABLE|Drt.RpcFlags.PRIVATE,
             "Show info bar.",
             handle_show_info_bar, {
-            new Drt.StringParam("id", true, false, null, "Info bar id."),
-            new Drt.DoubleParam("type", true, null, "Info bar type."),
-            new Drt.StringParam("name", true, false, null, "Info bar text.")
+                new Drt.StringParam("id", true, false, null, "Info bar id."),
+                new Drt.DoubleParam("type", true, null, "Info bar type."),
+                new Drt.StringParam("name", true, false, null, "Info bar text.")
             });
 
         return true;
@@ -404,11 +404,11 @@ public class AppRunnerController: Drtgtk.Application
         webkit_options = (web_options as WebkitOptions) ?? new WebkitOptions(app_storage);
         web_engine = web_options.create_web_engine(web_app);
         if (web_options.get_name() == "Chromium") {
-            show_info_bar("engine-warning", Gtk.MessageType.WARNING,
-            "Experimental %s web engine is in use. <a href=\"%s\">More info</a>. <a href=\"%s\">Report bug</a>.".printf(
+            string msg = "Experimental %s web engine is in use. <a href=\"%s\">More info</a>. <a href=\"%s\">Report bug</a>.".printf(
                 web_options.get_name_version(),
                 "https://medium.com/nuvola-news/nuvola-chromium-port-status-3b1648b29c77",
-                "https://github.com/tiliado/nuvolaruntime/issues/372"));
+                "https://github.com/tiliado/nuvolaruntime/issues/372");
+            show_info_bar("engine-warning", Gtk.MessageType.WARNING, msg);
         }
         web_worker_data["JS_ENGINE"] = web_options.get_name_version();
         web_worker_data["JS_ENGINE_NAME"] = web_options.get_name();
@@ -456,17 +456,17 @@ public class AppRunnerController: Drtgtk.Application
         main_window.sidebar.remove_page.connect_after(on_sidebar_page_removed);
 
         if (config.get_bool(ConfigKey.WINDOW_SIDEBAR_VISIBLE))
-            main_window.sidebar.show();
+        main_window.sidebar.show();
         else
-            main_window.sidebar.hide();
+        main_window.sidebar.hide();
         main_window.sidebar_position = (int) config.get_int64(ConfigKey.WINDOW_SIDEBAR_POS);
         var sidebar_page = config.get_string(ConfigKey.WINDOW_SIDEBAR_PAGE);
         if (sidebar_page != null)
-            main_window.sidebar.page = sidebar_page;
+        main_window.sidebar.page = sidebar_page;
         main_window.notify["sidebar-position"].connect_after((o, p) =>
-        {
-            config.set_int64(ConfigKey.WINDOW_SIDEBAR_POS, (int64) main_window.sidebar_position);
-        });
+            {
+                config.set_int64(ConfigKey.WINDOW_SIDEBAR_POS, (int64) main_window.sidebar_position);
+            });
         main_window.sidebar.notify["visible"].connect_after(on_sidebar_visibility_changed);
         main_window.sidebar.page_changed.connect(on_sidebar_page_changed);
         web_engine.get_main_web_view().show();
@@ -479,27 +479,27 @@ public class AppRunnerController: Drtgtk.Application
     public override void activate()
     {
         if (main_window != null)
-            main_window.present();
+        main_window.present();
         else if (startup_window != null)
-            startup_window.present();
+        startup_window.present();
         else
-            start();
+        start();
     }
 
     private void append_actions()
     {
         unowned ActionsHelper ah = actions_helper;
         Drtgtk.Action[] actions_spec = {
-        ah.simple_action("main", "app", Actions.PREFERENCES, "Preferences", "_Preferences", null, null, do_preferences),
-        ah.toggle_action("main", "win", Actions.TOGGLE_SIDEBAR, "Show sidebar", "Show _sidebar", null, null, do_toggle_sidebar, config.get_value(ConfigKey.WINDOW_SIDEBAR_VISIBLE)),
-        ah.simple_action("go", "app", Actions.GO_HOME, "Home", "_Home", "go-home", "<alt>Home", web_engine.go_home),
-        ah.simple_action("go", "app", Actions.GO_BACK, "Back", "_Back", "go-previous", "<alt>Left", web_engine.go_back),
-        ah.simple_action("go", "app", Actions.GO_FORWARD, "Forward", "_Forward", "go-next", "<alt>Right", web_engine.go_forward),
-        ah.simple_action("go", "app", Actions.GO_RELOAD, "Reload", "_Reload", "view-refresh", "<ctrl>R", web_engine.reload),
-        ah.simple_action("go", "app", Actions.GO_LOAD_URL, "Load URL...", null, null, "<ctrl>L", do_load_url),
-        ah.simple_action("view", "win", Actions.ZOOM_IN, "Zoom in", null, "zoom-in", "<ctrl>plus", web_engine.zoom_in),
-        ah.simple_action("view", "win", Actions.ZOOM_OUT, "Zoom out", null, "zoom-out", "<ctrl>minus", web_engine.zoom_out),
-        ah.simple_action("view", "win", Actions.ZOOM_RESET, "Original zoom", null, "zoom-original", "<ctrl>0", web_engine.zoom_reset),
+            ah.simple_action("main", "app", Actions.PREFERENCES, "Preferences", "_Preferences", null, null, do_preferences),
+            ah.toggle_action("main", "win", Actions.TOGGLE_SIDEBAR, "Show sidebar", "Show _sidebar", null, null, do_toggle_sidebar, config.get_value(ConfigKey.WINDOW_SIDEBAR_VISIBLE)),
+            ah.simple_action("go", "app", Actions.GO_HOME, "Home", "_Home", "go-home", "<alt>Home", web_engine.go_home),
+            ah.simple_action("go", "app", Actions.GO_BACK, "Back", "_Back", "go-previous", "<alt>Left", web_engine.go_back),
+            ah.simple_action("go", "app", Actions.GO_FORWARD, "Forward", "_Forward", "go-next", "<alt>Right", web_engine.go_forward),
+            ah.simple_action("go", "app", Actions.GO_RELOAD, "Reload", "_Reload", "view-refresh", "<ctrl>R", web_engine.reload),
+            ah.simple_action("go", "app", Actions.GO_LOAD_URL, "Load URL...", null, null, "<ctrl>L", do_load_url),
+            ah.simple_action("view", "win", Actions.ZOOM_IN, "Zoom in", null, "zoom-in", "<ctrl>plus", web_engine.zoom_in),
+            ah.simple_action("view", "win", Actions.ZOOM_OUT, "Zoom out", null, "zoom-out", "<ctrl>minus", web_engine.zoom_out),
+            ah.simple_action("view", "win", Actions.ZOOM_RESET, "Original zoom", null, "zoom-original", "<ctrl>0", web_engine.zoom_reset),
         };
         actions.add_actions(actions_spec);
         actions.get_action(Actions.GO_FORWARD).enabled = web_engine.can_go_forward;
@@ -623,9 +623,9 @@ public class AppRunnerController: Drtgtk.Application
             {
                 var new_value = new_values.get(key);
                 if (new_value == null)
-                    critical("New value '%s' not found", key);
+                critical("New value '%s' not found", key);
                 else
-                    config.set_value(key, new_value);
+                config.set_value(key, new_value);
             }
             NetworkProxyType type;
             string? host;
@@ -673,9 +673,9 @@ public class AppRunnerController: Drtgtk.Application
     {
         var sidebar = main_window.sidebar;
         if (sidebar.visible)
-            sidebar.hide();
+        sidebar.hide();
         else
-            sidebar.show();
+        sidebar.show();
     }
 
     private void do_help()
@@ -747,9 +747,9 @@ public class AppRunnerController: Drtgtk.Application
         foreach (var component in components)
         {
             if (!component.is_membership_ok(tiliado_activation))
-                component.toggle(false);
+            component.toggle(false);
             if (component.available && component.enabled)
-                component.auto_load();
+            component.auto_load();
             debug("Component %s (%s) %s", component.id, component.name,
                 component.available && component.enabled ? "enabled": "not enabled");
             component.notify["enabled"].connect_after(on_component_enabled_changed);
@@ -836,7 +836,7 @@ public class AppRunnerController: Drtgtk.Application
     private void on_window_is_active_changed(Object o, ParamSpec p)
     {
         if (!main_window.is_active)
-            return;
+        return;
 
         #if !NUVOLA_LITE
         try
@@ -854,7 +854,7 @@ public class AppRunnerController: Drtgtk.Application
     private bool on_configure_event(Gdk.EventConfigure event)
     {
         if (configure_event_cb_id != 0)
-            Source.remove(configure_event_cb_id);
+        Source.remove(configure_event_cb_id);
         configure_event_cb_id = Timeout.add(200, on_configure_event_cb);
         return false;
     }
@@ -1024,9 +1024,9 @@ public class AppRunnerController: Drtgtk.Application
             try
             {
                 if (web_engine.web_worker.ready)
-                    can_quit = web_engine.web_worker.send_data_request_bool("QuitRequest", "approved", can_quit);
+                can_quit = web_engine.web_worker.send_data_request_bool("QuitRequest", "approved", can_quit);
                 else
-                    debug("WebWorker not ready");
+                debug("WebWorker not ready");
             }
             catch (GLib.Error e)
             {
@@ -1036,9 +1036,9 @@ public class AppRunnerController: Drtgtk.Application
             {
 
                 if (web_engine.ready)
-                    can_quit = web_engine.send_data_request_bool("QuitRequest", "approved", can_quit);
+                can_quit = web_engine.send_data_request_bool("QuitRequest", "approved", can_quit);
                 else
-                    debug("WebEngine not ready");
+                debug("WebEngine not ready");
             }
             catch (GLib.Error e)
             {
@@ -1089,9 +1089,9 @@ public class AppRunnerController: Drtgtk.Application
         {
             var new_value = new_values.get(key);
             if (new_value == null)
-                critical("New values '%s'' not found", key);
+            critical("New values '%s'' not found", key);
             else
-                config.set_value(key, new_value);
+            config.set_value(key, new_value);
         }
 
         web_engine.init_app_runner();
@@ -1102,7 +1102,7 @@ public class AppRunnerController: Drtgtk.Application
         var visible = main_window.sidebar.visible;
         config.set_bool(ConfigKey.WINDOW_SIDEBAR_VISIBLE, visible);
         if (visible)
-            main_window.sidebar_position = (int) config.get_int64(ConfigKey.WINDOW_SIDEBAR_POS);
+        main_window.sidebar_position = (int) config.get_int64(ConfigKey.WINDOW_SIDEBAR_POS);
 
         actions.get_action(Actions.TOGGLE_SIDEBAR).state = new Variant.boolean(visible);
     }
@@ -1111,7 +1111,7 @@ public class AppRunnerController: Drtgtk.Application
     {
         var page = main_window.sidebar.page;
         if (page != null)
-            config.set_string(ConfigKey.WINDOW_SIDEBAR_PAGE, page);
+        config.set_string(ConfigKey.WINDOW_SIDEBAR_PAGE, page);
     }
 
     private void on_sidebar_page_added(Sidebar sidebar, string name, string label, Gtk.Widget child)

@@ -34,16 +34,16 @@ public class TiliadoActivationClient : GLib.Object, TiliadoActivation
     {
         this.master_conn = master_conn;
         subscribe.begin((o, res) =>
-        {
-            try
             {
-                subscribe.end(res);
-            }
-            catch (GLib.Error e)
-            {
-                warning("Failed to subscribe to notifications. %s", e.message);
-            }
-        });
+                try
+                {
+                    subscribe.end(res);
+                }
+                catch (GLib.Error e)
+                {
+                    warning("Failed to subscribe to notifications. %s", e.message);
+                }
+            });
         this.master_conn.router.notification.connect(on_notification_received);
     }
 
@@ -57,16 +57,16 @@ public class TiliadoActivationClient : GLib.Object, TiliadoActivation
     private static void unsubscribe(Drt.RpcChannel master_conn)
     {
         unsubscribe_async.begin(master_conn, (o, res) =>
-        {
-            try
             {
-                unsubscribe_async.end(res);
-            }
-            catch (GLib.Error e)
-            {
-                warning("Failed to unsubscribe to notifications. %s", e.message);
-            }
-        });
+                try
+                {
+                    unsubscribe_async.end(res);
+                }
+                catch (GLib.Error e)
+                {
+                    warning("Failed to unsubscribe to notifications. %s", e.message);
+                }
+            });
     }
 
     private async void subscribe() throws GLib.Error
@@ -119,7 +119,7 @@ public class TiliadoActivationClient : GLib.Object, TiliadoActivation
     public TiliadoApi2.User? get_user_info()
     {
         if (cached_user_set)
-            return cached_user;
+        return cached_user;
 
         string METHOD = "/tiliado-activation/get-user-info";
         try
@@ -137,64 +137,64 @@ public class TiliadoActivationClient : GLib.Object, TiliadoActivation
     {
         string METHOD = "/tiliado-activation/update-user-info";
         master_conn.call.begin(METHOD, null, (o, res) =>
-        {
-            try
             {
-                master_conn.call.end(res);
-            }
-            catch (GLib.Error e)
-            {
-                warning("%s call failed: %s", METHOD, e.message);
-            }
-        });
+                try
+                {
+                    master_conn.call.end(res);
+                }
+                catch (GLib.Error e)
+                {
+                    warning("%s call failed: %s", METHOD, e.message);
+                }
+            });
     }
 
     public void start_activation()
     {
         string METHOD = "/tiliado-activation/start-activation";
         master_conn.call.begin(METHOD, null, (o, res) =>
-        {
-            try
             {
-                master_conn.call.end(res);
-            }
-            catch (GLib.Error e)
-            {
-                warning("%s call failed: %s", METHOD, e.message);
-            }
-        });
+                try
+                {
+                    master_conn.call.end(res);
+                }
+                catch (GLib.Error e)
+                {
+                    warning("%s call failed: %s", METHOD, e.message);
+                }
+            });
     }
 
     public void cancel_activation()
     {
         string METHOD = "/tiliado-activation/cancel-activation";
         master_conn.call.begin(METHOD, null, (o, res) =>
-        {
-            try
             {
-                master_conn.call.end(res);
-            }
-            catch (GLib.Error e)
-            {
-                warning("%s call failed: %s", METHOD, e.message);
-            }
-        });
+                try
+                {
+                    master_conn.call.end(res);
+                }
+                catch (GLib.Error e)
+                {
+                    warning("%s call failed: %s", METHOD, e.message);
+                }
+            });
     }
 
     public void drop_activation()
     {
         string METHOD = "/tiliado-activation/drop-activation";
         master_conn.call.begin(METHOD, null, (o, res) =>
-        {
-            try
             {
-                master_conn.call.end(res);
-            }
-            catch (GLib.Error e)
-            {
-                warning("%s call failed: %s", METHOD, e.message);
-            }
-        });
+                try
+                {
+                    master_conn.call.end(res);
+                }
+                catch (GLib.Error e)
+                {
+                    warning("%s call failed: %s", METHOD, e.message);
+                }
+            });
     }
 }
 

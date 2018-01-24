@@ -72,7 +72,7 @@ public class MediaKeys: GLib.Object, MediaKeysInterface
     public void manage()
     {
         if (managed)
-            return;
+        return;
 
         // https://bugzilla.gnome.org/show_bug.cgi?id=781326
         gnome_media_keys_daemon_1 = true;
@@ -87,7 +87,7 @@ public class MediaKeys: GLib.Object, MediaKeysInterface
     public void unmanage()
     {
         if (!managed)
-            return;
+        return;
 
         if (gnome_media_keys == null)
         {
@@ -128,7 +128,7 @@ public class MediaKeys: GLib.Object, MediaKeysInterface
         }
 
         if (gnome_media_keys != null)
-            return;
+        return;
 
         ungrab_media_keys();
         if (!grab_gnome_media_keys(name))
@@ -141,12 +141,12 @@ public class MediaKeys: GLib.Object, MediaKeysInterface
     private bool grab_gnome_media_keys(string dbus_name)
     {
         if (debug_keys)
-            return false;
+        return false;
         try
         {
             gnome_media_keys = Bus.get_proxy_sync(BusType.SESSION,
-            dbus_name,
-            "/org/gnome/SettingsDaemon/MediaKeys");
+                dbus_name,
+                "/org/gnome/SettingsDaemon/MediaKeys");
             /* Vala includes "return false" if DBus method call fails! */
             gnome_media_keys.grab_media_player_keys(app_id, 0);
             gnome_media_keys.media_player_key_pressed.connect(on_media_key_pressed);
@@ -175,7 +175,7 @@ public class MediaKeys: GLib.Object, MediaKeysInterface
         if (!gnome_media_keys_daemon_1 && !gnome_media_keys_daemon_2)
         {
             if (gnome_media_keys != null)
-                gnome_media_keys.media_player_key_pressed.disconnect(on_media_key_pressed);
+            gnome_media_keys.media_player_key_pressed.disconnect(on_media_key_pressed);
             gnome_media_keys = null;
             grab_media_keys();
         }
@@ -185,7 +185,7 @@ public class MediaKeys: GLib.Object, MediaKeysInterface
     {
         debug("Media key pressed: %s, %s", app_name, key);
         if (app_name != app_id)
-            return;
+        return;
         media_key_pressed(key);
     }
 
@@ -197,7 +197,7 @@ public class MediaKeys: GLib.Object, MediaKeysInterface
         debug("Grabbing media keys with X key grabber");
         var keys = keymap.get_keys();
         foreach (var key in keys)
-            key_grabber.grab(key, true);
+        key_grabber.grab(key, true);
         key_grabber.keybinding_pressed.connect(on_keybinding_pressed);
     }
 
@@ -206,14 +206,14 @@ public class MediaKeys: GLib.Object, MediaKeysInterface
         key_grabber.keybinding_pressed.disconnect(on_keybinding_pressed);
         var keys = keymap.get_keys();
         foreach (var key in keys)
-            key_grabber.ungrab(key);
+        key_grabber.ungrab(key);
     }
 
     private void on_keybinding_pressed(string accelerator, uint32 time)
     {
         var name = keymap[accelerator];
         if (name != null)
-            media_key_pressed(name);
+        media_key_pressed(name);
     }
 }
 

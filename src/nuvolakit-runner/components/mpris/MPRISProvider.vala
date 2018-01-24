@@ -49,7 +49,7 @@ public class MPRISProvider
         owner_id = Bus.own_name(BusType.SESSION, bus_name, BusNameOwnerFlags.NONE,
             on_bus_acquired, on_name_acquired, on_name_lost);
         if (owner_id == 0)
-            critical("Unable to obtain bus name %s", bus_name);
+        critical("Unable to obtain bus name %s", bus_name);
     }
 
     public void stop()
@@ -63,7 +63,7 @@ public class MPRISProvider
         if (conn != null)
         {
             foreach (var registration_id in registered_objects)
-                conn.unregister_object(registration_id);
+            conn.unregister_object(registration_id);
             conn = null;
         }
     }

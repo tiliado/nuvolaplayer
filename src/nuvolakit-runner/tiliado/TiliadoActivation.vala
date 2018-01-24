@@ -53,10 +53,10 @@ public interface TiliadoActivation : GLib.Object
         TiliadoApi2.User? user = null;
         var loop = new MainLoop();
         var handler_id = user_info_updated.connect((o, u) =>
-        {
-            user = u;
-            loop.quit();
-        });
+            {
+                user = u;
+                loop.quit();
+            });
         update_user_info();
         loop.run();
         disconnect(handler_id);
@@ -73,7 +73,7 @@ public interface TiliadoActivation : GLib.Object
     {
         var user = get_user_info();
         if (user == null)
-            return TiliadoMembership.NONE == membership;
+        return TiliadoMembership.NONE == membership;
         return user.membership >= membership;
     }
 }

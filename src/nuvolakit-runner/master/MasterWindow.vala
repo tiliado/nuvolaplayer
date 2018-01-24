@@ -83,7 +83,7 @@ public class MasterWindow : Drtgtk.ApplicationWindow
         var was_empty = stack.visible_child == null;
         stack.add_titled(page, name, title);
         if (was_empty)
-            update();
+        update();
     }
 
     private void update_title(string? title=null)
@@ -97,7 +97,7 @@ public class MasterWindow : Drtgtk.ApplicationWindow
         string? name = null;
         string? title = null;
         if (child != null)
-            stack.child_get(child, "name", out name, "title", out title);
+        stack.child_get(child, "name", out name, "title", out title);
         update_title(title);
         page_changed(child, name, title);
     }

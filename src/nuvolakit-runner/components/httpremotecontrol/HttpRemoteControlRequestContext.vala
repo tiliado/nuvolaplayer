@@ -60,7 +60,7 @@ public class RequestContext
         msg.set_response(
             "text/html", Soup.MemoryUse.COPY,
             "<html><head><title>404</title></head><body><h1>404</h1><p>%s</p></body></html>".printf(
-               msg.uri.to_string(false)).data);
+                msg.uri.to_string(false)).data);
         msg.status_code = 404;
     }
 
@@ -78,9 +78,9 @@ public class RequestContext
         }
 
         if (mime_type == null)
-            mime_type = "application/octet-stream";
+        mime_type = "application/octet-stream";
         else if (mime_type == "text/plain")
-            mime_type += "; charset=utf8";
+        mime_type += "; charset=utf8";
         try
         {
             uint8[] data;

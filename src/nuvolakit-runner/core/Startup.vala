@@ -73,9 +73,9 @@ private int launch_app_runner(File web_app_dir, string? api_token, string[] argv
     move_old_xdg_dirs(new Drt.XdgStorage.for_project(Nuvola.get_old_id()), storage);
     var web_app = new WebApp.from_dir(web_app_dir);
     var app_storage = new WebAppStorage(
-          storage.user_config_dir.get_child(WEB_APP_DATA_SUBDIR).get_child(web_app.id),
-          storage.user_data_dir.get_child(WEB_APP_DATA_SUBDIR).get_child(web_app.id),
-          storage.user_cache_dir.get_child(WEB_APP_DATA_SUBDIR).get_child(web_app.id));
+        storage.user_config_dir.get_child(WEB_APP_DATA_SUBDIR).get_child(web_app.id),
+        storage.user_data_dir.get_child(WEB_APP_DATA_SUBDIR).get_child(web_app.id),
+        storage.user_cache_dir.get_child(WEB_APP_DATA_SUBDIR).get_child(web_app.id));
     var controller = new Nuvola.AppRunnerController(storage, web_app, app_storage, api_token, api_token == null);
     var return_code = controller.run(argv);
     controller.shutdown_engines();

@@ -52,7 +52,7 @@ public class LyricsFetcherCache : GLib.Object, LyricsFetcher{
         var fixed_song = escape_name(song.down());
 
         if (fixed_artist == "" || fixed_song == "")
-            throw new LyricsError.NOT_FOUND(@"Song $song was not found in cache");
+        throw new LyricsError.NOT_FOUND(@"Song $song was not found in cache");
 
         var cached = lyrics_cache.get_child(FILE_FORMAT.printf(fixed_artist, fixed_song));
         try
@@ -61,7 +61,7 @@ public class LyricsFetcherCache : GLib.Object, LyricsFetcher{
             yield cached.load_contents_async(null, out contents, null);
             var lyrics = (string) (owned) contents;
             if (lyrics != null && lyrics != "")
-                return lyrics;
+            return lyrics;
         }
         catch (GLib.Error e)
         {
@@ -87,7 +87,7 @@ public class LyricsFetcherCache : GLib.Object, LyricsFetcher{
         var fixed_song = escape_name(song.down());
 
         if (fixed_artist == "" || fixed_song == "")
-            return;
+        return;
 
         try
         {

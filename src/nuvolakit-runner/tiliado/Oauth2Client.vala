@@ -59,7 +59,7 @@ public class Oauth2Client : GLib.Object
     {
         soup = new Soup.Session();
         if (debug_soup)
-            soup.add_feature(new Soup.Logger(Soup.LoggerLogLevel.BODY, -1));
+        soup.add_feature(new Soup.Logger(Soup.LoggerLogLevel.BODY, -1));
         this.client_id = client_id;
         this.client_secret = client_secret;
         this.api_endpoint = api_endpoint;
@@ -82,16 +82,16 @@ public class Oauth2Client : GLib.Object
     }
 
     public virtual async Drt.JsonObject call(string? method, HashTable<string, string>? params=null,
-    HashTable<string, string>? headers=null)
+        HashTable<string, string>? headers=null)
     throws Oauth2Error
     {
         var uri = new Soup.URI(api_endpoint + (method ?? ""));
         if (params != null)
-            uri.set_query_from_form(params);
+        uri.set_query_from_form(params);
         var msg = new Soup.Message.from_uri("GET", uri);
         debug("Oauth2 GET %s", uri.to_string(false));
         if (headers != null)
-            headers.for_each(msg.request_headers.replace);
+        headers.for_each(msg.request_headers.replace);
         return yield send_message(msg, true);
     }
 
@@ -99,12 +99,12 @@ public class Oauth2Client : GLib.Object
     throws Oauth2Error
     {
         if (token == null || token.refresh_token == null)
-            return false;
+        return false;
         var msg = Soup.Form.request_new("POST", token_endpoint, "grant_type", "refresh_token",
-                "refresh_token", token.refresh_token, "client_id", client_id);
+            "refresh_token", token.refresh_token, "client_id", client_id);
         if (client_secret != null)
-            msg.request_headers.replace("Authorization",
-                "Basic " + Base64.encode("%s:%s".printf(client_id, client_secret).data));
+        msg.request_headers.replace("Authorization",
+            "Basic " + Base64.encode("%s:%s".printf(client_id, client_secret).data));
         SourceFunc resume_cb = refresh_token.callback;
         soup.queue_message(msg, (s, m) => Idle.add((owned) resume_cb));
         yield;
@@ -125,9 +125,9 @@ public class Oauth2Client : GLib.Object
             string error_code; string? error_description;
             parse_error(response, out error_code, out error_description);
             if (error_description == null)
-                error_description = error_code;
+            error_description = error_code;
             else
-                error_description = "%s: %s".printf(error_code, error_description);
+            error_description = "%s: %s".printf(error_code, error_description);
 
             switch (error_code)
             {
@@ -168,10 +168,10 @@ public class Oauth2Client : GLib.Object
     public void start_device_code_grant(string device_code_endpoint)
     {
         var msg = Soup.Form.request_new("POST", device_code_endpoint, "response_type", "tiliado_device_code",
-                "client_id", client_id);
+            "client_id", client_id);
         if (client_secret != null)
-            msg.request_headers.replace("Authorization",
-                "Basic " + Base64.encode("%s:%s".printf(client_id, client_secret).data));
+        msg.request_headers.replace("Authorization",
+            "Basic " + Base64.encode("%s:%s".printf(client_id, client_secret).data));
 
         soup.send_message(msg);
         unowned string response_data = (string) msg.response_body.flatten().data;
@@ -209,7 +209,7 @@ public class Oauth2Client : GLib.Object
         }
         int interval;
         if (!response.get_int("interval", out interval))
-            interval = 5;
+        interval = 5;
 
         this.device_code_endpoint = device_code_endpoint;
         this.device_code = device_code;
@@ -254,7 +254,7 @@ public class Oauth2Client : GLib.Object
     throws Oauth2Error
     {
         if (token != null)
-            msg.request_headers.replace("Authorization", "%s %s".printf(token.token_type, token.access_token));
+        msg.request_headers.replace("Authorization", "%s %s".printf(token.token_type, token.access_token));
         SourceFunc resume_cb = send_message.callback;
         soup.queue_message(msg, (s, m ) => {Idle.add((owned) resume_cb);});
         yield;
@@ -271,7 +271,7 @@ public class Oauth2Client : GLib.Object
                 {
                     message("Failed to send a message. Will try refreshing token. Reason: %s", http_error);
                     if (yield refresh_token())
-                        return yield send_message(msg, false);
+                    return yield send_message(msg, false);
                 }
                 throw new Oauth2Error.HTTP_UNAUTHORIZED(http_error);
             default:
@@ -292,17 +292,17 @@ public class Oauth2Client : GLib.Object
     private bool device_code_grant_cb()
     {
         if (device_code_endpoint == null || device_code == null)
-            return false;
+        return false;
 
         var msg = Soup.Form.request_new("POST", device_code_endpoint, "grant_type", "tiliado_device_code",
-                "client_id", client_id, "code", device_code);
+            "client_id", client_id, "code", device_code);
         if (client_secret != null)
-            msg.request_headers.replace("Authorization",
-                "Basic " + Base64.encode("%s:%s".printf(client_id, client_secret).data));
+        msg.request_headers.replace("Authorization",
+            "Basic " + Base64.encode("%s:%s".printf(client_id, client_secret).data));
         soup.send_message(msg);
 
         if (device_code_endpoint == null || device_code == null)
-            return false;
+        return false;
 
         unowned string response_data = (string) msg.response_body.flatten().data;
         Drt.JsonObject response;

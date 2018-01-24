@@ -63,7 +63,7 @@ public class MPRISPlayer : GLib.Object
         set
         {
             if (value == 0.0)
-                pause();
+            pause();
         }
     }
     public double minimum_rate {get{return 1.0;}}
@@ -120,7 +120,7 @@ public class MPRISPlayer : GLib.Object
     public void seek(int64 offset)
     {
         if (can_seek)
-            player.seek(player.track_position + offset);
+        player.seek(player.track_position + offset);
     }
 
     public void SetPosition(ObjectPath track_id, int64 position)
@@ -149,7 +149,7 @@ public class MPRISPlayer : GLib.Object
         case "track-length":
             var new_metadata = create_metadata();
             if (new_metadata.size() == 0 && metadata.size() == 0)
-                return;
+            return;
             pending_update["Metadata"] = metadata = new_metadata;
             break;
         case "track-position":
@@ -157,50 +157,50 @@ public class MPRISPlayer : GLib.Object
             position = player.track_position;
             pending_update["Position"] = position;
             if (delta > 2 || delta < -2)
-                seeked(position);
+            seeked(position);
             break;
         case "volume":
             if (_volume != player.volume)
-                pending_update["Volume"] = _volume = player.volume;
+            pending_update["Volume"] = _volume = player.volume;
             break;
         case "state":
             if (update_can_play())
-                pending_update["CanPlay"] = can_play;
+            pending_update["CanPlay"] = can_play;
             if (update_can_pause())
-                pending_update["CanPause"] = can_pause;
+            pending_update["CanPause"] = can_pause;
             var status = map_playback_state();
             if (playback_status == status)
-                return;
+            return;
             pending_update["PlaybackStatus"] = playback_status = status;
             break;
         case "can-go-next":
             if (can_go_next == player.can_go_next)
-                return;
+            return;
             pending_update["CanGoNext"] = can_go_next = player.can_go_next;
             break;
         case "can-go-previous":
             if (can_go_previous == player.can_go_previous)
-                return;
+            return;
             pending_update["CanGoPrevious"] = can_go_previous = player.can_go_previous;
             break;
         case "can-play":
             if (!update_can_play())
-                return;
+            return;
             pending_update["CanPlay"] = can_play;
             break;
         case "can-pause":
             if (!update_can_pause())
-                return;
+            return;
             pending_update["CanPause"] = can_pause;
             break;
         case "can-rate":
             if (nuvola_can_rate == player.can_rate)
-                return;
+            return;
             pending_update["NuvolaCanRate"] = nuvola_can_rate = player.can_rate;
             break;
         case "can-seek":
             if (can_seek == player.can_seek)
-                return;
+            return;
             pending_update["CanSeek"] = can_seek = player.can_seek;
             break;
         default:
@@ -208,7 +208,7 @@ public class MPRISPlayer : GLib.Object
         }
 
         if (pending_update_id == 0)
-            pending_update_id = Timeout.add(300, update_cb);
+        pending_update_id = Timeout.add(300, update_cb);
     }
 
     private bool update_cb()
@@ -219,7 +219,7 @@ public class MPRISPlayer : GLib.Object
         unowned string name;
         unowned Variant value;
         while (iter.next(out name, out value))
-            builder.add("{sv}", name, value);
+        builder.add("{sv}", name, value);
         pending_update.remove_all();
         var invalid_builder = new VariantBuilder(new VariantType ("as"));
         var payload = new Variant("(sa{sv}as)", "org.mpris.MediaPlayer2.Player", builder, invalid_builder);
@@ -244,15 +244,15 @@ public class MPRISPlayer : GLib.Object
             metadata.insert("xesam:artist", artistArray);
         }
         if (player.album != null)
-            metadata.insert("xesam:album", player.album);
+        metadata.insert("xesam:album", player.album);
         if (player.title != null)
-            metadata.insert("xesam:title", player.title);
+        metadata.insert("xesam:title", player.title);
         if (player.artwork_file != null)
-            metadata.insert("mpris:artUrl", "file://" + player.artwork_file);
+        metadata.insert("mpris:artUrl", "file://" + player.artwork_file);
         if (player.rating >= 0.0)
-            metadata.insert("xesam:userRating", player.rating);
+        metadata.insert("xesam:userRating", player.rating);
         if (player.track_length > 0)
-            metadata.insert("mpris:length", new Variant.int64((int64) player.track_length));
+        metadata.insert("mpris:length", new Variant.int64((int64) player.track_length));
         if (metadata.size() > 0)
         {
             var hash = Checksum.compute_for_string(ChecksumType.MD5, "%s:%s:%s".printf(

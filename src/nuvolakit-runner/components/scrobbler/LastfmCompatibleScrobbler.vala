@@ -77,11 +77,11 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
 
         var response = yield send_request(HTTP_GET, params);
         if (!response.has_member("token"))
-            throw new AudioScrobblerError.WRONG_RESPONSE("%s: Response doesn't contain token member.", API_METHOD);
+        throw new AudioScrobblerError.WRONG_RESPONSE("%s: Response doesn't contain token member.", API_METHOD);
 
         token = response.get_string_member("token");
         if (token == null || token == "")
-            throw new AudioScrobblerError.WRONG_RESPONSE("%s: Response contains empty token member.", API_METHOD);
+        throw new AudioScrobblerError.WRONG_RESPONSE("%s: Response contains empty token member.", API_METHOD);
 
         return "%s?api_key=%s&token=%s".printf(auth_endpoint, api_key, token);
     }
@@ -102,18 +102,18 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
 
         var response = yield send_request(HTTP_GET, params);
         if (!response.has_member("session"))
-            throw new AudioScrobblerError.WRONG_RESPONSE("%s: Response doesn't contain session member.", API_METHOD);
+        throw new AudioScrobblerError.WRONG_RESPONSE("%s: Response doesn't contain session member.", API_METHOD);
 
         var session_member = response.get_object_member("session");
         if (!session_member.has_member("key"))
-            throw new AudioScrobblerError.WRONG_RESPONSE("%s: Response doesn't contain session.key member.", API_METHOD);
+        throw new AudioScrobblerError.WRONG_RESPONSE("%s: Response doesn't contain session.key member.", API_METHOD);
 
         var session_key = session_member.get_string_member("key");
         if (session_key == null || session_key == "")
-            throw new AudioScrobblerError.WRONG_RESPONSE("%s: Response contain empty session.key member.", API_METHOD);
+        throw new AudioScrobblerError.WRONG_RESPONSE("%s: Response contain empty session.key member.", API_METHOD);
 
         if (session_member.has_member("name"))
-            username = session_member.get_string_member("name");
+        username = session_member.get_string_member("name");
 
         session = session_key;
         token = null;
@@ -129,7 +129,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
     {
         const string API_METHOD = "user.getInfo";
         if (session == null)
-            throw new AudioScrobblerError.NO_SESSION("%s: There is no authorized session.", API_METHOD);
+        throw new AudioScrobblerError.NO_SESSION("%s: There is no authorized session.", API_METHOD);
 
         // http://www.last.fm/api/show/user.getInfo
         var params = new HashTable<string, string>(str_hash, str_equal);
@@ -138,13 +138,13 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
         params.insert("sk", session);
         var response = yield send_request(HTTP_GET, params);
         if (!response.has_member("user"))
-            throw new AudioScrobblerError.WRONG_RESPONSE("%s: Response doesn't contain user member.", API_METHOD);
+        throw new AudioScrobblerError.WRONG_RESPONSE("%s: Response doesn't contain user member.", API_METHOD);
         var user = response.get_object_member("user");
         if (!user.has_member("name"))
-            throw new AudioScrobblerError.WRONG_RESPONSE("%s: Response doesn't contain name member.", API_METHOD);
+        throw new AudioScrobblerError.WRONG_RESPONSE("%s: Response doesn't contain name member.", API_METHOD);
         username = user.get_string_member("name");
         if (username == null || username == "")
-            throw new AudioScrobblerError.WRONG_RESPONSE("%s: Response contains empty username.", API_METHOD);
+        throw new AudioScrobblerError.WRONG_RESPONSE("%s: Response contains empty username.", API_METHOD);
     }
 
     /**
@@ -169,7 +169,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
 
         var response = yield send_request(HTTP_POST, params, 20);
         if (!response.has_member("nowplaying"))
-            throw new AudioScrobblerError.WRONG_RESPONSE("%s: Response doesn't contain nowplaying member.", API_METHOD);
+        throw new AudioScrobblerError.WRONG_RESPONSE("%s: Response doesn't contain nowplaying member.", API_METHOD);
     }
 
     /**
@@ -181,7 +181,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
      * @throws AudioScrobblerError on failure
      */
     public async override void scrobble_track(string song, string artist, string? album, int64 timestamp)
-        throws AudioScrobblerError
+    throws AudioScrobblerError
     {
         return_if_fail(session != null);
         debug("%s scrobble: %s by %s from %s, %s", id, song, artist, album, timestamp.to_string());
@@ -194,11 +194,11 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
         params.insert("artist", artist);
         params.insert("timestamp", timestamp.to_string());
         if (album != null)
-            params.insert("album", album);
+        params.insert("album", album);
 
         var response = yield send_request(HTTP_POST, params, 20);
         if (!response.has_member("scrobbles"))
-            throw new AudioScrobblerError.WRONG_RESPONSE("Response doesn't contain scrobbles member.");
+        throw new AudioScrobblerError.WRONG_RESPONSE("Response doesn't contain scrobbles member.");
     }
 
     /**
@@ -235,9 +235,9 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
             {
                 SourceFunc resume = send_request.callback;
                 connection.queue_message(message, () =>
-                {
-                    Idle.add((owned) resume);
-                });
+                    {
+                        Idle.add((owned) resume);
+                    });
                 yield;
 
                 var response = (string) message.response_body.flatten().data;
@@ -262,7 +262,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
 
                 var root = parser.get_root();
                 if (root == null)
-                    throw new AudioScrobblerError.WRONG_RESPONSE("Empty response from the server.");
+                throw new AudioScrobblerError.WRONG_RESPONSE("Empty response from the server.");
                 var root_object = root.get_object();
                 if (root_object.has_member("error") && root_object.has_member("message"))
                 {
@@ -286,7 +286,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
             catch (AudioScrobblerError e)
             {
                 if (retry == 0 && !(e is AudioScrobblerError.RETRY))
-                    throw e;
+                throw e;
 
                 retry--;
                 warning("Retry: %s", e.message);

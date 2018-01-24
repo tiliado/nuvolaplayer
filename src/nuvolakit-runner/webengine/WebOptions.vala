@@ -68,7 +68,7 @@ public abstract class WebOptions : GLib.Object {
         if (user_agent != null) {
             agent = user_agent.strip();
             if (agent[0] == '\0')
-                agent = null;
+            agent = null;
         }
 
         if (agent != null) {

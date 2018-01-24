@@ -120,7 +120,7 @@ public class WelcomeScreen : Gtk.Grid
     private void on_load_changed(WebKit.WebView view, WebKit.LoadEvent event)
     {
         if (event == WebKit.LoadEvent.FINISHED)
-            set_web_view_height();
+        set_web_view_height();
     }
 
     private bool set_web_view_height()
@@ -129,9 +129,9 @@ public class WelcomeScreen : Gtk.Grid
         web_view.run_javascript.begin("""
             var bodyElm = document.body, htmlElm = document.documentElement;
             document.title = Math.max(
-                bodyElm.scrollHeight, bodyElm.offsetHeight,
-                htmlElm.clientHeight, htmlElm.scrollHeight, htmlElm.offsetHeight);
-            """, null, on_height_retrieved);
+            bodyElm.scrollHeight, bodyElm.offsetHeight,
+            htmlElm.clientHeight, htmlElm.scrollHeight, htmlElm.offsetHeight);
+            """            , null, on_height_retrieved);
         return true;
     }
 
@@ -144,7 +144,7 @@ public class WelcomeScreen : Gtk.Grid
             int width; int height;
             web_view.get_size_request(out width, out height);
             if (height < page_height && page_height > 100)
-                web_view.set_size_request(width, page_height);
+            web_view.set_size_request(width, page_height);
         }
         catch (GLib.Error e)
         {
@@ -163,7 +163,7 @@ public class WelcomeScreen : Gtk.Grid
     {
         var uri = decision.navigation_action.get_request().uri;
         if (!uri.has_prefix("http://") && !uri.has_prefix("https://") || uri == PATRONS_BOX_URI)
-            return false;
+        return false;
 
         show_uri(uri);
         decision.ignore();

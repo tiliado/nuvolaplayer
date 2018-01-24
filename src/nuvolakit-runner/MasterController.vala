@@ -55,7 +55,7 @@ public class MasterController : Drtgtk.Application {
     private bool initialized = false;
 
     public MasterController(Drt.Storage storage, WebAppRegistry? web_app_reg, string[] exec_cmd,
-    bool debuging=false) {
+        bool debuging=false) {
         base(Nuvola.get_app_uid(), Nuvola.get_app_name(), Nuvola.get_dbus_id(),
             ApplicationFlags.HANDLES_COMMAND_LINE);
         icon = Nuvola.get_app_icon();
@@ -208,13 +208,13 @@ public class MasterController : Drtgtk.Application {
             server.api.add_method("/nuvola/core/runner-started", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
                 null,
                 handle_runner_started, {
-                new Drt.StringParam("id", true, false, null, "Application id"),
-                new Drt.StringParam("token", true, false, null, "Application token"),
+                    new Drt.StringParam("id", true, false, null, "Application id"),
+                    new Drt.StringParam("token", true, false, null, "Application token"),
                 });
             server.api.add_method("/nuvola/core/runner-activated", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
                 null,
                 handle_runner_activated, {
-                new Drt.StringParam("id", true, false, null, "Application id"),
+                    new Drt.StringParam("id", true, false, null, "Application id"),
                 });
             server.api.add_method("/nuvola/core/get_top_runner", Drt.RpcFlags.READABLE, null, handle_get_top_runner, null);
             server.api.add_method("/nuvola/core/list_apps", Drt.RpcFlags.READABLE,
@@ -223,7 +223,7 @@ public class MasterController : Drtgtk.Application {
             server.api.add_method("/nuvola/core/get_app_info", Drt.RpcFlags.READABLE,
                 "Returns information about a web app",
                 handle_get_app_info, {
-                new Drt.StringParam("id", true, false, null, "Application id"),
+                    new Drt.StringParam("id", true, false, null, "Application id"),
                 });
             server.api.add_notification(APP_STARTED, Drt.RpcFlags.WRITABLE|Drt.RpcFlags.SUBSCRIBE,
                 "Emitted when a new app is launched.");
@@ -299,7 +299,7 @@ public class MasterController : Drtgtk.Application {
         var keys = app_runners_map.get_keys();
         keys.sort(string.collate);
         foreach (var app_id in keys)
-            builder.add_value(app_runners_map[app_id].query_meta());
+        builder.add_value(app_runners_map[app_id].query_meta());
         request.respond(builder.end());
     }
 
@@ -327,7 +327,7 @@ public class MasterController : Drtgtk.Application {
             var dialog = new Drtgtk.ErrorDialog(
                 "Web App Loading Error",
                 ("The web application with id '%s' has not been found.\n\n"
-                + "DBus Activation has ended with an error:\n%s").printf(app_id, e.message));
+                    + "DBus Activation has ended with an error:\n%s").printf(app_id, e.message));
             dialog.run();
             dialog.destroy();
             release();

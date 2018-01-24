@@ -59,10 +59,10 @@ public class WebAppRegistry: GLib.Object
         var app = apps[id];
 
         if (app != null)
-            message("Using web app %s, version %u.%u, data dir %s", app.name, app.version_major, app.version_minor,
-                app.data_dir == null ? "(null)" : app.data_dir.get_path());
+        message("Using web app %s, version %u.%u, data dir %s", app.name, app.version_major, app.version_minor,
+            app.data_dir == null ? "(null)" : app.data_dir.get_path());
         else
-            message("Web App %s not found.", id);
+        message("Web App %s not found.", id);
 
         return app;
     }
@@ -78,7 +78,7 @@ public class WebAppRegistry: GLib.Object
         HashTable<string,  WebApp> result = new HashTable<string, WebApp>(str_hash, str_equal);
         find_apps(user_storage, filter_id, result);
         foreach (var dir in system_storage)
-            find_apps(dir, filter_id, result);
+        find_apps(dir, filter_id, result);
         return result;
     }
 
@@ -95,14 +95,14 @@ public class WebAppRegistry: GLib.Object
                     string dirname = file_info.get_name();
                     var app_dir = directory.get_child(dirname);
                     if (app_dir.query_file_type(0) != FileType.DIRECTORY)
-                        continue;
+                    continue;
 
                     try
                     {
                         var app = new WebApp.from_dir(app_dir);
                         var id = app.id;
                         debug("Found web app %s at %s, version %u.%u",
-                        app.name, app_dir.get_path(), app.version_major, app.version_minor);
+                            app.name, app_dir.get_path(), app.version_major, app.version_minor);
 
                         if (filter_id == null || filter_id == id)
                         {
@@ -113,7 +113,7 @@ public class WebAppRegistry: GLib.Object
                             if(prev_app == null
                             || app.version_major > prev_app.version_major
                             || app.version_major == prev_app.version_major && app.version_minor > prev_app.version_minor)
-                                result[id] = app;
+                            result[id] = app;
                         }
                     }
                     catch (WebAppError e)

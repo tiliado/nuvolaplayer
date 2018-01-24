@@ -47,13 +47,13 @@ public class TrayIconComponent: Component
         this.bindings = bindings;
         this.controller = controller;
         config.bind_object_property(NAMESPACE, this, "always_close_to_tray")
-            .set_default(true).update_property();
+        .set_default(true).update_property();
         config.bind_object_property(NAMESPACE, this, "use_x11_icon")
-            .set_default(false).update_property();
+        .set_default(false).update_property();
         config.bind_object_property(NAMESPACE, this, "use_appindicator")
-            .set_default(false).update_property();
+        .set_default(false).update_property();
         config.bind_object_property(NAMESPACE, this, "enabled")
-            .set_default(false).update_property();
+        .set_default(false).update_property();
         #else
         available = false;
         #endif
@@ -82,13 +82,13 @@ public class TrayIconComponent: Component
     private void update()
     {
         if (use_x11_icon && x11_icon == null)
-            x11_icon = new TrayIcon(controller, bindings.get_model<LauncherModel>());
+        x11_icon = new TrayIcon(controller, bindings.get_model<LauncherModel>());
         if (!use_x11_icon && x11_icon != null)
-            x11_icon = null;
+        x11_icon = null;
         if (use_appindicator && appindicator == null)
-            appindicator = new Appindicator(controller, bindings.get_model<LauncherModel>());
+        appindicator = new Appindicator(controller, bindings.get_model<LauncherModel>());
         if (!use_appindicator && appindicator != null)
-            appindicator = null;
+        appindicator = null;
     }
 
     public override Gtk.Widget? get_settings()
@@ -104,7 +104,7 @@ public class TrayIconComponent: Component
     private void on_can_quit(ref bool can_quit)
     {
         if (always_close_to_tray && is_visible())
-            can_quit = false;
+        can_quit = false;
     }
     #endif
 }

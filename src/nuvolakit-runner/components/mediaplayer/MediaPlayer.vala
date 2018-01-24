@@ -107,6 +107,6 @@ public class Nuvola.MediaPlayer: GLib.Object, Nuvola.MediaPlayerModel
     private void activate_action(string name, Variant? parameter=null)
     {
         if (!actions.activate_action(name, parameter))
-            critical("Failed to activate action '%s'.", name);
+        critical("Failed to activate action '%s'.", name);
     }
 }

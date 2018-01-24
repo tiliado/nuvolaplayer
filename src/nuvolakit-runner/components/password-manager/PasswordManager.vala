@@ -88,9 +88,9 @@ public class PasswordManager
                 var entry = new LoginCredentials(username, password);
                 var index = entries.index(entry);
                 if (index >= 0)
-                    entries[index] = entry;
+                entries[index] = entry;
                 else
-                    entries.prepend(entry);
+                entries.prepend(entry);
             }
         }
         this.passwords = credentials;
@@ -103,7 +103,7 @@ public class PasswordManager
             yield Secret.password_store(
                 secret_schema, Secret.COLLECTION_DEFAULT, "%s password for '%s' at %s".printf(
                     Nuvola.get_app_name(), username, hostname),
-                    password, cancellable, SCHEMA_APP_ID, app_id,  SCHEMA_HOSTNAME, hostname, SCHEMA_USERNAME, username);
+                password, cancellable, SCHEMA_APP_ID, app_id,  SCHEMA_HOSTNAME, hostname, SCHEMA_USERNAME, username);
         }
         catch (GLib.Error e)
         {

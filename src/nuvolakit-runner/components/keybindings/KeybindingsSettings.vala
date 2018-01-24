@@ -81,7 +81,7 @@ public class KeybindingsSettings : Gtk.Grid
         {
             var label = action.label;
             if (action is Drtgtk.RadioAction || label == null)
-                continue;
+            continue;
 
             var keybinding = action.keybinding;
             uint accel_key;
@@ -191,7 +191,7 @@ public class KeybindingsSettings : Gtk.Grid
             model.set(iter, 4, 0, 5, 0, -1);
             set_error(
                 ("Failed to set keybinding '%s'. Make sure it is not already used by your system or other"
-                + " programs (Google Chrome, for example).").printf(keybinding));
+                    + " programs (Google Chrome, for example).").printf(keybinding));
         }
     }
 

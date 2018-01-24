@@ -32,23 +32,23 @@ public void apply_custom_styles(Gdk.Screen screen)
         provider.load_from_data("""
             label.premium,  button.premium, GtkButton.premium, GtkLabel.premium
             {
-                background: #FFD600;
-                color: #000000;
-                font-weight: bold;
+            background: #FFD600;
+            color: #000000;
+            font-weight: bold;
             }
 
             label.premium, GtkLabel.premium
             {
-                border-radius: 10px;
-                padding: 2px 4px;
-                font-size: 90%;
+            border-radius: 10px;
+            padding: 2px 4px;
+            font-size: 90%;
             }
 
             button.premium:hover, GtkButton.premium:hover
             {
-                background-color: #E7C200;
+            background-color: #E7C200;
             }
-            """, -1);
+            """            , -1);
         Gtk.StyleContext.add_provider_for_screen(screen, provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
     }
     catch (GLib.Error e)

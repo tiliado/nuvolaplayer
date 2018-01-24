@@ -33,8 +33,8 @@ public class AZLyricsFetcher : GLib.Object, LyricsFetcher
 {
     public Soup.Session session {get; construct set;}
     /**
-    * URL format of AZ Lyrics
-    */
+     * URL format of AZ Lyrics
+     */
     private const string SONG_PAGE = "http://www.azlyrics.com/lyrics/%s/%s.html";
     private Regex html_tags;
 
@@ -62,18 +62,18 @@ public class AZLyricsFetcher : GLib.Object, LyricsFetcher
 
         SourceFunc callback = fetch_lyrics.callback;
         session.queue_message(message, () =>
-        {
-            Idle.add((owned) callback);
-        });
+            {
+                Idle.add((owned) callback);
+            });
         yield;
 
         var response = (string) message.response_body.flatten().data;
         if (message.status_code != 200 || response == "")
-            throw new LyricsError.NOT_FOUND(@"Song $song was not found on AZ Lyrics");
+        throw new LyricsError.NOT_FOUND(@"Song $song was not found on AZ Lyrics");
 
         response = parse_response(response);
         if (response == "")
-            throw new LyricsError.NOT_FOUND(@"Song $song was not found on AZ Lyrics");
+        throw new LyricsError.NOT_FOUND(@"Song $song was not found on AZ Lyrics");
 
         return response;
     }
@@ -121,7 +121,7 @@ public class AZLyricsFetcher : GLib.Object, LyricsFetcher
         {
             c = c.tolower();
             if (('a' <= c && c <= 'z') || ('0' <= c && c <= '9'))
-                buffer.append_unichar(c);
+            buffer.append_unichar(c);
         }
         return buffer.str;
     }

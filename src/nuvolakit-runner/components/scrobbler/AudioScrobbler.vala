@@ -54,7 +54,7 @@ public abstract class AudioScrobbler : GLib.Object
     }
 
     public virtual async void scrobble_track(string song, string artist, string? album, int64 timestamp)
-        throws AudioScrobblerError
+    throws AudioScrobblerError
     {
         throw new AudioScrobblerError.NOT_IMPLEMENTED("Scrobble track call is not implemented in %s (%s).", name, id);
     }

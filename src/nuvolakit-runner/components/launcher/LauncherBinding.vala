@@ -34,23 +34,23 @@ public class Nuvola.LauncherBinding: ModelBinding<LauncherModel>
         bind("set-tooltip", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             "Set launcher tooltip.",
             handle_set_tooltip, {
-            new Drt.StringParam("text", true, false, null, "Tooltip text.")
-        });
+                new Drt.StringParam("text", true, false, null, "Tooltip text.")
+            });
         bind("set-actions", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             "Set launcher actions.",
             handle_set_actions, {
-            new Drt.StringArrayParam("actions", true, null, "Action name.")
-        });
+                new Drt.StringArrayParam("actions", true, null, "Action name.")
+            });
         bind("add-action", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             "Add launcher action.",
             handle_add_action, {
-            new Drt.StringParam("name", true, false, null, "Action name.")
-        });
+                new Drt.StringParam("name", true, false, null, "Action name.")
+            });
         bind("remove-action", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             "Remove launcher action.",
             handle_remove_action, {
-            new Drt.StringParam("name", true, false, null, "Action name.")
-        });
+                new Drt.StringParam("name", true, false, null, "Action name.")
+            });
         bind("remove-actions", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             "Remove all launcher actions.",
             handle_remove_actions, null);

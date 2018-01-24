@@ -46,11 +46,11 @@ public class MasterUserInterface: GLib.Object {
         #endif
 
         Drtgtk.Action[] actions_spec = {
-        //          Action(group, scope, name, label?, mnemo_label?, icon?, keybinding?, callback?)
-        new Drtgtk.SimpleAction("main", "app", Actions.HELP, "Help", "_Help", null, "F1", do_help),
-        new Drtgtk.SimpleAction("main", "app", Actions.ABOUT, "About", "_About", null, null, do_about),
-        new Drtgtk.SimpleAction("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
-        new Drtgtk.SimpleAction("main", "win", Actions.START_APP, "Start app", "_Start app", "media-playback-start", "<ctrl>S", do_start_app),
+            //          Action(group, scope, name, label?, mnemo_label?, icon?, keybinding?, callback?)
+            new Drtgtk.SimpleAction("main", "app", Actions.HELP, "Help", "_Help", null, "F1", do_help),
+            new Drtgtk.SimpleAction("main", "app", Actions.ABOUT, "About", "_About", null, null, do_about),
+            new Drtgtk.SimpleAction("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
+            new Drtgtk.SimpleAction("main", "win", Actions.START_APP, "Start app", "_Start app", "media-playback-start", "<ctrl>S", do_start_app),
         };
         controller.actions.add_actions(actions_spec);
         controller.set_app_menu_items({Actions.HELP, Actions.ABOUT, Actions.QUIT});
@@ -114,10 +114,10 @@ public class MasterUserInterface: GLib.Object {
             var dialog = new Gtk.MessageDialog.with_markup(
                 main_window, Gtk.DialogFlags.MODAL, Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE,
                 ("<b><big>Failed to connect to XDG Desktop Portal</big></b>\n\n"
-                + "Make sure the XDG Desktop Portal is installed on your system. "
-                + "It might be sufficient to install the xdg-desktop-portal and xdg-desktop-portal-gtk "
-                + "packages. If unsure, follow detailed installation instructions at https://nuvola.tiliado.eu"
-                + "\n\n%s"), e.message);
+                    + "Make sure the XDG Desktop Portal is installed on your system. "
+                    + "It might be sufficient to install the xdg-desktop-portal and xdg-desktop-portal-gtk "
+                    + "packages. If unsure, follow detailed installation instructions at https://nuvola.tiliado.eu"
+                    + "\n\n%s"), e.message);
             Timeout.add_seconds(120, () => { dialog.destroy(); return false;});
             dialog.run();
             return false;

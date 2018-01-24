@@ -73,9 +73,9 @@ public class PasswordManagerComponent: Component
         try
         {
             if (ipc_bus.web_worker != null)
-                ipc_bus.web_worker.call_sync("/nuvola/password-manager/enable", null);
+            ipc_bus.web_worker.call_sync("/nuvola/password-manager/enable", null);
             else
-                ipc_bus.notify["web-worker"].connect_after(on_web_worker_notify);
+            ipc_bus.notify["web-worker"].connect_after(on_web_worker_notify);
         }
         catch (GLib.Error e)
         {
@@ -88,9 +88,9 @@ public class PasswordManagerComponent: Component
         try
         {
             if (ipc_bus.web_worker != null)
-                web_worker.call_sync("/nuvola/password-manager/disable", null);
+            web_worker.call_sync("/nuvola/password-manager/disable", null);
             else
-                ipc_bus.notify["web-worker"].connect_after(on_web_worker_notify);
+            ipc_bus.notify["web-worker"].connect_after(on_web_worker_notify);
         }
         catch (GLib.Error e)
         {

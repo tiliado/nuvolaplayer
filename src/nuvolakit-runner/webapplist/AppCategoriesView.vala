@@ -37,7 +37,7 @@ public class AppCategoriesView : Gtk.TreeView
             {
                 _category = value;
                 if (!internal_category_change)
-                    select_category(_category);
+                select_category(_category);
             }
         }
     }
@@ -48,15 +48,15 @@ public class AppCategoriesView : Gtk.TreeView
         var model = new Gtk.ListStore(2, typeof(string), typeof(string));
         var categories = Nuvola.get_desktop_categories();
         categories.for_each((key, name) =>
-        {
-            Gtk.TreeIter iter;
-            // Audio and Video apps are is common category AudioVideo
-            if (key != "Audio" && key != "Video")
             {
-                model.append(out iter);
-                model.set(iter, 0, key, 1, name);
-            }
-        });
+                Gtk.TreeIter iter;
+                // Audio and Video apps are is common category AudioVideo
+                if (key != "Audio" && key != "Video")
+                {
+                    model.append(out iter);
+                    model.set(iter, 0, key, 1, name);
+                }
+            });
 
         model.set_sort_column_id(1, Gtk.SortType.ASCENDING); // Sort by name
         model.set_sort_column_id(-2, Gtk.SortType.ASCENDING); // Disable sorting
@@ -74,7 +74,7 @@ public class AppCategoriesView : Gtk.TreeView
         selection.mode = Gtk.SelectionMode.BROWSE;
         this.category = selected_category;
         if (selected_category == null)
-            select_category(null);
+        select_category(null);
         selection.changed.connect(on_selection_changed);
     }
 
@@ -82,28 +82,28 @@ public class AppCategoriesView : Gtk.TreeView
     {
         internal_category_change = true;
         model.foreach((model, path, iter) =>
-        {
-            string? iter_category;
-            model.get(iter, 0, out iter_category, -1);
-            if (category == iter_category)
             {
-                get_selection().select_iter(iter);
-                return true;
-            }
-            return false;
-        });
+                string? iter_category;
+                model.get(iter, 0, out iter_category, -1);
+                if (category == iter_category)
+                {
+                    get_selection().select_iter(iter);
+                    return true;
+                }
+                return false;
+            });
         internal_category_change = false;
     }
 
     private void on_selection_changed(Gtk.TreeSelection selection)
     {
         if (internal_category_change)
-            return;
+        return;
         Gtk.TreeModel model;
         Gtk.TreeIter iter;
         string? category = null;
         if (selection.get_selected(out model, out iter))
-            model.get(iter, 0, &category, -1);
+        model.get(iter, 0, &category, -1);
 
         if (this.category != category)
         {

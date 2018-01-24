@@ -34,31 +34,31 @@ public class Nuvola.NotificationBinding: ObjectBinding<NotificationInterface>
         bind("update", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             "Update notification.",
             handle_update, {
-            new Drt.StringParam("name", true, false, null, "Notification name."),
-            new Drt.StringParam("title", true, false, null, "Notification title."),
-            new Drt.StringParam("message", true, false, null, "Notification message."),
-            new Drt.StringParam("icon-name", false, true, null, "Notification icon name."),
-            new Drt.StringParam("icon-path", false, true, null, "Notification icon path."),
-            new Drt.BoolParam("resident", false, false, "Whether the notification is resident."),
-            new Drt.StringParam("category", false, true, null, "Notification category."),
-        });
+                new Drt.StringParam("name", true, false, null, "Notification name."),
+                new Drt.StringParam("title", true, false, null, "Notification title."),
+                new Drt.StringParam("message", true, false, null, "Notification message."),
+                new Drt.StringParam("icon-name", false, true, null, "Notification icon name."),
+                new Drt.StringParam("icon-path", false, true, null, "Notification icon path."),
+                new Drt.BoolParam("resident", false, false, "Whether the notification is resident."),
+                new Drt.StringParam("category", false, true, null, "Notification category."),
+            });
         bind("set-actions", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             "Set notification actions.",
             handle_set_actions, {
-            new Drt.StringParam("name", true, false, null, "Notification name."),
-            new Drt.StringArrayParam("actions", true, null, "Notification actions.")
-        });
+                new Drt.StringParam("name", true, false, null, "Notification name."),
+                new Drt.StringArrayParam("actions", true, null, "Notification actions.")
+            });
         bind("remove-actions", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             "Remove notification actions.",
             handle_remove_actions, {
-            new Drt.StringParam("name", true, false, null, "Notification name.")
-        });
+                new Drt.StringParam("name", true, false, null, "Notification name.")
+            });
         bind("show", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             "Show notification.",
             handle_show, {
-            new Drt.StringParam("name", true, false, null, "Notification name."),
-            new Drt.BoolParam("force", false, false, "Make sure the notification is shown.")
-        });
+                new Drt.StringParam("name", true, false, null, "Notification name."),
+                new Drt.BoolParam("force", false, false, "Make sure the notification is shown.")
+            });
     }
 
     private void handle_update(Drt.RpcRequest request) throws Drt.RpcError
@@ -72,8 +72,8 @@ public class Nuvola.NotificationBinding: ObjectBinding<NotificationInterface>
         var resident = request.pop_bool();
         var category = request.pop_string();
         foreach (var object in objects)
-            if (object.update(name, title, message, icon_name, icon_path, resident, category))
-                break;
+        if (object.update(name, title, message, icon_name, icon_path, resident, category))
+        break;
         request.respond(null);
     }
 
@@ -83,8 +83,8 @@ public class Nuvola.NotificationBinding: ObjectBinding<NotificationInterface>
         var name = request.pop_string();
         var actions = request.pop_strv();
         foreach (var object in objects)
-            if (object.set_actions(name, (owned) actions))
-                break;
+        if (object.set_actions(name, (owned) actions))
+        break;
         request.respond(null);
     }
 
@@ -93,8 +93,8 @@ public class Nuvola.NotificationBinding: ObjectBinding<NotificationInterface>
         check_not_empty();
         var name = request.pop_string();
         foreach (var object in objects)
-            if (object.remove_actions(name))
-                break;
+        if (object.remove_actions(name))
+        break;
         request.respond(null);
     }
 
@@ -104,8 +104,8 @@ public class Nuvola.NotificationBinding: ObjectBinding<NotificationInterface>
         var name = request.pop_string();
         var force = request.pop_bool();
         foreach (var object in objects)
-            if (object.show(name, force))
-                break;
+        if (object.show(name, force))
+        break;
         request.respond(null);
     }
 }

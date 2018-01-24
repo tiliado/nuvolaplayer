@@ -182,7 +182,7 @@ public class WebAppWindow : Drtgtk.ApplicationWindow
     private void on_sidebar_position_changed(GLib.Object o, ParamSpec p)
     {
         if (sidebar_position_cb_id != 0)
-            Source.remove(sidebar_position_cb_id);
+        Source.remove(sidebar_position_cb_id);
         sidebar_position_cb_id = Timeout.add(250, sidebar_position_cb);
     }
 

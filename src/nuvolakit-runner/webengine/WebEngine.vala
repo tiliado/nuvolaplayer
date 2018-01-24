@@ -47,7 +47,7 @@ public abstract class WebEngine : GLib.Object, JSExecutor {
     public signal void context_menu(bool whatewer_fixme_in_future);
 
     public abstract void early_init(AppRunnerController runner_app, IpcBus ipc_bus,
-            Config config, Connection? connection, HashTable<string, Variant> worker_data);
+        Config config, Connection? connection, HashTable<string, Variant> worker_data);
 
     public abstract void init();
 

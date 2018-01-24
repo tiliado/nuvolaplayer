@@ -87,7 +87,7 @@ public class TrayIcon: GLib.Object
     private static void render_number(int number, ref Gdk.Pixbuf pixbuf)
     {
         if (number <= 0)
-            return;
+        return;
 
         var padding = 1.0;
         assert(pixbuf.width == pixbuf.height);
@@ -175,7 +175,7 @@ public class TrayIcon: GLib.Object
     ~TrayIcon()
     {
         if (menu != null)
-            menu.detach();
+        menu.detach();
         icon.visible = false;
         icon = null;
         model.notify.disconnect(on_model_changed);
@@ -185,7 +185,7 @@ public class TrayIcon: GLib.Object
     private void create_menu()
     {
         if (menu != null)
-            menu.detach();
+        menu.detach();
 
         var model = actions_reg.build_menu(slist_strings_to_array(model.actions), false, true);
         menu = new Gtk.Menu.from_model(model);

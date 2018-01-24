@@ -67,7 +67,7 @@ public class Channel: Engineio.Channel
             {
                 var builder = new VariantBuilder(new VariantType("a{smv}"));
                 if (variant_result != null)
-                    g_variant_ref(variant_result); // FIXME: How to avoid this hack
+                g_variant_ref(variant_result); // FIXME: How to avoid this hack
                 builder.add("{smv}", "result", variant_result);
                 result = Json.gvariant_serialize(builder.end());
             }
@@ -98,7 +98,7 @@ public class Channel: Engineio.Channel
         {
             var builder = new VariantBuilder(new VariantType("a{smv}"));
             if (data != null)
-                g_variant_ref(data); // FIXME: How to avoid this hack
+            g_variant_ref(data); // FIXME: How to avoid this hack
             builder.add("{smv}", "result", data);
             result = Json.gvariant_serialize(builder.end());
         }

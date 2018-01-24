@@ -27,12 +27,12 @@ namespace Nuvola.Nm {
 private static T[]? get_proxies<T>(BusType bus, string name, ObjectPath[]? entries)
 {
     if (entries == null || entries.length == 0)
-        return null;
+    return null;
     try
     {
         var result = new T[entries.length];
         for (var i = 0; i < entries.length; i++)
-            result[i] = Bus.get_proxy_sync<T>(bus, name, entries[i], 0, null);
+        result[i] = Bus.get_proxy_sync<T>(bus, name, entries[i], 0, null);
         return result;
     }
     catch (GLib.Error e)
@@ -69,7 +69,7 @@ public interface ActiveConnection : GLib.Object
     {
         var path = Ip4Config;
         if (path == null)
-            return null;
+        return null;
         try
         {
             return Bus.get_proxy_sync<Ip4Config>(BusType.SYSTEM, BUS_NAME, path, 0, null);
@@ -90,7 +90,7 @@ public interface Ip4Config : GLib.Object
         uint[] result = {};
         var addresses = (this as DBusProxy).get_cached_property("Addresses");
         if (addresses == null)
-            return null;
+        return null;
         if (!addresses.is_of_type(new VariantType("aau")))
         {
             warning(
@@ -118,7 +118,7 @@ public static async NetworkManager? get_client(Cancellable? cancellable) throws 
 {
     var nm = yield Bus.get_proxy<NetworkManager>(BusType.SYSTEM, BUS_NAME, "/org/freedesktop/NetworkManager", 0, cancellable);
     if (nm != null)
-        nm.check_connectivity();
+    nm.check_connectivity();
     return nm;
 }
 

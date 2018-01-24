@@ -37,7 +37,7 @@ public class Nuvola.ActionsHelper: GLib.Object, ActionsInterface
     {
         var action = actions.get_action(action_name);
         if (action == null)
-            return Binding.CONTINUE;
+        return Binding.CONTINUE;
 
         action.activate(parameter);
         return !Binding.CONTINUE;
@@ -47,7 +47,7 @@ public class Nuvola.ActionsHelper: GLib.Object, ActionsInterface
     {
         var action = actions.get_action(action_name);
         if (action == null)
-            return Binding.CONTINUE;
+        return Binding.CONTINUE;
 
         action.state = state;
         return !Binding.CONTINUE;
@@ -57,7 +57,7 @@ public class Nuvola.ActionsHelper: GLib.Object, ActionsInterface
     {
         var action = actions.get_action(action_name);
         if (action == null)
-            return Binding.CONTINUE;
+        return Binding.CONTINUE;
 
         state = action.state;
         return !Binding.CONTINUE;
@@ -67,7 +67,7 @@ public class Nuvola.ActionsHelper: GLib.Object, ActionsInterface
     {
         var action = actions.get_action(action_name);
         if (action == null)
-            return Binding.CONTINUE;
+        return Binding.CONTINUE;
 
         enabled = action.enabled;
         return !Binding.CONTINUE;
@@ -77,10 +77,10 @@ public class Nuvola.ActionsHelper: GLib.Object, ActionsInterface
     {
         var action = actions.get_action(action_name);
         if (action == null)
-            return Binding.CONTINUE;
+        return Binding.CONTINUE;
 
         if (action.enabled != enabled)
-            action.enabled = enabled;
+        action.enabled = enabled;
         return Binding.CONTINUE;
     }
 
@@ -88,9 +88,9 @@ public class Nuvola.ActionsHelper: GLib.Object, ActionsInterface
     {
         Drtgtk.Action action;
         if (state == null)
-            action = simple_action(group, scope, action_name, label, mnemo_label, icon, keybinding, null);
+        action = simple_action(group, scope, action_name, label, mnemo_label, icon, keybinding, null);
         else
-            action = toggle_action(group, scope, action_name, label, mnemo_label, icon, keybinding, null, state);
+        action = toggle_action(group, scope, action_name, label, mnemo_label, icon, keybinding, null, state);
 
         action.enabled = false;
         action.activated.connect(on_custom_action_activated);
@@ -111,7 +111,7 @@ public class Nuvola.ActionsHelper: GLib.Object, ActionsInterface
     {
         var kbd = config.get_string("nuvola.keybindings." + name) ?? keybinding;
         if (kbd == "")
-            kbd = null;
+        kbd = null;
         return new Drtgtk.SimpleAction(group, scope, name, label, mnemo_label, icon, kbd, (owned) callback);
     }
 

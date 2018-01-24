@@ -59,20 +59,20 @@ public class ComponentsManager: Gtk.Stack
         scroll.show();
         add_named(scroll, "list");
         if (tiliado_activation != null)
-            tiliado_activation.user_info_updated.connect(on_user_info_updated);
+        tiliado_activation.user_info_updated.connect(on_user_info_updated);
     }
 
     ~ComponentsManager()
     {
         if (tiliado_activation != null)
-            tiliado_activation.user_info_updated.disconnect(on_user_info_updated);
+        tiliado_activation.user_info_updated.disconnect(on_user_info_updated);
     }
 
     public void refresh()
     {
         rows = null;
         foreach (var child in grid.get_children())
-            grid.remove(child);
+        grid.remove(child);
 
         var components = this.components.to_list();
         components.sort_with_data((a, b) => {
@@ -85,7 +85,7 @@ public class ComponentsManager: Gtk.Stack
         foreach (var component in components)
         {
             if (component.hidden && !component.enabled)
-                continue;
+            continue;
             if (row > 0)
             {
                 var separator = new Gtk.Separator(Gtk.Orientation.HORIZONTAL);
@@ -115,11 +115,11 @@ public class ComponentsManager: Gtk.Stack
         {
             Gtk.Widget? widget;
             if (!is_component_membership_ok(component))
-                widget = membership_widget.change_component(component);
+            widget = membership_widget.change_component(component);
             else if (!is_component_available(component))
-                widget = component_not_available_widget;
+            widget = component_not_available_widget;
             else
-                widget = component.get_settings();
+            widget = component.get_settings();
             component_settings = new Settings(this, component, widget);
             this.add(component_settings.widget);
             this.visible_child = component_settings.widget;
@@ -133,15 +133,15 @@ public class ComponentsManager: Gtk.Stack
     }
 
     private bool is_component_membership_ok(Component component) {
-        return component.enabled || !component.available
-            || tiliado_activation == null || component.is_membership_ok(tiliado_activation);
+        return (component.enabled || !component.available
+        || tiliado_activation == null || component.is_membership_ok(tiliado_activation));
     }
 
     private void on_user_info_updated(TiliadoApi2.User? user)
     {
         if (component_settings != null
-            && component_settings.component_widget == membership_widget
-            && membership_widget.component.is_membership_ok(tiliado_activation))
+        && component_settings.component_widget == membership_widget
+        && membership_widget.component.is_membership_ok(tiliado_activation))
         {
             show_settings(null);
             refresh();
@@ -214,7 +214,7 @@ public class ComponentsManager: Gtk.Stack
             component.notify.disconnect(on_notify);
             checkbox.notify.disconnect(on_notify);
             if (button != null)
-                button.clicked.disconnect(on_settings_clicked);
+            button.clicked.disconnect(on_settings_clicked);
         }
 
         private void on_notify(GLib.Object o, ParamSpec p)
@@ -223,9 +223,9 @@ public class ComponentsManager: Gtk.Stack
             {
             case "enabled":
                 if (checkbox.active != component.enabled)
-                    checkbox.active = component.enabled;
+                checkbox.active = component.enabled;
                 if (button != null)
-                    button.sensitive = checkbox.active;
+                button.sensitive = checkbox.active;
                 break;
             case "active":
                 component.toggle(checkbox.active);

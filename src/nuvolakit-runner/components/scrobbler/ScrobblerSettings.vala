@@ -100,11 +100,11 @@ public class ScrobblerSettings: Gtk.Grid
         {
         case "scrobbling-enabled":
             if (checkbox.active != scrobbler.scrobbling_enabled)
-                checkbox.active = scrobbler.scrobbling_enabled;
+            checkbox.active = scrobbler.scrobbling_enabled;
             break;
         case "active":
             if (scrobbler.scrobbling_enabled != checkbox.active)
-                scrobbler.scrobbling_enabled = checkbox.active;
+            scrobbler.scrobbling_enabled = checkbox.active;
             break;
         }
     }
@@ -112,8 +112,8 @@ public class ScrobblerSettings: Gtk.Grid
     private void remove_info_bars()
     {
         foreach (var child in get_children())
-            if (child is Gtk.InfoBar)
-                remove(child);
+        if (child is Gtk.InfoBar)
+        remove(child);
     }
 
     private void on_response(GLib.Object emitter, int response_id)
@@ -145,26 +145,26 @@ public class ScrobblerSettings: Gtk.Grid
         {
             remove_info_bars();
             var url = scrobbler.request_authorization.end(res);
-                app.show_uri(url);
+            app.show_uri(url);
 
-                var info_bar = new Gtk.InfoBar();
-                info_bar.message_type = Gtk.MessageType.INFO;
-                var label = new Gtk.Label((
-                    "A web browser window should be opened for you to authorize access to your account. "
-                    + "Then return to %s.").printf(Nuvola.get_app_name()));
-                label.set_line_wrap(true);
-                info_bar.get_content_area().add(label);
-                info_bar.show_all();
-                attach(info_bar, 0, 0, 2, 1);
+            var info_bar = new Gtk.InfoBar();
+            info_bar.message_type = Gtk.MessageType.INFO;
+            var label = new Gtk.Label((
+                "A web browser window should be opened for you to authorize access to your account. "
+                + "Then return to %s.").printf(Nuvola.get_app_name()));
+            label.set_line_wrap(true);
+            info_bar.get_content_area().add(label);
+            info_bar.show_all();
+            attach(info_bar, 0, 0, 2, 1);
 
-                info_bar = new Gtk.InfoBar.with_buttons("Finish authorization", 2, null);
-                info_bar.message_type = Gtk.MessageType.INFO;
-                label = new Gtk.Label("Final step:");
-                label.set_line_wrap(true);
-                info_bar.get_content_area().add(label);
-                info_bar.response.connect(on_response);
-                info_bar.show_all();
-                attach(info_bar, 0, 1, 2, 1);
+            info_bar = new Gtk.InfoBar.with_buttons("Finish authorization", 2, null);
+            info_bar.message_type = Gtk.MessageType.INFO;
+            label = new Gtk.Label("Final step:");
+            label.set_line_wrap(true);
+            info_bar.get_content_area().add(label);
+            info_bar.response.connect(on_response);
+            info_bar.show_all();
+            attach(info_bar, 0, 1, 2, 1);
         }
         catch (AudioScrobblerError e)
         {

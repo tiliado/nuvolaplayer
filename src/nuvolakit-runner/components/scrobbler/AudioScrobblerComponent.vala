@@ -60,7 +60,7 @@ public class AudioScrobblerComponent: Component
     public override Gtk.Widget? get_settings()
     {
         if (scrobbler == null)
-            return null;
+        return null;
 
         var grid = new Gtk.Grid();
         grid.orientation = Gtk.Orientation.VERTICAL;
@@ -71,7 +71,7 @@ public class AudioScrobblerComponent: Component
         grid.add(label);
         var widget = scrobbler.get_settings(app);
         if (widget != null)
-            grid.add(widget);
+        grid.add(widget);
         grid.show_all();
         return grid;
     }
@@ -86,7 +86,7 @@ public class AudioScrobblerComponent: Component
         global_config.bind_object_property(base_key, scrobbler, "username").update_property();
 
         if (scrobbler.has_session)
-            scrobbler.retrieve_username.begin();
+        scrobbler.retrieve_username.begin();
         player = bindings.get_model<MediaPlayerModel>();
         player.set_track_info.connect(on_set_track_info);
         scrobbler.notify.connect_after(on_scrobbler_notify);
@@ -121,7 +121,7 @@ public class AudioScrobblerComponent: Component
             }
 
             if (!scrobbled)
-                scrobble_timeout = Timeout.add_seconds(SCROBBLE_SONG_DELAY, scrobble_cb);
+            scrobble_timeout = Timeout.add_seconds(SCROBBLE_SONG_DELAY, scrobble_cb);
         }
     }
 
@@ -144,14 +144,14 @@ public class AudioScrobblerComponent: Component
             if (scrobbler.can_update_now_playing)
             {
                 if (player.title != null && player.artist != null && player.state == "playing")
-                    scrobbler.update_now_playing.begin(player.title, player.artist, on_update_now_playing_done);
+                scrobbler.update_now_playing.begin(player.title, player.artist, on_update_now_playing_done);
             }
             break;
         case "can-scrobble":
             if (scrobbler.can_scrobble)
-                schedule_scrobbling(player.title, player.artist, player.album, player.state);
+            schedule_scrobbling(player.title, player.artist, player.album, player.state);
             else
-                cancel_scrobbling();
+            cancel_scrobbling();
             break;
         }
     }
@@ -167,20 +167,20 @@ public class AudioScrobblerComponent: Component
         }
 
         track_info_cb_id = Timeout.add_seconds(1, () =>
-        {
-            track_info_cb_id = 0;
-            if (scrobbler.can_update_now_playing)
             {
-                if (title != null && artist != null && state == "playing" )
+                track_info_cb_id = 0;
+                if (scrobbler.can_update_now_playing)
+                {
+                    if (title != null && artist != null && state == "playing" )
                     scrobbler.update_now_playing.begin(title, artist, on_update_now_playing_done);
-            }
+                }
 
-            cancel_scrobbling();
+                cancel_scrobbling();
 
-            if (scrobbler.can_scrobble)
+                if (scrobbler.can_scrobble)
                 schedule_scrobbling(title, artist, album, state);
-            return false;
-        });
+                return false;
+            });
     }
 
     private void on_update_now_playing_done(GLib.Object? o, AsyncResult res)

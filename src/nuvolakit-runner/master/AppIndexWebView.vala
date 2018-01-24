@@ -65,7 +65,7 @@ public class AppIndexWebView : WebView
         var user_gesture = action.is_user_gesture();
         // We care only about user clicks
         if (type != WebKit.NavigationType.LINK_CLICKED && !user_gesture)
-            return false;
+        return false;
 
         var uri = action.get_request().uri;
         var result = uri.has_prefix(root_uri) && !uri.has_suffix(".flatpakref");

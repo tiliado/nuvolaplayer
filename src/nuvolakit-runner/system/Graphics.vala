@@ -49,9 +49,9 @@ public bool is_required_gl_extension_mounted(out string? gl_extension)
 {
     gl_extension = get_required_gl_extension();
     if (gl_extension == null)
-        return true;
+    return true;
     else
-        return File.new_for_path("/usr/lib/GL").get_child(gl_extension).query_exists();
+    return File.new_for_path("/usr/lib/GL").get_child(gl_extension).query_exists();
 }
 
 public void ensure_gl_extension_mounted(Gtk.Window? parent_window)
@@ -62,9 +62,9 @@ public void ensure_gl_extension_mounted(Gtk.Window? parent_window)
         var dialog = new Gtk.MessageDialog.with_markup(
             parent_window, Gtk.DialogFlags.MODAL, Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE,
             ("<b><big>Missing Graphics Driver</big></b>\n\n"
-            + "Graphics driver '%s' for Flatpak has not been found on your system. "
-            + "Please consult <a href=\"https://github.com/tiliado/nuvolaruntime/wiki/Graphics-Drivers\">documentation "
-            + "on graphics drivers</a> to get help with installation."), gl_extension);
+                + "Graphics driver '%s' for Flatpak has not been found on your system. "
+                + "Please consult <a href=\"https://github.com/tiliado/nuvolaruntime/wiki/Graphics-Drivers\">documentation "
+                + "on graphics drivers</a> to get help with installation."), gl_extension);
         Timeout.add_seconds(120, () => { dialog.destroy(); return false;});
         dialog.run();
         error("GL extension not found: %s", gl_extension);
@@ -93,7 +93,7 @@ public string dri2_get_driver_name() throws DriError
 {
     var dpy = new X.Display(null);
     if (dpy == null)
-        throw new DriError.NO_X_DISPLAY("Cannot connect to X display.");
+    throw new DriError.NO_X_DISPLAY("Cannot connect to X display.");
     int major, minor;
     string driver;
     dri2_connect(dpy, out major, out minor, out driver);
@@ -111,16 +111,16 @@ private void dri2_connect(X.Display dpy, out int major, out int minor, out strin
     string? device = null;
 
     if (!Dri2.init_display(dpy, DRI2_NO_OPS))
-        throw new DriError.INIT_DISPLAY("DRI2InitDisplay failed.");
+    throw new DriError.INIT_DISPLAY("DRI2InitDisplay failed.");
 
     if (!Dri2.query_extension(dpy, out eventBase, out errorBase))
-        throw new DriError.EXTENSION_QUERY("DRI2QueryExtension failed, %d, %d", eventBase, errorBase);
+    throw new DriError.EXTENSION_QUERY("DRI2QueryExtension failed, %d, %d", eventBase, errorBase);
 
     if (!Dri2.query_version(dpy, out major, out minor))
-        throw new DriError.VERSION_QUERY("DRI2QueryVersion failed");
+    throw new DriError.VERSION_QUERY("DRI2QueryVersion failed");
 
     if (!Dri2.connect(dpy, dpy.default_root_window(), driverType, out driver, out device))
-        throw new DriError.CONNECT("DRI2Connect failed");
+    throw new DriError.CONNECT("DRI2Connect failed");
 }
 
 /**

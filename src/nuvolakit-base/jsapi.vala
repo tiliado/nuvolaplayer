@@ -442,9 +442,9 @@ public class JSApi : GLib.Object
         } else {
             var id = (int) args[2].to_number(ctx);
             storage.has_key_async.begin(key, (o, res) => {
-                    var result = storage.has_key_async.end(res);
-                    js_api.send_async_response(id, result, null);
-                });
+                var result = storage.has_key_async.end(res);
+                js_api.send_async_response(id, result, null);
+            });
         }
         return _false;
     }
@@ -501,9 +501,9 @@ public class JSApi : GLib.Object
         } else {
             var id = (int) args[2].to_number(ctx);
             storage.get_value_async.begin(key, (o, res) => {
-                    var value = storage.get_value_async.end(res);
-                    js_api.send_async_response(id, value, null);
-                });
+                var value = storage.get_value_async.end(res);
+                js_api.send_async_response(id, value, null);
+            });
         }
         return undefined;
     }
@@ -563,9 +563,9 @@ public class JSApi : GLib.Object
         } else {
             var id = (int) args[3].to_number(ctx);
             storage.set_value_async.begin(key, value, (o, res) => {
-                    storage.set_value_async.end(res);
-                    js_api.send_async_response(id, null, null);
-                });
+                storage.set_value_async.end(res);
+                js_api.send_async_response(id, null, null);
+            });
         }
         return undefined;
     }
@@ -625,9 +625,9 @@ public class JSApi : GLib.Object
         } else {
             var id = (int) args[3].to_number(ctx);
             storage.set_default_value_async.begin(key, value, (o, res) => {
-                    storage.set_default_value_async.end(res);
-                    js_api.send_async_response(id, null, null);
-                });
+                storage.set_default_value_async.end(res);
+                js_api.send_async_response(id, null, null);
+            });
         }
         return undefined;
     }

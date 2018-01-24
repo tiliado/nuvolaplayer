@@ -34,13 +34,13 @@ public class Nuvola.NotificationsBinding: ObjectBinding<NotificationsInterface>
         bind("show-notification", Drt.RpcFlags.WRITABLE,
             "Show notification.",
             handle_show_notification, {
-            new Drt.StringParam("title", true, false, null, "Notification title."),
-            new Drt.StringParam("message", true, false, null, "Notification message."),
-            new Drt.StringParam("icon-name", false, true, null, "Notification icon name."),
-            new Drt.StringParam("icon-path", false, true, null, "Notification icon path."),
-            new Drt.BoolParam("force", false, false, "Make sure the notification is shown."),
-            new Drt.StringParam("category", true, false, null, "Notification category.")
-        });
+                new Drt.StringParam("title", true, false, null, "Notification title."),
+                new Drt.StringParam("message", true, false, null, "Notification message."),
+                new Drt.StringParam("icon-name", false, true, null, "Notification icon name."),
+                new Drt.StringParam("icon-path", false, true, null, "Notification icon path."),
+                new Drt.BoolParam("force", false, false, "Make sure the notification is shown."),
+                new Drt.StringParam("category", true, false, null, "Notification category.")
+            });
         bind("is-persistence-supported", Drt.RpcFlags.READABLE,
             "returns true if persistence is supported.",
             handle_is_persistence_supported, null);
@@ -56,8 +56,8 @@ public class Nuvola.NotificationsBinding: ObjectBinding<NotificationsInterface>
         var force = request.pop_bool();
         var category = request.pop_string();
         foreach (var object in objects)
-            if (object.show_anonymous(title, message, icon_name, icon_path, force, category))
-                break;
+        if (object.show_anonymous(title, message, icon_name, icon_path, force, category))
+        break;
         request.respond(null);
     }
 
@@ -66,8 +66,8 @@ public class Nuvola.NotificationsBinding: ObjectBinding<NotificationsInterface>
         check_not_empty();
         bool supported = false;
         foreach (var object in objects)
-            if (object.is_persistence_supported(ref supported))
-                break;
+        if (object.is_persistence_supported(ref supported))
+        break;
         request.respond(new Variant.boolean(supported));
     }
 }

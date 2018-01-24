@@ -68,25 +68,25 @@ public class Server: Soup.Server
         subscribers = new HashTable<string, Drt.Lst<Subscription>>(str_hash, str_equal);
         bus.router.add_method("/nuvola/httpremotecontrol/register", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             null, handle_register, {
-            new Drt.StringParam("id", true, false)
-        });
+                new Drt.StringParam("id", true, false)
+            });
         bus.router.add_method("/nuvola/httpremotecontrol/unregister", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             null, handle_unregister, {
-            new Drt.StringParam("id", true, false)
-        });
+                new Drt.StringParam("id", true, false)
+            });
         bus.router.add_method("/nuvola/httpremotecontrol/get-addresses", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
             null, handle_get_addresses, null);
         bus.router.add_method("/nuvola/httpremotecontrol/set-address-enabled", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             null, handle_set_address_enabled, {
-            new Drt.StringParam("address", true, false),
-            new Drt.BoolParam("enabled", true, false),
-        });
+                new Drt.StringParam("address", true, false),
+                new Drt.BoolParam("enabled", true, false),
+            });
         bus.router.add_method("/nuvola/httpremotecontrol/get-port", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
             null, handle_get_port, null);
         bus.router.add_method("/nuvola/httpremotecontrol/set-port", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             null, handle_set_port, {
-            new Drt.IntParam("port", true, false),
-        });
+                new Drt.IntParam("port", true, false),
+            });
         bus.router.add_notification(APP_REGISTERED, Drt.RpcFlags.SUBSCRIBE|Drt.RpcFlags.WRITABLE, null);
         bus.router.add_notification(APP_UNREGISTERED, Drt.RpcFlags.SUBSCRIBE|Drt.RpcFlags.WRITABLE, null);
         app.runner_exited.connect(on_runner_exited);
@@ -106,12 +106,12 @@ public class Server: Soup.Server
     public void start()
     {
         if (running)
-            return;
+        return;
 
         foreach (var addr in addresses)
         {
             if (!addr.enabled)
-                continue;
+            continue;
             try
             {
                 message("Start HttpRemoteControlServer at %s:%u", addr.address, service_port);
@@ -124,7 +124,7 @@ public class Server: Soup.Server
             }
         }
         if (running)
-            add_handler("/", default_handler);
+        add_handler("/", default_handler);
     }
 
     public void restart()
@@ -164,10 +164,10 @@ public class Server: Soup.Server
                 {
                     var ip4_config =  conn.get_ip4_config();
                     if (ip4_config == null)
-                        continue;
+                    continue;
                     var addresses = ip4_config.get_addresses();
                     if (addresses == null)
-                        continue;
+                    continue;
                     foreach (var ip4 in addresses)
                     {
                         addr_str = "%u.%u.%u.%u".printf(
@@ -193,7 +193,7 @@ public class Server: Soup.Server
         app.add_capatibility(CAPABILITY_NAME);
         app.notification.connect(on_app_notification);
         if (!running)
-            start();
+        start();
         bus.router.emit(APP_REGISTERED, app_id, app_id);
     }
 
@@ -209,7 +209,7 @@ public class Server: Soup.Server
         var result = registered_runners.remove(app_id);
         bus.router.emit(APP_UNREGISTERED, app_id, app_id);
         if (running && registered_runners.length == 0)
-            stop();
+        stop();
         return result;
     }
 
@@ -380,7 +380,7 @@ public class Server: Soup.Server
             {
                 var app = app_runners[app_id];
                 if (app == null)
-                    throw new ChannelError.APP_NOT_FOUND("App with id '%s' doesn't exist or HTTP interface is not enabled.", app_id);
+                throw new ChannelError.APP_NOT_FOUND("App with id '%s' doesn't exist or HTTP interface is not enabled.", app_id);
 
                 yield app.call_full("/nuvola" + path, params, false, "rws");
             }
@@ -396,7 +396,7 @@ public class Server: Soup.Server
 
         var path = request.path == "/" ? "index" : request.path.substring(1);
         if (path.has_suffix("/"))
-            path += "index";
+        path += "index";
 
         var file = find_static_file(path);
         if (file == null)
@@ -413,10 +413,10 @@ public class Server: Soup.Server
         {
             var file = www_root.get_child(path);
             if (file.query_file_type(0) == FileType.REGULAR)
-                return file;
+            return file;
             file = www_root.get_child(path + ".html");
             if (file.query_file_type(0) == FileType.REGULAR)
-                return file;
+            return file;
         }
         return null;
     }
@@ -457,7 +457,7 @@ public class Server: Soup.Server
         {
             var builder = new VariantBuilder(new VariantType("a{smv}"));
             if (data != null)
-                g_variant_ref(data); // FIXME: How to avoid this hack
+            g_variant_ref(data); // FIXME: How to avoid this hack
             builder.add("{smv}", "result", data);
             result = builder.end();
         }
@@ -471,7 +471,7 @@ public class Server: Soup.Server
         var keys = registered_runners.get_values();
         keys.sort(string.collate);
         foreach (var app_id in keys)
-            builder.add_string_value(app_id);
+        builder.add_string_value(app_id);
         builder.end_array().end_object();
         return builder.get_root();
     }
@@ -530,7 +530,7 @@ public class Server: Soup.Server
     private void on_master_notification(Drt.RpcRouter router, GLib.Object conn, string path, string? detail, Variant? data)
     {
         if (conn != bus)
-            return;
+        return;
         var full_path = "/master" + path;
         var subscribers = this.subscribers[full_path];
         if (subscribers == null)
@@ -540,7 +540,7 @@ public class Server: Soup.Server
         }
         var path_without_nuvola = "/master" + path.substring(7);
         foreach (var subscriber in subscribers)
-                eio_channel.send_notification(subscriber.socket, path_without_nuvola, data);
+        eio_channel.send_notification(subscriber.socket, path_without_nuvola, data);
     }
 
     private void on_app_notification(AppRunner app, string path, string? detail, Variant? data)
@@ -554,7 +554,7 @@ public class Server: Soup.Server
         }
         var path_without_nuvola = "/app/" + app.app_id + path.substring(7);
         foreach (var subscriber in subscribers)
-            eio_channel.send_notification(subscriber.socket, path_without_nuvola, data);
+        eio_channel.send_notification(subscriber.socket, path_without_nuvola, data);
     }
 
     private void on_nm_client_created(GLib.Object? o, AsyncResult res)

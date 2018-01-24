@@ -34,8 +34,8 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder
         this.conn = conn;
         conn.router.add_method("/nuvola/actionkeybinder/action-activated", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             null, handle_action_activated, {
-            new Drt.StringParam("action", true, false)
-        });
+                new Drt.StringParam("action", true, false)
+            });
     }
 
     public string? get_keybinding(string action)

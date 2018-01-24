@@ -25,7 +25,7 @@
 namespace Nuvola {
 
 private const string XDG_DESKTOP_PORTAL_SIGSEGV = "GDBus.Error:org.freedesktop.DBus.Error.Spawn.ChildSignaled: " +
-    "Process org.freedesktop.portal.Desktop received signal 11";
+"Process org.freedesktop.portal.Desktop received signal 11";
 
 /**
  * Class performing a system check on start-up of Nuvola

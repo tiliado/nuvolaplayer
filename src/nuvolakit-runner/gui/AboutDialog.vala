@@ -143,7 +143,7 @@ public class AboutDialog: Gtk.Dialog
         grid.attach(new Gtk.Label("Revision"), 0, 3, 1, 1);
         var revision = Nuvola.get_revision();
         if (revision.length > 20)
-            revision = revision[0:20];
+        revision = revision[0:20];
         label = new Gtk.Label(revision);
         label.selectable = true;
         grid.attach(label, 1, 3, 1, 1);

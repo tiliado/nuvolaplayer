@@ -37,14 +37,14 @@ public class MediaKeysClient : GLib.Object, MediaKeysInterface
         this.app_id = app_id;
         conn.router.add_method("/nuvola/mediakeys/media-key-pressed", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             null, handle_media_key_pressed, {
-            new Drt.StringParam("key", true, false)
-        });
+                new Drt.StringParam("key", true, false)
+            });
     }
 
     public void manage()
     {
         if (managed)
-            return;
+        return;
 
         const string METHOD = "/nuvola/mediakeys/manage";
         try
@@ -62,7 +62,7 @@ public class MediaKeysClient : GLib.Object, MediaKeysInterface
     public void unmanage()
     {
         if (!managed)
-            return;
+        return;
 
         const string METHOD = "/nuvola/mediakeys/unmanage";
         try

@@ -55,14 +55,14 @@ public class WebView: WebKit.WebView
     {
         switch (event.button)
         {
-            case 8:  // mouse back button
-                go_back();
-                return true;
-            case 9:  // mouse forward button
-                go_forward();
-                return true;
-            default:
-                return false;
+        case 8:  // mouse back button
+            go_back();
+            return true;
+        case 9:  // mouse forward button
+            go_forward();
+            return true;
+        default:
+            return false;
         }
     }
 

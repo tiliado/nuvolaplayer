@@ -51,7 +51,7 @@ public class WebkitEngine : WebEngine
     }
 
     public override void early_init(AppRunnerController runner_app, IpcBus ipc_bus,
-    Config config, Connection? connection, HashTable<string, Variant> worker_data)  {
+        Config config, Connection? connection, HashTable<string, Variant> worker_data)  {
 
         this.ipc_bus = ipc_bus;
         this.runner_app = runner_app;
@@ -68,7 +68,7 @@ public class WebkitEngine : WebEngine
         worker_data["LIBSOUP_MICRO"] = Soup.get_micro_version();
 
         if (connection != null)
-            apply_network_proxy(connection);
+        apply_network_proxy(connection);
 
         var webkit_extension_dir = Nuvola.get_libdir();
         debug("Nuvola WebKit Extension directory: %s", webkit_extension_dir);
@@ -78,7 +78,7 @@ public class WebkitEngine : WebEngine
         web_context.set_web_extensions_initialization_user_data(web_extension_data);
 
         if (web_app.allow_insecure_content)
-            web_context.get_security_manager().register_uri_scheme_as_secure("http");
+        web_context.get_security_manager().register_uri_scheme_as_secure("http");
 
         web_context.download_started.connect(on_download_started);
 
@@ -157,7 +157,7 @@ public class WebkitEngine : WebEngine
             {
                 runner_app.fatal_error("Initialization error",
                     "%s failed to initialize app runner. Initialization exited with error:\n\n%s".printf(
-                    runner_app.app_name, e.message));
+                        runner_app.app_name, e.message));
             }
             debug("App Runner Initialized");
             ready = true;
@@ -192,7 +192,7 @@ public class WebkitEngine : WebEngine
             if (url != null)
             {
                 if (load_uri(url))
-                    return;
+                return;
                 runner_app.show_error("Invalid page URL", "The web app integration script has not provided a valid page URL '%s'.".printf(url));
             }
         }
@@ -210,7 +210,7 @@ public class WebkitEngine : WebEngine
         {
             var url = env.send_data_request_string("HomePageRequest", "url");
             if (url == null)
-                runner_app.fatal_error("Invalid home page URL", "The web app integration script has provided an empty home page URL.");
+            runner_app.fatal_error("Invalid home page URL", "The web app integration script has provided an empty home page URL.");
             else if (!load_uri(url))
             {
                 runner_app.fatal_error("Invalid home page URL", "The web app integration script has not provided a valid home page URL '%s'.".printf(url));
@@ -374,55 +374,55 @@ public class WebkitEngine : WebEngine
         router.add_method("/nuvola/core/session-has-key", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
             "Whether the session has a given key.",
             handle_session_has_key, {
-            new Drt.StringParam("key", true, false, null, "Session key.")
-        });
+                new Drt.StringParam("key", true, false, null, "Session key.")
+            });
         router.add_method("/nuvola/core/session-get-value", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
             "Get session value for the given key.",
             handle_session_get_value, {
-            new Drt.StringParam("key", true, false, null, "Session key.")
-        });
+                new Drt.StringParam("key", true, false, null, "Session key.")
+            });
         router.add_method("/nuvola/core/session-set-value", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             "Set session value for the given key.",
             handle_session_set_value, {
-            new Drt.StringParam("key", true, false, null, "Session key."),
-            new Drt.VariantParam("value", true, true, null, "Session value.")
-        });
+                new Drt.StringParam("key", true, false, null, "Session key."),
+                new Drt.VariantParam("value", true, true, null, "Session value.")
+            });
         router.add_method("/nuvola/core/session-set-default-value", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             "Set default session value for the given key.",
             handle_session_set_default_value, {
-            new Drt.StringParam("key", true, false, null, "Session key."),
-            new Drt.VariantParam("value", true, true, null, "Session value.")
-        });
+                new Drt.StringParam("key", true, false, null, "Session key."),
+                new Drt.VariantParam("value", true, true, null, "Session value.")
+            });
         router.add_method("/nuvola/core/config-has-key", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
             "Whether the config has a given key.",
             handle_config_has_key, {
-            new Drt.StringParam("key", true, false, null, "Config key.")
-        });
+                new Drt.StringParam("key", true, false, null, "Config key.")
+            });
         router.add_method("/nuvola/core/config-get-value", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
             "Get config value for the given key.",
             handle_config_get_value, {
-            new Drt.StringParam("key", true, false, null, "Config key.")
-        });
+                new Drt.StringParam("key", true, false, null, "Config key.")
+            });
         router.add_method("/nuvola/core/config-set-value", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             "Set config value for the given key.",
             handle_config_set_value, {
-            new Drt.StringParam("key", true, false, null, "Config key."),
-            new Drt.VariantParam("value", true, true, null, "Config value.")
-        });
+                new Drt.StringParam("key", true, false, null, "Config key."),
+                new Drt.VariantParam("value", true, true, null, "Config value.")
+            });
         router.add_method("/nuvola/core/config-set-default-value", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             "Set default config value for the given key.",
             handle_config_set_default_value, {
-            new Drt.StringParam("key", true, false, null, "Config key."),
-            new Drt.VariantParam("value", true, true, null, "Config value.")
-        });
+                new Drt.StringParam("key", true, false, null, "Config key."),
+                new Drt.VariantParam("value", true, true, null, "Config value.")
+            });
         router.add_method("/nuvola/core/show-error", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             "Show error message.",
             handle_show_error, {
-            new Drt.StringParam("text", true, false, null, "Error message.")
-        });
+                new Drt.StringParam("text", true, false, null, "Error message.")
+            });
         router.add_method("/nuvola/browser/download-file-async", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
-                "Download file.",
-                handle_download_file_async, {
+            "Download file.",
+            handle_download_file_async, {
                 new Drt.StringParam("uri", true, false, null, "File to download."),
                 new Drt.StringParam("basename", true, false, null, "Basename of the file."),
                 new Drt.DoubleParam("callback-id", true, null, "Callback id.")
@@ -593,9 +593,9 @@ public class WebkitEngine : WebEngine
         handler_ids[1] = download.failed.connect((d, err) => {
             WebKit.DownloadError e = (WebKit.DownloadError) err;
             if (e is WebKit.DownloadError.DESTINATION)
-                warning("Download failed because of destination: %s", e.message);
+            warning("Download failed because of destination: %s", e.message);
             else
-                warning("Download failed: %s", e.message);
+            warning("Download failed: %s", e.message);
             try
             {
                 var payload = new Variant(
@@ -639,7 +639,7 @@ public class WebkitEngine : WebEngine
     {
 
         if (download.destination == null)
-            download.cancel();
+        download.cancel();
         download.decide_destination.disconnect(on_download_decide_destination);
         return true;
     }
@@ -649,7 +649,7 @@ public class WebkitEngine : WebEngine
         var action = decision.navigation_action;
         var uri = action.get_request().uri;
         if (!uri.has_prefix("http://") && !uri.has_prefix("https://"))
-            return false;
+        return false;
 
         var handled = false;
         var load_uri = false;
@@ -746,9 +746,9 @@ public class WebkitEngine : WebEngine
         while (iter.next("{smv}", &key, &value))
         {
             if (key == "approved")
-                approved = value != null ? value.get_boolean() : false;
+            approved = value != null ? value.get_boolean() : false;
             else if (key == "newWindow" && value != null)
-                new_window = value.get_boolean();
+            new_window = value.get_boolean();
         }
         return approved;
     }
@@ -821,7 +821,7 @@ public class WebkitEngine : WebEngine
     {
         bool handled = false;
         if (dialog.get_dialog_type() == WebKit.ScriptDialogType.ALERT)
-            show_alert_dialog(ref handled, dialog.get_message());
+        show_alert_dialog(ref handled, dialog.get_message());
         return handled;
     }
 

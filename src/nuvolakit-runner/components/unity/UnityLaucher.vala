@@ -64,7 +64,7 @@ public class UnityLauncher: GLib.Object
     private void clear_menu()
     {
         if (dock_item == null || this.dock_item.quicklist == null)
-            return;
+        return;
 
         var menu = dock_item.quicklist;
         adaptors = null;
@@ -79,7 +79,7 @@ public class UnityLauncher: GLib.Object
         {
             var item = create_menu_item(action_name);
             if (item != null)
-                menu.child_append(item);
+            menu.child_append(item);
         }
     }
 
@@ -117,13 +117,13 @@ public class UnityLauncher: GLib.Object
         {
             item.property_set(Dbusmenu.MENUITEM_PROP_TOGGLE_TYPE, Dbusmenu.MENUITEM_TOGGLE_CHECK);
             item.property_set_int(Dbusmenu.MENUITEM_PROP_TOGGLE_STATE,
-            action.state.get_boolean() ? Dbusmenu.MENUITEM_TOGGLE_STATE_CHECKED : Dbusmenu.MENUITEM_TOGGLE_STATE_UNCHECKED);
+                action.state.get_boolean() ? Dbusmenu.MENUITEM_TOGGLE_STATE_CHECKED : Dbusmenu.MENUITEM_TOGGLE_STATE_UNCHECKED);
         }
         else if (action is Drtgtk.RadioAction)
         {
             item.property_set(Dbusmenu.MENUITEM_PROP_TOGGLE_TYPE, Dbusmenu.MENUITEM_TOGGLE_RADIO);
             item.property_set_int(Dbusmenu.MENUITEM_PROP_TOGGLE_STATE,
-            action.state.equal(target) ? Dbusmenu.MENUITEM_TOGGLE_STATE_CHECKED : Dbusmenu.MENUITEM_TOGGLE_STATE_UNCHECKED);
+                action.state.equal(target) ? Dbusmenu.MENUITEM_TOGGLE_STATE_CHECKED : Dbusmenu.MENUITEM_TOGGLE_STATE_UNCHECKED);
         }
 
         var adaptor = new ActionAdaptor(action, item, target);
@@ -179,10 +179,10 @@ private class ActionAdaptor
             if (state != null)
             {
                 if (state.is_of_type(VariantType.BOOLEAN))
-                    item.property_set_int(Dbusmenu.MENUITEM_PROP_TOGGLE_STATE,
+                item.property_set_int(Dbusmenu.MENUITEM_PROP_TOGGLE_STATE,
                     state.get_boolean() ? Dbusmenu.MENUITEM_TOGGLE_STATE_CHECKED : Dbusmenu.MENUITEM_TOGGLE_STATE_UNCHECKED);
                 else
-                    item.property_set_int(Dbusmenu.MENUITEM_PROP_TOGGLE_STATE,
+                item.property_set_int(Dbusmenu.MENUITEM_PROP_TOGGLE_STATE,
                     action.state.equal(parameter) ? Dbusmenu.MENUITEM_TOGGLE_STATE_CHECKED : Dbusmenu.MENUITEM_TOGGLE_STATE_UNCHECKED);
             }
             break;

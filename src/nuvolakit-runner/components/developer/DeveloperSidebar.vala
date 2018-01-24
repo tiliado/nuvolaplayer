@@ -215,7 +215,7 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
         lock (action_widgets)
         {
             if (action_widgets != null)
-                action_widgets.@foreach(unset_button);
+            action_widgets.@foreach(unset_button);
 
             action_widgets = null;
             radios.remove_all();
@@ -227,7 +227,7 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
             grid.add(label);
 
             foreach (var full_name in playback_actions)
-                add_action(full_name);
+            add_action(full_name);
 
         }
     }
@@ -299,7 +299,7 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
         string detailed_name;
         if (actions_reg.find_and_parse_action(full_name, out detailed_name, out action, out option)
         && !action.state.equal(option.parameter) && radio.active)
-                action.activate(option.parameter);
+        action.activate(option.parameter);
     }
 
     private void on_radio_action_changed(GLib.Object o, ParamSpec p)
@@ -314,7 +314,7 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
             if (actions_reg.find_and_parse_action(full_name, null, null, out option))
             {
                 if (!item.active && state.equal(option.parameter))
-                    item.active = true;
+                item.active = true;
             }
         }
     }
@@ -331,7 +331,7 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
             Drtgtk.RadioOption option;
             string detailed_name;
             if (actions_reg.find_and_parse_action(full_name, out detailed_name, out action, out option))
-                action.notify["state"].disconnect(on_radio_action_changed);
+            action.notify["state"].disconnect(on_radio_action_changed);
         }
     }
 
@@ -339,7 +339,7 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
     {
         var action = actions_reg.get_action("seek");
         if (action != null)
-            action.activate(new Variant.double(time_pos.position_sec * 1000000.0));
+        action.activate(new Variant.double(time_pos.position_sec * 1000000.0));
     }
 
     private void on_volume_changed()
@@ -348,7 +348,7 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
         {
             var action = actions_reg.get_action("change-volume");
             if (action != null)
-                action.activate(new Variant.double(volume_button.value));
+            action.activate(new Variant.double(volume_button.value));
         }
     }
 
@@ -358,7 +358,7 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
         {
             var rating = double.parse(entry.text);
             if (rating >= 0.0 && rating <= 1.0)
-                player.set_rating(rating);
+            player.set_rating(rating);
         }
     }
 }

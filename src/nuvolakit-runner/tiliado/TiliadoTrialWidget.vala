@@ -41,7 +41,7 @@ public class TiliadoTrialWidget : Gtk.Grid {
     private View? explore_view;
 
     public TiliadoTrialWidget(TiliadoActivation activation, Drtgtk.Application app,
-            TiliadoMembership required_membership) {
+        TiliadoMembership required_membership) {
         this.required_membership = required_membership;
         this.activation = activation;
         this.app = app;
@@ -143,7 +143,7 @@ public class TiliadoTrialWidget : Gtk.Grid {
         stack.transition_type = Gtk.StackTransitionType.SLIDE_LEFT_RIGHT;
         get_plan_view = new View(
             "Later", "I already have a plan", "Get a plan",
-            Drtgtk.Labels.markup("""Choose a suitable Nuvola plan to get continuous updates and user support."""));
+            Drtgtk.Labels.markup("Choose a suitable Nuvola plan to get continuous updates and user support."));
         get_plan_view.forward_button.clicked.connect(on_get_plan_forward_clicked);
         get_plan_view.back_button.clicked.connect(on_get_plan_back_clicked);
         get_plan_view.action_button.clicked.connect(on_get_plan_action_clicked);
@@ -151,17 +151,16 @@ public class TiliadoTrialWidget : Gtk.Grid {
         stack.add(get_plan_view);
 
         get_account_view = new View("Back", "I already have Tiliado account", "Get Tiliado account",
-            Drtgtk.Labels.markup("""Create a Tiliado account which will be linked to your Gumroad account to verify your membership."""));
+            Drtgtk.Labels.markup("Create a Tiliado account which will be linked to your Gumroad account to verify your membership."));
         get_account_view.forward_button.clicked.connect(on_get_account_forward_clicked);
         get_account_view.back_button.clicked.connect(on_get_account_back_clicked);
         get_account_view.action_button.clicked.connect(on_get_account_action_clicked);
         get_account_view.help_button.clicked.connect(on_help_clicked);
         stack.add(get_account_view);
 
-        activate_view = new View("Later", null, "Activate Nuvola",
-            Drtgtk.Labels.markup("""<b>Gumroad should have sent you an email with instructions. Please read them carefully.</b>
-
-Once a Nuvola developer confirms that your Gumroad and Tiliado accounts were linked, you can activate Nuvola with the button below."""));
+        activate_view = new View("Later", null, "Activate Nuvola", Drtgtk.Labels.markup(
+            "<b>Gumroad should have sent you an email with instructions. Please read them carefully.</b>\n\n"
+            + "Once a Nuvola developer confirms that your Gumroad and Tiliado accounts were linked, you can activate Nuvola with the button below."));
         activate_view.action_button.clicked.connect(on_activate_action_clicked);
         activate_view.back_button.clicked.connect(on_activate_back_clicked);
         activate_view.help_button.clicked.connect(on_help_clicked);
@@ -179,9 +178,8 @@ Once a Nuvola developer confirms that your Gumroad and Tiliado accounts were lin
         stack.add(failed_view);
 
         explore_view = new View("Close", null, "Explore Nuvola features", Drtgtk.Labels.markup(
-        """<b>Thank you for purchasing Nuvola.</b>
-
-We recommend taking a look at a list of Nuvola features to get the most of it."""), false);
+            "<b>Thank you for purchasing Nuvola.</b>\n\nWe recommend taking a look at a list of"
+            + " Nuvola features to get the most of it."), false);
         explore_view.back_button.clicked.connect(on_explore_back_clicked);
         explore_view.action_button.clicked.connect(on_explore_action_clicked);
         stack.add(explore_view);
@@ -313,10 +311,9 @@ We recommend taking a look at a list of Nuvola features to get the most of it.""
         if (!check_user()) {
             if (failed_view != null && user != null) {
                 failed_view.text_label.set_markup(Markup.printf_escaped(
-                """Your Tiliado account is valid but there is no record of purchased Nuvola plan.
-
-<b>User:</b> %s
-<b>Account:</b> %s""", user.name, TiliadoMembership.from_uint(user.membership).get_label()));
+                    "Your Tiliado account is valid but there is no record of purchased Nuvola plan.\n\n"
+                    + "<b>User:</b> %s\n<b>Account:</b> %s",
+                    user.name, TiliadoMembership.from_uint(user.membership).get_label()));
                 stack.visible_child = failed_view;
             }
         } else if (stack != null) {
