@@ -48,7 +48,7 @@ public unowned JS.Value object_from_JSON(JS.Context ctx, string json)
 {
     unowned JS.Value? result = JS.Value.from_JSON(ctx, new JS.String(json == "" ? "{}" : json));
     if (result == null || !result.is_object(ctx))
-        result = ctx.make_object();
+    result = ctx.make_object();
     return result;
 }
 
@@ -78,7 +78,7 @@ public static string? o_get_string(Context ctx, JS.Object obj, string property)
 {
     unowned JS.Value value = obj.get_property(ctx, new JS.String(property));
     if (value.is_string(ctx))
-        return utf8_string(value.to_jsstring(ctx));
+    return utf8_string(value.to_jsstring(ctx));
     return null;
 }
 
@@ -94,7 +94,7 @@ public static double o_get_number(Context ctx, JS.Object obj, string property)
 {
     unowned JS.Value value = obj.get_property(ctx, new JS.String(property));
     if (value.is_number(ctx))
-        return value.to_number(ctx);
+    return value.to_number(ctx);
     return 0.0;
 }
 
@@ -161,7 +161,7 @@ public static unowned JS.Object? o_get_object(Context ctx, JS.Object obj, string
 {
     unowned JS.Value value = obj.get_property(ctx, new JS.String(property));
     if (value.is_object(ctx))
-        return value.to_object(ctx);
+    return value.to_object(ctx);
     return null;
 }
 
@@ -186,11 +186,11 @@ public static string? string_or_null(JS.Context ctx, JS.Value val, bool allow_em
 public string? value_to_string(JS.Context ctx, JS.Value value)
 {
     if (value.is_string(ctx))
-        return utf8_string(value.to_jsstring(ctx));
+    return utf8_string(value.to_jsstring(ctx));
     if (value.is_number(ctx))
-        return (value.to_number(ctx).to_string());
+    return (value.to_number(ctx).to_string());
     if (value.is_object(ctx))
-        return utf8_string(value.to_object(ctx).to_JSON(ctx, 0, null));
+    return utf8_string(value.to_object(ctx).to_JSON(ctx, 0, null));
     return null;
 }
 
@@ -206,7 +206,7 @@ public string? exception_to_string(JS.Context ctx, JS.Value value)
             var line = (int) o_get_number(ctx, obj, "line");
             var file = o_get_string(ctx, obj, "sourceURL");
             if (line == 0 && file == null)
-                return "%s: %s. Enable JS debugging for more details.".printf(name ?? "null", message);
+            return "%s: %s. Enable JS debugging for more details.".printf(name ?? "null", message);
             return "%s:%d: %s: %s".printf(file ?? "(null)", line, name ?? "null", message);
         }
     }
@@ -218,7 +218,7 @@ public unowned JS.Value get_gobject_property_named(JS.Context ctx, GLib.Object o
     ObjectClass klass = (ObjectClass) o.get_type().class_ref();
     unowned ParamSpec? p = klass.find_property(name);
     if (p == null)
-        return JS.Value.undefined(ctx);
+    return JS.Value.undefined(ctx);
     return  get_gobject_property(ctx, o, p);
 }
 
@@ -266,19 +266,19 @@ public unowned JS.Value get_gobject_property(JS.Context ctx, GLib.Object o, Para
 public unowned JS.Value value_from_variant(JS.Context ctx, Variant? variant) throws JSError
 {
     if (variant == null)
-        return JS.Value.null(ctx);
+    return JS.Value.null(ctx);
 
     var type = variant.get_type();
 
     if (variant.is_of_type(VariantType.VARIANT))
-        return value_from_variant(ctx, variant.get_variant());
+    return value_from_variant(ctx, variant.get_variant());
 
     if (type.is_subtype_of(VariantType.MAYBE))
     {
         Variant? maybe_variant = null;
         variant.get("m*", &maybe_variant);
         if (maybe_variant == null)
-            return JS.Value.null(ctx);
+        return JS.Value.null(ctx);
         return value_from_variant(ctx, maybe_variant);
     }
 
@@ -291,37 +291,37 @@ public unowned JS.Value value_from_variant(JS.Context ctx, Variant? variant) thr
         string key = null;
         Variant value = null;
         while (iter.next("{s*}", &key, &value))
-            object.set_property(ctx, new JS.String(key), value_from_variant(ctx, value));
+        object.set_property(ctx, new JS.String(key), value_from_variant(ctx, value));
         return object;
     }
 
     if (variant.is_of_type(VariantType.STRING))
-        return JS.Value.string(ctx, new JS.String(variant.get_string()));
+    return JS.Value.string(ctx, new JS.String(variant.get_string()));
 
     if (variant.is_of_type(VariantType.BOOLEAN))
-        return JS.Value.boolean(ctx, variant.get_boolean());
+    return JS.Value.boolean(ctx, variant.get_boolean());
 
     if (variant.is_of_type(VariantType.DOUBLE))
-        return JS.Value.number(ctx, variant.get_double());
+    return JS.Value.number(ctx, variant.get_double());
 
     if (variant.is_of_type(VariantType.INT32))
-        return JS.Value.number(ctx, (double) variant.get_int32());
+    return JS.Value.number(ctx, (double) variant.get_int32());
 
     if (variant.is_of_type(VariantType.UINT32))
-        return JS.Value.number(ctx, (double) variant.get_uint32());
+    return JS.Value.number(ctx, (double) variant.get_uint32());
 
     if (variant.is_of_type(VariantType.INT64))
-        return JS.Value.number(ctx, (double) variant.get_int64());
+    return JS.Value.number(ctx, (double) variant.get_int64());
 
     if (variant.is_of_type(VariantType.UINT64))
-        return JS.Value.number(ctx, (double) variant.get_uint64());
+    return JS.Value.number(ctx, (double) variant.get_uint64());
 
     if (variant.is_container())
     {
         var size = variant.n_children();
         void*[] args = new void*[size];
         for (var i = 0; i < size; i++)
-            args[i] = (void*) value_from_variant(ctx, variant.get_child_value(i));
+        args[i] = (void*) value_from_variant(ctx, variant.get_child_value(i));
         return ctx.make_array((JS.Value[]) args);
     }
 
@@ -331,16 +331,16 @@ public unowned JS.Value value_from_variant(JS.Context ctx, Variant? variant) thr
 public Variant variant_from_value(JS.Context ctx, JS.Value val) throws JSError
 {
     if (val.is_null(ctx))
-        return new Variant("mv", null);
+    return new Variant("mv", null);
 
     if (val.is_string(ctx))
-        return new Variant.string(utf8_string(val.to_jsstring(ctx)));
+    return new Variant.string(utf8_string(val.to_jsstring(ctx)));
 
     if (val.is_number(ctx))
-        return new Variant.double(val.to_number(ctx));
+    return new Variant.double(val.to_number(ctx));
 
     if (val.is_boolean(ctx))
-        return new Variant.boolean(val.to_boolean(ctx));
+    return new Variant.boolean(val.to_boolean(ctx));
 
     unowned JS.Object glob_object = ctx.get_global_object();
     unowned JS.Object object = o_get_object(ctx, glob_object, "Array");
@@ -350,14 +350,14 @@ public Variant variant_from_value(JS.Context ctx, JS.Value val) throws JSError
     JS.Value? exception;
     unowned JS.Value result = object.call_as_function(ctx, glob_object, (JS.Value[]) params,  out exception);
     if (exception != null)
-        throw new JSError.WRONG_TYPE("Unsupported type. %s", exception_to_string(ctx, exception) ?? "(null)");
+    throw new JSError.WRONG_TYPE("Unsupported type. %s", exception_to_string(ctx, exception) ?? "(null)");
     if (result.to_boolean(ctx))
     {
         VariantBuilder builder = new VariantBuilder(new VariantType ("av"));
         object = (JS.Object) val;
         int size = (int) o_get_number(ctx, object, "length");
         for (uint i = 0; i < size; i++)
-            builder.add("v",  variant_from_value(ctx, object.get_property_at_index(ctx, i)));
+        builder.add("v",  variant_from_value(ctx, object.get_property_at_index(ctx, i)));
 
         return builder.end();
     }

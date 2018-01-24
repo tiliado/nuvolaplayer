@@ -612,6 +612,15 @@ def build(ctx):
         vala_target_glib = TARGET_GLIB,
         checks=VALALINT_CHECKS
     )
+    valalint(
+        source_dir = 'src/nuvolakit-base',
+        packages = packages + ' gstreamer-1.0',
+        vala_defines = vala_defines,
+        defines = ['G_LOG_DOMAIN="Nuvola"'],
+        vapi_dirs = vapi_dirs,
+        vala_target_glib = TARGET_GLIB,
+        checks=VALALINT_CHECKS
+    )
 
     ctx.add_group()
 

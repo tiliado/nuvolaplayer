@@ -109,7 +109,7 @@ public class JSApi : GLib.Object
     private bool warn_on_sync_func;
 
     public JSApi(Drt.Storage storage, File data_dir, File config_dir, Drt.KeyValueStorage config,
-    Drt.KeyValueStorage session, uint[] webkit_version, uint[] libsoup_version, bool warn_on_sync_func)
+        Drt.KeyValueStorage session, uint[] webkit_version, uint[] libsoup_version, bool warn_on_sync_func)
     {
         this.storage = storage;
         this.data_dir = data_dir;
@@ -163,7 +163,7 @@ public class JSApi : GLib.Object
         this.env = null;
         unowned JS.Context ctx = env.context;
         if (klass == null)
-            create_class();
+        create_class();
         unowned JS.Object main_object = ctx.make_object(klass, this);
         main_object.protect(ctx);
 
@@ -205,13 +205,13 @@ public class JSApi : GLib.Object
             {
                 main_js = dir.get_child(JS_DIR).get_child(MAIN_JS);
                 if (main_js.query_exists())
-                    break;
+                break;
                 main_js = null;
             }
         }
 
         if (main_js == null)
-            throw new JSError.INITIALIZATION_FAILED("Failed to find a core component main.js. This probably means the application has not been installed correctly or that component has been accidentally deleted.");
+        throw new JSError.INITIALIZATION_FAILED("Failed to find a core component main.js. This probably means the application has not been installed correctly or that component has been accidentally deleted.");
 
         try
         {
@@ -224,7 +224,7 @@ public class JSApi : GLib.Object
 
         var meta_json = data_dir.get_child(META_JSON);
         if (!meta_json.query_exists())
-            throw new JSError.INITIALIZATION_FAILED("Failed to find a web app component %s. This probably means the web app integration has not been installed correctly or that component has been accidentally deleted.", META_JSON);
+        throw new JSError.INITIALIZATION_FAILED("Failed to find a web app component %s. This probably means the web app integration has not been installed correctly or that component has been accidentally deleted.", META_JSON);
 
         string meta_json_data;
         try
@@ -250,7 +250,7 @@ public class JSApi : GLib.Object
     {
         var integrate_js = data_dir.get_child(INTEGRATE_JS);
         if (!integrate_js.query_exists())
-            throw new JSError.INITIALIZATION_FAILED("Failed to find a web app component %s. This probably means the web app integration has not been installed correctly or that component has been accidentally deleted.", INTEGRATE_JS);
+        throw new JSError.INITIALIZATION_FAILED("Failed to find a web app component %s. This probably means the web app integration has not been installed correctly or that component has been accidentally deleted.", INTEGRATE_JS);
 
         try
         {
@@ -314,22 +314,22 @@ public class JSApi : GLib.Object
     }
 
     static unowned JS.Value call_ipc_method_void_func(Context ctx, JS.Object function, JS.Object self,
-    JS.Value[] args, out unowned JS.Value exception) {
+        JS.Value[] args, out unowned JS.Value exception) {
         return call_ipc_method_func(ctx, function, self, args, out exception, JsFuncCallType.VOID);
     }
 
     static unowned JS.Value call_ipc_method_sync_func(Context ctx, JS.Object function, JS.Object self,
-    JS.Value[] args, out unowned JS.Value exception) {
+        JS.Value[] args, out unowned JS.Value exception) {
         return call_ipc_method_func(ctx, function, self, args, out exception, JsFuncCallType.SYNC);
     }
 
     static unowned JS.Value call_ipc_method_async_func(Context ctx, JS.Object function, JS.Object self,
-    JS.Value[] args, out unowned JS.Value exception) {
+        JS.Value[] args, out unowned JS.Value exception) {
         return call_ipc_method_func(ctx, function, self, args, out exception, JsFuncCallType.ASYNC);
     }
 
     static unowned JS.Value call_ipc_method_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args,
-    out unowned JS.Value exception, JsFuncCallType type) {
+        out unowned JS.Value exception, JsFuncCallType type) {
         unowned JS.Value undefined = JS.Value.undefined(ctx);
         exception = null;
         if (args.length == 0)
@@ -397,17 +397,17 @@ public class JSApi : GLib.Object
     }
 
     static unowned JS.Value key_value_storage_has_key_sync_func(Context ctx, JS.Object function, JS.Object self,
-    JS.Value[] args, out unowned JS.Value exception) {
+        JS.Value[] args, out unowned JS.Value exception) {
         return key_value_storage_has_key_func(ctx, function, self, args, out exception, JsFuncCallType.SYNC);
     }
 
     static unowned JS.Value key_value_storage_has_key_async_func(Context ctx, JS.Object function, JS.Object self,
-    JS.Value[] args, out unowned JS.Value exception) {
+        JS.Value[] args, out unowned JS.Value exception) {
         return key_value_storage_has_key_func(ctx, function, self, args, out exception, JsFuncCallType.ASYNC);
     }
 
     static unowned JS.Value key_value_storage_has_key_func(Context ctx, JS.Object function, JS.Object self,
-    JS.Value[] args, out unowned JS.Value exception,  JsFuncCallType type) {
+        JS.Value[] args, out unowned JS.Value exception,  JsFuncCallType type) {
         unowned JS.Value _false = JS.Value.boolean(ctx, false);
         exception = null;
         if (args.length != (type == JsFuncCallType.ASYNC ? 3 : 2)) {
@@ -442,25 +442,25 @@ public class JSApi : GLib.Object
         } else {
             var id = (int) args[2].to_number(ctx);
             storage.has_key_async.begin(key, (o, res) => {
-                var result = storage.has_key_async.end(res);
-                js_api.send_async_response(id, result, null);
-            });
+                    var result = storage.has_key_async.end(res);
+                    js_api.send_async_response(id, result, null);
+                });
         }
         return _false;
     }
 
     static unowned JS.Value key_value_storage_get_value_sync_func(Context ctx, JS.Object function, JS.Object self,
-    JS.Value[] args, out unowned JS.Value exception) {
+        JS.Value[] args, out unowned JS.Value exception) {
         return key_value_storage_get_value_func(ctx, function, self, args, out exception, JsFuncCallType.SYNC);
     }
 
     static unowned JS.Value key_value_storage_get_value_async_func(Context ctx, JS.Object function, JS.Object self,
-    JS.Value[] args, out unowned JS.Value exception) {
+        JS.Value[] args, out unowned JS.Value exception) {
         return key_value_storage_get_value_func(ctx, function, self, args, out exception, JsFuncCallType.ASYNC);
     }
 
     static unowned JS.Value key_value_storage_get_value_func(Context ctx, JS.Object function, JS.Object self,
-    JS.Value[] args, out unowned JS.Value exception, JsFuncCallType type) {
+        JS.Value[] args, out unowned JS.Value exception, JsFuncCallType type) {
         unowned JS.Value undefined = JS.Value.undefined(ctx);
         exception = null;
         if (args.length != (type == JsFuncCallType.ASYNC ? 3 : 2)) {
@@ -501,25 +501,25 @@ public class JSApi : GLib.Object
         } else {
             var id = (int) args[2].to_number(ctx);
             storage.get_value_async.begin(key, (o, res) => {
-                var value = storage.get_value_async.end(res);
-                js_api.send_async_response(id, value, null);
-            });
+                    var value = storage.get_value_async.end(res);
+                    js_api.send_async_response(id, value, null);
+                });
         }
         return undefined;
     }
 
     static unowned JS.Value key_value_storage_set_value_sync_func(Context ctx, JS.Object function, JS.Object self,
-    JS.Value[] args, out unowned JS.Value exception) {
+        JS.Value[] args, out unowned JS.Value exception) {
         return key_value_storage_set_value_func(ctx, function, self, args, out exception, JsFuncCallType.SYNC);
     }
 
     static unowned JS.Value key_value_storage_set_value_async_func(Context ctx, JS.Object function, JS.Object self,
-    JS.Value[] args, out unowned JS.Value exception) {
+        JS.Value[] args, out unowned JS.Value exception) {
         return key_value_storage_set_value_func(ctx, function, self, args, out exception, JsFuncCallType.ASYNC);
     }
 
     static unowned JS.Value key_value_storage_set_value_func(Context ctx, JS.Object function, JS.Object self,
-    JS.Value[] args, out unowned JS.Value exception, JsFuncCallType type)
+        JS.Value[] args, out unowned JS.Value exception, JsFuncCallType type)
     {
         unowned JS.Value undefined = JS.Value.undefined(ctx);
         exception = null;
@@ -563,27 +563,27 @@ public class JSApi : GLib.Object
         } else {
             var id = (int) args[3].to_number(ctx);
             storage.set_value_async.begin(key, value, (o, res) => {
-                storage.set_value_async.end(res);
-                js_api.send_async_response(id, null, null);
-            });
+                    storage.set_value_async.end(res);
+                    js_api.send_async_response(id, null, null);
+                });
         }
         return undefined;
     }
 
     static unowned JS.Value key_value_storage_set_default_value_sync_func(Context ctx, JS.Object function,
-    JS.Object self, JS.Value[] args, out unowned JS.Value exception) {
+        JS.Object self, JS.Value[] args, out unowned JS.Value exception) {
         return key_value_storage_set_default_value_func(
             ctx, function, self, args, out exception, JsFuncCallType.SYNC);
     }
 
     static unowned JS.Value key_value_storage_set_default_value_async_func(Context ctx, JS.Object function,
-    JS.Object self, JS.Value[] args, out unowned JS.Value exception) {
+        JS.Object self, JS.Value[] args, out unowned JS.Value exception) {
         return key_value_storage_set_default_value_func(
             ctx, function, self, args, out exception, JsFuncCallType.ASYNC);
     }
 
     static unowned JS.Value key_value_storage_set_default_value_func(Context ctx, JS.Object function, JS.Object self,
-    JS.Value[] args, out unowned JS.Value exception, JsFuncCallType type) {
+        JS.Value[] args, out unowned JS.Value exception, JsFuncCallType type) {
         unowned JS.Value undefined = JS.Value.undefined(ctx);
         exception = null;
         if (args.length != (type == JsFuncCallType.ASYNC ? 4 : 3)) {
@@ -625,9 +625,9 @@ public class JSApi : GLib.Object
         } else {
             var id = (int) args[3].to_number(ctx);
             storage.set_default_value_async.begin(key, value, (o, res) => {
-                storage.set_default_value_async.end(res);
-                js_api.send_async_response(id, null, null);
-            });
+                    storage.set_default_value_async.end(res);
+                    js_api.send_async_response(id, null, null);
+                });
         }
         return undefined;
     }

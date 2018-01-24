@@ -23,6 +23,6 @@
  */
 
 namespace Nuvola.IpcApi {
-    public const string CORE_GET_METADATA = "/nuvola/core/get-metadata";
+public const string CORE_GET_METADATA = "/nuvola/core/get-metadata";
 
 }  // namespace Nuvola.IpcApi

@@ -34,7 +34,7 @@ public interface JSExecutor: GLib.Object
         var default_variant = default_value == null ? null : new Variant.string(default_value);
         var variant = send_data_request_variant(name, key, default_variant);
         if (variant == null || !variant.is_of_type(VariantType.STRING))
-            return null;
+        return null;
         var result = variant.get_string();
 
         return result != "" ? result : null;
@@ -44,7 +44,7 @@ public interface JSExecutor: GLib.Object
     {
         var variant = send_data_request_variant(name, key, new Variant.boolean(default_value));
         if (variant == null || !variant.is_of_type(VariantType.BOOLEAN))
-            return default_value;
+        return default_value;
         return variant.get_boolean();
     }
 
