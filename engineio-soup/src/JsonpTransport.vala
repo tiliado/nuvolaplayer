@@ -53,10 +53,10 @@ public class JsonpTransport: PollingTransport
             try
             {
                 string_payload = newlines.replace_eval(string_payload, -1, 0, 0, (match, result) =>
-                {
-                    result.append(match.fetch(1) == "\\\\" ? "\\" : "\\\\");
-                    return false;
-                });
+                    {
+                        result.append(match.fetch(1) == "\\\\" ? "\\" : "\\\\");
+                        return false;
+                    });
             }
             catch (RegexError e)
             {
@@ -68,12 +68,12 @@ public class JsonpTransport: PollingTransport
 
     protected override void do_write(owned string? data, Bytes? bin_data, bool compress)
     {
-      // we must output valid javascript, not valid json
-      // see: http://timelessrepo.com/json-isnt-a-javascript-subset
+        // we must output valid javascript, not valid json
+        // see: http://timelessrepo.com/json-isnt-a-javascript-subset
         data = data.replace("\u2028", "\\u2028").replace("\u2029", "\\u2029");
 
-      base.do_write(head + data + foot, null, compress);
-  }
+        base.do_write(head + data + foot, null, compress);
+    }
 }
 
 } // namespace Engineio

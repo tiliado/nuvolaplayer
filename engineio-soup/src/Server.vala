@@ -92,7 +92,7 @@ public class Server: GLib.Object
         transport_factories = new HashTable<string, TransportFactory>(str_hash, str_equal);
         transport_factories["polling"] = PollingTransport.new_for_request;
         if (soup != null)
-            attach(soup, path);
+        attach(soup, path);
     }
 
     /**
@@ -123,7 +123,7 @@ public class Server: GLib.Object
         return_if_fail(this.soup == null);
         this.soup = soup;
         if (path != null)
-            this.path = path.has_suffix("/") ? path : path + "/";
+        this.path = path.has_suffix("/") ? path : path + "/";
         soup.add_handler(this.path, engine_io_handler);
     }
 
@@ -141,7 +141,7 @@ public class Server: GLib.Object
     public string[] list_upgrades(string transport)
     {
         if (!allow_upgrades)
-            return {};
+        return {};
         // TODO: transports[transport].upgradesTo || [];
         return {};
     }
@@ -229,9 +229,9 @@ public class Server: GLib.Object
         {
             yield perform_handshake(request.transport, request, response);
         }
-     }
+    }
 
-     /**
+    /**
      * Sends an Engine.IO Error Message
      *
      * @param {http.ServerResponse} response
@@ -258,12 +258,12 @@ public class Server: GLib.Object
     }
 
     /**
- * Handshakes a new client.
- *
- * @param {String} transport name
- * @param {Object} request object
- * @api private
- */
+     * Handshakes a new client.
+     *
+     * @param {String} transport name
+     * @param {Object} request object
+     * @api private
+     */
 
     private async void perform_handshake(string transport_name, Request request, Response response)
     {
@@ -307,7 +307,7 @@ public class Server: GLib.Object
         {
             var cookie = this.cookie + "=" + transport.sid;
             if (cookie_path != null)
-                cookie += "; path=" + cookie_path;
+            cookie += "; path=" + cookie_path;
             headers["Set-Cookie"] = cookie;
         }
     }

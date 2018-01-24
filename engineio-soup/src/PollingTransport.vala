@@ -47,9 +47,9 @@ public abstract class PollingTransport: Transport
     public static PollingTransport new_for_request(Request request)
     {
         if (request.jsonp_index < 0)
-            return new XhrTransport(request);
+        return new XhrTransport(request);
         else
-            return new JsonpTransport(request);
+        return new JsonpTransport(request);
     }
 
     public PollingTransport(Request request)
@@ -141,9 +141,9 @@ public abstract class PollingTransport: Transport
         }
 
         if (is_binary)
-            yield handle_incoming_data(null, request.get_data_as_bytes());
+        yield handle_incoming_data(null, request.get_data_as_bytes());
         else
-            yield handle_incoming_data(request.get_data_as_string(), null);
+        yield handle_incoming_data(request.get_data_as_string(), null);
 
         if (this.data_response != null)
         {
@@ -242,41 +242,41 @@ public abstract class PollingTransport: Transport
 
     private void write(string data, bool compress=false)
     {
-      debug("Writing '%s'", data);
-      do_write(data, null, compress);
-      this.poll_request = null;
-      this.poll_response = null;
+        debug("Writing '%s'", data);
+        do_write(data, null, compress);
+        this.poll_request = null;
+        this.poll_response = null;
     }
 
 
     /**
- * Performs the write.
- *
- * @api private
- */
+     * Performs the write.
+     *
+     * @api private
+     */
 
     protected virtual void do_write(owned string? str_data, Bytes? bin_data, bool compress)
     {
-      var is_string = str_data != null;
-      var content_type = is_string
+        var is_string = str_data != null;
+        var content_type = is_string
         ? "text/plain; charset=UTF-8"
         : "application/octet-stream";
 
-      poll_response.headers["Content-Type"] = content_type;
+        poll_response.headers["Content-Type"] = content_type;
 
-      if (!http_compression || !compress)
-      {
-        poll_response.headers["Content-Length"] = (is_string ? str_data.length : bin_data.length).to_string();
-        poll_response.status_code = 200;
-        if (is_string)
+        if (!http_compression || !compress)
+        {
+            poll_response.headers["Content-Length"] = (is_string ? str_data.length : bin_data.length).to_string();
+            poll_response.status_code = 200;
+            if (is_string)
             poll_response.end_string(str_data);
-        else
+            else
             poll_response.end_bytes(bin_data);
 
-        return;
-      }
+            return;
+        }
 
-      /* TODO: compression */
+        /* TODO: compression */
     }
 
     /**
@@ -287,37 +287,37 @@ public abstract class PollingTransport: Transport
 
     protected override void close_transport(owned CloseCallback? callback)
     {
-      message("Closing");
-      if (data_request != null)
-      {
-        message("Aborting ongoing data request");
-        data_response.status_code = 500;
-        data_response.end();
-        data_request = null;
-        data_response = null;
-      }
+        message("Closing");
+        if (data_request != null)
+        {
+            message("Aborting ongoing data request");
+            data_response.status_code = 500;
+            data_response.end();
+            data_request = null;
+            data_response = null;
+        }
 
-      if (writable)
-      {
-        message("Transport writable - closing right away");
-        send_one(new Packet(PacketType.CLOSE, null, null));
-        if (callback != null)
+        if (writable)
+        {
+            message("Transport writable - closing right away");
+            send_one(new Packet(PacketType.CLOSE, null, null));
+            if (callback != null)
             callback();
-        on_close();
-      }
-      else if (discarded)
-      {
-        message("transport discarded - closing right away");
-        if (callback != null)
+            on_close();
+        }
+        else if (discarded)
+        {
+            message("transport discarded - closing right away");
+            if (callback != null)
             callback();
-        on_close();
-      }
-      else
-      {
-        debug("transport not writable - buffering orderly close");
-        this.should_close = true;
-        close_timeout_id = Timeout.add(close_timeout, close_timeout_cb);
-      }
+            on_close();
+        }
+        else
+        {
+            debug("transport not writable - buffering orderly close");
+            this.should_close = true;
+            close_timeout_id = Timeout.add(close_timeout, close_timeout_cb);
+        }
     }
 
     private bool close_timeout_cb()

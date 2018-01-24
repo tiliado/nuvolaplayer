@@ -54,13 +54,13 @@ public class Channel: GLib.Object
         }
         switch (type)
         {
-            case MessageType.REQUEST:
-            case MessageType.SUBSCRIBE:
-                handle_request.begin(socket, type, id, method, data, (o, res) => {handle_request.end(res);});
-                break;
-            default:
-                warning("Other message types unsupported: %s", type.to_string());
-                break;
+        case MessageType.REQUEST:
+        case MessageType.SUBSCRIBE:
+            handle_request.begin(socket, type, id, method, data, (o, res) => {handle_request.end(res);});
+            break;
+        default:
+            warning("Other message types unsupported: %s", type.to_string());
+            break;
         }
     }
 

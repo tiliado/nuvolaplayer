@@ -84,13 +84,13 @@ public class Socket : GLib.Object
      *
      * @param message   the received message
      */
-     public signal void message_received(string message);
+    public signal void message_received(string message);
 
-     /**
-      * Emitted when the client sends a message.
-      *
-      * @param bytes   the received data
-      */
+    /**
+     * Emitted when the client sends a message.
+     *
+     * @param bytes   the received data
+     */
     public signal void bytes_received(Bytes bytes);
 
     /**
@@ -174,7 +174,7 @@ public class Socket : GLib.Object
     public void close(bool discard=false)
     {
         if (ready_state != ReadyState.OPEN)
-            return;
+        return;
 
         ready_state = ReadyState.CLOSING;
         if (write_buffer != null)
@@ -193,15 +193,15 @@ public class Socket : GLib.Object
     }
 
     /**
-    * Closes the underlying transport.
-    *
-    * @param {Boolean} discard
-    * @api private
-    */
+     * Closes the underlying transport.
+     *
+     * @param {Boolean} discard
+     * @api private
+     */
     private void close_transport(bool discard)
     {
         if (discard)
-            transport.discard();
+        transport.discard();
         transport.closed.connect(on_transport_force_closed);
         transport.close(null);
     }
@@ -260,12 +260,12 @@ public class Socket : GLib.Object
 
     private void set_ping_timeout()
     {
-      if (ping_timeout_timer > 0)
-      {
-          Source.remove(ping_timeout_timer);
-          ping_timeout_timer = 0;
-      }
-      ping_timeout_timer = Timeout.add(server.ping_interval + server.ping_timeout, on_ping_timeout);
+        if (ping_timeout_timer > 0)
+        {
+            Source.remove(ping_timeout_timer);
+            ping_timeout_timer = 0;
+        }
+        ping_timeout_timer = Timeout.add(server.ping_interval + server.ping_timeout, on_ping_timeout);
     }
 
     private bool on_ping_timeout()
@@ -372,11 +372,11 @@ public class Socket : GLib.Object
     }
 
     /**
-    * Called upon transport packet.
-    *
-    * @param {Object} packet
-    * @api private
-    */
+     * Called upon transport packet.
+     *
+     * @param {Object} packet
+     * @api private
+     */
 
     private void on_incoming_packet(Packet packet)
     {
@@ -398,9 +398,9 @@ public class Socket : GLib.Object
                 break;
             case PacketType.MESSAGE:
                 if (packet.str_data != null)
-                    message_received(packet.str_data);
+                message_received(packet.str_data);
                 else if(packet.bin_data != null)
-                    bytes_received(packet.bin_data);
+                bytes_received(packet.bin_data);
                 break;
             }
         }
@@ -430,8 +430,8 @@ public class Socket : GLib.Object
 
     private void detach_transport()
     {
-//~         var cleanup;
-//~         while (cleanup = this.cleanupFn.shift()) cleanup();
+        //~         var cleanup;
+        //~         while (cleanup = this.cleanupFn.shift()) cleanup();
         debug("Detaching transport %s", transport != null ? transport.sid : null);
         if (ping_timeout_timer > 0)
         {
@@ -459,8 +459,8 @@ public class Socket : GLib.Object
     {
         flush();
         if (sent_callbacks != null)
-            foreach (unowned SendAdaptor adaptor in sent_callbacks)
-                Idle.add(adaptor.source_func);
+        foreach (unowned SendAdaptor adaptor in sent_callbacks)
+        Idle.add(adaptor.source_func);
     }
 }
 

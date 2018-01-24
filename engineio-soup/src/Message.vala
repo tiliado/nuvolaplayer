@@ -75,7 +75,7 @@ public bool deserialize_message(string message, out MessageType type, out int id
         {
             id = int.parse(int_str.str);
             if (id < 0)
-                return false;
+            return false;
             i++;
             break;
         }
@@ -92,7 +92,7 @@ public bool deserialize_message(string message, out MessageType type, out int id
         {
             var size = int.parse(int_str.str);
             if (size <= 0)
-                return false;
+            return false;
             i++;
             method = message.substring(i, size);
             i += size;
@@ -111,7 +111,7 @@ public bool deserialize_message(string message, out MessageType type, out int id
         {
             var size = int.parse(int_str.str);
             if (size < 0)
-                return false;
+            return false;
 
             i++;
             if (size == 0)
@@ -131,9 +131,9 @@ public bool deserialize_message(string message, out MessageType type, out int id
                     return false;
                 }
                 if (parser.get_root() == null)
-                    data = null;
+                data = null;
                 else
-                    data = parser.get_root().copy();
+                data = parser.get_root().copy();
             }
             break;
         }

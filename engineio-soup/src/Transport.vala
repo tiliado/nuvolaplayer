@@ -127,10 +127,10 @@ public abstract class Transport: GLib.Object
         try
         {
             var packet = binary_payload != null
-                ? Parser.decode_packet_from_bytes(binary_payload)
-                : Parser.decode_packet(string_payload);
+            ? Parser.decode_packet_from_bytes(binary_payload)
+            : Parser.decode_packet(string_payload);
             if (packet != null)
-                yield handle_incoming_packet(packet);
+            yield handle_incoming_packet(packet);
         }
         catch (Parser.Error e)
         {

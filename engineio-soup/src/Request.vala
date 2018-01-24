@@ -54,7 +54,7 @@ public class Request
             transport = query["transport"];
             var jsonp_str = query["j"];
             if (jsonp_str != null)
-                jsonp_index = int.parse(jsonp_str);
+            jsonp_index = int.parse(jsonp_str);
             sid = query["sid"];
             base64 = query["b64"] != null && query["b64"] == "1";
         }
