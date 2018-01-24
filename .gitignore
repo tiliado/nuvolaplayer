@@ -10,3 +10,4 @@ engineio-soup/examples/www/engine.io.js
 web_apps/test/unit.js
 .idea
 core
+*~
