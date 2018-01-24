@@ -206,6 +206,85 @@ class checkvaladefs(Task.Task):
 	def run(self):
 		return check_vala_defs.run(definitions=self.definitions, files=[i.abspath() for i in self.inputs])
 
+@TaskGen.feature('valalint')
+@TaskGen.before_method('process_source', 'process_rule')
+def valalint_taskgen(self):	
+	source = Utils.to_list(getattr(self, 'source', []))
+	if isinstance(source, Node.Node):
+		source = [source]
+	if not source:
+		raise Errors.WafError('no input file')
+	for i, item in enumerate(source):
+		if isinstance(item, str):
+			source[i] =  self.path.find_resource(item)
+		elif not isinstance(item, Node.Node):
+			raise Errors.WafError('invalid source for %r' % self)
+	self.source = []
+	task = self.create_task('valalint', source, None)
+
+	if getattr(self, 'packages', None):
+		task.packages = Utils.to_list(self.packages)
+	if getattr(self, 'vapi_dirs', None):
+		vapi_dirs = Utils.to_list(self.vapi_dirs)
+		for vapi_dir in vapi_dirs:
+			try:
+				task.vapi_dirs.append(self.path.find_dir(vapi_dir).abspath())
+			except AttributeError:
+				Logs.warn('Unable to locate Vala API directory: %r', vapi_dir)
+	if getattr(self, 'protected', None):
+		task.protected = self.protected
+	if getattr(self, 'private', None):
+		task.private = self.private
+	if getattr(self, 'inherit', None):
+		task.inherit = self.inherit
+	if getattr(self, 'deps', None):
+		task.deps = self.deps
+	if getattr(self, 'vala_defines', None):
+		task.vala_defines = Utils.to_list(self.vala_defines)
+	if getattr(self, 'vala_target_glib', None):
+		task.vala_target_glib = self.vala_target_glib
+	if getattr(self, 'enable_non_null_experimental', None):
+		task.enable_non_null_experimental = self.enable_non_null_experimental
+	if getattr(self, 'force', None):
+		task.force = self.force
+	if getattr(self, 'checks', None):
+		task.valalint_checks = Utils.to_list(self.checks)
+
+
+class valalint(Task.Task):
+	vars  = ['VALALINT', 'VALALINTFLAGS']
+	color = 'BLUE'
+	def __init__(self, *k, **kw):
+		Task.Task.__init__(self, *k, **kw)
+		self.output_dir = ''
+		self.package_name = ''
+		self.package_version = ''
+		self.vapi_dirs = []
+		self.vala_defines = []
+		self.vala_target_glib = None
+		self.valalint_checks = []
+
+	def run(self):
+		if not self.env['VALALINTFLAGS']:
+			self.env['VALALINTFLAGS'] = ''
+		cmd = [Utils.subst_vars('${VALALINT}', self.env)]
+		if getattr(self, 'packages', None):
+			for package in self.packages:
+				cmd.append ('--pkg %s' % package)
+		if getattr(self, 'vapi_dirs', None):
+			for vapi_dir in self.vapi_dirs:
+				cmd.append ('--vapidir %s' % vapi_dir)
+		if getattr(self, 'vala_defines', None):
+			for define in self.vala_defines:
+				cmd.append ('--define %s' % define)
+		if getattr(self, 'vala_target_glib', None):
+			cmd.append ('--target-glib=%s' % self.vala_target_glib)
+		if getattr(self, 'valalint_checks', None):
+			for check in self.valalint_checks:
+				cmd.append ('-c %s' % check)
+		cmd.append (' '.join ([i.abspath() for i in self.inputs]))
+		return self.generator.bld.exec_command(' '.join(cmd))
+
 
 # Actions #
 #=========#
@@ -241,6 +320,8 @@ def options(ctx):
 		help="Lite version of Nuvola.")
 	ctx.add_option(
 		'--no-gir', action='store_false', default=True, dest='build_gir', help="Don't build GIR.")
+	ctx.add_option(
+		'--lint-vala', action='store_true', default=False, dest='lint_vala', help="Use Vala linter.")
 
 def configure(ctx):
 	add_version_info(ctx)
@@ -343,6 +424,10 @@ def configure(ctx):
 	ctx.env.BUILD_GIR = ctx.options.build_gir
 	if ctx.env.BUILD_GIR:
 		ctx.find_program('g-ir-compiler', var='GIR_COMPILER')
+
+	ctx.env.LINT_VALA = ctx.options.lint_vala
+	if ctx.env.LINT_VALA:
+		ctx.find_program('valalint', var='VALALINT')
 	
 	# For tests
 	ctx.find_program("diorite-testgen{}".format(TARGET_DIORITE), var="DIORITE_TESTGEN")
@@ -433,6 +518,13 @@ def configure(ctx):
 
 
 def build(ctx):
+	def valalint(source_dir=None, **kwargs):
+		if not ctx.env.LINT_VALA:
+			return
+		if source_dir is not None:
+			kwargs["source"] = ctx.path.ant_glob(source_dir + '/**/*.vala')
+		return ctx(features="valalint", **kwargs)
+	
 	def valalib(source_dir=None, **kwargs):
 		if source_dir is not None:
 			kwargs["source"] = ctx.path.ant_glob(source_dir + '/**/*.vala') + ctx.path.ant_glob(source_dir + '/**/*.vapi')
@@ -505,6 +597,17 @@ def build(ctx):
 	ctx(features = "checkvaladefs", source = ctx.path.ant_glob('**/*.vala'),
 		definitions="FLATPAK TILIADO_API WEBKIT_SUPPORTS_MSE GENUINE UNITY APPINDICATOR EXPERIMENTAL NUVOLA_RUNTIME"
 		+ " NUVOLA_ADK NUVOLA_CDK HAVE_CEF FALSE TRUE NUVOLA_LITE")
+
+	VALALINT_CHECKS = "space_indent=4"
+	valalint(
+		source_dir = 'engineio-soup/src',
+		packages = 'uuid libsoup-2.4 json-glib-1.0', 
+		defines = ['G_LOG_DOMAIN="Engineio"'],
+		vapi_dirs = vapi_dirs,
+		vala_target_glib = TARGET_GLIB,
+		checks=VALALINT_CHECKS
+	)
+	
 	ctx.add_group()
 		
 	valalib( 
