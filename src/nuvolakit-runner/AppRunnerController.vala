@@ -868,7 +868,7 @@ public class AppRunnerController: Drtgtk.Application
             int y;
             int width;
             int height;
-            main_window.get_position (out x, out y);
+            main_window.get_position(out x, out y);
             main_window.get_size(out width, out height);
             config.set_int64(ConfigKey.WINDOW_X, (int64) x);
             config.set_int64(ConfigKey.WINDOW_Y, (int64) y);

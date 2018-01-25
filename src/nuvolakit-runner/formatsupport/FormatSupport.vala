@@ -134,15 +134,15 @@ public class AudioPipeline : GLib.Object
             yield;
         }
         this.silent = silent;
-        var source = Gst.ElementFactory.make ("filesrc", "source");
-        var decoder = Gst.ElementFactory.make ("decodebin", "decoder");
+        var source = Gst.ElementFactory.make("filesrc", "source");
+        var decoder = Gst.ElementFactory.make("decodebin", "decoder");
         pipeline = new Gst.Pipeline ("test-pipeline");
         if (source == null || decoder == null || pipeline == null)
         {
             warn("Error: source, decoder or pipeline is null");
             return false;
         }
-        pipeline.add_many (source, decoder);
+        pipeline.add_many(source, decoder);
         if (!source.link(decoder))
         {
             warn("Failed to link source -> decoder");
@@ -198,7 +198,7 @@ public class AudioPipeline : GLib.Object
     {
         if (silent)
         {
-            var sink = Gst.ElementFactory.make ("fakesink", "sink");
+            var sink = Gst.ElementFactory.make("fakesink", "sink");
             pipeline.add(sink);
             if (pad.link(sink.get_static_pad("sink")) != Gst.PadLinkReturn.OK)
             warn("Failed to link pad to sink.");
@@ -230,7 +230,7 @@ public class AudioPipeline : GLib.Object
                 Gst.State old_state;
                 Gst.State new_state;
                 Gst.State pending_state;
-                msg.parse_state_changed (out old_state, out new_state, out pending_state);
+                msg.parse_state_changed(out old_state, out new_state, out pending_state);
                 info("Pipeline state changed from %s to %s.".printf(
                     Gst.Element.state_get_name(old_state),
                     Gst.Element.state_get_name(new_state)));

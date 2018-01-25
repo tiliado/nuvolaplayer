@@ -68,7 +68,7 @@ public class AppCategoriesView : Gtk.TreeView
 
         set_model(model);
         var text_cell = new Gtk.CellRendererText ();
-        insert_column_with_attributes (-1, "Category", text_cell, "text", 1);
+        insert_column_with_attributes(-1, "Category", text_cell, "text", 1);
 
         var selection = get_selection();
         selection.mode = Gtk.SelectionMode.BROWSE;

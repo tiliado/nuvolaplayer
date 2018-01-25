@@ -120,7 +120,7 @@ public class TrayIcon: GLib.Object
         var text_width = Math.round(extents.width);
         var text_height = Math.round(extents.height);
 
-        cairo.set_source_rgba (1, 1, 1, 0.6);
+        cairo.set_source_rgba(1, 1, 1, 0.6);
         var width = text_width + 2 * padding;
         var height = text_height + 2 * padding;
         cairo.rectangle(Math.floor(0.5 * (size - width)), Math.floor(0.5 * (size - height)), width, height);
@@ -131,7 +131,7 @@ public class TrayIcon: GLib.Object
         var y = Math.floor(0.5 * (size - text_height) - text_y);
         cairo.move_to(x, y);
         cairo.show_text(text);
-        pixbuf = Gdk.pixbuf_get_from_surface (surface, 0, 0, size, size);
+        pixbuf = Gdk.pixbuf_get_from_surface(surface, 0, 0, size, size);
     }
 
     private bool on_size_changed(int size)

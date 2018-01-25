@@ -33,7 +33,7 @@ public abstract class WebOptions : GLib.Object {
     public abstract VersionTuple engine_version {get; protected set;}
 
     public WebOptions(WebAppStorage storage) {
-        GLib.Object (storage: storage);
+        GLib.Object(storage: storage);
     }
 
     public virtual async void gather_format_support_info(WebApp web_app) {

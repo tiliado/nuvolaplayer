@@ -241,7 +241,7 @@ public class Socket : GLib.Object
         // sends an `open` packet
         transport.sid = this.id;
         var builder = new Json.Builder();
-        builder.begin_object ();
+        builder.begin_object();
         builder.set_member_name("sid").add_string_value(this.id);
         builder.set_member_name("upgrades").begin_array().end_array();
         builder.set_member_name("pingInterval").add_int_value(server.ping_interval);
