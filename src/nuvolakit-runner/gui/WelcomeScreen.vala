@@ -131,7 +131,7 @@ public class WelcomeScreen : Gtk.Grid
             document.title = Math.max(
             bodyElm.scrollHeight, bodyElm.offsetHeight,
             htmlElm.clientHeight, htmlElm.scrollHeight, htmlElm.offsetHeight);
-            """            , null, on_height_retrieved);
+            """, null, on_height_retrieved);
         return true;
     }
 

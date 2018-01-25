@@ -48,7 +48,7 @@ public void apply_custom_styles(Gdk.Screen screen)
             {
             background-color: #E7C200;
             }
-            """            , -1);
+            """, -1);
         Gtk.StyleContext.add_provider_for_screen(screen, provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
     }
     catch (GLib.Error e)
