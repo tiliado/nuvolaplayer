@@ -46,7 +46,7 @@ public class LoginFormManager: GLib.Object
             "Prefill username.",
             handle_prefill_username, {
                 new Drt.IntParam("index", true, null, "Username index.")
-        });
+            });
     }
 
     ~LoginFormManager()
@@ -95,9 +95,9 @@ public class LoginFormManager: GLib.Object
             var entry = new LoginCredentials(username, password);
             var index = entries.index(entry);
             if (index >= 0)
-                entries[index] = entry;
+            entries[index] = entry;
             else
-                entries.prepend(entry);
+            entries.prepend(entry);
         }
     }
 
@@ -128,7 +128,7 @@ public class LoginFormManager: GLib.Object
         {
             var entries = credentials[hostname];
             if (entries != null)
-                entries.remove(new LoginCredentials(username, null));
+            entries.remove(new LoginCredentials(username, null));
         }
     }
 
@@ -138,12 +138,12 @@ public class LoginFormManager: GLib.Object
         if (entries != null)
         {
             if (username == null)
-                return entries.to_slist();
+            return entries.to_slist();
             SList<LoginCredentials> result = null;
             foreach (var entry in entries)
             {
                 if (entry.username == username)
-                    result.prepend(entry);
+                result.prepend(entry);
             }
             result.reverse();
             return result;
@@ -194,7 +194,7 @@ public class LoginFormManager: GLib.Object
         clear_forms();
         look_up_forms_attempts = 0;
         if (!look_up_forms())
-            look_up_forms_source_id = Timeout.add_seconds(2, look_up_forms_cb);
+        look_up_forms_source_id = Timeout.add_seconds(2, look_up_forms_cb);
     }
 
     public bool manage_context_menu(WebKit.ContextMenu menu, WebKit.DOM.Node? node)
@@ -211,7 +211,7 @@ public class LoginFormManager: GLib.Object
                     {
                         var builder = new VariantBuilder(new VariantType("as"));
                         foreach (var entry in entries)
-                            builder.add_value(entry.username);
+                        builder.add_value(entry.username);
                         menu.set_user_data(new Variant("(sas)", "prefill-password", builder));
                         return true;
                     }
@@ -228,7 +228,7 @@ public class LoginFormManager: GLib.Object
         var forms = document.forms;
         var n_forms = forms.length;
         if (n_forms == 0)
-            return false;
+        return false;
 
         var form_found = false;
         for (var i = 0; i < n_forms; i++)
@@ -275,7 +275,7 @@ public class LoginFormManager: GLib.Object
             {
                 unowned LoginCredentials credentials = entries.nth_data((uint) index);
                 if (credentials != null)
-                    context_menu_form.fill(credentials.username, credentials.password, true);
+                context_menu_form.fill(credentials.username, credentials.password, true);
             }
             context_menu_form = null;
         }
@@ -301,20 +301,20 @@ public class LoginFormManager: GLib.Object
             {
                 var button = inputs.item(i) as WebKit.DOM.HTMLButtonElement;
                 if (button.type == "submit")
-                    submit_node = button;
+                submit_node = button;
                 continue;
             }
             var input_type = input.type;
             if (input_type == "text" || input_type == "tel" || input_type == "email")
             {
                 if (username_node != null)
-                    return false;
+                return false;
                 username_node = input;
             }
             else if (input_type == "password")
             {
                 if (password_node != null)
-                    return false;
+                return false;
                 password_node = input;
             }
             else if (input_type == "submit")

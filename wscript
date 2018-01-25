@@ -630,6 +630,35 @@ def build(ctx):
         vala_target_glib = TARGET_GLIB,
         checks=VALALINT_CHECKS
     )
+    valalint(
+        source_dir = 'src/master',
+        vala_defines = vala_defines,
+        vapi_dirs = vapi_dirs,
+        vala_target_glib = TARGET_GLIB,
+        checks=VALALINT_CHECKS
+    )
+    valalint(
+        source_dir = 'src/apprunner',
+        vala_defines = vala_defines,
+        vapi_dirs = vapi_dirs,
+        vala_target_glib = TARGET_GLIB,
+        checks=VALALINT_CHECKS
+    )
+    valalint(
+        source_dir = 'src/control',
+        vala_defines = vala_defines,
+        vapi_dirs = vapi_dirs,
+        vala_target_glib = TARGET_GLIB,
+        checks=VALALINT_CHECKS
+    )
+    valalint(
+        source_dir = 'src/nuvolakit-worker',
+        packages = "dioriteglib{0} {1} {2}".format(TARGET_DIORITE, 'webkit2gtk-web-extension-4.0', 'javascriptcoregtk-4.0'),
+        vala_defines = vala_defines,
+        vapi_dirs = vapi_dirs,
+        vala_target_glib = TARGET_GLIB,
+        checks=VALALINT_CHECKS
+    )
 
     ctx.add_group()
 

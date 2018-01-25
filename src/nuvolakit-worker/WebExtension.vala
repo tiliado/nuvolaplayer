@@ -60,10 +60,10 @@ public class WebExtension: GLib.Object
         router.add_method("/nuvola/webworker/call-function", Drt.RpcFlags.WRITABLE,
             "Call JavaScript function.",
             handle_call_function, {
-            new Drt.StringParam("name", true, false, null, "Function name."),
-            new Drt.VariantParam("params", true, true, null, "Function parameters."),
-            new Drt.BoolParam("propagate_error", true, true, "Whether to propagate error.")
-        });
+                new Drt.StringParam("name", true, false, null, "Function name."),
+                new Drt.VariantParam("params", true, true, null, "Function parameters."),
+                new Drt.BoolParam("propagate_error", true, true, "Whether to propagate error.")
+            });
         router.add_method("/nuvola/password-manager/enable", Drt.RpcFlags.WRITABLE,
             "Enable Password Manager", handle_enable_password_manager, null);
         router.add_method("/nuvola/password-manager/disable", Drt.RpcFlags.WRITABLE,
@@ -102,16 +102,16 @@ public class WebExtension: GLib.Object
         js_api.call_ipc_method_async.connect(on_call_ipc_method_async);
 
         channel.call.begin("/nuvola/core/web-worker-initialized", null, (o, res) =>
-        {
-            try
             {
-                channel.call.end(res);
-            }
-            catch (GLib.Error e)
-            {
-                error("Runner client error: %s", e.message);
-            }
-        });
+                try
+                {
+                    channel.call.end(res);
+                }
+                catch (GLib.Error e)
+                {
+                    error("Runner client error: %s", e.message);
+                }
+            });
     }
 
     private void on_window_object_cleared(WebKit.ScriptWorld world, WebKit.WebPage page, WebKit.Frame frame)
@@ -124,11 +124,11 @@ public class WebExtension: GLib.Object
         }
 
         if (!frame.is_main_frame())
-            return; // TODO: Add api not to ignore non-main frames
+        return; // TODO: Add api not to ignore non-main frames
 
         debug("Window object cleared for '%s'", frame.get_uri());
         if (frame.get_uri() == WEB_ENGINE_LOADING_URI)
-            return;
+        return;
 
         init_frame(world, page, frame);
     }
@@ -146,7 +146,7 @@ public class WebExtension: GLib.Object
             {
                 script = dir.get_child(JSApi.JS_DIR).get_child(WEBKITGTK_FIXES_JS);
                 if (script.query_exists())
-                    break;
+                break;
                 script = null;
             }
         }
@@ -212,9 +212,9 @@ public class WebExtension: GLib.Object
     private bool enable_password_manager_cb()
     {
         if (login_form_manager == null)
-            login_form_manager = new LoginFormManager(channel);
+        login_form_manager = new LoginFormManager(channel);
         if (page != null)
-            login_form_manager.manage_forms(page);
+        login_form_manager.manage_forms(page);
         return false;
     }
 
@@ -232,7 +232,7 @@ public class WebExtension: GLib.Object
                 channel.call.end(res);
             } catch (GLib.Error e) {
                 critical("Failed to send error message '%s'. %s", message, e.message);
-                }
+            }
         });
     }
 
@@ -270,7 +270,7 @@ public class WebExtension: GLib.Object
     {
         debug("Page %u created for %s", (uint) web_page.get_id(), web_page.get_uri());
         if (web_page.get_id() != 1)
-            return;
+        return;
 
         web_page.document_loaded.connect(on_document_loaded);
         web_page.context_menu.connect(on_context_menu);
@@ -303,16 +303,16 @@ public class WebExtension: GLib.Object
              * a local filesystem web page sometimes fails to load.
              */
             channel.call.begin("/nuvola/core/web-worker-ready", null, (o, res) =>
-            {
-                try
                 {
-                    channel.call.end(res);
-                }
-                catch (GLib.Error e)
-                {
-                    warning("Runner client error: %s", e.message);
-                }
-            });
+                    try
+                    {
+                        channel.call.end(res);
+                    }
+                    catch (GLib.Error e)
+                    {
+                        warning("Runner client error: %s", e.message);
+                    }
+                });
             try
             {
                 var args = new Variant("(s)", "InitWebWorker");
@@ -324,14 +324,14 @@ public class WebExtension: GLib.Object
             }
 
             if (login_form_manager != null)
-                login_form_manager.manage_forms(page);
+            login_form_manager.manage_forms(page);
         }
     }
 
     private bool on_context_menu(WebKit.ContextMenu menu, WebKit.WebHitTestResult hit_test)
     {
         if (login_form_manager != null)
-            return login_form_manager.manage_context_menu(menu, hit_test.node);
+        return login_form_manager.manage_context_menu(menu, hit_test.node);
         return false;
     }
 }

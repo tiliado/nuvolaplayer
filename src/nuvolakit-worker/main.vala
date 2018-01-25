@@ -50,7 +50,7 @@ public void webkit_web_extension_initialize_with_user_data(WebKit.WebExtension e
     }
 
     if (Environment.get_variable("NUVOLA_TEST_ABORT") == "worker")
-        error("Web Worker abort requested.");
+    error("Web Worker abort requested.");
 
     var worker_data = Drt.variant_to_hashtable(data);
     try

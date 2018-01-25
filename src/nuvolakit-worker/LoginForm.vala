@@ -28,108 +28,108 @@ namespace Nuvola {
 
 public class LoginForm: GLib.Object
 {
-        public WebKit.WebPage page {get; private set;}
-        public HTMLFormElement form {get; private set;}
-        public HTMLInputElement? username {get; private set;}
-        public HTMLInputElement password {get; private set;}
-        public HTMLElement? submit {get; private set;}
-        public Soup.URI uri {get; private set;}
+    public WebKit.WebPage page {get; private set;}
+    public HTMLFormElement form {get; private set;}
+    public HTMLInputElement? username {get; private set;}
+    public HTMLInputElement password {get; private set;}
+    public HTMLElement? submit {get; private set;}
+    public Soup.URI uri {get; private set;}
 
-        public LoginForm(WebKit.WebPage page, HTMLFormElement form, HTMLInputElement? username, HTMLInputElement password,
-                HTMLElement? submit)
+    public LoginForm(WebKit.WebPage page, HTMLFormElement form, HTMLInputElement? username, HTMLInputElement password,
+        HTMLElement? submit)
+    {
+        this.page = page;
+        this.form = form;
+        this.username = username;
+        this.password = password;
+        this.submit = submit;
+        this.uri = new Soup.URI(page.uri);
+    }
+
+    ~LoginForm()
+    {
+        debug("~LoginForm %s", uri.host);
+    }
+
+    public signal void new_credentials(string hostname, string username, string password);
+    public signal void username_changed(string hostname, string username);
+
+    public void subscribe()
+    {
+        form.add_event_listener("submit", on_form_submitted, false);
+        if (username != null)
+        username.add_event_listener("blur", on_username_changed, false);
+        if (submit != null)
+        submit.add_event_listener("mousedown", on_form_submitted, false);
+    }
+
+    public void unsubscribe()
+    {
+        form.remove_event_listener("submit", LoginForm.on_form_submitted, false);
+        if (submit != null)
+        submit.remove_event_listener("mousedown", LoginForm.on_form_submitted, false);
+        if (username != null)
+        username.remove_event_listener("blur", LoginForm.on_username_changed, false);
+    }
+
+    public void fill(string? username, string? password, bool force)
+    {
+        var active_element = form.owner_document.active_element;
+        if (this.username != null && username != null && username[0] != '\0' && (force || this.username != active_element))
+        this.username.value = username;
+        if (this.password != null && password != null && password[0] != '\0' && (force || this.password != active_element))
+        this.password.value = password;
+    }
+
+    private void on_form_submitted(EventTarget target, Event event)
+    {
+        HTMLInputElement? username; HTMLInputElement password; HTMLElement? submit;
+        if (LoginFormManager.find_login_form_entries(form, out username, out password, out submit))
         {
-                this.page = page;
-                this.form = form;
-                this.username = username;
-                this.password = password;
-                this.submit = submit;
-                this.uri = new Soup.URI(page.uri);
-        }
-
-        ~LoginForm()
-        {
-            debug("~LoginForm %s", uri.host);
-        }
-
-        public signal void new_credentials(string hostname, string username, string password);
-        public signal void username_changed(string hostname, string username);
-
-        public void subscribe()
-        {
-                form.add_event_listener("submit", on_form_submitted, false);
-                if (username != null)
-                    username.add_event_listener("blur", on_username_changed, false);
-                if (submit != null)
-                        submit.add_event_listener("mousedown", on_form_submitted, false);
-        }
-
-        public void unsubscribe()
-        {
-            form.remove_event_listener("submit", LoginForm.on_form_submitted, false);
-            if (submit != null)
-                        submit.remove_event_listener("mousedown", LoginForm.on_form_submitted, false);
+            var username_value = username != null ? username.value : "";
+            var password_value = password.value;
+            if (this.username != null)
+            this.username.remove_event_listener("blur", LoginForm.on_username_changed, false);
+            this.username = username;
             if (username != null)
-                        username.remove_event_listener("blur", LoginForm.on_username_changed, false);
+            username.add_event_listener("blur", on_username_changed, false);
+            this.password = password;
+            if (this.submit != null)
+            this.username.remove_event_listener("mousedown", LoginForm.on_form_submitted, false);
+            this.submit = submit;
+            if (this.submit != null)
+            this.username.add_event_listener("mousedown", on_form_submitted, false);
+            if (username_value != null && password_value != null && username_value != "" && password_value != "")
+            new_credentials(this.uri.host, username_value, password_value);
         }
+        Timeout.add_seconds(5, refresh_cb);
+    }
 
-        public void fill(string? username, string? password, bool force)
+    private bool refresh_cb()
+    {
+        HTMLInputElement? username; HTMLInputElement password; HTMLElement? submit;
+        if (LoginFormManager.find_login_form_entries(form, out username, out password, out submit))
         {
-                var active_element = form.owner_document.active_element;
-                if (this.username != null && username != null && username[0] != '\0' && (force || this.username != active_element))
-                        this.username.value = username;
-                if (this.password != null && password != null && password[0] != '\0' && (force || this.password != active_element))
-                        this.password.value = password;
+            if (this.username != null)
+            this.username.remove_event_listener("blur", LoginForm.on_username_changed, false);
+            this.username = username;
+            if (username != null)
+            username.add_event_listener("blur", on_username_changed, false);
+            this.password = password;
+            if (this.submit != null)
+            this.username.remove_event_listener("mousedown", LoginForm.on_form_submitted, false);
+            this.submit = submit;
+            if (this.submit != null)
+            this.username.add_event_listener("mousedown", on_form_submitted, false);
+            username_changed(this.uri.host, username != null ? username.value : "");
         }
+        return true;
+    }
 
-        private void on_form_submitted(EventTarget target, Event event)
-        {
-                HTMLInputElement? username; HTMLInputElement password; HTMLElement? submit;
-                if (LoginFormManager.find_login_form_entries(form, out username, out password, out submit))
-                {
-                        var username_value = username != null ? username.value : "";
-                        var password_value = password.value;
-                        if (this.username != null)
-                            this.username.remove_event_listener("blur", LoginForm.on_username_changed, false);
-                        this.username = username;
-                        if (username != null)
-                            username.add_event_listener("blur", on_username_changed, false);
-                        this.password = password;
-                        if (this.submit != null)
-                                this.username.remove_event_listener("mousedown", LoginForm.on_form_submitted, false);
-                        this.submit = submit;
-                        if (this.submit != null)
-                                this.username.add_event_listener("mousedown", on_form_submitted, false);
-                        if (username_value != null && password_value != null && username_value != "" && password_value != "")
-                                new_credentials(this.uri.host, username_value, password_value);
-                }
-                Timeout.add_seconds(5, refresh_cb);
-        }
-
-        private bool refresh_cb()
-        {
-                HTMLInputElement? username; HTMLInputElement password; HTMLElement? submit;
-                if (LoginFormManager.find_login_form_entries(form, out username, out password, out submit))
-                {
-                        if (this.username != null)
-                            this.username.remove_event_listener("blur", LoginForm.on_username_changed, false);
-                        this.username = username;
-                        if (username != null)
-                            username.add_event_listener("blur", on_username_changed, false);
-                        this.password = password;
-                        if (this.submit != null)
-                                this.username.remove_event_listener("mousedown", LoginForm.on_form_submitted, false);
-                        this.submit = submit;
-                        if (this.submit != null)
-                                this.username.add_event_listener("mousedown", on_form_submitted, false);
-                        username_changed(this.uri.host, username != null ? username.value : "");
-                }
-                return true;
-        }
-
-        private void on_username_changed(EventTarget target, Event event)
-        {
-                username_changed(this.uri.host, username.value);
-        }
+    private void on_username_changed(EventTarget target, Event event)
+    {
+        username_changed(this.uri.host, username.value);
+    }
 }
 
 } //namespace Nuvola

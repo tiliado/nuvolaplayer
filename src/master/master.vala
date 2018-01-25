@@ -30,148 +30,148 @@ namespace Nuvola
  */
 struct Args
 {
-	static bool debug;
-	static bool verbose;
-	static bool version;
-	#if !FLATPAK || !NUVOLA_RUNTIME
-	static string? app_id = null;
-	static string? apps_dir = null;
-	static bool list_apps = false;
-	static bool list_apps_json = false;
-	#endif
-	
-	public const OptionEntry[] options =
-	{
-		#if !FLATPAK || !NUVOLA_RUNTIME
-		{ "app-id", 'a', 0, OptionArg.STRING, ref app_id, "Web app to run, e.g. \"happy_songs\" for Happy Songs web app.", "ID" },
-		{ "apps-dir", 'A', 0, GLib.OptionArg.FILENAME, ref Args.apps_dir, "Search for web app integrations only in directory DIR and disable service management.", "DIR" },
-		{ "list-apps", 'l', 0, OptionArg.NONE, ref list_apps, "List available application.", null },
-		{ "list-apps-json", 'j', 0, OptionArg.NONE, ref list_apps_json, "List available application (JSON output).", null },
-		#endif
-		{ "verbose", 'v', 0, OptionArg.NONE, ref Args.verbose, "Print informational messages", null },
-		{ "debug", 'D', 0, OptionArg.NONE, ref Args.debug, "Print debugging messages", null },
-		{ "version", 'V', 0, OptionArg.NONE, ref Args.version, "Print version and exit", null },
-		{ null }
-	};
+    static bool debug;
+    static bool verbose;
+    static bool version;
+    #if !FLATPAK || !NUVOLA_RUNTIME
+    static string? app_id = null;
+    static string? apps_dir = null;
+    static bool list_apps = false;
+    static bool list_apps_json = false;
+    #endif
+    
+    public const OptionEntry[] options =
+    {
+        #if !FLATPAK || !NUVOLA_RUNTIME
+        { "app-id", 'a', 0, OptionArg.STRING, ref app_id, "Web app to run, e.g. \"happy_songs\" for Happy Songs web app.", "ID" },
+        { "apps-dir", 'A', 0, GLib.OptionArg.FILENAME, ref Args.apps_dir, "Search for web app integrations only in directory DIR and disable service management.", "DIR" },
+        { "list-apps", 'l', 0, OptionArg.NONE, ref list_apps, "List available application.", null },
+        { "list-apps-json", 'j', 0, OptionArg.NONE, ref list_apps_json, "List available application (JSON output).", null },
+        #endif
+        { "verbose", 'v', 0, OptionArg.NONE, ref Args.verbose, "Print informational messages", null },
+        { "debug", 'D', 0, OptionArg.NONE, ref Args.debug, "Print debugging messages", null },
+        { "version", 'V', 0, OptionArg.NONE, ref Args.version, "Print version and exit", null },
+        { null }
+    };
 }
 
 public int main(string[] args)
 {
-	/* We are not ready for Wayland yet.
-	 * https://github.com/tiliado/nuvolaplayer/issues/181
-	 * https://github.com/tiliado/nuvolaplayer/issues/240
-	 */
-	Environment.set_variable("GDK_BACKEND", "x11", true);
-	
-	try
-	{
-		var opt_context = new OptionContext("- %s".printf(Nuvola.get_app_name()));
-		opt_context.set_help_enabled(true);
-		opt_context.add_main_entries(Args.options, null);
-		opt_context.set_ignore_unknown_options(true);
-		opt_context.parse(ref args);
-	}
-	catch (OptionError e)
-	{
-		stderr.printf("option parsing failed: %s\n", e.message);
-		return 1;
-	}
-	
-	if (Args.version)
-	{
-		print_version_info(stdout, null);
-		return 0;
-	}
-	
-	var local_only_args = false;
-	Drt.Logger.init(stderr, Args.debug ? GLib.LogLevelFlags.LEVEL_DEBUG
-	 : (Args.verbose ? GLib.LogLevelFlags.LEVEL_INFO: GLib.LogLevelFlags.LEVEL_WARNING), true,
-	 "Master");
-	
-	/* Disable compositing mode in WebKitGTK < 2.13.4 as some websites may crash system with it:
-	 * https://bugs.webkit.org/show_bug.cgi?id=126122
-	 * https://github.com/tiliado/nuvolaplayer/issues/245
-	 * 
-	 * Note that WEBKIT_FORCE_COMPOSITING_MODE is honoured since WebKitGTK 2.10.5:
-	 * https://trac.webkit.org/wiki/EnvironmentVariables
-	 */
-	uint webkit_version = WebKit.get_major_version() * 10000 + WebKit.get_minor_version() * 100 + WebKit.get_micro_version();
-	if (webkit_version < 21304)
-	{
-		Environment.set_variable("WEBKIT_DISABLE_COMPOSITING_MODE", "1", true);
-		debug("Compositing mode disabled because of WebKitGTK < 2.13.4");
-	}
-	
-	if (Environment.get_variable("NUVOLA_TEST_ABORT") == "master")
-		error("Master abort requested.");
-	
-	WebAppRegistry? web_app_reg = null;
-	var storage = new Drt.XdgStorage.for_project(Nuvola.get_app_id());
-	move_old_xdg_dirs(new Drt.XdgStorage.for_project(Nuvola.get_old_id()), storage);
-	
-	#if !FLATPAK || !NUVOLA_RUNTIME
-	if (Args.apps_dir == null)
-		Args.apps_dir = Environment.get_variable("NUVOLA_WEB_APPS_DIR");
-	
-	if (Args.apps_dir != null && Args.apps_dir != "")
-	{
-		local_only_args = true;
-		web_app_reg = new WebAppRegistry(File.new_for_path(Args.apps_dir), {});
-	}
-	else
-	{
-		var web_apps_storage = storage.get_child("web_apps");
-		web_app_reg = new WebAppRegistry(web_apps_storage.user_data_dir, web_apps_storage.data_dirs);
-	}
-	#endif
-	
-	string[] exec_cmd = {};
-	var gdb_server = Environment.get_variable("NUVOLA_APP_RUNNER_GDB_SERVER");
-	if (gdb_server != null)
-	{
-		exec_cmd += "/usr/bin/gdbserver";
-		exec_cmd += gdb_server ;
-	}
-	
-	exec_cmd += Nuvola.get_app_runner_path();	
-	if (Args.debug)
-	{
-		local_only_args = true;
-		exec_cmd += "-D";
-	}
-	else if (Args.verbose)
-	{
-		local_only_args = true;
-		exec_cmd += "-v";
-	}
-	
-	var controller = new MasterController(storage, web_app_reg, (owned) exec_cmd, Args.debug);
-	var controller_args = new string[]{args[0]};
-	#if !FLATPAK || !NUVOLA_RUNTIME
-	if (Args.list_apps)
-		controller_args += "-l";
-	if (Args.list_apps_json)
-		controller_args += "-j";
-	if (Args.app_id != null)
-	{
-		controller_args += "-a";
-		controller_args += Args.app_id;
-	}
-	#endif
-	for (var i = 1; i < args.length; i++)
-		controller_args += args[i];
-	var result = controller.run(controller_args);
-	
-	if (controller.is_remote)
-	{
-		message("%s instance is already running and will be activated.", Nuvola.get_app_name());
-		if (local_only_args)
-			warning(
-				"Some command line parameters (-D, -v, -A, -L) are ignored because they apply only to a new instance."
-				+ " You might want to close all %s instances and run it again with your parameters.",
-				Nuvola.get_app_name());
-	}
-	return result;
+    /* We are not ready for Wayland yet.
+     * https://github.com/tiliado/nuvolaplayer/issues/181
+     * https://github.com/tiliado/nuvolaplayer/issues/240
+     */
+    Environment.set_variable("GDK_BACKEND", "x11", true);
+    
+    try
+    {
+        var opt_context = new OptionContext("- %s".printf(Nuvola.get_app_name()));
+        opt_context.set_help_enabled(true);
+        opt_context.add_main_entries(Args.options, null);
+        opt_context.set_ignore_unknown_options(true);
+        opt_context.parse(ref args);
+    }
+    catch (OptionError e)
+    {
+        stderr.printf("option parsing failed: %s\n", e.message);
+        return 1;
+    }
+    
+    if (Args.version)
+    {
+        print_version_info(stdout, null);
+        return 0;
+    }
+    
+    var local_only_args = false;
+    Drt.Logger.init(stderr, Args.debug ? GLib.LogLevelFlags.LEVEL_DEBUG
+        : (Args.verbose ? GLib.LogLevelFlags.LEVEL_INFO: GLib.LogLevelFlags.LEVEL_WARNING), true,
+        "Master");
+    
+    /* Disable compositing mode in WebKitGTK < 2.13.4 as some websites may crash system with it:
+     * https://bugs.webkit.org/show_bug.cgi?id=126122
+     * https://github.com/tiliado/nuvolaplayer/issues/245
+     * 
+     * Note that WEBKIT_FORCE_COMPOSITING_MODE is honoured since WebKitGTK 2.10.5:
+     * https://trac.webkit.org/wiki/EnvironmentVariables
+     */
+    uint webkit_version = WebKit.get_major_version() * 10000 + WebKit.get_minor_version() * 100 + WebKit.get_micro_version();
+    if (webkit_version < 21304)
+    {
+        Environment.set_variable("WEBKIT_DISABLE_COMPOSITING_MODE", "1", true);
+        debug("Compositing mode disabled because of WebKitGTK < 2.13.4");
+    }
+    
+    if (Environment.get_variable("NUVOLA_TEST_ABORT") == "master")
+    error("Master abort requested.");
+    
+    WebAppRegistry? web_app_reg = null;
+    var storage = new Drt.XdgStorage.for_project(Nuvola.get_app_id());
+    move_old_xdg_dirs(new Drt.XdgStorage.for_project(Nuvola.get_old_id()), storage);
+    
+    #if !FLATPAK || !NUVOLA_RUNTIME
+    if (Args.apps_dir == null)
+    Args.apps_dir = Environment.get_variable("NUVOLA_WEB_APPS_DIR");
+    
+    if (Args.apps_dir != null && Args.apps_dir != "")
+    {
+        local_only_args = true;
+        web_app_reg = new WebAppRegistry(File.new_for_path(Args.apps_dir), {});
+    }
+    else
+    {
+        var web_apps_storage = storage.get_child("web_apps");
+        web_app_reg = new WebAppRegistry(web_apps_storage.user_data_dir, web_apps_storage.data_dirs);
+    }
+    #endif
+    
+    string[] exec_cmd = {};
+    var gdb_server = Environment.get_variable("NUVOLA_APP_RUNNER_GDB_SERVER");
+    if (gdb_server != null)
+    {
+        exec_cmd += "/usr/bin/gdbserver";
+        exec_cmd += gdb_server ;
+    }
+    
+    exec_cmd += Nuvola.get_app_runner_path();	
+    if (Args.debug)
+    {
+        local_only_args = true;
+        exec_cmd += "-D";
+    }
+    else if (Args.verbose)
+    {
+        local_only_args = true;
+        exec_cmd += "-v";
+    }
+    
+    var controller = new MasterController(storage, web_app_reg, (owned) exec_cmd, Args.debug);
+    var controller_args = new string[]{args[0]};
+    #if !FLATPAK || !NUVOLA_RUNTIME
+    if (Args.list_apps)
+    controller_args += "-l";
+    if (Args.list_apps_json)
+    controller_args += "-j";
+    if (Args.app_id != null)
+    {
+        controller_args += "-a";
+        controller_args += Args.app_id;
+    }
+    #endif
+    for (var i = 1; i < args.length; i++)
+    controller_args += args[i];
+    var result = controller.run(controller_args);
+    
+    if (controller.is_remote)
+    {
+        message("%s instance is already running and will be activated.", Nuvola.get_app_name());
+        if (local_only_args)
+        warning(
+            "Some command line parameters (-D, -v, -A, -L) are ignored because they apply only to a new instance."
+            + " You might want to close all %s instances and run it again with your parameters.",
+            Nuvola.get_app_name());
+    }
+    return result;
 }
 
 } // namespace Nuvola
