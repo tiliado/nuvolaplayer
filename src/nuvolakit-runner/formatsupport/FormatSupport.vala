@@ -206,7 +206,7 @@ public class AudioPipeline : GLib.Object
         }
         else
         {
-            var conv = Gst.ElementFactory.make("audioconvert",  "converter");
+            var conv = Gst.ElementFactory.make("audioconvert", "converter");
             var sink = Gst.ElementFactory.make("autoaudiosink", "sink");
             pipeline.add_many(conv, sink);
             if (!conv.link(sink))

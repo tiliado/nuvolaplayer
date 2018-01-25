@@ -160,7 +160,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
         const string API_METHOD = "track.updateNowPlaying";
         debug("%s update now playing: %s by %s", id, song, artist);
         // http://www.last.fm/api/show/track.updateNowPlaying
-        var params = new HashTable<string,string>(null, null);
+        var params = new HashTable<string, string>(null, null);
         params.insert("method", API_METHOD);
         params.insert("api_key", api_key);
         params.insert("sk", session);
@@ -186,7 +186,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
         return_if_fail(session != null);
         debug("%s scrobble: %s by %s from %s, %s", id, song, artist, album, timestamp.to_string());
         // http://www.last.fm/api/show/track.scrobble
-        var params = new HashTable<string,string>(null, null);
+        var params = new HashTable<string, string>(null, null);
         params.insert("method", "track.scrobble");
         params.insert("api_key", api_key);
         params.insert("sk", session);
@@ -209,7 +209,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
      * @return Root JSON object of the response
      * @throws AudioScrobblerError on failure
      */
-    private async Json.Object send_request(string method, HashTable<string,string> params, uint retry=0) throws AudioScrobblerError
+    private async Json.Object send_request(string method, HashTable<string, string> params, uint retry=0) throws AudioScrobblerError
     {
         Soup.Message message;
         var request = create_signed_request(params) + "&format=json";
@@ -302,7 +302,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
      *
      * @param params parameters of the request
      */
-    private string create_signed_request(HashTable<string,string> params)
+    private string create_signed_request(HashTable<string, string> params)
     {
         // See http://www.last.fm/api/desktopauth#6
 

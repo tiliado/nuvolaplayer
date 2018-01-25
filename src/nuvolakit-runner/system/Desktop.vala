@@ -24,7 +24,7 @@
 
 namespace Nuvola {
 
-private static HashTable<string,string> desktop_categories = null;
+private static HashTable<string, string> desktop_categories = null;
 
 public HashTable<string, string> get_desktop_categories()
 {

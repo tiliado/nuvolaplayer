@@ -31,7 +31,7 @@ public class Request
     public string method;
     public unowned Soup.MessageHeaders headers;
     public unowned SocketAddress remote_address;
-    private GLib.HashTable<string,string>? query;
+    private GLib.HashTable<string, string>? query;
     /* transport: indicates the transport name. Supported ones by default are polling, flashsocket, websocket. */
     public string? transport = null;
     /* j: if the transport is polling but a JSONP response is required, j must be set with the JSONP response index. */
@@ -41,7 +41,7 @@ public class Request
     /* b64: if the client doesn't support XHR2, b64=1 is sent in the query string to signal the server that all binary data should be sent base64 encoded.*/
     public bool base64 = false;
 
-    public Request(Soup.ClientContext client, Soup.Message msg, GLib.HashTable<string,string>? query)
+    public Request(Soup.ClientContext client, Soup.Message msg, GLib.HashTable<string, string>? query)
     {
         this.msg = msg;
         this.method = msg.method;

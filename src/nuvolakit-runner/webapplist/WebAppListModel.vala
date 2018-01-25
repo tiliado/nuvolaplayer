@@ -39,12 +39,12 @@ public class WebAppListModel : Gtk.ListStore
         this.web_app_reg = web_app_reg;
 
         set_column_types({
-            typeof(string),  // id
-            typeof(string),  // name
-            typeof(Gdk.Pixbuf),  // icon
-            typeof(string),  // version
-            typeof(string),  // maintainer_name
-            typeof(string),  // maintainer_link
+            typeof(string), // id
+            typeof(string), // name
+            typeof(Gdk.Pixbuf), // icon
+            typeof(string), // version
+            typeof(string), // maintainer_name
+            typeof(string), // maintainer_link
             typeof(WebApp) // meta
         });
         load();

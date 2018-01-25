@@ -65,7 +65,7 @@ public class PasswordManager
     {
         var collection = yield Secret.Collection.for_alias(
             null, Secret.COLLECTION_DEFAULT, Secret.CollectionFlags.LOAD_ITEMS, null);
-        HashTable<string,string> attributes = new HashTable<string,string>(str_hash, str_equal);
+        HashTable<string, string> attributes = new HashTable<string, string>(str_hash, str_equal);
         attributes[SCHEMA_APP_ID] = app_id;
         var flags = Secret.SearchFlags.ALL|Secret.SearchFlags.UNLOCK|Secret.SearchFlags.LOAD_SECRETS;
         var items = yield collection.search(secret_schema, attributes, flags, null);
@@ -103,7 +103,7 @@ public class PasswordManager
             yield Secret.password_store(
                 secret_schema, Secret.COLLECTION_DEFAULT, "%s password for '%s' at %s".printf(
                     Nuvola.get_app_name(), username, hostname),
-                password, cancellable, SCHEMA_APP_ID, app_id,  SCHEMA_HOSTNAME, hostname, SCHEMA_USERNAME, username);
+                password, cancellable, SCHEMA_APP_ID, app_id, SCHEMA_HOSTNAME, hostname, SCHEMA_USERNAME, username);
         }
         catch (GLib.Error e)
         {

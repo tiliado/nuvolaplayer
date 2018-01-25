@@ -407,7 +407,7 @@ public class JSApi : GLib.Object
     }
 
     static unowned JS.Value key_value_storage_has_key_func(Context ctx, JS.Object function, JS.Object self,
-        JS.Value[] args, out unowned JS.Value exception,  JsFuncCallType type) {
+        JS.Value[] args, out unowned JS.Value exception, JsFuncCallType type) {
         unowned JS.Value _false = JS.Value.boolean(ctx, false);
         exception = null;
         if (args.length != (type == JsFuncCallType.ASYNC ? 3 : 2)) {

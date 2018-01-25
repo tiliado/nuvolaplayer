@@ -219,7 +219,7 @@ public class MasterController : Drtgtk.Application {
             server.api.add_method("/nuvola/core/get_top_runner", Drt.RpcFlags.READABLE, null, handle_get_top_runner, null);
             server.api.add_method("/nuvola/core/list_apps", Drt.RpcFlags.READABLE,
                 "Returns information about all installed web apps.",
-                handle_list_apps,  null);
+                handle_list_apps, null);
             server.api.add_method("/nuvola/core/get_app_info", Drt.RpcFlags.READABLE,
                 "Returns information about a web app",
                 handle_get_app_info, {

@@ -149,7 +149,7 @@ public class JsEnvironment: GLib.Object, JSExecutor
         }
 
         JS.Value? exception;
-        func.call_as_function(ctx, object, params,  out exception);
+        func.call_as_function(ctx, object, params, out exception);
         if (exception != null)
         throw new JSError.FUNC_FAILED("Function '%s' failed. %s", name, exception_to_string(ctx, exception) ?? "(null)");
 

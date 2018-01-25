@@ -348,7 +348,7 @@ public Variant variant_from_value(JS.Context ctx, JS.Value val) throws JSError
     void*[] params = new void*[1];
     params[0] = (void*) val;
     JS.Value? exception;
-    unowned JS.Value result = object.call_as_function(ctx, glob_object, (JS.Value[]) params,  out exception);
+    unowned JS.Value result = object.call_as_function(ctx, glob_object, (JS.Value[]) params, out exception);
     if (exception != null)
     throw new JSError.WRONG_TYPE("Unsupported type. %s", exception_to_string(ctx, exception) ?? "(null)");
     if (result.to_boolean(ctx))
@@ -357,7 +357,7 @@ public Variant variant_from_value(JS.Context ctx, JS.Value val) throws JSError
         object = (JS.Object) val;
         int size = (int) o_get_number(ctx, object, "length");
         for (uint i = 0; i < size; i++)
-        builder.add("v",  variant_from_value(ctx, object.get_property_at_index(ctx, i)));
+        builder.add("v", variant_from_value(ctx, object.get_property_at_index(ctx, i)));
 
         return builder.end();
     }

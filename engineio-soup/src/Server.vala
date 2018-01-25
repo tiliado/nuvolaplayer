@@ -312,7 +312,7 @@ public class Server: GLib.Object
         }
     }
 
-    private void on_socket_closed(Socket socket,string reason, string? description)
+    private void on_socket_closed(Socket socket, string reason, string? description)
     {
         socket.closed.disconnect(on_socket_closed);
         clients.remove(socket.id);
@@ -320,7 +320,7 @@ public class Server: GLib.Object
     }
 
     private void engine_io_handler(Soup.Server server, Soup.Message msg, string request_path,
-        GLib.HashTable<string,string>? query, Soup.ClientContext client)
+        GLib.HashTable<string, string>? query, Soup.ClientContext client)
     {
         var request = new Request(client, msg, query);
         var response = new Response(server, msg);
