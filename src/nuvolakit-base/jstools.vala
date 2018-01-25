@@ -219,7 +219,7 @@ public unowned JS.Value get_gobject_property_named(JS.Context ctx, GLib.Object o
     unowned ParamSpec? p = klass.find_property(name);
     if (p == null)
     return JS.Value.undefined(ctx);
-    return  get_gobject_property(ctx, o, p);
+    return get_gobject_property(ctx, o, p);
 }
 
 public unowned JS.Value get_gobject_property(JS.Context ctx, GLib.Object o, ParamSpec p)

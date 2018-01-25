@@ -43,7 +43,7 @@ public class XKeyGrabber: GLib.Object
     private HashTable<string, uint> keybindings;
     private Gdk.X11.Window? root_window = null;
 
-    public  XKeyGrabber()
+    public XKeyGrabber()
     {
         keybindings = new HashTable<string, uint>(str_hash, str_equal);
         var display = Gdk.Display.get_default();

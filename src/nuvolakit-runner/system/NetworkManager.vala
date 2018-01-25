@@ -101,7 +101,7 @@ public interface Ip4Config : GLib.Object
 
         var iter = addresses.iterator();
         VariantIter iter2 = null;
-        while(iter.next("au", out iter2))
+        while (iter.next("au", out iter2))
         {
             uint32 ip4 = 0;
             while (iter2.next("u", out ip4))

@@ -238,7 +238,7 @@ public class MPRISPlayer : GLib.Object
     private HashTable<string, Variant> create_metadata()
     {
         var metadata = new HashTable<string, Variant>(str_hash, str_equal);
-        if(player.artist != null)
+        if (player.artist != null)
         {
             string[] artistArray = {player.artist};
             metadata.insert("xesam:artist", artistArray);

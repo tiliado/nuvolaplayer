@@ -116,7 +116,7 @@ public class ActionsKeyBinderServer : GLib.Object
                     warning("Got invalid response from %s instance %s: %s\n", Nuvola.get_app_name(), app_runner.app_id,
                         response == null ? "null" : response.print(true));
                 }
-                else if(handled)
+                else if (handled)
                 {
                     debug("Action %s was handled in %s.", name, app_runner.app_id);
                     break;

@@ -603,7 +603,7 @@ def build(ctx):
         definitions="FLATPAK TILIADO_API WEBKIT_SUPPORTS_MSE GENUINE UNITY APPINDICATOR EXPERIMENTAL NUVOLA_RUNTIME"
         + " NUVOLA_ADK NUVOLA_CDK HAVE_CEF FALSE TRUE NUVOLA_LITE")
 
-    VALALINT_CHECKS = "space_indent=4 method_call_no_space"
+    VALALINT_CHECKS = "space_indent=4 method_call_no_space space_after_keyword"
     valalint(
         source_dir = 'engineio-soup/src',
         packages = 'uuid libsoup-2.4 json-glib-1.0',

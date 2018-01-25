@@ -146,7 +146,7 @@ public class AppRunnerController: Drtgtk.Application
         Nuvola.Css.apply_custom_styles(screen);
     }
 
-    private  void start() {
+    private void start() {
         init_settings();
         init_base_actions();
         format_support = new FormatSupport(storage.require_data_file("audio/audiotest.mp3").get_path());

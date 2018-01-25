@@ -49,7 +49,7 @@ public class WebAppRegistry: GLib.Object
      */
     public WebApp? get_app_meta(string id)
     {
-        if  (!WebApp.validate_id(id))
+        if (!WebApp.validate_id(id))
         {
             warning("Service id '%s' is invalid.", id);
             return null;
@@ -110,7 +110,7 @@ public class WebAppRegistry: GLib.Object
                             // Insert new value, if web app has not been added yet,
                             // or override previous web app integration, if
                             // the new one has greater version.
-                            if(prev_app == null
+                            if (prev_app == null
                             || app.version_major > prev_app.version_major
                             || app.version_major == prev_app.version_major && app.version_minor > prev_app.version_minor)
                             result[id] = app;
