@@ -21,18 +21,14 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-namespace Engineio
-{
+namespace Engineio {
 
-public enum MessageType
-{
+public enum MessageType {
     REQUEST, RESPONSE, SUBSCRIBE, NOTIFICATION;
 }
 
-public string stringify_json(Json.Node? node, out int size)
-{
-    if (node == null)
-    {
+public string stringify_json(Json.Node? node, out int size) {
+    if (node == null) {
         size = 0;
         return "";
     }
@@ -46,16 +42,14 @@ public string stringify_json(Json.Node? node, out int size)
     return (owned) data;
 }
 
-public string serialize_message(MessageType type, int id, string method, Json.Node? data)
-{
+public string serialize_message(MessageType type, int id, string method, Json.Node? data) {
     int data_size = 0;
     var data_str = stringify_json(data, out data_size);
     return "%d%d:%d:%s%d:%s".printf(
         (int) type, id, Parser.utf16_strlen(method), method, Parser.utf16_strlen(data_str), data_str);
 }
 
-public bool deserialize_message(string message, out MessageType type, out int id, out string method, out Json.Node? data)
-{
+public bool deserialize_message(string message, out MessageType type, out int id, out string method, out Json.Node? data) {
     // FIXME: Str len is in utf-16 code points.
     type = (MessageType) int.parse(message.substring(0, 1));
     id = 0;
@@ -65,14 +59,11 @@ public bool deserialize_message(string message, out MessageType type, out int id
     var msg_size = message.length;
     var int_str = new StringBuilder();
     int i;
-    for (i = 1; i < msg_size; i++)
-    {
-        if (message[i] != ':')
-        {
+    for (i = 1; i < msg_size; i++) {
+        if (message[i] != ':') {
             int_str.append_c((char) message[i]);
         }
-        else
-        {
+        else {
             id = int.parse(int_str.str);
             if (id < 0)
             return false;
@@ -82,14 +73,11 @@ public bool deserialize_message(string message, out MessageType type, out int id
     }
 
     int_str.truncate();
-    for (; i < msg_size; i++)
-    {
-        if (message[i] != ':')
-        {
+    for (; i < msg_size; i++) {
+        if (message[i] != ':') {
             int_str.append_c((char) message[i]);
         }
-        else
-        {
+        else {
             var size = int.parse(int_str.str);
             if (size <= 0)
             return false;
@@ -101,32 +89,25 @@ public bool deserialize_message(string message, out MessageType type, out int id
     }
 
     int_str.truncate();
-    for (; i < msg_size; i++)
-    {
-        if (message[i] != ':')
-        {
+    for (; i < msg_size; i++) {
+        if (message[i] != ':') {
             int_str.append_c((char) message[i]);
         }
-        else
-        {
+        else {
             var size = int.parse(int_str.str);
             if (size < 0)
             return false;
 
             i++;
-            if (size == 0)
-            {
+            if (size == 0) {
                 data = null;
             }
-            else
-            {
+            else {
                 var parser = new Json.Parser();
-                try
-                {
+                try {
                     parser.load_from_data(message.substring(i, size));
                 }
-                catch (GLib.Error e)
-                {
+                catch (GLib.Error e) {
                     data = null;
                     return false;
                 }

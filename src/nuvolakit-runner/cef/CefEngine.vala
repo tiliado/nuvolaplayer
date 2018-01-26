@@ -36,7 +36,7 @@ namespace Nuvola {
 public class CefEngine : WebEngine {
     private const string ZOOM_LEVEL_CONF = "webview.zoom_level";
 
-    public override Gtk.Widget get_main_web_view(){return web_view;}
+    public override Gtk.Widget get_main_web_view() {return web_view;}
 
     private AppRunnerController runner_app;
     private CefGtk.WebContext web_context;
@@ -54,7 +54,7 @@ public class CefEngine : WebEngine {
     }
 
     public override void early_init(AppRunnerController runner_app, IpcBus ipc_bus,
-        Config config, Connection? connection, HashTable<string, Variant> worker_data)  {
+        Config config, Connection? connection, HashTable<string, Variant> worker_data) {
         this.ipc_bus = ipc_bus;
         this.runner_app = runner_app;
         this.config = config;

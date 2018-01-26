@@ -24,8 +24,7 @@
 
 namespace Nuvola {
 
-public enum TiliadoMembership
-{
+public enum TiliadoMembership {
     NONE = 0,
     BASIC = 1,
     PREMIUM = 2,
@@ -34,10 +33,8 @@ public enum TiliadoMembership
     PATRON_PLUS = 5,
     DEVELOPER = 6;
 
-    public string get_label()
-    {
-        switch (this)
-        {
+    public string get_label() {
+        switch (this) {
         case NONE:
             return "No membership";
         case BASIC:
@@ -55,42 +52,35 @@ public enum TiliadoMembership
         }
     }
 
-    public static TiliadoMembership from_uint(uint level)
-    {
+    public static TiliadoMembership from_uint(uint level) {
         return (level > DEVELOPER) ? DEVELOPER : (TiliadoMembership) level;
     }
 
-    public static TiliadoMembership from_int(int level)
-    {
+    public static TiliadoMembership from_int(int level) {
         if (level < 0)
         level = 0;
         return from_uint((uint) level);
     }
 }
 
-public class TiliadoApi2 : Oauth2Client
-{
+public class TiliadoApi2 : Oauth2Client {
     public User? user {get; private set; default = null;}
     public string? project_id {get; private set; default = null;}
 
     public TiliadoApi2(string client_id, string? client_secret, string api_endpoint, string token_endpoint,
-        Oauth2Token? token, string? project_id=null)
-    {
+        Oauth2Token? token, string? project_id=null) {
         base(client_id, client_secret, api_endpoint, token_endpoint, token);
         this.project_id = project_id;
     }
 
-    public void drop_token()
-    {
+    public void drop_token() {
         token = null;
         user = null;
     }
 
-    public async User fetch_current_user() throws Oauth2Error
-    {
+    public async User fetch_current_user() throws Oauth2Error {
         var response = yield call("me/");
-        if (response.get_bool_or("is_authenticated", false) == false)
-        {
+        if (response.get_bool_or("is_authenticated", false) == false) {
             // Try refreshing the token to get an authenticated user
             yield refresh_token();
             response = yield call("me/");
@@ -111,18 +101,14 @@ public class TiliadoApi2 : Oauth2Client
         return user;
     }
 
-    public async void set_account_membership(User user, string project_id) throws Oauth2Error
-    {
+    public async void set_account_membership(User user, string project_id) throws Oauth2Error {
         var project = yield get_project(project_id);
         unowned int[] user_groups = user.groups;
         unowned int[] patron_groups = project.patron_groups;
         int membership = 0;
-        for (var i = 0;  i < user.groups.length; i++)
-        {
-            for (var j = 0; j < project.patron_groups.length; j++)
-            {
-                if (user_groups[i] == patron_groups[j])
-                {
+        for (var i = 0;  i < user.groups.length; i++) {
+            for (var j = 0; j < project.patron_groups.length; j++) {
+                if (user_groups[i] == patron_groups[j]) {
                     var group = yield get_group(user_groups[i]);
                     membership = int.max(membership, group.membership_rank);
                 }
@@ -131,8 +117,7 @@ public class TiliadoApi2 : Oauth2Client
         user.membership = (uint) membership;
     }
 
-    public async Project get_project(string id) throws Oauth2Error
-    {
+    public async Project get_project(string id) throws Oauth2Error {
         var response = yield call("projects/projects/%s".printf(id));
         int[] groups;
         if (!response.get_int_array("patron_groups", out groups))
@@ -143,8 +128,7 @@ public class TiliadoApi2 : Oauth2Client
             (owned) groups);
     }
 
-    public async Group get_group(int id) throws Oauth2Error
-    {
+    public async Group get_group(int id) throws Oauth2Error {
         var response = yield call("auth/groups/%d".printf(id));
         int[] groups;
         if (!response.get_int_array("patron_groups", out groups))
@@ -155,8 +139,7 @@ public class TiliadoApi2 : Oauth2Client
             response.get_int_or("membership_rank", 0));
     }
 
-    public class User
-    {
+    public class User {
         public int id {get; private set;}
         public string? username {get; private set;}
         public string? name {get; private set;}
@@ -165,8 +148,7 @@ public class TiliadoApi2 : Oauth2Client
         public int[] groups {get; private set;}
         public uint membership {get; set; default = 0;}
 
-        public static User? from_variant(Variant? data)
-        {
+        public static User? from_variant(Variant? data) {
             if (data == null || data.get_type_string() != "(imsmsu)")
             return null;
 
@@ -180,8 +162,7 @@ public class TiliadoApi2 : Oauth2Client
             return user;
         }
 
-        public class User(int id, string? username, string? name, bool is_authenticated, bool is_active, owned int[] groups)
-        {
+        public class User(int id, string? username, string? name, bool is_authenticated, bool is_active, owned int[] groups) {
             this.id = id;
             this.username = username;
             this.name = name;
@@ -190,61 +171,51 @@ public class TiliadoApi2 : Oauth2Client
             this.groups = (owned) groups;
         }
 
-        public bool is_valid()
-        {
+        public bool is_valid() {
             return is_active && is_authenticated;
         }
 
-        public bool has_membership(uint membership)
-        {
+        public bool has_membership(uint membership) {
             return this.membership >= membership;
         }
 
-        public string to_string()
-        {
+        public string to_string() {
             return id == 0 ? "null" : "%s (%s, %d, %u)".printf(name, username, id, membership);
         }
 
-        public Variant to_variant()
-        {
+        public Variant to_variant() {
             return new Variant("(imsmsu)", (int32) id, username, name, (uint) membership);
         }
     }
 
-    public class Project
-    {
+    public class Project {
         public string id {get; private set;}
         public string name {get; private set;}
         public int[] patron_groups {get; private set;}
 
-        public class Project(string id, string name, owned int[] patron_groups)
-        {
+        public class Project(string id, string name, owned int[] patron_groups) {
             this.id = id;
             this.name = name;
             this.patron_groups = (owned) patron_groups;
         }
 
-        public string to_string()
-        {
+        public string to_string() {
             return "%s (%s)".printf(name, id);
         }
     }
 
-    public class Group
-    {
+    public class Group {
         public int id {get; private set;}
         public string name {get; private set;}
         public int membership_rank {get; private set;}
 
-        public Group(int id, string name, int membership_rank)
-        {
+        public Group(int id, string name, int membership_rank) {
             this.id = id;
             this.name = name;
             this.membership_rank = membership_rank;
         }
 
-        public string to_string()
-        {
+        public string to_string() {
             return "%d:%s".printf(id, name);
         }
     }

@@ -24,12 +24,10 @@
 
 namespace Nuvola {
 
-public class MasterBus: Drt.RpcBus
-{
-    public Drt.RpcRouter api {get{return (Drt.RpcRouter) router;}}
+public class MasterBus: Drt.RpcBus {
+    public Drt.RpcRouter api {get {return (Drt.RpcRouter) router;}}
 
-    public MasterBus(string bus_name, Drt.RpcRouter? router=null)
-    {
+    public MasterBus(string bus_name, Drt.RpcRouter? router=null) {
         base(bus_name, router ?? new Drt.RpcRouter(), IPC_TIMEOUT);
     }
 }

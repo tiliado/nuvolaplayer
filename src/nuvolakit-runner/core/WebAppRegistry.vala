@@ -27,8 +27,7 @@ namespace Nuvola {
 /**
  *  WebAppRegistry deals with management and loading of web apps from filesystem.
  */
-public class WebAppRegistry: GLib.Object
-{
+public class WebAppRegistry: GLib.Object {
     private File user_storage;
     private File[] system_storage;
 
@@ -38,8 +37,7 @@ public class WebAppRegistry: GLib.Object
      * @param user_storage        user-specific directory with service integrations
      * @param system_storage      system-wide directories with service integrations
      */
-    public WebAppRegistry(File user_storage, File[] system_storage)
-    {
+    public WebAppRegistry(File user_storage, File[] system_storage) {
         this.user_storage = user_storage;
         this.system_storage = system_storage;
     }
@@ -47,10 +45,8 @@ public class WebAppRegistry: GLib.Object
     /**
      * Return web app by id.
      */
-    public WebApp? get_app_meta(string id)
-    {
-        if (!WebApp.validate_id(id))
-        {
+    public WebApp? get_app_meta(string id) {
+        if (!WebApp.validate_id(id)) {
             warning("Service id '%s' is invalid.", id);
             return null;
         }
@@ -73,8 +69,7 @@ public class WebAppRegistry: GLib.Object
      * @param filter_id    if not null, filter apps by id
      * @return hash table of web app id - metadata pairs
      */
-    public HashTable<string, WebApp> list_web_apps(string? filter_id=null)
-    {
+    public HashTable<string, WebApp> list_web_apps(string? filter_id=null) {
         HashTable<string, WebApp> result = new HashTable<string, WebApp>(str_hash, str_equal);
         find_apps(user_storage, filter_id, result);
         foreach (var dir in system_storage)
@@ -82,30 +77,24 @@ public class WebAppRegistry: GLib.Object
         return result;
     }
 
-    private void find_apps(File directory, string? filter_id, HashTable<string, WebApp> result)
-    {
-        if (directory.query_exists())
-        {
-            try
-            {
+    private void find_apps(File directory, string? filter_id, HashTable<string, WebApp> result) {
+        if (directory.query_exists()) {
+            try {
                 FileInfo file_info;
                 var enumerator = directory.enumerate_children(FileAttribute.STANDARD_NAME, 0);
-                while ((file_info = enumerator.next_file()) != null)
-                {
+                while ((file_info = enumerator.next_file()) != null) {
                     string dirname = file_info.get_name();
                     var app_dir = directory.get_child(dirname);
                     if (app_dir.query_file_type(0) != FileType.DIRECTORY)
                     continue;
 
-                    try
-                    {
+                    try {
                         var app = new WebApp.from_dir(app_dir);
                         var id = app.id;
                         debug("Found web app %s at %s, version %u.%u",
                             app.name, app_dir.get_path(), app.version_major, app.version_minor);
 
-                        if (filter_id == null || filter_id == id)
-                        {
+                        if (filter_id == null || filter_id == id) {
                             unowned WebApp? prev_app = result[id];
                             // Insert new value, if web app has not been added yet,
                             // or override previous web app integration, if
@@ -116,22 +105,19 @@ public class WebAppRegistry: GLib.Object
                             result[id] = app;
                         }
                     }
-                    catch (WebAppError e)
-                    {
+                    catch (WebAppError e) {
                         warning("Unable to load app from %s: %s", app_dir.get_path(), e.message);
                     }
                 }
             }
-            catch (GLib.Error e)
-            {
+            catch (GLib.Error e) {
                 warning("Filesystem error: %s", e.message);
             }
         }
     }
 }
 
-public errordomain WebAppError
-{
+public errordomain WebAppError {
     INVALID_METADATA,
     LOADING_FAILED,
     COMMAND_FAILED,

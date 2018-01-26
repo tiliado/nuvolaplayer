@@ -23,16 +23,13 @@
  */
 
 #if APPINDICATOR
-namespace Nuvola
-{
+namespace Nuvola {
 
-public static string[] slist_strings_to_array(SList<string> list)
-{
+public static string[] slist_strings_to_array(SList<string> list) {
     string[] array = new string[list.length()];
     int i = 0;
     unowned SList<string> cursor = list;
-    while (cursor != null)
-    {
+    while (cursor != null) {
         array[i++] = cursor.data;
         cursor = cursor.next;
     }
@@ -44,8 +41,7 @@ public static string[] slist_strings_to_array(SList<string> list)
  * (it's minimized, hidden or covered by other windows) and to bring the hidden main
  * window to foreground.
  */
-public class TrayIcon: GLib.Object
-{
+public class TrayIcon: GLib.Object {
     public bool visible {get; private set; default = false;}
     private AppRunnerController controller;
     private Drtgtk.Actions actions_reg;
@@ -54,8 +50,7 @@ public class TrayIcon: GLib.Object
     private Gtk.StatusIcon? icon;
     private int number = -1;
 
-    public TrayIcon(AppRunnerController controller, LauncherModel model)
-    {
+    public TrayIcon(AppRunnerController controller, LauncherModel model) {
         this.controller = controller;
         this.actions_reg = controller.actions;
         this.model = model;
@@ -73,19 +68,16 @@ public class TrayIcon: GLib.Object
         render_icon();
     }
 
-    public void unset_number()
-    {
+    public void unset_number() {
         set_number(-1);
     }
 
-    public void set_number(int number)
-    {
+    public void set_number(int number) {
         this.number = number;
         render_icon();
     }
 
-    private static void render_number(int number, ref Gdk.Pixbuf pixbuf)
-    {
+    private static void render_number(int number, ref Gdk.Pixbuf pixbuf) {
         if (number <= 0)
         return;
 
@@ -94,13 +86,11 @@ public class TrayIcon: GLib.Object
         var size = pixbuf.width;
         string text;
         double font_size;
-        if (number < 100)
-        {
+        if (number < 100) {
             text = number.to_string();
             font_size = 0.5 * size;
         }
-        else
-        {
+        else {
             text = "∞";
             font_size = 0.8 * size;
         }
@@ -134,18 +124,15 @@ public class TrayIcon: GLib.Object
         pixbuf = Gdk.pixbuf_get_from_surface(surface, 0, 0, size, size);
     }
 
-    private bool on_size_changed(int size)
-    {
+    private bool on_size_changed(int size) {
         render_icon();
         return true; // The icon was updated for the new size.
     }
 
-    private void render_icon()
-    {
+    private void render_icon() {
         var size = icon.size;
         var pixbuf = controller.web_app.get_icon_pixbuf(size);
-        if (pixbuf == null)
-        {
+        if (pixbuf == null) {
             warning("Failed to load pixbuf for tray icon.");
             return;
         }
@@ -154,15 +141,12 @@ public class TrayIcon: GLib.Object
         icon.set_from_pixbuf(pixbuf);
     }
 
-    private void on_activate()
-    {
+    private void on_activate() {
         controller.activate();
     }
 
-    private void on_model_changed(GLib.Object o, ParamSpec p)
-    {
-        switch (p.name)
-        {
+    private void on_model_changed(GLib.Object o, ParamSpec p) {
+        switch (p.name) {
         case "tooltip":
             icon.tooltip_text = model.tooltip;
             break;
@@ -172,8 +156,7 @@ public class TrayIcon: GLib.Object
         }
     }
 
-    ~TrayIcon()
-    {
+    ~TrayIcon() {
         if (menu != null)
         menu.detach();
         icon.visible = false;
@@ -182,8 +165,7 @@ public class TrayIcon: GLib.Object
         menu = null;
     }
 
-    private void create_menu()
-    {
+    private void create_menu() {
         if (menu != null)
         menu.detach();
 
@@ -192,18 +174,15 @@ public class TrayIcon: GLib.Object
         menu.attach_to_widget(controller.main_window, null);
     }
 
-    private void on_popup_menu(uint button, uint time)
-    {
+    private void on_popup_menu(uint button, uint time) {
         return_if_fail(menu != null);
 
         menu.show_all();
         menu.popup(null, null, icon.position_menu, button, time);
     }
 
-    private void on_icon_notifify(GLib.Object o, ParamSpec p)
-    {
-        switch (p.name)
-        {
+    private void on_icon_notifify(GLib.Object o, ParamSpec p) {
+        switch (p.name) {
         case "visible":
         case "embedded":
             visible = icon.visible && icon.embedded;

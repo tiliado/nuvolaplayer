@@ -24,28 +24,22 @@
 
 using Nuvola.JSTools;
 
-namespace Nuvola
-{
+namespace Nuvola {
 
 public const string WEB_ENGINE_LOADING_URI = "about:loading";
 
-public enum ValueType
-{
+public enum ValueType {
     STRING, INT, DOUBLE, NULL, JS_VALUE;
 }
 
-public class JsEnvironment: GLib.Object, JSExecutor
-{
+public class JsEnvironment: GLib.Object, JSExecutor {
     public unowned JS.GlobalContext context {get; private set;}
     private unowned JS.Object? _main_object = null;
-    public unowned JS.Object? main_object
-    {
-        get
-        {
+    public unowned JS.Object? main_object {
+        get {
             return _main_object;
         }
-        set
-        {
+        set {
             if (_main_object != null)
             _main_object.unprotect(context);
 
@@ -55,14 +49,12 @@ public class JsEnvironment: GLib.Object, JSExecutor
         }
     }
 
-    public JsEnvironment(JS.GlobalContext context, JS.Object? main_object)
-    {
+    public JsEnvironment(JS.GlobalContext context, JS.Object? main_object) {
         this.context = context;
         this.main_object = main_object;
     }
 
-    ~JsEnvironment()
-    {
+    ~JsEnvironment() {
         main_object = null;
         debug("~JsEnvironment %p", this);
     }
@@ -77,15 +69,12 @@ public class JsEnvironment: GLib.Object, JSExecutor
      * @return        return value of the script
      * @throw         JSError on failure
      */
-    public unowned Value execute_script_from_file(File file) throws JSError
-    {
+    public unowned Value execute_script_from_file(File file) throws JSError {
         string code;
-        try
-        {
+        try {
             code = Drt.System.read_file(file);
         }
-        catch (Error e)
-        {
+        catch (Error e) {
             throw new JSError.READ_ERROR("Unable to read script %s: %s",
                 file.get_path(), e.message);
         }
@@ -102,8 +91,7 @@ public class JsEnvironment: GLib.Object, JSExecutor
      * @return          return value of the script
      * @throw           JSError on failure
      */
-    public unowned Value execute_script(string script, string path = "about:blank", int line=1) throws JSError
-    {
+    public unowned Value execute_script(string script, string path = "about:blank", int line=1) throws JSError {
         JS.Value exception = null;
         unowned Value value = context.evaluate_script(new JS.String(script), main_object, new JS.String(path), line, out exception);
         if (exception != null)
@@ -111,15 +99,13 @@ public class JsEnvironment: GLib.Object, JSExecutor
         return value;
     }
 
-    public void call_function_sync(string name, ref Variant? args, bool propagate_error) throws GLib.Error
-    {
+    public void call_function_sync(string name, ref Variant? args, bool propagate_error) throws GLib.Error {
         unowned JS.Context ctx = context;
         string[] names = name.split(".");
         unowned JS.Object? object = main_object;
         if (object == null)
         throw new JSError.NOT_FOUND("Main object not found.'");
-        for (var i = 1; i < names.length - 1; i++)
-        {
+        for (var i = 1; i < names.length - 1; i++) {
             object = o_get_object(ctx, object, names[i]);
             if (object == null)
             throw new JSError.NOT_FOUND("Attribute '%s' not found.'", names[i]);
@@ -134,8 +120,7 @@ public class JsEnvironment: GLib.Object, JSExecutor
         //~         debug("Args before: %s", args.print(true));
         (unowned JS.Value)[] params;
         var size = 0;
-        if (args != null)
-        {
+        if (args != null) {
             assert(args.is_container()); // FIXME
             size = (int) args.n_children();
             params = new (unowned JS.Value)[size];
@@ -143,8 +128,7 @@ public class JsEnvironment: GLib.Object, JSExecutor
             foreach (var item in args)
             params[i++] = value_from_variant(ctx, item);
         }
-        else
-        {
+        else {
             params = {};
         }
 
@@ -153,8 +137,7 @@ public class JsEnvironment: GLib.Object, JSExecutor
         if (exception != null)
         throw new JSError.FUNC_FAILED("Function '%s' failed. %s", name, exception_to_string(ctx, exception) ?? "(null)");
 
-        if (args != null)
-        {
+        if (args != null) {
             Variant[] items = new Variant[size];
             for (var i = 0; i < size; i++)
             items[i] = variant_from_value(ctx, (JS.Value) params[i]);

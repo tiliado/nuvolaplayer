@@ -24,17 +24,14 @@
 
 namespace Nuvola {
 
-public class WebAppListModel : Gtk.ListStore
-{
+public class WebAppListModel : Gtk.ListStore {
     private WebAppRegistry web_app_reg;
 
-    public enum Pos
-    {
+    public enum Pos {
         ID, NAME, ICON, VERSION, MAINTAINER_NAME, MAINTAINER_LINK, META;
     }
 
-    public WebAppListModel(WebAppRegistry web_app_reg)
-    {
+    public WebAppListModel(WebAppRegistry web_app_reg) {
         Object();
         this.web_app_reg = web_app_reg;
 
@@ -50,14 +47,12 @@ public class WebAppListModel : Gtk.ListStore
         load();
     }
 
-    public void reload()
-    {
+    public void reload() {
         clear();
         load();
     }
 
-    public void append_web_app(WebApp web_app, Gdk.Pixbuf? icon)
-    {
+    public void append_web_app(WebApp web_app, Gdk.Pixbuf? icon) {
         Gtk.TreeIter iter;
         append(out iter);
         @set(iter,
@@ -71,8 +66,7 @@ public class WebAppListModel : Gtk.ListStore
             -1);
     }
 
-    private void load()
-    {
+    private void load() {
         var web_apps_map = web_app_reg.list_web_apps();
         var web_apps = web_apps_map.get_values();
         web_apps.sort(WebApp.cmp_by_name);

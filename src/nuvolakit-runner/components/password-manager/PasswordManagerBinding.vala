@@ -22,25 +22,20 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
-public class PasswordManagerBinding : ModelBinding<PasswordManager>
-{
-    public PasswordManagerBinding(Drt.RpcRouter router, WebWorker web_worker, PasswordManager model)
-    {
+public class PasswordManagerBinding : ModelBinding<PasswordManager> {
+    public PasswordManagerBinding(Drt.RpcRouter router, WebWorker web_worker, PasswordManager model) {
         base(router, web_worker, "Nuvola.PasswordManager", model);
         model.prefill_username.connect(on_prefil_username);
     }
 
-    ~PasswordManagerBinding()
-    {
+    ~PasswordManagerBinding() {
         debug("~PasswordManagerBinding");
         model.prefill_username.disconnect(on_prefil_username);
     }
 
-    protected override void bind_methods()
-    {
+    protected override void bind_methods() {
         bind("get-passwords", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
             "Returns passwords.", handle_get_passwords, null);
         bind("store-password", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE, null, handle_store_password, {
@@ -50,8 +45,7 @@ public class PasswordManagerBinding : ModelBinding<PasswordManager>
         });
     }
 
-    private void handle_store_password(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_store_password(Drt.RpcRequest request) throws Drt.RpcError {
         var hostname = request.pop_string();
         var username = request.pop_string();
         var password = request.pop_string();
@@ -59,12 +53,10 @@ public class PasswordManagerBinding : ModelBinding<PasswordManager>
         request.respond(null);
     }
 
-    private void handle_get_passwords(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_get_passwords(Drt.RpcRequest request) throws Drt.RpcError {
         var builder = new VariantBuilder(new VariantType("a(sss)"));
         var passwords = model.get_passwords();
-        if (passwords != null)
-        {
+        if (passwords != null) {
             var iter = HashTableIter<string, Drt.Lst<LoginCredentials>>(passwords);
             string hostname = null;
             Drt.Lst<LoginCredentials> credentials = null;
@@ -75,14 +67,11 @@ public class PasswordManagerBinding : ModelBinding<PasswordManager>
         request.respond(builder.end());
     }
 
-    private void on_prefil_username(int index)
-    {
-        try
-        {
+    private void on_prefil_username(int index) {
+        try {
             web_worker.call_sync("/nuvola/passwordmanager/prefill-username", new Variant("(i)", index));
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             warning("Request to prefill username %d failed. %s", index, e.message);
         }
     }

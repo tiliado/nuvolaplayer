@@ -22,14 +22,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
-public class XKeyGrabber: GLib.Object
-{
+public class XKeyGrabber: GLib.Object {
 
-    private static Gdk.ModifierType[] lock_modifiers =
-    {
+    private static Gdk.ModifierType[] lock_modifiers = {
         0,
         Gdk.ModifierType.MOD2_MASK, // NUM_LOCK
         Gdk.ModifierType.LOCK_MASK, // CAPS_LOCK
@@ -43,8 +40,7 @@ public class XKeyGrabber: GLib.Object
     private HashTable<string, uint> keybindings;
     private Gdk.X11.Window? root_window = null;
 
-    public XKeyGrabber()
-    {
+    public XKeyGrabber() {
         keybindings = new HashTable<string, uint>(str_hash, str_equal);
         var display = Gdk.Display.get_default();
         if (display != null)
@@ -55,15 +51,12 @@ public class XKeyGrabber: GLib.Object
 
     public signal void keybinding_pressed(string accelerator, uint32 time);
 
-    public bool is_grabbed(string accelerator)
-    {
+    public bool is_grabbed(string accelerator) {
         return accelerator in keybindings;
     }
 
-    public bool grab(string accelerator, bool allow_multiple)
-    {
-        if (is_grabbed(accelerator))
-        {
+    public bool grab(string accelerator, bool allow_multiple) {
+        if (is_grabbed(accelerator)) {
             if (!allow_multiple)
             return false;
 
@@ -81,14 +74,12 @@ public class XKeyGrabber: GLib.Object
         return true;
     }
 
-    public bool ungrab(string accelerator)
-    {
+    public bool ungrab(string accelerator) {
         if (!is_grabbed(accelerator))
         return false;
 
         var count = keybindings[accelerator] - 1;
-        if (count > 0)
-        {
+        if (count > 0) {
             keybindings[accelerator] = count;
             debug("Ungrabbed %s, count %u", accelerator, count);
             return true;
@@ -102,10 +93,8 @@ public class XKeyGrabber: GLib.Object
         return true;
     }
 
-    private bool grab_ungrab(bool grab, string accelerator)
-    {
-        if (root_window == null)
-        {
+    private bool grab_ungrab(bool grab, string accelerator) {
+        if (root_window == null) {
             warning("Failed to set a keybinding '%s' because a X11 window has not been set yet.", accelerator);
             return false;
         }
@@ -116,8 +105,7 @@ public class XKeyGrabber: GLib.Object
 
         /* Translate virtual modifiers (SUPER, etc.) to real modifiers (Mod2, etc.) */
         var keymap = Gdk.Keymap.get_default();
-        if (!keymap.map_virtual_modifiers(ref modifiers))
-        {
+        if (!keymap.map_virtual_modifiers(ref modifiers)) {
             warning("Failed to map virtual modifiers.");
             return false;
         }
@@ -131,8 +119,7 @@ public class XKeyGrabber: GLib.Object
         return_val_if_fail(keycode != 0, false);
         Gdk.error_trap_push();
 
-        foreach (Gdk.ModifierType lock_modifier in lock_modifiers)
-        {
+        foreach (Gdk.ModifierType lock_modifier in lock_modifiers) {
             if (grab)
             display.grab_key(keycode, modifiers|lock_modifier, xid, false, X.GrabMode.Async, X.GrabMode.Async);
             else
@@ -143,11 +130,9 @@ public class XKeyGrabber: GLib.Object
         return Gdk.error_trap_pop() == 0;
     }
 
-    private Gdk.FilterReturn event_filter(Gdk.XEvent gdk_xevent, Gdk.Event gdk_event)
-    {
+    private Gdk.FilterReturn event_filter(Gdk.XEvent gdk_xevent, Gdk.Event gdk_event) {
         X.Event* xevent = (X.Event*) gdk_xevent;
-        if (xevent->type == X.EventType.KeyPress)
-        {
+        if (xevent->type == X.EventType.KeyPress) {
             var keymap = Gdk.Keymap.get_default();
             Gdk.ModifierType event_mods = (Gdk.ModifierType) (xevent.xkey.state & ~lock_modifiers[7]);
             Gdk.ModifierType keyboard_state_mods;
@@ -172,21 +157,16 @@ public class XKeyGrabber: GLib.Object
         return Gdk.FilterReturn.CONTINUE;
     }
 
-    private void setup_display(Gdk.Display display)
-    {
-        if (root_window != null)
-        {
+    private void setup_display(Gdk.Display display) {
+        if (root_window != null) {
             warning("A display '%s' appeared but the root window had been already set.", display.get_name());
         }
-        else
-        {
+        else {
             root_window = Gdk.get_default_root_window() as Gdk.X11.Window;
-            if (root_window == null)
-            {
+            if (root_window == null) {
                 warning("Failed to get a X11 Window for the display '%s'.", display.get_name());
             }
-            else
-            {
+            else {
                 debug("Obtained a X11 Window for the display '%s'.", display.get_name());
                 root_window.add_filter(event_filter);
             }

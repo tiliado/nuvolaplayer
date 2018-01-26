@@ -22,11 +22,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
-public class TrayIconComponent: Component
-{
+public class TrayIconComponent: Component {
     #if APPINDICATOR
     private const string NAMESPACE = "component.tray_icon.";
     public bool always_close_to_tray {get; set; default = false;}
@@ -38,8 +36,7 @@ public class TrayIconComponent: Component
     private Appindicator appindicator = null;
     #endif
 
-    public TrayIconComponent(AppRunnerController controller, Bindings bindings, Drt.KeyValueStorage config)
-    {
+    public TrayIconComponent(AppRunnerController controller, Bindings bindings, Drt.KeyValueStorage config) {
         base("tray_icon", "Tray Icon", "Small icon with menu shown in the notification area.");
         this.required_membership = TiliadoMembership.PREMIUM;
         this.has_settings = true;
@@ -60,8 +57,7 @@ public class TrayIconComponent: Component
     }
 
     #if APPINDICATOR
-    protected override bool activate()
-    {
+    protected override bool activate() {
         update();
         controller.main_window.can_destroy.connect(on_can_quit);
         notify["use-x11-icon"].connect_after(update);
@@ -69,8 +65,7 @@ public class TrayIconComponent: Component
         return true;
     }
 
-    protected override bool deactivate()
-    {
+    protected override bool deactivate() {
         controller.main_window.can_destroy.disconnect(on_can_quit);
         notify["use-x11-icon"].disconnect(update);
         notify["use-appindicator"].disconnect(update);
@@ -79,8 +74,7 @@ public class TrayIconComponent: Component
         return true;
     }
 
-    private void update()
-    {
+    private void update() {
         if (use_x11_icon && x11_icon == null)
         x11_icon = new TrayIcon(controller, bindings.get_model<LauncherModel>());
         if (!use_x11_icon && x11_icon != null)
@@ -91,18 +85,15 @@ public class TrayIconComponent: Component
         appindicator = null;
     }
 
-    public override Gtk.Widget? get_settings()
-    {
+    public override Gtk.Widget? get_settings() {
         return new TrayIconSettings(this);
     }
 
-    private bool is_visible()
-    {
+    private bool is_visible() {
         return x11_icon != null && x11_icon.visible || appindicator != null && appindicator.visible;
     }
 
-    private void on_can_quit(ref bool can_quit)
-    {
+    private void on_can_quit(ref bool can_quit) {
         if (always_close_to_tray && is_visible())
         can_quit = false;
     }
@@ -110,14 +101,12 @@ public class TrayIconComponent: Component
 }
 
 #if APPINDICATOR
-public class TrayIconSettings : Gtk.Grid
-{
+public class TrayIconSettings : Gtk.Grid {
     private Gtk.Switch close_to_tray_switch;
     private Gtk.Switch x11_icon_switch;
     private Gtk.Switch appindicator_switch;
 
-    public TrayIconSettings(TrayIconComponent component)
-    {
+    public TrayIconSettings(TrayIconComponent component) {
         orientation = Gtk.Orientation.VERTICAL;
         row_spacing = 10;
         column_spacing = 10;

@@ -22,22 +22,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
-public class MenuBar: GLib.Object, MenuBarInterface
-{
+public class MenuBar: GLib.Object, MenuBarInterface {
     private unowned Drtgtk.Application app;
     private HashTable<string, SubMenu> menus;
 
-    public MenuBar(Drtgtk.Application app)
-    {
+    public MenuBar(Drtgtk.Application app) {
         this.app = app;
         this.menus = new HashTable<string, SubMenu>(str_hash, str_equal);
     }
 
-    public void update()
-    {
+    public void update() {
         var menubar = app.reset_menubar();
         var submenus = menus.get_keys();
         submenus.sort(strcmp);
@@ -45,32 +41,27 @@ public class MenuBar: GLib.Object, MenuBarInterface
         menus[submenu].append_to_menu(app.actions, menubar);
     }
 
-    public void set_submenu(string id, SubMenu submenu)
-    {
+    public void set_submenu(string id, SubMenu submenu) {
         menus[id] = submenu;
     }
 
-    public bool set_menu(string id, string label, string[] actions)
-    {
+    public bool set_menu(string id, string label, string[] actions) {
         set_submenu(id, new SubMenu(label, actions));
         update();
         return !Binding.CONTINUE;
     }
 }
 
-public class SubMenu
-{
+public class SubMenu {
     public string label {get; private set;}
     private string[] actions;
 
-    public SubMenu(string label, string[] actions)
-    {
+    public SubMenu(string label, string[] actions) {
         this.label = label;
         this.actions = actions;
     }
 
-    public void append_to_menu(Drtgtk.Actions actions, Menu menu)
-    {
+    public void append_to_menu(Drtgtk.Actions actions, Menu menu) {
         menu.append_submenu(label, actions.build_menu(this.actions, true, false));
     }
 }

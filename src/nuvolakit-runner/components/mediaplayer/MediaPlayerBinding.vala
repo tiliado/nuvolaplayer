@@ -22,19 +22,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
-{
+public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel> {
     private const string TRACK_INFO_CHANGED = "track-info-changed";
     private const string TRACK_POSITION_CHANGED = "track-position-changed";
     private const string VOLUME_CHANGED = "volume-changed";
 
-    public MediaPlayerBinding(Drt.RpcRouter router, WebWorker web_worker, MediaPlayerModel model)
-    {
+    public MediaPlayerBinding(Drt.RpcRouter router, WebWorker web_worker, MediaPlayerModel model) {
         base(router, web_worker, "Nuvola.MediaPlayer", model);
     }
 
-    protected override void bind_methods()
-    {
+    protected override void bind_methods() {
         bind("get-flag", Drt.RpcFlags.READABLE,
             "Returns boolean state of a particular flag or null if no such flag has been found.",
             handle_get_flag, {
@@ -79,8 +76,7 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
         model.set_rating.connect(on_set_rating);
     }
 
-    private void handle_set_track_info(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_set_track_info(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
         var title = request.pop_string();
         var artist = request.pop_string();
@@ -103,8 +99,7 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
         request.respond(new Variant.boolean(true));
     }
 
-    private void handle_get_track_info(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_get_track_info(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
         var builder = new VariantBuilder(new VariantType("a{smv}"));
         builder.add("{smv}", "title", Drt.new_variant_string_or_null(model.title));
@@ -117,8 +112,7 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
         request.respond(builder.end());
     }
 
-    private void handle_set_track_position(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_set_track_position(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
         var position = request.pop_double();
         model.track_position = (int64) position;
@@ -126,14 +120,12 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
         request.respond(new Variant.boolean(true));
     }
 
-    private void handle_get_track_position(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_get_track_position(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
         request.respond(new Variant.double((double) model.track_position));
     }
 
-    private void handle_update_volume(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_update_volume(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
         var volume = request.pop_double();
         model.volume = volume;
@@ -141,20 +133,17 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
         request.respond(new Variant.boolean(true));
     }
 
-    private void handle_get_volume(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_get_volume(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
         request.respond(new Variant.double(model.volume));
     }
 
-    private void handle_set_flag(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_set_flag(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
         var name = request.pop_string();
         var state = request.pop_bool();
         bool handled = false;
-        switch (name)
-        {
+        switch (name) {
         case "can-go-next":
         case "can-go-previous":
         case "can-play":
@@ -175,12 +164,10 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
         request.respond(new Variant.boolean(handled));
     }
 
-    private void handle_get_flag(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_get_flag(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
         var name = request.pop_string();
-        switch (name)
-        {
+        switch (name) {
         case "can-go-next":
         case "can-go-previous":
         case "can-play":
@@ -200,21 +187,17 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel>
         }
     }
 
-    private void on_set_rating(double rating)
-    {
-        if (!model.can_rate)
-        {
+    private void on_set_rating(double rating) {
+        if (!model.can_rate) {
             warning("Rating is not enabled");
             return;
         }
 
-        try
-        {
+        try {
             var payload = new Variant("(sd)", "RatingSet", rating);
             call_web_worker("Nuvola.mediaPlayer.emit", ref payload);
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             warning("Communication failed: %s", e.message);
         }
     }

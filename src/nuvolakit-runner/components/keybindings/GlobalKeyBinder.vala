@@ -22,16 +22,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
-public class GlobalKeybinder: GLib.Object
-{
+public class GlobalKeybinder: GLib.Object {
     public delegate void HandlerFunc(string accelerator, Gdk.Event event);
 
     private List<Keybinding> keybindings = null;
-    private static Gdk.ModifierType[] lock_modifiers =
-    {
+    private static Gdk.ModifierType[] lock_modifiers = {
         0,
         Gdk.ModifierType.MOD2_MASK, // NUM_LOCK
         Gdk.ModifierType.LOCK_MASK, // CAPS_LOCK
@@ -42,23 +39,20 @@ public class GlobalKeybinder: GLib.Object
         Gdk.ModifierType.MOD2_MASK|Gdk.ModifierType.LOCK_MASK|Gdk.ModifierType.MOD5_MASK
     };
 
-    public GlobalKeybinder()
-    {
+    public GlobalKeybinder() {
         var root_window = Gdk.get_default_root_window() as Gdk.X11.Window;
         return_if_fail(root_window != null);
         root_window.add_filter(event_filter);
     }
 
-    public bool is_bound(string accelerator)
-    {
+    public bool is_bound(string accelerator) {
         foreach (var keybinding in keybindings)
         if (keybinding.accelerator == accelerator)
         return true;
         return false;
     }
 
-    public bool bind(string accelerator, owned HandlerFunc handler)
-    {
+    public bool bind(string accelerator, owned HandlerFunc handler) {
         int keycode;
         Gdk.ModifierType modifiers;
         if (!grab_ungrab(true, accelerator, out keycode, out modifiers))
@@ -69,14 +63,12 @@ public class GlobalKeybinder: GLib.Object
         return true;
     }
 
-    public bool unbind(string accelerator)
-    {
+    public bool unbind(string accelerator) {
         if (!grab_ungrab(false, accelerator, null, null))
         return false;
 
         unowned List<Keybinding> iter = keybindings.first();
-        while (iter != null)
-        {
+        while (iter != null) {
             unowned List<Keybinding> next = iter.next;
             var keybinding = iter.data;
             if (keybinding.accelerator == accelerator)
@@ -87,8 +79,7 @@ public class GlobalKeybinder: GLib.Object
         return true;
     }
 
-    private bool grab_ungrab(bool grab, string accelerator, out int keycode, out Gdk.ModifierType virt_modifiers)
-    {
+    private bool grab_ungrab(bool grab, string accelerator, out int keycode, out Gdk.ModifierType virt_modifiers) {
         keycode = 0;
         virt_modifiers = 0;
         var bound = is_bound(accelerator);
@@ -103,8 +94,7 @@ public class GlobalKeybinder: GLib.Object
         /* Translate virtual modifiers (SUPER, etc.) to real modifiers (Mod2, etc.) */
         var keymap = Gdk.Keymap.get_default();
         Gdk.ModifierType modifiers = virt_modifiers;
-        if (!keymap.map_virtual_modifiers(ref modifiers))
-        {
+        if (!keymap.map_virtual_modifiers(ref modifiers)) {
             warning("Failed to map virtual modifiers.");
             return false;
         }
@@ -120,8 +110,7 @@ public class GlobalKeybinder: GLib.Object
         return_val_if_fail(keycode != 0, false);
         Gdk.error_trap_push();
 
-        foreach (Gdk.ModifierType lock_modifier in lock_modifiers)
-        {
+        foreach (Gdk.ModifierType lock_modifier in lock_modifiers) {
             if (grab)
             display.grab_key(keycode, modifiers|lock_modifier, xid, false, X.GrabMode.Async, X.GrabMode.Async);
             else
@@ -132,11 +121,9 @@ public class GlobalKeybinder: GLib.Object
         return Gdk.error_trap_pop() == 0;
     }
 
-    private Gdk.FilterReturn event_filter(Gdk.XEvent gdk_xevent, Gdk.Event gdk_event)
-    {
+    private Gdk.FilterReturn event_filter(Gdk.XEvent gdk_xevent, Gdk.Event gdk_event) {
         X.Event* xevent = (X.Event*) gdk_xevent;
-        if (xevent->type == X.EventType.KeyPress)
-        {
+        if (xevent->type == X.EventType.KeyPress) {
             var keymap = Gdk.Keymap.get_default();
             Gdk.ModifierType event_mods = (Gdk.ModifierType) (xevent.xkey.state & ~lock_modifiers[7]);
             Gdk.ModifierType keyboard_state_mods;
@@ -152,8 +139,7 @@ public class GlobalKeybinder: GLib.Object
             if ((event_mods & (Gdk.ModifierType.SUPER_MASK | Gdk.ModifierType.HYPER_MASK)) != 0)
             event_mods &= ~Gdk.ModifierType.HYPER_MASK;
 
-            foreach (var keybinding in keybindings)
-            {
+            foreach (var keybinding in keybindings) {
                 if (xevent->xkey.keycode == keybinding.keycode && event_mods == keybinding.modifiers)
                 keybinding.handler(keybinding.accelerator, gdk_event);
             }
@@ -161,15 +147,13 @@ public class GlobalKeybinder: GLib.Object
         return Gdk.FilterReturn.CONTINUE;
     }
 
-    private class Keybinding
-    {
+    private class Keybinding {
         public string accelerator {get; private set;}
         public int keycode {get; private set;}
         public unowned HandlerFunc handler {get; private set;}
         public Gdk.ModifierType modifiers {get; private set;}
 
-        public Keybinding(string accelerator, int keycode, Gdk.ModifierType modifiers, owned HandlerFunc handler)
-        {
+        public Keybinding(string accelerator, int keycode, Gdk.ModifierType modifiers, owned HandlerFunc handler) {
             this.accelerator = accelerator;
             this.keycode = keycode;
             this.modifiers = modifiers;

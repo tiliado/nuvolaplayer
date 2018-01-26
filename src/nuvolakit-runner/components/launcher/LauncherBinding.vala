@@ -22,15 +22,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Nuvola.LauncherBinding: ModelBinding<LauncherModel>
-{
-    public LauncherBinding(Drt.RpcRouter router, WebWorker web_worker, LauncherModel? model=null)
-    {
+public class Nuvola.LauncherBinding: ModelBinding<LauncherModel> {
+    public LauncherBinding(Drt.RpcRouter router, WebWorker web_worker, LauncherModel? model=null) {
         base(router, web_worker, "Nuvola.Launcher", model ?? new LauncherModel());
     }
 
-    protected override void bind_methods()
-    {
+    protected override void bind_methods() {
         bind("set-tooltip", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             "Set launcher tooltip.",
             handle_set_tooltip, {
@@ -56,32 +53,27 @@ public class Nuvola.LauncherBinding: ModelBinding<LauncherModel>
             handle_remove_actions, null);
     }
 
-    private void handle_set_tooltip(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_set_tooltip(Drt.RpcRequest request) throws Drt.RpcError {
         model.tooltip = request.pop_string();
         request.respond(null);
     }
 
-    private void handle_add_action(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_add_action(Drt.RpcRequest request) throws Drt.RpcError {
         model.add_action(request.pop_string());
         request.respond(null);
     }
 
-    private void handle_remove_action(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_remove_action(Drt.RpcRequest request) throws Drt.RpcError {
         model.remove_action(request.pop_string());
         request.respond(null);
     }
 
-    private void handle_set_actions(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_set_actions(Drt.RpcRequest request) throws Drt.RpcError {
         model.actions = request.pop_str_list();
         request.respond(null);
     }
 
-    private void handle_remove_actions(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_remove_actions(Drt.RpcRequest request) throws Drt.RpcError {
         model.remove_actions();
         request.respond(null);
     }

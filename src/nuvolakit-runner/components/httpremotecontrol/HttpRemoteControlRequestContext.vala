@@ -23,11 +23,9 @@
  */
 
 #if EXPERIMENTAL
-namespace Nuvola.HttpRemoteControl
-{
+namespace Nuvola.HttpRemoteControl {
 
-public class RequestContext
-{
+public class RequestContext {
     public Soup.Server server;
     public Soup.Message msg;
     public string path;
@@ -35,8 +33,7 @@ public class RequestContext
     public Soup.ClientContext client;
 
     public RequestContext(
-        Soup.Server server, Soup.Message msg, string path, GLib.HashTable? query, Soup.ClientContext client)
-    {
+        Soup.Server server, Soup.Message msg, string path, GLib.HashTable? query, Soup.ClientContext client) {
         this.server = server;
         this.msg = msg;
         this.path = path;
@@ -44,8 +41,7 @@ public class RequestContext
         this.client = client;
     }
 
-    public void respond_json(int status_code, Json.Node json)
-    {
+    public void respond_json(int status_code, Json.Node json) {
         var generator = new Json.Generator();
         generator.pretty = true;
         generator.indent = 4;
@@ -55,8 +51,7 @@ public class RequestContext
         msg.status_code = status_code;
     }
 
-    public void respond_not_found()
-    {
+    public void respond_not_found() {
         msg.set_response(
             "text/html", Soup.MemoryUse.COPY,
             "<html><head><title>404</title></head><body><h1>404</h1><p>%s</p></body></html>".printf(
@@ -64,16 +59,13 @@ public class RequestContext
         msg.status_code = 404;
     }
 
-    public void serve_file(File file)
-    {
+    public void serve_file(File file) {
         string? mime_type = null;
-        try
-        {
+        try {
             var content_type = file.query_info(FileAttribute.STANDARD_CONTENT_TYPE, 0).get_content_type();
             mime_type = ContentType.get_mime_type(content_type);
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             mime_type = null;
         }
 
@@ -81,16 +73,14 @@ public class RequestContext
         mime_type = "application/octet-stream";
         else if (mime_type == "text/plain")
         mime_type += "; charset=utf8";
-        try
-        {
+        try {
             uint8[] data;
             file.load_contents(null, out data, null);
             msg.response_headers.replace("Content-Type", mime_type);
             msg.response_body.append_take((owned) data);
             msg.status_code = 200;
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             warning("Failed to load file '%s': %s", file.get_path(), e.message);
             respond_not_found();
             return;

@@ -24,14 +24,12 @@
 
 namespace Nuvola {
 
-public class WebsiteDataManager: Gtk.Grid
-{
+public class WebsiteDataManager: Gtk.Grid {
     private WebKit.WebsiteDataManager data_manager;
     private Gtk.CheckButton[] check_buttons;
     private WebKit.WebsiteDataTypes[] data_types;
     private Gtk.Button clear_button;
-    public WebsiteDataManager(WebKit.WebsiteDataManager data_manager)
-    {
+    public WebsiteDataManager(WebKit.WebsiteDataManager data_manager) {
         this.data_manager = data_manager;
         orientation = Gtk.Orientation.VERTICAL;
         hexpand = true;
@@ -62,8 +60,7 @@ public class WebsiteDataManager: Gtk.Grid
             WebKit.WebsiteDataTypes.LOCAL_STORAGE,
         };
         check_buttons = new Gtk.CheckButton[data_types.length];
-        for (var i = 0; i < data_types.length; i++)
-        {
+        for (var i = 0; i < data_types.length; i++) {
             var check_button = check_buttons[i] = new Gtk.CheckButton.with_label(labels[i]);
             add(check_button);
             check_button.show();
@@ -81,28 +78,23 @@ public class WebsiteDataManager: Gtk.Grid
         button.show();
     }
 
-    private void on_clear_button_clicked()
-    {
+    private void on_clear_button_clicked() {
 
         WebKit.WebsiteDataTypes data_to_clear = 0;
         for (var i = 0; i < check_buttons.length; i++)
         if (check_buttons[i].active)
         data_to_clear |= data_types[i];
-        if (data_to_clear != 0)
-        {
+        if (data_to_clear != 0) {
             clear_button.sensitive = false;
             data_manager.clear.begin(data_to_clear, 0, null, on_data_cleared);
         }
     }
 
-    private void on_data_cleared(GLib.Object? o, AsyncResult res)
-    {
-        try
-        {
+    private void on_data_cleared(GLib.Object? o, AsyncResult res) {
+        try {
             data_manager.clear.end(res);
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             warning("Failed to clear data: %s", e.message);
         }
         clear_button.sensitive = true;

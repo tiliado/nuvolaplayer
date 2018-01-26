@@ -23,62 +23,50 @@
  */
 
 #if EXPERIMENTAL
-namespace Nuvola.HttpRemoteControl
-{
+namespace Nuvola.HttpRemoteControl {
 
-public errordomain ChannelError
-{
+public errordomain ChannelError {
     PARSE_ERROR,
     APP_NOT_FOUND,
     INVALID_REQUEST;
 }
 
-public class Channel: Engineio.Channel
-{
+public class Channel: Engineio.Channel {
     private unowned Server http_server;
 
-    public Channel(Engineio.Server eio_server, Server http_server)
-    {
+    public Channel(Engineio.Server eio_server, Server http_server) {
         base(eio_server);
         this.http_server = http_server;
     }
 
-    protected override async void handle_request(Engineio.Socket socket, Engineio.MessageType type, int id, string method, Json.Node? node)
-    {
+    protected override async void handle_request(Engineio.Socket socket, Engineio.MessageType type, int id, string method, Json.Node? node) {
         Variant? params = null;
         string status;
         Json.Node? result = null;
-        try
-        {
-            if (node != null)
-            {
-                try
-                {
+        try {
+            if (node != null) {
+                try {
                     params = Json.gvariant_deserialize(node, "a{smv}");
                 }
-                catch (GLib.Error e)
-                {
+                catch (GLib.Error e) {
                     throw new ChannelError.PARSE_ERROR("Failed to parse JSON params: %s. Ensure you have passed an object/mapping/dictionary.", e.message);
                 }
             }
 
             var variant_result = yield http_server.handle_eio_request(socket, type, method, params);
-            if (variant_result == null || !variant_result.get_type().is_subtype_of(VariantType.DICTIONARY))
-            {
+            if (variant_result == null || !variant_result.get_type().is_subtype_of(VariantType.DICTIONARY)) {
                 var builder = new VariantBuilder(new VariantType("a{smv}"));
                 if (variant_result != null)
                 g_variant_ref(variant_result); // FIXME: How to avoid this hack
                 builder.add("{smv}", "result", variant_result);
                 result = Json.gvariant_serialize(builder.end());
             }
-            else
-            {
+            else {
                 result = Json.gvariant_serialize(variant_result);
             }
             status = "OK";
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             status = "ERROR";
             var builder = new VariantBuilder(new VariantType("a{sv}"));
             builder.add("{sv}", "error", new Variant.int32(e.code));
@@ -91,19 +79,16 @@ public class Channel: Engineio.Channel
         socket.send_message(msg);
     }
 
-    public void send_notification(Engineio.Socket socket, string path, Variant? data)
-    {
+    public void send_notification(Engineio.Socket socket, string path, Variant? data) {
         Json.Node? result = null;
-        if (data == null || !data.get_type().is_subtype_of(VariantType.DICTIONARY))
-        {
+        if (data == null || !data.get_type().is_subtype_of(VariantType.DICTIONARY)) {
             var builder = new VariantBuilder(new VariantType("a{smv}"));
             if (data != null)
             g_variant_ref(data); // FIXME: How to avoid this hack
             builder.add("{smv}", "result", data);
             result = Json.gvariant_serialize(builder.end());
         }
-        else
-        {
+        else {
             result = Json.gvariant_serialize(data);
         }
         var msg = Engineio.serialize_message(Engineio.MessageType.NOTIFICATION, 0, path, result);

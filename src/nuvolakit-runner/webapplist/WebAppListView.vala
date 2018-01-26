@@ -24,12 +24,10 @@
 
 namespace Nuvola {
 
-public class WebAppListView : Gtk.IconView
-{
+public class WebAppListView : Gtk.IconView {
     public const int ICON_SIZE = 48;
 
-    public WebAppListView(Gtk.TreeModel model)
-    {
+    public WebAppListView(Gtk.TreeModel model) {
         Object(
             pixbuf_column: WebAppListModel.Pos.ICON, text_column: WebAppListModel.Pos.NAME,
             item_padding: 5, row_spacing: 5, item_width: 3 * ICON_SIZE / 2,

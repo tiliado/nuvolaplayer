@@ -22,14 +22,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
 
 /**
  * File-based cache for lyrics
  */
-public class LyricsFetcherCache : GLib.Object, LyricsFetcher{
+public class LyricsFetcherCache : GLib.Object, LyricsFetcher {
     public File lyrics_cache {get; construct set;}
     private const string FILE_FORMAT = "%s/%s.txt";
 
@@ -38,16 +37,14 @@ public class LyricsFetcherCache : GLib.Object, LyricsFetcher{
      *
      * @param storage    where to store lyrics
      */
-    public LyricsFetcherCache(File lyrics_cache)
-    {
+    public LyricsFetcherCache(File lyrics_cache) {
         GLib.Object(lyrics_cache: lyrics_cache);
     }
 
     /**
      * {@inheritDoc}
      */
-    public async string fetch_lyrics(string artist, string song) throws LyricsError
-    {
+    public async string fetch_lyrics(string artist, string song) throws LyricsError {
         var fixed_artist = escape_name(artist.down());
         var fixed_song = escape_name(song.down());
 
@@ -55,18 +52,15 @@ public class LyricsFetcherCache : GLib.Object, LyricsFetcher{
         throw new LyricsError.NOT_FOUND(@"Song $song was not found in cache");
 
         var cached = lyrics_cache.get_child(FILE_FORMAT.printf(fixed_artist, fixed_song));
-        try
-        {
+        try {
             uint8[] contents;
             yield cached.load_contents_async(null, out contents, null);
             var lyrics = (string) (owned) contents;
             if (lyrics != null && lyrics != "")
             return lyrics;
         }
-        catch (GLib.Error e)
-        {
-            if (e.code != 1)
-            {
+        catch (GLib.Error e) {
+            if (e.code != 1) {
                 warning("Unable to load cached lyrics: [%d] ]%s", e.code, e.message);
                 throw new LyricsError.NOT_FOUND(@"Unable to load song $song from cache");
             }
@@ -81,21 +75,18 @@ public class LyricsFetcherCache : GLib.Object, LyricsFetcher{
      * @param song      song name
      * @param lyrics    lyrics text
      */
-    public async void store(string artist, string song, string lyrics)
-    {
+    public async void store(string artist, string song, string lyrics) {
         var fixed_artist = escape_name(artist.down());
         var fixed_song = escape_name(song.down());
 
         if (fixed_artist == "" || fixed_song == "")
         return;
 
-        try
-        {
+        try {
             var cached_file = lyrics_cache.get_child(FILE_FORMAT.printf(fixed_artist, fixed_song));
             yield Drt.System.overwrite_file_async(cached_file, lyrics);
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             warning("Unable to store lyrics: %s", e.message);
         }
     }
@@ -106,8 +97,7 @@ public class LyricsFetcherCache : GLib.Object, LyricsFetcher{
      * @param name    string to escape
      * @return        escaped name
      */
-    private string escape_name(string name)
-    {
+    private string escape_name(string name) {
         return GLib.Uri.escape_string(name, " ").replace("%", ",");
     }
 }

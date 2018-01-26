@@ -28,38 +28,30 @@
 namespace Engineio {
 
 
-public class XhrTransport: PollingTransport
-{
-    public XhrTransport(Request request)
-    {
+public class XhrTransport: PollingTransport {
+    public XhrTransport(Request request) {
         base(request);
     }
 
-    public override async void handle_request(Request request, Response response)
-    {
-        if (request.method == "OPTIONS")
-        {
+    public override async void handle_request(Request request, Response response) {
+        if (request.method == "OPTIONS") {
             headers_requested(request, response.headers);
             response.headers["Access-Control-Allow-Headers"] = "Content-Type";
             response.status_code = 200;
             response.end(null);
         }
-        else
-        {
+        else {
             yield base.handle_request(request, response);
         }
     }
 
-    protected override void on_headers_requested(Request request, HashTable<string, string> headers)
-    {
+    protected override void on_headers_requested(Request request, HashTable<string, string> headers) {
         var origin = request.headers.get_one("origin");
-        if (origin != null)
-        {
+        if (origin != null) {
             headers["Access-Control-Allow-Credentials"] = "true";
             headers["Access-Control-Allow-Origin"] = origin;
         }
-        else
-        {
+        else {
             headers["Access-Control-Allow-Origin"] = "*";
         }
         base.on_headers_requested(request, headers);

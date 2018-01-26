@@ -61,14 +61,12 @@ td, th {padding: 5px 10px;}
 </html>
 """;
 
-public class FormatSupportScreen: Gtk.Notebook
-{
+public class FormatSupportScreen: Gtk.Notebook {
     public Drtgtk.Application app {get; construct;}
     public FormatSupport format_support {get; construct;}
     public Drt.Storage storage {get; construct;}
 
-    public FormatSupportScreen(Drtgtk.Application app, FormatSupport format_support, Drt.Storage storage, WebKit.WebContext web_context)
-    {
+    public FormatSupportScreen(Drtgtk.Application app, FormatSupport format_support, Drt.Storage storage, WebKit.WebContext web_context) {
         GLib.Object(format_support: format_support, storage: storage, app:app);
         Gtk.Label label = null;
         margin = 10;
@@ -95,8 +93,7 @@ public class FormatSupportScreen: Gtk.Notebook
         frame.show();
 
         var flash_detect = storage.get_data_file("js/flash_detect.js");
-        if (flash_detect != null)
-        {
+        if (flash_detect != null) {
             frame = new Gtk.Frame ("<b>Active Flash plugin</b>");
             (frame.label_widget as Gtk.Label).use_markup = true;
             var web_view = new WebView(web_context);
@@ -120,8 +117,7 @@ public class FormatSupportScreen: Gtk.Notebook
         frame.show();
 
         unowned List<WebPlugin?> plugins = format_support.list_web_plugins();
-        foreach (unowned WebPlugin plugin in plugins)
-        {
+        foreach (unowned WebPlugin plugin in plugins) {
             unowned Gtk.Grid grid = plugin.is_flash ? flash_plugins_grid : other_plugins_grid;
             if (grid.get_child_at(0, 0) != null)
             grid.add(new Gtk.Separator(Gtk.Orientation.HORIZONTAL));
@@ -146,8 +142,7 @@ public class FormatSupportScreen: Gtk.Notebook
             grid.show_all();
         }
 
-        if (format_support.n_flash_plugins != 1)
-        {
+        if (format_support.n_flash_plugins != 1) {
             var info_bar = new Gtk.InfoBar();
             info_bar.get_content_area().add(new Gtk.Label(format_support.n_flash_plugins == 0
                 ? "No Flash plugins have been found."
@@ -174,18 +169,15 @@ public class FormatSupportScreen: Gtk.Notebook
         show();
     }
 
-    public void show_tab(Tab tab)
-    {
+    public void show_tab(Tab tab) {
         this.page = tab == Tab.DEFAULT ? 0 : (int) tab - 1;
     }
 
-    public enum Tab
-    {
+    public enum Tab {
         DEFAULT, FLASH, MP3;
     }
 
-    private class Mp3View : Gtk.Grid
-    {
+    private class Mp3View : Gtk.Grid {
         private FormatSupport format_support;
         private Gtk.TextView text_view;
         private Gtk.Button button;
@@ -194,8 +186,7 @@ public class FormatSupportScreen: Gtk.Notebook
         private Gtk.Button help_button;
 
         public Mp3View(FormatSupport format_support, Gtk.Button help_button, File? audio_detect_script,
-            WebKit.WebContext web_context)
-        {
+            WebKit.WebContext web_context) {
             GLib.Object(orientation: Gtk.Orientation.VERTICAL);
             this.format_support = format_support;
             this.help_button = help_button;
@@ -224,8 +215,7 @@ public class FormatSupportScreen: Gtk.Notebook
             button.show();
             scroll.show_all();
 
-            if (audio_detect_script != null)
-            {
+            if (audio_detect_script != null) {
                 var frame = new Gtk.Frame ("<b>HTML5 Audio Support Status</b>");
                 (frame.label_widget as Gtk.Label).use_markup = true;
                 var web_view = new WebView(web_context);
@@ -243,23 +233,19 @@ public class FormatSupportScreen: Gtk.Notebook
             }
         }
 
-        private void update_result_text(bool result)
-        {
+        private void update_result_text(bool result) {
             result_label.label = (pipeline != null
                 ? "You should be hearing a really bad song now."
                 :(result ? "MP3 audio format is supported." : "MP3 audio format is not supported."));
             help_button.visible = !result;
         }
 
-        private void set_button_label()
-        {
+        private void set_button_label() {
             button.label = pipeline == null ? "Check again" : "Stop";
         }
 
-        private void toggle_check()
-        {
-            if (pipeline != null)
-            {
+        private void toggle_check() {
+            if (pipeline != null) {
                 pipeline.stop();
                 return;
             }
@@ -270,23 +256,21 @@ public class FormatSupportScreen: Gtk.Notebook
             text_view.buffer.text = "";
             set_button_label();
             update_result_text(false);
-            pipeline.check.begin(false, (o, res) =>
-                {
-                    pipeline.info.disconnect(on_pipeline_info);
-                    pipeline.warn.disconnect(on_pipeline_warn);
-                    var result = pipeline.check.end(res);
-                    pipeline = null;
-                    update_result_text(result);
-                    if (result)
-                    add_message("Info", "Playback has been successful.");
-                    else
-                    add_message("Error", "Playback has failed.");
-                    set_button_label();
-                });
+            pipeline.check.begin(false, (o, res) => {
+                pipeline.info.disconnect(on_pipeline_info);
+                pipeline.warn.disconnect(on_pipeline_warn);
+                var result = pipeline.check.end(res);
+                pipeline = null;
+                update_result_text(result);
+                if (result)
+                add_message("Info", "Playback has been successful.");
+                else
+                add_message("Error", "Playback has failed.");
+                set_button_label();
+            });
         }
 
-        private void add_message(string type, string text)
-        {
+        private void add_message(string type, string text) {
             var buffer = text_view.buffer;
             Gtk.TextIter iter;
             buffer.get_end_iter(out iter);
@@ -294,13 +278,11 @@ public class FormatSupportScreen: Gtk.Notebook
             buffer.insert(ref iter, data, -1);
         }
 
-        private void on_pipeline_info(string text)
-        {
+        private void on_pipeline_info(string text) {
             add_message("Info", text);
         }
 
-        private void on_pipeline_warn(string text)
-        {
+        private void on_pipeline_warn(string text) {
             add_message("Error", text);
         }
     }

@@ -25,14 +25,12 @@
 
 namespace Nuvola {
 
-public class WebView: WebKit.WebView
-{
+public class WebView: WebKit.WebView {
     public const double ZOOM_DEFAULT = 1.0;
     public const double ZOOM_STEP = 1.2;
     private SList<WebWindow> web_windows = null;
 
-    public WebView(WebKit.WebContext context)
-    {
+    public WebView(WebKit.WebContext context) {
         GLib.Object(web_context: context);
         unowned WebKit.Settings ws = get_settings();
         ws.enable_developer_extras = true;
@@ -51,10 +49,8 @@ public class WebView: WebKit.WebView
     /**
      * Handles special mouse buttons (back & forward navigation)
      */
-    private bool on_button_released(Gdk.EventButton event)
-    {
-        switch (event.button)
-        {
+    private bool on_button_released(Gdk.EventButton event) {
+        switch (event.button) {
         case 8:  // mouse back button
             go_back();
             return true;
@@ -66,23 +62,19 @@ public class WebView: WebKit.WebView
         }
     }
 
-    public void zoom_in()
-    {
+    public void zoom_in() {
         zoom_level *= ZOOM_STEP;
     }
 
-    public void zoom_out()
-    {
+    public void zoom_out() {
         zoom_level /= ZOOM_STEP;
     }
 
-    public void zoom_reset()
-    {
+    public void zoom_reset() {
         zoom_level = ZOOM_DEFAULT;
     }
 
-    private Gtk.Widget on_web_view_create()
-    {
+    private Gtk.Widget on_web_view_create() {
         var web_view = new WebView(web_context);
         var web_window = new WebWindow(web_view);
         web_window.destroy.connect(on_web_window_destroy);
@@ -90,8 +82,7 @@ public class WebView: WebKit.WebView
         return web_view;
     }
 
-    private void on_web_window_destroy(Gtk.Widget window)
-    {
+    private void on_web_window_destroy(Gtk.Widget window) {
         var web_window = window as WebWindow;
         assert(web_window != null);
         web_windows.remove(web_window);

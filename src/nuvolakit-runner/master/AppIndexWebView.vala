@@ -24,13 +24,11 @@
 
 namespace Nuvola {
 
-public class AppIndexWebView : WebView
-{
+public class AppIndexWebView : WebView {
     private unowned Drtgtk.Application app;
     private string? root_uri = null;
 
-    public AppIndexWebView(Drtgtk.Application app, WebKit.WebContext context)
-    {
+    public AppIndexWebView(Drtgtk.Application app, WebKit.WebContext context) {
         base(context);
         this.app = app;
         decide_policy.connect(on_decide_policy);
@@ -38,16 +36,13 @@ public class AppIndexWebView : WebView
         hexpand = vexpand = true;
     }
 
-    public void load_app_index(string index_uri, string? root_uri=null)
-    {
+    public void load_app_index(string index_uri, string? root_uri=null) {
         this.root_uri = root_uri ?? index_uri;
         load_uri(index_uri);
     }
 
-    private bool on_decide_policy(WebKit.PolicyDecision decision, WebKit.PolicyDecisionType decision_type)
-    {
-        switch (decision_type)
-        {
+    private bool on_decide_policy(WebKit.PolicyDecision decision, WebKit.PolicyDecisionType decision_type) {
+        switch (decision_type) {
         case WebKit.PolicyDecisionType.NAVIGATION_ACTION:
             return decide_navigation_policy(false, (WebKit.NavigationPolicyDecision) decision);
         case WebKit.PolicyDecisionType.NEW_WINDOW_ACTION:
@@ -58,8 +53,7 @@ public class AppIndexWebView : WebView
         }
     }
 
-    private bool decide_navigation_policy(bool new_window, WebKit.NavigationPolicyDecision decision)
-    {
+    private bool decide_navigation_policy(bool new_window, WebKit.NavigationPolicyDecision decision) {
         var action = decision.navigation_action;
         var type = action.get_navigation_type();
         var user_gesture = action.is_user_gesture();
@@ -73,10 +67,8 @@ public class AppIndexWebView : WebView
             new_window ? "new" : "current", uri, result.to_string(), decision.frame_name, type.to_string(),
             user_gesture.to_string());
 
-        if (result)
-        {
-            if (new_window)
-            {
+        if (result) {
+            if (new_window) {
                 // Open in current window instead of a new window
                 decision.ignore();
                 Idle.add(() => {load_uri(uri); return false;});
@@ -85,8 +77,7 @@ public class AppIndexWebView : WebView
             decision.use();
             return true;
         }
-        else
-        {
+        else {
             app.show_uri(uri);
             decision.ignore();
             return true;

@@ -22,17 +22,14 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
-public class LyricsSidebar: Gtk.Grid
-{
+public class LyricsSidebar: Gtk.Grid {
     private Gtk.Label status;
     private Gtk.TextView view;
     private LyricsProvider lyrics_provider;
 
-    public LyricsSidebar(AppRunnerController app, LyricsProvider lyrics_provider)
-    {
+    public LyricsSidebar(AppRunnerController app, LyricsProvider lyrics_provider) {
         this.lyrics_provider = lyrics_provider;
         row_spacing = 5;
         column_homogeneous = false;
@@ -65,40 +62,34 @@ public class LyricsSidebar: Gtk.Grid
         on_no_song_info();
     }
 
-    ~LyricsSidebar()
-    {
+    ~LyricsSidebar() {
         lyrics_provider.lyrics_available.disconnect(on_lyrics_available);
         lyrics_provider.lyrics_not_found.disconnect(on_lyrics_not_found);
         lyrics_provider.lyrics_loading.disconnect(on_lyrics_loading);
         lyrics_provider.no_song_info.disconnect(on_no_song_info);
     }
 
-    private void set_status(string? text=null)
-    {
+    private void set_status(string? text=null) {
         status.set_text(text ?? "");
         status.visible = text != null;
     }
 
-    private void on_lyrics_available(string artist, string song, string lyrics)
-    {
+    private void on_lyrics_available(string artist, string song, string lyrics) {
         set_status(song);
         view.buffer.set_text(lyrics);
     }
 
-    private void on_lyrics_not_found(string artist, string song)
-    {
+    private void on_lyrics_not_found(string artist, string song) {
         set_status(_("No lyrics has been found."));
         view.buffer.set_text("");
     }
 
-    private void on_lyrics_loading(string artist, string song)
-    {
+    private void on_lyrics_loading(string artist, string song) {
         set_status(_("Fetching lyrics ..."));
         view.buffer.set_text("");
     }
 
-    private void on_no_song_info()
-    {
+    private void on_no_song_info() {
         set_status(_("No song is playing"));
         view.buffer.set_text("");
     }

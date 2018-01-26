@@ -22,8 +22,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Nuvola.MediaPlayer: GLib.Object, Nuvola.MediaPlayerModel
-{
+public class Nuvola.MediaPlayer: GLib.Object, Nuvola.MediaPlayerModel {
     public string? title {get; set; default = null;}
     public string? artist {get; set; default = null;}
     public string? album {get; set; default = null;}
@@ -45,15 +44,13 @@ public class Nuvola.MediaPlayer: GLib.Object, Nuvola.MediaPlayerModel
     public SList<string> playback_actions {get; owned set;}
     private Drtgtk.Actions actions;
 
-    public MediaPlayer(Drtgtk.Actions actions)
-    {
+    public MediaPlayer(Drtgtk.Actions actions) {
         this.actions = actions;
     }
 
     protected void handle_set_track_info(
         string? title, string? artist, string? album, string? state, string? artwork_location, string? artwork_file,
-        double rating, int64 length)
-    {
+        double rating, int64 length) {
         this.title = title;
         this.artist = artist;
         this.album = album;
@@ -64,48 +61,39 @@ public class Nuvola.MediaPlayer: GLib.Object, Nuvola.MediaPlayerModel
         this.track_length = length;
     }
 
-    public void play()
-    {
+    public void play() {
         activate_action("play");
     }
 
-    public void pause()
-    {
+    public void pause() {
         activate_action("pause");
     }
 
-    public void toggle_play()
-    {
+    public void toggle_play() {
         activate_action("toggle-play");
     }
 
-    public void stop()
-    {
+    public void stop() {
         activate_action("stop");
     }
 
-    public void prev_song()
-    {
+    public void prev_song() {
         activate_action("prev-song");
     }
 
-    public void next_song()
-    {
+    public void next_song() {
         activate_action("next-song");
     }
 
-    public void seek(int64 position)
-    {
+    public void seek(int64 position) {
         activate_action("seek", position);
     }
 
-    public void change_volume(double volume)
-    {
+    public void change_volume(double volume) {
         activate_action("change-volume", volume);
     }
 
-    private void activate_action(string name, Variant? parameter=null)
-    {
+    private void activate_action(string name, Variant? parameter=null) {
         if (!actions.activate_action(name, parameter))
         critical("Failed to activate action '%s'.", name);
     }

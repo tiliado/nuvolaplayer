@@ -49,13 +49,11 @@ public const string TILIADO_OAUTH2_API_ENDPOINT = TILIADO_OAUTH2_SERVER + "/api/
 
 public const string WEB_APP_DATA_SUBDIR = "apps_data";
 
-public string get_app_uid()
-{
+public string get_app_uid() {
     return UNIQUE_NAME;
 }
 
-public string get_dbus_id()
-{
+public string get_dbus_id() {
     #if GENUINE
     return get_app_uid();
     #else
@@ -63,80 +61,66 @@ public string get_dbus_id()
     #endif
 }
 
-public string get_dbus_path()
-{
+public string get_dbus_path() {
     return "/" + get_dbus_id().replace(".", "/");
 }
 
-public string get_app_icon()
-{
+public string get_app_icon() {
     return APP_ICON;
 }
 
-public string get_app_id()
-{
+public string get_app_id() {
     return APPNAME;
 }
 
-public string get_old_id()
-{
+public string get_old_id() {
     return OLDNAME;
 }
 
-public string get_app_name()
-{
+public string get_app_name() {
     return NAME;
 }
 
-public string get_revision()
-{
+public string get_revision() {
     return REVISION;
 }
 
-public string get_version()
-{
+public string get_version() {
     return VERSION;
 }
 
-public string get_short_version()
-{
+public string get_short_version() {
     return "%d.%d.%d".printf(VERSION_MAJOR, VERSION_MINOR, VERSION_BUGFIX);
 }
 
-public string get_version_suffix()
-{
+public string get_version_suffix() {
     return VERSION_SUFFIX;
 }
 
-public int[] get_versions()
-{
+public int[] get_versions() {
     return {VERSION_MAJOR, VERSION_MINOR, VERSION_BUGFIX};
 }
 
 /**
  * Returns versions encoded as integer, e.g. 30105 for 3.1.5.
  */
-public int get_encoded_version()
-{
+public int get_encoded_version() {
     return VERSION_MAJOR * 10000 + VERSION_MINOR * 100 + VERSION_BUGFIX;
 }
 
-public string get_libdir()
-{
+public string get_libdir() {
     return Environment.get_variable("NUVOLA_LIBDIR") ?? LIBDIR;
 }
 
 private string? app_runner_path;
 
-public string get_app_runner_path()
-{
+public string get_app_runner_path() {
     if (app_runner_path == null)
     app_runner_path = Environment.get_variable("NUVOLA_APPRUNNER") ?? (get_libdir() + "/apprunner");
     return app_runner_path;
 }
 
-public string get_welcome_screen_name()
-{
+public string get_welcome_screen_name() {
     return WELCOME_SCREEN_NAME;
 }
 

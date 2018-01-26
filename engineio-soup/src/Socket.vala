@@ -26,16 +26,13 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Engineio
-{
+namespace Engineio {
 
-public enum ReadyState
-{
+public enum ReadyState {
     OPENING, OPEN, CLOSING, CLOSED;
 }
 
-public class Socket : GLib.Object
-{
+public class Socket : GLib.Object {
 
     /* unique identifier */
     public string id {get; private set;}
@@ -57,8 +54,7 @@ public class Socket : GLib.Object
     private SList<Packet> write_buffer = null;
     private bool discard = false;
 
-    public Socket (string id, Server server, Transport transport, Request request)
-    {
+    public Socket (string id, Server server, Transport transport, Request request) {
         debug("New Socket %s originated from %s", id, request.url);
         this.id = id;
         this.server = server;
@@ -139,8 +135,7 @@ public class Socket : GLib.Object
      * @param message     a string with outgoing data
      * @param compress    whether to compress sending data. This option might be ignored and forced to be true when using polling.
      */
-    public void send_message(string message, bool compress=false)
-    {
+    public void send_message(string message, bool compress=false) {
         send_packet(PacketType.MESSAGE, message, compress/*, callback*/);
     }
 
@@ -150,8 +145,7 @@ public class Socket : GLib.Object
      * @param node        a JSON root node
      * @param compress    whether to compress sending data. This option might be ignored and forced to be true when using polling.
      */
-    public void send_json(Json.Node node, bool compress=false)
-    {
+    public void send_json(Json.Node node, bool compress=false) {
         send_packet_json(PacketType.MESSAGE, node, compress/*, callback*/);
     }
 
@@ -161,8 +155,7 @@ public class Socket : GLib.Object
      * @param bytes       a string with outgoing data
      * @param compress    whether to compress sending data. This option might be ignored and forced to be true when using polling.
      */
-    public void send_bytes(Bytes bytes, bool compress=false)
-    {
+    public void send_bytes(Bytes bytes, bool compress=false) {
         send_packet_bytes(PacketType.MESSAGE, bytes, compress/*, callback*/);
     }
 
@@ -171,14 +164,12 @@ public class Socket : GLib.Object
      *
      * @param discard    whether to discard pending data
      */
-    public void close(bool discard=false)
-    {
+    public void close(bool discard=false) {
         if (ready_state != ReadyState.OPEN)
         return;
 
         ready_state = ReadyState.CLOSING;
-        if (write_buffer != null)
-        {
+        if (write_buffer != null) {
             this.discard = discard;
             draining.connect(on_draining_after_close);
             return;
@@ -186,8 +177,7 @@ public class Socket : GLib.Object
         close_transport(discard);
     }
 
-    private void on_draining_after_close()
-    {
+    private void on_draining_after_close() {
         draining.disconnect(on_draining_after_close);
         close_transport(discard);
     }
@@ -198,16 +188,14 @@ public class Socket : GLib.Object
      * @param {Boolean} discard
      * @api private
      */
-    private void close_transport(bool discard)
-    {
+    private void close_transport(bool discard) {
         if (discard)
         transport.discard();
         transport.closed.connect(on_transport_force_closed);
         transport.close(null);
     }
 
-    private void on_transport_force_closed(Transport transport)
-    {
+    private void on_transport_force_closed(Transport transport) {
         transport.closed.disconnect(on_transport_force_closed);
         do_close("forced close", null);
     }
@@ -219,8 +207,7 @@ public class Socket : GLib.Object
      * @api private
      */
 
-    private void attach_transport(Transport transport)
-    {
+    private void attach_transport(Transport transport) {
         transport.error_occured.connect(on_error_occured);
         transport.incoming_packet.connect(on_incoming_packet);
         transport.closed.connect(on_closed);
@@ -234,8 +221,7 @@ public class Socket : GLib.Object
      * @api private
      */
 
-    private void do_open()
-    {
+    private void do_open() {
         ready_state = ReadyState.OPEN;
 
         // sends an `open` packet
@@ -258,25 +244,21 @@ public class Socket : GLib.Object
      * @api private
      */
 
-    private void set_ping_timeout()
-    {
-        if (ping_timeout_timer > 0)
-        {
+    private void set_ping_timeout() {
+        if (ping_timeout_timer > 0) {
             Source.remove(ping_timeout_timer);
             ping_timeout_timer = 0;
         }
         ping_timeout_timer = Timeout.add(server.ping_interval + server.ping_timeout, on_ping_timeout);
     }
 
-    private bool on_ping_timeout()
-    {
+    private bool on_ping_timeout() {
         warning("Ping timeout");
         do_close("ping timeout", null);
         return false;
     }
 
-    private void send_packet_json(PacketType type, Json.Node data, bool compress=false/*, callback*/)
-    {
+    private void send_packet_json(PacketType type, Json.Node data, bool compress=false/*, callback*/) {
         var generator = new Json.Generator();
         generator.set_root(data);
         send_packet(type, generator.to_data(null), compress);
@@ -290,10 +272,8 @@ public class Socket : GLib.Object
      * @param {Object} options
      * @api private
      */
-    private void send_packet(PacketType type, string? data, bool compress/*, callback*/)
-    {
-        if (ready_state != ReadyState.CLOSING)
-        {
+    private void send_packet(PacketType type, string? data, bool compress/*, callback*/) {
+        if (ready_state != ReadyState.CLOSING) {
             debug("Sending packet %s: %s", type.to_string(), data);
             var packet = new Packet(type, data, null, compress);
             packed_created(packet);
@@ -304,10 +284,8 @@ public class Socket : GLib.Object
         }
     }
 
-    private void send_packet_bytes(PacketType type, Bytes data, bool compress/*, callback*/)
-    {
-        if (ready_state != ReadyState.CLOSING)
-        {
+    private void send_packet_bytes(PacketType type, Bytes data, bool compress/*, callback*/) {
+        if (ready_state != ReadyState.CLOSING) {
             debug("sending packet '%s' (bytes)", type.to_string());
             var packet = new Packet(type, null, data, compress);
 
@@ -328,10 +306,8 @@ public class Socket : GLib.Object
      * @api private
      */
 
-    private void flush()
-    {
-        if (ready_state != ReadyState.CLOSED && transport.writable && write_buffer != null)
-        {
+    private void flush() {
+        if (ready_state != ReadyState.CLOSED && transport.writable && write_buffer != null) {
             debug("Flushing buffer to transport (%u items)", write_buffer.length());
             var buffer = (owned) write_buffer;
             write_buffer = null;
@@ -349,18 +325,14 @@ public class Socket : GLib.Object
      * `transport error`, `server close`, `transport close`
      */
 
-    private void do_close(string reason, string? description)
-    {
-        if (ready_state != ReadyState.CLOSED)
-        {
+    private void do_close(string reason, string? description) {
+        if (ready_state != ReadyState.CLOSED) {
             ready_state = ReadyState.CLOSED;
-            if (ping_timeout_timer > 0)
-            {
+            if (ping_timeout_timer > 0) {
                 Source.remove(ping_timeout_timer);
                 ping_timeout_timer = 0;
             }
-            if (check_interval_timer > 0)
-            {
+            if (check_interval_timer > 0) {
                 Source.remove(check_interval_timer);
                 check_interval_timer = 0;
             }
@@ -378,10 +350,8 @@ public class Socket : GLib.Object
      * @api private
      */
 
-    private void on_incoming_packet(Packet packet)
-    {
-        if (ready_state == ReadyState.OPEN)
-        {
+    private void on_incoming_packet(Packet packet) {
+        if (ready_state == ReadyState.OPEN) {
             // export packet event
             debug("Packet received %s %s", packet.type.to_string(), packet.str_data);
             packed_received(packet);
@@ -389,8 +359,7 @@ public class Socket : GLib.Object
             // Reset ping timeout on any packet, incoming data is a good sign of
             // other side's liveness
             set_ping_timeout();
-            switch (packet.type)
-            {
+            switch (packet.type) {
             case PacketType.PING:
                 debug("got ping");
                 send_packet(PacketType.PONG, null, false);
@@ -404,8 +373,7 @@ public class Socket : GLib.Object
                 break;
             }
         }
-        else
-        {
+        else {
             debug("packet received with closed socket");
         }
     }
@@ -417,29 +385,24 @@ public class Socket : GLib.Object
      * @api private
      */
 
-    private void on_error_occured(string err, string? desc)
-    {
+    private void on_error_occured(string err, string? desc) {
         debug("Error occurred: %s, %s.", err, desc);
         do_close(err, desc);
     }
 
-    private void on_closed()
-    {
+    private void on_closed() {
         detach_transport();
     }
 
-    private void detach_transport()
-    {
+    private void detach_transport() {
         //~         var cleanup;
         //~         while (cleanup = this.cleanupFn.shift()) cleanup();
         debug("Detaching transport %s", transport != null ? transport.sid : null);
-        if (ping_timeout_timer > 0)
-        {
+        if (ping_timeout_timer > 0) {
             Source.remove(ping_timeout_timer);
             ping_timeout_timer = 0;
         }
-        if (transport != null)
-        {
+        if (transport != null) {
             transport.error_occured.disconnect(on_error_occured);
             transport.incoming_packet.disconnect(on_incoming_packet);
             transport.closed.disconnect(on_closed);
@@ -455,8 +418,7 @@ public class Socket : GLib.Object
      * @api private
      */
 
-    private void on_draining(Transport transport)
-    {
+    private void on_draining(Transport transport) {
         flush();
         if (sent_callbacks != null)
         foreach (unowned SendAdaptor adaptor in sent_callbacks)
@@ -466,19 +428,16 @@ public class Socket : GLib.Object
 
 public delegate void SentCallback(Transport? transport);
 
-public class SendAdaptor
-{
+public class SendAdaptor {
     public SentCallback callback;
     public Transport? transport;
 
-    public SendAdaptor(owned SentCallback callback)
-    {
+    public SendAdaptor(owned SentCallback callback) {
         this.callback = (owned) callback;
         this.transport = null;
     }
 
-    public bool source_func()
-    {
+    public bool source_func() {
         callback(transport);
         return false;
     }

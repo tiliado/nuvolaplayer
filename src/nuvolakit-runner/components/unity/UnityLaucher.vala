@@ -28,16 +28,14 @@ namespace Nuvola {
 /**
  * Manages dock item at Unity Launcher
  */
-public class UnityLauncher: GLib.Object
-{
+public class UnityLauncher: GLib.Object {
     private Drtgtk.Application controller;
     private Drtgtk.Actions actions_reg;
     private Unity.LauncherEntry dock_item;
     private LauncherModel model;
     private SList<ActionAdaptor> adaptors = null;
 
-    public UnityLauncher(Drtgtk.Application controller, LauncherModel model)
-    {
+    public UnityLauncher(Drtgtk.Application controller, LauncherModel model) {
         this.controller = controller;
         this.actions_reg = controller.actions;
         this.model = model;
@@ -46,23 +44,19 @@ public class UnityLauncher: GLib.Object
         model.notify.connect_after(on_model_changed);
     }
 
-    ~UnityLauncher()
-    {
+    ~UnityLauncher() {
         remove_menu();
     }
 
-    private void on_model_changed(GLib.Object o, ParamSpec p)
-    {
-        switch (p.name)
-        {
+    private void on_model_changed(GLib.Object o, ParamSpec p) {
+        switch (p.name) {
         case "actions":
             update_menu();
             break;
         }
     }
 
-    private void clear_menu()
-    {
+    private void clear_menu() {
         if (dock_item == null || this.dock_item.quicklist == null)
         return;
 
@@ -71,25 +65,21 @@ public class UnityLauncher: GLib.Object
         menu.take_children();
     }
 
-    private void update_menu()
-    {
+    private void update_menu() {
         clear_menu();
         var menu = dock_item.quicklist;
-        foreach (var action_name in model.actions)
-        {
+        foreach (var action_name in model.actions) {
             var item = create_menu_item(action_name);
             if (item != null)
             menu.child_append(item);
         }
     }
 
-    private Dbusmenu.Menuitem? create_menu_item(string action_name)
-    {
+    private Dbusmenu.Menuitem? create_menu_item(string action_name) {
         string? detailed_name = null;
         Drtgtk.Action? action = null;
         Drtgtk.RadioOption? option = null;
-        if (!actions_reg.find_and_parse_action(action_name, out detailed_name, out action, out option))
-        {
+        if (!actions_reg.find_and_parse_action(action_name, out detailed_name, out action, out option)) {
             warning("Action '%s' not found in registry.", action_name);
             return null;
         }
@@ -97,14 +87,12 @@ public class UnityLauncher: GLib.Object
         string? label;
         string? icon;
         Variant? target;
-        if (option != null)
-        {
+        if (option != null) {
             label = option.label;
             icon = option.icon;
             target = option.parameter;
         }
-        else
-        {
+        else {
             label = action.label;
             icon = action.icon;
             target = null;
@@ -113,14 +101,12 @@ public class UnityLauncher: GLib.Object
         var item = new Dbusmenu.Menuitem();
         item.property_set(Dbusmenu.MENUITEM_PROP_LABEL, label);
         item.property_set_bool(Dbusmenu.MENUITEM_PROP_ENABLED, action.enabled);
-        if (action is Drtgtk.ToggleAction)
-        {
+        if (action is Drtgtk.ToggleAction) {
             item.property_set(Dbusmenu.MENUITEM_PROP_TOGGLE_TYPE, Dbusmenu.MENUITEM_TOGGLE_CHECK);
             item.property_set_int(Dbusmenu.MENUITEM_PROP_TOGGLE_STATE,
                 action.state.get_boolean() ? Dbusmenu.MENUITEM_TOGGLE_STATE_CHECKED : Dbusmenu.MENUITEM_TOGGLE_STATE_UNCHECKED);
         }
-        else if (action is Drtgtk.RadioAction)
-        {
+        else if (action is Drtgtk.RadioAction) {
             item.property_set(Dbusmenu.MENUITEM_PROP_TOGGLE_TYPE, Dbusmenu.MENUITEM_TOGGLE_RADIO);
             item.property_set_int(Dbusmenu.MENUITEM_PROP_TOGGLE_STATE,
                 action.state.equal(target) ? Dbusmenu.MENUITEM_TOGGLE_STATE_CHECKED : Dbusmenu.MENUITEM_TOGGLE_STATE_UNCHECKED);
@@ -131,24 +117,20 @@ public class UnityLauncher: GLib.Object
         return item;
     }
 
-    private void remove_menu()
-    {
-        if (dock_item != null && dock_item.quicklist != null)
-        {
+    private void remove_menu() {
+        if (dock_item != null && dock_item.quicklist != null) {
             clear_menu();
             dock_item.quicklist = null;
         }
     }
 }
 
-private class ActionAdaptor
-{
+private class ActionAdaptor {
     private Drtgtk.Action action;
     private Dbusmenu.Menuitem item;
     private Variant? parameter;
 
-    public ActionAdaptor(Drtgtk.Action action, Dbusmenu.Menuitem item, Variant? parameter)
-    {
+    public ActionAdaptor(Drtgtk.Action action, Dbusmenu.Menuitem item, Variant? parameter) {
         this.action = action;
         this.item = item;
         this.parameter = parameter;
@@ -156,28 +138,23 @@ private class ActionAdaptor
         action.notify.connect_after(on_action_changed);
     }
 
-    ~ActionAdaptor()
-    {
+    ~ActionAdaptor() {
         action.notify.disconnect(on_action_changed);
         item.item_activated.disconnect(on_activated);
     }
 
-    private void on_activated(uint timestamp)
-    {
+    private void on_activated(uint timestamp) {
         action.activate(parameter);
     }
 
-    private void on_action_changed(GLib.Object o, ParamSpec p)
-    {
-        switch (p.name)
-        {
+    private void on_action_changed(GLib.Object o, ParamSpec p) {
+        switch (p.name) {
         case "enabled":
             item.property_set_bool(Dbusmenu.MENUITEM_PROP_ENABLED, action.enabled);
             break;
         case "state":
             var state = action.state;
-            if (state != null)
-            {
+            if (state != null) {
                 if (state.is_of_type(VariantType.BOOLEAN))
                 item.property_set_int(Dbusmenu.MENUITEM_PROP_TOGGLE_STATE,
                     state.get_boolean() ? Dbusmenu.MENUITEM_TOGGLE_STATE_CHECKED : Dbusmenu.MENUITEM_TOGGLE_STATE_UNCHECKED);

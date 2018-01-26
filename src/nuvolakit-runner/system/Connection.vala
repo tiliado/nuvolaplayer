@@ -24,8 +24,7 @@
 
 namespace Nuvola {
 
-public class Connection : GLib.Object
-{
+public class Connection : GLib.Object {
     public const string PROXY_DIRECT = "direct://";
     private const string PROXY_TYPE_CONF = "webview.proxy.type";
     private const string PROXY_HOST_CONF = "webview.proxy.host";
@@ -36,8 +35,7 @@ public class Connection : GLib.Object
     public string? proxy_uri {get; private set; default = null;}
     private Config config;
 
-    public Connection(Soup.Session session, File cache_dir, Config config)
-    {
+    public Connection(Soup.Session session, File cache_dir, Config config) {
         Object(session: session, cache_dir: cache_dir);
         this.config = config;
         config.set_default_value(PROXY_TYPE_CONF, NetworkProxyType.SYSTEM.to_string());
@@ -46,8 +44,7 @@ public class Connection : GLib.Object
         apply_network_proxy();
     }
 
-    public async bool download_file(string uri, File local_file, out Soup.Message msg=null)
-    {
+    public async bool download_file(string uri, File local_file, out Soup.Message msg=null) {
         msg = new Soup.Message("GET", uri);
         SourceFunc resume = download_file.callback;
         session.queue_message(msg, (session, msg) => {resume();});
@@ -58,60 +55,48 @@ public class Connection : GLib.Object
 
         unowned Soup.MessageBody body = msg.response_body;
         var dir = local_file.get_parent();
-        if (!dir.query_exists(null))
-        {
-            try
-            {
+        if (!dir.query_exists(null)) {
+            try {
                 dir.make_directory_with_parents(null);
             }
-            catch (GLib.Error e)
-            {
+            catch (GLib.Error e) {
                 critical("Unable to create directory: %s", e.message);
             }
         }
 
         FileOutputStream stream;
-        try
-        {
+        try {
             stream = local_file.replace(null, false, FileCreateFlags.REPLACE_DESTINATION, null);
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             critical("Unable to create local file: %s", e.message);
             return false;
         }
 
-        try
-        {
+        try {
             stream.write_all(body.data, null, null);
         }
-        catch (IOError e)
-        {
+        catch (IOError e) {
             critical("Unable to store remote file: %s", e.message);
             return false;
         }
-        try
-        {
+        try {
             stream.close();
         }
-        catch (IOError e)
-        {
+        catch (IOError e) {
             warning("Unable to close stream: %s", e.message);
         }
         return true;
     }
 
-    private void apply_network_proxy()
-    {
+    private void apply_network_proxy() {
         string? host;
         int port;
         var type = get_network_proxy(out host, out port);
-        if (type != NetworkProxyType.SYSTEM)
-        {
+        if (type != NetworkProxyType.SYSTEM) {
             if (host == null || host == "")
             host = "127.0.0.1";
-            switch (type)
-            {
+            switch (type) {
             case NetworkProxyType.HTTP:
                 proxy_uri = "http://%s:%d/".printf(host, port);
                 break;
@@ -125,24 +110,21 @@ public class Connection : GLib.Object
             debug("Network Proxy: '%s'", proxy_uri);
             session.proxy_uri = new Soup.URI(proxy_uri);
         }
-        else
-        {
+        else {
             debug("Network Proxy: system settings");
             proxy_uri = null;
             session.add_feature_by_type(typeof(Soup.ProxyResolverDefault));
         }
     }
 
-    public void set_network_proxy(NetworkProxyType type, string? server, int port)
-    {
+    public void set_network_proxy(NetworkProxyType type, string? server, int port) {
         config.set_string(PROXY_TYPE_CONF, type.to_string());
         config.set_string(PROXY_HOST_CONF, server);
         config.set_int64(PROXY_PORT_CONF, (int64) port);
         apply_network_proxy();
     }
 
-    public NetworkProxyType get_network_proxy(out string? host, out int port)
-    {
+    public NetworkProxyType get_network_proxy(out string? host, out int port) {
         host = config.get_string(PROXY_HOST_CONF);
         port = (int) config.get_int64(PROXY_PORT_CONF);
         return NetworkProxyType.from_string(config.get_string(PROXY_TYPE_CONF));

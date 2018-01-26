@@ -24,8 +24,7 @@
 
 namespace Nuvola {
 
-public class TiliadoAccountWidget : Gtk.Grid
-{
+public class TiliadoAccountWidget : Gtk.Grid {
     public bool full_width {get; private set; default = true;}
     private Gtk.Orientation orientation;
     private Gtk.Button? activate_button;
@@ -39,8 +38,7 @@ public class TiliadoAccountWidget : Gtk.Grid
     private TiliadoApi2.User? current_user = null;
     private Drtgtk.Application app;
 
-    public TiliadoAccountWidget(TiliadoActivation activation, Drtgtk.Application app, Gtk.Orientation orientation)
-    {
+    public TiliadoAccountWidget(TiliadoActivation activation, Drtgtk.Application app, Gtk.Orientation orientation) {
         this.activation = activation;
         this.app = app;
         this.orientation = orientation;
@@ -57,16 +55,14 @@ public class TiliadoAccountWidget : Gtk.Grid
         activation.activation_cancelled.connect(on_activation_cancelled);
         activation.activation_finished.connect(on_activation_finished);
         current_user = activation.get_user_info();
-        if (current_user == null)
-        {
+        if (current_user == null) {
             get_token();
         }
         else
         check_user();
     }
 
-    ~TiliadoAccountWidget()
-    {
+    ~TiliadoAccountWidget() {
         activation.user_info_updated.disconnect(on_user_info_updated);
         activation.activation_started.disconnect(on_activation_started);
         activation.activation_failed.disconnect(on_activation_failed);
@@ -74,8 +70,7 @@ public class TiliadoAccountWidget : Gtk.Grid
         activation.activation_finished.disconnect(on_activation_finished);
     }
 
-    private void show_premium_required()
-    {
+    private void show_premium_required() {
         var label = new Gtk.Label(null);
         label.hexpand = true;
         label.set_markup(
@@ -87,8 +82,7 @@ public class TiliadoAccountWidget : Gtk.Grid
         attach(label, 0, 0, 2, 1);
     }
 
-    private void get_token()
-    {
+    private void get_token() {
         clear_all();
         show_premium_required();
 
@@ -117,45 +111,37 @@ public class TiliadoAccountWidget : Gtk.Grid
         show_all();
     }
 
-    private void clear_status_row()
-    {
-        if (cancel_button != null)
-        {
+    private void clear_status_row() {
+        if (cancel_button != null) {
             cancel_button.clicked.disconnect(on_cancel_button_clicked);
             remove(cancel_button);
             cancel_button = null;
         }
-        if (status_label != null)
-        {
+        if (status_label != null) {
             remove(status_label);
             status_label = null;
         }
     }
 
-    private void clear_all()
-    {
+    private void clear_all() {
         this.full_width = true;
         clear_status_row();
-        if (plan_button != null)
-        {
+        if (plan_button != null) {
             plan_button.clicked.disconnect(on_plan_button_clicked);
             button_box.remove(plan_button);
             plan_button = null;
         }
-        if (activate_button != null)
-        {
+        if (activate_button != null) {
             activate_button.clicked.disconnect(on_activate_button_clicked);
             button_box.remove(activate_button);
             activate_button = null;
         }
-        if (free_button != null)
-        {
+        if (free_button != null) {
             free_button.clicked.disconnect(on_free_button_clicked);
             button_box.remove(free_button);
             free_button = null;
         }
-        if (logout_button != null)
-        {
+        if (logout_button != null) {
             logout_button.clicked.disconnect(on_logout_button_clicked);
             button_box.remove(logout_button);
             logout_button = null;
@@ -164,8 +150,7 @@ public class TiliadoAccountWidget : Gtk.Grid
         remove(child);
     }
 
-    private void on_activate_button_clicked(Gtk.Button button)
-    {
+    private void on_activate_button_clicked(Gtk.Button button) {
         activate_button.sensitive = false;
         if (status_label != null)
         remove(status_label);
@@ -189,35 +174,29 @@ public class TiliadoAccountWidget : Gtk.Grid
         activation.start_activation();
     }
 
-    private void on_free_button_clicked(Gtk.Button button)
-    {
+    private void on_free_button_clicked(Gtk.Button button) {
         app.show_uri("https://tiliado.github.io/nuvolaplayer/documentation/3.0/install.html");
     }
 
-    private void on_plan_button_clicked(Gtk.Button button)
-    {
+    private void on_plan_button_clicked(Gtk.Button button) {
         app.show_uri("https://tiliado.eu/nuvolaplayer/funding/");
     }
 
-    private void on_cancel_button_clicked(Gtk.Button button)
-    {
+    private void on_cancel_button_clicked(Gtk.Button button) {
         activation.cancel_activation();
     }
 
-    private void on_logout_button_clicked(Gtk.Button button)
-    {
+    private void on_logout_button_clicked(Gtk.Button button) {
         activation.drop_activation();
         get_token();
     }
 
-    private void on_activation_started(string uri)
-    {
+    private void on_activation_started(string uri) {
         if (activate_button != null && !activate_button.sensitive)
         app.show_uri(uri);
     }
 
-    private void on_activation_failed(string message)
-    {
+    private void on_activation_failed(string message) {
         activate_button.sensitive = true;
         clear_status_row();
         status_label = new Gtk.Label(null);
@@ -229,29 +208,24 @@ public class TiliadoAccountWidget : Gtk.Grid
         attach(status_label, 0, 3, 4, 1);
     }
 
-    private void on_activation_cancelled()
-    {
+    private void on_activation_cancelled() {
         activate_button.sensitive = true;
         clear_status_row();
     }
 
-    private void on_activation_finished(TiliadoApi2.User? user)
-    {
+    private void on_activation_finished(TiliadoApi2.User? user) {
         this.current_user = user;
         check_user();
     }
 
-    private void on_user_info_updated(TiliadoApi2.User? user)
-    {
+    private void on_user_info_updated(TiliadoApi2.User? user) {
         this.current_user = user;
         check_user();
     }
 
-    private void check_user()
-    {
+    private void check_user() {
         var user = this.current_user;
-        if (user == null)
-        {
+        if (user == null) {
             get_token();
             return;
         }
@@ -264,8 +238,7 @@ public class TiliadoAccountWidget : Gtk.Grid
         logout_button.valign = Gtk.Align.CENTER;
         logout_button.clicked.connect(on_logout_button_clicked);
 
-        if (user.membership < TiliadoMembership.BASIC)
-        {
+        if (user.membership < TiliadoMembership.BASIC) {
             show_premium_required();
             plan_button = new Gtk.Button.with_label("Get Premium");
             plan_button.hexpand = false;
@@ -287,8 +260,7 @@ public class TiliadoAccountWidget : Gtk.Grid
             button_box.halign = Gtk.Align.CENTER;
             attach(button_box, 0, 1, 2, 1);
         }
-        else
-        {
+        else {
             var label = new Gtk.Label(user.name);
             label.max_width_chars = 15;
             label.ellipsize = Pango.EllipsizeMode.END;
@@ -319,10 +291,8 @@ public class TiliadoAccountWidget : Gtk.Grid
 }
 
 
-public class AccountTypeLabel : Gtk.Label
-{
-    public AccountTypeLabel(TiliadoMembership membership)
-    {
+public class AccountTypeLabel : Gtk.Label {
+    public AccountTypeLabel(TiliadoMembership membership) {
         GLib.Object(
             label: membership.get_label(),
             halign: Gtk.Align.CENTER, valign: Gtk.Align.CENTER);
@@ -333,10 +303,8 @@ public class AccountTypeLabel : Gtk.Label
 }
 
 
-public class AccountTypeButton : Gtk.Button
-{
-    public AccountTypeButton(TiliadoMembership membership)
-    {
+public class AccountTypeButton : Gtk.Button {
+    public AccountTypeButton(TiliadoMembership membership) {
         GLib.Object();
         var label = new Gtk.Label(membership.get_label());
         label.hexpand = true;

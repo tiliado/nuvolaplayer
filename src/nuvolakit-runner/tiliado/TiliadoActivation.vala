@@ -24,14 +24,12 @@
 
 namespace Nuvola {
 
-public interface TiliadoActivation : GLib.Object
-{
+public interface TiliadoActivation : GLib.Object {
     public signal void user_info_updated(TiliadoApi2.User? user);
 
     public signal void activation_started(string url);
 
-    public virtual signal void activation_failed(string error)
-    {
+    public virtual signal void activation_failed(string error) {
         warning("Tiliado Activation failed: %s", error);
     }
 
@@ -43,20 +41,17 @@ public interface TiliadoActivation : GLib.Object
 
     public abstract void update_user_info();
 
-    public virtual TiliadoApi2.User? update_user_info_sync()
-    {
+    public virtual TiliadoApi2.User? update_user_info_sync() {
         return update_user_info_sync_internal();
     }
 
-    protected TiliadoApi2.User? update_user_info_sync_internal()
-    {
+    protected TiliadoApi2.User? update_user_info_sync_internal() {
         TiliadoApi2.User? user = null;
         var loop = new MainLoop();
-        var handler_id = user_info_updated.connect((o, u) =>
-            {
-                user = u;
-                loop.quit();
-            });
+        var handler_id = user_info_updated.connect((o, u) => {
+            user = u;
+            loop.quit();
+        });
         update_user_info();
         loop.run();
         disconnect(handler_id);
@@ -69,8 +64,7 @@ public interface TiliadoActivation : GLib.Object
 
     public abstract void drop_activation();
 
-    public bool has_user_membership(TiliadoMembership membership)
-    {
+    public bool has_user_membership(TiliadoMembership membership) {
         var user = get_user_info();
         if (user == null)
         return TiliadoMembership.NONE == membership;

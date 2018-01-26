@@ -25,14 +25,12 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-namespace Engineio
-{
+namespace Engineio {
 
 
 public delegate void OnCloseCallback();
 
-public abstract class PollingTransport: Transport
-{
+public abstract class PollingTransport: Transport {
     private int close_timeout;
     public int max_http_buffer_size {get; set;}
     private Request? poll_request = null;
@@ -44,16 +42,14 @@ public abstract class PollingTransport: Transport
     private OnCloseCallback on_close_callback = null;
 
 
-    public static PollingTransport new_for_request(Request request)
-    {
+    public static PollingTransport new_for_request(Request request) {
         if (request.jsonp_index < 0)
         return new XhrTransport(request);
         else
         return new JsonpTransport(request);
     }
 
-    public PollingTransport(Request request)
-    {
+    public PollingTransport(Request request) {
         base(request);
         this.name = "polling";
         this.close_timeout = 30 * 1000;
@@ -61,27 +57,21 @@ public abstract class PollingTransport: Transport
         headers_requested.connect(on_headers_requested);
     }
 
-    public override async void handle_request(Request request, Response response)
-    {
-        if (request.method == "GET")
-        {
+    public override async void handle_request(Request request, Response response) {
+        if (request.method == "GET") {
             yield handle_poll_request(request, response);
         }
-        else if (request.method == "POST")
-        {
+        else if (request.method == "POST") {
             yield handle_data_request(request, response);
         }
-        else
-        {
+        else {
             response.status_code = 500;
             response.end();
         }
     }
 
-    private async void handle_poll_request(Request request, Response response)
-    {
-        if (this.poll_request != null)
-        {
+    private async void handle_poll_request(Request request, Response response) {
+        if (this.poll_request != null) {
             debug("Concurrent poll request discarded.");
             response.status_code = 500;
             response.end(null);
@@ -95,19 +85,16 @@ public abstract class PollingTransport: Transport
         writable = true;
         draining();
 
-        if (writable && should_close)
-        {
+        if (writable && should_close) {
             debug("Triggering empty send to append close packet");
             send_one(new Packet(PacketType.NOOP, null, null));
         }
     }
 
-    private void on_poll_request_finished(Soup.Message msg)
-    {
+    private void on_poll_request_finished(Soup.Message msg) {
         msg.finished.disconnect(on_poll_request_finished);
         writable = false;
-        if (writable == true)
-        {
+        if (writable == true) {
             writable = false;
             discarded = true;
             close_transport(null);
@@ -116,10 +103,8 @@ public abstract class PollingTransport: Transport
         this.poll_response = null;
     }
 
-    private async void handle_data_request(Request request, Response response)
-    {
-        if (this.data_request != null)
-        {
+    private async void handle_data_request(Request request, Response response) {
+        if (this.data_request != null) {
             debug("Concurrent data request discarded.");
             response.status_code = 500;
             response.end();
@@ -130,8 +115,7 @@ public abstract class PollingTransport: Transport
         this.data_request = request;
         this.data_response = response;
 
-        if (request.get_content_length() > max_http_buffer_size)
-        {
+        if (request.get_content_length() > max_http_buffer_size) {
             debug("Data request too big.");
             this.data_request = null;
             this.data_response = null;
@@ -145,8 +129,7 @@ public abstract class PollingTransport: Transport
         else
         yield handle_incoming_data(request.get_data_as_string(), null);
 
-        if (this.data_response != null)
-        {
+        if (this.data_response != null) {
             response.status_code = 200;
             response.headers["Content-Type"] = "text/html";
             response.headers["Content-Length"] = "2";
@@ -165,17 +148,13 @@ public abstract class PollingTransport: Transport
      * @api private
      */
 
-    protected override async void handle_incoming_data(owned string? string_payload, Bytes? binary_payload)
-    {
+    protected override async void handle_incoming_data(owned string? string_payload, Bytes? binary_payload) {
         debug("Received payload: string:'%s', bytes:len(%d)", string_payload, binary_payload == null ? 0 : binary_payload.length);
         var decoder = new Parser.PayloadDecoder((owned) string_payload, binary_payload);
-        try
-        {
+        try {
             Packet? packet = null;
-            while (decoder.next(out packet))
-            {
-                if (packet.type == PacketType.CLOSE)
-                {
+            while (decoder.next(out packet)) {
+                if (packet.type == PacketType.CLOSE) {
                     debug("Received polling close packet");
                     on_close();
                     break;
@@ -183,36 +162,29 @@ public abstract class PollingTransport: Transport
                 yield handle_incoming_packet(packet);
             }
         }
-        catch (Parser.Error e)
-        {
+        catch (Parser.Error e) {
             handle_decode_error(e);
         }
     }
 
-    protected override void on_close()
-    {
-        if (writable)
-        {
+    protected override void on_close() {
+        if (writable) {
             // close pending poll request
             send_one(new Packet(PacketType.NOOP, null, null));
         }
         base.on_close();
     }
 
-    public override void send(owned SList<Packet> packets)
-    {
+    public override void send(owned SList<Packet> packets) {
         writable = false;
-        if (should_close)
-        {
+        if (should_close) {
             debug("Appending close packet to payload.");
             packets.append(new Packet(PacketType.CLOSE, null, null));
-            if (close_timeout_id > 0)
-            {
+            if (close_timeout_id > 0) {
                 GLib.Source.remove(close_timeout_id);
                 close_timeout_id = 0;
             }
-            if (on_close_callback != null)
-            {
+            if (on_close_callback != null) {
                 on_close_callback();
                 on_close_callback = null;
             }
@@ -221,13 +193,11 @@ public abstract class PollingTransport: Transport
 
         var payload = Parser.encode_payload(packets);
         // TODO: this.supports_binary = > encode_payload_as_bytes
-        if (payload != null)
-        {
+        if (payload != null) {
             var compress = false;
             write(payload, compress);
         }
-        else
-        {
+        else {
             writable = true;
         }
     }
@@ -240,8 +210,7 @@ public abstract class PollingTransport: Transport
      * @api private
      */
 
-    private void write(string data, bool compress=false)
-    {
+    private void write(string data, bool compress=false) {
         debug("Writing '%s'", data);
         do_write(data, null, compress);
         this.poll_request = null;
@@ -255,8 +224,7 @@ public abstract class PollingTransport: Transport
      * @api private
      */
 
-    protected virtual void do_write(owned string? str_data, Bytes? bin_data, bool compress)
-    {
+    protected virtual void do_write(owned string? str_data, Bytes? bin_data, bool compress) {
         var is_string = str_data != null;
         var content_type = is_string
         ? "text/plain; charset=UTF-8"
@@ -264,8 +232,7 @@ public abstract class PollingTransport: Transport
 
         poll_response.headers["Content-Type"] = content_type;
 
-        if (!http_compression || !compress)
-        {
+        if (!http_compression || !compress) {
             poll_response.headers["Content-Length"] = (is_string ? str_data.length : bin_data.length).to_string();
             poll_response.status_code = 200;
             if (is_string)
@@ -285,11 +252,9 @@ public abstract class PollingTransport: Transport
      * @api private
      */
 
-    protected override void close_transport(owned CloseCallback? callback)
-    {
+    protected override void close_transport(owned CloseCallback? callback) {
         message("Closing");
-        if (data_request != null)
-        {
+        if (data_request != null) {
             message("Aborting ongoing data request");
             data_response.status_code = 500;
             data_response.end();
@@ -297,35 +262,30 @@ public abstract class PollingTransport: Transport
             data_response = null;
         }
 
-        if (writable)
-        {
+        if (writable) {
             message("Transport writable - closing right away");
             send_one(new Packet(PacketType.CLOSE, null, null));
             if (callback != null)
             callback();
             on_close();
         }
-        else if (discarded)
-        {
+        else if (discarded) {
             message("transport discarded - closing right away");
             if (callback != null)
             callback();
             on_close();
         }
-        else
-        {
+        else {
             debug("transport not writable - buffering orderly close");
             this.should_close = true;
             close_timeout_id = Timeout.add(close_timeout, close_timeout_cb);
         }
     }
 
-    private bool close_timeout_cb()
-    {
+    private bool close_timeout_cb() {
         close_timeout_id = 0;
 
-        if (on_close_callback != null)
-        {
+        if (on_close_callback != null) {
             on_close_callback();
             on_close_callback = null;
         }
@@ -333,13 +293,11 @@ public abstract class PollingTransport: Transport
         return false;
     }
 
-    protected virtual void on_headers_requested(Request request, HashTable<string, string> headers)
-    {
+    protected virtual void on_headers_requested(Request request, HashTable<string, string> headers) {
         // prevent XSS warnings on IE
         // https://github.com/LearnBoost/socket.io/pull/1333
         var ua = request.headers.get_one("user-agent");
-        if (ua != null && ((";MSIE" in ua) || ("Trident/" in ua)))
-        {
+        if (ua != null && ((";MSIE" in ua) || ("Trident/" in ua))) {
             headers["X-XSS-Protection"] = "0";
         }
     }

@@ -22,11 +22,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
-public class KeybindingsSettings : Gtk.Grid
-{
+public class KeybindingsSettings : Gtk.Grid {
     private Drtgtk.Actions actions_reg;
     private Config config;
     private ActionsKeyBinder global_keybindings;
@@ -40,8 +38,7 @@ public class KeybindingsSettings : Gtk.Grid
      *
      * @param app Application object
      */
-    public KeybindingsSettings(Drtgtk.Actions actions_reg, Config config, ActionsKeyBinder? global_keybindings)
-    {
+    public KeybindingsSettings(Drtgtk.Actions actions_reg, Config config, ActionsKeyBinder? global_keybindings) {
 
         this.actions_reg = actions_reg;
         this.config = config;
@@ -77,8 +74,7 @@ public class KeybindingsSettings : Gtk.Grid
             6, typeof(string), typeof(string), typeof(uint),
             typeof(Gdk.ModifierType), typeof(uint), typeof(Gdk.ModifierType));
         Gtk.TreeIter iter;
-        foreach (var action in actions_reg.list_actions())
-        {
+        foreach (var action in actions_reg.list_actions()) {
             var label = action.label;
             if (action is Drtgtk.RadioAction || label == null)
             continue;
@@ -86,12 +82,10 @@ public class KeybindingsSettings : Gtk.Grid
             var keybinding = action.keybinding;
             uint accel_key;
             Gdk.ModifierType accel_mods;
-            if (keybinding != null)
-            {
+            if (keybinding != null) {
                 Gtk.accelerator_parse(keybinding, out accel_key, out accel_mods);
             }
-            else
-            {
+            else {
                 accel_key = 0;
                 accel_mods = 0;
             }
@@ -99,12 +93,10 @@ public class KeybindingsSettings : Gtk.Grid
             keybinding = global_keybindings != null ? global_keybindings.get_keybinding(action.name) : null;
             uint glob_accel_key;
             Gdk.ModifierType glob_accel_mods;
-            if (keybinding != null)
-            {
+            if (keybinding != null) {
                 Gtk.accelerator_parse(keybinding, out glob_accel_key, out glob_accel_mods);
             }
-            else
-            {
+            else {
                 glob_accel_key = 0;
                 glob_accel_mods = 0;
             }
@@ -139,8 +131,7 @@ public class KeybindingsSettings : Gtk.Grid
         view.show();
     }
 
-    private void on_accel_edited(string path_string, uint accel_key, Gdk.ModifierType accel_mods, uint hardware_keycode)
-    {
+    private void on_accel_edited(string path_string, uint accel_key, Gdk.ModifierType accel_mods, uint hardware_keycode) {
         var keybinding = Gtk.accelerator_name(accel_key, accel_mods);
         var path = new Gtk.TreePath.from_string(path_string);
         Gtk.TreeIter iter;
@@ -155,8 +146,7 @@ public class KeybindingsSettings : Gtk.Grid
         action.keybinding = keybinding;
     }
 
-    private void on_accel_cleared(string path_string)
-    {
+    private void on_accel_cleared(string path_string) {
         var path = new Gtk.TreePath.from_string(path_string);
         Gtk.TreeIter iter;
         model.get_iter(out iter, path);
@@ -169,8 +159,7 @@ public class KeybindingsSettings : Gtk.Grid
         action.keybinding = null;
     }
 
-    private void on_glob_accel_edited(string path_string, uint accel_key, Gdk.ModifierType accel_mods, uint hardware_keycode)
-    {
+    private void on_glob_accel_edited(string path_string, uint accel_key, Gdk.ModifierType accel_mods, uint hardware_keycode) {
         assert(global_keybindings != null);
         var keybinding = Gtk.accelerator_name(accel_key, accel_mods);
         var path = new Gtk.TreePath.from_string(path_string);
@@ -181,13 +170,11 @@ public class KeybindingsSettings : Gtk.Grid
         message("nuvola.global_keybindings.%s %s", name, Gtk.accelerator_name(accel_key, accel_mods));
 
 
-        if (global_keybindings.set_keybinding(name, keybinding))
-        {
+        if (global_keybindings.set_keybinding(name, keybinding)) {
             model.set(iter, 4, accel_key, 5, accel_mods, -1);
             set_error(null);
         }
-        else
-        {
+        else {
             model.set(iter, 4, 0, 5, 0, -1);
             set_error(
                 ("Failed to set keybinding '%s'. Make sure it is not already used by your system or other"
@@ -195,8 +182,7 @@ public class KeybindingsSettings : Gtk.Grid
         }
     }
 
-    private void on_glob_accel_cleared(string path_string)
-    {
+    private void on_glob_accel_cleared(string path_string) {
         assert(global_keybindings != null);
         var path = new Gtk.TreePath.from_string(path_string);
         Gtk.TreeIter iter;
@@ -208,15 +194,12 @@ public class KeybindingsSettings : Gtk.Grid
         set_error(null);
     }
 
-    private void set_error(string? error)
-    {
-        if (error != null)
-        {
+    private void set_error(string? error) {
+        if (error != null) {
             error_label.label = error;
             info_bar.show();
         }
-        else
-        {
+        else {
             info_bar.hide();
         }
     }

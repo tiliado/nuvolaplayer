@@ -24,17 +24,13 @@
 
 namespace Nuvola {
 
-public class AppCategoriesView : Gtk.TreeView
-{
+public class AppCategoriesView : Gtk.TreeView {
     private string? _category = null;
     private bool internal_category_change = false;
-    public string? category
-    {
+    public string? category {
         get {return _category;}
-        set
-        {
-            if (value != _category)
-            {
+        set {
+            if (value != _category) {
                 _category = value;
                 if (!internal_category_change)
                 select_category(_category);
@@ -42,21 +38,18 @@ public class AppCategoriesView : Gtk.TreeView
         }
     }
 
-    public AppCategoriesView(string? selected_category=null)
-    {
+    public AppCategoriesView(string? selected_category=null) {
         Object(headers_visible: false);
         var model = new Gtk.ListStore(2, typeof(string), typeof(string));
         var categories = Nuvola.get_desktop_categories();
-        categories.for_each((key, name) =>
-            {
-                Gtk.TreeIter iter;
-                // Audio and Video apps are is common category AudioVideo
-                if (key != "Audio" && key != "Video")
-                {
-                    model.append(out iter);
-                    model.set(iter, 0, key, 1, name);
-                }
-            });
+        categories.for_each((key, name) => {
+            Gtk.TreeIter iter;
+            // Audio and Video apps are is common category AudioVideo
+            if (key != "Audio" && key != "Video") {
+                model.append(out iter);
+                model.set(iter, 0, key, 1, name);
+            }
+        });
 
         model.set_sort_column_id(1, Gtk.SortType.ASCENDING); // Sort by name
         model.set_sort_column_id(-2, Gtk.SortType.ASCENDING); // Disable sorting
@@ -78,25 +71,21 @@ public class AppCategoriesView : Gtk.TreeView
         selection.changed.connect(on_selection_changed);
     }
 
-    private void select_category(string? category)
-    {
+    private void select_category(string? category) {
         internal_category_change = true;
-        model.foreach((model, path, iter) =>
-            {
-                string? iter_category;
-                model.get(iter, 0, out iter_category, -1);
-                if (category == iter_category)
-                {
-                    get_selection().select_iter(iter);
-                    return true;
-                }
-                return false;
-            });
+        model.foreach((model, path, iter) => {
+            string? iter_category;
+            model.get(iter, 0, out iter_category, -1);
+            if (category == iter_category) {
+                get_selection().select_iter(iter);
+                return true;
+            }
+            return false;
+        });
         internal_category_change = false;
     }
 
-    private void on_selection_changed(Gtk.TreeSelection selection)
-    {
+    private void on_selection_changed(Gtk.TreeSelection selection) {
         if (internal_category_change)
         return;
         Gtk.TreeModel model;
@@ -105,8 +94,7 @@ public class AppCategoriesView : Gtk.TreeView
         if (selection.get_selected(out model, out iter))
         model.get(iter, 0, &category, -1);
 
-        if (this.category != category)
-        {
+        if (this.category != category) {
             internal_category_change = true;
             this.category = (owned) category;
             internal_category_change = false;

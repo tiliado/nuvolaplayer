@@ -24,16 +24,14 @@
 
 namespace Nuvola {
 
-public class WebWindow: Gtk.Window
-{
+public class WebWindow: Gtk.Window {
     private const int MINIMAL_WIDTH = 100;
     private const int MINIMAL_HEIGHT = 100;
     private const int INITIAL_WIDTH = 800;
     private const int INITIAL_HEIGHT = 600;
     private weak WebKit.WebView web_view;
 
-    public WebWindow(WebKit.WebView web_view)
-    {
+    public WebWindow(WebKit.WebView web_view) {
         this.web_view = web_view;
         add(web_view);
         web_view.ready_to_show.connect(on_ready_to_show);
@@ -41,17 +39,14 @@ public class WebWindow: Gtk.Window
         web_view.notify["title"].connect_after(on_title_changed);
     }
 
-    private void on_ready_to_show()
-    {
+    private void on_ready_to_show() {
         var properties = web_view.get_window_properties();
         var geom = properties.geometry;
-        if (geom.width < MINIMAL_WIDTH || geom.height < MINIMAL_HEIGHT)
-        {
+        if (geom.width < MINIMAL_WIDTH || geom.height < MINIMAL_HEIGHT) {
             set_default_size(int.max(INITIAL_WIDTH, geom.width), int.max(INITIAL_HEIGHT, geom.height));
             maximize();
         }
-        else
-        {
+        else {
             move(geom.x, geom.y);
             set_default_size(geom.width, geom.height);
             if (properties.fullscreen)
@@ -61,14 +56,12 @@ public class WebWindow: Gtk.Window
         present();
     }
 
-    private void on_close()
-    {
+    private void on_close() {
         hide();
         destroy();
     }
 
-    private void on_title_changed(GLib.Object o, ParamSpec p)
-    {
+    private void on_title_changed(GLib.Object o, ParamSpec p) {
         title = web_view.title;
     }
 }

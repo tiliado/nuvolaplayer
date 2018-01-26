@@ -22,11 +22,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
-public class AudioScrobblerComponent: Component
-{
+public class AudioScrobblerComponent: Component {
     private const int SCROBBLE_SONG_DELAY = 60;
 
     private Bindings bindings;
@@ -44,8 +42,7 @@ public class AudioScrobblerComponent: Component
     private uint track_info_cb_id = 0;
 
     public AudioScrobblerComponent(
-        Drtgtk.Application app, Bindings bindings, Drt.KeyValueStorage global_config, Drt.KeyValueStorage config, Soup.Session connection)
-    {
+        Drtgtk.Application app, Bindings bindings, Drt.KeyValueStorage global_config, Drt.KeyValueStorage config, Soup.Session connection) {
         base("scrobbler", "Audio Scrobbler Services", "Integration with audio scrobbling services like Last FM and Libre FM.");
         this.bindings = bindings;
         this.app = app;
@@ -57,8 +54,7 @@ public class AudioScrobblerComponent: Component
         auto_activate = false;
     }
 
-    public override Gtk.Widget? get_settings()
-    {
+    public override Gtk.Widget? get_settings() {
         if (scrobbler == null)
         return null;
 
@@ -76,8 +72,7 @@ public class AudioScrobblerComponent: Component
         return grid;
     }
 
-    protected override bool activate()
-    {
+    protected override bool activate() {
         var scrobbler = new LastfmScrobbler(connection);
         this.scrobbler = scrobbler;
         var base_key = "component.%s.%s.".printf(id, scrobbler.id);
@@ -94,8 +89,7 @@ public class AudioScrobblerComponent: Component
         return true;
     }
 
-    protected override bool deactivate()
-    {
+    protected override bool deactivate() {
         scrobbler.notify.disconnect(on_scrobbler_notify);
         scrobbler = null;
         player.set_track_info.disconnect(on_set_track_info);
@@ -108,12 +102,9 @@ public class AudioScrobblerComponent: Component
         return true;
     }
 
-    private void schedule_scrobbling(string? title, string? artist, string? album, string? state)
-    {
-        if (scrobble_timeout == 0 && title != null && artist != null && state == "playing")
-        {
-            if (scrobble_title != title || scrobble_artist != artist)
-            {
+    private void schedule_scrobbling(string? title, string? artist, string? album, string? state) {
+        if (scrobble_timeout == 0 && title != null && artist != null && state == "playing") {
+            if (scrobble_title != title || scrobble_artist != artist) {
                 scrobble_title = title;
                 scrobble_artist = artist;
                 scrobble_album = album;
@@ -125,24 +116,19 @@ public class AudioScrobblerComponent: Component
         }
     }
 
-    private void cancel_scrobbling()
-    {
-        if (scrobble_timeout != 0)
-        {
+    private void cancel_scrobbling() {
+        if (scrobble_timeout != 0) {
             Source.remove(scrobble_timeout);
             scrobble_timeout = 0;
         }
     }
 
-    private void on_scrobbler_notify(GLib.Object o, ParamSpec p)
-    {
+    private void on_scrobbler_notify(GLib.Object o, ParamSpec p) {
         var scrobbler = o as AudioScrobbler;
         return_if_fail(scrobbler != null);
-        switch (p.name)
-        {
+        switch (p.name) {
         case "can-update-now-playing":
-            if (scrobbler.can_update_now_playing)
-            {
+            if (scrobbler.can_update_now_playing) {
                 if (player.title != null && player.artist != null && player.state == "playing")
                 scrobbler.update_now_playing.begin(player.title, player.artist, on_update_now_playing_done);
             }
@@ -157,42 +143,35 @@ public class AudioScrobblerComponent: Component
     }
 
     private void on_set_track_info(
-        string? title, string? artist, string? album, string? state)
-    {
+        string? title, string? artist, string? album, string? state) {
 
-        if (track_info_cb_id != 0)
-        {
+        if (track_info_cb_id != 0) {
             Source.remove(track_info_cb_id);
             track_info_cb_id = 0;
         }
 
-        track_info_cb_id = Timeout.add_seconds(1, () =>
-            {
-                track_info_cb_id = 0;
-                if (scrobbler.can_update_now_playing)
-                {
-                    if (title != null && artist != null && state == "playing" )
-                    scrobbler.update_now_playing.begin(title, artist, on_update_now_playing_done);
-                }
+        track_info_cb_id = Timeout.add_seconds(1, () => {
+            track_info_cb_id = 0;
+            if (scrobbler.can_update_now_playing) {
+                if (title != null && artist != null && state == "playing" )
+                scrobbler.update_now_playing.begin(title, artist, on_update_now_playing_done);
+            }
 
-                cancel_scrobbling();
+            cancel_scrobbling();
 
-                if (scrobbler.can_scrobble)
-                schedule_scrobbling(title, artist, album, state);
-                return false;
-            });
+            if (scrobbler.can_scrobble)
+            schedule_scrobbling(title, artist, album, state);
+            return false;
+        });
     }
 
-    private void on_update_now_playing_done(GLib.Object? o, AsyncResult res)
-    {
+    private void on_update_now_playing_done(GLib.Object? o, AsyncResult res) {
         var scrobbler = o as AudioScrobbler;
         return_if_fail(scrobbler != null);
-        try
-        {
+        try {
             scrobbler.update_now_playing.end(res);
         }
-        catch (AudioScrobblerError e)
-        {
+        catch (AudioScrobblerError e) {
             warning("Update now playing failed for %s (%s): %s", scrobbler.name, scrobbler.id, e.message);
             app.show_warning(
                 "%s Error".printf(scrobbler.name),
@@ -201,11 +180,9 @@ public class AudioScrobblerComponent: Component
         }
     }
 
-    private bool scrobble_cb()
-    {
+    private bool scrobble_cb() {
         scrobble_timeout = 0;
-        if (scrobbler.can_scrobble)
-        {
+        if (scrobbler.can_scrobble) {
             scrobbled = true;
             var datetime = new DateTime.now_utc();
             scrobbler.scrobble_track.begin(
@@ -214,16 +191,13 @@ public class AudioScrobblerComponent: Component
         return false;
     }
 
-    private void on_scrobble_track_done(GLib.Object? o, AsyncResult res)
-    {
+    private void on_scrobble_track_done(GLib.Object? o, AsyncResult res) {
         var scrobbler = o as AudioScrobbler;
         return_if_fail(scrobbler != null);
-        try
-        {
+        try {
             scrobbler.scrobble_track.end(res);
         }
-        catch (AudioScrobblerError e)
-        {
+        catch (AudioScrobblerError e) {
             warning("Scrobbling failed for %s (%s): %s", scrobbler.name, scrobbler.id, e.message);
             app.show_warning(
                 "%s Error".printf(scrobbler.name),

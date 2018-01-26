@@ -25,49 +25,40 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-namespace Engineio
-{
+namespace Engineio {
 
-public class JsonpTransport: PollingTransport
-{
+public class JsonpTransport: PollingTransport {
     private static Regex newlines = /(\\{2,4})n/;
     private string head;
     private string foot;
 
-    public JsonpTransport(Request request)
-    {
+    public JsonpTransport(Request request) {
         base(request);
         head = "___eio[%s](".printf(request.jsonp_index >= 0 ? request.jsonp_index.to_string() :  "");
         foot = ");";
     }
 
-    protected override async void handle_incoming_data(owned string? string_payload, Bytes? binary_payload)
-    {
-        if (string_payload != null)
-        {
+    protected override async void handle_incoming_data(owned string? string_payload, Bytes? binary_payload) {
+        if (string_payload != null) {
             string_payload = Soup.Form.decode(string_payload)["d"];
             //if ('string' == typeof data) {
             //client will send already escaped newlines as \\\\n and newlines as \\n
             // \\n must be replaced with \n and \\\\n with \\n
 
-            try
-            {
-                string_payload = newlines.replace_eval(string_payload, -1, 0, 0, (match, result) =>
-                    {
-                        result.append(match.fetch(1) == "\\\\" ? "\\" : "\\\\");
-                        return false;
-                    });
+            try {
+                string_payload = newlines.replace_eval(string_payload, -1, 0, 0, (match, result) => {
+                    result.append(match.fetch(1) == "\\\\" ? "\\" : "\\\\");
+                    return false;
+                });
             }
-            catch (RegexError e)
-            {
+            catch (RegexError e) {
                 critical("RegexError %s", e.message);
             }
         }
         yield base.handle_incoming_data((owned) string_payload, binary_payload);
     }
 
-    protected override void do_write(owned string? data, Bytes? bin_data, bool compress)
-    {
+    protected override void do_write(owned string? data, Bytes? bin_data, bool compress) {
         // we must output valid javascript, not valid json
         // see: http://timelessrepo.com/json-isnt-a-javascript-subset
         data = data.replace("\u2028", "\\u2028").replace("\u2029", "\\u2029");

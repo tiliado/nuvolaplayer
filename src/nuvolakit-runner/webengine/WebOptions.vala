@@ -39,7 +39,7 @@ public abstract class WebOptions : GLib.Object {
     public virtual async void gather_format_support_info(WebApp web_app) {
     }
 
-    public bool check_engine_version(VersionTuple min, VersionTuple max={0, 0, 0, 0}) {
+    public bool check_engine_version(VersionTuple min, VersionTuple max= {0, 0, 0, 0}) {
         var version = engine_version;
         return version.gte(min) && (max.empty() || version.lt(max));
     }

@@ -30,8 +30,7 @@ private const string XDG_DESKTOP_PORTAL_SIGSEGV = "GDBus.Error:org.freedesktop.D
 /**
  * Class performing a system check on start-up of Nuvola
  */
-public class StartupCheck : GLib.Object
-{
+public class StartupCheck : GLib.Object {
     [Description (nick="XDG Desktop Portal status", blurb="XDG Desktop Portal is required for proxy settings and opening URIs.")]
     public Status xdg_desktop_portal_status {get; set; default = Status.UNKNOWN;}
     [Description (nick="XDG Desktop Portal message", blurb="Null unless the check went wrong.")]
@@ -336,8 +335,7 @@ public class StartupCheck : GLib.Object
      *
      * The {@link tiliado_account_status} property is populated with the result of this check.
      */
-    public async void check_tiliado_account(TiliadoActivation activation)
-    {
+    public async void check_tiliado_account(TiliadoActivation activation) {
         const string NAME = "Tiliado account";
         task_started(NAME);
         tiliado_account_status = Status.IN_PROGRESS;
@@ -360,8 +358,7 @@ public class StartupCheck : GLib.Object
     /**
      * Statuses of {@link StartupCheck}s.
      */
-    public enum Status
-    {
+    public enum Status {
         /**
          * The corresponding check hasn't run yet.
          */
@@ -392,10 +389,8 @@ public class StartupCheck : GLib.Object
          *
          * @return A short status string.
          */
-        public string get_blurb()
-        {
-            switch (this)
-            {
+        public string get_blurb() {
+            switch (this) {
             case UNKNOWN:
                 return "Unknown";
             case IN_PROGRESS:
@@ -418,10 +413,8 @@ public class StartupCheck : GLib.Object
          *
          * @return A suitable CSS class.
          */
-        public string get_badge_class()
-        {
-            switch (this)
-            {
+        public string get_badge_class() {
+            switch (this) {
             case IN_PROGRESS:
                 return Drtgtk.Css.BADGE_INFO;
             case OK:
@@ -438,8 +431,7 @@ public class StartupCheck : GLib.Object
             }
         }
 
-        public static Status[] all()
-        {
+        public static Status[] all() {
             return {UNKNOWN, NOT_APPLICABLE, IN_PROGRESS, OK, WARNING, ERROR};
         }
     }

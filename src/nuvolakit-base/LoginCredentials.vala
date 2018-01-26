@@ -24,19 +24,16 @@
 
 namespace Nuvola {
 
-public class LoginCredentials
-{
+public class LoginCredentials {
     public string username;
     public string? password;
 
-    public LoginCredentials(string username, string? password)
-    {
+    public LoginCredentials(string username, string? password) {
         this.username = username;
         this.password = password;
     }
 
-    public bool username_equals(LoginCredentials other)
-    {
+    public bool username_equals(LoginCredentials other) {
         return this.username == other.username;
     }
 }

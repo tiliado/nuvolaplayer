@@ -21,39 +21,32 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-namespace Engineio
-{
+namespace Engineio {
 
-public class Channel: GLib.Object
-{
+public class Channel: GLib.Object {
     public Server server {get; private set;}
     private SList<Socket> clients = null;
 
-    public Channel(Server server)
-    {
+    public Channel(Server server) {
         this.server = server;
         server.connection.connect(on_server_connection);
     }
 
-    private void on_server_connection(Engineio.Server server, Engineio.Socket socket)
-    {
+    private void on_server_connection(Engineio.Server server, Engineio.Socket socket) {
         clients.prepend(socket);
         socket.message_received.connect(on_message_received);
     }
 
-    private void on_message_received(Engineio.Socket socket, string msg)
-    {
+    private void on_message_received(Engineio.Socket socket, string msg) {
         MessageType type;
         int id;
         string method;
         Json.Node? data = null;
-        if (!deserialize_message(msg, out type, out id, out method, out data))
-        {
+        if (!deserialize_message(msg, out type, out id, out method, out data)) {
             warning("Failed to deserialize message: %s", msg);
             return;
         }
-        switch (type)
-        {
+        switch (type) {
         case MessageType.REQUEST:
         case MessageType.SUBSCRIBE:
             handle_request.begin(socket, type, id, method, data, (o, res) => {handle_request.end(res);});
@@ -64,8 +57,7 @@ public class Channel: GLib.Object
         }
     }
 
-    protected virtual async void handle_request(Engineio.Socket socket, MessageType type, int id, string method, Json.Node? node)
-    {
+    protected virtual async void handle_request(Engineio.Socket socket, MessageType type, int id, string method, Json.Node? node) {
         Idle.add(handle_request.callback);
         yield;
         var msg = serialize_message(MessageType.RESPONSE, id, method, node);

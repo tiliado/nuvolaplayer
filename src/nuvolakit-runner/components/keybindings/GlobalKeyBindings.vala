@@ -22,16 +22,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
-public class GlobalKeybindings: GLib.Object
-{
+public class GlobalKeybindings: GLib.Object {
     public ActionsKeyBinder keybinder {get; private set;}
     private Drtgtk.Actions actions;
 
-    public GlobalKeybindings(ActionsKeyBinder keybinder, Drtgtk.Actions actions)
-    {
+    public GlobalKeybindings(ActionsKeyBinder keybinder, Drtgtk.Actions actions) {
         this.keybinder = keybinder;
         this.actions = actions;
 
@@ -42,20 +39,17 @@ public class GlobalKeybindings: GLib.Object
         update_action(action);
     }
 
-    private void update_action(Drtgtk.Action action)
-    {
+    private void update_action(Drtgtk.Action action) {
         if (!(action is Drtgtk.RadioAction))
         keybinder.bind(action.name);
     }
 
-    private void on_action_removed(Drtgtk.Action action)
-    {
+    private void on_action_removed(Drtgtk.Action action) {
         if (!(action is Drtgtk.RadioAction))
         keybinder.unbind(action.name);
     }
 
-    private void on_action_activated(string name, ref bool handled)
-    {
+    private void on_action_activated(string name, ref bool handled) {
         if (handled)
         return;
 

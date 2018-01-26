@@ -24,19 +24,16 @@
 
 namespace Nuvola.Nm {
 
-private static T[]? get_proxies<T>(BusType bus, string name, ObjectPath[]? entries)
-{
+private static T[]? get_proxies<T>(BusType bus, string name, ObjectPath[]? entries) {
     if (entries == null || entries.length == 0)
     return null;
-    try
-    {
+    try {
         var result = new T[entries.length];
         for (var i = 0; i < entries.length; i++)
         result[i] = Bus.get_proxy_sync<T>(bus, name, entries[i], 0, null);
         return result;
     }
-    catch (GLib.Error e)
-    {
+    catch (GLib.Error e) {
         debug("Failed to get DBus proxy. %s", e.message);
         return null;
     }
@@ -45,13 +42,11 @@ private static T[]? get_proxies<T>(BusType bus, string name, ObjectPath[]? entri
 private const string BUS_NAME = "org.freedesktop.NetworkManager";
 
 [DBus(name = "org.freedesktop.NetworkManager")]
-public interface NetworkManager : GLib.Object
-{
-    private abstract ObjectPath[] ActiveConnections{owned get;}
+public interface NetworkManager : GLib.Object {
+    private abstract ObjectPath[] ActiveConnections {owned get;}
 
     [DBus(visible=false)]
-    public ActiveConnection[]? get_active_connections()
-    {
+    public ActiveConnection[]? get_active_connections() {
         return get_proxies<ActiveConnection>(BusType.SYSTEM, BUS_NAME, ActiveConnections);
     }
 
@@ -59,23 +54,19 @@ public interface NetworkManager : GLib.Object
 }
 
 [DBus(name = "org.freedesktop.NetworkManager.Connection.Active")]
-public interface ActiveConnection : GLib.Object
-{
+public interface ActiveConnection : GLib.Object {
     private abstract ObjectPath? Ip4Config {owned get;}
     public abstract string? id {owned get;}
 
     [DBus(visible=false)]
-    public Ip4Config? get_ip4_config()
-    {
+    public Ip4Config? get_ip4_config() {
         var path = Ip4Config;
         if (path == null)
         return null;
-        try
-        {
+        try {
             return Bus.get_proxy_sync<Ip4Config>(BusType.SYSTEM, BUS_NAME, path, 0, null);
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             debug("Failed to get DBus proxy for '%s'. %s", path, e.message);
             return null;
         }
@@ -83,16 +74,13 @@ public interface ActiveConnection : GLib.Object
 }
 
 [DBus(name = "org.freedesktop.NetworkManager.IP4Config")]
-public interface Ip4Config : GLib.Object
-{
-    public uint[]? get_addresses()
-    {
+public interface Ip4Config : GLib.Object {
+    public uint[]? get_addresses() {
         uint[] result = {};
         var addresses = (this as DBusProxy).get_cached_property("Addresses");
         if (addresses == null)
         return null;
-        if (!addresses.is_of_type(new VariantType("aau")))
-        {
+        if (!addresses.is_of_type(new VariantType("aau"))) {
             warning(
                 "Wrong type of the org.freedesktop.NetworkManager.IP4Config.Addresses property: %s. %s",
                 addresses.get_type_string(), addresses.print(true));
@@ -101,11 +89,9 @@ public interface Ip4Config : GLib.Object
 
         var iter = addresses.iterator();
         VariantIter iter2 = null;
-        while (iter.next("au", out iter2))
-        {
+        while (iter.next("au", out iter2)) {
             uint32 ip4 = 0;
-            while (iter2.next("u", out ip4))
-            {
+            while (iter2.next("u", out ip4)) {
                 result += ip4;
                 break;
             }
@@ -114,8 +100,7 @@ public interface Ip4Config : GLib.Object
     }
 }
 
-public static async NetworkManager? get_client(Cancellable? cancellable) throws GLib.Error
-{
+public static async NetworkManager? get_client(Cancellable? cancellable) throws GLib.Error {
     var nm = yield Bus.get_proxy<NetworkManager>(BusType.SYSTEM, BUS_NAME, "/org/freedesktop/NetworkManager", 0, cancellable);
     if (nm != null)
     nm.check_connectivity();

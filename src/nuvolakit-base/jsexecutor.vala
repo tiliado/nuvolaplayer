@@ -25,12 +25,10 @@
 
 namespace Nuvola {
 
-public interface JSExecutor: GLib.Object
-{
+public interface JSExecutor: GLib.Object {
     public abstract void call_function_sync(string name, ref Variant? params, bool propagate_error=false) throws GLib.Error;
 
-    public string? send_data_request_string(string name, string key, string? default_value=null) throws GLib.Error
-    {
+    public string? send_data_request_string(string name, string key, string? default_value=null) throws GLib.Error {
         var default_variant = default_value == null ? null : new Variant.string(default_value);
         var variant = send_data_request_variant(name, key, default_variant);
         if (variant == null || !variant.is_of_type(VariantType.STRING))
@@ -40,8 +38,7 @@ public interface JSExecutor: GLib.Object
         return result != "" ? result : null;
     }
 
-    public bool send_data_request_bool(string name, string key, bool default_value) throws GLib.Error
-    {
+    public bool send_data_request_bool(string name, string key, bool default_value) throws GLib.Error {
         var variant = send_data_request_variant(name, key, new Variant.boolean(default_value));
         if (variant == null || !variant.is_of_type(VariantType.BOOLEAN))
         return default_value;

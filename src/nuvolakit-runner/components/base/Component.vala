@@ -22,14 +22,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
 /**
  * Component classes represent a particular component/feature.
  */
-public abstract class Component: GLib.Object
-{
+public abstract class Component: GLib.Object {
     public string id {get; construct;}
     public string name {get; construct;}
     public string description {get; construct;}
@@ -42,36 +40,28 @@ public abstract class Component: GLib.Object
     public bool available {get; protected set; default = true;}
     public TiliadoMembership required_membership {get; protected set; default = TiliadoMembership.NONE;}
 
-    public Component(string id, string name, string description)
-    {
+    public Component(string id, string name, string description) {
         GLib.Object(id: id, name: name, description: description);
     }
 
-    public bool is_membership_ok(TiliadoActivation? activation)
-    {
+    public bool is_membership_ok(TiliadoActivation? activation) {
         return (required_membership == TiliadoMembership.NONE
         || activation == null || activation.has_user_membership(required_membership));
     }
 
-    public virtual void toggle(bool enabled)
-    {
-        if (available)
-        {
-            if (enabled)
-            {
+    public virtual void toggle(bool enabled) {
+        if (available) {
+            if (enabled) {
                 if (this.enabled != enabled)
                 this.enabled = true;
-                if (!loaded)
-                {
+                if (!loaded) {
                     message("Load %s %s", id, name);
                     load();
                     loaded = true;
                 }
             }
-            else
-            {
-                if (loaded)
-                {
+            else {
+                if (loaded) {
                     message("Unload %s %s", id, name);
                     unload();
                     loaded = false;
@@ -83,34 +73,28 @@ public abstract class Component: GLib.Object
         }
     }
 
-    public virtual Gtk.Widget? get_settings()
-    {
+    public virtual Gtk.Widget? get_settings() {
         return null;
     }
 
-    public virtual void auto_load()
-    {
+    public virtual void auto_load() {
         toggle(enabled);
     }
 
-    protected virtual void load()
-    {
+    protected virtual void load() {
         if (auto_activate)
         toggle_active(true);
     }
 
-    protected virtual void unload()
-    {
+    protected virtual void unload() {
         toggle_active(false);
     }
 
-    public bool toggle_active(bool active)
-    {
+    public bool toggle_active(bool active) {
         if (!available || !enabled)
         return false;
         bool result = false;
-        if (this.active != active)
-        {
+        if (this.active != active) {
             message("%s: %s %s", active ? "Activate" : "Deactivate", id, name);
             result = active ? activate() : deactivate();
             if (!result)
@@ -121,13 +105,11 @@ public abstract class Component: GLib.Object
         return result;
     }
 
-    protected virtual bool activate()
-    {
+    protected virtual bool activate() {
         return false;
     }
 
-    protected virtual bool deactivate()
-    {
+    protected virtual bool deactivate() {
         return false;
     }
 }

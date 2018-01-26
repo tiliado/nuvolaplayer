@@ -22,8 +22,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public abstract class Nuvola.Binding<ObjectType>: GLib.Object
-{
+public abstract class Nuvola.Binding<ObjectType>: GLib.Object {
     /**
      * Return value to continue propagation of binding handlers.
      */
@@ -34,19 +33,16 @@ public abstract class Nuvola.Binding<ObjectType>: GLib.Object
     protected WebWorker web_worker;
     private SList<string> handlers = null;
 
-    public Binding(Drt.RpcRouter router, WebWorker web_worker, string name)
-    {
+    public Binding(Drt.RpcRouter router, WebWorker web_worker, string name) {
         GLib.Object(name: name);
         this.web_worker = web_worker;
         this.router = router;
     }
 
-    protected virtual void bind_methods()
-    {
+    protected virtual void bind_methods() {
     }
 
-    public override void dispose()
-    {
+    public override void dispose() {
         unbind_methods();
         base.dispose();
     }
@@ -63,62 +59,52 @@ public abstract class Nuvola.Binding<ObjectType>: GLib.Object
         active = false;
     }
 
-    protected void check_not_empty() throws Drt.RpcError
-    {
+    protected void check_not_empty() throws Drt.RpcError {
         if (!active)
         throw new Drt.RpcError.UNSUPPORTED("Binding %s has no registered components.", name);
     }
 
-    protected void bind(string method, Drt.RpcFlags flags, string? description, owned Drt.RpcHandler handler, Drt.RpcParam[]? params)
-    {
+    protected void bind(string method, Drt.RpcFlags flags, string? description, owned Drt.RpcHandler handler, Drt.RpcParam[]? params) {
         var path = "/%s.%s".printf(name, method).down().replace(".", "/");
         router.add_method(path, flags, description, (owned) handler, params);
         handlers.prepend(path);
     }
 
-    protected void add_notification(string method, Drt.RpcFlags flags, string? description)
-    {
+    protected void add_notification(string method, Drt.RpcFlags flags, string? description) {
         var path = "/%s.%s".printf(name, method).down().replace(".", "/");
         router.add_notification(path, flags, description);
         handlers.prepend(path);
     }
 
-    protected void emit(string notification, string? detail=null, Variant? data=null)
-    {
+    protected void emit(string notification, string? detail=null, Variant? data=null) {
         var path = "/%s.%s".printf(name, notification).down().replace(".", "/");
         router.emit(path, detail, data);
     }
 
-    protected void call_web_worker(string func_name, ref Variant? params) throws GLib.Error
-    {
+    protected void call_web_worker(string func_name, ref Variant? params) throws GLib.Error {
         warning("Call Web Worker sync: %s", func_name);
         web_worker.call_function_sync(func_name, ref params);
     }
 
-    ~Binding()
-    {
+    ~Binding() {
         unbind_methods();
     }
 }
 
-public abstract class Nuvola.ObjectBinding<ObjectType>: Binding<ObjectType>
-{
+public abstract class Nuvola.ObjectBinding<ObjectType>: Binding<ObjectType> {
     protected Drt.Lst<ObjectType> objects;
 
-    public ObjectBinding(Drt.RpcRouter router, WebWorker web_worker, string name)
-    {
+    public ObjectBinding(Drt.RpcRouter router, WebWorker web_worker, string name) {
         base(router, web_worker, name);
         objects = new Drt.Lst<ObjectType>();
     }
 
-    public bool add(GLib.Object object)
-    {
+    public bool add(GLib.Object object) {
         if (!(object is ObjectType))
         return false;
 
         objects.prepend(object);
-        if (objects.length == 1)
-        {
+        if (objects.length == 1) {
             bind_methods();
             active = true;
         }
@@ -126,8 +112,7 @@ public abstract class Nuvola.ObjectBinding<ObjectType>: Binding<ObjectType>
         return true;
     }
 
-    public bool remove(GLib.Object object)
-    {
+    public bool remove(GLib.Object object) {
         if (!(object is ObjectType))
         return false;
 
@@ -139,12 +124,10 @@ public abstract class Nuvola.ObjectBinding<ObjectType>: Binding<ObjectType>
         return true;
     }
 
-    protected virtual void object_added(ObjectType object)
-    {
+    protected virtual void object_added(ObjectType object) {
     }
 
-    protected virtual void object_removed(ObjectType object)
-    {
+    protected virtual void object_removed(ObjectType object) {
     }
 }
 
@@ -154,12 +137,10 @@ public abstract class Nuvola.ObjectBinding<ObjectType>: Binding<ObjectType>
  * Model object should only store and manipulate with data, but not to expose them in user interface, because
  * view objects that use a particular model as data source are responsible for that.
  */
-public abstract class Nuvola.ModelBinding<ModelType>: Binding<ModelType>
-{
+public abstract class Nuvola.ModelBinding<ModelType>: Binding<ModelType> {
     public ModelType model {get; private set;}
 
-    public ModelBinding(Drt.RpcRouter router, WebWorker web_worker, string name, ModelType model)
-    {
+    public ModelBinding(Drt.RpcRouter router, WebWorker web_worker, string name, ModelType model) {
         base(router, web_worker, name);
         this.model = model;
         bind_methods();

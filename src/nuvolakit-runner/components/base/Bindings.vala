@@ -22,39 +22,31 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Nuvola.Bindings: GLib.Object
-{
+public class Nuvola.Bindings: GLib.Object {
     private SList<Binding> bindings = null;
 
-    public Bindings()
-    {
+    public Bindings() {
     }
 
-    public void add_binding(Binding binding)
-    {
+    public void add_binding(Binding binding) {
         bindings.prepend(binding);
     }
 
-    public void add_object(GLib.Object object)
-    {
+    public void add_object(GLib.Object object) {
         foreach (var binding in bindings)
         if (binding is ObjectBinding)
         ((ObjectBinding) binding).add(object);
     }
 
-    public void remove_object(GLib.Object object)
-    {
+    public void remove_object(GLib.Object object) {
         foreach (var binding in bindings)
         if (binding is ObjectBinding)
         ((ObjectBinding) binding).remove(object);
     }
 
-    public ModelType? get_model<ModelType>()
-    {
-        foreach (var binding in bindings)
-        {
-            if (binding is ModelBinding)
-            {
+    public ModelType? get_model<ModelType>() {
+        foreach (var binding in bindings) {
+            if (binding is ModelBinding) {
                 var model = (binding as ModelBinding<Object>).model as Object;
                 if (model.get_type().is_a(typeof(ModelType)))
                 return (ModelType) model;

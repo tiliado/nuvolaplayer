@@ -22,15 +22,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Nuvola.MenuBarBinding: ObjectBinding<MenuBarInterface>
-{
-    public MenuBarBinding(Drt.RpcRouter router, WebWorker web_worker)
-    {
+public class Nuvola.MenuBarBinding: ObjectBinding<MenuBarInterface> {
+    public MenuBarBinding(Drt.RpcRouter router, WebWorker web_worker) {
         base(router, web_worker, "Nuvola.MenuBar");
     }
 
-    protected override void bind_methods()
-    {
+    protected override void bind_methods() {
         bind("set-menu", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             "Set menu entries.",
             handle_menubar_set_menu, {
@@ -40,8 +37,7 @@ public class Nuvola.MenuBarBinding: ObjectBinding<MenuBarInterface>
             });
     }
 
-    private void handle_menubar_set_menu(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_menubar_set_menu(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
         var id = request.pop_string();
         var label = request.pop_string();

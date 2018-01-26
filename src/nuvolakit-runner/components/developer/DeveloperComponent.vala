@@ -22,32 +22,27 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
-public class DeveloperComponent: Component
-{
+public class DeveloperComponent: Component {
     private Bindings bindings;
     private AppRunnerController app;
     private DeveloperSidebar? sidebar = null;
 
-    public DeveloperComponent(AppRunnerController app, Bindings bindings, Drt.KeyValueStorage config)
-    {
+    public DeveloperComponent(AppRunnerController app, Bindings bindings, Drt.KeyValueStorage config) {
         base("developer", "Developer's tools", "Enables developer's sidebar ");
         this.bindings = bindings;
         this.app = app;
         config.bind_object_property("component.%s.".printf(id), this, "enabled").set_default(false).update_property();
     }
 
-    protected override bool activate()
-    {
+    protected override bool activate() {
         sidebar = new DeveloperSidebar(app, bindings.get_model<MediaPlayerModel>());
         app.main_window.sidebar.add_page("developersidebar", _("Developer"), sidebar);
         return true;
     }
 
-    protected override bool deactivate()
-    {
+    protected override bool deactivate() {
         app.main_window.sidebar.remove_page(sidebar);
         sidebar = null;
         return true;

@@ -26,11 +26,10 @@ using Nuvola.JSTools;
 
 namespace Nuvola {
 
-public class WebkitEngine : WebEngine
-{
+public class WebkitEngine : WebEngine {
     private const string ZOOM_LEVEL_CONF = "webview.zoom_level";
 
-    public override Gtk.Widget get_main_web_view(){return web_view;}
+    public override Gtk.Widget get_main_web_view() {return web_view;}
 
     private AppRunnerController runner_app;
     private WebKit.WebContext web_context;
@@ -43,7 +42,7 @@ public class WebkitEngine : WebEngine
     private unowned WebkitOptions webkit_options;
     private HashTable<string, Variant> worker_data;
 
-    public WebkitEngine(WebkitOptions web_options, WebApp web_app){
+    public WebkitEngine(WebkitOptions web_options, WebApp web_app) {
         base(web_options, web_app);
         this.webkit_options = web_options;
         web_context = web_options.default_context;
@@ -51,7 +50,7 @@ public class WebkitEngine : WebEngine
     }
 
     public override void early_init(AppRunnerController runner_app, IpcBus ipc_bus,
-        Config config, Connection? connection, HashTable<string, Variant> worker_data)  {
+        Config config, Connection? connection, HashTable<string, Variant> worker_data) {
 
         this.ipc_bus = ipc_bus;
         this.runner_app = runner_app;
@@ -106,23 +105,19 @@ public class WebkitEngine : WebEngine
         register_ipc_handlers();
     }
 
-    ~WebkitEngine()
-    {
+    ~WebkitEngine() {
         web_view.get_back_forward_list().changed.disconnect(on_back_forward_list_changed);
     }
 
     public signal void webkit_context_menu(WebKit.ContextMenu menu, Gdk.Event event, WebKit.HitTestResult hit_test_result);
 
 
-    public override void init()
-    {
+    public override void init() {
         web_view.load_html("<html><body>A web app will be loaded shortly...</body></html>", WEB_ENGINE_LOADING_URI);
     }
 
-    public override void init_app_runner()
-    {
-        if (!ready)
-        {
+    public override void init_app_runner() {
+        if (!ready) {
             web_view.notify["uri"].connect(on_uri_changed);
             web_view.notify["zoom-level"].connect(on_zoom_level_changed);
             web_view.decide_policy.connect(on_decide_policy);
@@ -139,22 +134,18 @@ public class WebkitEngine : WebEngine
             api.call_ipc_method_sync.connect(on_call_ipc_method_sync);
             api.call_ipc_method_async.connect(on_call_ipc_method_async);
 
-            try
-            {
+            try {
                 api.inject(env, Utils.extract_js_properties(worker_data));
                 api.initialize(env);
             }
-            catch (JSError e)
-            {
+            catch (JSError e) {
                 runner_app.fatal_error("Initialization error", e.message);
             }
-            try
-            {
+            try {
                 var args = new Variant("(s)", "InitAppRunner");
                 env.call_function_sync("Nuvola.core.emit", ref args);
             }
-            catch (GLib.Error e)
-            {
+            catch (GLib.Error e) {
                 runner_app.fatal_error("Initialization error",
                     "%s failed to initialize app runner. Initialization exited with error:\n\n%s".printf(
                         runner_app.app_name, e.message));
@@ -162,17 +153,14 @@ public class WebkitEngine : WebEngine
             debug("App Runner Initialized");
             ready = true;
         }
-        if (!request_init_form())
-        {
+        if (!request_init_form()) {
             debug("App Runner Ready");
             app_runner_ready();
         }
     }
 
-    private bool web_worker_initialized_cb()
-    {
-        if (!web_worker.initialized)
-        {
+    private bool web_worker_initialized_cb() {
+        if (!web_worker.initialized) {
             web_worker.initialized = true;
             debug("Init finished");
             init_finished();
@@ -182,55 +170,45 @@ public class WebkitEngine : WebEngine
         return false;
     }
 
-    public override void load_app()
-    {
+    public override void load_app() {
         can_go_back = web_view.can_go_back();
         can_go_forward = web_view.can_go_forward();
-        try
-        {
+        try {
             var url = env.send_data_request_string("LastPageRequest", "url");
-            if (url != null)
-            {
+            if (url != null) {
                 if (load_uri(url))
                 return;
                 runner_app.show_error("Invalid page URL", "The web app integration script has not provided a valid page URL '%s'.".printf(url));
             }
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             runner_app.show_error("Initialization error", "%s failed to retrieve a last visited page from previous session. Initialization exited with error:\n\n%s".printf(runner_app.app_name, e.message));
         }
 
         go_home();
     }
 
-    public override void go_home()
-    {
-        try
-        {
+    public override void go_home() {
+        try {
             var url = env.send_data_request_string("HomePageRequest", "url");
             if (url == null)
             runner_app.fatal_error("Invalid home page URL", "The web app integration script has provided an empty home page URL.");
-            else if (!load_uri(url))
-            {
+            else if (!load_uri(url)) {
                 runner_app.fatal_error("Invalid home page URL", "The web app integration script has not provided a valid home page URL '%s'.".printf(url));
             }
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             runner_app.fatal_error("Initialization error", "%s failed to retrieve a home page of  a web app. Initialization exited with error:\n\n%s".printf(runner_app.app_name, e.message));
         }
     }
 
-    public override void apply_network_proxy(Connection connection)
-    {
+    public override void apply_network_proxy(Connection connection) {
         WebKit.NetworkProxyMode proxy_mode;
         WebKit.NetworkProxySettings? proxy_settings = null;
         string? host;
         int port;
         var type = connection.get_network_proxy(out host, out port);
-        switch (type)
-        {
+        switch (type) {
         case NetworkProxyType.SYSTEM:
             proxy_mode = WebKit.NetworkProxyMode.DEFAULT;
             break;
@@ -256,22 +234,18 @@ public class WebkitEngine : WebEngine
         load_uri(url);
     }
 
-    private bool load_uri(string uri)
-    {
-        if (uri.has_prefix("http://") || uri.has_prefix("https://"))
-        {
+    private bool load_uri(string uri) {
+        if (uri.has_prefix("http://") || uri.has_prefix("https://")) {
             web_view.load_uri(uri);
             return true;
         }
 
-        if (uri.has_prefix("nuvola://"))
-        {
+        if (uri.has_prefix("nuvola://")) {
             web_view.load_uri(web_app.data_dir.get_child(uri.substring(9)).get_uri());
             return true;
         }
 
-        if (uri.has_prefix(web_app.data_dir.get_uri()))
-        {
+        if (uri.has_prefix(web_app.data_dir.get_uri())) {
             web_view.load_uri(uri);
             return true;
         }
@@ -281,74 +255,60 @@ public class WebkitEngine : WebEngine
 
 
 
-    public override void go_back()
-    {
+    public override void go_back() {
         web_view.go_back();
     }
 
-    public override void go_forward()
-    {
+    public override void go_forward() {
         web_view.go_forward();
     }
 
-    public override void reload()
-    {
+    public override void reload() {
         web_view.reload();
     }
 
-    public override void zoom_in()
-    {
+    public override void zoom_in() {
         web_view.zoom_in();
     }
 
-    public override void zoom_out()
-    {
+    public override void zoom_out() {
         web_view.zoom_out();
     }
 
-    public override void zoom_reset()
-    {
+    public override void zoom_reset() {
         web_view.zoom_reset();
     }
 
-    public override void get_preferences(out Variant values, out Variant entries)
-    {
+    public override void get_preferences(out Variant values, out Variant entries) {
         var args = new Variant("(s@a{sv}@av)", "PreferencesForm", new Variant.array(new VariantType("{sv}"), {}), new Variant.array(VariantType.VARIANT, {}));
-        try
-        {
+        try {
             env.call_function_sync("Nuvola.core.emit", ref args);
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             runner_app.show_error("Integration error", "%s failed to load preferences with error:\n\n%s".printf(runner_app.app_name, e.message));
         }
         args.get("(s@a{smv}@av)", null, out values, out entries);
     }
 
-    public override void call_function_sync(string name, ref Variant? params, bool propagate_error=false) throws GLib.Error
-    {
+    public override void call_function_sync(string name, ref Variant? params, bool propagate_error=false) throws GLib.Error {
         env.call_function_sync(name, ref params);
     }
 
-    private bool request_init_form()
-    {
+    private bool request_init_form() {
         Variant values;
         Variant entries;
         var args = new Variant("(s@a{sv}@av)", "InitializationForm", new Variant.array(new VariantType("{sv}"), {}), new Variant.array(VariantType.VARIANT, {}));
-        try
-        {
+        try {
             env.call_function_sync("Nuvola.core.emit", ref args);
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             runner_app.fatal_error("Initialization error", "%s failed to crate initialization form. Initialization exited with error:\n\n%s".printf(runner_app.app_name, e.message));
             return false;
         }
 
         args.get("(s@a{smv}@av)", null, out values, out entries);
         var values_hashtable = Drt.variant_to_hashtable(values);
-        if (values_hashtable.size() > 0)
-        {
+        if (values_hashtable.size() > 0) {
             debug("Init form requested");
             init_form(values_hashtable, entries);
             return true;
@@ -508,7 +468,7 @@ public class WebkitEngine : WebEngine
         request.respond(null);
     }
 
-    private void handle_show_error(Drt.RpcRequest request) throws Drt.RpcError  {
+    private void handle_show_error(Drt.RpcRequest request) throws Drt.RpcError {
         runner_app.show_error("Integration error", request.pop_string());
         request.respond(null);
     }
@@ -555,34 +515,28 @@ public class WebkitEngine : WebEngine
         var cb_id = request.pop_double();
 
         var dir = storage.cache_dir.get_child("api-downloads");
-        try
-        {
+        try {
             dir.make_directory_with_parents();
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
         }
         var file = dir.get_child(basename);
-        try
-        {
+        try {
             file.@delete();
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
         }
         var download = web_context.download_uri(uri);
         download.set_destination(file.get_uri());
         ulong[] handler_ids = new ulong[2];
 
         handler_ids[0] = download.finished.connect((d) => {
-            try
-            {
+            try {
                 var payload = new Variant(
                     "(dbusss)", cb_id, true, d.get_response().status_code, d.get_response().status_code.to_string(), file.get_path(), file.get_uri());
                 web_worker.call_function_sync("Nuvola.browser._downloadDone", ref payload);
             }
-            catch (GLib.Error e)
-            {
+            catch (GLib.Error e) {
                 warning("Communication failed: %s", e.message);
             }
             download.disconnect(handler_ids[0]);
@@ -596,14 +550,12 @@ public class WebkitEngine : WebEngine
             warning("Download failed because of destination: %s", e.message);
             else
             warning("Download failed: %s", e.message);
-            try
-            {
+            try {
                 var payload = new Variant(
                     "(dbusss)", cb_id, false, d.get_response().status_code, d.get_response().status_code.to_string(), "", "");
                 web_worker.call_function_sync("Nuvola.browser._downloadDone", ref payload);
             }
-            catch (GLib.Error e)
-            {
+            catch (GLib.Error e) {
                 warning("Communication failed: %s", e.message);
             }
             download.disconnect(handler_ids[0]);
@@ -613,30 +565,25 @@ public class WebkitEngine : WebEngine
         request.respond(null);
     }
 
-    private void on_load_changed(WebKit.LoadEvent load_event)
-    {
+    private void on_load_changed(WebKit.LoadEvent load_event) {
         #if FLATPAK
-        if (load_event == WebKit.LoadEvent.COMMITTED)
-        {
+        if (load_event == WebKit.LoadEvent.COMMITTED) {
             debug("Terminate WebKitPluginProcess2");
             /* https://github.com/tiliado/nuvolaruntime/issues/354 */
             Drt.System.sigall(Drt.System.find_pid_by_basename("WebKitPluginProcess2"), GLib.ProcessSignal.TERM);
         }
         #endif
-        if (load_event == WebKit.LoadEvent.STARTED && web_worker != null)
-        {
+        if (load_event == WebKit.LoadEvent.STARTED && web_worker != null) {
             debug("Load started");
             web_worker.ready = false;
         }
     }
 
-    private void on_download_started(WebKit.Download download)
-    {
+    private void on_download_started(WebKit.Download download) {
         download.decide_destination.connect(on_download_decide_destination);
     }
 
-    private bool on_download_decide_destination(WebKit.Download download, string filename)
-    {
+    private bool on_download_decide_destination(WebKit.Download download, string filename) {
 
         if (download.destination == null)
         download.cancel();
@@ -644,8 +591,7 @@ public class WebkitEngine : WebEngine
         return true;
     }
 
-    private bool decide_navigation_policy(bool new_window, WebKit.NavigationPolicyDecision decision)
-    {
+    private bool decide_navigation_policy(bool new_window, WebKit.NavigationPolicyDecision decision) {
         var action = decision.navigation_action;
         var uri = action.get_request().uri;
         if (!uri.has_prefix("http://") && !uri.has_prefix("https://"))
@@ -667,50 +613,39 @@ public class WebkitEngine : WebEngine
             user_gesture.to_string());
 
         // We care only about user clicks
-        if (type == WebKit.NavigationType.LINK_CLICKED || user_gesture)
-        {
-            if (approved)
-            {
+        if (type == WebKit.NavigationType.LINK_CLICKED || user_gesture) {
+            if (approved) {
                 load_uri = handled = true;
-                if (new_window != new_window_override)
-                {
-                    if (!new_window_override)
-                    {
+                if (new_window != new_window_override) {
+                    if (!new_window_override) {
                         // Open in current window instead of a new window
                         load_uri = false;
                         Idle.add(() => {web_view.load_uri(uri); return false;});
                     }
-                    else
-                    {
+                    else {
                         warning("Overriding of new window flag false -> true hasn't been implemented yet.");
                     }
                 }
             }
-            else
-            {
+            else {
                 runner_app.show_uri(uri);
                 handled = true;
                 load_uri = false;
             }
         }
-        if (handled)
-        {
-            if (load_uri)
-            {
+        if (handled) {
+            if (load_uri) {
                 decision.use();
             }
-            else
-            {
+            else {
                 decision.ignore();
             }
         }
         return handled;
     }
 
-    private bool on_decide_policy(WebKit.PolicyDecision decision, WebKit.PolicyDecisionType decision_type)
-    {
-        switch (decision_type)
-        {
+    private bool on_decide_policy(WebKit.PolicyDecision decision, WebKit.PolicyDecisionType decision_type) {
+        switch (decision_type) {
         case WebKit.PolicyDecisionType.NAVIGATION_ACTION:
             return decide_navigation_policy(false, (WebKit.NavigationPolicyDecision) decision);
         case WebKit.PolicyDecisionType.NEW_WINDOW_ACTION:
@@ -721,19 +656,16 @@ public class WebkitEngine : WebEngine
         }
     }
 
-    private bool navigation_request(string url, ref bool new_window)
-    {
+    private bool navigation_request(string url, ref bool new_window) {
         var builder = new VariantBuilder(new VariantType("a{smv}"));
         builder.add("{smv}", "url", new Variant.string(url));
         builder.add("{smv}", "approved", new Variant.boolean(true));
         builder.add("{smv}", "newWindow", new Variant.boolean(new_window));
         var args = new Variant("(s@a{smv})", "NavigationRequest", builder.end());
-        try
-        {
+        try {
             env.call_function_sync("Nuvola.core.emit", ref args);
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             runner_app.show_error("Integration script error", "The web app integration script has not provided a valid response and caused an error: %s".printf(e.message));
             return true;
         }
@@ -743,8 +675,7 @@ public class WebkitEngine : WebEngine
         string key = null;
         Variant value = null;
         bool approved = false;
-        while (iter.next("{smv}", &key, &value))
-        {
+        while (iter.next("{smv}", &key, &value)) {
             if (key == "approved")
             approved = value != null ? value.get_boolean() : false;
             else if (key == "newWindow" && value != null)
@@ -753,20 +684,17 @@ public class WebkitEngine : WebEngine
         return approved;
     }
 
-    private void ask_page_settings(string url, bool new_window, ref bool javascript_enabled, ref string? user_agent)
-    {
+    private void ask_page_settings(string url, bool new_window, ref bool javascript_enabled, ref string? user_agent) {
         var builder = new VariantBuilder(new VariantType("a{smv}"));
         builder.add("{smv}", "url", new Variant.string(url));
         builder.add("{smv}", "newWindow", new Variant.boolean(new_window));
         builder.add("{smv}", "javascript", new Variant.boolean(javascript_enabled));
         builder.add("{smv}", "userAgent", user_agent != null ? new Variant.string(user_agent) : new Variant("mv", null));
         var args = new Variant("(s@a{smv})", "PageSettings", builder.end());
-        try
-        {
+        try {
             env.call_function_sync("Nuvola.core.emit", ref args);
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             runner_app.show_error("Integration script error", "The web app integration script has not provided a valid response and caused an error: %s".printf(e.message));
             return;
         }
@@ -775,10 +703,8 @@ public class WebkitEngine : WebEngine
         assert(iter.next("a{smv}", &iter));
         string key = null;
         Variant value = null;
-        while (iter.next("{smv}", &key, &value))
-        {
-            switch (key)
-            {
+        while (iter.next("{smv}", &key, &value)) {
+            switch (key) {
             case "javascript":
                 javascript_enabled = value != null ? value.get_boolean() : false;
                 break;
@@ -789,15 +715,12 @@ public class WebkitEngine : WebEngine
         }
     }
 
-    private void on_uri_changed(GLib.Object o, ParamSpec p)
-    {
+    private void on_uri_changed(GLib.Object o, ParamSpec p) {
         var args = new Variant("(sms)", "UriChanged", web_view.uri);
-        try
-        {
+        try {
             env.call_function_sync("Nuvola.core.emit", ref args);
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             runner_app.show_error("Integration script error", "The web app integration caused an error: %s".printf(e.message));
         }
     }
@@ -806,43 +729,36 @@ public class WebkitEngine : WebEngine
         this.is_loading = web_view.is_loading;
     }
 
-    private void on_back_forward_list_changed(WebKit.BackForwardListItem? item_added, void* items_removed)
-    {
+    private void on_back_forward_list_changed(WebKit.BackForwardListItem? item_added, void* items_removed) {
         can_go_back = web_view.can_go_back();
         can_go_forward = web_view.can_go_forward();
     }
 
-    private void on_zoom_level_changed(GLib.Object o, ParamSpec p)
-    {
+    private void on_zoom_level_changed(GLib.Object o, ParamSpec p) {
         config.set_double(ZOOM_LEVEL_CONF, web_view.zoom_level);
     }
 
-    private bool on_script_dialog(WebKit.ScriptDialog dialog)
-    {
+    private bool on_script_dialog(WebKit.ScriptDialog dialog) {
         bool handled = false;
         if (dialog.get_dialog_type() == WebKit.ScriptDialogType.ALERT)
         show_alert_dialog(ref handled, dialog.get_message());
         return handled;
     }
 
-    private bool on_context_menu(WebKit.ContextMenu menu, Gdk.Event event, WebKit.HitTestResult hit_test_result)
-    {
+    private bool on_context_menu(WebKit.ContextMenu menu, Gdk.Event event, WebKit.HitTestResult hit_test_result) {
         webkit_context_menu(menu, event, hit_test_result);
         return false;
     }
 }
 
-public enum NetworkProxyType
-{
+public enum NetworkProxyType {
     SYSTEM,
     DIRECT,
     HTTP,
     SOCKS;
 
-    public static NetworkProxyType from_string(string type)
-    {
-        switch (type.down())
-        {
+    public static NetworkProxyType from_string(string type) {
+        switch (type.down()) {
         case "none":
         case "direct":
             return DIRECT;
@@ -855,10 +771,8 @@ public enum NetworkProxyType
         }
     }
 
-    public string to_string()
-    {
-        switch (this)
-        {
+    public string to_string() {
+        switch (this) {
         case DIRECT:
             return "direct";
         case HTTP:

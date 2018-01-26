@@ -24,8 +24,7 @@
 
 namespace Nuvola {
 
-public class TiliadoActivationManager : GLib.Object, TiliadoActivation
-{
+public class TiliadoActivationManager : GLib.Object, TiliadoActivation {
     public const string ACTIVATION_STARTED = "/tiliado-activation/activation-started";
     public const string ACTIVATION_FAILED = "/tiliado-activation/activation-failed";
     public const string ACTIVATION_CANCELLED = "/tiliado-activation/activation-cancelled";
@@ -45,13 +44,11 @@ public class TiliadoActivationManager : GLib.Object, TiliadoActivation
     public MasterBus bus {get; construct;}
     private TiliadoApi2.User? cached_user = null;
 
-    public TiliadoActivationManager(TiliadoApi2 tiliado, MasterBus bus, Config config)
-    {
+    public TiliadoActivationManager(TiliadoApi2 tiliado, MasterBus bus, Config config) {
         GLib.Object(tiliado: tiliado, config: config, bus: bus);
     }
 
-    construct
-    {
+    construct {
         tiliado.notify["token"].connect_after(on_api_token_changed);
         tiliado.notify["user"].connect_after(on_api_user_changed);
         tiliado.device_code_grant_started.connect(on_device_code_grant_started);
@@ -83,8 +80,7 @@ public class TiliadoActivationManager : GLib.Object, TiliadoActivation
             USER_INFO_UPDATED, Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE|Drt.RpcFlags.SUBSCRIBE, null);
     }
 
-    ~TiliadoActivationManager()
-    {
+    ~TiliadoActivationManager() {
         tiliado.notify["token"].disconnect(on_api_token_changed);
         tiliado.notify["user"].disconnect(on_api_user_changed);
         tiliado.device_code_grant_started.disconnect(on_device_code_grant_started);
@@ -93,82 +89,68 @@ public class TiliadoActivationManager : GLib.Object, TiliadoActivation
         tiliado.device_code_grant_finished.disconnect(on_device_code_grant_finished);
     }
 
-    public TiliadoApi2.User? get_user_info()
-    {
+    public TiliadoApi2.User? get_user_info() {
         var current_user = tiliado.user;
         return current_user != null && current_user.is_valid() ? current_user : cached_user;
     }
 
-    public void update_user_info()
-    {
+    public void update_user_info() {
         tiliado.fetch_current_user.begin(on_update_current_user_done);
     }
 
-    public TiliadoApi2.User? update_user_info_sync()
-    {
+    public TiliadoApi2.User? update_user_info_sync() {
         if (tiliado.token == null)
         return null;
         else
         return update_user_info_sync_internal();
     }
 
-    public void start_activation()
-    {
+    public void start_activation() {
         tiliado.start_device_code_grant(TILIADO_OAUTH2_DEVICE_CODE_ENDPOINT);
     }
 
-    public void cancel_activation()
-    {
+    public void cancel_activation() {
         tiliado.cancel_device_code_grant();
     }
 
-    public void drop_activation()
-    {
+    public void drop_activation() {
         tiliado.drop_token();
         update_user_info();
     }
 
-    private void handle_get_user_info(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_get_user_info(Drt.RpcRequest request) throws Drt.RpcError {
         var user = get_user_info();
         request.respond(user != null ? user.to_variant() : null);
     }
 
-    private void handle_update_user_info(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_update_user_info(Drt.RpcRequest request) throws Drt.RpcError {
         update_user_info();
         request.respond(null);
     }
 
-    private void handle_start_activation(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_start_activation(Drt.RpcRequest request) throws Drt.RpcError {
         start_activation();
         request.respond(null);
     }
 
-    private void handle_cancel_activation(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_cancel_activation(Drt.RpcRequest request) throws Drt.RpcError {
         cancel_activation();
         request.respond(null);
     }
 
-    private void handle_drop_activation(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_drop_activation(Drt.RpcRequest request) throws Drt.RpcError {
         drop_activation();
         request.respond(null);
     }
 
-    private void on_device_code_grant_started(string url)
-    {
+    private void on_device_code_grant_started(string url) {
         activation_started(url);
         bus.api.emit(ACTIVATION_STARTED, null, new Variant.string(url));
     }
 
-    private void on_device_code_grant_error(string code, string? message)
-    {
+    private void on_device_code_grant_error(string code, string? message) {
         string detail;
-        switch (code)
-        {
+        switch (code) {
         case "parse_error":
         case "response_error":
             detail = "The server returned a malformed response.";
@@ -191,28 +173,23 @@ public class TiliadoActivationManager : GLib.Object, TiliadoActivation
         bus.api.emit(ACTIVATION_FAILED, null, detail);
     }
 
-    private void on_device_code_grant_cancelled()
-    {
+    private void on_device_code_grant_cancelled() {
         activation_cancelled();
         bus.api.emit(ACTIVATION_CANCELLED, null, null);
     }
 
-    private void on_device_code_grant_finished(Oauth2Token token)
-    {
+    private void on_device_code_grant_finished(Oauth2Token token) {
         tiliado.fetch_current_user.begin(on_get_current_user_for_activation_done);
     }
 
-    private void on_get_current_user_for_activation_done(GLib.Object? o, AsyncResult res)
-    {
-        try
-        {
+    private void on_get_current_user_for_activation_done(GLib.Object? o, AsyncResult res) {
+        try {
             var user = tiliado.fetch_current_user.end(res);
             user = user != null && user.is_valid() ? user : null;
             activation_finished(user);
             bus.api.emit(ACTIVATION_FINISHED, null, user == null ? null : user.to_variant());
         }
-        catch (Oauth2Error e)
-        {
+        catch (Oauth2Error e) {
             var err = "Failed to fetch user's details. " + e.message;
             activation_failed(err);
             bus.api.emit(ACTIVATION_FAILED, null, err);
@@ -220,26 +197,21 @@ public class TiliadoActivationManager : GLib.Object, TiliadoActivation
         cache_user(tiliado.user);
     }
 
-    private void on_update_current_user_done(GLib.Object? o, AsyncResult res)
-    {
-        try
-        {
+    private void on_update_current_user_done(GLib.Object? o, AsyncResult res) {
+        try {
             var user = tiliado.fetch_current_user.end(res);
             user = user != null && user.is_valid() ? user : null;
             user_info_updated(user);
             bus.api.emit(USER_INFO_UPDATED, null, user == null ? null : user.to_variant());
         }
-        catch (Oauth2Error e)
-        {
+        catch (Oauth2Error e) {
             user_info_updated(null);
             bus.api.emit(USER_INFO_UPDATED, null, null);
         }
     }
 
-    private void load_cached_data()
-    {
-        if (config.has_key(TILIADO_ACCOUNT_ACCESS_TOKEN))
-        {
+    private void load_cached_data() {
+        if (config.has_key(TILIADO_ACCOUNT_ACCESS_TOKEN)) {
             tiliado.token = new Oauth2Token(
                 config.get_string(TILIADO_ACCOUNT_ACCESS_TOKEN),
                 config.get_string(TILIADO_ACCOUNT_REFRESH_TOKEN),
@@ -247,15 +219,13 @@ public class TiliadoActivationManager : GLib.Object, TiliadoActivation
                 config.get_string(TILIADO_ACCOUNT_SCOPE));
 
             var signature = config.get_string(TILIADO_ACCOUNT_SIGNATURE);
-            if (signature != null)
-            {
+            if (signature != null) {
 
                 var expires = config.get_int64(TILIADO_ACCOUNT_EXPIRES);
                 var user_name = config.get_string(TILIADO_ACCOUNT_USER);
                 var membership = (uint) config.get_int64(TILIADO_ACCOUNT_MEMBERSHIP);
-                if (tiliado.hmac_sha1_verify_string(concat_tiliado_user_info(user_name, membership, expires), signature))
-                {
-                    var user = new TiliadoApi2.User(0, null, user_name, true, true, new int[]{});
+                if (tiliado.hmac_sha1_verify_string(concat_tiliado_user_info(user_name, membership, expires), signature)) {
+                    var user = new TiliadoApi2.User(0, null, user_name, true, true, new int[] {});
                     user.membership = membership;
                     cached_user = user;
                 }
@@ -263,11 +233,9 @@ public class TiliadoActivationManager : GLib.Object, TiliadoActivation
         }
     }
 
-    private void cache_user(TiliadoApi2.User? user)
-    {
+    private void cache_user(TiliadoApi2.User? user) {
         cached_user = null;
-        if (user != null && user.is_valid())
-        {
+        if (user != null && user.is_valid()) {
             var expires = new DateTime.now_utc().add_weeks(5).to_unix();
             config.set_string(TILIADO_ACCOUNT_USER, user.name);
             config.set_int64(TILIADO_ACCOUNT_MEMBERSHIP, (int64) user.membership);
@@ -276,8 +244,7 @@ public class TiliadoActivationManager : GLib.Object, TiliadoActivation
                 concat_tiliado_user_info(user.name, user.membership, expires));
             config.set_string(TILIADO_ACCOUNT_SIGNATURE, signature);
         }
-        else
-        {
+        else {
             config.unset(TILIADO_ACCOUNT_USER);
             config.unset(TILIADO_ACCOUNT_MEMBERSHIP);
             config.unset(TILIADO_ACCOUNT_EXPIRES);
@@ -285,23 +252,19 @@ public class TiliadoActivationManager : GLib.Object, TiliadoActivation
         }
     }
 
-    private inline string concat_tiliado_user_info(string name, uint membership_rank, int64 expires)
-    {
+    private inline string concat_tiliado_user_info(string name, uint membership_rank, int64 expires) {
         return "%s:%u:%s".printf(name, membership_rank, expires.to_string());
     }
 
-    private void on_api_token_changed(GLib.Object o, ParamSpec p)
-    {
+    private void on_api_token_changed(GLib.Object o, ParamSpec p) {
         var token = tiliado.token;
-        if (token != null)
-        {
+        if (token != null) {
             config.set_value(TILIADO_ACCOUNT_TOKEN_TYPE, token.token_type);
             config.set_value(TILIADO_ACCOUNT_ACCESS_TOKEN, token.access_token);
             config.set_value(TILIADO_ACCOUNT_REFRESH_TOKEN, token.refresh_token);
             config.set_value(TILIADO_ACCOUNT_SCOPE, token.scope);
         }
-        else
-        {
+        else {
             config.unset(TILIADO_ACCOUNT_TOKEN_TYPE);
             config.unset(TILIADO_ACCOUNT_ACCESS_TOKEN);
             config.unset(TILIADO_ACCOUNT_REFRESH_TOKEN);
@@ -309,8 +272,7 @@ public class TiliadoActivationManager : GLib.Object, TiliadoActivation
         }
     }
 
-    private void on_api_user_changed(GLib.Object o, ParamSpec p)
-    {
+    private void on_api_user_changed(GLib.Object o, ParamSpec p) {
         var user = tiliado.user;
         cache_user(user);
         user_info_updated(user);

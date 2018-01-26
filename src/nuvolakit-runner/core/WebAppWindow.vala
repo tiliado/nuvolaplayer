@@ -24,27 +24,21 @@
 
 namespace Nuvola {
 
-public class WebAppWindow : Drtgtk.ApplicationWindow
-{
+public class WebAppWindow : Drtgtk.ApplicationWindow {
     public Gtk.Grid grid {get; private set;}
     public Gtk.Overlay overlay {get; private set;}
     public Sidebar sidebar {get; private set;}
     public Drtgtk.HeaderBarTitle headerbar_title {get; private set;}
     public bool is_fullscreen {get; private set; default = false;}
 
-    public int sidebar_position
-    {
-        get
-        {
+    public int sidebar_position {
+        get {
             return paned.position;
         }
 
-        set
-        {
-            if (value == -1)
-            {
-                if (sidebar.visible)
-                {
+        set {
+            if (value == -1) {
+                if (sidebar.visible) {
                     Gtk.Allocation allocation;
                     int width = 0;
                     paned.get_allocation(out allocation);
@@ -52,8 +46,7 @@ public class WebAppWindow : Drtgtk.ApplicationWindow
                     paned.position = allocation.width - width;
                 }
             }
-            else if (paned.position != value)
-            {
+            else if (paned.position != value) {
                 paned.position = value;
             }
         }
@@ -66,8 +59,7 @@ public class WebAppWindow : Drtgtk.ApplicationWindow
 
     private new unowned AppRunnerController app;
 
-    public WebAppWindow(AppRunnerController app)
-    {
+    public WebAppWindow(AppRunnerController app) {
         base(app, true);
         window_state_event.connect(on_window_state_event);
         title = "%s • %s Runtime".printf(app.app_name, Nuvola.get_app_name());
@@ -79,12 +71,10 @@ public class WebAppWindow : Drtgtk.ApplicationWindow
                 header_bar.custom_title = headerbar_title;
             }
         });
-        try
-        {
+        try {
             icon = Gtk.IconTheme.get_default().load_icon(app.icon, 48, 0);
         }
-        catch (Error e)
-        {
+        catch (Error e) {
             warning("Unable to load application icon.");
         }
 
@@ -117,8 +107,7 @@ public class WebAppWindow : Drtgtk.ApplicationWindow
 
     public signal void can_destroy(ref bool result);
 
-    public void show_overlay_alert(string text)
-    {
+    public void show_overlay_alert(string text) {
         var loop = new MainLoop();
         var title = new Gtk.Label(Markup.printf_escaped("<b>%s</b>", "Web App Alert"));
         title.use_markup = true;
@@ -156,16 +145,14 @@ public class WebAppWindow : Drtgtk.ApplicationWindow
         overlay.remove(outer_box);
     }
 
-    public bool on_delete_event(Gdk.EventAny event)
-    {
+    public bool on_delete_event(Gdk.EventAny event) {
         hide();
         bool result = true;
         can_destroy(ref result);
         return !result;
     }
 
-    private bool on_window_state_event(Gdk.EventWindowState event)
-    {
+    private bool on_window_state_event(Gdk.EventWindowState event) {
         maximized = (event.new_window_state & Gdk.WindowState.MAXIMIZED) != 0;
         var fullscreen = (event.new_window_state & Gdk.WindowState.FULLSCREEN) != 0;
         if (this.is_fullscreen != fullscreen) {
@@ -179,15 +166,13 @@ public class WebAppWindow : Drtgtk.ApplicationWindow
         return false;
     }
 
-    private void on_sidebar_position_changed(GLib.Object o, ParamSpec p)
-    {
+    private void on_sidebar_position_changed(GLib.Object o, ParamSpec p) {
         if (sidebar_position_cb_id != 0)
         Source.remove(sidebar_position_cb_id);
         sidebar_position_cb_id = Timeout.add(250, sidebar_position_cb);
     }
 
-    private bool sidebar_position_cb()
-    {
+    private bool sidebar_position_cb() {
         debug("Sidebar position: %d", paned.position);
         sidebar_position_cb_id = 0;
         sidebar_position = paned.position;

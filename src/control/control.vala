@@ -24,8 +24,7 @@
 
 namespace Nuvola {
 
-struct Args
-{
+struct Args {
     static bool debug = false;
     static bool verbose = false;
     static bool version;
@@ -34,8 +33,7 @@ struct Args
     [CCode (array_length = false, array_null_terminated = true)]
     static string?[] command;
 
-    public const OptionEntry[] main_options =
-    {
+    public const OptionEntry[] main_options = {
         { "app", 'a', 0, GLib.OptionArg.FILENAME, ref Args.app, "Web app to control.", "ID" },
         { "verbose", 'v', 0, OptionArg.NONE, ref Args.verbose, "Print informational messages", null },
         { "debug", 'D', 0, OptionArg.NONE, ref Args.debug, "Print debugging messages", null },
@@ -47,8 +45,7 @@ struct Args
 }
 
 [PrintfFormat]
-private static int quit(int code, string format, ...)
-{
+private static int quit(int code, string format, ...) {
     stderr.vprintf(format, va_list());
     return code;
 }
@@ -84,10 +81,8 @@ const string DESCRIPTION = """Commands:
      'artwork_location', 'artwork_file' or 'rating'.
 """;
 
-public int main(string[] args)
-{
-    try
-    {
+public int main(string[] args) {
+    try {
         var opt_context = new OptionContext("- Control %s".printf(Nuvola.get_app_name()));
         opt_context.set_help_enabled(true);
         opt_context.add_main_entries(Args.main_options, null);
@@ -95,24 +90,20 @@ public int main(string[] args)
         opt_context.set_description(DESCRIPTION);
         opt_context.parse(ref args);
     }
-    catch (OptionError e)
-    {
+    catch (OptionError e) {
         stderr.printf("Error: Option parsing failed: %s\n", e.message);
         return 1;
     }
 
-    if (Args.version)
-    {
+    if (Args.version) {
         stdout.printf("%s %s\n", Nuvola.get_app_name(), Nuvola.get_version());
         return 0;
     }
 
     FileStream? log = null;
-    if (Args.log_file != null)
-    {
+    if (Args.log_file != null) {
         log = FileStream.open(Args.log_file, "w");
-        if (log == null)
-        {
+        if (log == null) {
             stderr.printf("Error: Cannot open log file '%s' for writing.\n", Args.log_file);
             return 1;
         }
@@ -122,10 +113,8 @@ public int main(string[] args)
         : (Args.verbose ? GLib.LogLevelFlags.LEVEL_INFO: GLib.LogLevelFlags.LEVEL_WARNING),
         true, "Control");
 
-    if (Args.app == null)
-    {
-        try
-        {
+    if (Args.app == null) {
+        try {
             var master = new Drt.RpcChannel.from_name(1, build_master_ipc_id(), null, null, 500);
 
             var response = master.call_sync("/nuvola/core/get_top_runner", null);
@@ -137,8 +126,7 @@ public int main(string[] args)
 
             message("Using '%s' as web app id.", Args.app);
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             return quit(2, "Error: Communication with %s master instance failed: %s\n", Nuvola.get_app_name(), e.message);
         }
     }
@@ -147,22 +135,18 @@ public int main(string[] args)
     return quit(1, "Error: No command specified. Type `%s --help` for help.\n", args[0]);
 
     Drt.RpcChannel client;
-    try
-    {
+    try {
         client = new Drt.RpcChannel.from_name(2, build_ui_runner_ipc_id(Args.app), null, null, 500);
     }
-    catch (GLib.Error e)
-    {
+    catch (GLib.Error e) {
         return quit(2, "Error: Failed to connect to %s instance for %s. %s\n", Nuvola.get_app_name(), Args.app, e.message);
     }
 
 
     var command = Args.command[0];
     var control = new Control(client);
-    try
-    {
-        switch (command)
-        {
+    try {
+        switch (command) {
         case "action":
             if (Args.command.length < 2)
             return quit(1, "Error: No action specified.\n");
@@ -182,41 +166,34 @@ public int main(string[] args)
         case "api-master":
             if (Args.command.length < 2)
             return quit(1, "Error: No API method specified.\n");
-            try
-            {
+            try {
                 var master = new Drt.RpcChannel.from_name(1, build_master_ipc_id(), null, null, 500);
                 return call_api_method(master, Args.command, 1);
             }
-            catch (GLib.Error e)
-            {
+            catch (GLib.Error e) {
                 return quit(2, "Error: Communication with %s master instance failed: %s\n", Nuvola.get_app_name(), e.message);
             }
         case "api-app":
             if (Args.command.length < 2)
             return quit(1, "Error: No API method specified.\n");
-            try
-            {
+            try {
                 return call_api_method(client, Args.command, 1);
             }
-            catch (GLib.Error e)
-            {
+            catch (GLib.Error e) {
                 return quit(2, "Error: Communication with %s instance for %s failed. %s\n", Nuvola.get_app_name(), Args.app, e.message);
             }
         default:
             return quit(1, "Error: Unknown command '%s'.\n", command);
         }
     }
-    catch (GLib.Error e)
-    {
+    catch (GLib.Error e) {
         return quit(2, "Error: Communication with %s instance failed: %s\n", Nuvola.get_app_name(), e.message);
     }
 }
 
-private int call_api_method(Drt.RpcChannel connection, string[] args, int offset) throws GLib.Error
-{
+private int call_api_method(Drt.RpcChannel connection, string[] args, int offset) throws GLib.Error {
     var response = connection.call_sync(args[offset], Drt.strv_to_variant_dict(args, offset + 1));
-    if (response != null)
-    {
+    if (response != null) {
         var node = Json.gvariant_serialize(response);
         var generator = new Json.Generator();
         generator.pretty = true;
@@ -227,29 +204,24 @@ private int call_api_method(Drt.RpcChannel connection, string[] args, int offset
     return 0;
 }
 
-class Control
-{
+class Control {
     private Drt.RpcChannel conn;
 
-    public Control(Drt.RpcChannel conn)
-    {
+    public Control(Drt.RpcChannel conn) {
         this.conn = conn;
     }
 
-    public int list_actions() throws GLib.Error
-    {
+    public int list_actions() throws GLib.Error {
         var response = conn.call_sync("/nuvola/actions/list-groups", null);
         stdout.printf("Available actions\n\nFormat: NAME (is enabled?) - label\n");
         var iter = response.iterator();
         string group_name = null;
-        while (iter.next("s", out group_name))
-        {
+        while (iter.next("s", out group_name)) {
             stdout.printf("\nGroup: %s\n\n", group_name);
             var actions = conn.call_sync("/nuvola/actions/list-group-actions", new Variant("(s)", group_name));
             Variant action = null;
             var actions_iter = actions.iterator();
-            while (actions_iter.next("@*", out action))
-            {
+            while (actions_iter.next("@*", out action)) {
                 string name = null;
                 string label = null;
                 bool enabled = false;
@@ -257,21 +229,18 @@ class Control
                 assert(action.lookup("name", "s", out name));
                 assert(action.lookup("label", "s", out label));
                 assert(action.lookup("enabled", "b", out enabled));
-                if (action.lookup("options", "@*", out options))
-                {
+                if (action.lookup("options", "@*", out options)) {
                     stdout.printf(" *  %s (%s) - %s\n", name, enabled ? "enabled" : "disabled", "invoke with following parameters:");
                     Variant option = null;
                     var options_iter = options.iterator();
-                    while (options_iter.next("@*", out option))
-                    {
+                    while (options_iter.next("@*", out option)) {
                         Variant parameter = null;
                         assert(option.lookup("param", "@*", out parameter));
                         assert(option.lookup("label", "s", out label));
                         stdout.printf("    %s %s - %s\n", name, parameter.print(false), label != "" ? label : "(No label specified.)");
                     }
                 }
-                else
-                {
+                else {
                     stdout.printf(" *  %s (%s) - %s\n", name, enabled ? "enabled" : "disabled", label != "" ? label : "(No label specified.)");
                 }
             }
@@ -279,18 +248,15 @@ class Control
         return 0;
     }
 
-    public int activate_action(string name, string? parameter_str) throws GLib.Error
-    {
+    public int activate_action(string name, string? parameter_str) throws GLib.Error {
         Variant parameter;
-        try
-        {
+        try {
             parameter =  parameter_str == null
             ? new Variant.maybe(VariantType.BYTE, null)
             :  Variant.parse(null, parameter_str);
 
         }
-        catch (VariantParseError e)
-        {
+        catch (VariantParseError e) {
             return quit(1,
                 "Failed to parse Variant from string %s: %s\n\n"
                 + "See https://developer.gnome.org/glib/stable/gvariant-text.html for format specification.\n",
@@ -310,16 +276,14 @@ class Control
         return 0;
     }
 
-    public int action_state(string name) throws GLib.Error
-    {
+    public int action_state(string name) throws GLib.Error {
         var response = conn.call_sync("/nuvola/actions/get-state", new Variant("(s)", name));
         if (response != null)
         stdout.printf("%s\n", response.print(false));
         return 0;
     }
 
-    public int track_info(string? key=null) throws GLib.Error
-    {
+    public int track_info(string? key=null) throws GLib.Error {
         var response = conn.call_sync("/nuvola/mediaplayer/track-info", null);
         var title = Drt.variant_dict_str(response, "title");
         var artist = Drt.variant_dict_str(response, "artist");
@@ -329,8 +293,7 @@ class Control
         var artwork_file = Drt.variant_dict_str(response, "artworkFile");
         var rating = Drt.variant_dict_double(response, "rating", 0.0);
 
-        if (key == null || key == "all")
-        {
+        if (key == null || key == "all") {
             if (title != null)
             stdout.printf("Title: %s\n", title);
             if (artist != null )
@@ -346,10 +309,8 @@ class Control
             if (rating != 0.0 )
             stdout.printf("Rating: %s\n", rating.to_string());
         }
-        else
-        {
-            switch (key)
-            {
+        else {
+            switch (key) {
             case "title":
                 if (title != null)
                 stdout.printf("%s\n", title);

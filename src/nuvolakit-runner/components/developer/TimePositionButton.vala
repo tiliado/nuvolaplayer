@@ -22,15 +22,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
 /**
  * Button which shows position inside a time interval and a popover with a slider
  * is shown when the button is clicked.
  */
-public class TimePositionButton: Drtgtk.PopoverButton
-{
+public class TimePositionButton: Drtgtk.PopoverButton {
     public int start_sec {get ; set; default = 0;}
     public int position_sec {get; set; default = 0;}
     public int end_sec {get; set; default = 1;}
@@ -46,8 +44,7 @@ public class TimePositionButton: Drtgtk.PopoverButton
      * @param orientation       The orientation of the slider.
      */
     public TimePositionButton(int start_sec, int end_sec, int position_sec,
-        Gtk.Orientation orientation=Gtk.Orientation.HORIZONTAL)
-    {
+        Gtk.Orientation orientation=Gtk.Orientation.HORIZONTAL) {
         GLib.Object(start_sec: start_sec, end_sec: end_sec, position_sec: position_sec, orientation: orientation);
     }
 
@@ -68,8 +65,7 @@ public class TimePositionButton: Drtgtk.PopoverButton
         scale.value_changed.connect_after(on_value_changed);
     }
 
-    ~TimePositionButton()
-    {
+    ~TimePositionButton() {
         scale.format_value.disconnect(format_time_double);
         notify["position-sec"].disconnect(update_label);
         notify["end-sec"].disconnect(update_label);
@@ -81,13 +77,11 @@ public class TimePositionButton: Drtgtk.PopoverButton
      */
     public signal void position_changed();
 
-    private void update_label()
-    {
+    private void update_label() {
         label = "%s/%s".printf(format_time(position_sec), format_time(end_sec));
     }
 
-    private string format_time(int seconds)
-    {
+    private string format_time(int seconds) {
         var hours = seconds / 3600;
         var result = (hours > 0) ? "%02d:".printf(hours) : "";
         seconds = (seconds - hours * 3600);
@@ -96,21 +90,17 @@ public class TimePositionButton: Drtgtk.PopoverButton
         return result + "%02d:%02d".printf(minutes, seconds);
     }
 
-    private string format_time_double(double seconds)
-    {
+    private string format_time_double(double seconds) {
         return format_time(round_sec(seconds));
     }
 
-    private inline int round_sec(double sec)
-    {
+    private inline int round_sec(double sec) {
         return (int) Math.round(sec);
     }
 
-    private void on_value_changed(Gtk.Range scale)
-    {
+    private void on_value_changed(Gtk.Range scale) {
         var position = round_sec(scale.adjustment.value);
-        if (position_sec != position)
-        {
+        if (position_sec != position) {
             position_sec = position;
             position_changed();
         }

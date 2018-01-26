@@ -22,14 +22,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
 /**
  * Errors in lyrics fetching process
  */
-public errordomain LyricsError
-{
+public errordomain LyricsError {
     /**
      * Artist and song pain leads to invalid id
      */
@@ -44,8 +42,7 @@ public errordomain LyricsError
 /**
  * Interface for lyrics fetchers
  */
-public interface LyricsFetcher: GLib.Object
-{
+public interface LyricsFetcher: GLib.Object {
     /**
      * Fetch lyrics
      *

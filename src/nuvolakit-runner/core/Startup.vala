@@ -24,21 +24,17 @@
 
 namespace Nuvola.Startup {
 
-public int print_web_app_version_stdout(File web_app_dir)
-{
+public int print_web_app_version_stdout(File web_app_dir) {
     return print_web_app_version(stdout, web_app_dir);
 }
 
-public int print_web_app_version(FileStream output, File web_app_dir)
-{
-    try
-    {
+public int print_web_app_version(FileStream output, File web_app_dir) {
+    try {
         var web_app = new WebApp.from_dir(web_app_dir);
         Nuvola.print_version_info(output, web_app);
         return 0;
     }
-    catch (WebAppError e)
-    {
+    catch (WebAppError e) {
         output.puts("### Failed to load web app! ###\n");
         output.printf("### %s ###\n", e.message);
         Nuvola.print_version_info(output, null);
@@ -46,18 +42,15 @@ public int print_web_app_version(FileStream output, File web_app_dir)
     }
 }
 
-public int run_web_app_with_dbus_handshake(File web_app_dir, string[] argv) throws WebAppError
-{
+public int run_web_app_with_dbus_handshake(File web_app_dir, string[] argv) throws WebAppError {
     return launch_app_runner(web_app_dir, null, argv);
 }
 
-public int run_web_app_as_subprocess(File web_app_dir, string api_token, string[] argv) throws WebAppError
-{
+public int run_web_app_as_subprocess(File web_app_dir, string api_token, string[] argv) throws WebAppError {
     return launch_app_runner(web_app_dir, api_token, argv);
 }
 
-private int launch_app_runner(File web_app_dir, string? api_token, string[] argv) throws WebAppError
-{
+private int launch_app_runner(File web_app_dir, string? api_token, string[] argv) throws WebAppError {
     /* We are not ready for Wayland yet.
      * https://github.com/tiliado/nuvolaplayer/issues/181
      * https://github.com/tiliado/nuvolaplayer/issues/240

@@ -29,8 +29,7 @@ namespace Nuvola {
 /**
  * Errors thrown from Nuvola Palyer JavaScript API
  */
-public errordomain JSError
-{
+public errordomain JSError {
     /**
      * An object has not been found
      */
@@ -68,8 +67,7 @@ public errordomain JSError
  * Main method of the main Nuvola Player JavaScript object are implemented here,
  * other helper functions and tools are loaded from a JavaScript file.
  */
-public class JSApi : GLib.Object
-{
+public class JSApi : GLib.Object {
     private const string MAIN_JS = "main.js";
     private const string META_JSON = "metadata.json";
     private const string META_PROPERTY = "meta";
@@ -109,8 +107,7 @@ public class JSApi : GLib.Object
     private bool warn_on_sync_func;
 
     public JSApi(Drt.Storage storage, File data_dir, File config_dir, Drt.KeyValueStorage config,
-        Drt.KeyValueStorage session, uint[] webkit_version, uint[] libsoup_version, bool warn_on_sync_func)
-    {
+        Drt.KeyValueStorage session, uint[] webkit_version, uint[] libsoup_version, bool warn_on_sync_func) {
         this.storage = storage;
         this.data_dir = data_dir;
         this.config_dir = config_dir;
@@ -121,19 +118,16 @@ public class JSApi : GLib.Object
         this.warn_on_sync_func = warn_on_sync_func;
     }
 
-    public static bool is_supported(int api_major, int api_minor)
-    {
+    public static bool is_supported(int api_major, int api_minor) {
         var api_version = API_VERSION_MAJOR * 100 + API_VERSION_MINOR + (VERSION_BUGFIX > 0 ? 1 : 0);
         return api_major >= 3 && api_major * 100 + api_minor <= api_version;
     }
 
-    public uint get_webkit_version()
-    {
+    public uint get_webkit_version() {
         return webkit_version[0] * 10000 + webkit_version[1] * 100 + webkit_version[2];
     }
 
-    public uint get_libsoup_version()
-    {
+    public uint get_libsoup_version() {
         return libsoup_version[0] * 10000 + libsoup_version[1] * 100 + libsoup_version[2];
     }
 
@@ -158,8 +152,7 @@ public class JSApi : GLib.Object
      *
      * @param env    JavaScript environment to use for injection
      */
-    public void inject(JsEnvironment env, HashTable<string, Variant?>? properties=null) throws JSError
-    {
+    public void inject(JsEnvironment env, HashTable<string, Variant?>? properties=null) throws JSError {
         this.env = null;
         unowned JS.Context ctx = env.context;
         if (klass == null)
@@ -198,11 +191,9 @@ public class JSApi : GLib.Object
         main_object.unprotect(ctx);
 
         File? main_js = storage.user_data_dir.get_child(JS_DIR).get_child(MAIN_JS);
-        if (!main_js.query_exists())
-        {
+        if (!main_js.query_exists()) {
             main_js = null;
-            foreach (var dir in storage.data_dirs)
-            {
+            foreach (var dir in storage.data_dirs) {
                 main_js = dir.get_child(JS_DIR).get_child(MAIN_JS);
                 if (main_js.query_exists())
                 break;
@@ -213,12 +204,10 @@ public class JSApi : GLib.Object
         if (main_js == null)
         throw new JSError.INITIALIZATION_FAILED("Failed to find a core component main.js. This probably means the application has not been installed correctly or that component has been accidentally deleted.");
 
-        try
-        {
+        try {
             env.execute_script_from_file(main_js);
         }
-        catch (JSError e)
-        {
+        catch (JSError e) {
             throw new JSError.INITIALIZATION_FAILED("Failed to initialize a core component main.js located at '%s'. Initialization exited with error:\n\n%s", main_js.get_path(), e.message);
         }
 
@@ -227,12 +216,10 @@ public class JSApi : GLib.Object
         throw new JSError.INITIALIZATION_FAILED("Failed to find a web app component %s. This probably means the web app integration has not been installed correctly or that component has been accidentally deleted.", META_JSON);
 
         string meta_json_data;
-        try
-        {
+        try {
             meta_json_data = Drt.System.read_file(meta_json);
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             throw new JSError.INITIALIZATION_FAILED("Failed load a web app component %s. This probably means the web app integration has not been installed correctly or that component has been accidentally deleted.\n\n%s", META_JSON, e.message);
         }
 
@@ -241,23 +228,19 @@ public class JSApi : GLib.Object
         this.env = env;
     }
 
-    public void initialize(JsEnvironment env) throws JSError
-    {
+    public void initialize(JsEnvironment env) throws JSError {
         integrate(env);
     }
 
-    public void integrate(JsEnvironment env) throws JSError
-    {
+    public void integrate(JsEnvironment env) throws JSError {
         var integrate_js = data_dir.get_child(INTEGRATE_JS);
         if (!integrate_js.query_exists())
         throw new JSError.INITIALIZATION_FAILED("Failed to find a web app component %s. This probably means the web app integration has not been installed correctly or that component has been accidentally deleted.", INTEGRATE_JS);
 
-        try
-        {
+        try {
             env.execute_script_from_file(integrate_js);
         }
-        catch (JSError e)
-        {
+        catch (JSError e) {
             throw new JSError.INITIALIZATION_FAILED("Failed to initialize a web app component %s located at '%s'. Initialization exited with error:\n\n%s", INTEGRATE_JS, integrate_js.get_path(), e.message);
         }
     }
@@ -266,8 +249,7 @@ public class JSApi : GLib.Object
      * Default methods of the main object. Other functions are implemented in JavaScript,
      * see file main.js
      */
-    private const JS.StaticFunction[] static_functions =
-    {
+    private const JS.StaticFunction[] static_functions = {
         {"_callIpcMethodVoid", call_ipc_method_void_func, 0},
         {"_callIpcMethodSync", call_ipc_method_sync_func, 0},
         {"_callIpcMethodAsync", call_ipc_method_async_func, 0},
@@ -287,10 +269,8 @@ public class JSApi : GLib.Object
     /**
      * Creates Nuvola Player main object class description
      */
-    private static void create_class()
-    {
-        unowned ClassDefinition class_def =
-        {
+    private static void create_class() {
+        unowned ClassDefinition class_def = {
             1,
             JS.ClassAttribute.None,
             "Nuvola JavaScript API",
@@ -332,22 +312,19 @@ public class JSApi : GLib.Object
         out unowned JS.Value exception, JsFuncCallType type) {
         unowned JS.Value undefined = JS.Value.undefined(ctx);
         exception = null;
-        if (args.length == 0)
-        {
+        if (args.length == 0) {
             exception = create_exception(ctx, "At least one argument required.");
             return undefined;
         }
 
         var name = string_or_null(ctx, args[0]);
-        if (name == null)
-        {
+        if (name == null) {
             exception = create_exception(ctx, "The first argument must be a non-null string");
             return undefined;
         }
 
         var js_api = (self.get_private() as JSApi);
-        if (js_api == null)
-        {
+        if (js_api == null) {
             exception = create_exception(ctx, "JSApi is null");
             return undefined;
         }
@@ -519,8 +496,7 @@ public class JSApi : GLib.Object
     }
 
     static unowned JS.Value key_value_storage_set_value_func(Context ctx, JS.Object function, JS.Object self,
-        JS.Value[] args, out unowned JS.Value exception, JsFuncCallType type)
-    {
+        JS.Value[] args, out unowned JS.Value exception, JsFuncCallType type) {
         unowned JS.Value undefined = JS.Value.undefined(ctx);
         exception = null;
         if (args.length != (type == JsFuncCallType.ASYNC ? 4 : 3)) {
@@ -632,23 +608,17 @@ public class JSApi : GLib.Object
         return undefined;
     }
 
-    static unowned JS.Value log_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)
-    {
+    static unowned JS.Value log_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception) {
         exception = null;
-        for (var i = 0; i < args.length; i++)
-        {
-            if (args[i].is_undefined(ctx))
-            {
+        for (var i = 0; i < args.length; i++) {
+            if (args[i].is_undefined(ctx)) {
                 debug("Nuvola.log: undefined");
             }
-            else
-            {
-                try
-                {
+            else {
+                try {
                     debug("Nuvola.log: %s", variant_from_value(ctx, args[i]).print(false));
                 }
-                catch (JSError e)
-                {
+                catch (JSError e) {
                     warning("Nuvola.log (JSError): %s", e.message);
                 }
             }
@@ -656,23 +626,17 @@ public class JSApi : GLib.Object
         return JS.Value.undefined(ctx);
     }
 
-    static unowned JS.Value warn_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception)
-    {
+    static unowned JS.Value warn_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception) {
         exception = null;
-        for (var i = 0; i < args.length; i++)
-        {
-            if (args[i].is_undefined(ctx))
-            {
+        for (var i = 0; i < args.length; i++) {
+            if (args[i].is_undefined(ctx)) {
                 warning("Nuvola.warn: undefined");
             }
-            else
-            {
-                try
-                {
+            else {
+                try {
                     warning("Nuvola.warn: %s", variant_from_value(ctx, args[i]).print(false));
                 }
-                catch (JSError e)
-                {
+                catch (JSError e) {
                     warning("Nuvola.warn (JSError): %s", e.message);
                 }
             }

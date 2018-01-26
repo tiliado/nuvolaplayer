@@ -22,11 +22,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
-public interface ActionsKeyBinder: GLib.Object
-{
+public interface ActionsKeyBinder: GLib.Object {
     public signal void action_activated(string action, ref bool handled);
     public abstract string? get_keybinding(string name);
     public abstract bool set_keybinding(string name, string? keybinding);

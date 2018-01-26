@@ -24,8 +24,7 @@
 
 namespace Nuvola {
 
-public class WebAppList : Gtk.Grid
-{
+public class WebAppList : Gtk.Grid {
     public WebAppListView view {get; private set;}
     public WebAppListFilter model {get; private set;}
     public string? category {get; set; default = null;}
@@ -37,8 +36,7 @@ public class WebAppList : Gtk.Grid
     private Gtk.Label app_version;
     private Gtk.Label app_maintainer;
 
-    public WebAppList(MasterController app, WebAppListFilter model)
-    {
+    public WebAppList(MasterController app, WebAppListFilter model) {
         this.app = app;
         app.actions.get_action(Actions.START_APP).enabled = false;
         this.model = model;
@@ -109,15 +107,13 @@ public class WebAppList : Gtk.Grid
             "category", categories, "category", GLib.BindingFlags.BIDIRECTIONAL|GLib.BindingFlags.SYNC_CREATE);
     }
 
-    private void on_selection_changed()
-    {
+    private void on_selection_changed() {
         var items = view.get_selected_items();
         Gtk.TreePath? path = null;
         foreach (var my_path in items)
         path = my_path;
 
-        if (path == null)
-        {
+        if (path == null) {
             details.hide();
             selected_web_app = null;
             app.actions.get_action(Actions.START_APP).enabled = false;
@@ -126,8 +122,7 @@ public class WebAppList : Gtk.Grid
 
         var model = view.get_model();
         Gtk.TreeIter iter;
-        if (!model.get_iter(out iter, path))
-        {
+        if (!model.get_iter(out iter, path)) {
             details.hide();
             selected_web_app = null;
             app.actions.get_action(Actions.START_APP).enabled = false;
@@ -156,8 +151,7 @@ public class WebAppList : Gtk.Grid
         app.actions.get_action(Actions.START_APP).enabled = true;
     }
 
-    private void on_category_changed(GLib.Object o, ParamSpec param)
-    {
+    private void on_category_changed(GLib.Object o, ParamSpec param) {
         model.category = category;
         categories.visible = category == null;
     }

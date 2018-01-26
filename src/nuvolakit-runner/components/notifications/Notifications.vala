@@ -25,11 +25,9 @@
 
 // https://people.gnome.org/~mccann/docs/notification-spec/notification-spec-latest.html
 
-namespace Nuvola
-{
+namespace Nuvola {
 
-public class Notification
-{
+public class Notification {
     public bool resident {get; private set; default = false;}
     private Notify.Notification notification = null;
     private string icon_path = "";
@@ -38,13 +36,11 @@ public class Notification
     private string category = "";
     private uint timeout_id = 0;
 
-    public Notification(string desktop_entry)
-    {
+    public Notification(string desktop_entry) {
         this.desktop_entry = desktop_entry;
     }
 
-    public void update(string? summary, string? body, string? icon_name, string? icon_path, bool resident, string category)
-    {
+    public void update(string? summary, string? body, string? icon_name, string? icon_path, bool resident, string category) {
         if (notification == null)
         notification = new Notify.Notification(summary ?? "", body ?? "", icon_name ?? "");
         else
@@ -55,34 +51,28 @@ public class Notification
         this.category = category;
     }
 
-    public void set_actions(Drtgtk.Action[] actions)
-    {
+    public void set_actions(Drtgtk.Action[] actions) {
         this.actions = actions;
     }
 
-    public void remove_actions()
-    {
+    public void remove_actions() {
         this.actions = {};
     }
 
-    public void show(bool add_actions)
-    {
+    public void show(bool add_actions) {
         if (notification == null)
         return;
 
         notification.clear_hints();
         notification.clear_actions();
 
-        if (icon_path != "")
-        {
-            try
-            {
+        if (icon_path != "") {
+            try {
                 // Pass actual image data over dbus instead of a filename to
                 // prevent caching. LP:1099825
                 notification.set_image_from_pixbuf(new Gdk.Pixbuf.from_file(icon_path));
             }
-            catch(GLib.Error e)
-            {
+            catch(GLib.Error e) {
                 warning("Failed to icon %s: %s", icon_path, e.message);
             }
         }
@@ -97,8 +87,7 @@ public class Notification
 
         notification.set_hint("desktop-entry", desktop_entry);
 
-        if (add_actions)
-        {
+        if (add_actions) {
             notification.set_hint("action-icons", true);
 
             foreach (var action in actions)
@@ -111,31 +100,25 @@ public class Notification
         timeout_id = Timeout.add(100, show_cb);
     }
 
-    public bool close()
-    {
-        try
-        {
+    public bool close() {
+        try {
             if (notification != null)
             notification.close();
             return true;
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             warning("Failed to close notification: %s", e.message);
             return false;
         }
     }
 
-    private bool show_cb()
-    {
+    private bool show_cb() {
         timeout_id = 0;
 
-        try
-        {
+        try {
             notification.show();
         }
-        catch(Error e)
-        {
+        catch(Error e) {
             warning("Unable to show notification: %s", e.message);
         }
         return false;
@@ -146,8 +129,7 @@ public class Notification
 /**
  * Manages notifications
  */
-public class Notifications : GLib.Object, NotificationsInterface, NotificationInterface
-{
+public class Notifications : GLib.Object, NotificationsInterface, NotificationInterface {
     public bool running {get; private set; default = false;}
     private AppRunnerController app;
     private ActionsHelper actions_helper;
@@ -156,15 +138,13 @@ public class Notifications : GLib.Object, NotificationsInterface, NotificationIn
     private bool persistence_supported = false;
     private bool icons_supported = false;
 
-    public Notifications(AppRunnerController app, ActionsHelper actions_helper)
-    {
+    public Notifications(AppRunnerController app, ActionsHelper actions_helper) {
         this.app = app;
         this.actions_helper = actions_helper;
         notifications = new HashTable<string, Notification>(str_hash, str_equal);
     }
 
-    public void start()
-    {
+    public void start() {
         return_if_fail(!running);
         running = true;
         Notify.init(app.app_name);
@@ -175,24 +155,20 @@ public class Notifications : GLib.Object, NotificationsInterface, NotificationIn
         debug(@"Notifications: persistence $persistence_supported, actions $actions_supported, icons $icons_supported");
     }
 
-    public void stop()
-    {
+    public void stop() {
         return_if_fail(running);
         running = false;
-        notifications.foreach_remove((key, notification) =>
-            {
-                notification.close();
-                return true; // remove
-            });
+        notifications.foreach_remove((key, notification) => {
+            notification.close();
+            return true; // remove
+        });
         // TODO: close anonymous notifications
         Notify.uninit();
     }
 
-    public Notification get_or_create(string name)
-    {
+    public Notification get_or_create(string name) {
         var notification = notifications[name];
-        if (notification == null)
-        {
+        if (notification == null) {
             notification = new Notification(app.app_id);
             notifications[name] = notification;
         }
@@ -200,17 +176,14 @@ public class Notifications : GLib.Object, NotificationsInterface, NotificationIn
         return notification;
     }
 
-    public bool update(string name, string summary, string body, string? icon_name, string? icon_path, bool resident, string category)
-    {
+    public bool update(string name, string summary, string body, string? icon_name, string? icon_path, bool resident, string category) {
         get_or_create(name).update(summary, body, icon_name, icon_path, persistence_supported && resident, category);
         return Binding.CONTINUE;
     }
 
-    public bool set_actions(string name, string[] actions)
-    {
+    public bool set_actions(string name, string[] actions) {
         Drtgtk.Action[] actions_found = {};
-        foreach (var action_name in actions)
-        {
+        foreach (var action_name in actions) {
             var action = app.actions.get_action(action_name);
             if (action != null)
             actions_found += action;
@@ -222,14 +195,12 @@ public class Notifications : GLib.Object, NotificationsInterface, NotificationIn
         return Binding.CONTINUE;
     }
 
-    public bool remove_actions(string name)
-    {
+    public bool remove_actions(string name) {
         get_or_create(name).remove_actions();
         return Binding.CONTINUE;
     }
 
-    public bool show(string name, bool force)
-    {
+    public bool show(string name, bool force) {
         var notification = get_or_create(name);
         var add_actions = actions_supported && icons_supported;
 
@@ -238,10 +209,8 @@ public class Notifications : GLib.Object, NotificationsInterface, NotificationIn
         return Binding.CONTINUE;
     }
 
-    public bool show_anonymous(string summary, string body, string? icon_name, string? icon_path, bool force, string category)
-    {
-        if (force || !app.main_window.is_active)
-        {
+    public bool show_anonymous(string summary, string body, string? icon_name, string? icon_path, bool force, string category) {
+        if (force || !app.main_window.is_active) {
             var notification = new Notification(app.app_id);
             notification.update(summary, body, icon_name, icon_path, false, category);
             notification.show(false);
@@ -249,8 +218,7 @@ public class Notifications : GLib.Object, NotificationsInterface, NotificationIn
         return Binding.CONTINUE;
     }
 
-    public bool is_persistence_supported(ref bool supported)
-    {
+    public bool is_persistence_supported(ref bool supported) {
         if (!supported && persistence_supported)
         supported = true;
 

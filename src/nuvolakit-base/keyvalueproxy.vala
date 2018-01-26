@@ -24,30 +24,25 @@
 
 namespace Nuvola {
 
-public class KeyValueProxy: GLib.Object, Drt.KeyValueStorage
-{
+public class KeyValueProxy: GLib.Object, Drt.KeyValueStorage {
     public Drt.Lst<Drt.PropertyBinding> property_bindings {get; protected set;}
     private Drt.RpcChannel channel;
     private string prefix;
 
-    public KeyValueProxy(Drt.RpcChannel channel, string prefix)
-    {
+    public KeyValueProxy(Drt.RpcChannel channel, string prefix) {
         property_bindings = new Drt.Lst<Drt.PropertyBinding>();
         this.channel = channel;
         this.prefix = prefix;
     }
 
-    public bool has_key(string key)
-    {
-        try
-        {
+    public bool has_key(string key) {
+        try {
             var response = channel.call_sync("/nuvola/core/" + prefix + "-has-key", new Variant("(s)", key));
             if (response.is_of_type(VariantType.BOOLEAN))
             return response.get_boolean();
             critical("Invalid response to KeyValueProxy.has_key: %s", response.print(false));
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             critical("Master client error: %s", e.message);
         }
         return false;
@@ -66,15 +61,12 @@ public class KeyValueProxy: GLib.Object, Drt.KeyValueStorage
         return false;
     }
 
-    public Variant? get_value(string key)
-    {
-        try
-        {
+    public Variant? get_value(string key) {
+        try {
             var response = channel.call_sync("/nuvola/core/"+ prefix + "-get-value", new Variant("(s)", key));
             return response;
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             critical("Master client error: %s", e.message);
             return null;
         }
@@ -89,14 +81,11 @@ public class KeyValueProxy: GLib.Object, Drt.KeyValueStorage
         }
     }
 
-    protected void set_value_unboxed(string key, Variant? value)
-    {
-        try
-        {
+    protected void set_value_unboxed(string key, Variant? value) {
+        try {
             channel.call_sync("/nuvola/core/" + prefix + "-set-value", new Variant("(smv)", key, value));
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             critical("Master client error: %s", e.message);
         }
     }
@@ -109,14 +98,11 @@ public class KeyValueProxy: GLib.Object, Drt.KeyValueStorage
         }
     }
 
-    protected void set_default_value_unboxed(string key, Variant? value)
-    {
-        try
-        {
+    protected void set_default_value_unboxed(string key, Variant? value) {
+        try {
             channel.call_sync("/nuvola/core/" + prefix + "-set-default-value", new Variant("(smv)", key, value));
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             critical("Master client error: %s", e.message);
         }
     }
@@ -129,8 +115,7 @@ public class KeyValueProxy: GLib.Object, Drt.KeyValueStorage
         }
     }
 
-    public void unset(string key)
-    {
+    public void unset(string key) {
         warn_if_reached(); // FIXME
     }
 

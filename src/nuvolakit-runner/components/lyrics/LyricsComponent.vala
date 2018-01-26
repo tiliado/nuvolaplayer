@@ -22,19 +22,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
-public class LyricsComponent: Component
-{
+public class LyricsComponent: Component {
     #if !NUVOLA_LITE
     private Bindings bindings;
     private AppRunnerController app;
     private LyricsSidebar? sidebar = null;
     #endif
 
-    public LyricsComponent(AppRunnerController app, Bindings bindings, Drt.KeyValueStorage config)
-    {
+    public LyricsComponent(AppRunnerController app, Bindings bindings, Drt.KeyValueStorage config) {
         base("lyrics", "Lyrics", "Shows lyrics for the current song.");
         #if !NUVOLA_LITE
         this.bindings = bindings;
@@ -47,8 +44,7 @@ public class LyricsComponent: Component
     }
 
     #if !NUVOLA_LITE
-    protected override bool activate()
-    {
+    protected override bool activate() {
         SList<LyricsFetcher> fetchers = null;
         fetchers.append(new LyricsFetcherCache(app.storage.get_cache_path("lyrics")));
         fetchers.append(new AZLyricsFetcher(app.connection.session));
@@ -58,8 +54,7 @@ public class LyricsComponent: Component
         return true;
     }
 
-    protected override bool deactivate()
-    {
+    protected override bool deactivate() {
         app.main_window.sidebar.remove_page(sidebar);
         sidebar = null;
         return true;

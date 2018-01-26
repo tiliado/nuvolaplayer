@@ -22,17 +22,14 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
-public class ActionsKeyBinderServer : GLib.Object
-{
+public class ActionsKeyBinderServer : GLib.Object {
     private Drt.RpcBus ipc_bus;
     private ActionsKeyBinder keybinder;
     private unowned Queue<AppRunner> app_runners;
 
-    public class ActionsKeyBinderServer(Drt.RpcBus ipc_bus, ActionsKeyBinder keybinder, Queue<AppRunner> app_runners)
-    {
+    public class ActionsKeyBinderServer(Drt.RpcBus ipc_bus, ActionsKeyBinder keybinder, Queue<AppRunner> app_runners) {
         this.ipc_bus = ipc_bus;
         this.keybinder = keybinder;
         this.app_runners = app_runners;
@@ -65,65 +62,53 @@ public class ActionsKeyBinderServer : GLib.Object
             });
     }
 
-    private void handle_get_keybinding(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_get_keybinding(Drt.RpcRequest request) throws Drt.RpcError {
         var action = request.pop_string();
         request.respond(new Variant("ms", keybinder.get_keybinding(action)));
     }
 
-    private void handle_set_keybinding(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_set_keybinding(Drt.RpcRequest request) throws Drt.RpcError {
         var action = request.pop_string();
         var keybinding = request.pop_string();
         request.respond(new Variant.boolean(keybinder.set_keybinding(action, keybinding)));
     }
 
-    private void handle_bind(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_bind(Drt.RpcRequest request) throws Drt.RpcError {
         var action = request.pop_string();
         request.respond(new Variant.boolean(keybinder.bind(action)));
     }
 
-    private void handle_unbind(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_unbind(Drt.RpcRequest request) throws Drt.RpcError {
         var action = request.pop_string();
         request.respond(new Variant.boolean(keybinder.unbind(action)));
     }
 
-    private void handle_get_action(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_get_action(Drt.RpcRequest request) throws Drt.RpcError {
         var keybinding = request.pop_string();
         request.respond(new Variant("ms", keybinder.get_action(keybinding)));
     }
 
-    private void handle_is_available(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_is_available(Drt.RpcRequest request) throws Drt.RpcError {
         var keybinding = request.pop_string();
         request.respond(new Variant.boolean(keybinder.is_available(keybinding)));
     }
 
-    private void on_action_activated(string name)
-    {
+    private void on_action_activated(string name) {
         unowned List<AppRunner> head = app_runners.head;
         var handled = false;
-        foreach (var app_runner in head)
-        {
-            try
-            {
+        foreach (var app_runner in head) {
+            try {
                 var response = app_runner.call_sync("/nuvola/actionkeybinder/action-activated", new Variant("(s)", name));
-                if (!Drt.variant_bool(response, ref handled))
-                {
+                if (!Drt.variant_bool(response, ref handled)) {
                     warning("Got invalid response from %s instance %s: %s\n", Nuvola.get_app_name(), app_runner.app_id,
                         response == null ? "null" : response.print(true));
                 }
-                else if (handled)
-                {
+                else if (handled) {
                     debug("Action %s was handled in %s.", name, app_runner.app_id);
                     break;
                 }
             }
-            catch (GLib.Error e)
-            {
+            catch (GLib.Error e) {
                 warning("Communication with app runner %s for action %s failed. %s", app_runner.app_id, name, e.message);
             }
         }

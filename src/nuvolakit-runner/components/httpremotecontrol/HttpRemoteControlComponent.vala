@@ -22,19 +22,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola.HttpRemoteControl
-{
+namespace Nuvola.HttpRemoteControl {
 
-public class Component: Nuvola.Component
-{
+public class Component: Nuvola.Component {
     #if EXPERIMENTAL
     private Bindings bindings;
     private AppRunnerController app;
     private IpcBus ipc_bus;
     #endif
 
-    public Component(AppRunnerController app, Bindings bindings, Drt.KeyValueStorage config, IpcBus ipc_bus)
-    {
+    public Component(AppRunnerController app, Bindings bindings, Drt.KeyValueStorage config, IpcBus ipc_bus) {
         base("httpremotecontrol", "Remote control over HTTP (experimental)", "Remote media player HTTP interface for control over network.");
         this.required_membership = TiliadoMembership.PREMIUM;
         this.has_settings = true;
@@ -49,54 +46,44 @@ public class Component: Nuvola.Component
     }
 
     #if EXPERIMENTAL
-    public override Gtk.Widget? get_settings()
-    {
+    public override Gtk.Widget? get_settings() {
         return new Settings(app, ipc_bus);
     }
 
-    protected override bool activate()
-    {
+    protected override bool activate() {
         register(true);
         return true;
     }
 
-    protected override bool deactivate()
-    {
+    protected override bool deactivate() {
         register(false);
         return true;
     }
 
-    private void register(bool register)
-    {
+    private void register(bool register) {
         var method = "/nuvola/httpremotecontrol/" + (register ? "register" : "unregister");
-        try
-        {
+        try {
             ipc_bus.master.call_sync(method, new Variant("(s)", app.web_app.id));
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             warning("Remote call %s failed: %s", method, e.message);
         }
     }
 
-    private class Settings : Gtk.Grid
-    {
+    private class Settings : Gtk.Grid {
         private IpcBus ipc_bus;
         private AppRunnerController app;
         private uint port = 0;
 
-        public Settings(AppRunnerController app, IpcBus ipc_bus)
-        {
+        public Settings(AppRunnerController app, IpcBus ipc_bus) {
             GLib.Object(row_spacing: 5, column_spacing: 10, hexpand: true, halign: Gtk.Align.CENTER);
             this.app = app;
             this.ipc_bus = ipc_bus;
             load.begin((o, res) => {load.end(res);});
         }
 
-        private async void load()
-        {
-            try
-            {
+        private async void load() {
+            try {
                 var addresses = yield ipc_bus.master.call("/nuvola/httpremotecontrol/get-addresses", null);
                 port = Drt.variant_to_uint(yield ipc_bus.master.call("/nuvola/httpremotecontrol/get-port", null));
                 return_if_fail(addresses != null);
@@ -136,8 +123,7 @@ public class Component: Nuvola.Component
                 spin.halign = Gtk.Align.CENTER;
                 spin.notify["value"].connect_after(on_spin_value_changed);
                 attach(spin, 2, line, 1, 1);
-                while (iter.next("(ssb)", out address, out name, out enabled))
-                {
+                while (iter.next("(ssb)", out address, out name, out enabled)) {
                     line++;
                     label = new Gtk.Label(name);
                     label.hexpand = true;
@@ -158,8 +144,7 @@ public class Component: Nuvola.Component
                     button.clicked.connect(on_home_button_clicked);
                     attach(button, 3, line, 1, 1);
                 }
-                if (nm_error != null)
-                {
+                if (nm_error != null) {
                     label = new Gtk.Label("<b>Network Manager Error</b>");
                     label.use_markup = true;
                     label.margin = 10;
@@ -173,42 +158,34 @@ public class Component: Nuvola.Component
                 }
                 show_all();
             }
-            catch (GLib.Error e)
-            {
+            catch (GLib.Error e) {
                 warning("Failed to get addresses. %s", e.message);
             }
         }
 
-        private void on_switch_switched(GLib.Object o, ParamSpec p)
-        {
+        private void on_switch_switched(GLib.Object o, ParamSpec p) {
             var toggle = o as Gtk.Switch;
             unowned string address = o.get_data<string>("address");
-            try
-            {
+            try {
                 ipc_bus.master.call_sync("/nuvola/httpremotecontrol/set-address-enabled", new Variant("(sb)", address, toggle.active));
             }
-            catch (GLib.Error e)
-            {
+            catch (GLib.Error e) {
                 warning("Failed to set address enabled. %s", e.message);
             }
         }
 
-        private void on_spin_value_changed(GLib.Object o, ParamSpec p)
-        {
+        private void on_spin_value_changed(GLib.Object o, ParamSpec p) {
             var spin = o as Gtk.SpinButton;
             port = (uint) spin.get_value_as_int();
-            try
-            {
+            try {
                 ipc_bus.master.call_sync("/nuvola/httpremotecontrol/set-port", new Variant("(i)", spin.get_value_as_int()));
             }
-            catch (GLib.Error e)
-            {
+            catch (GLib.Error e) {
                 warning("Failed to set address enabled. %s", e.message);
             }
         }
 
-        private void on_home_button_clicked(Gtk.Button button)
-        {
+        private void on_home_button_clicked(Gtk.Button button) {
             unowned string address = button.get_data<string>("address");
             app.show_uri("http://%s:%u/mediaplayer".printf(address, port));
         }

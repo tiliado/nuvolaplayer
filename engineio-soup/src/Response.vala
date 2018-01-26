@@ -21,19 +21,16 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-namespace Engineio
-{
+namespace Engineio {
 
-public class Response
-{
+public class Response {
     public HashTable<string, string> headers {get; private set;}
     public Soup.Message? msg {get; private set;}
     public uint status_code {get; set;}
     private Soup.Server? server;
 
 
-    public Response(Soup.Server server, Soup.Message msg)
-    {
+    public Response(Soup.Server server, Soup.Message msg) {
         this.server = server;
         this.msg = msg;
         this.status_code = 500;
@@ -41,8 +38,7 @@ public class Response
         server.pause_message(msg);
     }
 
-    public void reset(Soup.Server server, Soup.Message msg)
-    {
+    public void reset(Soup.Server server, Soup.Message msg) {
         this.server = server;
         this.msg = msg;
         this.status_code = 500;
@@ -50,19 +46,16 @@ public class Response
         server.pause_message(msg);
     }
 
-    public void end_bytes(owned Bytes data)
-    {
+    public void end_bytes(owned Bytes data) {
         uint8[] buffer = Bytes.unref_to_data((owned) data);
         end((owned) buffer);
     }
 
-    public void end_string(owned string data)
-    {
+    public void end_string(owned string data) {
         end(data.data);
     }
 
-    public void end(owned uint8[]? buffer=null)
-    {
+    public void end(owned uint8[]? buffer=null) {
         return_if_fail(msg != null);
         unowned string header;
         unowned string value;

@@ -22,17 +22,14 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
-public class MPRISComponent: Component
-{
+public class MPRISComponent: Component {
     private Bindings bindings;
     private Drtgtk.Application app;
     private MPRISProvider? mpris = null;
 
-    public MPRISComponent(Drtgtk.Application app, Bindings bindings, Drt.KeyValueStorage config)
-    {
+    public MPRISComponent(Drtgtk.Application app, Bindings bindings, Drt.KeyValueStorage config) {
         base("mpris", "MPRIS 2", "Remote media player interface used by Unity sound indicator and similar applets.");
         this.bindings = bindings;
         this.app = app;
@@ -40,15 +37,13 @@ public class MPRISComponent: Component
         auto_activate = false;
     }
 
-    protected override bool activate()
-    {
+    protected override bool activate() {
         mpris = new MPRISProvider(app, bindings.get_model<MediaPlayerModel>());
         mpris.start();
         return true;
     }
 
-    protected override bool deactivate()
-    {
+    protected override bool deactivate() {
         mpris.stop();
         mpris = null;
         return true;

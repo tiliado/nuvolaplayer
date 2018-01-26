@@ -24,53 +24,42 @@
 
 namespace Nuvola {
 
-public class TiliadoActivationClient : GLib.Object, TiliadoActivation
-{
+public class TiliadoActivationClient : GLib.Object, TiliadoActivation {
     private Drt.RpcChannel master_conn;
     private TiliadoApi2.User? cached_user = null;
     private bool cached_user_set = false;
 
-    public TiliadoActivationClient(Drt.RpcChannel master_conn)
-    {
+    public TiliadoActivationClient(Drt.RpcChannel master_conn) {
         this.master_conn = master_conn;
-        subscribe.begin((o, res) =>
-            {
-                try
-                {
-                    subscribe.end(res);
-                }
-                catch (GLib.Error e)
-                {
-                    warning("Failed to subscribe to notifications. %s", e.message);
-                }
-            });
+        subscribe.begin((o, res) => {
+            try {
+                subscribe.end(res);
+            }
+            catch (GLib.Error e) {
+                warning("Failed to subscribe to notifications. %s", e.message);
+            }
+        });
         this.master_conn.router.notification.connect(on_notification_received);
     }
 
-    ~TiliadoActivationClient()
-    {
+    ~TiliadoActivationClient() {
         unsubscribe(master_conn);
         this.master_conn.router.notification.disconnect(on_notification_received);
     }
 
     /* Static methods are used not to ref self in destructor which would fail because the ref_cout is already 0. */
-    private static void unsubscribe(Drt.RpcChannel master_conn)
-    {
-        unsubscribe_async.begin(master_conn, (o, res) =>
-            {
-                try
-                {
-                    unsubscribe_async.end(res);
-                }
-                catch (GLib.Error e)
-                {
-                    warning("Failed to unsubscribe to notifications. %s", e.message);
-                }
-            });
+    private static void unsubscribe(Drt.RpcChannel master_conn) {
+        unsubscribe_async.begin(master_conn, (o, res) => {
+            try {
+                unsubscribe_async.end(res);
+            }
+            catch (GLib.Error e) {
+                warning("Failed to unsubscribe to notifications. %s", e.message);
+            }
+        });
     }
 
-    private async void subscribe() throws GLib.Error
-    {
+    private async void subscribe() throws GLib.Error {
         yield master_conn.subscribe(TiliadoActivationManager.ACTIVATION_STARTED);
         yield master_conn.subscribe(TiliadoActivationManager.ACTIVATION_CANCELLED);
         yield master_conn.subscribe(TiliadoActivationManager.ACTIVATION_FAILED);
@@ -78,8 +67,7 @@ public class TiliadoActivationClient : GLib.Object, TiliadoActivation
         yield master_conn.subscribe(TiliadoActivationManager.USER_INFO_UPDATED);
     }
 
-    private static async void unsubscribe_async(Drt.RpcChannel master_conn) throws GLib.Error
-    {
+    private static async void unsubscribe_async(Drt.RpcChannel master_conn) throws GLib.Error {
         yield master_conn.unsubscribe(TiliadoActivationManager.ACTIVATION_STARTED);
         yield master_conn.unsubscribe(TiliadoActivationManager.ACTIVATION_CANCELLED);
         yield master_conn.unsubscribe(TiliadoActivationManager.ACTIVATION_FAILED);
@@ -87,10 +75,8 @@ public class TiliadoActivationClient : GLib.Object, TiliadoActivation
         yield master_conn.unsubscribe(TiliadoActivationManager.USER_INFO_UPDATED);
     }
 
-    private void on_notification_received(GLib.Object source, string name, string? detail, Variant? parameters)
-    {
-        switch (name)
-        {
+    private void on_notification_received(GLib.Object source, string name, string? detail, Variant? parameters) {
+        switch (name) {
         case TiliadoActivationManager.ACTIVATION_STARTED:
             activation_started(parameters.get_string());
             break;
@@ -109,92 +95,72 @@ public class TiliadoActivationClient : GLib.Object, TiliadoActivation
         }
     }
 
-    private TiliadoApi2.User? cache_user(TiliadoApi2.User? user)
-    {
+    private TiliadoApi2.User? cache_user(TiliadoApi2.User? user) {
         cached_user_set = true;
         cached_user = user;
         return user;
     }
 
-    public TiliadoApi2.User? get_user_info()
-    {
+    public TiliadoApi2.User? get_user_info() {
         if (cached_user_set)
         return cached_user;
 
         string METHOD = "/tiliado-activation/get-user-info";
-        try
-        {
+        try {
             return cache_user(TiliadoApi2.User.from_variant(master_conn.call_sync(METHOD, null)));
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             warning("%s call failed: %s", METHOD, e.message);
         }
         return null;
     }
 
-    public void update_user_info()
-    {
+    public void update_user_info() {
         string METHOD = "/tiliado-activation/update-user-info";
-        master_conn.call.begin(METHOD, null, (o, res) =>
-            {
-                try
-                {
-                    master_conn.call.end(res);
-                }
-                catch (GLib.Error e)
-                {
-                    warning("%s call failed: %s", METHOD, e.message);
-                }
-            });
+        master_conn.call.begin(METHOD, null, (o, res) => {
+            try {
+                master_conn.call.end(res);
+            }
+            catch (GLib.Error e) {
+                warning("%s call failed: %s", METHOD, e.message);
+            }
+        });
     }
 
-    public void start_activation()
-    {
+    public void start_activation() {
         string METHOD = "/tiliado-activation/start-activation";
-        master_conn.call.begin(METHOD, null, (o, res) =>
-            {
-                try
-                {
-                    master_conn.call.end(res);
-                }
-                catch (GLib.Error e)
-                {
-                    warning("%s call failed: %s", METHOD, e.message);
-                }
-            });
+        master_conn.call.begin(METHOD, null, (o, res) => {
+            try {
+                master_conn.call.end(res);
+            }
+            catch (GLib.Error e) {
+                warning("%s call failed: %s", METHOD, e.message);
+            }
+        });
     }
 
-    public void cancel_activation()
-    {
+    public void cancel_activation() {
         string METHOD = "/tiliado-activation/cancel-activation";
-        master_conn.call.begin(METHOD, null, (o, res) =>
-            {
-                try
-                {
-                    master_conn.call.end(res);
-                }
-                catch (GLib.Error e)
-                {
-                    warning("%s call failed: %s", METHOD, e.message);
-                }
-            });
+        master_conn.call.begin(METHOD, null, (o, res) => {
+            try {
+                master_conn.call.end(res);
+            }
+            catch (GLib.Error e) {
+                warning("%s call failed: %s", METHOD, e.message);
+            }
+        });
     }
 
-    public void drop_activation()
-    {
+    public void drop_activation() {
         string METHOD = "/tiliado-activation/drop-activation";
-        master_conn.call.begin(METHOD, null, (o, res) =>
-            {
-                try
-                {
-                    master_conn.call.end(res);
-                }
-                catch (GLib.Error e)
-                {
-                    warning("%s call failed: %s", METHOD, e.message);
-                }
-            });
+        master_conn.call.begin(METHOD, null, (o, res) => {
+            try {
+                master_conn.call.end(res);
+            }
+            catch (GLib.Error e) {
+                warning("%s call failed: %s", METHOD, e.message);
+            }
+        });
     }
 }
 

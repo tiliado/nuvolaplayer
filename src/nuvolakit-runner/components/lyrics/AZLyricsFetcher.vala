@@ -22,15 +22,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
 
 /**
  * Lyric fetcher for [[http://www.azlyrics.com/|AZ Lyrics]].
  */
-public class AZLyricsFetcher : GLib.Object, LyricsFetcher
-{
+public class AZLyricsFetcher : GLib.Object, LyricsFetcher {
     public Soup.Session session {get; construct set;}
     /**
      * URL format of AZ Lyrics
@@ -38,15 +36,12 @@ public class AZLyricsFetcher : GLib.Object, LyricsFetcher
     private const string SONG_PAGE = "http://www.azlyrics.com/lyrics/%s/%s.html";
     private Regex html_tags;
 
-    public AZLyricsFetcher(Soup.Session session)
-    {
+    public AZLyricsFetcher(Soup.Session session) {
         GLib.Object(session: session);
-        try
-        {
+        try {
             html_tags = new Regex("</?\\w+?( /)?>", RegexCompileFlags.CASELESS);
         }
-        catch (RegexError e)
-        {
+        catch (RegexError e) {
             error("RegexError: %s", e.message);
         }
     }
@@ -54,17 +49,15 @@ public class AZLyricsFetcher : GLib.Object, LyricsFetcher
     /**
      * {@inheritDoc}
      */
-    public async string fetch_lyrics(string artist, string song) throws LyricsError
-    {
+    public async string fetch_lyrics(string artist, string song) throws LyricsError {
         Soup.Message message;
         var url = SONG_PAGE.printf(transform_name(artist), transform_name(song));
         message = new Soup.Message("GET", url);
 
         SourceFunc callback = fetch_lyrics.callback;
-        session.queue_message(message, () =>
-            {
-                Idle.add((owned) callback);
-            });
+        session.queue_message(message, () => {
+            Idle.add((owned) callback);
+        });
         yield;
 
         var response = (string) message.response_body.flatten().data;
@@ -78,24 +71,19 @@ public class AZLyricsFetcher : GLib.Object, LyricsFetcher
         return response;
     }
 
-    private string parse_response(string response)
-    {
+    private string parse_response(string response) {
         const string START = "<!-- Usage of azlyrics.com content";
         const string END = "</div>";
         var start_pos = response.index_of(START);
-        if (start_pos >= 0)
-        {
+        if (start_pos >= 0) {
             start_pos = response.index_of("-->", start_pos) + 4;
             var end_pos = response.index_of(END, start_pos);
-            if (end_pos >= 0)
-            {
+            if (end_pos >= 0) {
                 var lyrics = response.slice(start_pos, end_pos);
-                try
-                {
+                try {
                     lyrics = html_tags.replace_literal(lyrics, lyrics.length, 0, "");
                 }
-                catch (RegexError e)
-                {
+                catch (RegexError e) {
                     warning("RegexError: %s", e.message);
                 }
                 return replace_html_entities(lyrics.strip()) + "\n";
@@ -111,14 +99,12 @@ public class AZLyricsFetcher : GLib.Object, LyricsFetcher
      * @param name        original name
      * @return            transformed name
      */
-    public static string transform_name(string name)
-    {
+    public static string transform_name(string name) {
         var normalized = name.normalize();
         var buffer = new StringBuilder("");
         unichar c;
         int i = 0;
-        while (normalized.get_next_char(ref i, out c))
-        {
+        while (normalized.get_next_char(ref i, out c)) {
             c = c.tolower();
             if (('a' <= c && c <= 'z') || ('0' <= c && c <= '9'))
             buffer.append_unichar(c);
@@ -126,8 +112,7 @@ public class AZLyricsFetcher : GLib.Object, LyricsFetcher
         return buffer.str;
     }
 
-    public static string replace_html_entities(string text)
-    {
+    public static string replace_html_entities(string text) {
         return text.replace("&quot;", "\"").replace("&amp;", "&");
     }
 }

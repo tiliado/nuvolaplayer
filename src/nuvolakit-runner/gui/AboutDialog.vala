@@ -24,10 +24,8 @@
 
 namespace Nuvola {
 
-public void print_version_info(FileStream output, WebApp? web_app)
-{
-    if (web_app != null)
-    {
+public void print_version_info(FileStream output, WebApp? web_app) {
+    if (web_app != null) {
         output.printf("%s script %d.%d\n", web_app.name, web_app.version_major, web_app.version_minor);
         output.printf("Maintainer: %s\n", web_app.maintainer_name);
         output.printf("\n--- Powered by ---\n\n");
@@ -50,10 +48,8 @@ public void print_version_info(FileStream output, WebApp? web_app)
     output.printf("libsoup %u.%u.%u\n", Soup.get_major_version(), Soup.get_minor_version(), Soup.get_micro_version());
 }
 
-public class AboutDialog: Gtk.Dialog
-{
-    public AboutDialog(Gtk.Window? parent, WebApp? web_app, WebOptions[]? web_options)
-    {
+public class AboutDialog: Gtk.Dialog {
+    public AboutDialog(Gtk.Window? parent, WebApp? web_app, WebOptions[]? web_options) {
         GLib.Object(title: "About", transient_for: parent);
         resizable = false;
         add_button("_Close", Gtk.ResponseType.CLOSE);
@@ -64,8 +60,7 @@ public class AboutDialog: Gtk.Dialog
         Gtk.Image? img = null;
         var icon_size = 64;
 
-        if (web_app != null)
-        {
+        if (web_app != null) {
             grid = new Gtk.Grid();
             grid.margin = 10;
             grid.halign = Gtk.Align.FILL;
@@ -75,8 +70,7 @@ public class AboutDialog: Gtk.Dialog
             title.margin = 10;
 
             var pixbuf = web_app.get_icon_pixbuf(icon_size);
-            if (pixbuf != null)
-            {
+            if (pixbuf != null) {
                 img = new Gtk.Image.from_pixbuf(pixbuf);
                 img.valign = img.halign = Gtk.Align.CENTER;
                 title.attach(img, 0, 0, 1, 2);
@@ -113,9 +107,8 @@ public class AboutDialog: Gtk.Dialog
         title.column_spacing = 10;
         title.margin = 10;
 
-        var pixbuf = Drtgtk.Icons.load_theme_icon({Nuvola.get_app_icon()}, icon_size);
-        if (pixbuf != null)
-        {
+        var pixbuf = Drtgtk.Icons.load_theme_icon( {Nuvola.get_app_icon()}, icon_size);
+        if (pixbuf != null) {
             img = new Gtk.Image.from_pixbuf(pixbuf);
             img.valign = img.halign = Gtk.Align.CENTER;
             title.attach(img, 0, 0, 1, 2);

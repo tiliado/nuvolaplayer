@@ -22,18 +22,15 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
-public class MediaKeysServer: GLib.Object
-{
+public class MediaKeysServer: GLib.Object {
     private MediaKeysInterface media_keys;
     private Drt.RpcBus ipc_bus;
     private unowned Queue<AppRunner> app_runners;
     private GenericSet<string> clients;
 
-    public MediaKeysServer(MediaKeysInterface media_keys, Drt.RpcBus ipc_bus, Queue<AppRunner> app_runners)
-    {
+    public MediaKeysServer(MediaKeysInterface media_keys, Drt.RpcBus ipc_bus, Queue<AppRunner> app_runners) {
         this.media_keys = media_keys;
         this.ipc_bus = ipc_bus;
         this.app_runners = app_runners;
@@ -51,7 +48,7 @@ public class MediaKeysServer: GLib.Object
 
     private void handle_manage(Drt.RpcRequest request) throws Drt.RpcError {
         var app_id = request.pop_string();
-        if (app_id in clients){
+        if (app_id in clients) {
             request.respond(new Variant.boolean(false));
         } else {
             clients.add(app_id);
@@ -75,26 +72,20 @@ public class MediaKeysServer: GLib.Object
         }
     }
 
-    private void on_media_key_pressed(string key)
-    {
+    private void on_media_key_pressed(string key) {
         unowned List<AppRunner> head = app_runners.head;
         var handled = false;
-        foreach (var app_runner in head)
-        {
+        foreach (var app_runner in head) {
             var app_id = app_runner.app_id;
-            if (app_id in clients)
-            {
-                try
-                {
+            if (app_id in clients) {
+                try {
                     var response = app_runner.call_sync("/nuvola/mediakeys/media-key-pressed", new Variant("(s)", key));
-                    if (!Drt.variant_bool(response, ref handled))
-                    {
+                    if (!Drt.variant_bool(response, ref handled)) {
                         warning("/nuvola/mediakeys/media-key-pressed got invalid response from %s instance %s: %s\n", Nuvola.get_app_name(), app_id,
                             response == null ? "null" : response.print(true));
                     }
                 }
-                catch (GLib.Error e)
-                {
+                catch (GLib.Error e) {
                     warning("Communication with app runner %s for action %s failed. %s", app_id, key, e.message);
                 }
 

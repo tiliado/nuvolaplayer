@@ -22,19 +22,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
-public enum LyricsStatus
-{
+public enum LyricsStatus {
     NO_SONG,
     LOADING,
     DONE,
     NOT_FOUND;
 }
 
-public class LyricsProvider: GLib.Object
-{
+public class LyricsProvider: GLib.Object {
     public string? title {get; private set; default = null;}
     public string? artist {get; private set; default = null;}
     public string? lyrics {get; private set; default = null;}
@@ -43,14 +40,11 @@ public class LyricsProvider: GLib.Object
     private SList<LyricsFetcher> fetchers;
     private LyricsFetcherCache? cache = null;
 
-    public LyricsProvider(MediaPlayerModel player, owned SList<LyricsFetcher> fetchers)
-    {
+    public LyricsProvider(MediaPlayerModel player, owned SList<LyricsFetcher> fetchers) {
         this.player = player;
         this.fetchers = (owned) fetchers;
-        foreach (var fetcher in this.fetchers)
-        {
-            if (fetcher is LyricsFetcherCache)
-            {
+        foreach (var fetcher in this.fetchers) {
+            if (fetcher is LyricsFetcherCache) {
                 cache = (LyricsFetcherCache) fetcher;
                 break;
             }
@@ -59,50 +53,41 @@ public class LyricsProvider: GLib.Object
         song_changed(player.title, player.artist);
     }
 
-    ~LyricsProvider()
-    {
+    ~LyricsProvider() {
         player.set_track_info.disconnect(on_song_changed);
     }
 
     private void on_song_changed(string? title, string? artist, string? album, string? state,
-        string? artwork_location, string? artwork_file)
-    {
+        string? artwork_location, string? artwork_file) {
         song_changed(title, artist);
     }
 
-    private void song_changed(string? title, string? artist)
-    {
+    private void song_changed(string? title, string? artist) {
         if (this.title == title && this.artist == artist)
         return;
 
         this.title = title;
         this.artist = artist;
 
-        if (title == null || artist == null)
-        {
+        if (title == null || artist == null) {
             status = LyricsStatus.NO_SONG;
             lyrics = null;
             no_song_info();
         }
-        else
-        {
+        else {
             queue_fetch_lyrics(artist, title);
         }
     }
 
-    private void queue_fetch_lyrics(string artist, string song)
-    {
+    private void queue_fetch_lyrics(string artist, string song) {
         lyrics_loading(artist, song);
         fetch_lyrics.begin(artist, song);
     }
 
-    private async void fetch_lyrics(string artist, string song)
-    {
-        foreach (var fetcher in fetchers)
-        {
+    private async void fetch_lyrics(string artist, string song) {
+        foreach (var fetcher in fetchers) {
             debug("Fetcher: %s", fetcher.get_type().name());
-            try
-            {
+            try {
                 var lyrics = yield fetcher.fetch_lyrics(artist, song);
                 lyrics_available(artist, song, lyrics);
                 if (cache != null && fetcher != cache)
@@ -110,8 +95,7 @@ public class LyricsProvider: GLib.Object
 
                 return;
             }
-            catch (GLib.Error e)
-            {
+            catch (GLib.Error e) {
                 debug("Fetch error: %s", e.message);
             }
         }

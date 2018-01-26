@@ -22,7 +22,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public interface Nuvola.MenuBarInterface: GLib.Object
-{
+public interface Nuvola.MenuBarInterface: GLib.Object {
     public abstract bool set_menu(string id, string label, string[] actions);
 }

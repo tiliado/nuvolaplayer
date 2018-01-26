@@ -45,8 +45,7 @@ public string? get_required_gl_extension() {
     return null;
 }
 
-public bool is_required_gl_extension_mounted(out string? gl_extension)
-{
+public bool is_required_gl_extension_mounted(out string? gl_extension) {
     gl_extension = get_required_gl_extension();
     if (gl_extension == null)
     return true;
@@ -54,11 +53,9 @@ public bool is_required_gl_extension_mounted(out string? gl_extension)
     return File.new_for_path("/usr/lib/GL").get_child(gl_extension).query_exists();
 }
 
-public void ensure_gl_extension_mounted(Gtk.Window? parent_window)
-{
+public void ensure_gl_extension_mounted(Gtk.Window? parent_window) {
     string? gl_extension = null;
-    if (!is_required_gl_extension_mounted(out gl_extension))
-    {
+    if (!is_required_gl_extension_mounted(out gl_extension)) {
         var dialog = new Gtk.MessageDialog.with_markup(
             parent_window, Gtk.DialogFlags.MODAL, Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE,
             ("<b><big>Missing Graphics Driver</big></b>\n\n"
@@ -74,8 +71,7 @@ public void ensure_gl_extension_mounted(Gtk.Window? parent_window)
 
 const Dri2.EventOps DRI2_NO_OPS = {};
 
-public errordomain DriError
-{
+public errordomain DriError {
     NO_X_DISPLAY,
     INIT_DISPLAY,
     EXTENSION_QUERY,
@@ -89,8 +85,7 @@ public errordomain DriError
  * @return driver name
  * @throws DriError on failure
  */
-public string dri2_get_driver_name() throws DriError
-{
+public string dri2_get_driver_name() throws DriError {
     var dpy = new X.Display(null);
     if (dpy == null)
     throw new DriError.NO_X_DISPLAY("Cannot connect to X display.");
@@ -101,8 +96,7 @@ public string dri2_get_driver_name() throws DriError
     return driver;
 }
 
-private void dri2_connect(X.Display dpy, out int major, out int minor, out string driver) throws DriError
-{
+private void dri2_connect(X.Display dpy, out int major, out int minor, out string driver) throws DriError {
     major = 0;
     minor = 0;
     int driverType = Dri2.DriverDRI;

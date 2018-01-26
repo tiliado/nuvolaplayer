@@ -22,22 +22,19 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
 /**
  * Struct containing command line arguments. Check Args.options for their meaning.
  */
-struct Args
-{
+struct Args {
     static bool debug;
     static bool verbose;
     static bool version;
     static string? app_dir;
     static bool nuvola_dbus;
 
-    public const OptionEntry[] options =
-    {
+    public const OptionEntry[] options = {
         { "dbus", 0, 0, OptionArg.NONE, ref Args.nuvola_dbus, "Connect to Nuvola via DBus", null },
         { "app-dir", 'a', 0, GLib.OptionArg.FILENAME, ref Args.app_dir, "Web app to run.", "DIR" },
         { "verbose", 'v', 0, OptionArg.NONE, ref Args.verbose, "Print informational messages", null },
@@ -47,24 +44,20 @@ struct Args
     };
 }
 
-public int main(string[] args)
-{
-    try
-    {
+public int main(string[] args) {
+    try {
         var opt_context = new OptionContext("- %s".printf(Nuvola.get_app_name()));
         opt_context.set_help_enabled(true);
         opt_context.add_main_entries(Args.options, null);
         opt_context.set_ignore_unknown_options(true);
         opt_context.parse(ref args);
     }
-    catch (OptionError e)
-    {
+    catch (OptionError e) {
         stderr.printf("option parsing failed: %s\n", e.message);
         return 1;
     }
 
-    if (Args.app_dir == null)
-    {
+    if (Args.app_dir == null) {
         stderr.printf("No app specified.");
         return 1;
     }
@@ -80,15 +73,13 @@ public int main(string[] args)
     if (Args.version)
     return Nuvola.Startup.print_web_app_version(stdout, app_dir);
 
-    try
-    {
+    try {
         if (Args.nuvola_dbus)
         return Nuvola.Startup.run_web_app_with_dbus_handshake(app_dir, args);
         else
         return Nuvola.Startup.run_web_app_as_subprocess(app_dir, stdin.read_line(), args);
     }
-    catch (WebAppError e)
-    {
+    catch (WebAppError e) {
         stderr.puts("Failed to load web app!\n");
         stderr.printf("Dir: %s\n", Args.app_dir);
         stderr.printf("Error: %s\n", e.message);

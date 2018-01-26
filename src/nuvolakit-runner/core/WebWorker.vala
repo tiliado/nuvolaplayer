@@ -25,8 +25,7 @@
 
 namespace Nuvola {
 
-public interface WebWorker: GLib.Object, JSExecutor
-{
+public interface WebWorker: GLib.Object, JSExecutor {
     public abstract bool initialized {get; set; default = false;}
     public abstract bool ready {get; set; default = false;}
 
@@ -38,19 +37,16 @@ public interface WebWorker: GLib.Object, JSExecutor
         out Variant? modified_params) throws GLib.Error;
 }
 
-public class RemoteWebWorker: GLib.Object, JSExecutor, WebWorker
-{
+public class RemoteWebWorker: GLib.Object, JSExecutor, WebWorker {
     public bool initialized {get; set; default = false;}
     public bool ready {get; set; default = false;}
     private IpcBus ipc_bus;
 
-    public RemoteWebWorker(IpcBus ipc_bus)
-    {
+    public RemoteWebWorker(IpcBus ipc_bus) {
         this.ipc_bus = ipc_bus;
     }
 
-    public Variant? call_sync(string name, Variant? params) throws GLib.Error
-    {
+    public Variant? call_sync(string name, Variant? params) throws GLib.Error {
         if (ipc_bus.web_worker == null)
         throw new Drt.RpcError.NOT_READY("Web worker process is not ready yet");
 

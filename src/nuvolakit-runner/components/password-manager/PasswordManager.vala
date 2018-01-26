@@ -22,11 +22,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
-public class PasswordManager
-{
+public class PasswordManager {
     private const string SCHEMA_ID = "eu.tiliado.nuvola.LoginCretentials";
     private const string SCHEMA_APP_ID = "app-id";
     private const string SCHEMA_HOSTNAME = "hostname";
@@ -36,8 +34,7 @@ public class PasswordManager
     private HashTable<string, Drt.Lst<LoginCredentials>>? passwords = null;
     private WebkitEngine web_engine;
 
-    public PasswordManager(WebkitEngine web_engine, string app_id)
-    {
+    public PasswordManager(WebkitEngine web_engine, string app_id) {
         this.app_id = app_id;
         secret_schema = new Secret.Schema(
             SCHEMA_ID, Secret.SchemaFlags.NONE,
@@ -48,21 +45,18 @@ public class PasswordManager
         web_engine.webkit_context_menu.connect(on_context_menu);
     }
 
-    ~PasswordManager()
-    {
+    ~PasswordManager() {
         debug("~PasswordManager");
         web_engine.webkit_context_menu.disconnect(on_context_menu);
     }
 
     public signal void prefill_username(int username_index);
 
-    public HashTable<string, Drt.Lst<LoginCredentials>>? get_passwords()
-    {
+    public HashTable<string, Drt.Lst<LoginCredentials>>? get_passwords() {
         return passwords;
     }
 
-    public async void fetch_passwords() throws GLib.Error
-    {
+    public async void fetch_passwords() throws GLib.Error {
         var collection = yield Secret.Collection.for_alias(
             null, Secret.COLLECTION_DEFAULT, Secret.CollectionFlags.LOAD_ITEMS, null);
         HashTable<string, string> attributes = new HashTable<string, string>(str_hash, str_equal);
@@ -70,21 +64,18 @@ public class PasswordManager
         var flags = Secret.SearchFlags.ALL|Secret.SearchFlags.UNLOCK|Secret.SearchFlags.LOAD_SECRETS;
         var items = yield collection.search(secret_schema, attributes, flags, null);
         var credentials = new HashTable<string, Drt.Lst<LoginCredentials>>(str_hash, str_equal);
-        foreach (var item in items)
-        {
+        foreach (var item in items) {
             attributes = item.get_attributes();
             var hostname = attributes[SCHEMA_HOSTNAME];
             var username = attributes[SCHEMA_USERNAME];
             var password = item.get_secret().get_text();
             var entries = credentials[hostname];
-            if (entries == null)
-            {
+            if (entries == null) {
                 entries = new Drt.Lst<LoginCredentials>(LoginCredentials.username_equals);
                 entries.prepend(new LoginCredentials(username, password));
                 credentials[hostname] = entries;
             }
-            else
-            {
+            else {
                 var entry = new LoginCredentials(username, password);
                 var index = entries.index(entry);
                 if (index >= 0)
@@ -96,36 +87,29 @@ public class PasswordManager
         this.passwords = credentials;
     }
 
-    public async void store_password(string hostname, string username, string password, Cancellable? cancellable=null)
-    {
-        try
-        {
+    public async void store_password(string hostname, string username, string password, Cancellable? cancellable=null) {
+        try {
             yield Secret.password_store(
                 secret_schema, Secret.COLLECTION_DEFAULT, "%s password for '%s' at %s".printf(
                     Nuvola.get_app_name(), username, hostname),
                 password, cancellable, SCHEMA_APP_ID, app_id, SCHEMA_HOSTNAME, hostname, SCHEMA_USERNAME, username);
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             warning("Failed to store password for '%s' at %s. %s".printf(username, hostname, e.message));
         }
     }
 
-    private void on_context_menu(WebKit.ContextMenu menu, Gdk.Event event, WebKit.HitTestResult hit_test_result)
-    {
+    private void on_context_menu(WebKit.ContextMenu menu, Gdk.Event event, WebKit.HitTestResult hit_test_result) {
         var data = menu.get_user_data();
-        if (data != null && data.is_of_type(new VariantType("(sas)")))
-        {
+        if (data != null && data.is_of_type(new VariantType("(sas)"))) {
             string name = null;
             VariantIter iter = null;
             data.get("(sas)", out name, out iter);
-            if (name == "prefill-password")
-            {
+            if (name == "prefill-password") {
                 var usernames = new WebKit.ContextMenu();
                 string username = null;
                 var i = 0;
-                while (iter.next("s", out username))
-                {
+                while (iter.next("s", out username)) {
                     var action = new Gtk.Action("prefill-password-%d".printf(i++), username, null, null);
                     action.activate.connect(on_prefill_menu_item_activated);
                     usernames.append(new WebKit.ContextMenuItem(action));
@@ -135,8 +119,7 @@ public class PasswordManager
         }
     }
 
-    private void on_prefill_menu_item_activated(Gtk.Action action)
-    {
+    private void on_prefill_menu_item_activated(Gtk.Action action) {
         prefill_username(int.parse(action.name.substring(17)));
     }
 }

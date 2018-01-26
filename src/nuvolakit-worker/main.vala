@@ -28,23 +28,19 @@ public WebExtension extension;
 
 } // namespace Nuvola
 
-public void webkit_web_extension_initialize_with_user_data(WebKit.WebExtension extension, Variant data)
-{
+public void webkit_web_extension_initialize_with_user_data(WebKit.WebExtension extension, Variant data) {
     Drt.Logger.init(stderr, GLib.LogLevelFlags.LEVEL_DEBUG, true, "Worker");
 
     var debug_sleep = Environment.get_variable("NUVOLA_WEB_WORKER_SLEEP");
-    if (debug_sleep != null)
-    {
+    if (debug_sleep != null) {
         var seconds = int.parse(debug_sleep);
-        if (seconds > 0)
-        {
+        if (seconds > 0) {
             warning("WebWorker is going to sleep for %d seconds.", seconds);
             warning("Run `gdb -p %d` to debug it with gdb.", (int) Posix.getpid());
             GLib.Thread.usleep(seconds * 1000000);
             warning("WebWorker is awake.");
         }
-        else
-        {
+        else {
             warning("Invalid NUVOLA_WEB_WORKER_SLEEP variable: %s", debug_sleep);
         }
     }
@@ -53,14 +49,12 @@ public void webkit_web_extension_initialize_with_user_data(WebKit.WebExtension e
     error("Web Worker abort requested.");
 
     var worker_data = Drt.variant_to_hashtable(data);
-    try
-    {
+    try {
         var channel = new Drt.RpcChannel.from_name(0, worker_data["RUNNER_BUS_NAME"].dup_string(), null,
             worker_data["NUVOLA_API_ROUTER_TOKEN"].dup_string(), 5000);
         Nuvola.extension = new Nuvola.WebExtension(extension, channel, worker_data);
     }
-    catch (GLib.Error e)
-    {
+    catch (GLib.Error e) {
         error("Failed to connect to app runner. %s", e.message);
     }
 }

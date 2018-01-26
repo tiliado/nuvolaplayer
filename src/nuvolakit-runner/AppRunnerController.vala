@@ -26,8 +26,7 @@ namespace Nuvola {
 
 private extern const bool CEF_DEFAULT;
 
-namespace ConfigKey
-{
+namespace ConfigKey {
     public const string WINDOW_X = "nuvola.window.x";
     public const string WINDOW_Y = "nuvola.window.y";
     public const string WINDOW_WIDTH = "nuvola.window.width";
@@ -39,8 +38,7 @@ namespace ConfigKey
     public const string DARK_THEME = "nuvola.dark_theme";
 }
 
-namespace Actions
-{
+namespace Actions {
     public const string ABOUT = "about";
     public const string HELP = "help";
     public const string DONATE = "donate";
@@ -59,13 +57,11 @@ namespace Actions
 }
 
 
-public string build_ui_runner_ipc_id(string web_app_id)
-{
+public string build_ui_runner_ipc_id(string web_app_id) {
     return "N3" + web_app_id.replace("_", "");
 }
 
-public class AppRunnerController: Drtgtk.Application
-{
+public class AppRunnerController: Drtgtk.Application {
     public Drt.Storage storage {get; private set;}
     public Config config {get; protected set; default = null;}
     public Connection connection {get; protected set;}
@@ -102,8 +98,7 @@ public class AppRunnerController: Drtgtk.Application
 
     public AppRunnerController(
         Drt.Storage storage, WebApp web_app, WebAppStorage app_storage,
-        string? api_token, bool use_nuvola_dbus=false)
-    {
+        string? api_token, bool use_nuvola_dbus=false) {
         var uid = web_app.get_uid();
         var dbus_id = web_app.get_dbus_id();
         base(uid, web_app.name, dbus_id);
@@ -121,8 +116,7 @@ public class AppRunnerController: Drtgtk.Application
     public signal void info_bar_response(string id, int reponse_id);
 
     public override bool dbus_register(DBusConnection conn, string object_path)
-    throws GLib.Error
-    {
+    throws GLib.Error {
         if (!base.dbus_register(conn, object_path))
         return false;
         dbus_api = new AppDbusApi(this);
@@ -130,18 +124,15 @@ public class AppRunnerController: Drtgtk.Application
         return true;
     }
 
-    public override void dbus_unregister(DBusConnection conn, string object_path)
-    {
-        if (dbus_api_id > 0)
-        {
+    public override void dbus_unregister(DBusConnection conn, string object_path) {
+        if (dbus_api_id > 0) {
             conn.unregister_object(dbus_api_id);
             dbus_api_id = 0;
         }
         base.dbus_unregister(conn, object_path);
     }
 
-    public override void apply_custom_styles(Gdk.Screen screen)
-    {
+    public override void apply_custom_styles(Gdk.Screen screen) {
         base.apply_custom_styles(screen);
         Nuvola.Css.apply_custom_styles(screen);
     }
@@ -160,28 +151,23 @@ public class AppRunnerController: Drtgtk.Application
         startup_check.task_finished.connect_after(on_startup_check_task_finished);
     }
 
-    private void on_startup_check_task_finished(GLib.Object emitter, string task_name)
-    {
+    private void on_startup_check_task_finished(GLib.Object emitter, string task_name) {
         var startup_check = emitter as StartupCheck;
         assert(startup_check != null);
-        if (startup_check.finished_tasks == 3 && startup_check.running_tasks == 0)
-        {
-            if (startup_check.get_overall_status() == StartupCheck.Status.ERROR)
-            {
+        if (startup_check.finished_tasks == 3 && startup_check.running_tasks == 0) {
+            if (startup_check.get_overall_status() == StartupCheck.Status.ERROR) {
                 startup_check.task_finished.disconnect(on_startup_check_task_finished);
                 startup_window.ready_to_continue.connect(on_startup_window_ready_to_continue);
                 startup_check.mark_as_finished();
             }
-            else
-            {
+            else {
                 startup_check.task_finished.disconnect(on_startup_check_task_finished);
                 startup_window.ready_to_continue.connect(on_startup_window_ready_to_continue);
                 #if !TILIADO_API
                 init_ipc(startup_check);
                 startup_check.mark_as_finished();
                 #else
-                if (init_ipc(startup_check))
-                {
+                if (init_ipc(startup_check)) {
                     tiliado_activation = new TiliadoActivationClient(ipc_bus.master);
                     startup_check.check_tiliado_account.begin(
                         tiliado_activation, () => startup_check.mark_as_finished());
@@ -206,8 +192,7 @@ public class AppRunnerController: Drtgtk.Application
         startup_window = null;
     }
 
-    private void init_settings()
-    {
+    private void init_settings() {
         /* Disable GStreamer plugin helper because it is shown too often and quite annoying.  */
         Environment.set_variable("GST_INSTALL_PLUGINS_HELPER", "/bin/true", true);
         web_worker_data = new HashTable<string, Variant>(str_hash, str_equal);
@@ -256,18 +241,15 @@ public class AppRunnerController: Drtgtk.Application
         set_app_menu_items({Actions.HELP, Actions.ABOUT, Actions.QUIT});
     }
 
-    private bool init_ipc(StartupCheck startup_check)
-    {
-        try
-        {
+    private bool init_ipc(StartupCheck startup_check) {
+        try {
             var bus_name = build_ui_runner_ipc_id(web_app.id);
             web_worker_data["WEB_APP_ID"] = web_app.id;
             web_worker_data["RUNNER_BUS_NAME"] = bus_name;
             ipc_bus = new IpcBus(bus_name);
             ipc_bus.start();
             #if !NUVOLA_LITE
-            if (use_nuvola_dbus)
-            {
+            if (use_nuvola_dbus) {
                 var nuvola_api = Bus.get_proxy_sync<MasterDbusIfce>(
                     BusType.SESSION, Nuvola.get_dbus_id(), Nuvola.get_dbus_path(),
                     DBusProxyFlags.DO_NOT_CONNECT_SIGNALS|DBusProxyFlags.DO_NOT_LOAD_PROPERTIES);
@@ -288,8 +270,7 @@ public class AppRunnerController: Drtgtk.Application
                     }
                 }
 
-                if (socket == null)
-                {
+                if (socket == null) {
                     startup_check.nuvola_service_message = (
                         "<b>Nuvola Apps Runtime Service refused connection.</b>\n\n"
                         + "1. Make sure Nuvola Apps Runtime is installed.\n"
@@ -299,16 +280,14 @@ public class AppRunnerController: Drtgtk.Application
                 }
                 ipc_bus.connect_master_socket(socket, api_token);
             }
-            else
-            {
+            else {
                 bus_name = Environment.get_variable("NUVOLA_IPC_MASTER");
                 assert(bus_name != null);
                 ipc_bus.connect_master(bus_name, api_token);
             }
             #endif
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             startup_check.nuvola_service_message = Markup.printf_escaped(
                 "<b>Failed to connect to Nuvola Apps Runtime Service.</b>\n\n"
                 + "1. Make sure Nuvola Apps Runtime is installed.\n"
@@ -324,13 +303,11 @@ public class AppRunnerController: Drtgtk.Application
             "Get web app metadata.", handle_get_metadata, null);
 
         #if !NUVOLA_LITE
-        try
-        {
+        try {
             var response = ipc_bus.master.call_sync("/nuvola/core/runner-started", new Variant("(ss)", web_app.id, ipc_bus.router.hex_token));
             assert(response.equal(new Variant.boolean(true)));
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             startup_check.nuvola_service_message = Markup.printf_escaped(
                 "<b>Communication with Nuvola Apps Runtime Service failed.</b>\n\n"
                 + "1. Make sure Nuvola Apps Runtime is installed.\n"
@@ -431,8 +408,7 @@ public class AppRunnerController: Drtgtk.Application
         show_welcome_screen();
     }
 
-    private void init_app_runner()
-    {
+    private void init_app_runner() {
         append_actions();
         #if !NUVOLA_LITE
         var gakb = new ActionsKeyBinderClient(ipc_bus.master);
@@ -444,8 +420,7 @@ public class AppRunnerController: Drtgtk.Application
         web_engine.init_app_runner();
     }
 
-    private void load_app()
-    {
+    private void load_app() {
         set_app_menu_items({Actions.PREFERENCES, Actions.HELP, Actions.WELCOME, Actions.ABOUT, Actions.QUIT});
         main_window.set_menu_button_items({
             Actions.ZOOM_IN, Actions.ZOOM_OUT, Actions.ZOOM_RESET, "|",
@@ -463,10 +438,9 @@ public class AppRunnerController: Drtgtk.Application
         var sidebar_page = config.get_string(ConfigKey.WINDOW_SIDEBAR_PAGE);
         if (sidebar_page != null)
         main_window.sidebar.page = sidebar_page;
-        main_window.notify["sidebar-position"].connect_after((o, p) =>
-            {
-                config.set_int64(ConfigKey.WINDOW_SIDEBAR_POS, (int64) main_window.sidebar_position);
-            });
+        main_window.notify["sidebar-position"].connect_after((o, p) => {
+            config.set_int64(ConfigKey.WINDOW_SIDEBAR_POS, (int64) main_window.sidebar_position);
+        });
         main_window.sidebar.notify["visible"].connect_after(on_sidebar_visibility_changed);
         main_window.sidebar.page_changed.connect(on_sidebar_page_changed);
         web_engine.get_main_web_view().show();
@@ -476,8 +450,7 @@ public class AppRunnerController: Drtgtk.Application
         web_engine.load_app();
     }
 
-    public override void activate()
-    {
+    public override void activate() {
         if (main_window != null)
         main_window.present();
         else if (startup_window != null)
@@ -486,8 +459,7 @@ public class AppRunnerController: Drtgtk.Application
         start();
     }
 
-    private void append_actions()
-    {
+    private void append_actions() {
         unowned ActionsHelper ah = actions_helper;
         Drtgtk.Action[] actions_spec = {
             ah.simple_action("main", "app", Actions.PREFERENCES, "Preferences", "_Preferences", null, null, do_preferences),
@@ -557,8 +529,7 @@ public class AppRunnerController: Drtgtk.Application
         }
     }
 
-    private void do_activate()
-    {
+    private void do_activate() {
         activate();
     }
 
@@ -568,36 +539,31 @@ public class AppRunnerController: Drtgtk.Application
         dialog.destroy();
     }
 
-    private void do_preferences()
-    {
+    private void do_preferences() {
         var values = new HashTable<string, Variant>(str_hash, str_equal);
         values.insert(ConfigKey.DARK_THEME, config.get_value(ConfigKey.DARK_THEME));
         Drtgtk.Form form;
-        try
-        {
+        try {
             form = Drtgtk.Form.create_from_spec(values, new Variant.tuple({
                 new Variant.tuple({new Variant.string("header"), new Variant.string("Basic settings")}),
                 new Variant.tuple({new Variant.string("bool"), new Variant.string(ConfigKey.DARK_THEME), new Variant.string("Prefer dark theme")})
             }));
         }
-        catch (Drtgtk.FormError e)
-        {
+        catch (Drtgtk.FormError e) {
             show_error("Preferences form error",
                 "Preferences form hasn't been shown because of malformed form specification: %s"
                 .printf(e.message));
             return;
         }
 
-        try
-        {
+        try {
             Variant? extra_values = null;
             Variant? extra_entries = null;
             web_engine.get_preferences(out extra_values, out extra_entries);
             form.add_values(Drt.variant_to_hashtable(extra_values));
             form.add_entries(extra_entries);
         }
-        catch (Drtgtk.FormError e)
-        {
+        catch (Drtgtk.FormError e) {
             show_error("Preferences form error",
                 "Some entries of the Preferences form haven't been shown because of malformed form specification: %s"
                 .printf(e.message));
@@ -616,11 +582,9 @@ public class AppRunnerController: Drtgtk.Application
         }
 
         var response = dialog.run();
-        if (response == Gtk.ResponseType.OK)
-        {
+        if (response == Gtk.ResponseType.OK) {
             var new_values = form.get_values();
-            foreach (var key in new_values.get_keys())
-            {
+            foreach (var key in new_values.get_keys()) {
                 var new_value = new_values.get(key);
                 if (new_value == null)
                 critical("New value '%s' not found", key);
@@ -630,8 +594,7 @@ public class AppRunnerController: Drtgtk.Application
             NetworkProxyType type;
             string? host;
             int port;
-            if (network_settings.get_proxy_settings(out type, out host, out port))
-            {
+            if (network_settings.get_proxy_settings(out type, out host, out port)) {
                 debug("New network proxy settings: %s %s %d", type.to_string(), host, port);
                 connection.set_network_proxy(type, host, port);
                 web_engine.apply_network_proxy(connection);
@@ -669,8 +632,7 @@ public class AppRunnerController: Drtgtk.Application
         dialog.destroy();
     }
 
-    private void do_toggle_sidebar()
-    {
+    private void do_toggle_sidebar() {
         var sidebar = main_window.sidebar;
         if (sidebar.visible)
         sidebar.hide();
@@ -678,8 +640,7 @@ public class AppRunnerController: Drtgtk.Application
         sidebar.show();
     }
 
-    private void do_help()
-    {
+    private void do_help() {
         show_uri(Nuvola.HELP_URL);
     }
 
@@ -711,8 +672,7 @@ public class AppRunnerController: Drtgtk.Application
         }
     }
 
-    private void load_extensions()
-    {
+    private void load_extensions() {
         var router = ipc_bus.router;
         var web_worker = web_engine.web_worker;
         bindings = new Bindings();
@@ -744,8 +704,7 @@ public class AppRunnerController: Drtgtk.Application
         components.prepend(new DeveloperComponent(this, bindings, config));
         components.reverse();
 
-        foreach (var component in components)
-        {
+        foreach (var component in components) {
             if (!component.is_membership_ok(tiliado_activation))
             component.toggle(false);
             if (component.available && component.enabled)
@@ -777,8 +736,7 @@ public class AppRunnerController: Drtgtk.Application
         });
     }
 
-    private void on_show_warning(string title, string message)
-    {
+    private void on_show_warning(string title, string message) {
         var info_bar = new Gtk.InfoBar();
         info_bar.show_close_button = true;
         var label = new Gtk.Label(Markup.printf_escaped("<span size='medium'><b>%s</b></span> %s", title, message));
@@ -821,49 +779,41 @@ public class AppRunnerController: Drtgtk.Application
         return true;
     }
 
-    private void on_close_warning(Gtk.InfoBar info_bar, int response_id)
-    {
+    private void on_close_warning(Gtk.InfoBar info_bar, int response_id) {
         (info_bar.get_parent() as Gtk.Container).remove(info_bar);
     }
 
-    private bool on_window_state_event(Gdk.EventWindowState event)
-    {
+    private bool on_window_state_event(Gdk.EventWindowState event) {
         bool m = (event.new_window_state & Gdk.WindowState.MAXIMIZED) != 0;
         config.set_bool(ConfigKey.WINDOW_MAXIMIZED, m);
         return false;
     }
 
-    private void on_window_is_active_changed(Object o, ParamSpec p)
-    {
+    private void on_window_is_active_changed(Object o, ParamSpec p) {
         if (!main_window.is_active)
         return;
 
         #if !NUVOLA_LITE
-        try
-        {
+        try {
             var response = ipc_bus.master.call_sync("/nuvola/core/runner-activated", new Variant("(s)", web_app.id));
             warn_if_fail(response.equal(new Variant.boolean(true)));
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             critical("Communication with master process failed: %s", e.message);
         }
         #endif
     }
 
-    private bool on_configure_event(Gdk.EventConfigure event)
-    {
+    private bool on_configure_event(Gdk.EventConfigure event) {
         if (configure_event_cb_id != 0)
         Source.remove(configure_event_cb_id);
         configure_event_cb_id = Timeout.add(200, on_configure_event_cb);
         return false;
     }
 
-    private bool on_configure_event_cb()
-    {
+    private bool on_configure_event_cb() {
         configure_event_cb_id = 0;
-        if (!main_window.maximized)
-        {
+        if (!main_window.maximized) {
             int x;
             int y;
             int width;
@@ -897,20 +847,15 @@ public class AppRunnerController: Drtgtk.Application
         });
     }
 
-    private void handle_get_metadata(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_get_metadata(Drt.RpcRequest request) throws Drt.RpcError {
         request.respond(web_app.to_variant());
     }
 
-    private void handle_get_component_info(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_get_component_info(Drt.RpcRequest request) throws Drt.RpcError {
         var id = request.pop_string();
-        if (components != null)
-        {
-            foreach (var component in components)
-            {
-                if (id == component.id)
-                {
+        if (components != null) {
+            foreach (var component in components) {
+                if (id == component.id) {
                     var builder = new VariantBuilder(new VariantType("a{smv}"));
                     builder.add("{smv}", "name", new Variant.string(component.name));
                     builder.add("{smv}", "found", new Variant.boolean(true));
@@ -928,14 +873,11 @@ public class AppRunnerController: Drtgtk.Application
         request.respond(builder.end());
     }
 
-    private void handle_toggle_component_active(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_toggle_component_active(Drt.RpcRequest request) throws Drt.RpcError {
         var id = request.pop_string();
         var active = request.pop_bool();
-        if (components != null)
-        {
-            foreach (var component in components)
-            {
+        if (components != null) {
+            foreach (var component in components) {
                 if (id == component.id) {
                     request.respond(new Variant.boolean(component.toggle_active(active)));
                     return;
@@ -1017,46 +959,37 @@ public class AppRunnerController: Drtgtk.Application
         }
     }
 
-    private void on_can_quit(ref bool can_quit)
-    {
-        if (web_engine != null)
-        {
-            try
-            {
+    private void on_can_quit(ref bool can_quit) {
+        if (web_engine != null) {
+            try {
                 if (web_engine.web_worker.ready)
                 can_quit = web_engine.web_worker.send_data_request_bool("QuitRequest", "approved", can_quit);
                 else
                 debug("WebWorker not ready");
             }
-            catch (GLib.Error e)
-            {
+            catch (GLib.Error e) {
                 warning("QuitRequest failed in web worker: %s", e.message);
             }
-            try
-            {
+            try {
 
                 if (web_engine.ready)
                 can_quit = web_engine.send_data_request_bool("QuitRequest", "approved", can_quit);
                 else
                 debug("WebEngine not ready");
             }
-            catch (GLib.Error e)
-            {
+            catch (GLib.Error e) {
                 warning("QuitRequest failed in web engine: %s", e.message);
             }
         }
     }
 
-    private void on_init_form(HashTable<string, Variant> values, Variant entries)
-    {
-        if (init_form != null)
-        {
+    private void on_init_form(HashTable<string, Variant> values, Variant entries) {
+        if (init_form != null) {
             main_window.overlay.remove(init_form);
             init_form = null;
         }
 
-        try
-        {
+        try {
             init_form = Drtgtk.Form.create_from_spec(values, entries);
             init_form.check_toggles();
             init_form.expand = true;
@@ -1070,23 +1003,20 @@ public class AppRunnerController: Drtgtk.Application
             main_window.grid.add(init_form);
             init_form.show();
         }
-        catch (Drtgtk.FormError e)
-        {
+        catch (Drtgtk.FormError e) {
             show_error("Initialization form error",
                 "Initialization form hasn't been shown because of malformed form specification: %s"
                 .printf(e.message));
         }
     }
 
-    private void on_init_form_button_clicked(Gtk.Button button)
-    {
+    private void on_init_form_button_clicked(Gtk.Button button) {
         button.clicked.disconnect(on_init_form_button_clicked);
         main_window.grid.remove(init_form);
         var new_values = init_form.get_values();
         init_form = null;
 
-        foreach (var key in new_values.get_keys())
-        {
+        foreach (var key in new_values.get_keys()) {
             var new_value = new_values.get(key);
             if (new_value == null)
             critical("New values '%s'' not found", key);
@@ -1097,8 +1027,7 @@ public class AppRunnerController: Drtgtk.Application
         web_engine.init_app_runner();
     }
 
-    private void on_sidebar_visibility_changed(GLib.Object o, ParamSpec p)
-    {
+    private void on_sidebar_visibility_changed(GLib.Object o, ParamSpec p) {
         var visible = main_window.sidebar.visible;
         config.set_bool(ConfigKey.WINDOW_SIDEBAR_VISIBLE, visible);
         if (visible)
@@ -1107,25 +1036,21 @@ public class AppRunnerController: Drtgtk.Application
         actions.get_action(Actions.TOGGLE_SIDEBAR).state = new Variant.boolean(visible);
     }
 
-    private void on_sidebar_page_changed()
-    {
+    private void on_sidebar_page_changed() {
         var page = main_window.sidebar.page;
         if (page != null)
         config.set_string(ConfigKey.WINDOW_SIDEBAR_PAGE, page);
     }
 
-    private void on_sidebar_page_added(Sidebar sidebar, string name, string label, Gtk.Widget child)
-    {
+    private void on_sidebar_page_added(Sidebar sidebar, string name, string label, Gtk.Widget child) {
         actions.get_action(Actions.TOGGLE_SIDEBAR).enabled = !sidebar.is_empty();
     }
 
-    private void on_sidebar_page_removed(Sidebar sidebar, Gtk.Widget child)
-    {
+    private void on_sidebar_page_removed(Sidebar sidebar, Gtk.Widget child) {
         actions.get_action(Actions.TOGGLE_SIDEBAR).enabled = !sidebar.is_empty();
     }
 
-    private void on_show_alert_dialog(ref bool handled, string text)
-    {
+    private void on_show_alert_dialog(ref bool handled, string text) {
         main_window.show_overlay_alert(text);
         handled = true;
     }

@@ -24,8 +24,7 @@
 
 namespace Nuvola {
 
-public class NetworkSettings: Gtk.Grid
-{
+public class NetworkSettings: Gtk.Grid {
 
     private Connection connection;
     private Gtk.RadioButton[] proxy_types;
@@ -35,8 +34,7 @@ public class NetworkSettings: Gtk.Grid
     private string? original_host;
     private int original_port;
 
-    public NetworkSettings(Connection connection)
-    {
+    public NetworkSettings(Connection connection) {
         this.connection = connection;
         original_type = connection.get_network_proxy(out original_host, out original_port);
 
@@ -100,18 +98,15 @@ public class NetworkSettings: Gtk.Grid
         show_all();
     }
 
-    private void on_change()
-    {
+    private void on_change() {
         proxy_server.sensitive = proxy_port.sensitive = is_manual_settings(get_proxy_type());
     }
 
-    private inline bool is_manual_settings(NetworkProxyType type)
-    {
+    private inline bool is_manual_settings(NetworkProxyType type) {
         return (type == NetworkProxyType.HTTP || type == NetworkProxyType.SOCKS);
     }
 
-    private NetworkProxyType get_proxy_type()
-    {
+    private NetworkProxyType get_proxy_type() {
         var type = NetworkProxyType.SYSTEM;
         if (proxy_types[0].active)
         type = NetworkProxyType.SYSTEM;
@@ -124,8 +119,7 @@ public class NetworkSettings: Gtk.Grid
         return type;
     }
 
-    public bool get_proxy_settings(out NetworkProxyType type, out string? host, out int port)
-    {
+    public bool get_proxy_settings(out NetworkProxyType type, out string? host, out int port) {
         host = proxy_server.text;
         if (host == "")
         host = null;
@@ -137,19 +131,16 @@ public class NetworkSettings: Gtk.Grid
         return changed;
     }
 
-    private void on_proxy_type_toggled(Gtk.ToggleButton button)
-    {
+    private void on_proxy_type_toggled(Gtk.ToggleButton button) {
         if (button.active)
         on_change();
     }
 
-    private void on_proxy_server_changed()
-    {
+    private void on_proxy_server_changed() {
         on_change();
     }
 
-    private void on_proxy_port_changed()
-    {
+    private void on_proxy_port_changed() {
         on_change();
     }
 }

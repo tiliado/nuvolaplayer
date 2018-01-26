@@ -27,15 +27,12 @@
  * The obvious example is the Nuvola Player Controller (nuvolaplayer3ctl) using the actions
  * to control playback (e.g. play, pause, skip to the next song, etc.).
  */
-public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
-{
-    public ActionsBinding(Drt.RpcRouter router, WebWorker web_worker)
-    {
+public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface> {
+    public ActionsBinding(Drt.RpcRouter router, WebWorker web_worker) {
         base(router, web_worker, "Nuvola.Actions");
     }
 
-    protected override void bind_methods()
-    {
+    protected override void bind_methods() {
         bind("add-action", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             "Add a new action.",
             handle_add_action, {
@@ -95,18 +92,15 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
             });
     }
 
-    protected override void object_added(ActionsInterface object)
-    {
+    protected override void object_added(ActionsInterface object) {
         object.custom_action_activated.connect(on_custom_action_activated);
     }
 
-    protected override void object_removed(ActionsInterface object)
-    {
+    protected override void object_removed(ActionsInterface object) {
         object.custom_action_activated.disconnect(on_custom_action_activated);
     }
 
-    private void handle_add_action(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_add_action(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
         var group = request.pop_string();
         var scope = request.pop_string();
@@ -124,8 +118,7 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
         request.respond(null);
     }
 
-    private void handle_add_radio_action(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_add_radio_action(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
         var group = request.pop_string();
         var scope = request.pop_string();
@@ -140,8 +133,7 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
         Drtgtk.RadioOption[] options = new Drtgtk.RadioOption[options_iter.n_children()];
         var i = 0;
         Variant? array = null;
-        while (options_iter.next("v", &array))
-        {
+        while (options_iter.next("v", &array)) {
             Variant? value = array.get_child_value(0);
             parameter = value.get_variant();
             array.get_child(1, "v", &value);
@@ -160,8 +152,7 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
         request.respond(null);
     }
 
-    private void handle_is_action_enabled(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_is_action_enabled(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
         string action_name = request.pop_string();
         bool enabled = false;
@@ -171,8 +162,7 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
         request.respond(new Variant.boolean(enabled));
     }
 
-    private void handle_action_set_enabled(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_action_set_enabled(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
         var action_name = request.pop_string();
         var enabled = request.pop_bool();
@@ -182,8 +172,7 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
         request.respond(null);
     }
 
-    private void handle_action_get_state(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_action_get_state(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
         var action_name = request.pop_string();
         Variant? state = null;
@@ -193,8 +182,7 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
         request.respond(state);
     }
 
-    private void handle_action_set_state(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_action_set_state(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
         var action_name = request.pop_string();
         var state = request.pop_variant();
@@ -204,8 +192,7 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
         request.respond(null);
     }
 
-    private void handle_action_activate(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_action_activate(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
         string action_name = request.pop_string();
         Variant? parameter = request.pop_variant();
@@ -217,12 +204,10 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
         request.respond(new Variant.boolean(handled));
     }
 
-    private void handle_list_groups(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_list_groups(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
         var groups_set = new GenericSet<string>(str_hash, str_equal);
-        foreach (var object in objects)
-        {
+        foreach (var object in objects) {
             List<unowned string> groups_list;
             var done = object.list_groups(out groups_list);
             foreach (var group in groups_list)
@@ -238,27 +223,22 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
         request.respond(builder.end());
     }
 
-    private void handle_list_group_actions(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_list_group_actions(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
         var group_name = request.pop_string();
         var builder = new VariantBuilder(new VariantType("aa{sv}"));
-        foreach (var object in objects)
-        {
+        foreach (var object in objects) {
             SList<Drtgtk.Action> actions_list;
             var done = object.list_group_actions(group_name, out actions_list);
-            foreach (var action in actions_list)
-            {
+            foreach (var action in actions_list) {
                 builder.open(new VariantType("a{sv}"));
                 builder.add("{sv}", "name", new Variant.string(action.name));
                 builder.add("{sv}", "label", new Variant.string(action.label ?? ""));
                 builder.add("{sv}", "enabled", new Variant.boolean(action.enabled));
                 var radio = action as Drtgtk.RadioAction;
-                if (radio != null)
-                {
+                if (radio != null) {
                     var radio_builder = new VariantBuilder(new VariantType("aa{sv}"));
-                    foreach (var option in radio.get_options())
-                    {
+                    foreach (var option in radio.get_options()) {
                         radio_builder.open(new VariantType("a{sv}"));
                         radio_builder.add("{sv}", "param", option.parameter);
                         radio_builder.add("{sv}", "label", new Variant.string(option.label ?? ""));
@@ -274,15 +254,12 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface>
         request.respond(builder.end());
     }
 
-    private void on_custom_action_activated(string name, Variant? parameter)
-    {
-        try
-        {
+    private void on_custom_action_activated(string name, Variant? parameter) {
+        try {
             var payload = new Variant("(ssmv)", "ActionActivated", name, parameter);
             call_web_worker("Nuvola.actions.emit", ref payload);
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             warning("Communication failed: %s", e.message);
         }
     }

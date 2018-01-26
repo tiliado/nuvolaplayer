@@ -22,15 +22,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Nuvola.NotificationsBinding: ObjectBinding<NotificationsInterface>
-{
-    public NotificationsBinding(Drt.RpcRouter router, WebWorker web_worker)
-    {
+public class Nuvola.NotificationsBinding: ObjectBinding<NotificationsInterface> {
+    public NotificationsBinding(Drt.RpcRouter router, WebWorker web_worker) {
         base(router, web_worker, "Nuvola.Notifications");
     }
 
-    protected override void bind_methods()
-    {
+    protected override void bind_methods() {
         bind("show-notification", Drt.RpcFlags.WRITABLE,
             "Show notification.",
             handle_show_notification, {
@@ -46,8 +43,7 @@ public class Nuvola.NotificationsBinding: ObjectBinding<NotificationsInterface>
             handle_is_persistence_supported, null);
     }
 
-    private void handle_show_notification(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_show_notification(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
         var title = request.pop_string();
         var message = request.pop_string();
@@ -61,8 +57,7 @@ public class Nuvola.NotificationsBinding: ObjectBinding<NotificationsInterface>
         request.respond(null);
     }
 
-    private void handle_is_persistence_supported(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_is_persistence_supported(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
         bool supported = false;
         foreach (var object in objects)

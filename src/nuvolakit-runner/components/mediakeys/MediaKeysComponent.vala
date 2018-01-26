@@ -22,11 +22,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
-public class MediaKeysComponent: Component
-{
+public class MediaKeysComponent: Component {
     #if !NUVOLA_LITE
     private Bindings bindings;
     private Drtgtk.Application app;
@@ -35,8 +33,7 @@ public class MediaKeysComponent: Component
     private string web_app_id;
     #endif
 
-    public MediaKeysComponent(Drtgtk.Application app, Bindings bindings, Drt.KeyValueStorage config, Drt.RpcChannel? conn, string web_app_id)
-    {
+    public MediaKeysComponent(Drtgtk.Application app, Bindings bindings, Drt.KeyValueStorage config, Drt.RpcChannel? conn, string web_app_id) {
         base("mediakeys", "Media keys", "Handles multimedia keys of your keyboard.");
         #if !NUVOLA_LITE
         assert(conn != null);
@@ -52,16 +49,14 @@ public class MediaKeysComponent: Component
     }
 
     #if !NUVOLA_LITE
-    protected override bool activate()
-    {
+    protected override bool activate() {
         media_keys = new MediaKeysClient(web_app_id, conn);
         bindings.add_object(media_keys);
         media_keys.manage();
         return true;
     }
 
-    protected override bool deactivate()
-    {
+    protected override bool deactivate() {
         bindings.remove_object(media_keys);
         media_keys.unmanage();
         media_keys = null;

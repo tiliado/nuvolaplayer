@@ -22,15 +22,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Nuvola.NotificationBinding: ObjectBinding<NotificationInterface>
-{
-    public NotificationBinding(Drt.RpcRouter router, WebWorker web_worker)
-    {
+public class Nuvola.NotificationBinding: ObjectBinding<NotificationInterface> {
+    public NotificationBinding(Drt.RpcRouter router, WebWorker web_worker) {
         base(router, web_worker, "Nuvola.Notification");
     }
 
-    protected override void bind_methods()
-    {
+    protected override void bind_methods() {
         bind("update", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             "Update notification.",
             handle_update, {
@@ -61,8 +58,7 @@ public class Nuvola.NotificationBinding: ObjectBinding<NotificationInterface>
             });
     }
 
-    private void handle_update(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_update(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
         var name = request.pop_string();
         var title = request.pop_string();
@@ -77,8 +73,7 @@ public class Nuvola.NotificationBinding: ObjectBinding<NotificationInterface>
         request.respond(null);
     }
 
-    private void handle_set_actions(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_set_actions(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
         var name = request.pop_string();
         var actions = request.pop_strv();
@@ -88,8 +83,7 @@ public class Nuvola.NotificationBinding: ObjectBinding<NotificationInterface>
         request.respond(null);
     }
 
-    private void handle_remove_actions(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_remove_actions(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
         var name = request.pop_string();
         foreach (var object in objects)
@@ -98,8 +92,7 @@ public class Nuvola.NotificationBinding: ObjectBinding<NotificationInterface>
         request.respond(null);
     }
 
-    private void handle_show(Drt.RpcRequest request) throws Drt.RpcError
-    {
+    private void handle_show(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
         var name = request.pop_string();
         var force = request.pop_bool();

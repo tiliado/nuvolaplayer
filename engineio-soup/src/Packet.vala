@@ -21,23 +21,19 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-namespace Engineio
-{
+namespace Engineio {
 
-public enum PacketType
-{
+public enum PacketType {
     OPEN, CLOSE, PING, PONG, MESSAGE, UPGRADE, NOOP;
 }
 
-public class Packet
-{
+public class Packet {
     public PacketType type;
     public string? str_data;
     public Bytes? bin_data;
     public bool compress;
 
-    public Packet(PacketType type, string? str_data, Bytes? bin_data, bool compress=false)
-    {
+    public Packet(PacketType type, string? str_data, Bytes? bin_data, bool compress=false) {
         this.type = type;
         this.str_data = str_data;
         this.bin_data = bin_data;

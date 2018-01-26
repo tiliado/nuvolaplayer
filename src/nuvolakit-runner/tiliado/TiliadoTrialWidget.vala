@@ -92,7 +92,7 @@ public class TiliadoTrialWidget : Gtk.Grid {
                 add_button(free_button);
             }
             show();
-        } else if (popover == null || !popover.visible){
+        } else if (popover == null || !popover.visible) {
             clear_all();
             hide();
         }

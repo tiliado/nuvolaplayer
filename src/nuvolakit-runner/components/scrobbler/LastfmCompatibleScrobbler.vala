@@ -22,16 +22,14 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
-public class LastfmCompatibleScrobbler: AudioScrobbler
-{
+public class LastfmCompatibleScrobbler: AudioScrobbler {
     public const string HTTP_GET = "GET";
     public const string HTTP_POST = "POST";
 
     public string? session {get; protected set; default = null;}
-    public bool has_session { get{ return session != null; }}
+    public bool has_session { get { return session != null; }}
     public string? username { get; protected set; default = null;}
     private Soup.Session connection;
     private string api_key;
@@ -42,8 +40,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
 
     public LastfmCompatibleScrobbler(
         Soup.Session connection, string id,
-        string name, string auth_endpoint, string api_key, string api_secret, string api_root)
-    {
+        string name, string auth_endpoint, string api_key, string api_secret, string api_root) {
         GLib.Object(id: id, name: name);
         this.connection = connection;
         this.auth_endpoint = auth_endpoint;
@@ -56,8 +53,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
         notify.connect_after(on_notify);
     }
 
-    public override Gtk.Widget? get_settings(Drtgtk.Application app)
-    {
+    public override Gtk.Widget? get_settings(Drtgtk.Application app) {
         return new ScrobblerSettings(this, app);
     }
 
@@ -67,8 +63,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
      * @return authorization URL
      * @throws AudioScrobblerError on failure
      */
-    public async string request_authorization() throws AudioScrobblerError
-    {
+    public async string request_authorization() throws AudioScrobblerError {
         // http://www.last.fm/api/show/auth.getToken
         const string API_METHOD = "auth.getToken";
         var params = new HashTable<string, string>(str_hash, str_equal);
@@ -91,8 +86,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
      *
      * @throws AudioScrobblerError on failure
      */
-    public async void finish_authorization() throws AudioScrobblerError
-    {
+    public async void finish_authorization() throws AudioScrobblerError {
         // http://www.last.fm/api/show/auth.getSession
         const string API_METHOD = "auth.getSession";
         var params = new HashTable<string, string>(str_hash, str_equal);
@@ -119,14 +113,12 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
         token = null;
     }
 
-    public void drop_session()
-    {
+    public void drop_session() {
         session = null;
         username = null;
     }
 
-    public async void retrieve_username() throws AudioScrobblerError
-    {
+    public async void retrieve_username() throws AudioScrobblerError {
         const string API_METHOD = "user.getInfo";
         if (session == null)
         throw new AudioScrobblerError.NO_SESSION("%s: There is no authorized session.", API_METHOD);
@@ -154,8 +146,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
      * @param artist artist name
      * @throws AudioScrobblerError on failure
      */
-    public async override void update_now_playing(string song, string artist) throws AudioScrobblerError
-    {
+    public async override void update_now_playing(string song, string artist) throws AudioScrobblerError {
         return_if_fail(session != null);
         const string API_METHOD = "track.updateNowPlaying";
         debug("%s update now playing: %s by %s", id, song, artist);
@@ -181,8 +172,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
      * @throws AudioScrobblerError on failure
      */
     public async override void scrobble_track(string song, string artist, string? album, int64 timestamp)
-    throws AudioScrobblerError
-    {
+    throws AudioScrobblerError {
         return_if_fail(session != null);
         debug("%s scrobble: %s by %s from %s, %s", id, song, artist, album, timestamp.to_string());
         // http://www.last.fm/api/show/track.scrobble
@@ -209,52 +199,41 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
      * @return Root JSON object of the response
      * @throws AudioScrobblerError on failure
      */
-    private async Json.Object send_request(string method, HashTable<string, string> params, uint retry=0) throws AudioScrobblerError
-    {
+    private async Json.Object send_request(string method, HashTable<string, string> params, uint retry=0) throws AudioScrobblerError {
         Soup.Message message;
         var request = create_signed_request(params) + "&format=json";
-        if (method == HTTP_GET)
-        {
+        if (method == HTTP_GET) {
             message = new Soup.Message(method, api_root + "?" + request);
         }
-        else if (method == HTTP_POST)
-        {
+        else if (method == HTTP_POST) {
             message = new Soup.Message(method, api_root);
             message.set_request("application/x-www-form-urlencoded",
                 Soup.MemoryUse.COPY, request.data);
         }
-        else
-        {
+        else {
             message = null;
             error("Last.fm: Unsupported request method: %s", method);
         }
 
-        while (true)
-        {
-            try
-            {
+        while (true) {
+            try {
                 SourceFunc resume = send_request.callback;
-                connection.queue_message(message, () =>
-                    {
-                        Idle.add((owned) resume);
-                    });
+                connection.queue_message(message, () => {
+                    Idle.add((owned) resume);
+                });
                 yield;
 
                 var response = (string) message.response_body.flatten().data;
                 var parser = new Json.Parser();
-                try
-                {
+                try {
                     parser.load_from_data(response);
                 }
-                catch (GLib.Error e)
-                {
+                catch (GLib.Error e) {
                     var data = (string) request.data;
-                    if ("Your request timed out" in data)
-                    {
+                    if ("Your request timed out" in data) {
                         throw new AudioScrobblerError.RETRY("%s", data);
                     }
-                    else
-                    {
+                    else {
                         debug("Send request: %s\n---------\n%s\n----------", data, response);
                         throw new AudioScrobblerError.JSON_PARSE_ERROR(e.message);
                     }
@@ -264,12 +243,10 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
                 if (root == null)
                 throw new AudioScrobblerError.WRONG_RESPONSE("Empty response from the server.");
                 var root_object = root.get_object();
-                if (root_object.has_member("error") && root_object.has_member("message"))
-                {
+                if (root_object.has_member("error") && root_object.has_member("message")) {
                     var error_code = root_object.get_int_member("error");
                     var error_message = root_object.get_string_member("message");
-                    switch (error_code)
-                    {
+                    switch (error_code) {
                     case 9:  // Invalid session key - Please re-authenticate
                         drop_session();
                         throw new AudioScrobblerError.NO_SESSION("Session expired. Please re-authenticate. %s", error_message);
@@ -283,8 +260,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
                 }
                 return root_object;
             }
-            catch (AudioScrobblerError e)
-            {
+            catch (AudioScrobblerError e) {
                 if (retry == 0 && !(e is AudioScrobblerError.RETRY))
                 throw e;
 
@@ -302,8 +278,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
      *
      * @param params parameters of the request
      */
-    private string create_signed_request(HashTable<string, string> params)
-    {
+    private string create_signed_request(HashTable<string, string> params) {
         // See http://www.last.fm/api/desktopauth#6
 
         // Buffer for request string
@@ -315,8 +290,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
         var keys = params.get_keys();
         keys.sort(strcmp);
 
-        foreach (var key in keys)
-        {
+        foreach (var key in keys) {
             var val = params[key];
             // signature buffer does not contain "=" and "&"
             // to separate key and value or key-value pairs
@@ -348,10 +322,8 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
      * @param key parameter name
      * @param value parameter value
      */
-    private void append_param(StringBuilder buffer, string key, string value)
-    {
-        if (buffer.len > 0)
-        {
+    private void append_param(StringBuilder buffer, string key, string value) {
+        if (buffer.len > 0) {
             buffer.append_c('&');
         }
         buffer.append(Uri.escape_string(key, "", true));
@@ -359,10 +331,8 @@ public class LastfmCompatibleScrobbler: AudioScrobbler
         buffer.append(Uri.escape_string(value, "", true));
     }
 
-    private void on_notify(ParamSpec param)
-    {
-        switch (param.name)
-        {
+    private void on_notify(ParamSpec param) {
+        switch (param.name) {
         case "scrobbling-enabled":
         case "session":
             can_scrobble = can_update_now_playing = scrobbling_enabled && has_session;

@@ -26,13 +26,11 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Engineio
-{
+namespace Engineio {
 
 public delegate void CloseCallback();
 
-public abstract class Transport: GLib.Object
-{
+public abstract class Transport: GLib.Object {
     public string sid {get; set;}
     public string name {get; protected set;}
     public bool writable {get; protected set; default = false;}
@@ -41,12 +39,10 @@ public abstract class Transport: GLib.Object
     public ReadyState ready_state {get; protected set; default = ReadyState.OPEN;}
     public bool supports_binary {get; set; default = false;}
 
-    public Transport(Request request)
-    {
+    public Transport(Request request) {
     }
 
-    public void send_one(Packet packet)
-    {
+    public void send_one(Packet packet) {
         SList<Packet> packets = null;
         packets.prepend(packet);
         send((owned) packets);
@@ -62,8 +58,7 @@ public abstract class Transport: GLib.Object
 
     public signal void closed();
 
-    public virtual signal void error_occured(string msg, string? desc)
-    {
+    public virtual signal void error_occured(string msg, string? desc) {
         warning("Transport error: %s %s", msg, desc);
     }
 
@@ -75,8 +70,7 @@ public abstract class Transport: GLib.Object
      *
      * @api private
      */
-    public void discard()
-    {
+    public void discard() {
         discarded = true;
     }
 
@@ -85,10 +79,8 @@ public abstract class Transport: GLib.Object
      *
      * @api private
      */
-    public void close(owned CloseCallback? callback)
-    {
-        switch (ready_state)
-        {
+    public void close(owned CloseCallback? callback) {
+        switch (ready_state) {
         case ReadyState.CLOSED:
         case ReadyState.CLOSING:
             return;
@@ -105,13 +97,11 @@ public abstract class Transport: GLib.Object
      * @param {Object} packet
      * @api private
      */
-    protected virtual async void handle_incoming_packet(Packet packet)
-    {
+    protected virtual async void handle_incoming_packet(Packet packet) {
         incoming_packet(packet);
     }
 
-    protected void handle_decode_error(Parser.Error e)
-    {
+    protected void handle_decode_error(Parser.Error e) {
         error_occured("decode error", e.message);
     }
 
@@ -122,18 +112,15 @@ public abstract class Transport: GLib.Object
      * @api private
      */
 
-    protected virtual async void handle_incoming_data(owned string? string_payload, Bytes? binary_payload)
-    {
-        try
-        {
+    protected virtual async void handle_incoming_data(owned string? string_payload, Bytes? binary_payload) {
+        try {
             var packet = binary_payload != null
             ? Parser.decode_packet_from_bytes(binary_payload)
             : Parser.decode_packet(string_payload);
             if (packet != null)
             yield handle_incoming_packet(packet);
         }
-        catch (Parser.Error e)
-        {
+        catch (Parser.Error e) {
             handle_decode_error(e);
         }
     }
@@ -144,8 +131,7 @@ public abstract class Transport: GLib.Object
      * @api private
      */
 
-    protected virtual void on_close()
-    {
+    protected virtual void on_close() {
         ready_state = ReadyState.CLOSED;
         closed();
     }

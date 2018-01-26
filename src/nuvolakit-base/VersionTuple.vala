@@ -170,7 +170,7 @@ public struct VersionTuple {
      * @return A dot-separated version string X.Y.Z or X.Y.Z.P.
      */
     public string to_string() {
-        if (patch > 0 ){
+        if (patch > 0 ) {
             return "%u.%u.%u.%u".printf(major, minor, micro, patch);
         } else {
             return "%u.%u.%u".printf(major, minor, micro);

@@ -22,12 +22,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
 
-public errordomain AudioScrobblerError
-{
+public errordomain AudioScrobblerError {
     NOT_IMPLEMENTED,
     CONNECTION_ERROR,
     NOT_AUTHENTICATED,
@@ -39,8 +37,7 @@ public errordomain AudioScrobblerError
 }
 
 
-public abstract class AudioScrobbler : GLib.Object
-{
+public abstract class AudioScrobbler : GLib.Object {
     public string id {get; protected construct;}
     public string name {get; protected construct;}
     public bool has_settings {get; protected set; default = false;}
@@ -48,19 +45,16 @@ public abstract class AudioScrobbler : GLib.Object
     public bool can_scrobble {get; protected set; default = false;}
     public bool can_update_now_playing {get; protected set; default = false;}
 
-    public virtual Gtk.Widget? get_settings(Drtgtk.Application app)
-    {
+    public virtual Gtk.Widget? get_settings(Drtgtk.Application app) {
         return null;
     }
 
     public virtual async void scrobble_track(string song, string artist, string? album, int64 timestamp)
-    throws AudioScrobblerError
-    {
+    throws AudioScrobblerError {
         throw new AudioScrobblerError.NOT_IMPLEMENTED("Scrobble track call is not implemented in %s (%s).", name, id);
     }
 
-    public virtual async void update_now_playing(string song, string artist) throws AudioScrobblerError
-    {
+    public virtual async void update_now_playing(string song, string artist) throws AudioScrobblerError {
         throw new AudioScrobblerError.NOT_IMPLEMENTED("Update now playing call is not implemented in %s (%s).", name, id);
     }
 }

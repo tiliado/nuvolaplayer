@@ -25,16 +25,14 @@
 
 namespace Nuvola {
 
-public class UnityLauncherComponent: Component
-{
+public class UnityLauncherComponent: Component {
     #if UNITY
     private Bindings bindings;
     private Drtgtk.Application app;
     private UnityLauncher? launcher = null;
     #endif
 
-    public UnityLauncherComponent(Drtgtk.Application app, Bindings bindings, Drt.KeyValueStorage config)
-    {
+    public UnityLauncherComponent(Drtgtk.Application app, Bindings bindings, Drt.KeyValueStorage config) {
         base("unity_launcher", "Unity Laucher", "Adds quick list (menu) to the icon on Unity Launcher.");
         #if UNITY
         this.bindings = bindings;
@@ -46,14 +44,12 @@ public class UnityLauncherComponent: Component
     }
 
     #if UNITY
-    protected override bool activate()
-    {
+    protected override bool activate() {
         launcher = new UnityLauncher(app, bindings.get_model<LauncherModel>());
         return true;
     }
 
-    protected override bool deactivate()
-    {
+    protected override bool deactivate() {
         launcher = null;
         return true;
     }

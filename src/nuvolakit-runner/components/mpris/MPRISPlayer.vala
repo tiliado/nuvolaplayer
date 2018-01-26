@@ -22,19 +22,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
 [DBus(name = "org.mpris.MediaPlayer2.Player")]
-public class MPRISPlayer : GLib.Object
-{
+public class MPRISPlayer : GLib.Object {
     private DBusConnection conn;
     private MediaPlayerModel player;
     private HashTable<string, Variant> pending_update;
     private uint pending_update_id = 0;
 
-    public MPRISPlayer(MediaPlayerModel player, DBusConnection conn)
-    {
+    public MPRISPlayer(MediaPlayerModel player, DBusConnection conn) {
         this.player = player;
         this.conn = conn;
         player.notify.connect_after((o, p) => {schedule_update(p.name);});
@@ -54,93 +51,77 @@ public class MPRISPlayer : GLib.Object
     /* If the media player has no ability to play at speeds other than the normal playback rate,
      * this must still be implemented, and must return 1.0. The MinimumRate and MaximumRate properties
      * must also be set to 1.0.  A value of 0.0 set by the client should act as though Pause was called. */
-    public double rate
-    {
-        get
-        {
+    public double rate {
+        get {
             return 1.0;
         }
-        set
-        {
+        set {
             if (value == 0.0)
             pause();
         }
     }
-    public double minimum_rate {get{return 1.0;}}
-    public double maximum_rate {get{return 1.0;}}
+    public double minimum_rate {get {return 1.0;}}
+    public double maximum_rate {get {return 1.0;}}
     public int64 position {get; private set; default = 0;}
     public bool can_go_next {get; private set; default = false;}
     public bool can_go_previous {get; private set; default = false;}
     public bool can_play {get; private set; default = false;}
     public bool can_pause {get; private set; default = false;}
     public bool can_seek {get; private set; default = false;}
-    public bool can_control {get{return true;}}
+    public bool can_control {get {return true;}}
     public bool nuvola_can_rate {get; private set; default = false;}
     public HashTable<string, Variant> metadata {get; private set; default = null;}
 
     private double _volume = 1.0;
-    public double volume
-    {
+    public double volume {
         get {return _volume;}
         set {player.change_volume(value < 0.0 ? 0.0 : value);}
     }
 
     public signal void seeked(int64 position);
 
-    public void next()
-    {
+    public void next() {
         player.next_song();
     }
 
-    public void previous()
-    {
+    public void previous() {
         player.prev_song();
     }
 
-    public void pause()
-    {
+    public void pause() {
         player.pause();
     }
 
-    public void play_pause()
-    {
+    public void play_pause() {
         player.toggle_play();
     }
 
-    public void stop()
-    {
+    public void stop() {
         player.stop();
     }
 
-    public void play()
-    {
+    public void play() {
         player.play();
     }
 
-    public void seek(int64 offset)
-    {
+    public void seek(int64 offset) {
         if (can_seek)
         player.seek(player.track_position + offset);
     }
 
-    public void SetPosition(ObjectPath track_id, int64 position)
-    {
+    public void SetPosition(ObjectPath track_id, int64 position) {
         player.seek(position);
     }
 
-    public void open_uri(string uri)
-    {
+    public void open_uri(string uri) {
     }
 
-    public void nuvola_set_rating(double rating)
-    {
+    public void nuvola_set_rating(double rating) {
         player.set_rating(rating);
     }
 
-    private void schedule_update(string param)
-    {
-        switch (param)
-        {
+    private void schedule_update(string param) {
+        switch (param) {
         case "title":
         case "artist":
         case "album":
@@ -211,8 +192,7 @@ public class MPRISPlayer : GLib.Object
         pending_update_id = Timeout.add(300, update_cb);
     }
 
-    private bool update_cb()
-    {
+    private bool update_cb() {
         pending_update_id = 0;
         var builder = new VariantBuilder(VariantType.ARRAY);
         var iter = HashTableIter<string, Variant>(pending_update);
@@ -223,23 +203,19 @@ public class MPRISPlayer : GLib.Object
         pending_update.remove_all();
         var invalid_builder = new VariantBuilder(new VariantType ("as"));
         var payload = new Variant("(sa{sv}as)", "org.mpris.MediaPlayer2.Player", builder, invalid_builder);
-        try
-        {
+        try {
             conn.emit_signal(null, "/org/mpris/MediaPlayer2", "org.freedesktop.DBus.Properties", "PropertiesChanged",
                 payload);
         }
-        catch (Error e)
-        {
+        catch (Error e) {
             warning("Unable to emit PropertiesChanged signal: %s", e.message);
         }
         return false;
     }
 
-    private HashTable<string, Variant> create_metadata()
-    {
+    private HashTable<string, Variant> create_metadata() {
         var metadata = new HashTable<string, Variant>(str_hash, str_equal);
-        if (player.artist != null)
-        {
+        if (player.artist != null) {
             string[] artistArray = {player.artist};
             metadata.insert("xesam:artist", artistArray);
         }
@@ -253,8 +229,7 @@ public class MPRISPlayer : GLib.Object
         metadata.insert("xesam:userRating", player.rating);
         if (player.track_length > 0)
         metadata.insert("mpris:length", new Variant.int64((int64) player.track_length));
-        if (metadata.size() > 0)
-        {
+        if (metadata.size() > 0) {
             var hash = Checksum.compute_for_string(ChecksumType.MD5, "%s:%s:%s".printf(
                 player.title ?? "unknown title",
                 player.artist ?? "unknown artist",
@@ -273,11 +248,9 @@ public class MPRISPlayer : GLib.Object
      * is a "current track": the value should not depend on whether the track is currently paused or playing. In fact,
      * if a track is currently playing (and CanControl is true), this should be true.
      */
-    private bool update_can_play()
-    {
+    private bool update_can_play() {
         var can_play = player.can_play || player.state != "unknown";
-        if (this.can_play != can_play)
-        {
+        if (this.can_play != can_play) {
             this.can_play = can_play;
             return true;
         }
@@ -291,21 +264,17 @@ public class MPRISPlayer : GLib.Object
      * the current track: its value should not depend on whether the track is currently paused or playing. In fact,
      * if playback is currently paused (and CanControl is true), this should be true.
      */
-    private bool update_can_pause()
-    {
+    private bool update_can_pause() {
         var can_pause = player.can_pause || player.state != "unknown";
-        if (this.can_pause != can_pause)
-        {
+        if (this.can_pause != can_pause) {
             this.can_pause = can_pause;
             return true;
         }
         return false;
     }
 
-    private string map_playback_state()
-    {
-        switch (player.state)
-        {
+    private string map_playback_state() {
+        switch (player.state) {
         case "paused":
             return "Paused";
         case "playing":

@@ -22,11 +22,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
-public class PasswordManagerComponent: Component
-{
+public class PasswordManagerComponent: Component {
     #if EXPERIMENTAL
     private IpcBus ipc_bus;
     private WebWorker web_worker;
@@ -36,8 +34,7 @@ public class PasswordManagerComponent: Component
     private WebkitEngine engine;
     #endif
 
-    public PasswordManagerComponent(Drt.KeyValueStorage config, IpcBus ipc_bus, WebWorker web_worker, string web_app_id, WebkitEngine engine)
-    {
+    public PasswordManagerComponent(Drt.KeyValueStorage config, IpcBus ipc_bus, WebWorker web_worker, string web_app_id, WebkitEngine engine) {
         base("passwordmanager", "Password Manager (Experimental)", "Stores passwords from login forms in a keyring.");
         #if EXPERIMENTAL
         this.required_membership = TiliadoMembership.PREMIUM;
@@ -52,48 +49,39 @@ public class PasswordManagerComponent: Component
     }
 
     #if EXPERIMENTAL
-    protected override bool activate()
-    {
+    protected override bool activate() {
         manager = new PasswordManager(engine, web_app_id);
         binding = new PasswordManagerBinding(ipc_bus.router, web_worker, manager);
         manager.fetch_passwords.begin(on_passwords_fetched);
         return true;
     }
 
-    private void on_passwords_fetched(GLib.Object? o, AsyncResult res)
-    {
-        try
-        {
+    private void on_passwords_fetched(GLib.Object? o, AsyncResult res) {
+        try {
             manager.fetch_passwords.end(res);
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             warning("Failed to fetch passwords. %s", e.message);
         }
-        try
-        {
+        try {
             if (ipc_bus.web_worker != null)
             ipc_bus.web_worker.call_sync("/nuvola/password-manager/enable", null);
             else
             ipc_bus.notify["web-worker"].connect_after(on_web_worker_notify);
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             warning("Failed to enable the password manager: %s", e.message);
         }
     }
 
-    protected override bool deactivate()
-    {
-        try
-        {
+    protected override bool deactivate() {
+        try {
             if (ipc_bus.web_worker != null)
             web_worker.call_sync("/nuvola/password-manager/disable", null);
             else
             ipc_bus.notify["web-worker"].connect_after(on_web_worker_notify);
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             warning("Failed to disable the password manager: %s", e.message);
         }
         binding.dispose();
@@ -102,18 +90,14 @@ public class PasswordManagerComponent: Component
         return true;
     }
 
-    private void on_web_worker_notify(GLib.Object o, ParamSpec p)
-    {
+    private void on_web_worker_notify(GLib.Object o, ParamSpec p) {
         var bus = o as IpcBus;
-        if (bus != null && bus.web_worker != null)
-        {
-            try
-            {
+        if (bus != null && bus.web_worker != null) {
+            try {
                 web_worker.call_sync("/nuvola/password-manager/" + (enabled ? "enable": "disable"), null);
                 ipc_bus.notify["web-worker"].disconnect(on_web_worker_notify);
             }
-            catch (GLib.Error e)
-            {
+            catch (GLib.Error e) {
                 warning("Failed to %s the password manager. %s", enabled ? "enable": "disable", e.message);
             }
         }

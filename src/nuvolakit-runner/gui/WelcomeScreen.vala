@@ -24,8 +24,7 @@
 
 namespace Nuvola {
 
-public class WelcomeScreen : Gtk.Grid
-{
+public class WelcomeScreen : Gtk.Grid {
     private const string PATRONS_BOX_URI = "https://tiliado.eu/nuvolaplayer/funding/patrons_list_box/";
     private Gtk.Grid grid;
     private Drtgtk.Application app;
@@ -33,8 +32,7 @@ public class WelcomeScreen : Gtk.Grid
     private Drtgtk.RichTextView welcome_text;
     private Gtk.ScrolledWindow scroll;
 
-    public WelcomeScreen(Drtgtk.Application app, Drt.Storage storage, WebKit.WebContext web_context)
-    {
+    public WelcomeScreen(Drtgtk.Application app, Drt.Storage storage, WebKit.WebContext web_context) {
         this.app = app;
 
         grid = new Gtk.Grid();
@@ -43,22 +41,18 @@ public class WelcomeScreen : Gtk.Grid
 
         string welcome_xml = null;
         var welcome_xml_file = storage.require_data_file("welcome.xml");
-        try
-        {
+        try {
             welcome_xml = Drt.System.read_file(welcome_xml_file);
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             error("Failed to load '%s': %s", welcome_xml_file.get_path(), e.message);
         }
 
         var buffer = new Drtgtk.RichTextBuffer();
-        try
-        {
+        try {
             buffer.load(welcome_xml);
         }
-        catch (MarkupError e)
-        {
+        catch (MarkupError e) {
             error("Markup Error in '%s': %s", welcome_xml_file.get_path(), e.message);
         }
 
@@ -92,18 +86,15 @@ public class WelcomeScreen : Gtk.Grid
         scroll.show_all();
     }
 
-    private bool on_scroll_event(Gdk.EventScroll event)
-    {
+    private bool on_scroll_event(Gdk.EventScroll event) {
         /* Propagate the scroll event to the ScrolledWindow. */
         scroll.scroll_event(event);
         return true;
     }
 
-    private bool on_motion_notify(Gtk.Widget widget, Gdk.EventMotion event)
-    {
+    private bool on_motion_notify(Gtk.Widget widget, Gdk.EventMotion event) {
         #if !NUVOLA_LITE
-        if (!widget.has_focus)
-        {
+        if (!widget.has_focus) {
             /* The focus grab is necessary for a WebView in a ScrolledWindow as it jumps on click otherwise.
              * Since the scroll position moves to top on focus grab, it's necessary to restore the original
              * position after that. */
@@ -117,14 +108,12 @@ public class WelcomeScreen : Gtk.Grid
     }
 
     #if !NUVOLA_LITE
-    private void on_load_changed(WebKit.WebView view, WebKit.LoadEvent event)
-    {
+    private void on_load_changed(WebKit.WebView view, WebKit.LoadEvent event) {
         if (event == WebKit.LoadEvent.FINISHED)
         set_web_view_height();
     }
 
-    private bool set_web_view_height()
-    {
+    private bool set_web_view_height() {
         /* A hack to get the document height. */
         web_view.run_javascript.begin("""
             var bodyElm = document.body, htmlElm = document.documentElement;
@@ -135,10 +124,8 @@ public class WelcomeScreen : Gtk.Grid
         return true;
     }
 
-    private void on_height_retrieved(GLib.Object? o, AsyncResult result)
-    {
-        try
-        {
+    private void on_height_retrieved(GLib.Object? o, AsyncResult result) {
+        try {
             web_view.run_javascript.end(result);
             var page_height = int.parse(web_view.title);
             int width; int height;
@@ -146,21 +133,18 @@ public class WelcomeScreen : Gtk.Grid
             if (height < page_height && page_height > 100)
             web_view.set_size_request(width, page_height);
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             debug("JavaScript error: %s", e.message);
         }
     }
     #endif
 
-    private void show_uri(string uri)
-    {
+    private void show_uri(string uri) {
         app.show_uri(uri);
     }
 
     #if !NUVOLA_LITE
-    private bool decide_navigation_policy(bool new_window, WebKit.NavigationPolicyDecision decision)
-    {
+    private bool decide_navigation_policy(bool new_window, WebKit.NavigationPolicyDecision decision) {
         var uri = decision.navigation_action.get_request().uri;
         if (!uri.has_prefix("http://") && !uri.has_prefix("https://") || uri == PATRONS_BOX_URI)
         return false;
@@ -170,10 +154,8 @@ public class WelcomeScreen : Gtk.Grid
         return true;
     }
 
-    private bool on_decide_policy(WebKit.PolicyDecision decision, WebKit.PolicyDecisionType decision_type)
-    {
-        switch (decision_type)
-        {
+    private bool on_decide_policy(WebKit.PolicyDecision decision, WebKit.PolicyDecisionType decision_type) {
+        switch (decision_type) {
         case WebKit.PolicyDecisionType.NAVIGATION_ACTION:
             return decide_navigation_policy(false, (WebKit.NavigationPolicyDecision) decision);
         case WebKit.PolicyDecisionType.NEW_WINDOW_ACTION:

@@ -22,32 +22,25 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Nuvola.MediaKeysBinding: ObjectBinding<MediaKeysInterface>
-{
-    public MediaKeysBinding(Drt.RpcRouter server, WebWorker web_worker)
-    {
+public class Nuvola.MediaKeysBinding: ObjectBinding<MediaKeysInterface> {
+    public MediaKeysBinding(Drt.RpcRouter server, WebWorker web_worker) {
         base(server, web_worker, "Nuvola.MediaKey");
     }
 
-    protected override void object_added(MediaKeysInterface object)
-    {
+    protected override void object_added(MediaKeysInterface object) {
         object.media_key_pressed.connect(on_media_key_pressed);
     }
 
-    protected override void object_removed(MediaKeysInterface object)
-    {
+    protected override void object_removed(MediaKeysInterface object) {
         object.media_key_pressed.disconnect(on_media_key_pressed);
     }
 
-    private void on_media_key_pressed(string key)
-    {
-        try
-        {
+    private void on_media_key_pressed(string key) {
+        try {
             var payload = new Variant("(ss)", "MediaKeyPressed", key);
             call_web_worker("Nuvola.mediaKeys.emit", ref payload);
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             warning("Communication failed: %s", e.message);
         }
     }

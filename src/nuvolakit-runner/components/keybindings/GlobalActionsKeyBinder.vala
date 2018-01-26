@@ -22,43 +22,36 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
-public class GlobalActionsKeyBinder : GLib.Object, ActionsKeyBinder
-{
+public class GlobalActionsKeyBinder : GLib.Object, ActionsKeyBinder {
     private XKeyGrabber grabber;
     private Config config;
     private HashTable<string, string> keybindings;
 
     private const string CONF_PREFIX = "nuvola.global_keybindings.";
 
-    public class GlobalActionsKeyBinder(XKeyGrabber grabber, Config config)
-    {
+    public class GlobalActionsKeyBinder(XKeyGrabber grabber, Config config) {
         this.grabber = grabber;
         this.config = config;
         keybindings = new HashTable<string, string>(str_hash, str_equal);
         grabber.keybinding_pressed.connect(on_keybinding_pressed);
     }
 
-    public string? get_keybinding(string action)
-    {
+    public string? get_keybinding(string action) {
         return config.get_string(CONF_PREFIX + action);
     }
 
-    public bool set_keybinding(string action, string? keybinding)
-    {
+    public bool set_keybinding(string action, string? keybinding) {
         var old_keybinding = get_keybinding(action);
-        if (old_keybinding != null)
-        {
+        if (old_keybinding != null) {
             grabber.ungrab(old_keybinding);
             warn_if_fail(keybindings[old_keybinding] == action);
             keybindings.remove(old_keybinding);
         }
 
         var result = keybinding == null || grabber.grab(keybinding, false);
-        if (result)
-        {
+        if (result) {
             if (keybinding != null)
             keybindings[keybinding] = action;
             config.set_string(CONF_PREFIX + action, keybinding);
@@ -66,8 +59,7 @@ public class GlobalActionsKeyBinder : GLib.Object, ActionsKeyBinder
         return result;
     }
 
-    public bool bind(string action)
-    {
+    public bool bind(string action) {
         var keybinding = get_keybinding(action);
         if (keybinding == null)
         return true;
@@ -76,15 +68,13 @@ public class GlobalActionsKeyBinder : GLib.Object, ActionsKeyBinder
         if (bound_action == action)
         return true;
 
-        if (bound_action != null)
-        {
+        if (bound_action != null) {
             warning("Action %s has keybinding '%s' that is already bound to action %s.",
                 action, keybinding, bound_action);
             return false;
         }
 
-        if (grabber.grab(keybinding, false))
-        {
+        if (grabber.grab(keybinding, false)) {
             keybindings[keybinding] = action;
             return true;
         }
@@ -93,22 +83,19 @@ public class GlobalActionsKeyBinder : GLib.Object, ActionsKeyBinder
         return false;
     }
 
-    public bool unbind(string action)
-    {
+    public bool unbind(string action) {
         var keybinding = get_keybinding(action);
         if (keybinding == null)
         return true;
 
         var bound_action = keybindings[keybinding];
-        if (bound_action != action)
-        {
+        if (bound_action != action) {
             warning("Action %s has keybinding '%s' that is bound to action %s.",
                 action, keybinding, bound_action);
             return false;
         }
 
-        if (grabber.ungrab(keybinding))
-        {
+        if (grabber.ungrab(keybinding)) {
             keybindings.remove(keybinding);
             return true;
         }
@@ -117,18 +104,15 @@ public class GlobalActionsKeyBinder : GLib.Object, ActionsKeyBinder
         return false;
     }
 
-    public string? get_action(string keybinding)
-    {
+    public string? get_action(string keybinding) {
         return keybindings[keybinding];
     }
 
-    public bool is_available(string keybinding)
-    {
+    public bool is_available(string keybinding) {
         return keybindings[keybinding] == null;
     }
 
-    private void on_keybinding_pressed(string accelerator, uint32 time)
-    {
+    private void on_keybinding_pressed(string accelerator, uint32 time) {
         var name = keybindings[accelerator];
         bool handled = false;
         if (name != null)

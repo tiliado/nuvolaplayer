@@ -21,11 +21,9 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-namespace Engineio
-{
+namespace Engineio {
 
-public class Request
-{
+public class Request {
     public Soup.Message? msg {get; private set;}
     public string url;
     public string method;
@@ -41,16 +39,14 @@ public class Request
     /* b64: if the client doesn't support XHR2, b64=1 is sent in the query string to signal the server that all binary data should be sent base64 encoded.*/
     public bool base64 = false;
 
-    public Request(Soup.ClientContext client, Soup.Message msg, GLib.HashTable<string, string>? query)
-    {
+    public Request(Soup.ClientContext client, Soup.Message msg, GLib.HashTable<string, string>? query) {
         this.msg = msg;
         this.method = msg.method;
         this.headers = msg.request_headers;
         this.query = query;
         this.url = msg.get_uri().to_string(false);
         this.remote_address = client.get_remote_address();
-        if (query != null)
-        {
+        if (query != null) {
             transport = query["transport"];
             var jsonp_str = query["j"];
             if (jsonp_str != null)
@@ -60,29 +56,24 @@ public class Request
         }
     }
 
-    public bool in_query(string key)
-    {
+    public bool in_query(string key) {
         return query != null && key in query;
     }
 
-    public string? get_query_param(string param)
-    {
+    public string? get_query_param(string param) {
         return query != null ? query[param] : null;
     }
 
-    public int64 get_content_length()
-    {
+    public int64 get_content_length() {
         return msg.request_body.length;
     }
 
-    public string get_data_as_string()
-    {
+    public string get_data_as_string() {
         assert(msg.request_body.data != null);
         return (string) msg.request_body.data;
     }
 
-    public Bytes get_data_as_bytes()
-    {
+    public Bytes get_data_as_bytes() {
         assert(msg.request_body.data != null);
         return new Bytes(msg.request_body.data);
     }

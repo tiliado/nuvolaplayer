@@ -22,17 +22,14 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
-public class ScrobblerSettings: Gtk.Grid
-{
+public class ScrobblerSettings: Gtk.Grid {
     private LastfmCompatibleScrobbler scrobbler;
     private unowned Drtgtk.Application app;
     private Gtk.Switch checkbox;
 
-    public ScrobblerSettings(LastfmCompatibleScrobbler scrobbler, Drtgtk.Application app)
-    {
+    public ScrobblerSettings(LastfmCompatibleScrobbler scrobbler, Drtgtk.Application app) {
         Object(orientation: Gtk.Orientation.VERTICAL, column_spacing: 10, row_spacing: 10);
         this.scrobbler = scrobbler;
         this.app = app;
@@ -48,15 +45,13 @@ public class ScrobblerSettings: Gtk.Grid
         label.halign = Gtk.Align.START;
         attach(label, 1, row, 1, 1);
 
-        if (!scrobbler.has_session)
-        {
+        if (!scrobbler.has_session) {
             add_info_bar(
                 "You have not connected your account yet.", "Connect", Gtk.MessageType.WARNING, 1);
             checkbox.sensitive = false;
             checkbox.active = false;
         }
-        else
-        {
+        else {
             add_info_bar(
                 "Connected account: %s".printf(scrobbler.username ?? "(unknown)"),
                 "Disconnect", Gtk.MessageType.OTHER, 3);
@@ -64,17 +59,14 @@ public class ScrobblerSettings: Gtk.Grid
         }
     }
 
-    private void toggle_switches(bool enabled)
-    {
-        if (enabled)
-        {
+    private void toggle_switches(bool enabled) {
+        if (enabled) {
             checkbox.active = scrobbler.scrobbling_enabled;
             checkbox.sensitive = true;
             scrobbler.notify.connect_after(on_notify);
             checkbox.notify.connect_after(on_notify);
         }
-        else
-        {
+        else {
             scrobbler.notify.disconnect(on_notify);
             checkbox.notify.disconnect(on_notify);
             checkbox.active = false;
@@ -82,8 +74,7 @@ public class ScrobblerSettings: Gtk.Grid
         }
     }
 
-    private void add_info_bar(string text, string button_label, Gtk.MessageType type, int response_id)
-    {
+    private void add_info_bar(string text, string button_label, Gtk.MessageType type, int response_id) {
         var info_bar = new Gtk.InfoBar.with_buttons(button_label, response_id, null);
         info_bar.message_type = type;
         var label = new Gtk.Label(text);
@@ -94,10 +85,8 @@ public class ScrobblerSettings: Gtk.Grid
         attach(info_bar, 0, 0, 2, 1);
     }
 
-    private void on_notify(GLib.Object o, ParamSpec p)
-    {
-        switch (p.name)
-        {
+    private void on_notify(GLib.Object o, ParamSpec p) {
+        switch (p.name) {
         case "scrobbling-enabled":
             if (checkbox.active != scrobbler.scrobbling_enabled)
             checkbox.active = scrobbler.scrobbling_enabled;
@@ -109,18 +98,15 @@ public class ScrobblerSettings: Gtk.Grid
         }
     }
 
-    private void remove_info_bars()
-    {
+    private void remove_info_bars() {
         foreach (var child in get_children())
         if (child is Gtk.InfoBar)
         remove(child);
     }
 
-    private void on_response(GLib.Object emitter, int response_id)
-    {
+    private void on_response(GLib.Object emitter, int response_id) {
         var info_bar = emitter as Gtk.InfoBar;
-        switch (response_id)
-        {
+        switch (response_id) {
         case 1:
             info_bar.sensitive = false;
             scrobbler.request_authorization.begin(on_request_authorization_done);
@@ -139,10 +125,8 @@ public class ScrobblerSettings: Gtk.Grid
         }
     }
 
-    private void on_request_authorization_done(GLib.Object? o, AsyncResult res)
-    {
-        try
-        {
+    private void on_request_authorization_done(GLib.Object? o, AsyncResult res) {
+        try {
             remove_info_bars();
             var url = scrobbler.request_authorization.end(res);
             app.show_uri(url);
@@ -166,18 +150,15 @@ public class ScrobblerSettings: Gtk.Grid
             info_bar.show_all();
             attach(info_bar, 0, 1, 2, 1);
         }
-        catch (AudioScrobblerError e)
-        {
+        catch (AudioScrobblerError e) {
             warning("Failed to get auth URL: %s", e.message);
             add_info_bar(
                 "Attempt to get authorization URL has failed.", "Retry", Gtk.MessageType.ERROR, 1);
         }
     }
 
-    private void on_finish_authorization_done(GLib.Object? o, AsyncResult res)
-    {
-        try
-        {
+    private void on_finish_authorization_done(GLib.Object? o, AsyncResult res) {
+        try {
             remove_info_bars();
             scrobbler.finish_authorization.end(res);
             toggle_switches(true);
@@ -185,8 +166,7 @@ public class ScrobblerSettings: Gtk.Grid
                 "You have connected account: %s".printf(scrobbler.username ?? "(unknown)"),
                 "Disconnect", Gtk.MessageType.INFO, 3);
         }
-        catch (AudioScrobblerError e)
-        {
+        catch (AudioScrobblerError e) {
             warning("Failed to retrieve confirmed authorization: %s", e.message);
             add_info_bar(
                 "Failed to retrieve confirmed authorization.", "Retry", Gtk.MessageType.ERROR, 1);

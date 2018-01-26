@@ -27,8 +27,7 @@ namespace Nuvola {
 /**
  * Main window of the Nuvola Master process
  */
-public class MasterWindow : Drtgtk.ApplicationWindow
-{
+public class MasterWindow : Drtgtk.ApplicationWindow {
     /** Stack for the pages of the main window */
     public Gtk.Stack stack;
     private Gtk.StackSwitcher switcher;
@@ -37,15 +36,12 @@ public class MasterWindow : Drtgtk.ApplicationWindow
     /**
      * Creates new MasterWindow for given app
      */
-    public MasterWindow(MasterController app)
-    {
+    public MasterWindow(MasterController app) {
         base(app, false);
-        try
-        {
+        try {
             icon = Gtk.IconTheme.get_default().load_icon(app.icon, 48, 0);
         }
-        catch (Error e)
-        {
+        catch (Error e) {
             warning("Unable to load application icon.");
         }
         set_default_size(900, 600);
@@ -78,21 +74,18 @@ public class MasterWindow : Drtgtk.ApplicationWindow
      * @param name     A page name.
      * @param title    A title for the switcher.
      */
-    public void add_page(Gtk.Widget page, string name, string title)
-    {
+    public void add_page(Gtk.Widget page, string name, string title) {
         var was_empty = stack.visible_child == null;
         stack.add_titled(page, name, title);
         if (was_empty)
         update();
     }
 
-    private void update_title(string? title=null)
-    {
+    private void update_title(string? title=null) {
         this.title = title != null ? "%s - %s".printf(title, app.app_name) : app.app_name;
     }
 
-    private void update()
-    {
+    private void update() {
         var child = stack.visible_child;
         string? name = null;
         string? title = null;

@@ -26,7 +26,7 @@ namespace Nuvola {
 
 public class WebkitOptions : WebOptions {
     public override VersionTuple engine_version {get; protected set;}
-    public WebKit.WebContext default_context{
+    public WebKit.WebContext default_context {
         get {if (_default_context == null) {init();} return _default_context;}
         private set {_default_context = value;}
     }
@@ -130,7 +130,7 @@ public class WebkitOptions : WebOptions {
             flash_required = true;
             if (format_support == null) {
                 return Drt.RequirementState.UNKNOWN;
-            } else  {
+            } else {
                 unowned List<WebPlugin?> plugins = format_support.list_web_plugins();
                 foreach (unowned WebPlugin plugin in plugins) {
                     debug(

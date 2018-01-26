@@ -25,8 +25,7 @@
 namespace Nuvola {
 
 
-public class PreferencesDialog : Gtk.Dialog
-{
+public class PreferencesDialog : Gtk.Dialog {
     /// Preferences dialog title
     private const string TITLE = ("Web App Preferences");
     private Drtgtk.Application app;
@@ -37,19 +36,16 @@ public class PreferencesDialog : Gtk.Dialog
      *
      * @param app Application object
      */
-    public PreferencesDialog(Drtgtk.Application app, Gtk.Window? parent, Drtgtk.Form form)
-    {
+    public PreferencesDialog(Drtgtk.Application app, Gtk.Window? parent, Drtgtk.Form form) {
         this.app = app;
 
         window_position = Gtk.WindowPosition.CENTER;
         title = TITLE;
         border_width = 5;
-        try
-        {
+        try {
             icon = Gtk.IconTheme.get_default().load_icon(app.icon, 48, 0);
         }
-        catch (Error e)
-        {
+        catch (Error e) {
             warning("Unable to load application icon.");
         }
 
@@ -72,14 +68,12 @@ public class PreferencesDialog : Gtk.Dialog
         notebook.show();
     }
 
-    public void add_tab(string label, Gtk.Widget widget)
-    {
+    public void add_tab(string label, Gtk.Widget widget) {
         widget.show();
         notebook.append_page(widget, new Gtk.Label(label));
     }
 
-    public override bool delete_event(Gdk.EventAny event)
-    {
+    public override bool delete_event(Gdk.EventAny event) {
         return false;
     }
 }

@@ -22,19 +22,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Nuvola.ActionsHelper: GLib.Object, ActionsInterface
-{
+public class Nuvola.ActionsHelper: GLib.Object, ActionsInterface {
     private Drtgtk.Actions actions;
     private Config config;
 
-    public ActionsHelper(Drtgtk.Actions actions, Config config)
-    {
+    public ActionsHelper(Drtgtk.Actions actions, Config config) {
         this.actions = actions;
         this.config = config;
     }
 
-    public bool activate(string action_name, Variant? parameter=null)
-    {
+    public bool activate(string action_name, Variant? parameter=null) {
         var action = actions.get_action(action_name);
         if (action == null)
         return Binding.CONTINUE;
@@ -43,8 +40,7 @@ public class Nuvola.ActionsHelper: GLib.Object, ActionsInterface
         return !Binding.CONTINUE;
     }
 
-    public bool set_state(string action_name, Variant? state)
-    {
+    public bool set_state(string action_name, Variant? state) {
         var action = actions.get_action(action_name);
         if (action == null)
         return Binding.CONTINUE;
@@ -53,8 +49,7 @@ public class Nuvola.ActionsHelper: GLib.Object, ActionsInterface
         return !Binding.CONTINUE;
     }
 
-    public bool get_state(string action_name, ref Variant? state)
-    {
+    public bool get_state(string action_name, ref Variant? state) {
         var action = actions.get_action(action_name);
         if (action == null)
         return Binding.CONTINUE;
@@ -63,8 +58,7 @@ public class Nuvola.ActionsHelper: GLib.Object, ActionsInterface
         return !Binding.CONTINUE;
     }
 
-    public bool is_enabled(string action_name, ref bool enabled)
-    {
+    public bool is_enabled(string action_name, ref bool enabled) {
         var action = actions.get_action(action_name);
         if (action == null)
         return Binding.CONTINUE;
@@ -73,8 +67,7 @@ public class Nuvola.ActionsHelper: GLib.Object, ActionsInterface
         return !Binding.CONTINUE;
     }
 
-    public bool set_enabled(string action_name, bool enabled)
-    {
+    public bool set_enabled(string action_name, bool enabled) {
         var action = actions.get_action(action_name);
         if (action == null)
         return Binding.CONTINUE;
@@ -84,8 +77,7 @@ public class Nuvola.ActionsHelper: GLib.Object, ActionsInterface
         return Binding.CONTINUE;
     }
 
-    public bool add_action(string group, string scope, string action_name, string? label, string? mnemo_label, string? icon, string? keybinding, Variant? state)
-    {
+    public bool add_action(string group, string scope, string action_name, string? label, string? mnemo_label, string? icon, string? keybinding, Variant? state) {
         Drtgtk.Action action;
         if (state == null)
         action = simple_action(group, scope, action_name, label, mnemo_label, icon, keybinding, null);
@@ -98,8 +90,7 @@ public class Nuvola.ActionsHelper: GLib.Object, ActionsInterface
         return !Binding.CONTINUE;
     }
 
-    public bool add_radio_action(string group, string scope, string name, Variant state, Drtgtk.RadioOption[] options)
-    {
+    public bool add_radio_action(string group, string scope, string name, Variant state, Drtgtk.RadioOption[] options) {
         var radio = new Drtgtk.RadioAction(group, scope, name, null, state, options);
         radio.enabled = false;
         radio.activated.connect(on_custom_action_activated);
@@ -107,33 +98,28 @@ public class Nuvola.ActionsHelper: GLib.Object, ActionsInterface
         return !Binding.CONTINUE;
     }
 
-    public Drtgtk.SimpleAction simple_action(string group, string scope, string name, string? label, string? mnemo_label, string? icon, string? keybinding, owned Drtgtk.ActionCallback? callback)
-    {
+    public Drtgtk.SimpleAction simple_action(string group, string scope, string name, string? label, string? mnemo_label, string? icon, string? keybinding, owned Drtgtk.ActionCallback? callback) {
         var kbd = config.get_string("nuvola.keybindings." + name) ?? keybinding;
         if (kbd == "")
         kbd = null;
         return new Drtgtk.SimpleAction(group, scope, name, label, mnemo_label, icon, kbd, (owned) callback);
     }
 
-    public Drtgtk.ToggleAction toggle_action(string group, string scope, string name, string? label, string? mnemo_label, string? icon, string? keybinding, owned Drtgtk.ActionCallback? callback, Variant state)
-    {
+    public Drtgtk.ToggleAction toggle_action(string group, string scope, string name, string? label, string? mnemo_label, string? icon, string? keybinding, owned Drtgtk.ActionCallback? callback, Variant state) {
         var kbd = config.get_string("nuvola.keybindings." + name) ?? keybinding;
         return new Drtgtk.ToggleAction(group, scope, name, label, mnemo_label, icon, kbd, (owned) callback, state);
     }
 
-    private void on_custom_action_activated(Drtgtk.Action action, Variant? parameter)
-    {
+    private void on_custom_action_activated(Drtgtk.Action action, Variant? parameter) {
         custom_action_activated(action.name, parameter);
     }
 
-    public bool list_groups(out List<unowned string> groups)
-    {
+    public bool list_groups(out List<unowned string> groups) {
         groups = actions.list_groups();
         return Binding.CONTINUE;
     }
 
-    public bool list_group_actions(string group, out SList<Drtgtk.Action> actions)
-    {
+    public bool list_group_actions(string group, out SList<Drtgtk.Action> actions) {
         actions = this.actions.get_group(group);
         return Binding.CONTINUE;
     }

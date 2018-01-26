@@ -24,20 +24,17 @@
 
 namespace Nuvola {
 
-public class WebAppListFilter : Gtk.TreeModelFilter
-{
+public class WebAppListFilter : Gtk.TreeModelFilter {
     public string? category {get; set; default = null;}
     public bool show_hidden {get; set; default = false;}
 
-    public WebAppListFilter(WebAppListModel model, bool show_hidden=false, string? category=null)
-    {
+    public WebAppListFilter(WebAppListModel model, bool show_hidden=false, string? category=null) {
         Object(child_model: model, category: category, show_hidden: show_hidden);
         set_visible_func(visible_func);
         notify.connect_after(on_notify);
     }
 
-    private bool visible_func(Gtk.TreeModel model, Gtk.TreeIter iter)
-    {
+    private bool visible_func(Gtk.TreeModel model, Gtk.TreeIter iter) {
         WebApp web_app = null;
         model.get(iter, WebAppListModel.Pos.META, out web_app);
         assert(web_app != null);
@@ -48,11 +45,9 @@ public class WebAppListFilter : Gtk.TreeModelFilter
         return web_app.in_category(category);
     }
 
-    private void on_notify(GLib.Object o, ParamSpec param)
-    {
+    private void on_notify(GLib.Object o, ParamSpec param) {
         assert(this == o);
-        switch (param.name)
-        {
+        switch (param.name) {
         case "category":
         case "show-hidden":
             refilter();

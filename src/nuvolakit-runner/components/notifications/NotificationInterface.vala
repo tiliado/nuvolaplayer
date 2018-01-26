@@ -22,8 +22,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public interface Nuvola.NotificationInterface: GLib.Object
-{
+public interface Nuvola.NotificationInterface: GLib.Object {
     public abstract bool update(string name, string summary, string body, string? icon_name, string? icon_path, bool resident, string category);
 
     public abstract bool set_actions(string name, string[] actions);

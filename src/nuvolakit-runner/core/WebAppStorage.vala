@@ -24,23 +24,19 @@
 
 namespace Nuvola {
 
-public class WebAppStorage : GLib.Object
-{
+public class WebAppStorage : GLib.Object {
     public File config_dir {get; construct;}
     public File data_dir {get; construct;}
     public File cache_dir {get; construct;}
 
-    public WebAppStorage(File config_dir, File data_dir, File cache_dir)
-    {
+    public WebAppStorage(File config_dir, File data_dir, File cache_dir) {
         Object(config_dir: config_dir, data_dir: data_dir, cache_dir: cache_dir);
-        try
-        {
+        try {
             Drt.System.make_dirs(config_dir);
             Drt.System.make_dirs(data_dir);
             Drt.System.make_dirs(cache_dir);
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             error("Failed to create directory. %s", e.message);
         }
     }
@@ -51,15 +47,12 @@ public class WebAppStorage : GLib.Object
      * @param path    Subdirectory path.
      * @return cache subdirectory
      */
-    public File create_cache_subdir(string path)
-    {
+    public File create_cache_subdir(string path) {
         var dir = cache_dir.get_child(path);
-        try
-        {
+        try {
             Drt.System.make_dirs(dir);
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             warning("Failed to create directory '%s'. %s", dir.get_path(), e.message);
         }
         return dir;
@@ -71,15 +64,12 @@ public class WebAppStorage : GLib.Object
      * @param path    Subdirectory path.
      * @return data subdirectory
      */
-    public File create_data_subdir(string path)
-    {
+    public File create_data_subdir(string path) {
         var dir = data_dir.get_child(path);
-        try
-        {
+        try {
             Drt.System.make_dirs(dir);
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             warning("Failed to create directory '%s'. %s", dir.get_path(), e.message);
         }
         return dir;

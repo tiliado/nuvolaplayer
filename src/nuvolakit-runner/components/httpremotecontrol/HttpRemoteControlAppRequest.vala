@@ -23,35 +23,30 @@
  */
 
 #if EXPERIMENTAL
-namespace Nuvola.HttpRemoteControl
-{
+namespace Nuvola.HttpRemoteControl {
 
-public class AppRequest
-{
+public class AppRequest {
     public string app_path;
     public string method;
     public Soup.URI uri;
     public Soup.Buffer? body;
 
 
-    public AppRequest(string app_path, string method, Soup.URI uri, Soup.Buffer? body)
-    {
+    public AppRequest(string app_path, string method, Soup.URI uri, Soup.Buffer? body) {
         this.app_path = app_path;
         this.method = method;
         this.uri = uri;
         this.body = body;
     }
 
-    public AppRequest.from_request_context(string app_path, RequestContext request)
-    {
+    public AppRequest.from_request_context(string app_path, RequestContext request) {
         var msg = request.msg;
         this(
             app_path, msg.method, msg.uri,
             msg.request_body == null ? null : msg.request_body.flatten());
     }
 
-    public AppRequest.from_variant(Variant variant)
-    {
+    public AppRequest.from_variant(Variant variant) {
         string app_path = null;
         string method = null;
         string uri = null;
@@ -62,8 +57,7 @@ public class AppRequest
         this(app_path, method, new Soup.URI(uri), null);
     }
 
-    public Variant to_variant()
-    {
+    public Variant to_variant() {
         var builder = new VariantBuilder(new VariantType("a{sv}"));
         builder.add("{sv}", "type", new Variant.string("AppRequest"));
         builder.add("{sv}", "app_path", new Variant.string(app_path));
@@ -72,8 +66,7 @@ public class AppRequest
         return builder.end();
     }
 
-    public string to_string()
-    {
+    public string to_string() {
         return to_variant().print(false);
     }
 }

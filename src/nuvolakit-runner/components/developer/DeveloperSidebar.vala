@@ -22,13 +22,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
-public class HeaderLabel: Gtk.Label
-{
-    public HeaderLabel(string? text)
-    {
+public class HeaderLabel: Gtk.Label {
+    public HeaderLabel(string? text) {
         Object(label: text);
         var text_attrs = new Pango.AttrList();
         text_attrs.change(Pango.attr_weight_new(Pango.Weight.BOLD));
@@ -37,8 +34,7 @@ public class HeaderLabel: Gtk.Label
     }
 }
 
-public class DeveloperSidebar: Gtk.ScrolledWindow
-{
+public class DeveloperSidebar: Gtk.ScrolledWindow {
     private Drtgtk.Actions? actions_reg;
     private Gtk.Grid grid;
     private Gtk.Image? artwork = null;
@@ -53,8 +49,7 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
     private HashTable<string, Gtk.RadioButton>? radios = null;
     private MediaPlayerModel player;
 
-    public DeveloperSidebar(AppRunnerController app, MediaPlayerModel player)
-    {
+    public DeveloperSidebar(AppRunnerController app, MediaPlayerModel player) {
         vexpand = true;
         actions_reg = app.actions;
         this.player = player;
@@ -131,47 +126,37 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
         player.notify.connect_after(on_player_notify);
     }
 
-    ~DeveloperSidebar()
-    {
+    ~DeveloperSidebar() {
         player.notify.disconnect(on_player_notify);
         action_widgets = null;
         radios = null;
     }
 
-    private void clear_artwork(bool broken)
-    {
-        try
-        {
+    private void clear_artwork(bool broken) {
+        try {
             var icon_name = broken ? "dialog-error": "audio-x-generic";
             var pixbuf = Gtk.IconTheme.get_default().load_icon(icon_name, 80, Gtk.IconLookupFlags.FORCE_SIZE);
             artwork.set_from_pixbuf(pixbuf);
         }
-        catch (GLib.Error e)
-        {
+        catch (GLib.Error e) {
             warning("Pixbuf error: %s", e.message);
             artwork.clear();
         }
     }
 
-    private void on_player_notify(GLib.Object o, ParamSpec p)
-    {
+    private void on_player_notify(GLib.Object o, ParamSpec p) {
         var player = o as MediaPlayerModel;
-        switch (p.name)
-        {
+        switch (p.name) {
         case "artwork-file":
-            if (player.artwork_file == null)
-            {
+            if (player.artwork_file == null) {
                 clear_artwork(false);
             }
-            else
-            {
-                try
-                {
+            else {
+                try {
                     var pixbuf = new Gdk.Pixbuf.from_file_at_scale(player.artwork_file, 80, 80, true);
                     artwork.set_from_pixbuf(pixbuf);
                 }
-                catch (GLib.Error e)
-                {
+                catch (GLib.Error e) {
                     warning("Pixbuf error: %s", e.message);
                     clear_artwork(true);
                 }
@@ -210,10 +195,8 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
         }
     }
 
-    private void set_actions(SList<string> playback_actions)
-    {
-        lock (action_widgets)
-        {
+    private void set_actions(SList<string> playback_actions) {
+        lock (action_widgets) {
             if (action_widgets != null)
             action_widgets.@foreach(unset_button);
 
@@ -232,26 +215,21 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
         }
     }
 
-    private void add_action(string full_name)
-    {
+    private void add_action(string full_name) {
         Drtgtk.Action action;
         Drtgtk.RadioOption option;
         string detailed_name;
-        if (actions_reg.find_and_parse_action(full_name, out detailed_name, out action, out option))
-        {
+        if (actions_reg.find_and_parse_action(full_name, out detailed_name, out action, out option)) {
             string action_name;
             Variant target_value;
-            try
-            {
+            try {
                 GLib.Action.parse_detailed_name(action.scope + "." + detailed_name, out action_name, out target_value);
             }
-            catch (GLib.Error e)
-            {
+            catch (GLib.Error e) {
                 critical("Failed to parse '%s': %s", action.scope + "." + detailed_name, e.message);
                 return;
             }
-            if (action is Drtgtk.SimpleAction)
-            {
+            if (action is Drtgtk.SimpleAction) {
                 var button = new Gtk.Button.with_label(action.label);
                 button.action_name = action_name;
                 button.action_target = target_value;
@@ -260,8 +238,7 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
                 action_widgets.prepend(button);
                 grid.add(button);
             }
-            else if (action is Drtgtk.ToggleAction)
-            {
+            else if (action is Drtgtk.ToggleAction) {
                 var button = new Gtk.CheckButton.with_label(action.label);
                 button.action_name = action_name;
                 button.action_target = target_value;
@@ -270,12 +247,10 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
                 action_widgets.prepend(button);
                 grid.add(button);
             }
-            else if (action is Drtgtk.RadioAction)
-            {
+            else if (action is Drtgtk.RadioAction) {
                 var radio = radios.lookup(action.name);
                 var button = new Gtk.RadioButton.with_label_from_widget(radio, option.label);
-                if (radio == null)
-                {
+                if (radio == null) {
                     radios.insert(action.name, button);
                     action.notify["state"].connect_after(on_radio_action_changed);
                 }
@@ -290,8 +265,7 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
         }
     }
 
-    private void on_radio_clicked(Gtk.Button button)
-    {
+    private void on_radio_clicked(Gtk.Button button) {
         var radio = button as Gtk.RadioButton;
         var full_name = button.get_data<string>("full-name");
         Drtgtk.Action action;
@@ -302,29 +276,24 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
         action.activate(option.parameter);
     }
 
-    private void on_radio_action_changed(GLib.Object o, ParamSpec p)
-    {
+    private void on_radio_action_changed(GLib.Object o, ParamSpec p) {
         var action = o as Drtgtk.RadioAction;
         var state = action.state;
         var radio = radios.lookup(action.name);
-        foreach (var item in radio.get_group())
-        {
+        foreach (var item in radio.get_group()) {
             var full_name = item.get_data<string>("full-name");
             Drtgtk.RadioOption option;
-            if (actions_reg.find_and_parse_action(full_name, null, null, out option))
-            {
+            if (actions_reg.find_and_parse_action(full_name, null, null, out option)) {
                 if (!item.active && state.equal(option.parameter))
                 item.active = true;
             }
         }
     }
 
-    private void unset_button(Gtk.Widget widget)
-    {
+    private void unset_button(Gtk.Widget widget) {
         grid.remove(widget);
         var radio = widget as Gtk.RadioButton;
-        if (radio != null)
-        {
+        if (radio != null) {
             radio.clicked.disconnect(on_radio_clicked);
             var full_name = radio.get_data<string>("full-name");
             Drtgtk.Action action;
@@ -335,27 +304,22 @@ public class DeveloperSidebar: Gtk.ScrolledWindow
         }
     }
 
-    private void on_time_position_changed()
-    {
+    private void on_time_position_changed() {
         var action = actions_reg.get_action("seek");
         if (action != null)
         action.activate(new Variant.double(time_pos.position_sec * 1000000.0));
     }
 
-    private void on_volume_changed()
-    {
-        if (player.volume != volume_button.value)
-        {
+    private void on_volume_changed() {
+        if (player.volume != volume_button.value) {
             var action = actions_reg.get_action("change-volume");
             if (action != null)
             action.activate(new Variant.double(volume_button.value));
         }
     }
 
-    private void on_rating_icon_pressed(Gtk.Entry entry, Gtk.EntryIconPosition position, Gdk.Event event)
-    {
-        if (position == Gtk.EntryIconPosition.SECONDARY)
-        {
+    private void on_rating_icon_pressed(Gtk.Entry entry, Gtk.EntryIconPosition position, Gdk.Event event) {
+        if (position == Gtk.EntryIconPosition.SECONDARY) {
             var rating = double.parse(entry.text);
             if (rating >= 0.0 && rating <= 1.0)
             player.set_rating(rating);

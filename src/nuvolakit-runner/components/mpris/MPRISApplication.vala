@@ -22,40 +22,35 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
 [DBus(name = "org.mpris.MediaPlayer2")]
-public class MPRISApplication: GLib.Object
-{
+public class MPRISApplication: GLib.Object {
     private Drtgtk.Application app;
 
-    public MPRISApplication(Drtgtk.Application app)
-    {
+    public MPRISApplication(Drtgtk.Application app) {
         this.app = app;
         var desktop_entry = app.desktop_name;
         this.desktop_entry = desktop_entry[0:desktop_entry.length - 8];
     }
 
     /* Properties: http://www.mpris.org/2.1/spec/Root_Node.html#properties */
-    public bool can_quit {get{return true;}}
-    public bool can_raise {get{ return true;}}
-    public bool has_track_list {get{return false;}}
-    public string identity {get{ return app.app_name;}}
+    public bool can_quit {get {return true;}}
+    public bool can_raise {get { return true;}}
+    public bool has_track_list {get {return false;}}
+    public string identity {get { return app.app_name;}}
     public string desktop_entry {get; private set;}
-    public string[] supported_uri_schemes {owned get{return {};}}
-    public string[] supported_mime_types{owned get{return {};}}
+    public string[] supported_uri_schemes {owned get {return {};}}
+    public string[] supported_mime_types {owned get {return {};}}
 
     /* Extra properties */
-    public int nuvola_version {get{return Nuvola.get_encoded_version();}}
+    public int nuvola_version {get {return Nuvola.get_encoded_version();}}
 
-    public void raise()
-    {
+    public void raise() {
         app.activate();
     }
 
-    public void quit()
-    {
+    public void quit() {
         app.quit();
     }
 }

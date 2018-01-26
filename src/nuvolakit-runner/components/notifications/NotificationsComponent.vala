@@ -22,19 +22,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Nuvola
-{
+namespace Nuvola {
 
-public class NotificationsComponent: Component
-{
+public class NotificationsComponent: Component {
     private Bindings bindings;
     private AppRunnerController app;
     private ActionsHelper actions_helper;
     private Notifications? notifications = null;
 
 
-    public NotificationsComponent(AppRunnerController app, Bindings bindings, ActionsHelper actions_helper)
-    {
+    public NotificationsComponent(AppRunnerController app, Bindings bindings, ActionsHelper actions_helper) {
         base("notifications", "Notifications", "Shows desktop notifications.");
         this.bindings = bindings;
         this.actions_helper = actions_helper;
@@ -42,16 +39,14 @@ public class NotificationsComponent: Component
         app.config.bind_object_property("component.%s.".printf(id), this, "enabled").set_default(false).update_property();
     }
 
-    protected override bool activate()
-    {
+    protected override bool activate() {
         notifications = new Notifications(app, actions_helper);
         notifications.start();
         bindings.add_object(notifications);
         return true;
     }
 
-    protected override bool deactivate()
-    {
+    protected override bool deactivate() {
         bindings.remove_object(notifications);
         notifications.stop();
         notifications = null;

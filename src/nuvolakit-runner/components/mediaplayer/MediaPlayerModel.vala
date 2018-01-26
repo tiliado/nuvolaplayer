@@ -22,8 +22,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public interface Nuvola.MediaPlayerModel: GLib.Object
-{
+public interface Nuvola.MediaPlayerModel: GLib.Object {
     public abstract string? title {get; set; default = null;}
     public abstract string? artist {get; set; default = null;}
     public abstract string? album {get; set; default = null;}
@@ -45,8 +44,7 @@ public interface Nuvola.MediaPlayerModel: GLib.Object
 
     public virtual signal void set_track_info(
         string? title, string? artist, string? album, string? state, string? artwork_location, string? artwork_file,
-        double rating, int64 length)
-    {
+        double rating, int64 length) {
         handle_set_track_info(title, artist, album, state, artwork_location, artwork_file, rating, length);
     }
 
