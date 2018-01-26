@@ -37,4 +37,4 @@ public HashTable extract_js_properties(HashTable<string, Variant> data) {
     return properties;
 }
 
-} // Nuvola.Utils
+} // namespace Nuvola.Utils

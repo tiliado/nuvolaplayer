@@ -44,4 +44,4 @@ public interface MasterDbusIfce: GLib.Object {
     throws GLib.Error;
 }
 
-} //namespace Nuvola
+} // namespace Nuvola

@@ -132,4 +132,4 @@ public class LoginForm: GLib.Object
     }
 }
 
-} //namespace Nuvola
+} // namespace Nuvola

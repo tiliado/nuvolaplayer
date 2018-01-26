@@ -334,4 +334,4 @@ public class LoginFormManager: GLib.Object
     }
 }
 
-} //namespace Nuvola
+} // namespace Nuvola

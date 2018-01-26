@@ -41,4 +41,4 @@ public class LoginCredentials
     }
 }
 
-} //namespace Nuvola
+} // namespace Nuvola

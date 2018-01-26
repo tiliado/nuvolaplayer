@@ -47,4 +47,4 @@ public interface AppDbusIfce: GLib.Object {
     public abstract void activate() throws GLib.Error;
 }
 
-} //namespace Nuvola
+} // namespace Nuvola

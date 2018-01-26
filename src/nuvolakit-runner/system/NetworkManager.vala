@@ -123,5 +123,5 @@ public static async NetworkManager? get_client(Cancellable? cancellable) throws 
 }
 
 
-} // namespace Nm
+} // namespace Nuvola.Nm
 
