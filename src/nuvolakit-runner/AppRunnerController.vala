@@ -26,37 +26,6 @@ namespace Nuvola {
 
 private extern const bool CEF_DEFAULT;
 
-namespace ConfigKey {
-    public const string WINDOW_X = "nuvola.window.x";
-    public const string WINDOW_Y = "nuvola.window.y";
-    public const string WINDOW_WIDTH = "nuvola.window.width";
-    public const string WINDOW_HEIGHT = "nuvola.window.height";
-    public const string WINDOW_MAXIMIZED = "nuvola.window.maximized";
-    public const string WINDOW_SIDEBAR_POS = "nuvola.window.sidebar.position";
-    public const string WINDOW_SIDEBAR_VISIBLE = "nuvola.window.sidebar.visible";
-    public const string WINDOW_SIDEBAR_PAGE = "nuvola.window.sidebar.page";
-    public const string DARK_THEME = "nuvola.dark_theme";
-}
-
-namespace Actions {
-    public const string ABOUT = "about";
-    public const string HELP = "help";
-    public const string DONATE = "donate";
-    public const string ACTIVATE = "activate";
-    public const string GO_HOME = "go-home";
-    public const string GO_BACK = "go-back";
-    public const string GO_FORWARD = "go-forward";
-    public const string GO_RELOAD = "go-reload";
-    public const string GO_LOAD_URL = "go-load-url";
-    public const string PREFERENCES = "preferences";
-    public const string WELCOME = "welcome";
-    public const string TOGGLE_SIDEBAR = "toggle-sidebar";
-    public const string ZOOM_IN = "zoom-in";
-    public const string ZOOM_OUT = "zoom-out";
-    public const string ZOOM_RESET = "zoom-reset";
-}
-
-
 public string build_ui_runner_ipc_id(string web_app_id) {
     return "N3" + web_app_id.replace("_", "");
 }

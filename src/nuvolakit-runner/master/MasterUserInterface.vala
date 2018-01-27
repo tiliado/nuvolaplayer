@@ -24,13 +24,10 @@
 
 namespace Nuvola {
 
-namespace Actions {
-    public const string START_APP = "start-app";
-    public const string QUIT = "quit";
-}
-
 public class MasterUserInterface: GLib.Object {
     public const string PAGE_WELCOME = "welcome";
+    public const string START_APP = "start-app";
+    public const string QUIT = "quit";
 
     public MasterWindow? main_window {get; private set; default = null;}
     public WebAppList? web_app_list {get; private set; default = null;}
@@ -49,11 +46,11 @@ public class MasterUserInterface: GLib.Object {
             //          Action(group, scope, name, label?, mnemo_label?, icon?, keybinding?, callback?)
             new Drtgtk.SimpleAction("main", "app", Actions.HELP, "Help", "_Help", null, "F1", do_help),
             new Drtgtk.SimpleAction("main", "app", Actions.ABOUT, "About", "_About", null, null, do_about),
-            new Drtgtk.SimpleAction("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
-            new Drtgtk.SimpleAction("main", "win", Actions.START_APP, "Start app", "_Start app", "media-playback-start", "<ctrl>S", do_start_app),
+            new Drtgtk.SimpleAction("main", "app", QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
+            new Drtgtk.SimpleAction("main", "win", START_APP, "Start app", "_Start app", "media-playback-start", "<ctrl>S", do_start_app),
         };
         controller.actions.add_actions(actions_spec);
-        controller.set_app_menu_items({Actions.HELP, Actions.ABOUT, Actions.QUIT});
+        controller.set_app_menu_items({Actions.HELP, Actions.ABOUT, QUIT});
     }
 
     private void create_main_window() {
@@ -173,9 +170,9 @@ public class MasterUserInterface: GLib.Object {
 
     private void on_master_stack_page_changed(Gtk.Widget? page, string? name, string? title) {
         if (page != null && page == web_app_list) {
-            set_toolbar({Actions.START_APP});
+            set_toolbar({START_APP});
             // For Unity
-            controller.reset_menubar().append_submenu("_Apps", controller.actions.build_menu({Actions.START_APP}));
+            controller.reset_menubar().append_submenu("_Apps", controller.actions.build_menu({START_APP}));
         } else {
             set_toolbar({});
             controller.reset_menubar();

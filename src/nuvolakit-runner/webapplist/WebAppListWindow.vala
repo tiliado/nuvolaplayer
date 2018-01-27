@@ -38,7 +38,7 @@ public class WebAppList : Gtk.Grid {
 
     public WebAppList(MasterController app, WebAppListFilter model) {
         this.app = app;
-        app.actions.get_action(Actions.START_APP).enabled = false;
+        app.actions.get_action(MasterUserInterface.START_APP).enabled = false;
         this.model = model;
         view = new WebAppListView(model);
         view.selection_changed.connect(on_selection_changed);
@@ -116,7 +116,7 @@ public class WebAppList : Gtk.Grid {
         if (path == null) {
             details.hide();
             selected_web_app = null;
-            app.actions.get_action(Actions.START_APP).enabled = false;
+            app.actions.get_action(MasterUserInterface.START_APP).enabled = false;
             return;
         }
 
@@ -125,7 +125,7 @@ public class WebAppList : Gtk.Grid {
         if (!model.get_iter(out iter, path)) {
             details.hide();
             selected_web_app = null;
-            app.actions.get_action(Actions.START_APP).enabled = false;
+            app.actions.get_action(MasterUserInterface.START_APP).enabled = false;
             return;
         }
 
@@ -148,7 +148,7 @@ public class WebAppList : Gtk.Grid {
         app_maintainer.label = "<a href=\"%s\">%s</a>".printf(
             Markup.escape_text(maintainer_link), Markup.escape_text(maintainer_name));
         details.show();
-        app.actions.get_action(Actions.START_APP).enabled = true;
+        app.actions.get_action(MasterUserInterface.START_APP).enabled = true;
     }
 
     private void on_category_changed(GLib.Object o, ParamSpec param) {
