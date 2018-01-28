@@ -68,7 +68,7 @@ public string? encode_payload(SList<Packet> packets) {
 
     var buffer = new StringBuilder();
     foreach (unowned Packet packet in packets) {
-        var data = encode_packet(packet);
+        string data = encode_packet(packet);
         /* Engine.io protocol requires a string length to be in UTF-16 characters rather than in bytes */
         buffer.append_printf("%d:", utf16_strlen(data));
         buffer.append((owned) data);
@@ -96,7 +96,7 @@ public Bytes? encode_payload_as_bytes(SList<Packet> packets) {
 public string encode_packet(Packet packet) {
     if (packet.bin_data != null)
     return "b%d".printf((int) packet.type) + Base64.encode((uchar[]) packet.bin_data.get_data());
-    var type = ((int) packet.type).to_string();
+    string type = ((int) packet.type).to_string();
     return packet.str_data != null ? type + packet.str_data : type;
 }
 
@@ -107,8 +107,8 @@ public string encode_packet(Packet packet) {
  * @return The packet encoded as bytes.
  */
 public Bytes encode_packet_as_bytes(Packet packet) {
-    var bytes = packet.bin_data;
-    var data_size = bytes != null ? bytes.length : 0;
+    Bytes? bytes = packet.bin_data;
+    int data_size = bytes != null ? bytes.length : 0;
     var buffer = new ByteArray.sized(1 + data_size);
     buffer.append(new uint8[] {(uint8) packet.type});
     if (data_size > 0)
@@ -130,7 +130,7 @@ public Packet decode_packet(owned string data) throws Error {
     throw new Error.EMPTY_DATA("Data string is empty.");
     if (data[0] == 'b')
     return decode_base64_packet((owned) data, 1);
-    var type = int.parse(data.substring(0, 1));
+    int type = int.parse(data.substring(0, 1));
     if (type < 0 || type > (int) PacketType.NOOP)
     throw new Error.INVALID_TYPE("Invalid packet type: %d.", type);
     return new Packet((PacketType) type, data.substring(1), null);
@@ -145,10 +145,10 @@ public Packet decode_packet(owned string data) throws Error {
  * @throw Error on decode failure.
  */
 private Packet decode_base64_packet(owned string data, int offset=0) throws Error {
-    var size = data.length;
+    int size = data.length;
     if (offset < 0 || offset >= size)
     throw new Error.INVALID_OFFSET("Data string offset %d is invalid. Data size is %d.", offset, size);
-    var type = int.parse(data.substring(offset, 1));
+    int type = int.parse(data.substring(offset, 1));
     if (type < 0 || type > (int) PacketType.NOOP)
     throw new Error.INVALID_TYPE("Invalid packet type: %d.", type);
     Bytes? bytes = null;
@@ -168,11 +168,11 @@ private Packet decode_base64_packet(owned string data, int offset=0) throws Erro
  * @throw Error on decode failure.
  */
 public Packet decode_packet_from_bytes(Bytes bytes) throws Error {
-    var size = bytes.length;
+    int size = bytes.length;
     if (size == 0)
     throw new Error.EMPTY_DATA("Data bytes are empty.");
     unowned uint8[] data = bytes.get_data();
-    var type = data[0];
+    uint8 type = data[0];
     if (type < 0 || type > (int) PacketType.NOOP)
     throw new Error.INVALID_TYPE("Invalid packet type: %d.", type);
     return new Packet((PacketType) type, null, size > 1 ? bytes.slice(1, bytes.length - 1) : null);
@@ -260,12 +260,12 @@ public class StringPayloadDecoder {
 
         var length = new StringBuilder();
         unowned string data = payload;
-        for (var i = cursor; i < size; i++) {
+        for (int i = cursor; i < size; i++) {
             if (data[i] != ':') {
                 length.append_c(data[i]);
             }
             else {
-                var packet_len = int.parse(length.str);
+                int packet_len = int.parse(length.str);
                 if (packet_len < 0) {
                     exhausted = true;
                     throw new Error.INVALID_LENGTH("Packet length cannot be negative: %d.", packet_len);
@@ -275,7 +275,7 @@ public class StringPayloadDecoder {
                     continue;
                 }
                 // FIXME: Is packet_length in UTF-16 code points?
-                var msg = data.substring(i + 1, packet_len);
+                string msg = data.substring(i + 1, packet_len);
                 if (msg.length != packet_len) {
                     exhausted = true;
                     throw new Error.INVALID_LENGTH("Packet length '%d' doesn't match the real data length '%d'.", packet_len, msg.length);
@@ -331,7 +331,7 @@ public class BinaryPayloadDecoder {
         bool is_string = data[cursor++] == '\0';
         var length = new StringBuilder();
         var length_too_long = false;
-        for (var i = cursor; i < size; i++) {
+        for (int i = cursor; i < size; i++) {
             if (data[i] == 255)
             break;
             // 310 = char length of Number.MAX_VALUE
@@ -346,7 +346,7 @@ public class BinaryPayloadDecoder {
             throw new Error.INVALID_LENGTH("Packet length is too long: %d.", (int) length.len);
         }
 
-        var packet_len = int.parse(length.str);
+        int packet_len = int.parse(length.str);
         if (packet_len < 0) {
             exhausted = true;
             throw new Error.INVALID_LENGTH("Packet length cannot be negative: %d.", packet_len);
@@ -366,7 +366,7 @@ public class BinaryPayloadDecoder {
             packet = decode_packet((owned) str);
         }
         else {
-            var bytes = payload.slice(cursor, cursor + packet_len);
+            Bytes bytes = payload.slice(cursor, cursor + packet_len);
             packet = decode_packet_from_bytes(bytes);
         }
         cursor += packet_len;

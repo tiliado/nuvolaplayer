@@ -71,7 +71,7 @@ public class NetworkSettings: Gtk.Grid {
         proxy_types[3].active = true;
         attach(proxy_types[3], 0, row++, 3, 1);
 
-        var manual_settings = original_type == NetworkProxyType.HTTP || original_type == NetworkProxyType.SOCKS;
+        bool manual_settings = original_type == NetworkProxyType.HTTP || original_type == NetworkProxyType.SOCKS;
         var label = new Gtk.Label(_("Proxy Server"));
         attach(label, 0, row, 1, 1);
         proxy_server = new Gtk.Entry();
@@ -90,7 +90,7 @@ public class NetworkSettings: Gtk.Grid {
         proxy_port.hexpand = true;
         attach(proxy_port, 1, row++, 2, 1);
 
-        foreach (var t in proxy_types)
+        foreach (Gtk.RadioButton t in proxy_types)
         t.toggled.connect(on_proxy_type_toggled);
         proxy_server.changed.connect(on_proxy_server_changed);
         proxy_port.value_changed.connect(on_proxy_port_changed);
@@ -107,7 +107,7 @@ public class NetworkSettings: Gtk.Grid {
     }
 
     private NetworkProxyType get_proxy_type() {
-        var type = NetworkProxyType.SYSTEM;
+        NetworkProxyType type = NetworkProxyType.SYSTEM;
         if (proxy_types[0].active)
         type = NetworkProxyType.SYSTEM;
         else if (proxy_types[1].active)
@@ -125,7 +125,7 @@ public class NetworkSettings: Gtk.Grid {
         host = null;
         port = (int) proxy_port.value;
         type = get_proxy_type();
-        var changed = type != original_type;
+        bool changed = type != original_type;
         if (is_manual_settings(type) && !changed)
         changed = host != original_host || port != original_port;
         return changed;

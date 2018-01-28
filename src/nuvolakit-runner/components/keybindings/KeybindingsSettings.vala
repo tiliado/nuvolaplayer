@@ -74,12 +74,12 @@ public class KeybindingsSettings : Gtk.Grid {
             6, typeof(string), typeof(string), typeof(uint),
             typeof(Gdk.ModifierType), typeof(uint), typeof(Gdk.ModifierType));
         Gtk.TreeIter iter;
-        foreach (var action in actions_reg.list_actions()) {
-            var label = action.label;
+        foreach (Drtgtk.Action action in actions_reg.list_actions()) {
+            unowned string? label = action.label;
             if (action is Drtgtk.RadioAction || label == null)
             continue;
 
-            var keybinding = action.keybinding;
+            unowned string? keybinding = action.keybinding;
             uint accel_key;
             Gdk.ModifierType accel_mods;
             if (keybinding != null) {
@@ -132,8 +132,8 @@ public class KeybindingsSettings : Gtk.Grid {
     }
 
     private void on_accel_edited(string path_string, uint accel_key, Gdk.ModifierType accel_mods, uint hardware_keycode) {
-        var keybinding = Gtk.accelerator_name(accel_key, accel_mods);
-        var path = new Gtk.TreePath.from_string(path_string);
+        string keybinding = Gtk.accelerator_name(accel_key, accel_mods);
+        Gtk.TreePath path = new Gtk.TreePath.from_string(path_string);
         Gtk.TreeIter iter;
         model.get_iter(out iter, path);
         model.set(iter, 2, accel_key, 3, accel_mods, -1);
@@ -141,7 +141,7 @@ public class KeybindingsSettings : Gtk.Grid {
         model.get(iter, 0, out name, -1);
         message("nuvola.keybindings.%s %s", name, Gtk.accelerator_name(accel_key, accel_mods));
         config.set_string("nuvola.keybindings." + name, keybinding);
-        var action = actions_reg.get_action(name);
+        Drtgtk.Action? action = actions_reg.get_action(name);
         return_if_fail(action != null);
         action.keybinding = keybinding;
     }
@@ -154,14 +154,14 @@ public class KeybindingsSettings : Gtk.Grid {
         string name;
         model.get(iter, 0, out name, -1);
         config.set_string("nuvola.keybindings." + name, "");
-        var action = actions_reg.get_action(name);
+        Drtgtk.Action? action = actions_reg.get_action(name);
         return_if_fail(action != null);
         action.keybinding = null;
     }
 
     private void on_glob_accel_edited(string path_string, uint accel_key, Gdk.ModifierType accel_mods, uint hardware_keycode) {
         assert(global_keybindings != null);
-        var keybinding = Gtk.accelerator_name(accel_key, accel_mods);
+        string keybinding = Gtk.accelerator_name(accel_key, accel_mods);
         var path = new Gtk.TreePath.from_string(path_string);
         Gtk.TreeIter iter;
         model.get_iter(out iter, path);

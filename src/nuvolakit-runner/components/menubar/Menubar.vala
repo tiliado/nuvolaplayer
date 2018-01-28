@@ -34,10 +34,10 @@ public class MenuBar: GLib.Object, MenuBarInterface {
     }
 
     public void update() {
-        var menubar = app.reset_menubar();
-        var submenus = menus.get_keys();
+        GLib.Menu menubar = app.reset_menubar();
+        List<unowned string> submenus = menus.get_keys();
         submenus.sort(strcmp);
-        foreach (var submenu in submenus)
+        foreach (unowned string submenu in submenus)
         menus[submenu].append_to_menu(app.actions, menubar);
     }
 

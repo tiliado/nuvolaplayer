@@ -46,7 +46,7 @@ public class RequestContext {
         generator.pretty = true;
         generator.indent = 4;
         generator.set_root(json);
-        var data = generator.to_data(null);
+        string data = generator.to_data(null);
         msg.set_response("text/plain; charset=utf-8", Soup.MemoryUse.COPY, data.data);
         msg.status_code = status_code;
     }
@@ -62,7 +62,7 @@ public class RequestContext {
     public void serve_file(File file) {
         string? mime_type = null;
         try {
-            var content_type = file.query_info(FileAttribute.STANDARD_CONTENT_TYPE, 0).get_content_type();
+            string? content_type = file.query_info(FileAttribute.STANDARD_CONTENT_TYPE, 0).get_content_type();
             mime_type = ContentType.get_mime_type(content_type);
         }
         catch (GLib.Error e) {

@@ -55,10 +55,10 @@ public class LoginFormManager: GLib.Object {
     private void request_passwords() {
         channel.call.begin("/nuvola/passwordmanager/get-passwords", null, (o, res) => {
             try {
-                var passwords = channel.call.end(res);
+                Variant? passwords = channel.call.end(res);
                 if (passwords != null) {
                     return_if_fail(passwords.is_of_type(new VariantType("a(sss)")));
-                    var iter = passwords.iterator();
+                    VariantIter iter = passwords.iterator();
                     string hostname = null;
                     string username = null;
                     string password = null;
@@ -78,7 +78,7 @@ public class LoginFormManager: GLib.Object {
     }
 
     private void add_credentials(string hostname, string username, string password) {
-        var entries = credentials[hostname];
+        Drt.Lst<LoginCredentials> entries = credentials[hostname];
         if (entries == null) {
             entries = new Drt.Lst<LoginCredentials>(LoginCredentials.username_equals);
             entries.prepend(new LoginCredentials(username, password));
@@ -86,7 +86,7 @@ public class LoginFormManager: GLib.Object {
         }
         else {
             var entry = new LoginCredentials(username, password);
-            var index = entries.index(entry);
+            int index = entries.index(entry);
             if (index >= 0)
             entries[index] = entry;
             else
@@ -112,19 +112,19 @@ public class LoginFormManager: GLib.Object {
             credentials.remove(hostname);
         }
         else {
-            var entries = credentials[hostname];
+            Drt.Lst<LoginCredentials> entries = credentials[hostname];
             if (entries != null)
             entries.remove(new LoginCredentials(username, null));
         }
     }
 
     private SList<LoginCredentials>? get_credentials(string hostname, string? username) {
-        var entries = credentials[hostname];
+        Drt.Lst<LoginCredentials> entries = credentials[hostname];
         if (entries != null) {
             if (username == null)
             return entries.to_slist();
             SList<LoginCredentials> result = null;
-            foreach (var entry in entries) {
+            foreach (LoginCredentials entry in entries) {
                 if (entry.username == username)
                 result.prepend(entry);
             }
@@ -143,7 +143,7 @@ public class LoginFormManager: GLib.Object {
     }
 
     public void clear_forms() {
-        foreach (var form in login_forms) {
+        foreach (LoginForm form in login_forms) {
             form.new_credentials.disconnect(on_new_credentials_from_form);
             form.username_changed.disconnect(on_form_username_changed);
             form.unsubscribe();
@@ -152,8 +152,8 @@ public class LoginFormManager: GLib.Object {
     }
 
     public bool prefill(LoginForm form, bool force=false) {
-        var username = form.username != null ? form.username.value : "";
-        var entries = get_credentials(form.uri.host, username);
+        string username = form.username != null ? form.username.value : "";
+        SList<LoginCredentials>? entries = get_credentials(form.uri.host, username);
         if (entries != null) {
             form.fill(entries.data.username, entries.data.password, force);
             return true;
@@ -175,13 +175,13 @@ public class LoginFormManager: GLib.Object {
 
     public bool manage_context_menu(WebKit.ContextMenu menu, WebKit.DOM.Node? node) {
         if (node != null && node is HTMLInputElement) {
-            foreach (var form in login_forms) {
+            foreach (LoginForm form in login_forms) {
                 if (form.username == node || form.password == node) {
                     context_menu_form = form;
-                    var entries = get_credentials(form.uri.host, null);
+                    SList<Nuvola.LoginCredentials> entries = get_credentials(form.uri.host, null);
                     if (entries != null) {
                         var builder = new VariantBuilder(new VariantType("as"));
-                        foreach (var entry in entries)
+                        foreach (LoginCredentials entry in entries)
                         builder.add_value(entry.username);
                         menu.set_user_data(new Variant("(sas)", "prefill-password", builder));
                         return true;
@@ -194,15 +194,15 @@ public class LoginFormManager: GLib.Object {
     }
 
     private bool look_up_forms() {
-        var document = page.get_dom_document();
-        var forms = document.forms;
-        var n_forms = forms.length;
+        WebKit.DOM.Document document = page.get_dom_document();
+        WebKit.DOM.HTMLCollection forms = document.forms;
+        ulong n_forms = forms.length;
         if (n_forms == 0)
         return false;
 
         var form_found = false;
         for (var i = 0; i < n_forms; i++) {
-            var form = forms.item(i) as HTMLFormElement;
+            WebKit.DOM.HTMLFormElement? form = forms.item(i) as HTMLFormElement;
             assert(form != null);
             HTMLInputElement? username;
             HTMLInputElement? password;
@@ -232,8 +232,8 @@ public class LoginFormManager: GLib.Object {
 
     private void handle_prefill_username(Drt.RpcRequest request) throws Drt.RpcError {
         if (context_menu_form != null) {
-            var index = request.pop_int();
-            var entries = get_credentials(context_menu_form.uri.host, null);
+            int index = request.pop_int();
+            SList<LoginCredentials>? entries = get_credentials(context_menu_form.uri.host, null);
             if (entries != null) {
                 unowned LoginCredentials credentials = entries.nth_data((uint) index);
                 if (credentials != null)
@@ -250,8 +250,8 @@ public class LoginFormManager: GLib.Object {
         username = null;
         password = null;
         submit = null;
-        var inputs = form.elements;
-        var n_inputs = inputs.length;
+        WebKit.DOM.HTMLCollection inputs = form.elements;
+        ulong n_inputs = inputs.length;
         WebKit.DOM.HTMLInputElement? username_node = null;
         WebKit.DOM.HTMLInputElement? password_node = null;
         WebKit.DOM.HTMLElement? submit_node = null;
@@ -263,7 +263,7 @@ public class LoginFormManager: GLib.Object {
                 submit_node = button;
                 continue;
             }
-            var input_type = input.type;
+            string? input_type = input.type;
             if (input_type == "text" || input_type == "tel" || input_type == "email") {
                 if (username_node != null)
                 return false;

@@ -44,7 +44,7 @@ public class MediaKeysClient : GLib.Object, MediaKeysInterface {
 
         const string METHOD = "/nuvola/mediakeys/manage";
         try {
-            var data = conn.call_sync(METHOD, new Variant("(s)", app_id));
+            Variant? data = conn.call_sync(METHOD, new Variant("(s)", app_id));
             Drt.Rpc.check_type_string(data, "b");
             managed = data.get_boolean();
         }
@@ -59,7 +59,7 @@ public class MediaKeysClient : GLib.Object, MediaKeysInterface {
 
         const string METHOD = "/nuvola/mediakeys/unmanage";
         try {
-            var data = conn.call_sync(METHOD, new Variant("(s)", app_id));
+            Variant? data = conn.call_sync(METHOD, new Variant("(s)", app_id));
             Drt.Rpc.check_type_string(data, "b");
             managed = !data.get_boolean();
         }
@@ -69,7 +69,7 @@ public class MediaKeysClient : GLib.Object, MediaKeysInterface {
     }
 
     private void handle_media_key_pressed(Drt.RpcRequest request) throws Drt.RpcError {
-        var key = request.pop_string();
+        string? key = request.pop_string();
         media_key_pressed(key);
         request.respond(new Variant.boolean(true));
     }

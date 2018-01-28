@@ -79,7 +79,7 @@ public class TiliadoApi2 : Oauth2Client {
     }
 
     public async User fetch_current_user() throws Oauth2Error {
-        var response = yield call("me/");
+        Drt.JsonObject response = yield call("me/");
         if (response.get_bool_or("is_authenticated", false) == false) {
             // Try refreshing the token to get an authenticated user
             yield refresh_token();
@@ -102,14 +102,14 @@ public class TiliadoApi2 : Oauth2Client {
     }
 
     public async void set_account_membership(User user, string project_id) throws Oauth2Error {
-        var project = yield get_project(project_id);
+        Project project = yield get_project(project_id);
         unowned int[] user_groups = user.groups;
         unowned int[] patron_groups = project.patron_groups;
         int membership = 0;
         for (var i = 0;  i < user.groups.length; i++) {
             for (var j = 0; j < project.patron_groups.length; j++) {
                 if (user_groups[i] == patron_groups[j]) {
-                    var group = yield get_group(user_groups[i]);
+                    Group group = yield get_group(user_groups[i]);
                     membership = int.max(membership, group.membership_rank);
                 }
             }
@@ -118,7 +118,7 @@ public class TiliadoApi2 : Oauth2Client {
     }
 
     public async Project get_project(string id) throws Oauth2Error {
-        var response = yield call("projects/projects/%s".printf(id));
+        Drt.JsonObject response = yield call("projects/projects/%s".printf(id));
         int[] groups;
         if (!response.get_int_array("patron_groups", out groups))
         groups = {};
@@ -129,7 +129,7 @@ public class TiliadoApi2 : Oauth2Client {
     }
 
     public async Group get_group(int id) throws Oauth2Error {
-        var response = yield call("auth/groups/%d".printf(id));
+        Drt.JsonObject response = yield call("auth/groups/%d".printf(id));
         int[] groups;
         if (!response.get_int_array("patron_groups", out groups))
         groups = {};

@@ -42,7 +42,7 @@ public class XKeyGrabber: GLib.Object {
 
     public XKeyGrabber() {
         keybindings = new HashTable<string, uint>(str_hash, str_equal);
-        var display = Gdk.Display.get_default();
+        Gdk.Display display = Gdk.Display.get_default();
         if (display != null)
         setup_display(display);
         else
@@ -60,7 +60,7 @@ public class XKeyGrabber: GLib.Object {
             if (!allow_multiple)
             return false;
 
-            var count = keybindings[accelerator] + 1;
+            uint count = keybindings[accelerator] + 1;
             keybindings[accelerator] = count;
             debug("Grabbed %s, count %u", accelerator, count);
             return true;
@@ -78,8 +78,8 @@ public class XKeyGrabber: GLib.Object {
         if (!is_grabbed(accelerator))
         return false;
 
-        var count = keybindings[accelerator] - 1;
-        if (count > 0) {
+        uint count = keybindings[accelerator] - 1;
+        if (count > 0) {  // FIXME: (count == 0) ?
             keybindings[accelerator] = count;
             debug("Ungrabbed %s, count %u", accelerator, count);
             return true;
@@ -104,7 +104,7 @@ public class XKeyGrabber: GLib.Object {
         return_val_if_fail(keysym != 0, false);
 
         /* Translate virtual modifiers (SUPER, etc.) to real modifiers (Mod2, etc.) */
-        var keymap = Gdk.Keymap.get_default();
+        Gdk.Keymap keymap = Gdk.Keymap.get_default();
         if (!keymap.map_virtual_modifiers(ref modifiers)) {
             warning("Failed to map virtual modifiers.");
             return false;
@@ -115,7 +115,7 @@ public class XKeyGrabber: GLib.Object {
 
         unowned X.Display display = gdk_display.get_xdisplay();
         X.ID xid = root_window.get_xid();
-        var keycode = display.keysym_to_keycode(keysym);
+        int keycode = display.keysym_to_keycode(keysym);
         return_val_if_fail(keycode != 0, false);
         Gdk.error_trap_push();
 
@@ -133,7 +133,7 @@ public class XKeyGrabber: GLib.Object {
     private Gdk.FilterReturn event_filter(Gdk.XEvent gdk_xevent, Gdk.Event gdk_event) {
         X.Event* xevent = (X.Event*) gdk_xevent;
         if (xevent->type == X.EventType.KeyPress) {
-            var keymap = Gdk.Keymap.get_default();
+            Gdk.Keymap keymap = Gdk.Keymap.get_default();
             Gdk.ModifierType event_mods = (Gdk.ModifierType) (xevent.xkey.state & ~lock_modifiers[7]);
             Gdk.ModifierType keyboard_state_mods;
             uint keyval;
@@ -148,7 +148,7 @@ public class XKeyGrabber: GLib.Object {
             if ((event_mods & (Gdk.ModifierType.SUPER_MASK | Gdk.ModifierType.HYPER_MASK)) != 0)
             event_mods &= ~Gdk.ModifierType.HYPER_MASK;
 
-            var accelerator = Gtk.accelerator_name(keyval, event_mods);
+            string accelerator = Gtk.accelerator_name(keyval, event_mods);
             if (is_grabbed(accelerator))
             keybinding_pressed(accelerator, gdk_event.get_time());
             else

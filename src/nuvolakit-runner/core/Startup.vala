@@ -70,7 +70,7 @@ private int launch_app_runner(File web_app_dir, string? api_token, string[] argv
         storage.user_data_dir.get_child(WEB_APP_DATA_SUBDIR).get_child(web_app.id),
         storage.user_cache_dir.get_child(WEB_APP_DATA_SUBDIR).get_child(web_app.id));
     var controller = new Nuvola.AppRunnerController(storage, web_app, app_storage, api_token, api_token == null);
-    var return_code = controller.run(argv);
+    int return_code = controller.run(argv);
     controller.shutdown_engines();
     return return_code;
 }

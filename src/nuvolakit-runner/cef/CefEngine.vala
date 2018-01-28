@@ -82,17 +82,17 @@ public class CefEngine : WebEngine {
         web_view.zoom_level = config.get_double(ZOOM_LEVEL_CONF);
         web_view.load_started.connect(on_load_started);
 
-        var data = worker_data;
-        var size = data.size();
+        HashTable<string, Variant> data = worker_data;
+        uint size = data.size();
         var args = new Variant?[2 * size];
-        var iter = HashTableIter<string, Variant>(data);
+        HashTableIter<string, Variant> iter = HashTableIter<string, Variant>(data);
         unowned string key = null;
         unowned Variant val = null;
         for (var i = 0; i < size && iter.next(out key, out val); i++) {
             args[2 * i] = new Variant.string(key);
             args[2 * i + 1] = val;
         }
-        var path = Nuvola.get_libdir() + "/libnuvolaruntime-cef-worker.so";
+        string path = Nuvola.get_libdir() + "/libnuvolaruntime-cef-worker.so";
         web_view.add_autoloaded_renderer_extension(path, args);
     }
 
@@ -152,7 +152,7 @@ public class CefEngine : WebEngine {
 
     public override void load_app() {
         try {
-            var url = env.send_data_request_string("LastPageRequest", "url");
+            string? url = env.send_data_request_string("LastPageRequest", "url");
             if (url != null) {
                 if (load_uri(url)) {
                     return;
@@ -171,7 +171,7 @@ public class CefEngine : WebEngine {
 
     public override void go_home() {
         try {
-            var url = env.send_data_request_string("HomePageRequest", "url");
+            string url = env.send_data_request_string("HomePageRequest", "url");
             if (url == null) {
                 runner_app.fatal_error("Invalid home page URL",
                     "The web app integration script has provided an empty home page URL.");
@@ -271,7 +271,7 @@ public class CefEngine : WebEngine {
             return false;
         }
         args.get("(s@a{smv}@av)", null, out values, out entries);
-        var values_hashtable = Drt.variant_to_hashtable(values);
+        HashTable<string, Variant> values_hashtable = Drt.variant_to_hashtable(values);
         if (values_hashtable.size() > 0) {
             debug("Init form requested");
             init_form(values_hashtable, entries);
@@ -282,7 +282,7 @@ public class CefEngine : WebEngine {
 
     private void register_ipc_handlers() {
         assert(ipc_bus != null);
-        var router = ipc_bus.router;
+        Drt.RpcRouter router = ipc_bus.router;
         message("Partially implemented: register_ipc_handlers()");
         router.add_method("/nuvola/core/web-worker-initialized", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             "Notify that the web worker has been initialized.",
@@ -396,7 +396,7 @@ public class CefEngine : WebEngine {
     }
 
     private void handle_session_get_value(Drt.RpcRequest request) throws Drt.RpcError {
-        var response = session.get_value(request.pop_string());
+        Variant? response = session.get_value(request.pop_string());
         if (response == null) {
             response = new Variant("mv", null);
         }
@@ -418,7 +418,7 @@ public class CefEngine : WebEngine {
     }
 
     private void handle_config_get_value(Drt.RpcRequest request) throws Drt.RpcError {
-        var response = config.get_value(request.pop_string());
+        Variant? response = config.get_value(request.pop_string());
         if (response == null) {
             response = new Variant("mv", null);
         }
@@ -436,20 +436,20 @@ public class CefEngine : WebEngine {
     }
 
     private void handle_download_file_async(Drt.RpcRequest request) throws Drt.RpcError {
-        var uri = request.pop_string();
-        var basename = request.pop_string();
-        var cb_id = request.pop_double();
-        var dir = storage.cache_dir.get_child("api-downloads");
+        string? uri = request.pop_string();
+        string? basename = request.pop_string();
+        double cb_id = request.pop_double();
+        File dir = storage.cache_dir.get_child("api-downloads");
         try {
             dir.make_directory_with_parents();
         } catch (GLib.Error e) {}
-        var file = dir.get_child(basename);
+        File file = dir.get_child(basename);
         try {
             file.@delete();
         } catch (GLib.Error e) {}
         web_view.download_file.begin(uri, file.get_path(), null, (o, res) => {
-            var result = web_view.download_file.end(res);
-            var status_code = result ? 200 : 404;
+            bool result = web_view.download_file.end(res);
+            int status_code = result ? 200 : 404;
             try {
                 var payload = new Variant(
                     "(dbusss)", cb_id, result, status_code, status_code.to_string(),
@@ -494,7 +494,7 @@ public class CefEngine : WebEngine {
         try {
             ipc_bus.local.call.begin(name, data, (o, res) => {
                 try {
-                    var response = ipc_bus.local.call.end(res);
+                    Variant? response = ipc_bus.local.call.end(res);
                     js_api.send_async_response(id, response, null);
                 } catch (GLib.Error e) {
                     js_api.send_async_response(id, null, e);

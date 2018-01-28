@@ -83,7 +83,7 @@ public class TrayIcon: GLib.Object {
 
         var padding = 1.0;
         assert(pixbuf.width == pixbuf.height);
-        var size = pixbuf.width;
+        int size = pixbuf.width;
         string text;
         double font_size;
         if (number < 100) {
@@ -94,7 +94,7 @@ public class TrayIcon: GLib.Object {
             text = "∞";
             font_size = 0.8 * size;
         }
-        var format = pixbuf.has_alpha ? Cairo.Format.ARGB32 : Cairo.Format.RGB24;
+        Cairo.Format format = pixbuf.has_alpha ? Cairo.Format.ARGB32 : Cairo.Format.RGB24;
         var surface = new Cairo.ImageSurface(format, size, size);
         var cairo = new Cairo.Context(surface);
         Gdk.cairo_set_source_pixbuf(cairo, pixbuf, 0.0, 0.0);
@@ -105,20 +105,20 @@ public class TrayIcon: GLib.Object {
         cairo.set_font_size(font_size);
         Cairo.TextExtents extents;
         cairo.text_extents(text, out extents);
-        var text_x = Math.round(extents.x_bearing);
-        var text_y = Math.round(extents.y_bearing);
-        var text_width = Math.round(extents.width);
-        var text_height = Math.round(extents.height);
+        double text_x = Math.round(extents.x_bearing);
+        double text_y = Math.round(extents.y_bearing);
+        double text_width = Math.round(extents.width);
+        double text_height = Math.round(extents.height);
 
         cairo.set_source_rgba(1, 1, 1, 0.6);
-        var width = text_width + 2 * padding;
-        var height = text_height + 2 * padding;
+        double width = text_width + 2 * padding;
+        double height = text_height + 2 * padding;
         cairo.rectangle(Math.floor(0.5 * (size - width)), Math.floor(0.5 * (size - height)), width, height);
         cairo.fill();
 
         cairo.set_source_rgba(1, 0, 0, 1.0);
-        var x = Math.floor(0.5 * (size - text_width) - text_x);
-        var y = Math.floor(0.5 * (size - text_height) - text_y);
+        double x = Math.floor(0.5 * (size - text_width) - text_x);
+        double y = Math.floor(0.5 * (size - text_height) - text_y);
         cairo.move_to(x, y);
         cairo.show_text(text);
         pixbuf = Gdk.pixbuf_get_from_surface(surface, 0, 0, size, size);
@@ -130,8 +130,8 @@ public class TrayIcon: GLib.Object {
     }
 
     private void render_icon() {
-        var size = icon.size;
-        var pixbuf = controller.web_app.get_icon_pixbuf(size);
+        int size = icon.size;
+        Gdk.Pixbuf? pixbuf = controller.web_app.get_icon_pixbuf(size);
         if (pixbuf == null) {
             warning("Failed to load pixbuf for tray icon.");
             return;
@@ -169,7 +169,7 @@ public class TrayIcon: GLib.Object {
         if (menu != null)
         menu.detach();
 
-        var model = actions_reg.build_menu(slist_strings_to_array(model.actions), false, true);
+        GLib.MenuModel model = actions_reg.build_menu(slist_strings_to_array(model.actions), false, true);
         menu = new Gtk.Menu.from_model(model);
         menu.attach_to_widget(controller.main_window, null);
     }

@@ -82,10 +82,10 @@ public class TimePositionButton: Drtgtk.PopoverButton {
     }
 
     private string format_time(int seconds) {
-        var hours = seconds / 3600;
-        var result = (hours > 0) ? "%02d:".printf(hours) : "";
+        int hours = seconds / 3600;
+        string result = (hours > 0) ? "%02d:".printf(hours) : "";
         seconds = (seconds - hours * 3600);
-        var minutes = seconds / 60;
+        int minutes = seconds / 60;
         seconds = (seconds - minutes * 60);
         return result + "%02d:%02d".printf(minutes, seconds);
     }
@@ -99,7 +99,7 @@ public class TimePositionButton: Drtgtk.PopoverButton {
     }
 
     private void on_value_changed(Gtk.Range scale) {
-        var position = round_sec(scale.adjustment.value);
+        int position = round_sec(scale.adjustment.value);
         if (position_sec != position) {
             position_sec = position;
             position_changed();

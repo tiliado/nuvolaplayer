@@ -58,7 +58,7 @@ public class WebApp : GLib.Object {
     public static string build_uid_from_app_id(string app_id, string? base_id=null) {
         var buffer = new StringBuilder(base_id ?? Nuvola.get_app_uid());
         buffer.append("App");
-        foreach (var part in app_id.split("_")) {
+        foreach (string part in app_id.split("_")) {
             buffer.append_c(part[0].toupper());
             if (part.length > 1)
             buffer.append(part.substring(1));
@@ -150,7 +150,7 @@ public class WebApp : GLib.Object {
         if (dir.query_file_type(0) != FileType.DIRECTORY)
         throw new WebAppError.LOADING_FAILED(@"$(dir.get_path()) is not a directory");
 
-        var metadata_file = dir.get_child(METADATA_FILENAME);
+        File metadata_file = dir.get_child(METADATA_FILENAME);
         if (metadata_file.query_file_type(0) != FileType.REGULAR)
         throw new WebAppError.LOADING_FAILED(@"$(metadata_file.get_path()) is not a file");
 
@@ -205,12 +205,12 @@ public class WebApp : GLib.Object {
         throw new WebAppError.INVALID_METADATA("The api_minor key is missing or is not an integer.");
         if (!meta.get_bool_or("has_desktop_launcher", false))
         throw new WebAppError.INVALID_METADATA("Web apps without a desktop launcher are no longer supported. Upgrade Nuvola SDK.");
-        var categories = meta.get_string_or("categories");
+        string? categories = meta.get_string_or("categories");
         if (Drt.String.is_empty(categories)) {
             warning("Empty 'categories' entry for web app '%s'. Using '%s' as a fallback.", id, DEFAULT_CATEGORY);
             categories = DEFAULT_CATEGORY;
         }
-        var requirements = meta.get_string_or("requirements");
+        string? requirements = meta.get_string_or("requirements");
         if (requirements == null) {
             requirements = "Feature[flash] Codec[mp3]";
             warning("No requirements specified. '%s' used by default but that may change in the future.", requirements);
@@ -261,7 +261,7 @@ public class WebApp : GLib.Object {
      * @return        pixbuf with icon scaled to the given size
      */
     public Gdk.Pixbuf? get_icon_pixbuf(int size) requires (size > 0) {
-        var info = lookup_theme_icon(size, Gtk.IconLookupFlags.FORCE_SIZE);
+        Gtk.IconInfo info = lookup_theme_icon(size, Gtk.IconLookupFlags.FORCE_SIZE);
         if (info != null) {
             try {
                 return info.load_icon().copy();
@@ -273,7 +273,7 @@ public class WebApp : GLib.Object {
 
         lookup_icons();
         /* Return the first icon >= size */
-        foreach (var icon in icons) {
+        foreach (IconInfo icon in icons) {
             if (icon.size <= 0 || icon.size >= size) {
                 try {
                     var pixbuf =  new Gdk.Pixbuf.from_file_at_scale(icon.path, size, size, false);
@@ -296,7 +296,7 @@ public class WebApp : GLib.Object {
         else if (size <= 32)
         flags |= Gtk.IconLookupFlags.NO_SVG;
 
-        var icon = Gtk.IconTheme.get_default().lookup_icon(get_icon_name(), size, flags);
+        Gtk.IconInfo? icon = Gtk.IconTheme.get_default().lookup_icon(get_icon_name(), size, flags);
         if (icon == null)
         debug("Theme icon %s %d not found.", get_icon_name(), size);
         return icon;
@@ -307,19 +307,19 @@ public class WebApp : GLib.Object {
         return;
 
         icons = null;
-        var icons_dir = data_dir.get_child("icons");
+        File icons_dir = data_dir.get_child("icons");
         try {
             FileInfo file_info;
-            var enumerator = icons_dir.enumerate_children(FileAttribute.STANDARD_NAME, 0);
+            FileEnumerator enumerator = icons_dir.enumerate_children(FileAttribute.STANDARD_NAME, 0);
             while ((file_info = enumerator.next_file()) != null) {
                 int width = 0;
                 int height = 0;
-                var path = icons_dir.get_child(file_info.get_name()).get_path();
-                var format = Gdk.Pixbuf.get_file_info(path, out width, out height);
+                string path = icons_dir.get_child(file_info.get_name()).get_path();
+                unowned Gdk.PixbufFormat? format = Gdk.Pixbuf.get_file_info(path, out width, out height);
                 if (format == null)
                 continue;
 
-                var size = path.has_suffix(".svg") ? 0 : int.min(width, height);
+                int size = path.has_suffix(".svg") ? 0 : int.min(width, height);
                 icons.prepend( {path, size});
             }
         }

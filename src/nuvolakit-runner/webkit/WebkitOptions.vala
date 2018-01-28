@@ -74,7 +74,7 @@ public class WebkitOptions : WebOptions {
         var web_context =  new WebKit.WebContext.with_website_data_manager(data_manager);
         web_context.set_favicon_database_directory(storage.create_data_subdir("favicons").get_path());
         /* Persistence must be set up after WebContext is created! */
-        var cookie_manager = data_manager.get_cookie_manager();
+        WebKit.CookieManager cookie_manager = data_manager.get_cookie_manager();
         cookie_manager.set_persistent_storage(storage.data_dir.get_child("cookies.dat").get_path(),
             WebKit.CookiePersistentStorage.SQLITE);
         default_context = web_context;
@@ -95,18 +95,18 @@ public class WebkitOptions : WebOptions {
             if (parameter == null) {
                 return Drt.RequirementState.SUPPORTED;
             }
-            var param = parameter.strip().down();
+            string param = parameter.strip().down();
             if (param[0] == 0) {
                 return Drt.RequirementState.SUPPORTED;
             }
-            var versions = param.split(".");
+            string[] versions = param.split(".");
             if (versions.length > 3) {
                 error = "WebKitGtk[] received invalid version parameter '%s'.".printf(param);
                 return Drt.RequirementState.ERROR;
             }
             uint[] uint_versions = {0, 0, 0, 0};
             for (var i = 0; i < versions.length; i++) {
-                var version = int.parse(versions[i]);
+                int version = int.parse(versions[i]);
                 if (i < 0) {
                     error = "WebKitGtk[] received invalid version parameter '%s'.".printf(param);
                     return Drt.RequirementState.ERROR;
@@ -168,7 +168,7 @@ public class WebkitOptions : WebOptions {
     public override string[] get_format_support_warnings() {
         string[] warnings = {};
         if (flash_required) {
-            var flash_plugins = format_support.n_flash_plugins;
+            uint flash_plugins = format_support.n_flash_plugins;
             if (flash_plugins == 0) {
                 warnings += "<b>Flash plugin issue:</b> No Flash Player plugin has been found. Music playback may fail.";
             } else if (flash_plugins > 1) {

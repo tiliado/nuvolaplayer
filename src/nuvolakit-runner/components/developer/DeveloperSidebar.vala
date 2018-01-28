@@ -134,8 +134,8 @@ public class DeveloperSidebar: Gtk.ScrolledWindow {
 
     private void clear_artwork(bool broken) {
         try {
-            var icon_name = broken ? "dialog-error": "audio-x-generic";
-            var pixbuf = Gtk.IconTheme.get_default().load_icon(icon_name, 80, Gtk.IconLookupFlags.FORCE_SIZE);
+            string icon_name = broken ? "dialog-error": "audio-x-generic";
+            Gdk.Pixbuf pixbuf = Gtk.IconTheme.get_default().load_icon(icon_name, 80, Gtk.IconLookupFlags.FORCE_SIZE);
             artwork.set_from_pixbuf(pixbuf);
         }
         catch (GLib.Error e) {
@@ -209,7 +209,7 @@ public class DeveloperSidebar: Gtk.ScrolledWindow {
             action_widgets.prepend(label);
             grid.add(label);
 
-            foreach (var full_name in playback_actions)
+            foreach (unowned string full_name in playback_actions)
             add_action(full_name);
 
         }
@@ -248,7 +248,7 @@ public class DeveloperSidebar: Gtk.ScrolledWindow {
                 grid.add(button);
             }
             else if (action is Drtgtk.RadioAction) {
-                var radio = radios.lookup(action.name);
+                Gtk.RadioButton? radio = radios.lookup(action.name);
                 var button = new Gtk.RadioButton.with_label_from_widget(radio, option.label);
                 if (radio == null) {
                     radios.insert(action.name, button);
@@ -267,7 +267,7 @@ public class DeveloperSidebar: Gtk.ScrolledWindow {
 
     private void on_radio_clicked(Gtk.Button button) {
         var radio = button as Gtk.RadioButton;
-        var full_name = button.get_data<string>("full-name");
+        string full_name = button.get_data<string>("full-name");
         Drtgtk.Action action;
         Drtgtk.RadioOption option;
         string detailed_name;
@@ -278,10 +278,10 @@ public class DeveloperSidebar: Gtk.ScrolledWindow {
 
     private void on_radio_action_changed(GLib.Object o, ParamSpec p) {
         var action = o as Drtgtk.RadioAction;
-        var state = action.state;
-        var radio = radios.lookup(action.name);
-        foreach (var item in radio.get_group()) {
-            var full_name = item.get_data<string>("full-name");
+        Variant state = action.state;
+        Gtk.RadioButton radio = radios.lookup(action.name);
+        foreach (Gtk.RadioButton item in radio.get_group()) {
+            string full_name = item.get_data<string>("full-name");
             Drtgtk.RadioOption option;
             if (actions_reg.find_and_parse_action(full_name, null, null, out option)) {
                 if (!item.active && state.equal(option.parameter))
@@ -295,7 +295,7 @@ public class DeveloperSidebar: Gtk.ScrolledWindow {
         var radio = widget as Gtk.RadioButton;
         if (radio != null) {
             radio.clicked.disconnect(on_radio_clicked);
-            var full_name = radio.get_data<string>("full-name");
+            string full_name = radio.get_data<string>("full-name");
             Drtgtk.Action action;
             Drtgtk.RadioOption option;
             string detailed_name;
@@ -305,14 +305,14 @@ public class DeveloperSidebar: Gtk.ScrolledWindow {
     }
 
     private void on_time_position_changed() {
-        var action = actions_reg.get_action("seek");
+        Drtgtk.Action? action = actions_reg.get_action("seek");
         if (action != null)
         action.activate(new Variant.double(time_pos.position_sec * 1000000.0));
     }
 
     private void on_volume_changed() {
         if (player.volume != volume_button.value) {
-            var action = actions_reg.get_action("change-volume");
+            Drtgtk.Action action = actions_reg.get_action("change-volume");
             if (action != null)
             action.activate(new Variant.double(volume_button.value));
         }
@@ -320,7 +320,7 @@ public class DeveloperSidebar: Gtk.ScrolledWindow {
 
     private void on_rating_icon_pressed(Gtk.Entry entry, Gtk.EntryIconPosition position, Gdk.Event event) {
         if (position == Gtk.EntryIconPosition.SECONDARY) {
-            var rating = double.parse(entry.text);
+            double rating = double.parse(entry.text);
             if (rating >= 0.0 && rating <= 1.0)
             player.set_rating(rating);
         }

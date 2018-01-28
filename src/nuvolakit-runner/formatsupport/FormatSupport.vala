@@ -51,15 +51,15 @@ public class FormatSupport: GLib.Object {
         if (web_plugins != null)
         return;
 
-        var wc = WebKit.WebContext.get_default();
-        var plugins = yield wc.get_plugins(null);
+        WebKit.WebContext wc = WebKit.WebContext.get_default();
+        List<WebKit.Plugin> plugins = yield wc.get_plugins(null);
         var paths = new GenericSet<string>(str_hash, str_equal);
         uint n_flash_plugins = 0;
-        foreach (var plugin in plugins) {
-            var name = plugin.get_name();
-            var is_flash = name.down().strip() == "shockwave flash";
-            var file = yield Drt.System.resolve_symlink(File.new_for_path(plugin.get_path()), null);
-            var path = file.get_path();
+        foreach (WebKit.Plugin plugin in plugins) {
+            string name = plugin.get_name();
+            bool is_flash = name.down().strip() == "shockwave flash";
+            File file = yield Drt.System.resolve_symlink(File.new_for_path(plugin.get_path()), null);
+            string path = file.get_path();
             web_plugins.append({name, plugin.get_path(), plugin.get_description(), true, is_flash});
             if (!(path in paths)) {
                 paths.add(path);
@@ -71,10 +71,10 @@ public class FormatSupport: GLib.Object {
     }
 
     private async bool check_mp3(string audio_file, bool silent) {
-        var pipeline = get_mp3_pipeline();
+        AudioPipeline pipeline = get_mp3_pipeline();
         pipeline.info.connect(on_pipeline_info);
         pipeline.warn.connect(on_pipeline_warn);
-        var result = yield pipeline.check(silent);
+        bool result = yield pipeline.check(silent);
         pipeline.info.disconnect(on_pipeline_info);
         pipeline.warn.disconnect(on_pipeline_warn);
         return result;
@@ -118,8 +118,8 @@ public class AudioPipeline : GLib.Object {
             yield;
         }
         this.silent = silent;
-        var source = Gst.ElementFactory.make("filesrc", "source");
-        var decoder = Gst.ElementFactory.make("decodebin", "decoder");
+        Gst.Element? source = Gst.ElementFactory.make("filesrc", "source");
+        Gst.Element? decoder = Gst.ElementFactory.make("decodebin", "decoder");
         pipeline = new Gst.Pipeline ("test-pipeline");
         if (source == null || decoder == null || pipeline == null) {
             warn("Error: source, decoder or pipeline is null");
@@ -131,7 +131,7 @@ public class AudioPipeline : GLib.Object {
             return false;
         }
 
-        var bus = pipeline.get_bus();
+        Gst.Bus bus = pipeline.get_bus();
         bus.message.connect(on_bus_message);
         bus.add_signal_watch();
         decoder.pad_added.connect(on_pad_added);
@@ -173,15 +173,15 @@ public class AudioPipeline : GLib.Object {
 
     private void on_pad_added (Gst.Element element, Gst.Pad pad) {
         if (silent) {
-            var sink = Gst.ElementFactory.make("fakesink", "sink");
+            Gst.Element? sink = Gst.ElementFactory.make("fakesink", "sink");
             pipeline.add(sink);
             if (pad.link(sink.get_static_pad("sink")) != Gst.PadLinkReturn.OK)
             warn("Failed to link pad to sink.");
             sink.sync_state_with_parent();
         }
         else {
-            var conv = Gst.ElementFactory.make("audioconvert", "converter");
-            var sink = Gst.ElementFactory.make("autoaudiosink", "sink");
+            Gst.Element? conv = Gst.ElementFactory.make("audioconvert", "converter");
+            Gst.Element? sink = Gst.ElementFactory.make("autoaudiosink", "sink");
             pipeline.add_many(conv, sink);
             if (!conv.link(sink))
             warn("Failed to link converter to sink.");

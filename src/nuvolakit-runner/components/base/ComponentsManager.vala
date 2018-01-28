@@ -66,18 +66,18 @@ public class ComponentsManager: Gtk.Stack {
 
     public void refresh() {
         rows = null;
-        foreach (var child in grid.get_children())
+        foreach (Gtk.Widget child in grid.get_children())
         grid.remove(child);
 
-        var components = this.components.to_list();
+        List<Component> components = this.components.to_list();
         components.sort_with_data((a, b) => {
-            var a_available = is_component_available(a);
-            var b_available = is_component_available(b);
+            bool a_available = is_component_available(a);
+            bool b_available = is_component_available(b);
             return (a_available != b_available) ? (a_available ? -1 : 1) : strcmp(a.name, b.name);
         });
 
         var row = 0;
-        foreach (var component in components) {
+        foreach (Component component in components) {
             if (component.hidden && !component.enabled)
             continue;
             if (row > 0) {
@@ -146,7 +146,7 @@ public class ComponentsManager: Gtk.Stack {
             this.component = component;
 
             checkbox = new Gtk.Switch();
-            var available = manager.is_component_available(component);
+            bool available = manager.is_component_available(component);
             if (available) {
                 checkbox.active = component.enabled;
                 checkbox.sensitive = true;
@@ -234,7 +234,7 @@ public class ComponentsManager: Gtk.Stack {
             button.valign = button.halign = Gtk.Align.CENTER;
             button.clicked.connect(on_back_clicked);
             grid.attach(button, 0, 0, 1, 1);
-            var label = Drtgtk.Labels.markup(
+            Gtk.Label label = Drtgtk.Labels.markup(
                 "<span size='medium'><b>%s</b></span>\n<span foreground='#444' size='small'>%s</span>",
                 component.name, component.description);
             grid.attach(label, 1, 0, 1, 1);

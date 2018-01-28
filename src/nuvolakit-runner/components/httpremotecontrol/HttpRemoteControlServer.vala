@@ -102,7 +102,7 @@ public class Server: Soup.Server {
         if (running)
         return;
 
-        foreach (var addr in addresses) {
+        foreach (Address addr in addresses) {
             if (!addr.enabled)
             continue;
             try {
@@ -137,28 +137,28 @@ public class Server: Soup.Server {
 
     public void refresh_addresses() {
         this.addresses.clear();
-        var config = app.config;
+        Config config = app.config;
         var addr_str = "127.0.0.1";
-        var key = mk_address_enabled_key(addr_str);
+        string key = mk_address_enabled_key(addr_str);
         this.addresses.append(new Address(addr_str, "Localhost", config.has_key(key) ? config.get_bool(key) : true));
         if (nm != null) {
-            var connections = nm.get_active_connections();
+            Nm.ActiveConnection[]? connections = nm.get_active_connections();
             if (connections != null) {
-                foreach (var conn in connections) {
-                    var ip4_config =  conn.get_ip4_config();
+                foreach (Nm.ActiveConnection conn in connections) {
+                    Nm.Ip4Config? ip4_config =  conn.get_ip4_config();
                     if (ip4_config == null)
                     continue;
-                    var addresses = ip4_config.get_addresses();
+                    uint[]? addresses = ip4_config.get_addresses();
                     if (addresses == null)
                     continue;
-                    foreach (var ip4 in addresses) {
+                    foreach (uint ip4 in addresses) {
                         addr_str = "%u.%u.%u.%u".printf(
                             (ip4 & 0xFF),
                             (ip4 >> 8) & 0xFF,
                             (ip4 >> 16) & 0xFF,
                             (ip4 >> 24) & 0xFF);
                         key = mk_address_enabled_key(addr_str);
-                        var enabled = config.has_key(key) ? config.get_bool(key) : false;
+                        bool enabled = config.has_key(key) ? config.get_bool(key) : false;
                         this.addresses.append(new Address(addr_str, conn.id, enabled));
                     }
                 }
@@ -170,7 +170,7 @@ public class Server: Soup.Server {
     private void register_app(string app_id) {
         message("HttpRemoteControlServer: Register app id: %s", app_id);
         registered_runners.add(app_id);
-        var app = app_runners[app_id];
+        AppRunner? app = app_runners[app_id];
         app.add_capatibility(CAPABILITY_NAME);
         app.notification.connect(on_app_notification);
         if (!running)
@@ -180,12 +180,12 @@ public class Server: Soup.Server {
 
     private bool unregister_app(string app_id) {
         message("HttpRemoteControlServer: unregister app id: %s", app_id);
-        var app = app_runners[app_id];
+        AppRunner? app = app_runners[app_id];
         if (app != null) {
             app.remove_capatibility(CAPABILITY_NAME);
             app.notification.disconnect(on_app_notification);
         }
-        var result = registered_runners.remove(app_id);
+        bool result = registered_runners.remove(app_id);
         bus.router.emit(APP_UNREGISTERED, app_id, app_id);
         if (running && registered_runners.length == 0)
         stop();
@@ -205,9 +205,9 @@ public class Server: Soup.Server {
 
     public async Variant? handle_eio_request(Engineio.Socket socket, Engineio.MessageType type, string path, Variant? params) throws GLib.Error {
         if (path.has_prefix("/app/")) {
-            var app_path = path.substring(5);
+            string app_path = path.substring(5);
             string app_id;
-            var slash_pos = app_path.index_of_char('/');
+            int slash_pos = app_path.index_of_char('/');
             if (slash_pos <= 0) {
                 app_id = app_path;
                 app_path = "";
@@ -223,21 +223,21 @@ public class Server: Soup.Server {
             if (type == Engineio.MessageType.SUBSCRIBE) {
                 bool subscribe = true;
                 string? detail = null;
-                var abs_path = "/app/%s/nuvola%s".printf(app_id, path);
+                string abs_path = "/app/%s/nuvola%s".printf(app_id, path);
                 Drt.RpcNotification.parse_params(abs_path, params, out subscribe, out detail);
                 yield this.subscribe(app_id, app_path, subscribe, detail, socket);
                 return null;
             }
 
-            var app = app_runners[app_id];
+            AppRunner? app = app_runners[app_id];
             return yield app.call_full("/nuvola" + app_path, params, false, "rw");
         }
         if (path.has_prefix("/master/")) {
-            var master_path = path.substring(7);
+            string master_path = path.substring(7);
             if (type == Engineio.MessageType.SUBSCRIBE) {
                 bool subscribe = true;
                 string? detail = null;
-                var abs_path = "/master/nuvola%s".printf(master_path);
+                string abs_path = "/master/nuvola%s".printf(master_path);
                 Drt.RpcNotification.parse_params(abs_path, params, out subscribe, out detail);
                 yield this.subscribe(null, master_path, subscribe, detail, socket);
                 return null;
@@ -249,15 +249,15 @@ public class Server: Soup.Server {
     }
 
     protected void handle_request(RequestContext request) {
-        var path = request.path;
+        string path = request.path;
         if (path == "/+api/app" || path == "/+api/app/") {
             request.respond_json(200, list_apps());
             return;
         }
         if (path.has_prefix("/+api/app/")) {
-            var app_path = path.substring(10);
+            string app_path = path.substring(10);
             string app_id;
-            var slash_pos = app_path.index_of_char('/');
+            int slash_pos = app_path.index_of_char('/');
             if (slash_pos <= 0) {
                 app_id = app_path;
                 app_path = "";
@@ -273,7 +273,7 @@ public class Server: Soup.Server {
                 var app_request = new AppRequest.from_request_context(app_path, request);
                 message("App-specific request %s: %s => %s", app_id, app_path, app_request.to_string());
                 try {
-                    var data = send_app_request(app_id, app_request);
+                    Json.Node data = send_app_request(app_id, app_request);
                     request.respond_json(200, data);
                 }
                 catch (GLib.Error e) {
@@ -288,7 +288,7 @@ public class Server: Soup.Server {
         }
         else if (path.has_prefix("/+api/")) {
             try {
-                var data = send_local_request(path.substring(6), request);
+                Json.Node data = send_local_request(path.substring(6), request);
                 request.respond_json(200, data);
             }
             catch (GLib.Error e) {
@@ -304,8 +304,8 @@ public class Server: Soup.Server {
     }
 
     public async void subscribe(string? app_id, string path, bool subscribe, string? detail, Engineio.Socket socket) throws GLib.Error {
-        var abs_path = app_id != null ? "/app/%s/nuvola%s".printf(app_id, path) : "/master/nuvola%s".printf(path);
-        var subscribers = this.subscribers[abs_path];
+        string abs_path = app_id != null ? "/app/%s/nuvola%s".printf(app_id, path) : "/master/nuvola%s".printf(path);
+        Drt.Lst<Subscription>? subscribers = this.subscribers[abs_path];
         if (subscribers == null) {
             subscribers = new Drt.Lst<Subscription>(Subscription.equals);
             this.subscribers[abs_path] = subscribers;
@@ -327,9 +327,9 @@ public class Server: Soup.Server {
             var builder = new VariantBuilder(new VariantType("a{smv}"));
             builder.add("{smv}", "subscribe", new Variant.boolean(subscribe));
             builder.add("{smv}", "detail", detail != null ? new Variant.string(detail) : null);
-            var params = builder.end();
+            Variant params = builder.end();
             if (app_id != null) {
-                var app = app_runners[app_id];
+                AppRunner app = app_runners[app_id];
                 if (app == null)
                 throw new ChannelError.APP_NOT_FOUND("App with id '%s' doesn't exist or HTTP interface is not enabled.", app_id);
 
@@ -342,12 +342,11 @@ public class Server: Soup.Server {
     }
 
     private void serve_static(RequestContext request) {
-
-        var path = request.path == "/" ? "index" : request.path.substring(1);
+        string path = request.path == "/" ? "index" : request.path.substring(1);
         if (path.has_suffix("/"))
         path += "index";
 
-        var file = find_static_file(path);
+        File file = find_static_file(path);
         if (file == null) {
             request.respond_not_found();
             return;
@@ -356,8 +355,8 @@ public class Server: Soup.Server {
     }
 
     private File? find_static_file(string path) {
-        foreach (var www_root in www_roots) {
-            var file = www_root.get_child(path);
+        foreach (File www_root in www_roots) {
+            File file = www_root.get_child(path);
             if (file.query_file_type(0) == FileType.REGULAR)
             return file;
             file = www_root.get_child(path + ".html");
@@ -368,25 +367,25 @@ public class Server: Soup.Server {
     }
 
     private Json.Node send_app_request(string app_id, AppRequest app_request) throws GLib.Error {
-        var app = app_runners[app_id];
-        var flags = app_request.method == "POST" ? "rw" : "r";
-        var method = "/nuvola/" + app_request.app_path;
+        AppRunner app = app_runners[app_id];
+        string flags = app_request.method == "POST" ? "rw" : "r";
+        string method = "/nuvola/" + app_request.app_path;
         unowned string? form_data = app_request.method == "POST" ? (string) app_request.body.data : app_request.uri.query;
         return to_json(app.call_full_sync(method, serialize_params(form_data), false, flags));
     }
 
     private Json.Node send_local_request(string path, RequestContext request) throws GLib.Error {
-        var msg = request.msg;
-        var body = msg.request_body.flatten();
-        var flags = msg.method == "POST" ? "rw" : "r";
-        var method = "/nuvola/" + path;
+        Soup.Message msg = request.msg;
+        Soup.Buffer body = msg.request_body.flatten();
+        string flags = msg.method == "POST" ? "rw" : "r";
+        string method = "/nuvola/" + path;
         unowned string? form_data = msg.method == "POST" ? (string) body.data : msg.uri.query;
         return to_json(bus.local.call_full_sync(method, serialize_params(form_data), false, flags));
     }
 
     private Variant? serialize_params(string? form_data) {
         if (form_data != null) {
-            var query_params = Soup.Form.decode(form_data);
+            HashTable<string, string> query_params = Soup.Form.decode(form_data);
             return Drt.str_table_to_variant_dict(query_params);
         }
         return null;
@@ -407,9 +406,9 @@ public class Server: Soup.Server {
     private Json.Node? list_apps() {
         var builder = new Json.Builder();
         builder.begin_object().set_member_name("apps").begin_array();
-        var keys = registered_runners.get_values();
+        List<unowned string> keys = registered_runners.get_values();
         keys.sort(string.collate);
-        foreach (var app_id in keys)
+        foreach (unowned string app_id in keys)
         builder.add_string_value(app_id);
         builder.end_array().end_object();
         return builder.get_root();
@@ -421,7 +420,7 @@ public class Server: Soup.Server {
     }
 
     private void handle_unregister(Drt.RpcRequest request) throws Drt.RpcError {
-        var app_id = request.pop_string();
+        string? app_id = request.pop_string();
         if (!unregister_app(app_id)) {
             warning("App %s hasn't been registered yet!", app_id);
         }
@@ -437,9 +436,9 @@ public class Server: Soup.Server {
     }
 
     private void handle_set_address_enabled(Drt.RpcRequest request) throws Drt.RpcError {
-        var address = request.pop_string();
-        var enabled = request.pop_bool();
-        foreach (var addr in this.addresses) {
+        string? address = request.pop_string();
+        bool enabled = request.pop_bool();
+        foreach (Address addr in this.addresses) {
             if (addr.address == address) {
                 if (addr.enabled != enabled) {
                     addr.enabled = enabled;
@@ -457,7 +456,7 @@ public class Server: Soup.Server {
     }
 
     private void handle_set_port(Drt.RpcRequest request) throws Drt.RpcError {
-        var port = request.pop_int();
+        int port = request.pop_int();
         if (port != service_port) {
             service_port = port;
             Idle.add(() => {restart(); return false;});
@@ -469,26 +468,26 @@ public class Server: Soup.Server {
     private void on_master_notification(Drt.RpcRouter router, GLib.Object conn, string path, string? detail, Variant? data) {
         if (conn != bus)
         return;
-        var full_path = "/master" + path;
-        var subscribers = this.subscribers[full_path];
+        string full_path = "/master" + path;
+        Drt.Lst<Subscription>? subscribers = this.subscribers[full_path];
         if (subscribers == null) {
             warning("No subscriber for %s!", full_path);
             return;
         }
-        var path_without_nuvola = "/master" + path.substring(7);
-        foreach (var subscriber in subscribers)
+        string path_without_nuvola = "/master" + path.substring(7);
+        foreach (Subscription subscriber in subscribers)
         eio_channel.send_notification(subscriber.socket, path_without_nuvola, data);
     }
 
     private void on_app_notification(AppRunner app, string path, string? detail, Variant? data) {
-        var full_path = "/app/" + app.app_id + path;
-        var subscribers = this.subscribers[full_path];
+        string full_path = "/app/" + app.app_id + path;
+        Drt.Lst<Subscription>? subscribers = this.subscribers[full_path];
         if (subscribers == null) {
             warning("No subscriber for %s!", full_path);
             return;
         }
-        var path_without_nuvola = "/app/" + app.app_id + path.substring(7);
-        foreach (var subscriber in subscribers)
+        string path_without_nuvola = "/app/" + app.app_id + path.substring(7);
+        foreach (Subscription subscriber in subscribers)
         eio_channel.send_notification(subscriber.socket, path_without_nuvola, data);
     }
 

@@ -39,8 +39,8 @@ public void init_gstreamer() {
 }
 
 private void check_gstreamer_cache() {
-    var gstreamer_cache_dir = File.new_for_path(Environment.get_user_cache_dir() + "/gstreamer-1.0");
-    var gstreamer_nuvola_tag = gstreamer_cache_dir.get_child("__nuvola_%d_%d_%d__".printf(VERSION_MAJOR, VERSION_MINOR, VERSION_BUGFIX));
+    File gstreamer_cache_dir = File.new_for_path(Environment.get_user_cache_dir() + "/gstreamer-1.0");
+    File gstreamer_nuvola_tag = gstreamer_cache_dir.get_child("__nuvola_%d_%d_%d__".printf(VERSION_MAJOR, VERSION_MINOR, VERSION_BUGFIX));
     if (!gstreamer_nuvola_tag.query_exists(null)) {
         debug("Nuvola GStreamer cache tag does not exist. %s", gstreamer_nuvola_tag.get_path());
         try {

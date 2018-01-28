@@ -102,17 +102,17 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface> {
 
     private void handle_add_action(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
-        var group = request.pop_string();
-        var scope = request.pop_string();
-        var action_name = request.pop_string();
-        var label = request.pop_string();
-        var mnemo_label = request.pop_string();
-        var icon = request.pop_string();
-        var keybinding = request.pop_string();
-        var state = request.pop_variant();
+        string? group = request.pop_string();
+        string? scope = request.pop_string();
+        string? action_name = request.pop_string();
+        string? label = request.pop_string();
+        string? mnemo_label = request.pop_string();
+        string? icon = request.pop_string();
+        string? keybinding = request.pop_string();
+        Variant? state = request.pop_variant();
         if (state != null && state.get_type_string() == "mv")
         state = null;
-        foreach (var object in objects)
+        foreach (ActionsInterface object in objects)
         if (object.add_action(group, scope, action_name, label, mnemo_label, icon, keybinding, state))
         break;
         request.respond(null);
@@ -120,11 +120,11 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface> {
 
     private void handle_add_radio_action(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
-        var group = request.pop_string();
-        var scope = request.pop_string();
-        var action_name = request.pop_string();
-        var state = request.pop_variant();
-        var options_iter = request.pop_variant_array();
+        string? group = request.pop_string();
+        string? scope = request.pop_string();
+        string? action_name = request.pop_string();
+        Variant? state = request.pop_variant();
+        VariantIter options_iter = request.pop_variant_array();
         string? label = null;
         string? mnemo_label = null;
         string? icon = null;
@@ -146,7 +146,7 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface> {
             keybinding = value.is_of_type(VariantType.STRING) ? value.get_string() : null;
             options[i++] = new Drtgtk.RadioOption(parameter, label, mnemo_label, icon, keybinding);
         }
-        foreach (var object in objects)
+        foreach (ActionsInterface object in objects)
         if (object.add_radio_action(group, scope, action_name, state, options))
         break;
         request.respond(null);
@@ -156,7 +156,7 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface> {
         check_not_empty();
         string action_name = request.pop_string();
         bool enabled = false;
-        foreach (var object in objects)
+        foreach (ActionsInterface object in objects)
         if (object.is_enabled(action_name, ref enabled))
         break;
         request.respond(new Variant.boolean(enabled));
@@ -164,9 +164,9 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface> {
 
     private void handle_action_set_enabled(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
-        var action_name = request.pop_string();
-        var enabled = request.pop_bool();
-        foreach (var object in objects)
+        string? action_name = request.pop_string();
+        bool enabled = request.pop_bool();
+        foreach (ActionsInterface object in objects)
         if (object.set_enabled(action_name, enabled))
         break;
         request.respond(null);
@@ -174,9 +174,9 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface> {
 
     private void handle_action_get_state(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
-        var action_name = request.pop_string();
+        string? action_name = request.pop_string();
         Variant? state = null;
-        foreach (var object in objects)
+        foreach (ActionsInterface object in objects)
         if (object.get_state(action_name, ref state))
         break;
         request.respond(state);
@@ -184,9 +184,9 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface> {
 
     private void handle_action_set_state(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
-        var action_name = request.pop_string();
-        var state = request.pop_variant();
-        foreach (var object in objects)
+        string? action_name = request.pop_string();
+        Variant? state = request.pop_variant();
+        foreach (ActionsInterface object in objects)
         if (object.set_state(action_name, state))
         break;
         request.respond(null);
@@ -197,7 +197,7 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface> {
         string action_name = request.pop_string();
         Variant? parameter = request.pop_variant();
         bool handled = false;
-        foreach (var object in objects)
+        foreach (ActionsInterface object in objects)
         if (handled = object.activate(action_name, parameter))
         break;
 
@@ -207,30 +207,30 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface> {
     private void handle_list_groups(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
         var groups_set = new GenericSet<string>(str_hash, str_equal);
-        foreach (var object in objects) {
+        foreach (ActionsInterface object in objects) {
             List<unowned string> groups_list;
-            var done = object.list_groups(out groups_list);
-            foreach (var group in groups_list)
+            bool done = object.list_groups(out groups_list);
+            foreach (unowned string group in groups_list)
             groups_set.add(group);
 
             if (done)
             break;
         }
         var builder = new VariantBuilder(new VariantType ("as"));
-        var groups = groups_set.get_values();
-        foreach (var name in groups)
+        List<unowned string> groups = groups_set.get_values();
+        foreach (unowned string name in groups)
         builder.add_value(new Variant.string(name));
         request.respond(builder.end());
     }
 
     private void handle_list_group_actions(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
-        var group_name = request.pop_string();
+        string? group_name = request.pop_string();
         var builder = new VariantBuilder(new VariantType("aa{sv}"));
-        foreach (var object in objects) {
+        foreach (ActionsInterface object in objects) {
             SList<Drtgtk.Action> actions_list;
-            var done = object.list_group_actions(group_name, out actions_list);
-            foreach (var action in actions_list) {
+            bool done = object.list_group_actions(group_name, out actions_list);
+            foreach (Drtgtk.Action action in actions_list) {
                 builder.open(new VariantType("a{sv}"));
                 builder.add("{sv}", "name", new Variant.string(action.name));
                 builder.add("{sv}", "label", new Variant.string(action.label ?? ""));
@@ -238,7 +238,7 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface> {
                 var radio = action as Drtgtk.RadioAction;
                 if (radio != null) {
                     var radio_builder = new VariantBuilder(new VariantType("aa{sv}"));
-                    foreach (var option in radio.get_options()) {
+                    foreach (Drtgtk.RadioOption option in radio.get_options()) {
                         radio_builder.open(new VariantType("a{sv}"));
                         radio_builder.add("{sv}", "param", option.parameter);
                         radio_builder.add("{sv}", "label", new Variant.string(option.label ?? ""));

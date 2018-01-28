@@ -60,13 +60,13 @@ public class Nuvola.NotificationBinding: ObjectBinding<NotificationInterface> {
 
     private void handle_update(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
-        var name = request.pop_string();
-        var title = request.pop_string();
-        var message = request.pop_string();
-        var icon_name = request.pop_string();
-        var icon_path = request.pop_string();
-        var resident = request.pop_bool();
-        var category = request.pop_string();
+        string? name = request.pop_string();
+        string? title = request.pop_string();
+        string? message = request.pop_string();
+        string? icon_name = request.pop_string();
+        string? icon_path = request.pop_string();
+        bool resident = request.pop_bool();
+        string? category = request.pop_string();
         foreach (var object in objects)
         if (object.update(name, title, message, icon_name, icon_path, resident, category))
         break;
@@ -75,9 +75,9 @@ public class Nuvola.NotificationBinding: ObjectBinding<NotificationInterface> {
 
     private void handle_set_actions(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
-        var name = request.pop_string();
-        var actions = request.pop_strv();
-        foreach (var object in objects)
+        string? name = request.pop_string();
+        string[] actions = request.pop_strv();
+        foreach (NotificationInterface object in objects)
         if (object.set_actions(name, (owned) actions))
         break;
         request.respond(null);
@@ -85,8 +85,8 @@ public class Nuvola.NotificationBinding: ObjectBinding<NotificationInterface> {
 
     private void handle_remove_actions(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
-        var name = request.pop_string();
-        foreach (var object in objects)
+        string? name = request.pop_string();
+        foreach (NotificationInterface object in objects)
         if (object.remove_actions(name))
         break;
         request.respond(null);
@@ -94,9 +94,9 @@ public class Nuvola.NotificationBinding: ObjectBinding<NotificationInterface> {
 
     private void handle_show(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
-        var name = request.pop_string();
-        var force = request.pop_bool();
-        foreach (var object in objects)
+        string? name = request.pop_string();
+        bool force = request.pop_bool();
+        foreach (NotificationInterface object in objects)
         if (object.show(name, force))
         break;
         request.respond(null);

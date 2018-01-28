@@ -41,7 +41,7 @@ public class AppCategoriesView : Gtk.TreeView {
     public AppCategoriesView(string? selected_category=null) {
         Object(headers_visible: false);
         var model = new Gtk.ListStore(2, typeof(string), typeof(string));
-        var categories = Nuvola.get_desktop_categories();
+        HashTable<string, string> categories = Nuvola.get_desktop_categories();
         categories.for_each((key, name) => {
             Gtk.TreeIter iter;
             // Audio and Video apps are is common category AudioVideo
@@ -63,7 +63,7 @@ public class AppCategoriesView : Gtk.TreeView {
         var text_cell = new Gtk.CellRendererText ();
         insert_column_with_attributes(-1, "Category", text_cell, "text", 1);
 
-        var selection = get_selection();
+        Gtk.TreeSelection selection = get_selection();
         selection.mode = Gtk.SelectionMode.BROWSE;
         this.category = selected_category;
         if (selected_category == null)

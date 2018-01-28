@@ -110,13 +110,13 @@ public int main(string[] args) {
         web_app_reg = new WebAppRegistry(File.new_for_path(Args.apps_dir), {});
     }
     else {
-        var web_apps_storage = storage.get_child("web_apps");
+        Drt.Storage web_apps_storage = storage.get_child("web_apps");
         web_app_reg = new WebAppRegistry(web_apps_storage.user_data_dir, web_apps_storage.data_dirs);
     }
     #endif
 
     string[] exec_cmd = {};
-    var gdb_server = Environment.get_variable("NUVOLA_APP_RUNNER_GDB_SERVER");
+    string? gdb_server = Environment.get_variable("NUVOLA_APP_RUNNER_GDB_SERVER");
     if (gdb_server != null) {
         exec_cmd += "/usr/bin/gdbserver";
         exec_cmd += gdb_server ;
@@ -146,7 +146,7 @@ public int main(string[] args) {
     #endif
     for (var i = 1; i < args.length; i++)
     controller_args += args[i];
-    var result = controller.run(controller_args);
+    int result = controller.run(controller_args);
 
     if (controller.is_remote) {
         message("%s instance is already running and will be activated.", Nuvola.get_app_name());

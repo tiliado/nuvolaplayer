@@ -48,8 +48,8 @@ public abstract class AppRunner : GLib.Object {
             var dict = new VariantDict(call_sync(IpcApi.CORE_GET_METADATA, null));
             dict.insert_value("running", new Variant.boolean(true));
             var capatibilities_array = new VariantBuilder(new VariantType("as"));
-            var capatibilities = get_capatibilities();
-            foreach (var capability in capatibilities)
+            List<unowned string> capatibilities = get_capatibilities();
+            foreach (unowned string capability in capatibilities)
             capatibilities_array.add("s", capability);
             dict.insert_value("capabilities", capatibilities_array.end());
             return dict.end();
@@ -133,8 +133,8 @@ public class SubprocessAppRunner : AppRunner {
             try {
                 yield process.get_stderr_pipe().read_async(buffer);
                 unowned string str = (string) buffer;
-                var lines = str.split("\n");
-                var size = lines.length;
+                string[] lines = str.split("\n");
+                int size = lines.length;
                 if (size == 1) {
                     if (stderr_last_line != null && stderr_last_line[0] != '\0')
                     stderr_last_line = stderr_last_line + lines[0];
@@ -172,7 +172,7 @@ public class SubprocessAppRunner : AppRunner {
 
     private async void pass_api_token(string api_token) {
         try {
-            var stdin = process.get_stdin_pipe();
+            OutputStream stdin = process.get_stdin_pipe();
             yield stdin.write_async(api_token.data);
             yield stdin.write_async({'\n'});
         }

@@ -31,7 +31,7 @@ namespace Engineio.Utils {
  * @param separator    separator of hexadecimal pairs ('\0' for none)
  */
 public void bin_to_hex(uint8[] array, out string result, char separator='\0') {
-    var size = separator == '\0' ? 2 * array.length : 3 * array.length - 1;
+    int size = separator == '\0' ? 2 * array.length : 3 * array.length - 1;
     var buffer = new StringBuilder.sized(size);
     bin_to_hex_buf(array, buffer, separator);
     result = buffer.str;

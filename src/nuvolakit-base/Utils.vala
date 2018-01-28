@@ -25,7 +25,7 @@
 namespace Nuvola.Utils {
 
 public HashTable extract_js_properties(HashTable<string, Variant> data) {
-    var iter = HashTableIter<string, Variant>(data);
+    HashTableIter<string, Variant> iter = HashTableIter<string, Variant>(data);
     var properties = new HashTable<string, Variant>(str_hash, str_equal);
     unowned string key = null;
     unowned Variant val = null;

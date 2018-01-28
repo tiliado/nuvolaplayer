@@ -78,19 +78,19 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel> {
 
     private void handle_set_track_info(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
-        var title = request.pop_string();
-        var artist = request.pop_string();
-        var album = request.pop_string();
-        var state = request.pop_string();
-        var artwork_location = request.pop_string();
-        var artwork_file = request.pop_string();
-        var rating = request.pop_double();
-        var length = request.pop_double();
+        string? title = request.pop_string();
+        string? artist = request.pop_string();
+        string? album = request.pop_string();
+        string? state = request.pop_string();
+        string? artwork_location = request.pop_string();
+        string? artwork_file = request.pop_string();
+        double rating = request.pop_double();
+        double length = request.pop_double();
         model.set_track_info(title, artist, album, state, artwork_location, artwork_file, rating, (int64) length);
 
         SList<string> playback_actions = null;
-        var actions = request.pop_strv();
-        foreach (var action in actions)
+        string[] actions = request.pop_strv();
+        foreach (string action in actions)
         playback_actions.prepend(action);
         playback_actions.reverse();
         model.playback_actions = (owned) playback_actions;
@@ -114,7 +114,7 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel> {
 
     private void handle_set_track_position(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
-        var position = request.pop_double();
+        double position = request.pop_double();
         model.track_position = (int64) position;
         emit(TRACK_POSITION_CHANGED);
         request.respond(new Variant.boolean(true));
@@ -127,7 +127,7 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel> {
 
     private void handle_update_volume(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
-        var volume = request.pop_double();
+        double volume = request.pop_double();
         model.volume = volume;
         emit(VOLUME_CHANGED);
         request.respond(new Variant.boolean(true));
@@ -140,8 +140,8 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel> {
 
     private void handle_set_flag(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
-        var name = request.pop_string();
-        var state = request.pop_bool();
+        string? name = request.pop_string();
+        bool state = request.pop_bool();
         bool handled = false;
         switch (name) {
         case "can-go-next":
@@ -166,7 +166,7 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel> {
 
     private void handle_get_flag(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
-        var name = request.pop_string();
+        string? name = request.pop_string();
         switch (name) {
         case "can-go-next":
         case "can-go-previous":

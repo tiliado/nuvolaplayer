@@ -45,13 +45,13 @@ public class Nuvola.NotificationsBinding: ObjectBinding<NotificationsInterface> 
 
     private void handle_show_notification(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
-        var title = request.pop_string();
-        var message = request.pop_string();
-        var icon_name = request.pop_string();
-        var icon_path = request.pop_string();
-        var force = request.pop_bool();
-        var category = request.pop_string();
-        foreach (var object in objects)
+        string? title = request.pop_string();
+        string? message = request.pop_string();
+        string? icon_name = request.pop_string();
+        string? icon_path = request.pop_string();
+        bool force = request.pop_bool();
+        string? category = request.pop_string();
+        foreach (NotificationsInterface object in objects)
         if (object.show_anonymous(title, message, icon_name, icon_path, force, category))
         break;
         request.respond(null);
@@ -60,7 +60,7 @@ public class Nuvola.NotificationsBinding: ObjectBinding<NotificationsInterface> 
     private void handle_is_persistence_supported(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
         bool supported = false;
-        foreach (var object in objects)
+        foreach (NotificationsInterface object in objects)
         if (object.is_persistence_supported(ref supported))
         break;
         request.respond(new Variant.boolean(supported));

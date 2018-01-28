@@ -40,7 +40,7 @@ public class AppRequest {
     }
 
     public AppRequest.from_request_context(string app_path, RequestContext request) {
-        var msg = request.msg;
+        Soup.Message msg = request.msg;
         this(
             app_path, msg.method, msg.uri,
             msg.request_body == null ? null : msg.request_body.flatten());

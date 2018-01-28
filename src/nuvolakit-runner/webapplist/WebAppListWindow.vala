@@ -108,9 +108,9 @@ public class WebAppList : Gtk.Grid {
     }
 
     private void on_selection_changed() {
-        var items = view.get_selected_items();
+        List<Gtk.TreePath> items = view.get_selected_items();
         Gtk.TreePath? path = null;
-        foreach (var my_path in items)
+        foreach (Gtk.TreePath my_path in items)
         path = my_path;
 
         if (path == null) {
@@ -120,7 +120,7 @@ public class WebAppList : Gtk.Grid {
             return;
         }
 
-        var model = view.get_model();
+        Gtk.TreeModel model = view.get_model();
         Gtk.TreeIter iter;
         if (!model.get_iter(out iter, path)) {
             details.hide();

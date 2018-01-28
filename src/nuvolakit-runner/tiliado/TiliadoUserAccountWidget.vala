@@ -50,7 +50,7 @@ public class TiliadoUserAccountWidget : Gtk.Grid {
             remove(logout_button);
             logout_button = null;
         }
-        foreach (var child in get_children()) {
+        foreach (Gtk.Widget child in get_children()) {
             remove(child);
         }
     }
@@ -66,7 +66,7 @@ public class TiliadoUserAccountWidget : Gtk.Grid {
 
     private void check_user() {
         clear_all();
-        var user = this.current_user;
+        TiliadoApi2.User? user = this.current_user;
         if (user != null) {
             var label = new Gtk.Label(user.name);
             label.max_width_chars = 15;

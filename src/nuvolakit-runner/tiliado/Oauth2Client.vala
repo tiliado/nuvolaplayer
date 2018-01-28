@@ -92,7 +92,7 @@ public class Oauth2Client : GLib.Object {
     throws Oauth2Error {
         if (token == null || token.refresh_token == null)
         return false;
-        var msg = Soup.Form.request_new("POST", token_endpoint, "grant_type", "refresh_token",
+        Soup.Message msg = Soup.Form.request_new("POST", token_endpoint, "grant_type", "refresh_token",
             "refresh_token", token.refresh_token, "client_id", client_id);
         if (client_secret != null)
         msg.request_headers.replace("Authorization",
@@ -154,7 +154,7 @@ public class Oauth2Client : GLib.Object {
     }
 
     public void start_device_code_grant(string device_code_endpoint) {
-        var msg = Soup.Form.request_new("POST", device_code_endpoint, "response_type", "tiliado_device_code",
+        Soup.Message msg = Soup.Form.request_new("POST", device_code_endpoint, "response_type", "tiliado_device_code",
             "client_id", client_id);
         if (client_secret != null)
         msg.request_headers.replace("Authorization",
@@ -222,7 +222,7 @@ public class Oauth2Client : GLib.Object {
     }
 
     public bool hmac_verify_string(ChecksumType checksum, string data, string hmac) {
-        var expected_hmac = hmac_for_string(checksum, data);
+        string expected_hmac = hmac_for_string(checksum, data);
         return expected_hmac != null ? Drt.Utils.const_time_byte_equal(expected_hmac.data, hmac.data) : false;
     }
 
@@ -235,7 +235,7 @@ public class Oauth2Client : GLib.Object {
         yield;
         unowned string response_data = (string) msg.response_body.flatten().data;
         if (msg.status_code < 200 || msg.status_code >= 300) {
-            var http_error = "%u: %s".printf(msg.status_code, Soup.Status.get_phrase(msg.status_code));
+            string http_error = "%u: %s".printf(msg.status_code, Soup.Status.get_phrase(msg.status_code));
             warning("Oauth2 Response error. %s.\n%s", http_error, response_data);
             switch (msg.status_code) {
             case 401:
@@ -263,7 +263,7 @@ public class Oauth2Client : GLib.Object {
         if (device_code_endpoint == null || device_code == null)
         return false;
 
-        var msg = Soup.Form.request_new("POST", device_code_endpoint, "grant_type", "tiliado_device_code",
+        Soup.Message msg = Soup.Form.request_new("POST", device_code_endpoint, "grant_type", "tiliado_device_code",
             "client_id", client_id, "code", device_code);
         if (client_secret != null)
         msg.request_headers.replace("Authorization",

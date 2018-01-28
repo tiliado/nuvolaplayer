@@ -37,7 +37,7 @@ public class KeyValueProxy: GLib.Object, Drt.KeyValueStorage {
 
     public bool has_key(string key) {
         try {
-            var response = channel.call_sync("/nuvola/core/" + prefix + "-has-key", new Variant("(s)", key));
+            Variant response = channel.call_sync("/nuvola/core/" + prefix + "-has-key", new Variant("(s)", key));
             if (response.is_of_type(VariantType.BOOLEAN))
             return response.get_boolean();
             critical("Invalid response to KeyValueProxy.has_key: %s", response.print(false));
@@ -50,7 +50,7 @@ public class KeyValueProxy: GLib.Object, Drt.KeyValueStorage {
 
     public async bool has_key_async(string key) {
         try {
-            var response = yield channel.call("/nuvola/core/" + prefix + "-has-key", new Variant("(s)", key));
+            Variant response = yield channel.call("/nuvola/core/" + prefix + "-has-key", new Variant("(s)", key));
             if (response.is_of_type(VariantType.BOOLEAN)) {
                 return response.get_boolean();
             }
@@ -63,7 +63,7 @@ public class KeyValueProxy: GLib.Object, Drt.KeyValueStorage {
 
     public Variant? get_value(string key) {
         try {
-            var response = channel.call_sync("/nuvola/core/"+ prefix + "-get-value", new Variant("(s)", key));
+            Variant response = channel.call_sync("/nuvola/core/"+ prefix + "-get-value", new Variant("(s)", key));
             return response;
         }
         catch (GLib.Error e) {

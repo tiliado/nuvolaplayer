@@ -32,7 +32,7 @@ public class RequirementParser : Drt.RequirementParser {
     }
 
     protected override Drt.RequirementState call(int pos, string ident, string? params) {
-        var type = ident.down();
+        string type = ident.down();
         Drt.RequirementState result = Drt.RequirementState.UNSUPPORTED;
         switch (type) {
         case "codec":
@@ -68,13 +68,13 @@ public class RequirementParser : Drt.RequirementParser {
             set_eval_error(pos, "Codec[] needs a codec name as a parameter.");
             return Drt.RequirementState.ERROR;
         }
-        var name = params.strip().down();
+        string name = params.strip().down();
         if (name[0] == 0) {
             set_eval_error(pos, "Codec[] needs a codec name as a parameter.");
             return Drt.RequirementState.ERROR;
         }
         string? error = null;
-        var result = web_options.supports_codec(name, out error);
+        Drt.RequirementState result = web_options.supports_codec(name, out error);
         if (error != null) {
             set_eval_error(pos, error);
         }
@@ -86,13 +86,13 @@ public class RequirementParser : Drt.RequirementParser {
             set_eval_error(pos, "Feature[] needs a feature name as a parameter.");
             return Drt.RequirementState.ERROR;
         }
-        var name = params.strip().down();
+        string name = params.strip().down();
         if (name[0] == 0) {
             set_eval_error(pos, "Feature[] needs a feature name as a parameter.");
             return Drt.RequirementState.ERROR;
         }
         string? error = null;
-        var result = web_options.supports_feature(name, out error);
+        Drt.RequirementState result = web_options.supports_feature(name, out error);
         if (error != null) {
             set_eval_error(pos, error);
         }

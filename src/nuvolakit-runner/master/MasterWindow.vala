@@ -75,7 +75,7 @@ public class MasterWindow : Drtgtk.ApplicationWindow {
      * @param title    A title for the switcher.
      */
     public void add_page(Gtk.Widget page, string name, string title) {
-        var was_empty = stack.visible_child == null;
+        bool was_empty = stack.visible_child == null;
         stack.add_titled(page, name, title);
         if (was_empty)
         update();
@@ -86,7 +86,7 @@ public class MasterWindow : Drtgtk.ApplicationWindow {
     }
 
     private void update() {
-        var child = stack.visible_child;
+        Gtk.Widget child = stack.visible_child;
         string? name = null;
         string? title = null;
         if (child != null)

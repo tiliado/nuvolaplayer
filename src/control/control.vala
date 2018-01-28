@@ -117,7 +117,7 @@ public int main(string[] args) {
         try {
             var master = new Drt.RpcChannel.from_name(1, build_master_ipc_id(), null, null, 500);
 
-            var response = master.call_sync("/nuvola/core/get_top_runner", null);
+            Variant? response = master.call_sync("/nuvola/core/get_top_runner", null);
             Drt.Rpc.check_type_string(response, "ms");
             response.get("ms", out Args.app);
 
@@ -143,7 +143,7 @@ public int main(string[] args) {
     }
 
 
-    var command = Args.command[0];
+    string command = Args.command[0];
     var control = new Control(client);
     try {
         switch (command) {
@@ -192,13 +192,13 @@ public int main(string[] args) {
 }
 
 private int call_api_method(Drt.RpcChannel connection, string[] args, int offset) throws GLib.Error {
-    var response = connection.call_sync(args[offset], Drt.strv_to_variant_dict(args, offset + 1));
+    Variant? response = connection.call_sync(args[offset], Drt.strv_to_variant_dict(args, offset + 1));
     if (response != null) {
-        var node = Json.gvariant_serialize(response);
+        Json.Node node = Json.gvariant_serialize(response);
         var generator = new Json.Generator();
         generator.pretty = true;
         generator.set_root(node);
-        var data = generator.to_data(null);
+        string data = generator.to_data(null);
         stdout.printf("%s\n", data);
     }
     return 0;
@@ -212,15 +212,15 @@ class Control {
     }
 
     public int list_actions() throws GLib.Error {
-        var response = conn.call_sync("/nuvola/actions/list-groups", null);
+        Variant? response = conn.call_sync("/nuvola/actions/list-groups", null);
         stdout.printf("Available actions\n\nFormat: NAME (is enabled?) - label\n");
-        var iter = response.iterator();
+        VariantIter iter = response.iterator();
         string group_name = null;
         while (iter.next("s", out group_name)) {
             stdout.printf("\nGroup: %s\n\n", group_name);
-            var actions = conn.call_sync("/nuvola/actions/list-group-actions", new Variant("(s)", group_name));
+            Variant? actions = conn.call_sync("/nuvola/actions/list-group-actions", new Variant("(s)", group_name));
             Variant action = null;
-            var actions_iter = actions.iterator();
+            VariantIter actions_iter = actions.iterator();
             while (actions_iter.next("@*", out action)) {
                 string name = null;
                 string label = null;
@@ -232,7 +232,7 @@ class Control {
                 if (action.lookup("options", "@*", out options)) {
                     stdout.printf(" *  %s (%s) - %s\n", name, enabled ? "enabled" : "disabled", "invoke with following parameters:");
                     Variant option = null;
-                    var options_iter = options.iterator();
+                    VariantIter options_iter = options.iterator();
                     while (options_iter.next("@*", out option)) {
                         Variant parameter = null;
                         assert(option.lookup("param", "@*", out parameter));
@@ -263,7 +263,7 @@ class Control {
                 parameter_str, e.message);
         }
 
-        var response = conn.call_sync("/nuvola/actions/activate",
+        Variant? response = conn.call_sync("/nuvola/actions/activate",
             new Variant.tuple({new Variant.string(name), parameter}));
         bool handled = false;
         if (!Drt.variant_bool(response, ref handled))
@@ -277,21 +277,21 @@ class Control {
     }
 
     public int action_state(string name) throws GLib.Error {
-        var response = conn.call_sync("/nuvola/actions/get-state", new Variant("(s)", name));
+        Variant? response = conn.call_sync("/nuvola/actions/get-state", new Variant("(s)", name));
         if (response != null)
         stdout.printf("%s\n", response.print(false));
         return 0;
     }
 
     public int track_info(string? key=null) throws GLib.Error {
-        var response = conn.call_sync("/nuvola/mediaplayer/track-info", null);
-        var title = Drt.variant_dict_str(response, "title");
-        var artist = Drt.variant_dict_str(response, "artist");
-        var album = Drt.variant_dict_str(response, "album");
-        var state = Drt.variant_dict_str(response, "state");
-        var artwork_location = Drt.variant_dict_str(response, "artworkLocation");
-        var artwork_file = Drt.variant_dict_str(response, "artworkFile");
-        var rating = Drt.variant_dict_double(response, "rating", 0.0);
+        Variant? response = conn.call_sync("/nuvola/mediaplayer/track-info", null);
+        string? title = Drt.variant_dict_str(response, "title");
+        string? artist = Drt.variant_dict_str(response, "artist");
+        string? album = Drt.variant_dict_str(response, "album");
+        string? state = Drt.variant_dict_str(response, "state");
+        string? artwork_location = Drt.variant_dict_str(response, "artworkLocation");
+        string? artwork_file = Drt.variant_dict_str(response, "artworkFile");
+        double rating = Drt.variant_dict_double(response, "rating", 0.0);
 
         if (key == null || key == "all") {
             if (title != null)

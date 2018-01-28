@@ -54,7 +54,7 @@ public class Connection : GLib.Object {
         return false;
 
         unowned Soup.MessageBody body = msg.response_body;
-        var dir = local_file.get_parent();
+        File dir = local_file.get_parent();
         if (!dir.query_exists(null)) {
             try {
                 dir.make_directory_with_parents(null);
@@ -92,7 +92,7 @@ public class Connection : GLib.Object {
     private void apply_network_proxy() {
         string? host;
         int port;
-        var type = get_network_proxy(out host, out port);
+        NetworkProxyType type = get_network_proxy(out host, out port);
         if (type != NetworkProxyType.SYSTEM) {
             if (host == null || host == "")
             host = "127.0.0.1";

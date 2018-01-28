@@ -31,7 +31,7 @@ namespace Nuvola.JSTools {
  * @return Vala UTF-8 string
  */
 public static string utf8_string(JS.String jsstring) {
-    var max_size = jsstring.get_maximum_utf8_string_size();
+    size_t max_size = jsstring.get_maximum_utf8_string_size();
     uint8[] buffer = new uint8[max_size];
     jsstring.get_utf8_string(buffer);
     return (string) buffer;
@@ -59,7 +59,7 @@ public unowned JS.Value object_from_JSON(JS.Context ctx, string json) {
  * @return  JavaScript object
  */
 public unowned JS.Value create_exception(JS.Context ctx, string message) {
-    var exception = """{"type":"NuvolaError", "message":"%s"}""".printf(message.replace("\"", "\\\""));
+    string exception = """{"type":"NuvolaError", "message":"%s"}""".printf(message.replace("\"", "\\\""));
     debug(exception);
     return object_from_JSON(ctx, exception);
 }
@@ -166,7 +166,7 @@ public static unowned JS.Object? o_get_object(Context ctx, JS.Object obj, string
  */
 public static string? string_or_null(JS.Context ctx, JS.Value val, bool allow_empty=false) {
     if (val.is_string(ctx)) {
-        var str = utf8_string(val.to_jsstring(ctx));
+        string str = utf8_string(val.to_jsstring(ctx));
         return (str == "" && !allow_empty) ? null : str;
     }
     return null;
@@ -185,11 +185,11 @@ public string? value_to_string(JS.Context ctx, JS.Value value) {
 public string? exception_to_string(JS.Context ctx, JS.Value value) {
     if (value.is_object(ctx)) {
         unowned JS.Object obj = value.to_object(ctx);
-        var message = o_get_string(ctx, obj, "message");
+        string? message = o_get_string(ctx, obj, "message");
         if (message != null) {
-            var name = o_get_string(ctx, obj, "name");
+            string? name = o_get_string(ctx, obj, "name");
             var line = (int) o_get_number(ctx, obj, "line");
-            var file = o_get_string(ctx, obj, "sourceURL");
+            string? file = o_get_string(ctx, obj, "sourceURL");
             if (line == 0 && file == null)
             return "%s: %s. Enable JS debugging for more details.".printf(name ?? "null", message);
             return "%s:%d: %s: %s".printf(file ?? "(null)", line, name ?? "null", message);
@@ -207,7 +207,7 @@ public unowned JS.Value get_gobject_property_named(JS.Context ctx, GLib.Object o
 }
 
 public unowned JS.Value get_gobject_property(JS.Context ctx, GLib.Object o, ParamSpec p) {
-    var type = p.value_type;
+    GLib.Type type = p.value_type;
     if (type == typeof(string)) {
         string str_val;
         o.@get(p.name, out str_val);
@@ -245,7 +245,7 @@ public unowned JS.Value value_from_variant(JS.Context ctx, Variant? variant) thr
     if (variant == null)
     return JS.Value.null(ctx);
 
-    var type = variant.get_type();
+    VariantType type = variant.get_type();
 
     if (variant.is_of_type(VariantType.VARIANT))
     return value_from_variant(ctx, variant.get_variant());
@@ -292,7 +292,7 @@ public unowned JS.Value value_from_variant(JS.Context ctx, Variant? variant) thr
     return JS.Value.number(ctx, (double) variant.get_uint64());
 
     if (variant.is_container()) {
-        var size = variant.n_children();
+        size_t size = variant.n_children();
         void*[] args = new void*[size];
         for (var i = 0; i < size; i++)
         args[i] = (void*) value_from_variant(ctx, variant.get_child_value(i));
@@ -336,12 +336,12 @@ public Variant variant_from_value(JS.Context ctx, JS.Value val) throws JSError {
 
     if (val.is_object(ctx)) {
         object = (JS.Object) val;
-        var properties = object.get_properties(ctx);
-        var size = properties.get_count();
+        JS.Properties properties = object.get_properties(ctx);
+        size_t size = properties.get_count();
         var builder = new VariantBuilder(new VariantType("a{smv}"));
         for (size_t i = 0; i < size; i++) {
             unowned JS.String js_property = properties.get(i);
-            var value = variant_from_value(ctx, object.get_property(ctx, js_property));
+            Variant? value = variant_from_value(ctx, object.get_property(ctx, js_property));
             builder.add("{smv}", utf8_string(js_property), value);
         }
 

@@ -78,8 +78,8 @@ public class WebAppWindow : Drtgtk.ApplicationWindow {
             warning("Unable to load application icon.");
         }
 
-        var app_window_width = app.web_app.window_width;
-        var app_window_height = app.web_app.window_height;
+        int app_window_width = app.web_app.window_width;
+        int app_window_height = app.web_app.window_height;
         set_default_size(
             int.min(Gdk.Screen.width() - 100, app_window_width > 0 ? app_window_width : 1100),
             int.min(Gdk.Screen.height() - 100, app_window_height > 0 ? app_window_height : 600));
@@ -134,7 +134,7 @@ public class WebAppWindow : Drtgtk.ApplicationWindow {
 
         var inner_box = new Gtk.EventBox();
         inner_box.valign = inner_box.halign = Gtk.Align.CENTER;
-        var color = get_style_context().get_background_color(Gtk.StateFlags.NORMAL);
+        Gdk.RGBA color = get_style_context().get_background_color(Gtk.StateFlags.NORMAL);
         inner_box.override_background_color(Gtk.StateFlags.NORMAL, color);
 
         outer_box.add(inner_box);
@@ -154,7 +154,7 @@ public class WebAppWindow : Drtgtk.ApplicationWindow {
 
     private bool on_window_state_event(Gdk.EventWindowState event) {
         maximized = (event.new_window_state & Gdk.WindowState.MAXIMIZED) != 0;
-        var fullscreen = (event.new_window_state & Gdk.WindowState.FULLSCREEN) != 0;
+        bool fullscreen = (event.new_window_state & Gdk.WindowState.FULLSCREEN) != 0;
         if (this.is_fullscreen != fullscreen) {
             if (fullscreen) {
                 header_bar.hide();

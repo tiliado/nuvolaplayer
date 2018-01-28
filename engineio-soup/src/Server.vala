@@ -150,7 +150,7 @@ public class Server: GLib.Object {
     protected bool verify_request(Request request, bool upgrade, out EngineError? err) {
         // transport check
         err = null;
-        var transport = request.transport;
+        string? transport = request.transport;
         if (transport == null || !transport_factories.contains(transport)) {
             debug("unknown transport '%s'", transport);
             err = EngineError.UNKNOWN_TRANSPORT;
@@ -158,7 +158,7 @@ public class Server: GLib.Object {
         }
 
         // sid check
-        var sid = request.sid;
+        string? sid = request.sid;
         if (sid != null) {
             if (!(sid in clients)) {
                 err = EngineError.UNKNOWN_SID;
@@ -184,7 +184,7 @@ public class Server: GLib.Object {
         debug("closing all open clients");
         unowned string id = null;
         unowned Socket socket = null;
-        var iter = HashTableIter<string, Socket>(clients);
+        HashTableIter<string, Socket> iter = HashTableIter<string, Socket>(clients);
         while (iter.next(out id, out socket)) {
             socket.close(true);
         }
@@ -224,7 +224,7 @@ public class Server: GLib.Object {
     private void send_error_message(Request request, Response response, EngineError code) {
         response.headers["Content-Type"] = "application/json";
 
-        var origin = request.headers.get_one("origin");
+        string? origin = request.headers.get_one("origin");
         if (origin != null) {
             response.headers["Access-Control-Allow-Credentials"] = "true";
             response.headers["Access-Control-Allow-Origin"] = origin;
@@ -245,15 +245,15 @@ public class Server: GLib.Object {
      */
 
     private async void perform_handshake(string transport_name, Request request, Response response) {
-        var id = generate_id(request);
+        string id = generate_id(request);
         debug("Handshaking new client '%s'", id);
 
-        var transport_factory = transport_factories[transport_name];
+        TransportFactory? transport_factory = transport_factories[transport_name];
         if (transport_factory == null) {
             send_error_message(request, response, EngineError.UNKNOWN_TRANSPORT);
             return;
         }
-        var transport = transport_factory(request);
+        Transport transport = transport_factory(request);
         transport.sid = id;
         var polling = transport as PollingTransport;
         if (polling != null) {
@@ -278,7 +278,7 @@ public class Server: GLib.Object {
 
     private void on_transport_headers_requested(Transport transport, Request request, HashTable<string, string> headers) {
         if (this.cookie != null) {
-            var cookie = this.cookie + "=" + transport.sid;
+            string cookie = this.cookie + "=" + transport.sid;
             if (cookie_path != null)
             cookie += "; path=" + cookie_path;
             headers["Set-Cookie"] = cookie;

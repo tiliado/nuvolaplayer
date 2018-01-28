@@ -128,13 +128,13 @@ public class MPRISPlayer : GLib.Object {
         case "artwork-file":
         case "rating":
         case "track-length":
-            var new_metadata = create_metadata();
+            HashTable<string, Variant> new_metadata = create_metadata();
             if (new_metadata.size() == 0 && metadata.size() == 0)
             return;
             pending_update["Metadata"] = metadata = new_metadata;
             break;
         case "track-position":
-            var delta = player.track_position - position;
+            int64 delta = player.track_position - position;
             position = player.track_position;
             pending_update["Position"] = position;
             if (delta > 2 || delta < -2)
@@ -149,7 +149,7 @@ public class MPRISPlayer : GLib.Object {
             pending_update["CanPlay"] = can_play;
             if (update_can_pause())
             pending_update["CanPause"] = can_pause;
-            var status = map_playback_state();
+            string status = map_playback_state();
             if (playback_status == status)
             return;
             pending_update["PlaybackStatus"] = playback_status = status;
@@ -195,7 +195,7 @@ public class MPRISPlayer : GLib.Object {
     private bool update_cb() {
         pending_update_id = 0;
         var builder = new VariantBuilder(VariantType.ARRAY);
-        var iter = HashTableIter<string, Variant>(pending_update);
+        HashTableIter<string, Variant> iter = HashTableIter<string, Variant>(pending_update);
         unowned string name;
         unowned Variant value;
         while (iter.next(out name, out value))
@@ -230,7 +230,7 @@ public class MPRISPlayer : GLib.Object {
         if (player.track_length > 0)
         metadata.insert("mpris:length", new Variant.int64((int64) player.track_length));
         if (metadata.size() > 0) {
-            var hash = Checksum.compute_for_string(ChecksumType.MD5, "%s:%s:%s".printf(
+            string hash = Checksum.compute_for_string(ChecksumType.MD5, "%s:%s:%s".printf(
                 player.title ?? "unknown title",
                 player.artist ?? "unknown artist",
                 player.album ?? "unknown album"));
@@ -249,7 +249,7 @@ public class MPRISPlayer : GLib.Object {
      * if a track is currently playing (and CanControl is true), this should be true.
      */
     private bool update_can_play() {
-        var can_play = player.can_play || player.state != "unknown";
+        bool can_play = player.can_play || player.state != "unknown";
         if (this.can_play != can_play) {
             this.can_play = can_play;
             return true;
@@ -265,7 +265,7 @@ public class MPRISPlayer : GLib.Object {
      * if playback is currently paused (and CanControl is true), this should be true.
      */
     private bool update_can_pause() {
-        var can_pause = player.can_pause || player.state != "unknown";
+        bool can_pause = player.can_pause || player.state != "unknown";
         if (this.can_pause != can_pause) {
             this.can_pause = can_pause;
             return true;

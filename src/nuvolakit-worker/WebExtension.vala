@@ -52,7 +52,7 @@ public class WebExtension: GLib.Object {
     }
 
     private async void ainit() {
-        var router = channel.router;
+        Drt.RpcRouter router = channel.router;
         router.add_method("/nuvola/webworker/call-function", Drt.RpcFlags.WRITABLE,
             "Call JavaScript function.",
             handle_call_function, {
@@ -129,7 +129,7 @@ public class WebExtension: GLib.Object {
         File? script = storage.user_data_dir.get_child(JSApi.JS_DIR).get_child(WEBKITGTK_FIXES_JS);
         if (!script.query_exists()) {
             script = null;
-            foreach (var dir in storage.data_dirs) {
+            foreach (File dir in storage.data_dirs) {
                 script = dir.get_child(JSApi.JS_DIR).get_child(WEBKITGTK_FIXES_JS);
                 if (script.query_exists())
                 break;
@@ -165,9 +165,9 @@ public class WebExtension: GLib.Object {
     }
 
     private void handle_call_function(Drt.RpcRequest request) throws GLib.Error {
-        var name = request.pop_string();
-        var func_params = request.pop_variant();
-        var propagate_error = request.pop_bool();
+        string? name = request.pop_string();
+        Variant? func_params = request.pop_variant();
+        bool propagate_error = request.pop_bool();
         try {
             if (bridge != null) {
                 bridge.call_function_sync(name, ref func_params);
@@ -228,7 +228,7 @@ public class WebExtension: GLib.Object {
     private void on_call_ipc_method_async(JSApi js_api, string name, Variant? data, int id) {
         channel.call.begin(name, data, (o, res) => {
             try {
-                var response = channel.call.end(res);
+                Variant? response = channel.call.end(res);
                 js_api.send_async_response(id, response, null);
             } catch (GLib.Error e) {
                 js_api.send_async_response(id, null, e);
@@ -265,7 +265,7 @@ public class WebExtension: GLib.Object {
         }
         else {
             this.page = page;
-            var frame = page.get_main_frame();
+            WebKit.Frame frame = page.get_main_frame();
             /*
              * If a page doesn't contain any JavaScript, `window_object_cleared` is never called because no JavaScript
              * GlobalContext is created. Following line ensures GlobalContext is created if it hasn't been before.

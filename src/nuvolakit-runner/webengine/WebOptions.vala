@@ -40,7 +40,7 @@ public abstract class WebOptions : GLib.Object {
     }
 
     public bool check_engine_version(VersionTuple min, VersionTuple max= {0, 0, 0, 0}) {
-        var version = engine_version;
+        VersionTuple  version = engine_version;
         return version.gte(min) && (max.empty() || version.lt(max));
     }
 
@@ -72,7 +72,7 @@ public abstract class WebOptions : GLib.Object {
         }
 
         if (agent != null) {
-            var parts = agent.split_set(" \t", 2);
+            string[] parts = agent.split_set(" \t", 2);
             browser = parts[0];
             if (browser != null) {
                 browser = browser.strip();

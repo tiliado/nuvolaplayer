@@ -98,7 +98,7 @@ public class Appindicator: GLib.Object {
         var radio_action = action as Drtgtk.RadioAction;
         var toggle_action = action as Drtgtk.ToggleAction;
         if (radio_action != null) {
-            var radio_group = radio_groups[action.name];
+            Gtk.RadioMenuItem radio_group = radio_groups[action.name];
             var radio_item = new Gtk.RadioMenuItem.with_label_from_widget(radio_group, option.label);
             if (radio_group == null) {
                 radio_groups[action.name] = radio_item;
@@ -133,19 +133,19 @@ public class Appindicator: GLib.Object {
     }
 
     private void clean_radio_groups() {
-        var iter = HashTableIter<string, Gtk.RadioMenuItem>(radio_groups);
+        HashTableIter<string, Gtk.RadioMenuItem> iter = HashTableIter<string, Gtk.RadioMenuItem>(radio_groups);
         Gtk.RadioMenuItem item = null;
         while (iter.next(null, out item)) {
-            var action = item.get_data<Drtgtk.Action?>("diorite_action");
+            Drtgtk.Action? action = item.get_data<Drtgtk.Action?>("diorite_action");
             action.notify["state"].disconnect(on_radio_action_state_changed);
             iter.remove();
         }
     }
 
     private void on_menu_item_activated(Gtk.MenuItem item) {
-        var action = item.get_data<Drtgtk.Action?>("diorite_action");
+        Drtgtk.Action? action = item.get_data<Drtgtk.Action?>("diorite_action");
         if (action != null) {
-            var parameter = item.get_data<Variant?>("diorite_action_param");
+            Variant? parameter = item.get_data<Variant?>("diorite_action_param");
             var radio_action = action as Drtgtk.RadioAction;
             var toggle_action = action as Drtgtk.ToggleAction;
             if (radio_action == null || !Drt.variant_equal(radio_action.state, parameter))
@@ -160,12 +160,12 @@ public class Appindicator: GLib.Object {
 
     private void on_radio_action_state_changed(GLib.Object emitter, ParamSpec p) {
         var action = emitter as Drtgtk.RadioAction;
-        var state = action.state;
+        Variant? state = action.state;
         unowned SList<Gtk.RadioMenuItem> radios = radio_groups[action.name].get_group();
 
         /* Remove action from the currently active radio item to prevent it from emitting "activated" signal.*/
         Gtk.RadioMenuItem? prev_active_radio = null;
-        foreach (var radio in radios) {
+        foreach (Gtk.RadioMenuItem radio in radios) {
             if (radio.active) {
                 prev_active_radio = radio;
                 prev_active_radio.set_data<Drtgtk.Action?>("diorite_action", null);
@@ -174,7 +174,7 @@ public class Appindicator: GLib.Object {
         }
 
         /* Mark the new active radio */
-        foreach (var radio in radios) {
+        foreach (Gtk.RadioMenuItem radio in radios) {
             if (Drt.variant_equal(state, radio.get_data<Variant?>("diorite_action_param"))) {
                 radio.active = true;
                 break;
@@ -188,7 +188,7 @@ public class Appindicator: GLib.Object {
 
     private void on_toggle_action_state_changed(GLib.Object emitter, ParamSpec p) {
         var action = emitter as Drtgtk.ToggleAction;
-        var children = menu.get_children();
+        List<unowned Gtk.Widget> children = menu.get_children();
         foreach (var widget in children) {
             var toggle_item = widget as Gtk.CheckMenuItem;
             if (toggle_item != null && toggle_item.get_data<Drtgtk.Action?>("diorite_action") == action) {

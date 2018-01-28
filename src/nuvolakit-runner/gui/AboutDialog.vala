@@ -53,7 +53,7 @@ public class AboutDialog: Gtk.Dialog {
         GLib.Object(title: "About", transient_for: parent);
         resizable = false;
         add_button("_Close", Gtk.ResponseType.CLOSE);
-        var box = get_content_area();
+        Gtk.Container box = get_content_area();
         Pango.AttrList attributes = null;
         Gtk.Grid grid, title;
         Gtk.Label label;
@@ -69,7 +69,7 @@ public class AboutDialog: Gtk.Dialog {
             title.column_spacing = 10;
             title.margin = 10;
 
-            var pixbuf = web_app.get_icon_pixbuf(icon_size);
+            Gdk.Pixbuf? pixbuf = web_app.get_icon_pixbuf(icon_size);
             if (pixbuf != null) {
                 img = new Gtk.Image.from_pixbuf(pixbuf);
                 img.valign = img.halign = Gtk.Align.CENTER;
@@ -107,14 +107,14 @@ public class AboutDialog: Gtk.Dialog {
         title.column_spacing = 10;
         title.margin = 10;
 
-        var pixbuf = Drtgtk.Icons.load_theme_icon( {Nuvola.get_app_icon()}, icon_size);
+        Gdk.Pixbuf? pixbuf = Drtgtk.Icons.load_theme_icon({Nuvola.get_app_icon()}, icon_size);
         if (pixbuf != null) {
             img = new Gtk.Image.from_pixbuf(pixbuf);
             img.valign = img.halign = Gtk.Align.CENTER;
             title.attach(img, 0, 0, 1, 2);
         }
 
-        var name = Nuvola.get_app_name();
+        string name = Nuvola.get_app_name();
         var subtitle = "Web App Integration Runtime\n";
         #if GENUINE
         subtitle += "Genuine flatpak build";
@@ -134,7 +134,7 @@ public class AboutDialog: Gtk.Dialog {
         label.selectable = true;
         grid.attach(label, 1, 2, 1, 1);
         grid.attach(new Gtk.Label("Revision"), 0, 3, 1, 1);
-        var revision = Nuvola.get_revision();
+        string revision = Nuvola.get_revision();
         if (revision.length > 20)
         revision = revision[0:20];
         label = new Gtk.Label(revision);
@@ -150,7 +150,7 @@ public class AboutDialog: Gtk.Dialog {
         label.selectable = true;
         label.margin_top = 10;
         grid.attach(label, 0, line++, 2, 1);
-        foreach (var entry in web_options) {
+        foreach (WebOptions entry in web_options) {
             label = new Gtk.Label("Web Engine: " + entry.get_name_version());
             label.selectable = true;
             grid.attach(label, 0, line++, 2, 1);

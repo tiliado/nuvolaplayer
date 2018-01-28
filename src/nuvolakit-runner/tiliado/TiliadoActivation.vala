@@ -48,7 +48,7 @@ public interface TiliadoActivation : GLib.Object {
     protected TiliadoApi2.User? update_user_info_sync_internal() {
         TiliadoApi2.User? user = null;
         var loop = new MainLoop();
-        var handler_id = user_info_updated.connect((o, u) => {
+        ulong handler_id = user_info_updated.connect((o, u) => {
             user = u;
             loop.quit();
         });
@@ -65,7 +65,7 @@ public interface TiliadoActivation : GLib.Object {
     public abstract void drop_activation();
 
     public bool has_user_membership(TiliadoMembership membership) {
-        var user = get_user_info();
+        TiliadoApi2.User user = get_user_info();
         if (user == null)
         return TiliadoMembership.NONE == membership;
         return user.membership >= membership;

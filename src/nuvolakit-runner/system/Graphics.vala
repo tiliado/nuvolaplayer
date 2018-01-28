@@ -27,11 +27,11 @@ namespace Nuvola.Graphics {
 #if FLATPAK
 public string? get_required_gl_extension() {
     try {
-        var nvidia_version = Drt.System.read_file(File.new_for_path("/sys/module/nvidia/version")).strip();
+        string nvidia_version = Drt.System.read_file(File.new_for_path("/sys/module/nvidia/version")).strip();
         if (nvidia_version != "") {
-            var i915 = FileUtils.test("/sys/module/i915", FileTest.EXISTS);
-            var bumblebeed = FileUtils.test("/sys/fs/cgroup/pids/system.slice/bumblebeed.service", FileTest.EXISTS);
-            var ignored = i915 && bumblebeed;  // tiliado/nuvolaruntime#380
+            bool i915 = FileUtils.test("/sys/module/i915", FileTest.EXISTS);
+            bool bumblebeed = FileUtils.test("/sys/fs/cgroup/pids/system.slice/bumblebeed.service", FileTest.EXISTS);
+            bool ignored = i915 && bumblebeed;  // tiliado/nuvolaruntime#380
             debug("Nvidia %s, i915 %d, bumblebeed %d => ignored %d",
                 nvidia_version, (int) i915, (int) bumblebeed, (int) ignored);
             return ignored ? null : "nvidia-" + nvidia_version.replace(".", "-");
@@ -124,13 +124,13 @@ private void dri2_connect(X.Display dpy, out int major, out int minor, out strin
  * @return `true` if the corresponding `libvdpau_XXX.so` has been found, false otherwise.
  */
 public bool have_vdpau_driver(string name) {
-    var filename = "/usr/lib/vdpau/libvdpau_%s.so".printf(name);
+    string filename = "/usr/lib/vdpau/libvdpau_%s.so".printf(name);
     var paths = new StringBuilder(filename);
     if (FileUtils.test(filename, FileTest.EXISTS)) {
         debug("VDPAU driver found: %s", filename);
         return true;
     }
-    var libdirs = Drt.String.split_strip(Environment.get_variable("LD_LIBRARY_PATH"), ":");
+    SList<string> libdirs = Drt.String.split_strip(Environment.get_variable("LD_LIBRARY_PATH"), ":");
     #if FLATPAK
     // The latest flatpak does not set LD_LIBRARY_PATH anymore.
     // flatpak/flatpak#1073 tiliado/nuvolaruntime#280
@@ -155,13 +155,13 @@ public bool have_vdpau_driver(string name) {
  * @return `true` if the corresponding `dri/XXX_dri_video.so` has been found, false otherwise.
  */
 public bool have_vaapi_driver(string name) {
-    var filename = "/usr/lib/dri/%s_drv_video.so".printf(name);
+    string filename = "/usr/lib/dri/%s_drv_video.so".printf(name);
     var paths = new StringBuilder(filename);
     if (FileUtils.test(filename, FileTest.EXISTS)) {
         debug("VA-API driver found: %s", filename);
         return true;
     }
-    var libdirs = Drt.String.split_strip(Environment.get_variable("LIBVA_DRIVERS_PATH"), ":");
+    SList<string> libdirs = Drt.String.split_strip(Environment.get_variable("LIBVA_DRIVERS_PATH"), ":");
     foreach (unowned string libdir in libdirs) {
         filename = "%s/%s_drv_video.so".printf(libdir, name);
         paths.append_c(':').append(filename);

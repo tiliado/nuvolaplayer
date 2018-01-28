@@ -35,7 +35,7 @@ public class GlobalKeybindings: GLib.Object {
         keybinder.action_activated.connect(on_action_activated);
         actions.action_added.connect(update_action);
         actions.action_removed.connect(on_action_removed);
-        foreach (var action in actions.list_actions())
+        foreach (Drtgtk.Action action in actions.list_actions())
         update_action(action);
     }
 
@@ -53,7 +53,7 @@ public class GlobalKeybindings: GLib.Object {
         if (handled)
         return;
 
-        var action = actions.get_action(name);
+        Drtgtk.Action? action = actions.get_action(name);
         return_if_fail(action != null);
         action.activate(null);
         handled = true;

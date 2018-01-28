@@ -146,7 +146,7 @@ public class TiliadoAccountWidget : Gtk.Grid {
             button_box.remove(logout_button);
             logout_button = null;
         }
-        foreach (var child in get_children())
+        foreach (Gtk.Widget child in get_children())
         remove(child);
     }
 
@@ -224,7 +224,7 @@ public class TiliadoAccountWidget : Gtk.Grid {
     }
 
     private void check_user() {
-        var user = this.current_user;
+        TiliadoApi2.User user = this.current_user;
         if (user == null) {
             get_token();
             return;

@@ -51,7 +51,7 @@ public class AZLyricsFetcher : GLib.Object, LyricsFetcher {
      */
     public async string fetch_lyrics(string artist, string song) throws LyricsError {
         Soup.Message message;
-        var url = SONG_PAGE.printf(transform_name(artist), transform_name(song));
+        string url = SONG_PAGE.printf(transform_name(artist), transform_name(song));
         message = new Soup.Message("GET", url);
 
         SourceFunc callback = fetch_lyrics.callback;
@@ -60,7 +60,7 @@ public class AZLyricsFetcher : GLib.Object, LyricsFetcher {
         });
         yield;
 
-        var response = (string) message.response_body.flatten().data;
+        string response = (string) message.response_body.flatten().data;
         if (message.status_code != 200 || response == "")
         throw new LyricsError.NOT_FOUND(@"Song $song was not found on AZ Lyrics");
 
@@ -74,12 +74,12 @@ public class AZLyricsFetcher : GLib.Object, LyricsFetcher {
     private string parse_response(string response) {
         const string START = "<!-- Usage of azlyrics.com content";
         const string END = "</div>";
-        var start_pos = response.index_of(START);
+        int start_pos = response.index_of(START);
         if (start_pos >= 0) {
             start_pos = response.index_of("-->", start_pos) + 4;
-            var end_pos = response.index_of(END, start_pos);
+            int end_pos = response.index_of(END, start_pos);
             if (end_pos >= 0) {
-                var lyrics = response.slice(start_pos, end_pos);
+                string lyrics = response.slice(start_pos, end_pos);
                 try {
                     lyrics = html_tags.replace_literal(lyrics, lyrics.length, 0, "");
                 }
@@ -100,7 +100,7 @@ public class AZLyricsFetcher : GLib.Object, LyricsFetcher {
      * @return            transformed name
      */
     public static string transform_name(string name) {
-        var normalized = name.normalize();
+        string normalized = name.normalize();
         var buffer = new StringBuilder("");
         unichar c;
         int i = 0;

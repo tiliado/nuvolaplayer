@@ -43,14 +43,14 @@ public class GlobalActionsKeyBinder : GLib.Object, ActionsKeyBinder {
     }
 
     public bool set_keybinding(string action, string? keybinding) {
-        var old_keybinding = get_keybinding(action);
+        string? old_keybinding = get_keybinding(action);
         if (old_keybinding != null) {
             grabber.ungrab(old_keybinding);
             warn_if_fail(keybindings[old_keybinding] == action);
             keybindings.remove(old_keybinding);
         }
 
-        var result = keybinding == null || grabber.grab(keybinding, false);
+        bool result = keybinding == null || grabber.grab(keybinding, false);
         if (result) {
             if (keybinding != null)
             keybindings[keybinding] = action;
@@ -60,11 +60,11 @@ public class GlobalActionsKeyBinder : GLib.Object, ActionsKeyBinder {
     }
 
     public bool bind(string action) {
-        var keybinding = get_keybinding(action);
+        string? keybinding = get_keybinding(action);
         if (keybinding == null)
         return true;
 
-        var bound_action = keybindings[keybinding];
+        string? bound_action = keybindings[keybinding];
         if (bound_action == action)
         return true;
 
@@ -84,11 +84,11 @@ public class GlobalActionsKeyBinder : GLib.Object, ActionsKeyBinder {
     }
 
     public bool unbind(string action) {
-        var keybinding = get_keybinding(action);
+        string? keybinding = get_keybinding(action);
         if (keybinding == null)
         return true;
 
-        var bound_action = keybindings[keybinding];
+        string? bound_action = keybindings[keybinding];
         if (bound_action != action) {
             warning("Action %s has keybinding '%s' that is bound to action %s.",
                 action, keybinding, bound_action);
@@ -113,7 +113,7 @@ public class GlobalActionsKeyBinder : GLib.Object, ActionsKeyBinder {
     }
 
     private void on_keybinding_pressed(string accelerator, uint32 time) {
-        var name = keybindings[accelerator];
+        string? name = keybindings[accelerator];
         bool handled = false;
         if (name != null)
         action_activated(name, ref handled);

@@ -42,7 +42,7 @@ public class Config : GLib.Object, Drt.KeyValueStorage {
     public signal void reloaded();
 
     public bool reload() {
-        var result = load();
+        bool result = load();
         reloaded();
         return result;
     }
@@ -118,7 +118,7 @@ public class Config : GLib.Object, Drt.KeyValueStorage {
         }
         else {
             if (old_value == null || !old_value.equal(value)) {
-                var node = Json.gvariant_serialize(value);
+                Json.Node? node = Json.gvariant_serialize(value);
                 object.set_member(member_name, (owned) node);
                 changed(key, old_value);
             }
@@ -159,13 +159,13 @@ public class Config : GLib.Object, Drt.KeyValueStorage {
 
     private unowned Json.Object? get_parent_object(string key, out string? member_name) {
         member_name = null;
-        var keys = key.split(".");
+        string[] keys = key.split(".");
         unowned Json.Node node = root;
         for (var i = 0; i < keys.length - 1; i++) {
             if (node.get_node_type() != Json.NodeType.OBJECT)
             return null;
-            var object = node.get_object();
-            var name = keys[i];
+            Json.Object object = node.get_object();
+            string name = keys[i];
             if (!object.has_member(name))
             return null;
             node = object.get_member(name);
@@ -180,13 +180,13 @@ public class Config : GLib.Object, Drt.KeyValueStorage {
 
     private unowned Json.Object? create_parent_object(string key, out string? member_name) {
         member_name = null;
-        var keys = key.split(".");
+        string[] keys = key.split(".");
         unowned Json.Node node = root;
         for (var i = 0; i < keys.length - 1; i++) {
             if (node.get_node_type() != Json.NodeType.OBJECT)
             return null;
-            var object = node.get_object();
-            var name = keys[i];
+            Json.Object object = node.get_object();
+            string? name = keys[i];
             if (!object.has_member(name)) {
                 var new_node = new Json.Node(Json.NodeType.OBJECT);
                 new_node.set_object(new Json.Object());

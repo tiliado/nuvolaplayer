@@ -34,7 +34,7 @@ public class ActionsKeyBinderServer : GLib.Object {
         this.keybinder = keybinder;
         this.app_runners = app_runners;
         keybinder.action_activated.connect(on_action_activated);
-        var router = ipc_bus.router;
+        Drt.RpcRouter router = ipc_bus.router;
         router.add_method("/nuvola/actionkeybinder/get-keybinding", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.READABLE,
             null, handle_get_keybinding, {
                 new Drt.StringParam("action", true, false)
@@ -63,42 +63,42 @@ public class ActionsKeyBinderServer : GLib.Object {
     }
 
     private void handle_get_keybinding(Drt.RpcRequest request) throws Drt.RpcError {
-        var action = request.pop_string();
+        string? action = request.pop_string();
         request.respond(new Variant("ms", keybinder.get_keybinding(action)));
     }
 
     private void handle_set_keybinding(Drt.RpcRequest request) throws Drt.RpcError {
-        var action = request.pop_string();
-        var keybinding = request.pop_string();
+        string? action = request.pop_string();
+        string? keybinding = request.pop_string();
         request.respond(new Variant.boolean(keybinder.set_keybinding(action, keybinding)));
     }
 
     private void handle_bind(Drt.RpcRequest request) throws Drt.RpcError {
-        var action = request.pop_string();
+        string? action = request.pop_string();
         request.respond(new Variant.boolean(keybinder.bind(action)));
     }
 
     private void handle_unbind(Drt.RpcRequest request) throws Drt.RpcError {
-        var action = request.pop_string();
+        string? action = request.pop_string();
         request.respond(new Variant.boolean(keybinder.unbind(action)));
     }
 
     private void handle_get_action(Drt.RpcRequest request) throws Drt.RpcError {
-        var keybinding = request.pop_string();
+        string? keybinding = request.pop_string();
         request.respond(new Variant("ms", keybinder.get_action(keybinding)));
     }
 
     private void handle_is_available(Drt.RpcRequest request) throws Drt.RpcError {
-        var keybinding = request.pop_string();
+        string? keybinding = request.pop_string();
         request.respond(new Variant.boolean(keybinder.is_available(keybinding)));
     }
 
     private void on_action_activated(string name) {
         unowned List<AppRunner> head = app_runners.head;
         var handled = false;
-        foreach (var app_runner in head) {
+        foreach (AppRunner app_runner in head) {
             try {
-                var response = app_runner.call_sync("/nuvola/actionkeybinder/action-activated", new Variant("(s)", name));
+                Variant? response = app_runner.call_sync("/nuvola/actionkeybinder/action-activated", new Variant("(s)", name));
                 if (!Drt.variant_bool(response, ref handled)) {
                     warning("Got invalid response from %s instance %s: %s\n", Nuvola.get_app_name(), app_runner.app_id,
                         response == null ? "null" : response.print(true));

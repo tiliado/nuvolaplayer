@@ -125,7 +125,7 @@ public class JsEnvironment: GLib.Object, JSExecutor {
             size = (int) args.n_children();
             params = new (unowned JS.Value)[size];
             int i = 0;
-            foreach (var item in args)
+            foreach (Variant item in args)
             params[i++] = value_from_variant(ctx, item);
         }
         else {

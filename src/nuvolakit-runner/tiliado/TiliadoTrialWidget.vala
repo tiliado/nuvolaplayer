@@ -71,14 +71,14 @@ public class TiliadoTrialWidget : Gtk.Grid {
     }
 
     private bool check_user() {
-        var user = this.current_user;
+        TiliadoApi2.User? user = this.current_user;
         return user != null  && activation.has_user_membership(required_membership);
     }
 
     private void toggle_trial() {
         if (!check_user()) {
             if (purchase_button == null) {
-                var label = Drtgtk.Labels.markup("<b>%s free trial</b>", Nuvola.get_app_name());
+                Gtk.Label label = Drtgtk.Labels.markup("<b>%s free trial</b>", Nuvola.get_app_name());
                 label.halign = Gtk.Align.CENTER;
                 label.hexpand = true;
                 label.vexpand = true;
@@ -109,7 +109,7 @@ public class TiliadoTrialWidget : Gtk.Grid {
             remove(free_button);
             free_button = null;
         }
-        foreach (var child in get_children()) {
+        foreach (Gtk.Widget child in get_children()) {
             remove(child);
         }
         if (popover != null) {
@@ -382,7 +382,7 @@ public class TiliadoTrialWidget : Gtk.Grid {
                 help_button.halign = Gtk.Align.FILL;
             }
 
-            var first_button = action_button ?? forward_button ?? help_button ?? back_button;
+            Gtk.Button first_button = action_button ?? forward_button ?? help_button ?? back_button;
             if (first_button != null) {
                 first_button.vexpand = true;
                 first_button.valign = Gtk.Align.END;

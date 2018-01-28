@@ -30,7 +30,7 @@ public class MPRISApplication: GLib.Object {
 
     public MPRISApplication(Drtgtk.Application app) {
         this.app = app;
-        var desktop_entry = app.desktop_name;
+        string desktop_entry = app.desktop_name;
         this.desktop_entry = desktop_entry[0:desktop_entry.length - 8];
     }
 

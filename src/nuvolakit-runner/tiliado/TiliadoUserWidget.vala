@@ -75,7 +75,7 @@ public class TiliadoUserWidget : Gtk.Grid {
         if (component == null) {
             return;
         }
-        var user = this.current_user;
+        TiliadoApi2.User? user = this.current_user;
         if (user == null) {
             get_token();
             return;
@@ -104,7 +104,7 @@ public class TiliadoUserWidget : Gtk.Grid {
     }
 
     private void show_premium_required() {
-        var label = Drtgtk.Labels.markup(
+        Gtk.Label label = Drtgtk.Labels.markup(
             "This feature requires <b>%s</b>.", component.required_membership.get_label());
         label.margin = 10;
         label.halign = Gtk.Align.CENTER;
@@ -115,7 +115,7 @@ public class TiliadoUserWidget : Gtk.Grid {
 
     private void show_user_info() {
         if (current_user != null ) {
-            var label = Drtgtk.Labels.markup("<b>User:</b> %s\n<b>Account:</b> %s",
+            Gtk.Label label = Drtgtk.Labels.markup("<b>User:</b> %s\n<b>Account:</b> %s",
                 current_user.name, TiliadoMembership.from_uint(current_user.membership).get_label());
             label.halign = Gtk.Align.CENTER;
             label.hexpand = true;
@@ -172,7 +172,7 @@ public class TiliadoUserWidget : Gtk.Grid {
             button_box.remove(logout_button);
             logout_button = null;
         }
-        foreach (var child in get_children()) {
+        foreach (Gtk.Widget child in get_children()) {
             remove(child);
         }
     }

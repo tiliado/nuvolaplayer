@@ -99,7 +99,7 @@ public class ScrobblerSettings: Gtk.Grid {
     }
 
     private void remove_info_bars() {
-        foreach (var child in get_children())
+        foreach (Gtk.Widget child in get_children())
         if (child is Gtk.InfoBar)
         remove(child);
     }
@@ -128,7 +128,7 @@ public class ScrobblerSettings: Gtk.Grid {
     private void on_request_authorization_done(GLib.Object? o, AsyncResult res) {
         try {
             remove_info_bars();
-            var url = scrobbler.request_authorization.end(res);
+            string url = scrobbler.request_authorization.end(res);
             app.show_uri(url);
 
             var info_bar = new Gtk.InfoBar();

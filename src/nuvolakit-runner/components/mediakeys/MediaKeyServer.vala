@@ -47,7 +47,7 @@ public class MediaKeysServer: GLib.Object {
     }
 
     private void handle_manage(Drt.RpcRequest request) throws Drt.RpcError {
-        var app_id = request.pop_string();
+        string? app_id = request.pop_string();
         if (app_id in clients) {
             request.respond(new Variant.boolean(false));
         } else {
@@ -60,7 +60,7 @@ public class MediaKeysServer: GLib.Object {
     }
 
     private void handle_unmanage(Drt.RpcRequest request) throws Drt.RpcError {
-        var app_id = request.pop_string();
+        string? app_id = request.pop_string();
         if (!(app_id in clients)) {
             request.respond(new Variant.boolean(false));
         } else {
@@ -75,11 +75,11 @@ public class MediaKeysServer: GLib.Object {
     private void on_media_key_pressed(string key) {
         unowned List<AppRunner> head = app_runners.head;
         var handled = false;
-        foreach (var app_runner in head) {
-            var app_id = app_runner.app_id;
+        foreach (AppRunner app_runner in head) {
+            string app_id = app_runner.app_id;
             if (app_id in clients) {
                 try {
-                    var response = app_runner.call_sync("/nuvola/mediakeys/media-key-pressed", new Variant("(s)", key));
+                    Variant? response = app_runner.call_sync("/nuvola/mediakeys/media-key-pressed", new Variant("(s)", key));
                     if (!Drt.variant_bool(response, ref handled)) {
                         warning("/nuvola/mediakeys/media-key-pressed got invalid response from %s instance %s: %s\n", Nuvola.get_app_name(), app_id,
                             response == null ? "null" : response.print(true));

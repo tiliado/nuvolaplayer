@@ -135,7 +135,7 @@ public class CefJSApi : GLib.Object {
         Cef.V8.set_uint(main_object, "LIBSOUP_MICRO", libsoup_version[2]);
 
         if (properties != null) {
-            var iter = HashTableIter<string, Variant?>(properties);
+            HashTableIter<string, Variant?> iter = HashTableIter<string, Variant?>(properties);
             unowned string key;
             unowned Variant? val;
             while (iter.next(out key, out val)) {
@@ -162,7 +162,7 @@ public class CefJSApi : GLib.Object {
         File? main_js = storage.user_data_dir.get_child(JS_DIR).get_child(MAIN_JS);
         if (!main_js.query_exists()) {
             main_js = null;
-            foreach (var dir in storage.data_dirs) {
+            foreach (File dir in storage.data_dirs) {
                 main_js = dir.get_child(JS_DIR).get_child(MAIN_JS);
                 if (main_js.query_exists()) {
                     break;
@@ -184,7 +184,7 @@ public class CefJSApi : GLib.Object {
                 main_js.get_path(), e.message);
         }
 
-        var meta_json = data_dir.get_child(META_JSON);
+        File meta_json = data_dir.get_child(META_JSON);
         if (!meta_json.query_exists()) {
             throw new JSError.INITIALIZATION_FAILED(
                 "Failed to find a web app component %s. This probably means the web app integration has not been"
@@ -200,7 +200,7 @@ public class CefJSApi : GLib.Object {
         }
 
         string? json_error = null;
-        var meta = Cef.V8.parse_json(v8_ctx, meta_json_data, out json_error);
+        Cef.V8value meta = Cef.V8.parse_json(v8_ctx, meta_json_data, out json_error);
         if (meta == null) {
             throw new JSError.INITIALIZATION_FAILED("Failed to parse metadata.json. %s", json_error);
         }
@@ -209,7 +209,7 @@ public class CefJSApi : GLib.Object {
 
     public void integrate(Cef.V8context v8_ctx) throws JSError{
         Assert.on_js_thread();
-        var integrate_js = data_dir.get_child(INTEGRATE_JS);
+        File integrate_js = data_dir.get_child(INTEGRATE_JS);
         if (!integrate_js.query_exists()) {
             throw new JSError.INITIALIZATION_FAILED(
                 "Failed to find a web app component %s. This probably means the web app integration has not been"
@@ -251,7 +251,7 @@ public class CefJSApi : GLib.Object {
         Assert.on_js_thread();
         assert(v8_ctx != null);
         Cef.String _script = {};
-        var wrapped_script = SCRIPT_WRAPPER.printf(script).replace("\t", " ");
+        string wrapped_script = SCRIPT_WRAPPER.printf(script).replace("\t", " ");
 //~         stderr.puts(wrapped_script);
         Cef.set_string(&_script, wrapped_script);
         Cef.String _path = {};
@@ -265,11 +265,11 @@ public class CefJSApi : GLib.Object {
         if (!result) {
             throw new JSError.EXCEPTION("Failed to execute script '%s'.", path);
         }
-        var global_object = v8_ctx.get_global();
-        var func = Cef.V8.get_function(global_object, "__nuvola_func__");
+        Cef.V8value global_object = v8_ctx.get_global();
+        Cef.V8value? func = Cef.V8.get_function(global_object, "__nuvola_func__");
         assert(func != null);
         main_object.ref();
-        var ret_val = func.execute_function(main_object, {});
+        Cef.V8value? ret_val = func.execute_function(main_object, {});
         if (ret_val == null) {
             throw new JSError.EXCEPTION(Cef.V8.format_exception(func.get_exception()));
         }
@@ -308,7 +308,7 @@ public class CefJSApi : GLib.Object {
                         throw new JSError.NOT_FOUND("Attribute '%s' not found.'", names[i]);
                     }
                 }
-                var func = Cef.V8.get_function(object, names[names.length - 1]);
+                Cef.V8value? func = Cef.V8.get_function(object, names[names.length - 1]);
                 if (func == null) {
                     throw new JSError.NOT_FOUND("Attribute '%s' not found.'", names[names.length - 1]);
                 }
@@ -319,22 +319,22 @@ public class CefJSApi : GLib.Object {
                     size = (int) args.n_children();
                     params = new Cef.V8value[size];
                     int i = 0;
-                    foreach (var item in args) {
+                    foreach (Variant item in args) {
                         string? exception = null;
-                        var param = Cef.V8.value_from_variant(item, out exception);
+                        Cef.V8value param = Cef.V8.value_from_variant(item, out exception);
                         if (param == null) {
                             throw new JSError.WRONG_TYPE(exception);
                         }
                         params[i++] = param;
                     }
-                    foreach (var p in params) {
+                    foreach (Cef.V8value p in params) {
                         p.ref();
                     }
                 } else {
                     params = {};
                 }
                 object.ref();
-                var ret_val = func.execute_function(object, params);
+                Cef.V8value ret_val = func.execute_function(object, params);
                 if (ret_val == null) {
                     throw new JSError.FUNC_FAILED("Function '%s' failed. %s",
                         name, Cef.V8.format_exception(func.get_exception()));
@@ -393,7 +393,7 @@ public class CefJSApi : GLib.Object {
             return;
         }
 
-        var method = Cef.V8.string_or_null(args[0]);
+        string? method = Cef.V8.string_or_null(args[0]);
         if (method == null) {
             exception = "The first argument must be a non-null string.";
             return;
@@ -438,7 +438,7 @@ public class CefJSApi : GLib.Object {
             return;
         }
         int index = args[0].get_int_value();
-        var key = Cef.V8.string_or_null(args[1]);
+        string? key = Cef.V8.string_or_null(args[1]);
         if (key == null) {
             exception = "The first argument must be a non-null string";
             return;
@@ -448,11 +448,11 @@ public class CefJSApi : GLib.Object {
             return;
         }
 
-        var storage = key_value_storages[index];
-        var id = Cef.V8.any_int(args[2]);
+        Drt.KeyValueStorage storage = key_value_storages[index];
+        int id = Cef.V8.any_int(args[2]);
         event_loop.add_idle(() => {
             storage.has_key_async.begin(key, (o, res) => {
-                var result = storage.has_key_async.end(res);
+                bool result = storage.has_key_async.end(res);
                 try {
                     send_async_response(id, result, null);
                 } catch (GLib.Error e) {
@@ -478,7 +478,7 @@ public class CefJSApi : GLib.Object {
             return;
         }
         int index = args[0].get_int_value();
-        var key = Cef.V8.string_or_null(args[1]);
+        string key = Cef.V8.string_or_null(args[1]);
         if (key == null) {
             exception = "The first argument must be a non-null string";
             return;
@@ -488,11 +488,11 @@ public class CefJSApi : GLib.Object {
             return;
         }
 
-        var storage = key_value_storages[index];
-        var id = Cef.V8.any_int(args[2]);
+        Drt.KeyValueStorage storage = key_value_storages[index];
+        int id = Cef.V8.any_int(args[2]);
         event_loop.add_idle(() => {
             storage.get_value_async.begin(key, (o, res) => {
-                var value = storage.get_value_async.end(res);
+                Variant? value = storage.get_value_async.end(res);
                 try {
                     send_async_response(id, value, null);
                 } catch (GLib.Error e) {
@@ -518,7 +518,7 @@ public class CefJSApi : GLib.Object {
             return;
         }
         int index = args[0].get_int_value();
-        var key = Cef.V8.string_or_null(args[1]);
+        string? key = Cef.V8.string_or_null(args[1]);
         if (key == null) {
             exception = "The first argument must be a non-null string";
             return;
@@ -533,8 +533,8 @@ public class CefJSApi : GLib.Object {
             return;
         }
 
-        var storage = key_value_storages[index];
-        var id = Cef.V8.any_int(args[3]);
+        Drt.KeyValueStorage storage = key_value_storages[index];
+        int id = Cef.V8.any_int(args[3]);
         event_loop.add_idle(() => {
             storage.set_value_async.begin(key, value, (o, res) => {
                 storage.set_value_async.end(res);
@@ -563,7 +563,7 @@ public class CefJSApi : GLib.Object {
             return;
         }
         int index = args[0].get_int_value();
-        var key = Cef.V8.string_or_null(args[1]);
+        string? key = Cef.V8.string_or_null(args[1]);
         if (key == null) {
             exception = "The first argument must be a non-null string";
             return;
@@ -578,8 +578,8 @@ public class CefJSApi : GLib.Object {
             return;
         }
 
-        var storage = key_value_storages[index];
-        var id = Cef.V8.any_int(args[3]);
+        Drt.KeyValueStorage storage = key_value_storages[index];
+        int id = Cef.V8.any_int(args[3]);
         event_loop.add_idle(() => {
             storage.set_default_value_async.begin(key, value, (o, res) => {
                 storage.set_default_value_async.end(res);
@@ -602,7 +602,7 @@ public class CefJSApi : GLib.Object {
             if (args[i].is_undefined() == 1) {
                 debug("Nuvola.log: undefined");
             } else {
-                var val = Cef.V8.variant_from_value( args[i], out exception);
+                Variant? val = Cef.V8.variant_from_value( args[i], out exception);
                 if (exception != null) {
                     retval = null;
                     return;
@@ -621,7 +621,7 @@ public class CefJSApi : GLib.Object {
             if (args[i].is_undefined() == 1) {
                 warning("Nuvola.warn: undefined");
             } else {
-                var val = Cef.V8.variant_from_value( args[i], out exception);
+                Variant? val = Cef.V8.variant_from_value( args[i], out exception);
                 if (exception != null) {
                     retval = null;
                     return;

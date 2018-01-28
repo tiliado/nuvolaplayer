@@ -39,10 +39,10 @@ public class Nuvola.MenuBarBinding: ObjectBinding<MenuBarInterface> {
 
     private void handle_menubar_set_menu(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
-        var id = request.pop_string();
-        var label = request.pop_string();
-        var actions = request.pop_strv();
-        foreach (var object in objects)
+        string? id = request.pop_string();
+        string? label = request.pop_string();
+        string[] actions = request.pop_strv();
+        foreach (MenuBarInterface object in objects)
         if (object.set_menu(id, label, actions))
         break;
         request.respond(null);

@@ -39,7 +39,7 @@ public class MPRISProvider {
     }
 
     public void start() {
-        var app_id = app.application_id;
+        string app_id = app.application_id;
         string bus_name = "org.mpris.MediaPlayer2." + app_id.substring(app_id.last_index_of_char('.') + 1);
         // Watch out! Bus.own_name takes three references!
         owner_id = Bus.own_name(BusType.SESSION, bus_name, BusNameOwnerFlags.NONE,
@@ -55,7 +55,7 @@ public class MPRISProvider {
         }
 
         if (conn != null) {
-            foreach (var registration_id in registered_objects)
+            foreach (uint registration_id in registered_objects)
             conn.unregister_object(registration_id);
             conn = null;
         }

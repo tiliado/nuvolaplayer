@@ -111,12 +111,12 @@ public class TrayIconSettings : Gtk.Grid {
         row_spacing = 10;
         column_spacing = 10;
         var line = 0;
-        var label = Drtgtk.Labels.header("Variants");
+        Gtk.Label label = Drtgtk.Labels.header("Variants");
         label.hexpand = true;
         label.show();
         attach(label, 0, line, 2, 1);
         line++;
-        var bind_flags = BindingFlags.BIDIRECTIONAL|BindingFlags.SYNC_CREATE;
+        BindingFlags bind_flags = BindingFlags.BIDIRECTIONAL|BindingFlags.SYNC_CREATE;
 
         label = Drtgtk.Labels.markup("<span size='medium'><b>%s</b></span>", "AppIndicator icon");
         attach(label, 1, line, 1, 1);

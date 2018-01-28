@@ -67,10 +67,10 @@ public class WebAppListModel : Gtk.ListStore {
     }
 
     private void load() {
-        var web_apps_map = web_app_reg.list_web_apps();
-        var web_apps = web_apps_map.get_values();
+        HashTable<string, WebApp> web_apps_map = web_app_reg.list_web_apps();
+        List<unowned WebApp> web_apps = web_apps_map.get_values();
         web_apps.sort(WebApp.cmp_by_name);
-        foreach (var web_app in web_apps)
+        foreach (unowned WebApp web_app in web_apps)
         append_web_app(web_app, web_app.get_icon_pixbuf(WebAppListView.ICON_SIZE));
     }
 }

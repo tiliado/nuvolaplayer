@@ -48,7 +48,7 @@ public abstract class Nuvola.Binding<ObjectType>: GLib.Object {
     }
 
     protected void unbind_methods() {
-        foreach (var handler in handlers) {
+        foreach (unowned string handler in handlers) {
             if (handler[0] == '/') {
                 router.remove_method(handler);
             } else {
@@ -65,19 +65,19 @@ public abstract class Nuvola.Binding<ObjectType>: GLib.Object {
     }
 
     protected void bind(string method, Drt.RpcFlags flags, string? description, owned Drt.RpcHandler handler, Drt.RpcParam[]? params) {
-        var path = "/%s.%s".printf(name, method).down().replace(".", "/");
+        string path = "/%s.%s".printf(name, method).down().replace(".", "/");
         router.add_method(path, flags, description, (owned) handler, params);
         handlers.prepend(path);
     }
 
     protected void add_notification(string method, Drt.RpcFlags flags, string? description) {
-        var path = "/%s.%s".printf(name, method).down().replace(".", "/");
+        string path = "/%s.%s".printf(name, method).down().replace(".", "/");
         router.add_notification(path, flags, description);
         handlers.prepend(path);
     }
 
     protected void emit(string notification, string? detail=null, Variant? data=null) {
-        var path = "/%s.%s".printf(name, notification).down().replace(".", "/");
+        string path = "/%s.%s".printf(name, notification).down().replace(".", "/");
         router.emit(path, detail, data);
     }
 

@@ -46,7 +46,7 @@ public class XhrTransport: PollingTransport {
     }
 
     protected override void on_headers_requested(Request request, HashTable<string, string> headers) {
-        var origin = request.headers.get_one("origin");
+        string? origin = request.headers.get_one("origin");
         if (origin != null) {
             headers["Access-Control-Allow-Credentials"] = "true";
             headers["Access-Control-Allow-Origin"] = origin;

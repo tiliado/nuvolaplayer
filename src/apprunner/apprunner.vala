@@ -69,7 +69,7 @@ public int main(string[] args) {
     if (Environment.get_variable("NUVOLA_TEST_ABORT") == "runner")
     error("App runner abort requested.");
 
-    var app_dir = File.new_for_path(Args.app_dir);
+    File app_dir = File.new_for_path(Args.app_dir);
     if (Args.version)
     return Nuvola.Startup.print_web_app_version(stdout, app_dir);
 

@@ -65,7 +65,7 @@ public class AudioScrobblerComponent: Component {
         label.vexpand = false;
         label.hexpand = true;
         grid.add(label);
-        var widget = scrobbler.get_settings(app);
+        Gtk.Widget? widget = scrobbler.get_settings(app);
         if (widget != null)
         grid.add(widget);
         grid.show_all();
@@ -75,7 +75,7 @@ public class AudioScrobblerComponent: Component {
     protected override bool activate() {
         var scrobbler = new LastfmScrobbler(connection);
         this.scrobbler = scrobbler;
-        var base_key = "component.%s.%s.".printf(id, scrobbler.id);
+        string base_key = "component.%s.%s.".printf(id, scrobbler.id);
         config.bind_object_property(base_key, scrobbler, "scrobbling_enabled").set_default(true).update_property();
         global_config.bind_object_property(base_key, scrobbler, "session").update_property();
         global_config.bind_object_property(base_key, scrobbler, "username").update_property();

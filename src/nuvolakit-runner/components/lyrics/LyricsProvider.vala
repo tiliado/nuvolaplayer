@@ -43,7 +43,7 @@ public class LyricsProvider: GLib.Object {
     public LyricsProvider(MediaPlayerModel player, owned SList<LyricsFetcher> fetchers) {
         this.player = player;
         this.fetchers = (owned) fetchers;
-        foreach (var fetcher in this.fetchers) {
+        foreach (LyricsFetcher fetcher in this.fetchers) {
             if (fetcher is LyricsFetcherCache) {
                 cache = (LyricsFetcherCache) fetcher;
                 break;
@@ -85,14 +85,13 @@ public class LyricsProvider: GLib.Object {
     }
 
     private async void fetch_lyrics(string artist, string song) {
-        foreach (var fetcher in fetchers) {
+        foreach (LyricsFetcher fetcher in fetchers) {
             debug("Fetcher: %s", fetcher.get_type().name());
             try {
-                var lyrics = yield fetcher.fetch_lyrics(artist, song);
+                string lyrics = yield fetcher.fetch_lyrics(artist, song);
                 lyrics_available(artist, song, lyrics);
                 if (cache != null && fetcher != cache)
                 yield cache.store(artist, song, lyrics);
-
                 return;
             }
             catch (GLib.Error e) {

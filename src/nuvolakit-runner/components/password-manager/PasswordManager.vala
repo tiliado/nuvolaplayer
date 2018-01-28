@@ -57,19 +57,19 @@ public class PasswordManager {
     }
 
     public async void fetch_passwords() throws GLib.Error {
-        var collection = yield Secret.Collection.for_alias(
+        Secret.Collection collection = yield Secret.Collection.for_alias(
             null, Secret.COLLECTION_DEFAULT, Secret.CollectionFlags.LOAD_ITEMS, null);
         HashTable<string, string> attributes = new HashTable<string, string>(str_hash, str_equal);
         attributes[SCHEMA_APP_ID] = app_id;
-        var flags = Secret.SearchFlags.ALL|Secret.SearchFlags.UNLOCK|Secret.SearchFlags.LOAD_SECRETS;
-        var items = yield collection.search(secret_schema, attributes, flags, null);
+        Secret.SearchFlags flags = Secret.SearchFlags.ALL|Secret.SearchFlags.UNLOCK|Secret.SearchFlags.LOAD_SECRETS;
+        List<Secret.Item> items = yield collection.search(secret_schema, attributes, flags, null);
         var credentials = new HashTable<string, Drt.Lst<LoginCredentials>>(str_hash, str_equal);
-        foreach (var item in items) {
+        foreach (Secret.Item item in items) {
             attributes = item.get_attributes();
-            var hostname = attributes[SCHEMA_HOSTNAME];
-            var username = attributes[SCHEMA_USERNAME];
-            var password = item.get_secret().get_text();
-            var entries = credentials[hostname];
+            string? hostname = attributes[SCHEMA_HOSTNAME];
+            string? username = attributes[SCHEMA_USERNAME];
+            string? password = item.get_secret().get_text();
+            Drt.Lst<LoginCredentials> entries = credentials[hostname];
             if (entries == null) {
                 entries = new Drt.Lst<LoginCredentials>(LoginCredentials.username_equals);
                 entries.prepend(new LoginCredentials(username, password));
@@ -77,7 +77,7 @@ public class PasswordManager {
             }
             else {
                 var entry = new LoginCredentials(username, password);
-                var index = entries.index(entry);
+                int index = entries.index(entry);
                 if (index >= 0)
                 entries[index] = entry;
                 else
@@ -100,7 +100,7 @@ public class PasswordManager {
     }
 
     private void on_context_menu(WebKit.ContextMenu menu, Gdk.Event event, WebKit.HitTestResult hit_test_result) {
-        var data = menu.get_user_data();
+        Variant? data = menu.get_user_data();
         if (data != null && data.is_of_type(new VariantType("(sas)"))) {
             string name = null;
             VariantIter iter = null;

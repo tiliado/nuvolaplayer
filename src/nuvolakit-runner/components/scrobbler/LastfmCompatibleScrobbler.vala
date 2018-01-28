@@ -70,7 +70,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler {
         params.insert("method", API_METHOD);
         params.insert("api_key", api_key);
 
-        var response = yield send_request(HTTP_GET, params);
+        Json.Object response = yield send_request(HTTP_GET, params);
         if (!response.has_member("token"))
         throw new AudioScrobblerError.WRONG_RESPONSE("%s: Response doesn't contain token member.", API_METHOD);
 
@@ -94,15 +94,15 @@ public class LastfmCompatibleScrobbler: AudioScrobbler {
         params.insert("api_key", api_key);
         params.insert("token", token);
 
-        var response = yield send_request(HTTP_GET, params);
+        Json.Object response = yield send_request(HTTP_GET, params);
         if (!response.has_member("session"))
         throw new AudioScrobblerError.WRONG_RESPONSE("%s: Response doesn't contain session member.", API_METHOD);
 
-        var session_member = response.get_object_member("session");
+        Json.Object session_member = response.get_object_member("session");
         if (!session_member.has_member("key"))
         throw new AudioScrobblerError.WRONG_RESPONSE("%s: Response doesn't contain session.key member.", API_METHOD);
 
-        var session_key = session_member.get_string_member("key");
+        string session_key = session_member.get_string_member("key");
         if (session_key == null || session_key == "")
         throw new AudioScrobblerError.WRONG_RESPONSE("%s: Response contain empty session.key member.", API_METHOD);
 
@@ -128,10 +128,10 @@ public class LastfmCompatibleScrobbler: AudioScrobbler {
         params.insert("method", API_METHOD);
         params.insert("api_key", api_key);
         params.insert("sk", session);
-        var response = yield send_request(HTTP_GET, params);
+        Json.Object response = yield send_request(HTTP_GET, params);
         if (!response.has_member("user"))
         throw new AudioScrobblerError.WRONG_RESPONSE("%s: Response doesn't contain user member.", API_METHOD);
-        var user = response.get_object_member("user");
+        Json.Object user = response.get_object_member("user");
         if (!user.has_member("name"))
         throw new AudioScrobblerError.WRONG_RESPONSE("%s: Response doesn't contain name member.", API_METHOD);
         username = user.get_string_member("name");
@@ -158,7 +158,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler {
         params.insert("track", song);
         params.insert("artist", artist);
 
-        var response = yield send_request(HTTP_POST, params, 20);
+        Json.Object response = yield send_request(HTTP_POST, params, 20);
         if (!response.has_member("nowplaying"))
         throw new AudioScrobblerError.WRONG_RESPONSE("%s: Response doesn't contain nowplaying member.", API_METHOD);
     }
@@ -186,7 +186,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler {
         if (album != null)
         params.insert("album", album);
 
-        var response = yield send_request(HTTP_POST, params, 20);
+        Json.Object response = yield send_request(HTTP_POST, params, 20);
         if (!response.has_member("scrobbles"))
         throw new AudioScrobblerError.WRONG_RESPONSE("Response doesn't contain scrobbles member.");
     }
@@ -201,7 +201,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler {
      */
     private async Json.Object send_request(string method, HashTable<string, string> params, uint retry=0) throws AudioScrobblerError {
         Soup.Message message;
-        var request = create_signed_request(params) + "&format=json";
+        string request = create_signed_request(params) + "&format=json";
         if (method == HTTP_GET) {
             message = new Soup.Message(method, api_root + "?" + request);
         }
@@ -223,7 +223,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler {
                 });
                 yield;
 
-                var response = (string) message.response_body.flatten().data;
+                string response = (string) message.response_body.flatten().data;
                 var parser = new Json.Parser();
                 try {
                     parser.load_from_data(response);
@@ -239,13 +239,13 @@ public class LastfmCompatibleScrobbler: AudioScrobbler {
                     }
                 }
 
-                var root = parser.get_root();
+                Json.Node root = parser.get_root();
                 if (root == null)
                 throw new AudioScrobblerError.WRONG_RESPONSE("Empty response from the server.");
-                var root_object = root.get_object();
+                Json.Object root_object = root.get_object();
                 if (root_object.has_member("error") && root_object.has_member("message")) {
-                    var error_code = root_object.get_int_member("error");
-                    var error_message = root_object.get_string_member("message");
+                    int64 error_code = root_object.get_int_member("error");
+                    string? error_message = root_object.get_string_member("message");
                     switch (error_code) {
                     case 9:  // Invalid session key - Please re-authenticate
                         drop_session();
@@ -287,11 +287,11 @@ public class LastfmCompatibleScrobbler: AudioScrobbler {
         var sig_buffer = new StringBuilder();
 
         // Signature requires sorted params
-        var keys = params.get_keys();
+        List<unowned string> keys = params.get_keys();
         keys.sort(strcmp);
 
-        foreach (var key in keys) {
-            var val = params[key];
+        foreach (unowned string key in keys) {
+            string val = params[key];
             // signature buffer does not contain "=" and "&"
             // to separate key and value or key-value pairs
             // TODO: how about escaping?
@@ -305,7 +305,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler {
 
         // Append API_SECRET and generate MD5 hash
         sig_buffer.append(api_secret);
-        var api_sig = Checksum.compute_for_string(ChecksumType.MD5, sig_buffer.str);
+        string api_sig = Checksum.compute_for_string(ChecksumType.MD5, sig_buffer.str);
         sig_buffer.truncate();
 
         // Append signature to the request string

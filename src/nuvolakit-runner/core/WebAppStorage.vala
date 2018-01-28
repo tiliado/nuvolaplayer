@@ -48,7 +48,7 @@ public class WebAppStorage : GLib.Object {
      * @return cache subdirectory
      */
     public File create_cache_subdir(string path) {
-        var dir = cache_dir.get_child(path);
+        File dir = cache_dir.get_child(path);
         try {
             Drt.System.make_dirs(dir);
         }
@@ -65,7 +65,7 @@ public class WebAppStorage : GLib.Object {
      * @return data subdirectory
      */
     public File create_data_subdir(string path) {
-        var dir = data_dir.get_child(path);
+        File dir = data_dir.get_child(path);
         try {
             Drt.System.make_dirs(dir);
         }

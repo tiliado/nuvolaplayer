@@ -61,7 +61,7 @@ public class WebsiteDataManager: Gtk.Grid {
         };
         check_buttons = new Gtk.CheckButton[data_types.length];
         for (var i = 0; i < data_types.length; i++) {
-            var check_button = check_buttons[i] = new Gtk.CheckButton.with_label(labels[i]);
+            Gtk.CheckButton check_button = check_buttons[i] = new Gtk.CheckButton.with_label(labels[i]);
             add(check_button);
             check_button.show();
         }
@@ -71,7 +71,7 @@ public class WebsiteDataManager: Gtk.Grid {
         add(label);
         label.show();
 
-        var button = clear_button = new Gtk.Button.with_label("Clear selected data");
+        Gtk.Button button = clear_button = new Gtk.Button.with_label("Clear selected data");
         button.get_style_context().add_class("destructive-action");
         button.clicked.connect(on_clear_button_clicked);
         add(button);

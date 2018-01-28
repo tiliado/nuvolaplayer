@@ -60,7 +60,7 @@ public class Channel: GLib.Object {
     protected virtual async void handle_request(Engineio.Socket socket, MessageType type, int id, string method, Json.Node? node) {
         Idle.add(handle_request.callback);
         yield;
-        var msg = serialize_message(MessageType.RESPONSE, id, method, node);
+        string msg = serialize_message(MessageType.RESPONSE, id, method, node);
         socket.send_message(msg);
     }
 }

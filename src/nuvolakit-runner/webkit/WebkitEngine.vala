@@ -69,10 +69,10 @@ public class WebkitEngine : WebEngine {
         if (connection != null)
         apply_network_proxy(connection);
 
-        var webkit_extension_dir = Nuvola.get_libdir();
+        string webkit_extension_dir = Nuvola.get_libdir();
         debug("Nuvola WebKit Extension directory: %s", webkit_extension_dir);
         web_context.set_web_extensions_directory(webkit_extension_dir);
-        var web_extension_data = Drt.variant_from_hashtable(worker_data);
+        Variant web_extension_data = Drt.variant_from_hashtable(worker_data);
         debug("Nuvola WebKit Extension data: %s", web_extension_data.print(true));
         web_context.set_web_extensions_initialization_user_data(web_extension_data);
 
@@ -86,7 +86,7 @@ public class WebkitEngine : WebEngine {
         ws.enable_plugins = webkit_options.flash_required;
         ws.enable_mediasource = webkit_options.mse_required;
 
-        var user_agent = WebOptions.make_user_agent(web_app.user_agent);
+        string user_agent = WebOptions.make_user_agent(web_app.user_agent);
         if (user_agent == null) {
             ws.enable_site_specific_quirks = true;
             ws.set_user_agent_with_application_details("Nuvola", Nuvola.get_short_version());
@@ -174,7 +174,7 @@ public class WebkitEngine : WebEngine {
         can_go_back = web_view.can_go_back();
         can_go_forward = web_view.can_go_forward();
         try {
-            var url = env.send_data_request_string("LastPageRequest", "url");
+            string url = env.send_data_request_string("LastPageRequest", "url");
             if (url != null) {
                 if (load_uri(url))
                 return;
@@ -190,7 +190,7 @@ public class WebkitEngine : WebEngine {
 
     public override void go_home() {
         try {
-            var url = env.send_data_request_string("HomePageRequest", "url");
+            string url = env.send_data_request_string("HomePageRequest", "url");
             if (url == null)
             runner_app.fatal_error("Invalid home page URL", "The web app integration script has provided an empty home page URL.");
             else if (!load_uri(url)) {
@@ -207,7 +207,7 @@ public class WebkitEngine : WebEngine {
         WebKit.NetworkProxySettings? proxy_settings = null;
         string? host;
         int port;
-        var type = connection.get_network_proxy(out host, out port);
+        NetworkProxyType type = connection.get_network_proxy(out host, out port);
         switch (type) {
         case NetworkProxyType.SYSTEM:
             proxy_mode = WebKit.NetworkProxyMode.DEFAULT;
@@ -217,7 +217,7 @@ public class WebkitEngine : WebEngine {
             break;
         default:
             proxy_mode = WebKit.NetworkProxyMode.CUSTOM;
-            var proxy_uri = "%s://%s:%d/".printf(
+            string proxy_uri = "%s://%s:%d/".printf(
                 type == NetworkProxyType.HTTP ? "http" : "socks",
                 (host != null && host != "") ? host : "127.0.0.1", port);
             proxy_settings = new WebKit.NetworkProxySettings(proxy_uri, null);
@@ -307,7 +307,7 @@ public class WebkitEngine : WebEngine {
         }
 
         args.get("(s@a{smv}@av)", null, out values, out entries);
-        var values_hashtable = Drt.variant_to_hashtable(values);
+        HashTable<string, Variant> values_hashtable = Drt.variant_to_hashtable(values);
         if (values_hashtable.size() > 0) {
             debug("Init form requested");
             init_form(values_hashtable, entries);
@@ -318,7 +318,7 @@ public class WebkitEngine : WebEngine {
 
     private void register_ipc_handlers() {
         assert(ipc_bus != null);
-        var router = ipc_bus.router;
+        Drt.RpcRouter router = ipc_bus.router;
         router.add_method("/nuvola/core/web-worker-initialized", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             "Notify that the web worker has been initialized.",
             handle_web_worker_initialized, null);
@@ -429,7 +429,7 @@ public class WebkitEngine : WebEngine {
     }
 
     private void handle_session_get_value(Drt.RpcRequest request) throws Drt.RpcError {
-        var response = session.get_value(request.pop_string());
+        Variant? response = session.get_value(request.pop_string());
         if (response == null) {
             response = new Variant("mv", null);
         }
@@ -451,7 +451,7 @@ public class WebkitEngine : WebEngine {
     }
 
     private void handle_config_get_value(Drt.RpcRequest request) throws Drt.RpcError {
-        var response = config.get_value(request.pop_string());
+        Variant? response = config.get_value(request.pop_string());
         if (response == null) {
             response = new Variant("mv", null);
         }
@@ -490,7 +490,7 @@ public class WebkitEngine : WebEngine {
         try {
             ipc_bus.local.call.begin(name, data, (o, res) => {
                 try {
-                    var response = ipc_bus.local.call.end(res);
+                    Variant? response = ipc_bus.local.call.end(res);
                     js_api.send_async_response(id, response, null);
                 } catch (GLib.Error e) {
                     js_api.send_async_response(id, null, e);
@@ -510,23 +510,23 @@ public class WebkitEngine : WebEngine {
     }
 
     private void handle_download_file_async(Drt.RpcRequest request) throws Drt.RpcError {
-        var uri = request.pop_string();
-        var basename = request.pop_string();
-        var cb_id = request.pop_double();
+        string? uri = request.pop_string();
+        string? basename = request.pop_string();
+        double cb_id = request.pop_double();
 
-        var dir = storage.cache_dir.get_child("api-downloads");
+        File dir = storage.cache_dir.get_child("api-downloads");
         try {
             dir.make_directory_with_parents();
         }
         catch (GLib.Error e) {
         }
-        var file = dir.get_child(basename);
+        File file = dir.get_child(basename);
         try {
             file.@delete();
         }
         catch (GLib.Error e) {
         }
-        var download = web_context.download_uri(uri);
+        WebKit.Download download = web_context.download_uri(uri);
         download.set_destination(file.get_uri());
         ulong[] handler_ids = new ulong[2];
 
@@ -592,22 +592,22 @@ public class WebkitEngine : WebEngine {
     }
 
     private bool decide_navigation_policy(bool new_window, WebKit.NavigationPolicyDecision decision) {
-        var action = decision.navigation_action;
-        var uri = action.get_request().uri;
+        WebKit.NavigationAction action = decision.navigation_action;
+        string uri = action.get_request().uri;
         if (!uri.has_prefix("http://") && !uri.has_prefix("https://"))
         return false;
 
         var handled = false;
         var load_uri = false;
-        var new_window_override = new_window;
-        var approved = navigation_request(uri, ref new_window_override);
+        bool new_window_override = new_window;
+        bool approved = navigation_request(uri, ref new_window_override);
         var javascript_enabled = true;
         const string KEEP_USER_AGENT = "KEEP_USER_AGENT";
         string? user_agent = KEEP_USER_AGENT;
         ask_page_settings(uri, new_window_override, ref javascript_enabled, ref user_agent);
 
-        var type = action.get_navigation_type();
-        var user_gesture = action.is_user_gesture();
+        WebKit.NavigationType type = action.get_navigation_type();
+        bool user_gesture = action.is_user_gesture();
         debug("Navigation, %s window: uri = %s, approved = %s, frame = %s, type = %s, user gesture %s",
             new_window_override ? "new" : "current", uri, approved.to_string(), decision.frame_name, type.to_string(),
             user_gesture.to_string());

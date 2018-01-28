@@ -309,7 +309,7 @@ public class Socket : GLib.Object {
     private void flush() {
         if (ready_state != ReadyState.CLOSED && transport.writable && write_buffer != null) {
             debug("Flushing buffer to transport (%u items)", write_buffer.length());
-            var buffer = (owned) write_buffer;
+            SList<Packet> buffer = (owned) write_buffer;
             write_buffer = null;
             flushing(ref buffer);
             server.socket_flushed(this, ref buffer);

@@ -31,9 +31,9 @@ public WebExtension extension;
 public void webkit_web_extension_initialize_with_user_data(WebKit.WebExtension extension, Variant data) {
     Drt.Logger.init(stderr, GLib.LogLevelFlags.LEVEL_DEBUG, true, "Worker");
 
-    var debug_sleep = Environment.get_variable("NUVOLA_WEB_WORKER_SLEEP");
+    string? debug_sleep = Environment.get_variable("NUVOLA_WEB_WORKER_SLEEP");
     if (debug_sleep != null) {
-        var seconds = int.parse(debug_sleep);
+        int seconds = int.parse(debug_sleep);
         if (seconds > 0) {
             warning("WebWorker is going to sleep for %d seconds.", seconds);
             warning("Run `gdb -p %d` to debug it with gdb.", (int) Posix.getpid());
@@ -48,7 +48,7 @@ public void webkit_web_extension_initialize_with_user_data(WebKit.WebExtension e
     if (Environment.get_variable("NUVOLA_TEST_ABORT") == "worker")
     error("Web Worker abort requested.");
 
-    var worker_data = Drt.variant_to_hashtable(data);
+    HashTable<string, Variant> worker_data = Drt.variant_to_hashtable(data);
     try {
         var channel = new Drt.RpcChannel.from_name(0, worker_data["RUNNER_BUS_NAME"].dup_string(), null,
             worker_data["NUVOLA_API_ROUTER_TOKEN"].dup_string(), 5000);

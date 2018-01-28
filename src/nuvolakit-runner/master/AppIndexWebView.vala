@@ -54,15 +54,15 @@ public class AppIndexWebView : WebView {
     }
 
     private bool decide_navigation_policy(bool new_window, WebKit.NavigationPolicyDecision decision) {
-        var action = decision.navigation_action;
-        var type = action.get_navigation_type();
-        var user_gesture = action.is_user_gesture();
+        WebKit.NavigationAction action = decision.navigation_action;
+        WebKit.NavigationType type = action.get_navigation_type();
+        bool user_gesture = action.is_user_gesture();
         // We care only about user clicks
         if (type != WebKit.NavigationType.LINK_CLICKED && !user_gesture)
         return false;
 
-        var uri = action.get_request().uri;
-        var result = uri.has_prefix(root_uri) && !uri.has_suffix(".flatpakref");
+        string uri = action.get_request().uri;
+        bool result = uri.has_prefix(root_uri) && !uri.has_suffix(".flatpakref");
         debug("Navigation, %s window: uri = %s, result = %s, frame = %s, type = %s, user gesture %s",
             new_window ? "new" : "current", uri, result.to_string(), decision.frame_name, type.to_string(),
             user_gesture.to_string());

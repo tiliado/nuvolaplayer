@@ -53,7 +53,7 @@ public class Channel: Engineio.Channel {
                 }
             }
 
-            var variant_result = yield http_server.handle_eio_request(socket, type, method, params);
+            Variant variant_result = yield http_server.handle_eio_request(socket, type, method, params);
             if (variant_result == null || !variant_result.get_type().is_subtype_of(VariantType.DICTIONARY)) {
                 var builder = new VariantBuilder(new VariantType("a{smv}"));
                 if (variant_result != null)
@@ -75,7 +75,7 @@ public class Channel: Engineio.Channel {
             result = Json.gvariant_serialize(builder.end());
         }
 
-        var msg = Engineio.serialize_message(Engineio.MessageType.RESPONSE, id, status, result);
+        string msg = Engineio.serialize_message(Engineio.MessageType.RESPONSE, id, status, result);
         socket.send_message(msg);
     }
 
@@ -91,7 +91,7 @@ public class Channel: Engineio.Channel {
         else {
             result = Json.gvariant_serialize(data);
         }
-        var msg = Engineio.serialize_message(Engineio.MessageType.NOTIFICATION, 0, path, result);
+        string msg = Engineio.serialize_message(Engineio.MessageType.NOTIFICATION, 0, path, result);
         socket.send_message(msg);
     }
 }

@@ -60,16 +60,16 @@ public class UnityLauncher: GLib.Object {
         if (dock_item == null || this.dock_item.quicklist == null)
         return;
 
-        var menu = dock_item.quicklist;
+        Dbusmenu.Menuitem menu = dock_item.quicklist;
         adaptors = null;
         menu.take_children();
     }
 
     private void update_menu() {
         clear_menu();
-        var menu = dock_item.quicklist;
-        foreach (var action_name in model.actions) {
-            var item = create_menu_item(action_name);
+        Dbusmenu.Menuitem menu = dock_item.quicklist;
+        foreach (string action_name in model.actions) {
+            Dbusmenu.Menuitem item = create_menu_item(action_name);
             if (item != null)
             menu.child_append(item);
         }
@@ -153,7 +153,7 @@ private class ActionAdaptor {
             item.property_set_bool(Dbusmenu.MENUITEM_PROP_ENABLED, action.enabled);
             break;
         case "state":
-            var state = action.state;
+            Variant? state = action.state;
             if (state != null) {
                 if (state.is_of_type(VariantType.BOOLEAN))
                 item.property_set_int(Dbusmenu.MENUITEM_PROP_TOGGLE_STATE,

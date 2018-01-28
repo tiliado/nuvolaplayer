@@ -114,7 +114,7 @@ public abstract class Transport: GLib.Object {
 
     protected virtual async void handle_incoming_data(owned string? string_payload, Bytes? binary_payload) {
         try {
-            var packet = binary_payload != null
+            Packet packet = binary_payload != null
             ? Parser.decode_packet_from_bytes(binary_payload)
             : Parser.decode_packet(string_payload);
             if (packet != null)

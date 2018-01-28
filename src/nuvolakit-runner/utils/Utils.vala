@@ -28,10 +28,10 @@ public const int ONE_HOUR_IN_USEC = 3600 * 1000000;
 public const int ONE_MINUTE_IN_USEC = 60 * 1000000;
 
 public string format_track_time(int time_usec) {
-    var hours = time_usec / ONE_HOUR_IN_USEC;
-    var result = (hours > 0) ? "%02d:".printf(hours) : "";
+    int hours = time_usec / ONE_HOUR_IN_USEC;
+    string result = (hours > 0) ? "%02d:".printf(hours) : "";
     time_usec = (time_usec - hours * ONE_HOUR_IN_USEC);
-    var minutes = time_usec / ONE_MINUTE_IN_USEC;
+    int minutes = time_usec / ONE_MINUTE_IN_USEC;
     time_usec = (time_usec - minutes * ONE_MINUTE_IN_USEC);
     return result + "%02d:%02d".printf(minutes, time_usec / 1000000);
 }

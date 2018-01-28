@@ -98,7 +98,7 @@ public class MasterController : Drtgtk.Application {
 
     public override int command_line(ApplicationCommandLine command_line) {
         hold();
-        var result = handle_command_line(command_line);
+        int result = handle_command_line(command_line);
         release();
         return result;
     }
@@ -140,17 +140,17 @@ public class MasterController : Drtgtk.Application {
         late_init();
 
         if (list_apps || list_apps_json) {
-            var all_apps = web_app_reg.list_web_apps(null);
-            var keys = all_apps.get_keys();
+            HashTable<string, WebApp> all_apps = web_app_reg.list_web_apps(null);
+            List<unowned string> keys = all_apps.get_keys();
             keys.sort(strcmp);
 
             if (list_apps_json) {
                 var builder = new Drt.JsonBuilder();
                 builder.begin_array();
-                foreach (var key in keys) {
+                foreach (unowned string key in keys) {
                     builder.begin_object();
                     builder.set_string("id", key);
-                    var app = all_apps[key];
+                    WebApp app = all_apps[key];
                     builder.set_string("name", app.name);
                     builder.set_printf("version", "%d.%d", app.version_major, app.version_minor);
                     builder.set_member("datadir");
@@ -165,8 +165,8 @@ public class MasterController : Drtgtk.Application {
                 command_line.print_literal(builder.to_pretty_string());
             } else {
                 var buf = new StringBuilder();
-                foreach (var key in keys) {
-                    var app = all_apps[key];
+                foreach (unowned string key in keys) {
+                    WebApp app = all_apps[key];
                     string path = app.data_dir == null ? "" : app.data_dir.get_path();
                     buf.append_printf("%s | %s | %d.%d | %s\n",
                         key, app.name, app.version_major, app.version_minor, path);
@@ -201,7 +201,7 @@ public class MasterController : Drtgtk.Application {
         var default_config = new HashTable<string, Variant>(str_hash, str_equal);
         config = new Config(storage.user_config_dir.get_child("master").get_child("config.json"), default_config);
 
-        var server_name = build_master_ipc_id();
+        string server_name = build_master_ipc_id();
         Environment.set_variable("NUVOLA_IPC_MASTER", server_name, true);
         try {
             server = new MasterBus(server_name);
@@ -250,7 +250,7 @@ public class MasterController : Drtgtk.Application {
         storage.assert_data_file("www/engine.io.js");
         var www_root_dirname = "www";
         File[] www_roots = {storage.user_data_dir.get_child(www_root_dirname)};
-        foreach (var data_dir in storage.data_dirs) {
+        foreach (File data_dir in storage.data_dirs) {
             www_roots += data_dir.get_child(www_root_dirname);
         }
         http_remote_control = new HttpRemoteControl.Server(
@@ -260,9 +260,9 @@ public class MasterController : Drtgtk.Application {
     }
 
     private void handle_runner_started(Drt.RpcRequest request) throws Drt.RpcError {
-        var app_id = request.pop_string();
-        var api_token = request.pop_string();
-        var runner = app_runners_map[app_id];
+        string? app_id = request.pop_string();
+        string? api_token = request.pop_string();
+        AppRunner runner = app_runners_map[app_id];
         return_val_if_fail(runner != null, null);
 
         var channel = request.connection as Drt.RpcChannel;
@@ -278,8 +278,8 @@ public class MasterController : Drtgtk.Application {
     }
 
     private void handle_runner_activated(Drt.RpcRequest request) throws Drt.RpcError {
-        var app_id = request.pop_string();
-        var runner = app_runners_map[app_id];
+        string? app_id = request.pop_string();
+        AppRunner runner = app_runners_map[app_id];
         return_val_if_fail(runner != null, false);
 
         if (!app_runners.remove(runner)) {
@@ -290,22 +290,22 @@ public class MasterController : Drtgtk.Application {
     }
 
     private void handle_get_top_runner(Drt.RpcRequest request) throws Drt.RpcError {
-        var runner = app_runners.peek_head();
+        AppRunner runner = app_runners.peek_head();
         request.respond(new Variant("ms", runner == null ? null : runner.app_id));
     }
 
     private void handle_list_apps(Drt.RpcRequest request) throws Drt.RpcError {
         var builder = new VariantBuilder(new VariantType("aa{sv}"));
-        var keys = app_runners_map.get_keys();
+        List<unowned string> keys = app_runners_map.get_keys();
         keys.sort(string.collate);
-        foreach (var app_id in keys)
+        foreach (unowned string app_id in keys)
         builder.add_value(app_runners_map[app_id].query_meta());
         request.respond(builder.end());
     }
 
     private void handle_get_app_info(Drt.RpcRequest request) throws Drt.RpcError {
-        var app_id = request.pop_string();
-        var app = app_runners_map[app_id];
+        string? app_id = request.pop_string();
+        AppRunner app = app_runners_map[app_id];
         request.respond(app != null ? app.query_meta() : null);
     }
 
@@ -313,9 +313,9 @@ public class MasterController : Drtgtk.Application {
         hold();
         #if FLATPAK && NUVOLA_RUNTIME
         try {
-            var uid = WebApp.build_uid_from_app_id(app_id);
-            var path = "/" + uid.replace(".", "/");
-            var app_api = yield Bus.get_proxy<AppDbusIfce>(
+            string uid = WebApp.build_uid_from_app_id(app_id);
+            string path = "/" + uid.replace(".", "/");
+            AppDbusIfce app_api = yield Bus.get_proxy<AppDbusIfce>(
                 BusType.SESSION, uid, path,
                 DBusProxyFlags.DO_NOT_CONNECT_SIGNALS|DBusProxyFlags.DO_NOT_LOAD_PROPERTIES);
             app_api.activate();
@@ -333,7 +333,7 @@ public class MasterController : Drtgtk.Application {
             release();
         }
         #else
-        var app_meta = web_app_reg.get_app_meta(app_id);
+        WebApp? app_meta = web_app_reg.get_app_meta(app_id);
         if (app_meta == null) {
             var dialog = new Drtgtk.ErrorDialog(
                 "Web App Loading Error",
@@ -348,7 +348,7 @@ public class MasterController : Drtgtk.Application {
         for (var i = 0; i < exec_cmd.length; i++) {
             argv[i] = exec_cmd[i];
         }
-        var j = exec_cmd.length;
+        int j = exec_cmd.length;
         argv[j++] = "-a";
         argv[j++] = app_meta.data_dir.get_path();
         argv[j++] = null;

@@ -48,7 +48,7 @@ public class Request {
         this.remote_address = client.get_remote_address();
         if (query != null) {
             transport = query["transport"];
-            var jsonp_str = query["j"];
+            string? jsonp_str = query["j"];
             if (jsonp_str != null)
             jsonp_index = int.parse(jsonp_str);
             sid = query["sid"];

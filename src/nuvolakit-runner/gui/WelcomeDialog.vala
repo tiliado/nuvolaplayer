@@ -29,7 +29,7 @@ public class WelcomeDialog : Gtk.Dialog {
         GLib.Object(title: "Welcome", transient_for: parent);
         set_default_size(800, 600);
         add_button("_Close", Gtk.ResponseType.CLOSE);
-        var box = get_content_area();
+        Gtk.Container box = get_content_area();
         box.add(screen);
         screen.show();
     }

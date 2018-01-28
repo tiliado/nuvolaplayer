@@ -61,7 +61,7 @@ public class Component: Nuvola.Component {
     }
 
     private void register(bool register) {
-        var method = "/nuvola/httpremotecontrol/" + (register ? "register" : "unregister");
+        string method = "/nuvola/httpremotecontrol/" + (register ? "register" : "unregister");
         try {
             ipc_bus.master.call_sync(method, new Variant("(s)", app.web_app.id));
         }
@@ -84,7 +84,7 @@ public class Component: Nuvola.Component {
 
         private async void load() {
             try {
-                var addresses = yield ipc_bus.master.call("/nuvola/httpremotecontrol/get-addresses", null);
+                Variant addresses = yield ipc_bus.master.call("/nuvola/httpremotecontrol/get-addresses", null);
                 port = Drt.variant_to_uint(yield ipc_bus.master.call("/nuvola/httpremotecontrol/get-port", null));
                 return_if_fail(addresses != null);
                 VariantIter iter;

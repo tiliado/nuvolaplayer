@@ -122,10 +122,10 @@ public class StartupWindow : Drtgtk.ApplicationWindow {
     private void add_line(ref int line, string header, string name) {
         StartupCheck.Status status = StartupCheck.Status.UNKNOWN;
         string? msg = null;
-        var prop_status = name.replace("_", "-") + "-status";
-        var prop_msg = name.replace("_", "-") + "-message";
+        string prop_status = name.replace("_", "-") + "-status";
+        string prop_msg = name.replace("_", "-") + "-message";
         model.get(prop_status, out status, prop_msg, out msg);
-        var label = Drtgtk.Labels.header(header);
+        Gtk.Label label = Drtgtk.Labels.header(header);
         label.show();
         label.set_line_wrap(false);
         grid.attach(label, 0, line, 1, 1);
@@ -154,8 +154,8 @@ public class StartupWindow : Drtgtk.ApplicationWindow {
             Gtk.Label label = null;
             this.get(param.name, out label);
             label.label = status.get_blurb();
-            var styles = label.get_style_context();
-            foreach (var item in StartupCheck.Status.all())
+            Gtk.StyleContext styles = label.get_style_context();
+            foreach (StartupCheck.Status item in StartupCheck.Status.all())
             styles.remove_class(item.get_badge_class());
             styles.add_class(status.get_badge_class());
         }

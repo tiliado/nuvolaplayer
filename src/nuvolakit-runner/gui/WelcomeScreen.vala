@@ -40,7 +40,7 @@ public class WelcomeScreen : Gtk.Grid {
         grid.orientation = Gtk.Orientation.VERTICAL;
 
         string welcome_xml = null;
-        var welcome_xml_file = storage.require_data_file("welcome.xml");
+        File welcome_xml_file = storage.require_data_file("welcome.xml");
         try {
             welcome_xml = Drt.System.read_file(welcome_xml_file);
         }
@@ -98,8 +98,8 @@ public class WelcomeScreen : Gtk.Grid {
             /* The focus grab is necessary for a WebView in a ScrolledWindow as it jumps on click otherwise.
              * Since the scroll position moves to top on focus grab, it's necessary to restore the original
              * position after that. */
-            var adjustment = scroll.get_vadjustment();
-            var position = adjustment.value;
+            Gtk.Adjustment adjustment = scroll.get_vadjustment();
+            double position = adjustment.value;
             widget.grab_focus();
             adjustment.value = position;
         }
@@ -127,7 +127,7 @@ public class WelcomeScreen : Gtk.Grid {
     private void on_height_retrieved(GLib.Object? o, AsyncResult result) {
         try {
             web_view.run_javascript.end(result);
-            var page_height = int.parse(web_view.title);
+            int page_height = int.parse(web_view.title);
             int width; int height;
             web_view.get_size_request(out width, out height);
             if (height < page_height && page_height > 100)
@@ -145,7 +145,7 @@ public class WelcomeScreen : Gtk.Grid {
 
     #if !NUVOLA_LITE
     private bool decide_navigation_policy(bool new_window, WebKit.NavigationPolicyDecision decision) {
-        var uri = decision.navigation_action.get_request().uri;
+        string uri = decision.navigation_action.get_request().uri;
         if (!uri.has_prefix("http://") && !uri.has_prefix("https://") || uri == PATRONS_BOX_URI)
         return false;
 

@@ -45,17 +45,17 @@ public class LyricsFetcherCache : GLib.Object, LyricsFetcher {
      * {@inheritDoc}
      */
     public async string fetch_lyrics(string artist, string song) throws LyricsError {
-        var fixed_artist = escape_name(artist.down());
-        var fixed_song = escape_name(song.down());
+        string fixed_artist = escape_name(artist.down());
+        string fixed_song = escape_name(song.down());
 
         if (fixed_artist == "" || fixed_song == "")
         throw new LyricsError.NOT_FOUND(@"Song $song was not found in cache");
 
-        var cached = lyrics_cache.get_child(FILE_FORMAT.printf(fixed_artist, fixed_song));
+        File cached = lyrics_cache.get_child(FILE_FORMAT.printf(fixed_artist, fixed_song));
         try {
             uint8[] contents;
             yield cached.load_contents_async(null, out contents, null);
-            var lyrics = (string) (owned) contents;
+            string lyrics = (string) (owned) contents;
             if (lyrics != null && lyrics != "")
             return lyrics;
         }
@@ -76,14 +76,14 @@ public class LyricsFetcherCache : GLib.Object, LyricsFetcher {
      * @param lyrics    lyrics text
      */
     public async void store(string artist, string song, string lyrics) {
-        var fixed_artist = escape_name(artist.down());
-        var fixed_song = escape_name(song.down());
+        string fixed_artist = escape_name(artist.down());
+        string fixed_song = escape_name(song.down());
 
         if (fixed_artist == "" || fixed_song == "")
         return;
 
         try {
-            var cached_file = lyrics_cache.get_child(FILE_FORMAT.printf(fixed_artist, fixed_song));
+            File cached_file = lyrics_cache.get_child(FILE_FORMAT.printf(fixed_artist, fixed_song));
             yield Drt.System.overwrite_file_async(cached_file, lyrics);
         }
         catch (GLib.Error e) {

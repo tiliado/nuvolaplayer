@@ -77,7 +77,7 @@ public class CefRendererExtension : GLib.Object {
 
     private async void ainit() {
         Assert.on_glib_thread();
-        var router = channel.router;
+        Drt.RpcRouter router = channel.router;
         router.add_method("/nuvola/webworker/call-function", Drt.RpcFlags.WRITABLE,
             "Call JavaScript function.",
             handle_call_function, {
@@ -229,9 +229,9 @@ public class CefRendererExtension : GLib.Object {
 
     private void handle_call_function(Drt.RpcRequest request) throws GLib.Error {
         Assert.on_glib_thread();
-        var name = request.pop_string();
-        var func_params = request.pop_variant();
-        var propagate_error = request.pop_bool();
+        string? name = request.pop_string();
+        Variant? func_params = request.pop_variant();
+        bool propagate_error = request.pop_bool();
         GLib.Error? error = null;
         try {
             func_params = js_api.call_function_sync(name, func_params, true);

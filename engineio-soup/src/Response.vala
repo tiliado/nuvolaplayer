@@ -59,7 +59,7 @@ public class Response {
         return_if_fail(msg != null);
         unowned string header;
         unowned string value;
-        var iter = HashTableIter<string, string>(headers);
+        HashTableIter<string, string> iter = HashTableIter<string, string>(headers);
         while (iter.next(out header, out value))
         msg.response_headers.replace(header, value);
         if (buffer != null)

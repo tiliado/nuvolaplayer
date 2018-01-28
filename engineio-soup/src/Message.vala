@@ -37,14 +37,14 @@ public string stringify_json(Json.Node? node, out int size) {
     generator.indent = 4;
     generator.set_root(node);
     size_t data_size = 0;
-    var data = generator.to_data(out data_size);
+    string data = generator.to_data(out data_size);
     size = (int) data_size;
     return (owned) data;
 }
 
 public string serialize_message(MessageType type, int id, string method, Json.Node? data) {
     int data_size = 0;
-    var data_str = stringify_json(data, out data_size);
+    string data_str = stringify_json(data, out data_size);
     return "%d%d:%d:%s%d:%s".printf(
         (int) type, id, Parser.utf16_strlen(method), method, Parser.utf16_strlen(data_str), data_str);
 }
@@ -56,7 +56,7 @@ public bool deserialize_message(string message, out MessageType type, out int id
     data = null;
     method = null;
 
-    var msg_size = message.length;
+    int msg_size = message.length;
     var int_str = new StringBuilder();
     int i;
     for (i = 1; i < msg_size; i++) {
@@ -78,7 +78,7 @@ public bool deserialize_message(string message, out MessageType type, out int id
             int_str.append_c((char) message[i]);
         }
         else {
-            var size = int.parse(int_str.str);
+            int size = int.parse(int_str.str);
             if (size <= 0)
             return false;
             i++;
@@ -94,7 +94,7 @@ public bool deserialize_message(string message, out MessageType type, out int id
             int_str.append_c((char) message[i]);
         }
         else {
-            var size = int.parse(int_str.str);
+            int size = int.parse(int_str.str);
             if (size < 0)
             return false;
 

@@ -28,7 +28,7 @@ public class JsRuntime : JsEnvironment {
     private JS.GlobalContext? ctx_ref;
 
     public JsRuntime() {
-        var ctx = JS.GlobalContext.create();
+        JS.GlobalContext ctx = JS.GlobalContext.create();
         base(ctx, null);
         ctx_ref = (owned) ctx;
     }

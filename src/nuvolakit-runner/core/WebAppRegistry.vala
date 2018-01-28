@@ -51,9 +51,8 @@ public class WebAppRegistry: GLib.Object {
             return null;
         }
 
-        var apps = list_web_apps(id);
-        var app = apps[id];
-
+        HashTable<string, WebApp> apps = list_web_apps(id);
+        WebApp? app = apps[id];
         if (app != null)
         message("Using web app %s, version %u.%u, data dir %s", app.name, app.version_major, app.version_minor,
             app.data_dir == null ? "(null)" : app.data_dir.get_path());
@@ -72,7 +71,7 @@ public class WebAppRegistry: GLib.Object {
     public HashTable<string, WebApp> list_web_apps(string? filter_id=null) {
         HashTable<string, WebApp> result = new HashTable<string, WebApp>(str_hash, str_equal);
         find_apps(user_storage, filter_id, result);
-        foreach (var dir in system_storage)
+        foreach (File dir in system_storage)
         find_apps(dir, filter_id, result);
         return result;
     }
@@ -81,16 +80,16 @@ public class WebAppRegistry: GLib.Object {
         if (directory.query_exists()) {
             try {
                 FileInfo file_info;
-                var enumerator = directory.enumerate_children(FileAttribute.STANDARD_NAME, 0);
+                FileEnumerator enumerator = directory.enumerate_children(FileAttribute.STANDARD_NAME, 0);
                 while ((file_info = enumerator.next_file()) != null) {
                     string dirname = file_info.get_name();
-                    var app_dir = directory.get_child(dirname);
+                    File app_dir = directory.get_child(dirname);
                     if (app_dir.query_file_type(0) != FileType.DIRECTORY)
                     continue;
 
                     try {
                         var app = new WebApp.from_dir(app_dir);
-                        var id = app.id;
+                        string id = app.id;
                         debug("Found web app %s at %s, version %u.%u",
                             app.name, app_dir.get_path(), app.version_major, app.version_minor);
 

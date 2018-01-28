@@ -40,8 +40,8 @@ public class WebWindow: Gtk.Window {
     }
 
     private void on_ready_to_show() {
-        var properties = web_view.get_window_properties();
-        var geom = properties.geometry;
+        WebKit.WindowProperties properties = web_view.get_window_properties();
+        Gdk.Rectangle geom = properties.geometry;
         if (geom.width < MINIMAL_WIDTH || geom.height < MINIMAL_HEIGHT) {
             set_default_size(int.max(INITIAL_WIDTH, geom.width), int.max(INITIAL_HEIGHT, geom.height));
             maximize();

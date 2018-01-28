@@ -121,7 +121,7 @@ public class StartupCheck : GLib.Object {
      * {@link Status.WARNING} if there was any warning, finally {@link Status.OK} otherwise.
      */
     public Status mark_as_finished() {
-        var status = get_overall_status();
+        Status status = get_overall_status();
         final_status = status;
         finished(status);
         return status;
@@ -198,7 +198,7 @@ public class StartupCheck : GLib.Object {
             result_message = e.message;
         }
 
-        var n_options = available_web_options.length;
+        int n_options = available_web_options.length;
         assert(n_options > 0);
         var checks = new WebOptionsCheck[n_options];
         for (var i = 0; i < n_options; i++) {
@@ -211,7 +211,7 @@ public class StartupCheck : GLib.Object {
 
         /* The first pass: Perform requirements check for all web engines and asses the results. */
         var n_engines_without_unsupported = 0;
-        foreach (var check in checks) {
+        foreach (WebOptionsCheck check in checks) {
             try {
                 debug("Checking requirements with %s", check.web_options.get_name_version());
                 check.check_requirements();
@@ -240,7 +240,7 @@ public class StartupCheck : GLib.Object {
         }
 
         /* Select the first engine which satisfies requirements. */
-        foreach (var check in checks) {
+        foreach (WebOptionsCheck check in checks) {
             if (check.parser.n_unsupported == 0) {
                 if (check.parser.n_unknown > 0) {
                     yield check.web_options.gather_format_support_info(check.web_app);
@@ -275,9 +275,9 @@ public class StartupCheck : GLib.Object {
     }
 
     private void check_app_requirements_finished(Status status, owned string? message, WebOptions[] web_options) {
-        var msg = (owned) message;
-        foreach (var web_opt in web_options) {
-            var warnings = web_opt.get_format_support_warnings();
+        string msg = (owned) message;
+        foreach (WebOptions web_opt in web_options) {
+            string[] warnings = web_opt.get_format_support_warnings();
             if (warnings.length > 0) {
                 if (status < Status.WARNING) {
                     status = Status.WARNING;
@@ -341,7 +341,7 @@ public class StartupCheck : GLib.Object {
         tiliado_account_status = Status.IN_PROGRESS;
         yield Drt.EventLoop.resume_later();
         this.activation = activation;
-        var user = activation.get_user_info();
+        TiliadoApi2.User? user = activation.get_user_info();
         if (user != null) {
             tiliado_account_message = Markup.printf_escaped("Tiliado account: %s", user.name);
             tiliado_account_status = Status.OK;

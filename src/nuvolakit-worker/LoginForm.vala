@@ -68,7 +68,7 @@ public class LoginForm: GLib.Object {
     }
 
     public void fill(string? username, string? password, bool force) {
-        var active_element = form.owner_document.active_element;
+        WebKit.DOM.Element? active_element = form.owner_document.active_element;
         if (this.username != null && username != null && username[0] != '\0' && (force || this.username != active_element))
         this.username.value = username;
         if (this.password != null && password != null && password[0] != '\0' && (force || this.password != active_element))
@@ -78,8 +78,8 @@ public class LoginForm: GLib.Object {
     private void on_form_submitted(EventTarget target, Event event) {
         HTMLInputElement? username; HTMLInputElement password; HTMLElement? submit;
         if (LoginFormManager.find_login_form_entries(form, out username, out password, out submit)) {
-            var username_value = username != null ? username.value : "";
-            var password_value = password.value;
+            string? username_value = username != null ? username.value : "";
+            string? password_value = password.value;
             if (this.username != null)
             this.username.remove_event_listener("blur", LoginForm.on_username_changed, false);
             this.username = username;

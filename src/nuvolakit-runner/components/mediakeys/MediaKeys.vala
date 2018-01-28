@@ -173,21 +173,21 @@ public class MediaKeys: GLib.Object, MediaKeysInterface {
      */
     private void grab_media_keys() {
         debug("Grabbing media keys with X key grabber");
-        var keys = keymap.get_keys();
-        foreach (var key in keys)
+        List<unowned string> keys = keymap.get_keys();
+        foreach (unowned string key in keys)
         key_grabber.grab(key, true);
         key_grabber.keybinding_pressed.connect(on_keybinding_pressed);
     }
 
     private void ungrab_media_keys() {
         key_grabber.keybinding_pressed.disconnect(on_keybinding_pressed);
-        var keys = keymap.get_keys();
-        foreach (var key in keys)
+        List<unowned string> keys = keymap.get_keys();
+        foreach (unowned string key in keys)
         key_grabber.ungrab(key);
     }
 
     private void on_keybinding_pressed(string accelerator, uint32 time) {
-        var name = keymap[accelerator];
+        unowned string name = keymap[accelerator];
         if (name != null)
         media_key_pressed(name);
     }

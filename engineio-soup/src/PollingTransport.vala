@@ -111,7 +111,7 @@ public abstract class PollingTransport: Transport {
             return;
         }
 
-        var is_binary = "application/octet-stream" == request.headers.get_one("content-type");
+        bool is_binary = "application/octet-stream" == request.headers.get_one("content-type");
         this.data_request = request;
         this.data_response = response;
 
@@ -191,7 +191,7 @@ public abstract class PollingTransport: Transport {
             should_close = false;
         }
 
-        var payload = Parser.encode_payload(packets);
+        string? payload = Parser.encode_payload(packets);
         // TODO: this.supports_binary = > encode_payload_as_bytes
         if (payload != null) {
             var compress = false;
@@ -225,8 +225,8 @@ public abstract class PollingTransport: Transport {
      */
 
     protected virtual void do_write(owned string? str_data, Bytes? bin_data, bool compress) {
-        var is_string = str_data != null;
-        var content_type = is_string
+        bool is_string = str_data != null;
+        string content_type = is_string
         ? "text/plain; charset=UTF-8"
         : "application/octet-stream";
 
@@ -296,7 +296,7 @@ public abstract class PollingTransport: Transport {
     protected virtual void on_headers_requested(Request request, HashTable<string, string> headers) {
         // prevent XSS warnings on IE
         // https://github.com/LearnBoost/socket.io/pull/1333
-        var ua = request.headers.get_one("user-agent");
+        string? ua = request.headers.get_one("user-agent");
         if (ua != null && ((";MSIE" in ua) || ("Trident/" in ua))) {
             headers["X-XSS-Protection"] = "0";
         }

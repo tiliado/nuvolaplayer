@@ -119,7 +119,7 @@ public class JSApi : GLib.Object {
     }
 
     public static bool is_supported(int api_major, int api_minor) {
-        var api_version = API_VERSION_MAJOR * 100 + API_VERSION_MINOR + (VERSION_BUGFIX > 0 ? 1 : 0);
+        int api_version = API_VERSION_MAJOR * 100 + API_VERSION_MINOR + (VERSION_BUGFIX > 0 ? 1 : 0);
         return api_major >= 3 && api_major * 100 + api_minor <= api_version;
     }
 
@@ -179,7 +179,7 @@ public class JSApi : GLib.Object {
         o_set_number(ctx, main_object, "LIBSOUP_MICRO", (double) libsoup_version[2]);
 
         if (properties != null) {
-            var iter = HashTableIter<string, Variant?>(properties);
+            HashTableIter<string, Variant?> iter = HashTableIter<string, Variant?>(properties);
             unowned string key;
             unowned Variant? val;
             while (iter.next(out key, out val)) {
@@ -193,7 +193,7 @@ public class JSApi : GLib.Object {
         File? main_js = storage.user_data_dir.get_child(JS_DIR).get_child(MAIN_JS);
         if (!main_js.query_exists()) {
             main_js = null;
-            foreach (var dir in storage.data_dirs) {
+            foreach (File dir in storage.data_dirs) {
                 main_js = dir.get_child(JS_DIR).get_child(MAIN_JS);
                 if (main_js.query_exists())
                 break;
@@ -211,7 +211,7 @@ public class JSApi : GLib.Object {
             throw new JSError.INITIALIZATION_FAILED("Failed to initialize a core component main.js located at '%s'. Initialization exited with error:\n\n%s", main_js.get_path(), e.message);
         }
 
-        var meta_json = data_dir.get_child(META_JSON);
+        File meta_json = data_dir.get_child(META_JSON);
         if (!meta_json.query_exists())
         throw new JSError.INITIALIZATION_FAILED("Failed to find a web app component %s. This probably means the web app integration has not been installed correctly or that component has been accidentally deleted.", META_JSON);
 
@@ -233,7 +233,7 @@ public class JSApi : GLib.Object {
     }
 
     public void integrate(JsEnvironment env) throws JSError {
-        var integrate_js = data_dir.get_child(INTEGRATE_JS);
+        File integrate_js = data_dir.get_child(INTEGRATE_JS);
         if (!integrate_js.query_exists())
         throw new JSError.INITIALIZATION_FAILED("Failed to find a web app component %s. This probably means the web app integration has not been installed correctly or that component has been accidentally deleted.", INTEGRATE_JS);
 
@@ -317,13 +317,13 @@ public class JSApi : GLib.Object {
             return undefined;
         }
 
-        var name = string_or_null(ctx, args[0]);
+        string? name = string_or_null(ctx, args[0]);
         if (name == null) {
             exception = create_exception(ctx, "The first argument must be a non-null string");
             return undefined;
         }
 
-        var js_api = (self.get_private() as JSApi);
+        var js_api = self.get_private() as JSApi;
         if (js_api == null) {
             exception = create_exception(ctx, "JSApi is null");
             return undefined;
@@ -396,13 +396,13 @@ public class JSApi : GLib.Object {
             return _false;
         }
         int index = (int) args[0].to_number(ctx);
-        var key = string_or_null(ctx, args[1]);
+        string? key = string_or_null(ctx, args[1]);
         if (key == null) {
             exception = create_exception(ctx, "The first argument must be a non-null string");
             return _false;
         }
 
-        var js_api = (self.get_private() as JSApi);
+        var js_api = self.get_private() as JSApi;
         if (js_api == null) {
             exception = create_exception(ctx, "JSApi is null");
             return _false;
@@ -412,14 +412,14 @@ public class JSApi : GLib.Object {
             return _false;
         }
 
-        var storage = js_api.key_value_storages[index];
+        Drt.KeyValueStorage storage = js_api.key_value_storages[index];
         if (type == JsFuncCallType.SYNC) {
             js_api.warn_sync_func("key_value_storage_has_key(%d, '%s')".printf(index, key));
             return JS.Value.boolean(ctx, storage.has_key(key));
         } else {
             var id = (int) args[2].to_number(ctx);
             storage.has_key_async.begin(key, (o, res) => {
-                var result = storage.has_key_async.end(res);
+                bool result = storage.has_key_async.end(res);
                 js_api.send_async_response(id, result, null);
             });
         }
@@ -449,13 +449,13 @@ public class JSApi : GLib.Object {
             return undefined;
         }
         int index = (int) args[0].to_number(ctx);
-        var key = string_or_null(ctx, args[1]);
+        string? key = string_or_null(ctx, args[1]);
         if (key == null) {
             exception = create_exception(ctx, "Argument 1 must be a non-null string");
             return undefined;
         }
 
-        var js_api = (self.get_private() as JSApi);
+        var js_api = self.get_private() as JSApi;
         if (js_api == null) {
             exception = create_exception(ctx, "JSApi is null");
             return undefined;
@@ -465,10 +465,10 @@ public class JSApi : GLib.Object {
             return undefined;
         }
 
-        var storage = js_api.key_value_storages[index];
+        Drt.KeyValueStorage storage = js_api.key_value_storages[index];
         if (type == JsFuncCallType.SYNC) {
             js_api.warn_sync_func("key_value_storage_get_value(%d, '%s')".printf(index, key));
-            var value = storage.get_value(key);
+            Variant? value = storage.get_value(key);
             try {
                 return value_from_variant(ctx, value);
             } catch (JSError e) {
@@ -478,7 +478,7 @@ public class JSApi : GLib.Object {
         } else {
             var id = (int) args[2].to_number(ctx);
             storage.get_value_async.begin(key, (o, res) => {
-                var value = storage.get_value_async.end(res);
+                Variant? value = storage.get_value_async.end(res);
                 js_api.send_async_response(id, value, null);
             });
         }
@@ -509,13 +509,13 @@ public class JSApi : GLib.Object {
             return undefined;
         }
         int index = (int) args[0].to_number(ctx);
-        var key = string_or_null(ctx, args[1]);
+        string? key = string_or_null(ctx, args[1]);
         if (key == null) {
             exception = create_exception(ctx, "Argument 1 must be a non-null string");
             return undefined;
         }
 
-        var js_api = (self.get_private() as JSApi);
+        var js_api = self.get_private() as JSApi;
         if (js_api == null) {
             exception = create_exception(ctx, "JSApi is null");
             return undefined;
@@ -532,7 +532,7 @@ public class JSApi : GLib.Object {
             exception = create_exception(ctx, "Failed to convert JavaScript value to Variant. %s".printf(e.message));
             return undefined;
         }
-        var storage = js_api.key_value_storages[index];
+        Drt.KeyValueStorage storage = js_api.key_value_storages[index];
         if (type == JsFuncCallType.SYNC) {
             js_api.warn_sync_func("key_value_storage_set_value(%d, '%s')".printf(index, key));
             storage.set_value(key, value);
@@ -572,12 +572,12 @@ public class JSApi : GLib.Object {
             return undefined;
         }
         int index = (int) args[0].to_number(ctx);
-        var key = string_or_null(ctx, args[1]);
+        string? key = string_or_null(ctx, args[1]);
         if (key == null) {
             exception = create_exception(ctx, "Argument 1 must be a non-null string");
             return undefined;
         }
-        var js_api = (self.get_private() as JSApi);
+        var js_api = self.get_private() as JSApi;
         if (js_api == null) {
             exception = create_exception(ctx, "JSApi is null");
             return undefined;
@@ -594,7 +594,7 @@ public class JSApi : GLib.Object {
             exception = create_exception(ctx, "Failed to convert JavaScript value to Variant. %s".printf(e.message));
             return undefined;
         }
-        var storage = js_api.key_value_storages[index];
+        Drt.KeyValueStorage storage = js_api.key_value_storages[index];
         if (type == JsFuncCallType.SYNC) {
             js_api.warn_sync_func("key_value_storage_set_default_value(%d, '%s')".printf(index, key));
             storage.set_default_value(key, value);

@@ -66,7 +66,7 @@ public struct VersionTuple {
      * @param version    A dot-separated version string.
      */
     public VersionTuple.parse(string version) {
-        var parts = version.split(".");
+        string[] parts = version.split(".");
         if (parts.length > 0) {
             major = (uint) int.parse(parts[0].strip());
             if (parts.length > 1) {

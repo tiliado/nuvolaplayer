@@ -54,7 +54,7 @@ public class MasterUserInterface: GLib.Object {
     }
 
     private void create_main_window() {
-        var storage = controller.storage;
+        Drt.Storage storage = controller.storage;
         var app_storage = new WebAppStorage(storage.user_config_dir, storage.user_data_dir, storage.user_cache_dir);
         webkit_options = new WebkitOptions(app_storage);
         main_window = new MasterWindow(controller);

@@ -46,22 +46,22 @@ public class PasswordManagerBinding : ModelBinding<PasswordManager> {
     }
 
     private void handle_store_password(Drt.RpcRequest request) throws Drt.RpcError {
-        var hostname = request.pop_string();
-        var username = request.pop_string();
-        var password = request.pop_string();
+        string? hostname = request.pop_string();
+        string? username = request.pop_string();
+        string? password = request.pop_string();
         model.store_password.begin(hostname, username, password, null, (o, res) => {model.store_password.end(res);});
         request.respond(null);
     }
 
     private void handle_get_passwords(Drt.RpcRequest request) throws Drt.RpcError {
         var builder = new VariantBuilder(new VariantType("a(sss)"));
-        var passwords = model.get_passwords();
+        HashTable<string, Drt.Lst<LoginCredentials>> passwords = model.get_passwords();
         if (passwords != null) {
-            var iter = HashTableIter<string, Drt.Lst<LoginCredentials>>(passwords);
+            HashTableIter<string, Drt.Lst<LoginCredentials>> iter = HashTableIter<string, Drt.Lst<LoginCredentials>>(passwords);
             string hostname = null;
             Drt.Lst<LoginCredentials> credentials = null;
             while (iter.next(out hostname, out credentials))
-            foreach (var item in credentials)
+            foreach (LoginCredentials item in credentials)
             builder.add("(sss)", hostname, item.username, item.password);
         }
         request.respond(builder.end());

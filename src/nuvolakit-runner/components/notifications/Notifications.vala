@@ -90,7 +90,7 @@ public class Notification {
         if (add_actions) {
             notification.set_hint("action-icons", true);
 
-            foreach (var action in actions)
+            foreach (Drtgtk.Action action in actions)
             if (action.enabled)
             notification.add_action(action.icon, action.label, () => { action.activate(null); });
         }
@@ -167,7 +167,7 @@ public class Notifications : GLib.Object, NotificationsInterface, NotificationIn
     }
 
     public Notification get_or_create(string name) {
-        var notification = notifications[name];
+        Notification notification = notifications[name];
         if (notification == null) {
             notification = new Notification(app.app_id);
             notifications[name] = notification;
@@ -183,8 +183,8 @@ public class Notifications : GLib.Object, NotificationsInterface, NotificationIn
 
     public bool set_actions(string name, string[] actions) {
         Drtgtk.Action[] actions_found = {};
-        foreach (var action_name in actions) {
-            var action = app.actions.get_action(action_name);
+        foreach (string action_name in actions) {
+            Drtgtk.Action action = app.actions.get_action(action_name);
             if (action != null)
             actions_found += action;
             else
@@ -201,9 +201,8 @@ public class Notifications : GLib.Object, NotificationsInterface, NotificationIn
     }
 
     public bool show(string name, bool force) {
-        var notification = get_or_create(name);
-        var add_actions = actions_supported && icons_supported;
-
+        Notification notification = get_or_create(name);
+        bool add_actions = actions_supported && icons_supported;
         if (force || !app.main_window.is_active || notification.resident)
         notification.show(add_actions);
         return Binding.CONTINUE;

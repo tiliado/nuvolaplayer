@@ -49,11 +49,11 @@ public class CefOptions : WebOptions {
 
     public override async void gather_format_support_info(WebApp web_app) {
         init(web_app);
-        var result = CefGtk.get_init_result();
-        var widevine = result.widevine_plugin;
+        CefGtk.InitializationResult result = CefGtk.get_init_result();
+        CefGtk.WidevinePlugin widevine = result.widevine_plugin;
         if (widevine != null && !widevine.registration_complete) {
             SourceFunc cb = gather_format_support_info.callback;
-            var handler_id = widevine.notify["registration-complete"].connect_after(() => Idle.add((owned) cb));
+            ulong handler_id = widevine.notify["registration-complete"].connect_after(() => Idle.add((owned) cb));
             yield;
             widevine.disconnect(handler_id);
         }
@@ -61,11 +61,11 @@ public class CefOptions : WebOptions {
 
     public void init(WebApp web_app) {
         if (default_context == null) {
-            var user_agent = WebOptions.make_user_agent(web_app.user_agent);
+            string? user_agent = WebOptions.make_user_agent(web_app.user_agent);
             if (user_agent != null) {
                 user_agent += " Nuvola/" + Nuvola.get_short_version();
             }
-            var product = "Chrome/%s Nuvola/%s".printf(Cef.get_chromium_version(), Nuvola.get_short_version());
+            string? product = "Chrome/%s Nuvola/%s".printf(Cef.get_chromium_version(), Nuvola.get_short_version());
             CefGtk.init(web_app.scale_factor, widevine_required, flash_required, user_agent, product);
             default_context = new CefGtk.WebContext(storage.create_data_subdir("cef").get_path());
         }
@@ -88,18 +88,18 @@ public class CefOptions : WebOptions {
             if (parameter == null) {
                 return Drt.RequirementState.SUPPORTED;
             }
-            var param = parameter.strip().down();
+            string param = parameter.strip().down();
             if (param[0] == 0) {
                 return Drt.RequirementState.SUPPORTED;
             }
-            var versions = param.split(".");
+            string[] versions = param.split(".");
             if (versions.length > 4) {
                 error = "%s[] received invalid version parameter '%s'.".printf(type, param);
                 return Drt.RequirementState.ERROR;
             }
             uint[] uint_versions = {0, 0, 0, 0};
             for (var i = 0; i < versions.length; i++) {
-                var version = int.parse(versions[i]);
+                int version = int.parse(versions[i]);
                 if (i < 0) {
                     error = "%s[] received invalid version parameter '%s'.".printf(type, param);
                     return Drt.RequirementState.ERROR;
@@ -120,20 +120,20 @@ public class CefOptions : WebOptions {
             return Drt.RequirementState.SUPPORTED;
         case "widevine":
             widevine_required = true;
-            var result = CefGtk.get_init_result();
+            CefGtk.InitializationResult? result = CefGtk.get_init_result();
             if (result == null) {
                 return Drt.RequirementState.UNKNOWN;
             }
-            var widevine = result.widevine_plugin;
+            CefGtk.WidevinePlugin widevine = result.widevine_plugin;
             return (widevine != null && widevine.available ?
                 Drt.RequirementState.SUPPORTED : Drt.RequirementState.UNSUPPORTED);
         case "flash":
             flash_required = true;
-            var result = CefGtk.get_init_result();
+            CefGtk.InitializationResult? result = CefGtk.get_init_result();
             if (result == null) {
                 return Drt.RequirementState.UNKNOWN;
             }
-            var flash = result.flash_plugin;
+            CefGtk.FlashPlugin flash = result.flash_plugin;
             return (flash != null && flash.available
                 ? Drt.RequirementState.SUPPORTED : Drt.RequirementState.UNSUPPORTED);
         default:
@@ -154,7 +154,7 @@ public class CefOptions : WebOptions {
 
     public override string[] get_format_support_warnings() {
         string[] warnings = {};
-        var result = CefGtk.get_init_result();
+        CefGtk.InitializationResult? result = CefGtk.get_init_result();
         if (result != null) {
             if (result.flash_plugin != null && result.flash_plugin.registration_error != null) {
                 warnings += Markup.printf_escaped("Failed to load Flash plugin: %s",

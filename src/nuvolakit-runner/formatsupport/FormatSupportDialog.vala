@@ -92,7 +92,7 @@ public class FormatSupportScreen: Gtk.Notebook {
         plugins_view.attach(frame, 0, 3, 2, 1);
         frame.show();
 
-        var flash_detect = storage.get_data_file("js/flash_detect.js");
+        File flash_detect = storage.get_data_file("js/flash_detect.js");
         if (flash_detect != null) {
             frame = new Gtk.Frame ("<b>Active Flash plugin</b>");
             (frame.label_widget as Gtk.Label).use_markup = true;
@@ -162,7 +162,7 @@ public class FormatSupportScreen: Gtk.Notebook {
         append_page(scrolled_window, new Gtk.Label("Web Plugins"));
         var help_button = new Gtk.Button.with_label("Help");
         help_button.clicked.connect(() => {app.show_uri(WEB_APP_REQUIREMENTS_HELP_URL);});
-        var audio_detect_script = storage.get_data_file("js/audio.js");
+        File audio_detect_script = storage.get_data_file("js/audio.js");
         var mp3_view = new Mp3View(format_support, help_button, audio_detect_script, web_context);
         mp3_view.show();
         append_page(mp3_view, new Gtk.Label("MP3 format"));
@@ -259,7 +259,7 @@ public class FormatSupportScreen: Gtk.Notebook {
             pipeline.check.begin(false, (o, res) => {
                 pipeline.info.disconnect(on_pipeline_info);
                 pipeline.warn.disconnect(on_pipeline_warn);
-                var result = pipeline.check.end(res);
+                bool result = pipeline.check.end(res);
                 pipeline = null;
                 update_result_text(result);
                 if (result)
@@ -271,10 +271,10 @@ public class FormatSupportScreen: Gtk.Notebook {
         }
 
         private void add_message(string type, string text) {
-            var buffer = text_view.buffer;
+            Gtk.TextBuffer buffer = text_view.buffer;
             Gtk.TextIter iter;
             buffer.get_end_iter(out iter);
-            var data = "%s: %s\n".printf(type, text);
+            string data = "%s: %s\n".printf(type, text);
             buffer.insert(ref iter, data, -1);
         }
 

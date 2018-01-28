@@ -38,7 +38,7 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder {
     public string? get_keybinding(string action) {
         const string METHOD = "/nuvola/actionkeybinder/get-keybinding";
         try {
-            var data = conn.call_sync(METHOD, new Variant("(s)", action));
+            Variant? data = conn.call_sync(METHOD, new Variant("(s)", action));
             Drt.Rpc.check_type_string(data, "ms");
             string? keybinding = null;
             data.get("ms", &keybinding);
@@ -53,7 +53,7 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder {
     public bool set_keybinding(string action, string? keybinding) {
         const string METHOD = "/nuvola/actionkeybinder/set-keybinding";
         try {
-            var data = conn.call_sync(METHOD, new Variant("(sms)", action, keybinding));
+            Variant? data = conn.call_sync(METHOD, new Variant("(sms)", action, keybinding));
             Drt.Rpc.check_type_string(data, "b");
             return data.get_boolean();
         }
@@ -66,7 +66,7 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder {
     public bool bind(string action) {
         const string METHOD = "/nuvola/actionkeybinder/bind";
         try {
-            var data = conn.call_sync(METHOD, new Variant("(s)", action));
+            Variant? data = conn.call_sync(METHOD, new Variant("(s)", action));
             Drt.Rpc.check_type_string(data, "b");
             return data.get_boolean();
         }
@@ -79,7 +79,7 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder {
     public bool unbind(string action) {
         const string METHOD = "/nuvola/actionkeybinder/unbind";
         try {
-            var data = conn.call_sync(METHOD, new Variant("(s)", action));
+            Variant? data = conn.call_sync(METHOD, new Variant("(s)", action));
             Drt.Rpc.check_type_string(data, "b");
             return data.get_boolean();
         }
@@ -92,7 +92,7 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder {
     public string? get_action(string keybinding) {
         const string METHOD = "/nuvola/actionkeybinder/get-action";
         try {
-            var data = conn.call_sync(METHOD, new Variant("(s)", keybinding));
+            Variant? data = conn.call_sync(METHOD, new Variant("(s)", keybinding));
             Drt.Rpc.check_type_string(data, "ms");
             string? action = null;
             data.get("ms", &action);
@@ -107,7 +107,7 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder {
     public bool is_available(string keybinding) {
         const string METHOD = "/nuvola/actionkeybinder/is-available";
         try {
-            var data = conn.call_sync(METHOD, new Variant("(s)", keybinding));
+            Variant? data = conn.call_sync(METHOD, new Variant("(s)", keybinding));
             Drt.Rpc.check_type_string(data, "b");
             return data.get_boolean();
         }
@@ -118,7 +118,7 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder {
     }
 
     private void handle_action_activated(Drt.RpcRequest request) throws Drt.RpcError {
-        var action = request.pop_string();
+        string? action = request.pop_string();
         var handled = false;
         action_activated(action, ref handled);
         request.respond(new Variant.boolean(handled));
