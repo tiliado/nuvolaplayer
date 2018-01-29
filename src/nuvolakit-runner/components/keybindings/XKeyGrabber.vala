@@ -43,10 +43,12 @@ public class XKeyGrabber: GLib.Object {
     public XKeyGrabber() {
         keybindings = new HashTable<string, uint>(str_hash, str_equal);
         Gdk.Display display = Gdk.Display.get_default();
-        if (display != null)
-        setup_display(display);
-        else
-        Gdk.DisplayManager.get().display_opened.connect(setup_display);
+        if (display != null) {
+            setup_display(display);
+        }
+        else {
+            Gdk.DisplayManager.get().display_opened.connect(setup_display);
+        }
     }
 
     public signal void keybinding_pressed(string accelerator, uint32 time);
@@ -57,8 +59,9 @@ public class XKeyGrabber: GLib.Object {
 
     public bool grab(string accelerator, bool allow_multiple) {
         if (is_grabbed(accelerator)) {
-            if (!allow_multiple)
-            return false;
+            if (!allow_multiple) {
+                return false;
+            }
 
             uint count = keybindings[accelerator] + 1;
             keybindings[accelerator] = count;
@@ -66,8 +69,9 @@ public class XKeyGrabber: GLib.Object {
             return true;
         }
 
-        if (!grab_ungrab(true, accelerator))
-        return false;
+        if (!grab_ungrab(true, accelerator)) {
+            return false;
+        }
 
         keybindings[accelerator] = 1;
         debug("Grabbed %s, count %d", accelerator, 1);
@@ -75,8 +79,9 @@ public class XKeyGrabber: GLib.Object {
     }
 
     public bool ungrab(string accelerator) {
-        if (!is_grabbed(accelerator))
-        return false;
+        if (!is_grabbed(accelerator)) {
+            return false;
+        }
 
         uint count = keybindings[accelerator] - 1;
         if (count > 0) {  // FIXME: (count == 0) ?
@@ -85,8 +90,9 @@ public class XKeyGrabber: GLib.Object {
             return true;
         }
 
-        if (!grab_ungrab(false, accelerator))
-        return false;
+        if (!grab_ungrab(false, accelerator)) {
+            return false;
+        }
 
         keybindings.remove(accelerator);
         debug("Ungrabbed %s, count %u", accelerator, count);
@@ -120,10 +126,12 @@ public class XKeyGrabber: GLib.Object {
         Gdk.error_trap_push();
 
         foreach (Gdk.ModifierType lock_modifier in lock_modifiers) {
-            if (grab)
-            display.grab_key(keycode, modifiers|lock_modifier, xid, false, X.GrabMode.Async, X.GrabMode.Async);
-            else
-            display.ungrab_key(keycode, modifiers|lock_modifier, xid);
+            if (grab) {
+                display.grab_key(keycode, modifiers|lock_modifier, xid, false, X.GrabMode.Async, X.GrabMode.Async);
+            }
+            else {
+                display.ungrab_key(keycode, modifiers|lock_modifier, xid);
+            }
         }
 
         Gdk.flush();
@@ -145,14 +153,17 @@ public class XKeyGrabber: GLib.Object {
             /* Ignore insignificant modifiers */
             event_mods &= Gtk.accelerator_get_default_mod_mask();
             /* SUPER + HYPER => SUPER */
-            if ((event_mods & (Gdk.ModifierType.SUPER_MASK | Gdk.ModifierType.HYPER_MASK)) != 0)
-            event_mods &= ~Gdk.ModifierType.HYPER_MASK;
+            if ((event_mods & (Gdk.ModifierType.SUPER_MASK | Gdk.ModifierType.HYPER_MASK)) != 0) {
+                event_mods &= ~Gdk.ModifierType.HYPER_MASK;
+            }
 
             string accelerator = Gtk.accelerator_name(keyval, event_mods);
-            if (is_grabbed(accelerator))
-            keybinding_pressed(accelerator, gdk_event.get_time());
-            else
-            warning("Unknown keybinding %s", accelerator);
+            if (is_grabbed(accelerator)) {
+                keybinding_pressed(accelerator, gdk_event.get_time());
+            }
+            else {
+                warning("Unknown keybinding %s", accelerator);
+            }
         }
         return Gdk.FilterReturn.CONTINUE;
     }

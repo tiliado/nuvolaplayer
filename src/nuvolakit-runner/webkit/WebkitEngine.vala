@@ -66,8 +66,9 @@ public class WebkitEngine : WebEngine {
         worker_data["LIBSOUP_MINOR"] = Soup.get_minor_version();
         worker_data["LIBSOUP_MICRO"] = Soup.get_micro_version();
 
-        if (connection != null)
-        apply_network_proxy(connection);
+        if (connection != null) {
+            apply_network_proxy(connection);
+        }
 
         string webkit_extension_dir = Nuvola.get_libdir();
         debug("Nuvola WebKit Extension directory: %s", webkit_extension_dir);
@@ -76,8 +77,9 @@ public class WebkitEngine : WebEngine {
         debug("Nuvola WebKit Extension data: %s", web_extension_data.print(true));
         web_context.set_web_extensions_initialization_user_data(web_extension_data);
 
-        if (web_app.allow_insecure_content)
-        web_context.get_security_manager().register_uri_scheme_as_secure("http");
+        if (web_app.allow_insecure_content) {
+            web_context.get_security_manager().register_uri_scheme_as_secure("http");
+        }
 
         web_context.download_started.connect(on_download_started);
 
@@ -176,8 +178,9 @@ public class WebkitEngine : WebEngine {
         try {
             string url = env.send_data_request_string("LastPageRequest", "url");
             if (url != null) {
-                if (load_uri(url))
-                return;
+                if (load_uri(url)) {
+                    return;
+                }
                 runner_app.show_error("Invalid page URL", "The web app integration script has not provided a valid page URL '%s'.".printf(url));
             }
         }
@@ -191,8 +194,9 @@ public class WebkitEngine : WebEngine {
     public override void go_home() {
         try {
             string url = env.send_data_request_string("HomePageRequest", "url");
-            if (url == null)
-            runner_app.fatal_error("Invalid home page URL", "The web app integration script has provided an empty home page URL.");
+            if (url == null) {
+                runner_app.fatal_error("Invalid home page URL", "The web app integration script has provided an empty home page URL.");
+            }
             else if (!load_uri(url)) {
                 runner_app.fatal_error("Invalid home page URL", "The web app integration script has not provided a valid home page URL '%s'.".printf(url));
             }
@@ -546,10 +550,12 @@ public class WebkitEngine : WebEngine {
 
         handler_ids[1] = download.failed.connect((d, err) => {
             WebKit.DownloadError e = (WebKit.DownloadError) err;
-            if (e is WebKit.DownloadError.DESTINATION)
-            warning("Download failed because of destination: %s", e.message);
-            else
-            warning("Download failed: %s", e.message);
+            if (e is WebKit.DownloadError.DESTINATION) {
+                warning("Download failed because of destination: %s", e.message);
+            }
+            else {
+                warning("Download failed: %s", e.message);
+            }
             try {
                 var payload = new Variant(
                     "(dbusss)", cb_id, false, d.get_response().status_code, d.get_response().status_code.to_string(), "", "");
@@ -585,8 +591,9 @@ public class WebkitEngine : WebEngine {
 
     private bool on_download_decide_destination(WebKit.Download download, string filename) {
 
-        if (download.destination == null)
-        download.cancel();
+        if (download.destination == null) {
+            download.cancel();
+        }
         download.decide_destination.disconnect(on_download_decide_destination);
         return true;
     }
@@ -594,8 +601,9 @@ public class WebkitEngine : WebEngine {
     private bool decide_navigation_policy(bool new_window, WebKit.NavigationPolicyDecision decision) {
         WebKit.NavigationAction action = decision.navigation_action;
         string uri = action.get_request().uri;
-        if (!uri.has_prefix("http://") && !uri.has_prefix("https://"))
-        return false;
+        if (!uri.has_prefix("http://") && !uri.has_prefix("https://")) {
+            return false;
+        }
 
         var handled = false;
         var load_uri = false;
@@ -676,10 +684,12 @@ public class WebkitEngine : WebEngine {
         Variant value = null;
         bool approved = false;
         while (iter.next("{smv}", &key, &value)) {
-            if (key == "approved")
-            approved = value != null ? value.get_boolean() : false;
-            else if (key == "newWindow" && value != null)
-            new_window = value.get_boolean();
+            if (key == "approved") {
+                approved = value != null ? value.get_boolean() : false;
+            }
+            else if (key == "newWindow" && value != null) {
+                new_window = value.get_boolean();
+            }
         }
         return approved;
     }
@@ -740,8 +750,9 @@ public class WebkitEngine : WebEngine {
 
     private bool on_script_dialog(WebKit.ScriptDialog dialog) {
         bool handled = false;
-        if (dialog.get_dialog_type() == WebKit.ScriptDialogType.ALERT)
-        show_alert_dialog(ref handled, dialog.get_message());
+        if (dialog.get_dialog_type() == WebKit.ScriptDialogType.ALERT) {
+            show_alert_dialog(ref handled, dialog.get_message());
+        }
         return handled;
     }
 

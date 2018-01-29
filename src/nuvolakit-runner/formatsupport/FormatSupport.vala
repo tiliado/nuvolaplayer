@@ -48,8 +48,9 @@ public class FormatSupport: GLib.Object {
     }
 
     private async void collect_web_plugins() throws GLib.Error {
-        if (web_plugins != null)
-        return;
+        if (web_plugins != null) {
+            return;
+        }
 
         WebKit.WebContext wc = WebKit.WebContext.get_default();
         List<WebKit.Plugin> plugins = yield wc.get_plugins(null);
@@ -63,8 +64,9 @@ public class FormatSupport: GLib.Object {
             web_plugins.append({name, plugin.get_path(), plugin.get_description(), true, is_flash});
             if (!(path in paths)) {
                 paths.add(path);
-                if (is_flash)
-                n_flash_plugins++;
+                if (is_flash) {
+                    n_flash_plugins++;
+                }
             }
         }
         this.n_flash_plugins = n_flash_plugins;
@@ -175,18 +177,21 @@ public class AudioPipeline : GLib.Object {
         if (silent) {
             Gst.Element? sink = Gst.ElementFactory.make("fakesink", "sink");
             pipeline.add(sink);
-            if (pad.link(sink.get_static_pad("sink")) != Gst.PadLinkReturn.OK)
-            warn("Failed to link pad to sink.");
+            if (pad.link(sink.get_static_pad("sink")) != Gst.PadLinkReturn.OK) {
+                warn("Failed to link pad to sink.");
+            }
             sink.sync_state_with_parent();
         }
         else {
             Gst.Element? conv = Gst.ElementFactory.make("audioconvert", "converter");
             Gst.Element? sink = Gst.ElementFactory.make("autoaudiosink", "sink");
             pipeline.add_many(conv, sink);
-            if (!conv.link(sink))
-            warn("Failed to link converter to sink.");
-            if (pad.link(conv.get_static_pad("sink")) != Gst.PadLinkReturn.OK)
-            warn("Failed to link pad to converter.");
+            if (!conv.link(sink)) {
+                warn("Failed to link converter to sink.");
+            }
+            if (pad.link(conv.get_static_pad("sink")) != Gst.PadLinkReturn.OK) {
+                warn("Failed to link pad to converter.");
+            }
             conv.sync_state_with_parent();
             sink.sync_state_with_parent();
         }
@@ -206,8 +211,9 @@ public class AudioPipeline : GLib.Object {
                     Gst.Element.state_get_name(old_state),
                     Gst.Element.state_get_name(new_state)));
 
-                if (new_state == Gst.State.PLAYING)
-                result = true;
+                if (new_state == Gst.State.PLAYING) {
+                    result = true;
+                }
             }
             break;
         case Gst.MessageType.EOS:

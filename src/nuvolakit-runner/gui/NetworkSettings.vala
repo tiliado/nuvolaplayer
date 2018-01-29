@@ -49,26 +49,30 @@ public class NetworkSettings: Gtk.Grid {
         proxy_types[0] = new Gtk.RadioButton.with_label(
             null, _("Use system network proxy settings"));
         proxy_types[0].hexpand = true;
-        if (original_type == NetworkProxyType.SYSTEM)
-        proxy_types[0].active = true;
+        if (original_type == NetworkProxyType.SYSTEM) {
+            proxy_types[0].active = true;
+        }
         attach(proxy_types[0], 0, row++, 3, 1);
         proxy_types[1] = new Gtk.RadioButton.with_label(
             proxy_types[0].get_group(), _("Use direct connection without a proxy server"));
         proxy_types[1].hexpand = true;
-        if (original_type == NetworkProxyType.DIRECT)
-        proxy_types[1].active = true;
+        if (original_type == NetworkProxyType.DIRECT) {
+            proxy_types[1].active = true;
+        }
         attach(proxy_types[1], 0, row++, 3, 1);
         proxy_types[2] = new Gtk.RadioButton.with_label(
             proxy_types[0].get_group(), _("Use manual HTTP proxy settings"));
         proxy_types[2].hexpand = true;
-        if (original_type == NetworkProxyType.HTTP)
-        proxy_types[2].active = true;
+        if (original_type == NetworkProxyType.HTTP) {
+            proxy_types[2].active = true;
+        }
         attach(proxy_types[2], 0, row++, 3, 1);
         proxy_types[3] = new Gtk.RadioButton.with_label(
             proxy_types[0].get_group(), _("Use manual SOCKS proxy settings"));
         proxy_types[3].hexpand = true;
-        if (original_type == NetworkProxyType.SOCKS)
-        proxy_types[3].active = true;
+        if (original_type == NetworkProxyType.SOCKS) {
+            proxy_types[3].active = true;
+        }
         attach(proxy_types[3], 0, row++, 3, 1);
 
         bool manual_settings = original_type == NetworkProxyType.HTTP || original_type == NetworkProxyType.SOCKS;
@@ -108,32 +112,39 @@ public class NetworkSettings: Gtk.Grid {
 
     private NetworkProxyType get_proxy_type() {
         NetworkProxyType type = NetworkProxyType.SYSTEM;
-        if (proxy_types[0].active)
-        type = NetworkProxyType.SYSTEM;
-        else if (proxy_types[1].active)
-        type = NetworkProxyType.DIRECT;
-        else if (proxy_types[2].active)
-        type = NetworkProxyType.HTTP;
-        else if (proxy_types[3].active)
-        type = NetworkProxyType.SOCKS;
+        if (proxy_types[0].active) {
+            type = NetworkProxyType.SYSTEM;
+        }
+        else if (proxy_types[1].active) {
+            type = NetworkProxyType.DIRECT;
+        }
+        else if (proxy_types[2].active) {
+            type = NetworkProxyType.HTTP;
+        }
+        else if (proxy_types[3].active) {
+            type = NetworkProxyType.SOCKS;
+        }
         return type;
     }
 
     public bool get_proxy_settings(out NetworkProxyType type, out string? host, out int port) {
         host = proxy_server.text;
-        if (host == "")
-        host = null;
+        if (host == "") {
+            host = null;
+        }
         port = (int) proxy_port.value;
         type = get_proxy_type();
         bool changed = type != original_type;
-        if (is_manual_settings(type) && !changed)
-        changed = host != original_host || port != original_port;
+        if (is_manual_settings(type) && !changed) {
+            changed = host != original_host || port != original_port;
+        }
         return changed;
     }
 
     private void on_proxy_type_toggled(Gtk.ToggleButton button) {
-        if (button.active)
-        on_change();
+        if (button.active) {
+            on_change();
+        }
     }
 
     private void on_proxy_server_changed() {

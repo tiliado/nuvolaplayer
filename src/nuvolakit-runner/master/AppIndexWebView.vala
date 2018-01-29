@@ -58,8 +58,9 @@ public class AppIndexWebView : WebView {
         WebKit.NavigationType type = action.get_navigation_type();
         bool user_gesture = action.is_user_gesture();
         // We care only about user clicks
-        if (type != WebKit.NavigationType.LINK_CLICKED && !user_gesture)
-        return false;
+        if (type != WebKit.NavigationType.LINK_CLICKED && !user_gesture) {
+            return false;
+        }
 
         string uri = action.get_request().uri;
         bool result = uri.has_prefix(root_uri) && !uri.has_suffix(".flatpakref");

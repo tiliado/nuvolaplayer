@@ -94,16 +94,18 @@ public int main(string[] args) {
         debug("Compositing mode disabled because of WebKitGTK < 2.13.4");
     }
 
-    if (Environment.get_variable("NUVOLA_TEST_ABORT") == "master")
-    error("Master abort requested.");
+    if (Environment.get_variable("NUVOLA_TEST_ABORT") == "master") {
+        error("Master abort requested.");
+    }
 
     WebAppRegistry? web_app_reg = null;
     var storage = new Drt.XdgStorage.for_project(Nuvola.get_app_id());
     move_old_xdg_dirs(new Drt.XdgStorage.for_project(Nuvola.get_old_id()), storage);
 
     #if !FLATPAK || !NUVOLA_RUNTIME
-    if (Args.apps_dir == null)
-    Args.apps_dir = Environment.get_variable("NUVOLA_WEB_APPS_DIR");
+    if (Args.apps_dir == null) {
+        Args.apps_dir = Environment.get_variable("NUVOLA_WEB_APPS_DIR");
+    }
 
     if (Args.apps_dir != null && Args.apps_dir != "") {
         local_only_args = true;
@@ -135,10 +137,12 @@ public int main(string[] args) {
     var controller = new MasterController(storage, web_app_reg, (owned) exec_cmd, Args.debug);
     var controller_args = new string[] {args[0]};
     #if !FLATPAK || !NUVOLA_RUNTIME
-    if (Args.list_apps)
-    controller_args += "-l";
-    if (Args.list_apps_json)
-    controller_args += "-j";
+    if (Args.list_apps) {
+        controller_args += "-l";
+    }
+    if (Args.list_apps_json) {
+        controller_args += "-j";
+    }
     if (Args.app_id != null) {
         controller_args += "-a";
         controller_args += Args.app_id;
@@ -150,11 +154,12 @@ public int main(string[] args) {
 
     if (controller.is_remote) {
         message("%s instance is already running and will be activated.", Nuvola.get_app_name());
-        if (local_only_args)
-        warning(
-            "Some command line parameters (-D, -v, -A, -L) are ignored because they apply only to a new instance."
-            + " You might want to close all %s instances and run it again with your parameters.",
-            Nuvola.get_app_name());
+        if (local_only_args) {
+            warning(
+                "Some command line parameters (-D, -v, -A, -L) are ignored because they apply only to a new instance."
+                + " You might want to close all %s instances and run it again with your parameters.",
+                Nuvola.get_app_name());
+        }
     }
     return result;
 }

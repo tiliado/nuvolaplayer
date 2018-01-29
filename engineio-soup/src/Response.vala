@@ -62,8 +62,9 @@ public class Response {
         HashTableIter<string, string> iter = HashTableIter<string, string>(headers);
         while (iter.next(out header, out value))
         msg.response_headers.replace(header, value);
-        if (buffer != null)
-        msg.response_body.append_take((owned) buffer);
+        if (buffer != null) {
+            msg.response_body.append_take((owned) buffer);
+        }
         msg.status_code = status_code;
         server.unpause_message(msg);
         headers.remove_all();

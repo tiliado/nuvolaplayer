@@ -77,8 +77,9 @@ public class MasterWindow : Drtgtk.ApplicationWindow {
     public void add_page(Gtk.Widget page, string name, string title) {
         bool was_empty = stack.visible_child == null;
         stack.add_titled(page, name, title);
-        if (was_empty)
-        update();
+        if (was_empty) {
+            update();
+        }
     }
 
     private void update_title(string? title=null) {
@@ -89,8 +90,9 @@ public class MasterWindow : Drtgtk.ApplicationWindow {
         Gtk.Widget child = stack.visible_child;
         string? name = null;
         string? title = null;
-        if (child != null)
-        stack.child_get(child, "name", out name, "title", out title);
+        if (child != null) {
+            stack.child_get(child, "name", out name, "title", out title);
+        }
         update_title(title);
         page_changed(child, name, title);
     }

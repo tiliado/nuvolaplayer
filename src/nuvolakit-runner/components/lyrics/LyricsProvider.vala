@@ -63,8 +63,9 @@ public class LyricsProvider: GLib.Object {
     }
 
     private void song_changed(string? title, string? artist) {
-        if (this.title == title && this.artist == artist)
-        return;
+        if (this.title == title && this.artist == artist) {
+            return;
+        }
 
         this.title = title;
         this.artist = artist;
@@ -90,8 +91,9 @@ public class LyricsProvider: GLib.Object {
             try {
                 string lyrics = yield fetcher.fetch_lyrics(artist, song);
                 lyrics_available(artist, song, lyrics);
-                if (cache != null && fetcher != cache)
-                yield cache.store(artist, song, lyrics);
+                if (cache != null && fetcher != cache) {
+                    yield cache.store(artist, song, lyrics);
+                }
                 return;
             }
             catch (GLib.Error e) {

@@ -59,8 +59,9 @@ public class Sidebar : Gtk.Grid {
     }
 
     public override void show() {
-        if (is_empty())
-        return;
+        if (is_empty()) {
+            return;
+        }
         base.show();
     }
 
@@ -72,8 +73,9 @@ public class Sidebar : Gtk.Grid {
 
     public virtual signal void remove_page(Gtk.Widget page) {
         stack.remove(page);
-        if (is_empty())
-        hide();
+        if (is_empty()) {
+            hide();
+        }
     }
 
     public bool is_empty() {

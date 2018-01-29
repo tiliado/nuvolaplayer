@@ -56,8 +56,9 @@ public class MPRISPlayer : GLib.Object {
             return 1.0;
         }
         set {
-            if (value == 0.0)
-            pause();
+            if (value == 0.0) {
+                pause();
+            }
         }
     }
     public double minimum_rate {get {return 1.0;}}
@@ -105,8 +106,9 @@ public class MPRISPlayer : GLib.Object {
     }
 
     public void seek(int64 offset) {
-        if (can_seek)
-        player.seek(player.track_position + offset);
+        if (can_seek) {
+            player.seek(player.track_position + offset);
+        }
     }
 
     public void SetPosition(ObjectPath track_id, int64 position) {
@@ -129,67 +131,80 @@ public class MPRISPlayer : GLib.Object {
         case "rating":
         case "track-length":
             HashTable<string, Variant> new_metadata = create_metadata();
-            if (new_metadata.size() == 0 && metadata.size() == 0)
-            return;
+            if (new_metadata.size() == 0 && metadata.size() == 0) {
+                return;
+            }
             pending_update["Metadata"] = metadata = new_metadata;
             break;
         case "track-position":
             int64 delta = player.track_position - position;
             position = player.track_position;
             pending_update["Position"] = position;
-            if (delta > 2 || delta < -2)
-            seeked(position);
+            if (delta > 2 || delta < -2) {
+                seeked(position);
+            }
             break;
         case "volume":
-            if (_volume != player.volume)
-            pending_update["Volume"] = _volume = player.volume;
+            if (_volume != player.volume) {
+                pending_update["Volume"] = _volume = player.volume;
+            }
             break;
         case "state":
-            if (update_can_play())
-            pending_update["CanPlay"] = can_play;
-            if (update_can_pause())
-            pending_update["CanPause"] = can_pause;
+            if (update_can_play()) {
+                pending_update["CanPlay"] = can_play;
+            }
+            if (update_can_pause()) {
+                pending_update["CanPause"] = can_pause;
+            }
             string status = map_playback_state();
-            if (playback_status == status)
-            return;
+            if (playback_status == status) {
+                return;
+            }
             pending_update["PlaybackStatus"] = playback_status = status;
             break;
         case "can-go-next":
-            if (can_go_next == player.can_go_next)
-            return;
+            if (can_go_next == player.can_go_next) {
+                return;
+            }
             pending_update["CanGoNext"] = can_go_next = player.can_go_next;
             break;
         case "can-go-previous":
-            if (can_go_previous == player.can_go_previous)
-            return;
+            if (can_go_previous == player.can_go_previous) {
+                return;
+            }
             pending_update["CanGoPrevious"] = can_go_previous = player.can_go_previous;
             break;
         case "can-play":
-            if (!update_can_play())
-            return;
+            if (!update_can_play()) {
+                return;
+            }
             pending_update["CanPlay"] = can_play;
             break;
         case "can-pause":
-            if (!update_can_pause())
-            return;
+            if (!update_can_pause()) {
+                return;
+            }
             pending_update["CanPause"] = can_pause;
             break;
         case "can-rate":
-            if (nuvola_can_rate == player.can_rate)
-            return;
+            if (nuvola_can_rate == player.can_rate) {
+                return;
+            }
             pending_update["NuvolaCanRate"] = nuvola_can_rate = player.can_rate;
             break;
         case "can-seek":
-            if (can_seek == player.can_seek)
-            return;
+            if (can_seek == player.can_seek) {
+                return;
+            }
             pending_update["CanSeek"] = can_seek = player.can_seek;
             break;
         default:
             return;
         }
 
-        if (pending_update_id == 0)
-        pending_update_id = Timeout.add(300, update_cb);
+        if (pending_update_id == 0) {
+            pending_update_id = Timeout.add(300, update_cb);
+        }
     }
 
     private bool update_cb() {
@@ -219,16 +234,21 @@ public class MPRISPlayer : GLib.Object {
             string[] artistArray = {player.artist};
             metadata.insert("xesam:artist", artistArray);
         }
-        if (player.album != null)
-        metadata.insert("xesam:album", player.album);
-        if (player.title != null)
-        metadata.insert("xesam:title", player.title);
-        if (player.artwork_file != null)
-        metadata.insert("mpris:artUrl", "file://" + player.artwork_file);
-        if (player.rating >= 0.0)
-        metadata.insert("xesam:userRating", player.rating);
-        if (player.track_length > 0)
-        metadata.insert("mpris:length", new Variant.int64((int64) player.track_length));
+        if (player.album != null) {
+            metadata.insert("xesam:album", player.album);
+        }
+        if (player.title != null) {
+            metadata.insert("xesam:title", player.title);
+        }
+        if (player.artwork_file != null) {
+            metadata.insert("mpris:artUrl", "file://" + player.artwork_file);
+        }
+        if (player.rating >= 0.0) {
+            metadata.insert("xesam:userRating", player.rating);
+        }
+        if (player.track_length > 0) {
+            metadata.insert("mpris:length", new Variant.int64((int64) player.track_length));
+        }
         if (metadata.size() > 0) {
             string hash = Checksum.compute_for_string(ChecksumType.MD5, "%s:%s:%s".printf(
                 player.title ?? "unknown title",

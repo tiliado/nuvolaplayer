@@ -53,11 +53,13 @@ public class WebAppRegistry: GLib.Object {
 
         HashTable<string, WebApp> apps = list_web_apps(id);
         WebApp? app = apps[id];
-        if (app != null)
-        message("Using web app %s, version %u.%u, data dir %s", app.name, app.version_major, app.version_minor,
-            app.data_dir == null ? "(null)" : app.data_dir.get_path());
-        else
-        message("Web App %s not found.", id);
+        if (app != null) {
+            message("Using web app %s, version %u.%u, data dir %s", app.name, app.version_major, app.version_minor,
+                app.data_dir == null ? "(null)" : app.data_dir.get_path());
+        }
+        else {
+            message("Web App %s not found.", id);
+        }
 
         return app;
     }
@@ -84,8 +86,9 @@ public class WebAppRegistry: GLib.Object {
                 while ((file_info = enumerator.next_file()) != null) {
                     string dirname = file_info.get_name();
                     File app_dir = directory.get_child(dirname);
-                    if (app_dir.query_file_type(0) != FileType.DIRECTORY)
-                    continue;
+                    if (app_dir.query_file_type(0) != FileType.DIRECTORY) {
+                        continue;
+                    }
 
                     try {
                         var app = new WebApp.from_dir(app_dir);
@@ -100,8 +103,9 @@ public class WebAppRegistry: GLib.Object {
                             // the new one has greater version.
                             if (prev_app == null
                             || app.version_major > prev_app.version_major
-                            || app.version_major == prev_app.version_major && app.version_minor > prev_app.version_minor)
-                            result[id] = app;
+                            || app.version_major == prev_app.version_major && app.version_minor > prev_app.version_minor) {
+                                result[id] = app;
+                            }
                         }
                     }
                     catch (WebAppError e) {

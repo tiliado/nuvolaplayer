@@ -99,12 +99,14 @@ public class Server: Soup.Server {
     }
 
     public void start() {
-        if (running)
-        return;
+        if (running) {
+            return;
+        }
 
         foreach (Address addr in addresses) {
-            if (!addr.enabled)
-            continue;
+            if (!addr.enabled) {
+                continue;
+            }
             try {
                 message("Start HttpRemoteControlServer at %s:%u", addr.address, service_port);
                 listen(new InetSocketAddress.from_string(addr.address, service_port), 0);
@@ -114,8 +116,9 @@ public class Server: Soup.Server {
                 critical("Cannot start HttpRemoteControlServer at %s:%u: %s", addr.address, service_port, e.message);
             }
         }
-        if (running)
-        add_handler("/", default_handler);
+        if (running) {
+            add_handler("/", default_handler);
+        }
     }
 
     public void restart() {
@@ -146,11 +149,13 @@ public class Server: Soup.Server {
             if (connections != null) {
                 foreach (Nm.ActiveConnection conn in connections) {
                     Nm.Ip4Config? ip4_config =  conn.get_ip4_config();
-                    if (ip4_config == null)
-                    continue;
+                    if (ip4_config == null) {
+                        continue;
+                    }
                     uint[]? addresses = ip4_config.get_addresses();
-                    if (addresses == null)
-                    continue;
+                    if (addresses == null) {
+                        continue;
+                    }
                     foreach (uint ip4 in addresses) {
                         addr_str = "%u.%u.%u.%u".printf(
                             (ip4 & 0xFF),
@@ -173,8 +178,9 @@ public class Server: Soup.Server {
         AppRunner? app = app_runners[app_id];
         app.add_capatibility(CAPABILITY_NAME);
         app.notification.connect(on_app_notification);
-        if (!running)
-        start();
+        if (!running) {
+            start();
+        }
         bus.router.emit(APP_REGISTERED, app_id, app_id);
     }
 
@@ -187,8 +193,9 @@ public class Server: Soup.Server {
         }
         bool result = registered_runners.remove(app_id);
         bus.router.emit(APP_UNREGISTERED, app_id, app_id);
-        if (running && registered_runners.length == 0)
-        stop();
+        if (running && registered_runners.length == 0) {
+            stop();
+        }
         return result;
     }
 
@@ -330,8 +337,9 @@ public class Server: Soup.Server {
             Variant params = builder.end();
             if (app_id != null) {
                 AppRunner app = app_runners[app_id];
-                if (app == null)
-                throw new ChannelError.APP_NOT_FOUND("App with id '%s' doesn't exist or HTTP interface is not enabled.", app_id);
+                if (app == null) {
+                    throw new ChannelError.APP_NOT_FOUND("App with id '%s' doesn't exist or HTTP interface is not enabled.", app_id);
+                }
 
                 yield app.call_full("/nuvola" + path, params, false, "rws");
             }
@@ -343,8 +351,9 @@ public class Server: Soup.Server {
 
     private void serve_static(RequestContext request) {
         string path = request.path == "/" ? "index" : request.path.substring(1);
-        if (path.has_suffix("/"))
-        path += "index";
+        if (path.has_suffix("/")) {
+            path += "index";
+        }
 
         File file = find_static_file(path);
         if (file == null) {
@@ -357,11 +366,13 @@ public class Server: Soup.Server {
     private File? find_static_file(string path) {
         foreach (File www_root in www_roots) {
             File file = www_root.get_child(path);
-            if (file.query_file_type(0) == FileType.REGULAR)
-            return file;
+            if (file.query_file_type(0) == FileType.REGULAR) {
+                return file;
+            }
             file = www_root.get_child(path + ".html");
-            if (file.query_file_type(0) == FileType.REGULAR)
-            return file;
+            if (file.query_file_type(0) == FileType.REGULAR) {
+                return file;
+            }
         }
         return null;
     }
@@ -395,8 +406,9 @@ public class Server: Soup.Server {
         Variant? result = data;
         if (data == null || !data.get_type().is_subtype_of(VariantType.DICTIONARY)) {
             var builder = new VariantBuilder(new VariantType("a{smv}"));
-            if (data != null)
-            g_variant_ref(data); // FIXME: How to avoid this hack
+            if (data != null) {
+                g_variant_ref(data);
+            } // FIXME: How to avoid this hack
             builder.add("{smv}", "result", data);
             result = builder.end();
         }
@@ -466,8 +478,9 @@ public class Server: Soup.Server {
     }
 
     private void on_master_notification(Drt.RpcRouter router, GLib.Object conn, string path, string? detail, Variant? data) {
-        if (conn != bus)
-        return;
+        if (conn != bus) {
+            return;
+        }
         string full_path = "/master" + path;
         Drt.Lst<Subscription>? subscribers = this.subscribers[full_path];
         if (subscribers == null) {

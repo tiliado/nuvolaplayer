@@ -88,20 +88,23 @@ public class ScrobblerSettings: Gtk.Grid {
     private void on_notify(GLib.Object o, ParamSpec p) {
         switch (p.name) {
         case "scrobbling-enabled":
-            if (checkbox.active != scrobbler.scrobbling_enabled)
-            checkbox.active = scrobbler.scrobbling_enabled;
+            if (checkbox.active != scrobbler.scrobbling_enabled) {
+                checkbox.active = scrobbler.scrobbling_enabled;
+            }
             break;
         case "active":
-            if (scrobbler.scrobbling_enabled != checkbox.active)
-            scrobbler.scrobbling_enabled = checkbox.active;
+            if (scrobbler.scrobbling_enabled != checkbox.active) {
+                scrobbler.scrobbling_enabled = checkbox.active;
+            }
             break;
         }
     }
 
     private void remove_info_bars() {
         foreach (Gtk.Widget child in get_children())
-        if (child is Gtk.InfoBar)
-        remove(child);
+        if (child is Gtk.InfoBar) {
+            remove(child);
+        }
     }
 
     private void on_response(GLib.Object emitter, int response_id) {

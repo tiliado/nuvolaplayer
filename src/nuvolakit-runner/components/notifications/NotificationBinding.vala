@@ -68,8 +68,9 @@ public class Nuvola.NotificationBinding: ObjectBinding<NotificationInterface> {
         bool resident = request.pop_bool();
         string? category = request.pop_string();
         foreach (var object in objects)
-        if (object.update(name, title, message, icon_name, icon_path, resident, category))
-        break;
+        if (object.update(name, title, message, icon_name, icon_path, resident, category)) {
+            break;
+        }
         request.respond(null);
     }
 
@@ -78,8 +79,9 @@ public class Nuvola.NotificationBinding: ObjectBinding<NotificationInterface> {
         string? name = request.pop_string();
         string[] actions = request.pop_strv();
         foreach (NotificationInterface object in objects)
-        if (object.set_actions(name, (owned) actions))
-        break;
+        if (object.set_actions(name, (owned) actions)) {
+            break;
+        }
         request.respond(null);
     }
 
@@ -87,8 +89,9 @@ public class Nuvola.NotificationBinding: ObjectBinding<NotificationInterface> {
         check_not_empty();
         string? name = request.pop_string();
         foreach (NotificationInterface object in objects)
-        if (object.remove_actions(name))
-        break;
+        if (object.remove_actions(name)) {
+            break;
+        }
         request.respond(null);
     }
 
@@ -97,8 +100,9 @@ public class Nuvola.NotificationBinding: ObjectBinding<NotificationInterface> {
         string? name = request.pop_string();
         bool force = request.pop_bool();
         foreach (NotificationInterface object in objects)
-        if (object.show(name, force))
-        break;
+        if (object.show(name, force)) {
+            break;
+        }
         request.respond(null);
     }
 }

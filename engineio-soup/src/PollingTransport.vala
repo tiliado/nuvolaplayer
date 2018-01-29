@@ -43,10 +43,12 @@ public abstract class PollingTransport: Transport {
 
 
     public static PollingTransport new_for_request(Request request) {
-        if (request.jsonp_index < 0)
-        return new XhrTransport(request);
-        else
-        return new JsonpTransport(request);
+        if (request.jsonp_index < 0) {
+            return new XhrTransport(request);
+        }
+        else {
+            return new JsonpTransport(request);
+        }
     }
 
     public PollingTransport(Request request) {
@@ -124,10 +126,12 @@ public abstract class PollingTransport: Transport {
             return;
         }
 
-        if (is_binary)
-        yield handle_incoming_data(null, request.get_data_as_bytes());
-        else
-        yield handle_incoming_data(request.get_data_as_string(), null);
+        if (is_binary) {
+            yield handle_incoming_data(null, request.get_data_as_bytes());
+        }
+        else {
+            yield handle_incoming_data(request.get_data_as_string(), null);
+        }
 
         if (this.data_response != null) {
             response.status_code = 200;
@@ -235,10 +239,12 @@ public abstract class PollingTransport: Transport {
         if (!http_compression || !compress) {
             poll_response.headers["Content-Length"] = (is_string ? str_data.length : bin_data.length).to_string();
             poll_response.status_code = 200;
-            if (is_string)
-            poll_response.end_string(str_data);
-            else
-            poll_response.end_bytes(bin_data);
+            if (is_string) {
+                poll_response.end_string(str_data);
+            }
+            else {
+                poll_response.end_bytes(bin_data);
+            }
 
             return;
         }
@@ -265,14 +271,16 @@ public abstract class PollingTransport: Transport {
         if (writable) {
             message("Transport writable - closing right away");
             send_one(new Packet(PacketType.CLOSE, null, null));
-            if (callback != null)
-            callback();
+            if (callback != null) {
+                callback();
+            }
             on_close();
         }
         else if (discarded) {
             message("transport discarded - closing right away");
-            if (callback != null)
-            callback();
+            if (callback != null) {
+                callback();
+            }
             on_close();
         }
         else {

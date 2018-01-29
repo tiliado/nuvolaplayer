@@ -55,13 +55,15 @@ public class ComponentsManager: Gtk.Stack {
         scroll.add(grid);
         scroll.show();
         add_named(scroll, "list");
-        if (tiliado_activation != null)
-        tiliado_activation.user_info_updated.connect(on_user_info_updated);
+        if (tiliado_activation != null) {
+            tiliado_activation.user_info_updated.connect(on_user_info_updated);
+        }
     }
 
     ~ComponentsManager() {
-        if (tiliado_activation != null)
-        tiliado_activation.user_info_updated.disconnect(on_user_info_updated);
+        if (tiliado_activation != null) {
+            tiliado_activation.user_info_updated.disconnect(on_user_info_updated);
+        }
     }
 
     public void refresh() {
@@ -78,8 +80,9 @@ public class ComponentsManager: Gtk.Stack {
 
         var row = 0;
         foreach (Component component in components) {
-            if (component.hidden && !component.enabled)
-            continue;
+            if (component.hidden && !component.enabled) {
+                continue;
+            }
             if (row > 0) {
                 var separator = new Gtk.Separator(Gtk.Orientation.HORIZONTAL);
                 separator.hexpand = true;
@@ -103,12 +106,15 @@ public class ComponentsManager: Gtk.Stack {
         }
         else {
             Gtk.Widget? widget;
-            if (!is_component_membership_ok(component))
-            widget = membership_widget.change_component(component);
-            else if (!is_component_available(component))
-            widget = component_not_available_widget;
-            else
-            widget = component.get_settings();
+            if (!is_component_membership_ok(component)) {
+                widget = membership_widget.change_component(component);
+            }
+            else if (!is_component_available(component)) {
+                widget = component_not_available_widget;
+            }
+            else {
+                widget = component.get_settings();
+            }
             component_settings = new Settings(this, component, widget);
             this.add(component_settings.widget);
             this.visible_child = component_settings.widget;
@@ -192,17 +198,20 @@ public class ComponentsManager: Gtk.Stack {
         ~Row() {
             component.notify.disconnect(on_notify);
             checkbox.notify.disconnect(on_notify);
-            if (button != null)
-            button.clicked.disconnect(on_settings_clicked);
+            if (button != null) {
+                button.clicked.disconnect(on_settings_clicked);
+            }
         }
 
         private void on_notify(GLib.Object o, ParamSpec p) {
             switch (p.name) {
             case "enabled":
-                if (checkbox.active != component.enabled)
-                checkbox.active = component.enabled;
-                if (button != null)
-                button.sensitive = checkbox.active;
+                if (checkbox.active != component.enabled) {
+                    checkbox.active = component.enabled;
+                }
+                if (button != null) {
+                    button.sensitive = checkbox.active;
+                }
                 break;
             case "active":
                 component.toggle(checkbox.active);

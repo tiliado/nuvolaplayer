@@ -85,8 +85,9 @@ public class Config : GLib.Object, Drt.KeyValueStorage {
     public Variant? get_value(string key) {
         string? member_name;
         unowned Json.Object? object = get_parent_object(key, out member_name);
-        if (object == null || !object.has_member(member_name))
-        return defaults.get(key);
+        if (object == null || !object.has_member(member_name)) {
+            return defaults.get(key);
+        }
 
         try {
             return Json.gvariant_deserialize(object.get_member(member_name), null);
@@ -126,10 +127,12 @@ public class Config : GLib.Object, Drt.KeyValueStorage {
     }
 
     protected void set_default_value_unboxed(string key, Variant? value) {
-        if (value == null)
-        defaults.remove(key);
-        else
-        defaults.insert(key, value);
+        if (value == null) {
+            defaults.remove(key);
+        }
+        else {
+            defaults.insert(key, value);
+        }
     }
 
     public void unset(string key) {
@@ -162,17 +165,20 @@ public class Config : GLib.Object, Drt.KeyValueStorage {
         string[] keys = key.split(".");
         unowned Json.Node node = root;
         for (var i = 0; i < keys.length - 1; i++) {
-            if (node.get_node_type() != Json.NodeType.OBJECT)
-            return null;
+            if (node.get_node_type() != Json.NodeType.OBJECT) {
+                return null;
+            }
             Json.Object object = node.get_object();
             string name = keys[i];
-            if (!object.has_member(name))
-            return null;
+            if (!object.has_member(name)) {
+                return null;
+            }
             node = object.get_member(name);
         }
 
-        if (node.get_node_type() != Json.NodeType.OBJECT)
-        return null;
+        if (node.get_node_type() != Json.NodeType.OBJECT) {
+            return null;
+        }
 
         member_name = keys[keys.length - 1];
         return node.get_object();
@@ -183,8 +189,9 @@ public class Config : GLib.Object, Drt.KeyValueStorage {
         string[] keys = key.split(".");
         unowned Json.Node node = root;
         for (var i = 0; i < keys.length - 1; i++) {
-            if (node.get_node_type() != Json.NodeType.OBJECT)
-            return null;
+            if (node.get_node_type() != Json.NodeType.OBJECT) {
+                return null;
+            }
             Json.Object object = node.get_object();
             string? name = keys[i];
             if (!object.has_member(name)) {
@@ -195,16 +202,18 @@ public class Config : GLib.Object, Drt.KeyValueStorage {
             node = object.get_member(name);
         }
 
-        if (node.get_node_type() != Json.NodeType.OBJECT)
-        return null;
+        if (node.get_node_type() != Json.NodeType.OBJECT) {
+            return null;
+        }
 
         member_name = keys[keys.length - 1];
         return node.get_object();
     }
 
     private void on_changed(string key, Variant? old_value) {
-        if (save_cb_id != 0)
-        Source.remove(save_cb_id);
+        if (save_cb_id != 0) {
+            Source.remove(save_cb_id);
+        }
         save_cb_id = Timeout.add(250, save_cb);
     }
 

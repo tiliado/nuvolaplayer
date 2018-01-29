@@ -31,16 +31,18 @@ public interface JSExecutor: GLib.Object {
     public string? send_data_request_string(string name, string key, string? default_value=null) throws GLib.Error {
         Variant? default_variant = default_value == null ? null : new Variant.string(default_value);
         Variant? variant = send_data_request_variant(name, key, default_variant);
-        if (variant == null || !variant.is_of_type(VariantType.STRING))
-        return null;
+        if (variant == null || !variant.is_of_type(VariantType.STRING)) {
+            return null;
+        }
         string? result = variant.get_string();
         return result != "" ? result : null;
     }
 
     public bool send_data_request_bool(string name, string key, bool default_value) throws GLib.Error {
         Variant? variant = send_data_request_variant(name, key, new Variant.boolean(default_value));
-        if (variant == null || !variant.is_of_type(VariantType.BOOLEAN))
-        return default_value;
+        if (variant == null || !variant.is_of_type(VariantType.BOOLEAN)) {
+            return default_value;
+        }
         return variant.get_boolean();
     }
 

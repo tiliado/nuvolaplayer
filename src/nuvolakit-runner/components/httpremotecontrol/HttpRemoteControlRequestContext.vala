@@ -69,10 +69,12 @@ public class RequestContext {
             mime_type = null;
         }
 
-        if (mime_type == null)
-        mime_type = "application/octet-stream";
-        else if (mime_type == "text/plain")
-        mime_type += "; charset=utf8";
+        if (mime_type == null) {
+            mime_type = "application/octet-stream";
+        }
+        else if (mime_type == "text/plain") {
+            mime_type += "; charset=utf8";
+        }
         try {
             uint8[] data;
             file.load_contents(null, out data, null);

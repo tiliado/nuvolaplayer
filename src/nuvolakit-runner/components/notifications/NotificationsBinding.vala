@@ -52,8 +52,9 @@ public class Nuvola.NotificationsBinding: ObjectBinding<NotificationsInterface> 
         bool force = request.pop_bool();
         string? category = request.pop_string();
         foreach (NotificationsInterface object in objects)
-        if (object.show_anonymous(title, message, icon_name, icon_path, force, category))
-        break;
+        if (object.show_anonymous(title, message, icon_name, icon_path, force, category)) {
+            break;
+        }
         request.respond(null);
     }
 
@@ -61,8 +62,9 @@ public class Nuvola.NotificationsBinding: ObjectBinding<NotificationsInterface> 
         check_not_empty();
         bool supported = false;
         foreach (NotificationsInterface object in objects)
-        if (object.is_persistence_supported(ref supported))
-        break;
+        if (object.is_persistence_supported(ref supported)) {
+            break;
+        }
         request.respond(new Variant.boolean(supported));
     }
 }

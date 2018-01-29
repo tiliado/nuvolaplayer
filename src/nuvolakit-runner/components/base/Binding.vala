@@ -60,8 +60,9 @@ public abstract class Nuvola.Binding<ObjectType>: GLib.Object {
     }
 
     protected void check_not_empty() throws Drt.RpcError {
-        if (!active)
-        throw new Drt.RpcError.UNSUPPORTED("Binding %s has no registered components.", name);
+        if (!active) {
+            throw new Drt.RpcError.UNSUPPORTED("Binding %s has no registered components.", name);
+        }
     }
 
     protected void bind(string method, Drt.RpcFlags flags, string? description, owned Drt.RpcHandler handler, Drt.RpcParam[]? params) {
@@ -100,8 +101,9 @@ public abstract class Nuvola.ObjectBinding<ObjectType>: Binding<ObjectType> {
     }
 
     public bool add(GLib.Object object) {
-        if (!(object is ObjectType))
-        return false;
+        if (!(object is ObjectType)) {
+            return false;
+        }
 
         objects.prepend(object);
         if (objects.length == 1) {
@@ -113,12 +115,14 @@ public abstract class Nuvola.ObjectBinding<ObjectType>: Binding<ObjectType> {
     }
 
     public bool remove(GLib.Object object) {
-        if (!(object is ObjectType))
-        return false;
+        if (!(object is ObjectType)) {
+            return false;
+        }
 
         objects.remove((ObjectType) object);
-        if (objects.length == 0)
-        unbind_methods();
+        if (objects.length == 0) {
+            unbind_methods();
+        }
 
         object_removed((ObjectType) object);
         return true;

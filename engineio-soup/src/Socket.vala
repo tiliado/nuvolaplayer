@@ -165,8 +165,9 @@ public class Socket : GLib.Object {
      * @param discard    whether to discard pending data
      */
     public void close(bool discard=false) {
-        if (ready_state != ReadyState.OPEN)
-        return;
+        if (ready_state != ReadyState.OPEN) {
+            return;
+        }
 
         ready_state = ReadyState.CLOSING;
         if (write_buffer != null) {
@@ -189,8 +190,9 @@ public class Socket : GLib.Object {
      * @api private
      */
     private void close_transport(bool discard) {
-        if (discard)
-        transport.discard();
+        if (discard) {
+            transport.discard();
+        }
         transport.closed.connect(on_transport_force_closed);
         transport.close(null);
     }
@@ -366,10 +368,12 @@ public class Socket : GLib.Object {
                 heartbeat();
                 break;
             case PacketType.MESSAGE:
-                if (packet.str_data != null)
-                message_received(packet.str_data);
-                else if (packet.bin_data != null)
-                bytes_received(packet.bin_data);
+                if (packet.str_data != null) {
+                    message_received(packet.str_data);
+                }
+                else if (packet.bin_data != null) {
+                    bytes_received(packet.bin_data);
+                }
                 break;
             }
         }
@@ -420,9 +424,10 @@ public class Socket : GLib.Object {
 
     private void on_draining(Transport transport) {
         flush();
-        if (sent_callbacks != null)
-        foreach (unowned SendAdaptor adaptor in sent_callbacks)
-        Idle.add(adaptor.source_func);
+        if (sent_callbacks != null) {
+            foreach (unowned SendAdaptor adaptor in sent_callbacks)
+            Idle.add(adaptor.source_func);
+        }
     }
 }
 

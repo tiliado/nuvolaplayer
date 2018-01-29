@@ -78,10 +78,12 @@ public class PasswordManager {
             else {
                 var entry = new LoginCredentials(username, password);
                 int index = entries.index(entry);
-                if (index >= 0)
-                entries[index] = entry;
-                else
-                entries.prepend(entry);
+                if (index >= 0) {
+                    entries[index] = entry;
+                }
+                else {
+                    entries.prepend(entry);
+                }
             }
         }
         this.passwords = credentials;

@@ -119,8 +119,9 @@ public class FormatSupportScreen: Gtk.Notebook {
         unowned List<WebPlugin?> plugins = format_support.list_web_plugins();
         foreach (unowned WebPlugin plugin in plugins) {
             unowned Gtk.Grid grid = plugin.is_flash ? flash_plugins_grid : other_plugins_grid;
-            if (grid.get_child_at(0, 0) != null)
-            grid.add(new Gtk.Separator(Gtk.Orientation.HORIZONTAL));
+            if (grid.get_child_at(0, 0) != null) {
+                grid.add(new Gtk.Separator(Gtk.Orientation.HORIZONTAL));
+            }
 
             label = new Gtk.Label(Markup.printf_escaped(
                 "<b>%s</b> (%s)", plugin.name, plugin.enabled ? "enabled" : "disabled"));
@@ -147,16 +148,19 @@ public class FormatSupportScreen: Gtk.Notebook {
             info_bar.get_content_area().add(new Gtk.Label(format_support.n_flash_plugins == 0
                 ? "No Flash plugins have been found."
                 : "Too many Flash plugins have been found, wrong version may have been used."));
-            if (format_support.n_flash_plugins == 0)
-            info_bar.add_button("Help", 0).clicked.connect(() => {app.show_uri(WEB_APP_REQUIREMENTS_HELP_URL);});
+            if (format_support.n_flash_plugins == 0) {
+                info_bar.add_button("Help", 0).clicked.connect(() => {app.show_uri(WEB_APP_REQUIREMENTS_HELP_URL);});
+            }
             info_bar.show_all();
             plugins_view.attach(info_bar, 0, 2, 2, 1);
         }
 
-        if (flash_plugins_grid.get_children() == null)
-        flash_plugins_grid.get_parent().hide();
-        if (other_plugins_grid.get_children() == null)
-        other_plugins_grid.get_parent().hide();
+        if (flash_plugins_grid.get_children() == null) {
+            flash_plugins_grid.get_parent().hide();
+        }
+        if (other_plugins_grid.get_children() == null) {
+            other_plugins_grid.get_parent().hide();
+        }
 
         plugins_view.show();
         append_page(scrolled_window, new Gtk.Label("Web Plugins"));
@@ -262,10 +266,12 @@ public class FormatSupportScreen: Gtk.Notebook {
                 bool result = pipeline.check.end(res);
                 pipeline = null;
                 update_result_text(result);
-                if (result)
-                add_message("Info", "Playback has been successful.");
-                else
-                add_message("Error", "Playback has failed.");
+                if (result) {
+                    add_message("Info", "Playback has been successful.");
+                }
+                else {
+                    add_message("Error", "Playback has failed.");
+                }
                 set_button_label();
             });
         }

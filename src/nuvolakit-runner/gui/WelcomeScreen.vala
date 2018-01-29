@@ -109,8 +109,9 @@ public class WelcomeScreen : Gtk.Grid {
 
     #if !NUVOLA_LITE
     private void on_load_changed(WebKit.WebView view, WebKit.LoadEvent event) {
-        if (event == WebKit.LoadEvent.FINISHED)
-        set_web_view_height();
+        if (event == WebKit.LoadEvent.FINISHED) {
+            set_web_view_height();
+        }
     }
 
     private bool set_web_view_height() {
@@ -130,8 +131,9 @@ public class WelcomeScreen : Gtk.Grid {
             int page_height = int.parse(web_view.title);
             int width; int height;
             web_view.get_size_request(out width, out height);
-            if (height < page_height && page_height > 100)
-            web_view.set_size_request(width, page_height);
+            if (height < page_height && page_height > 100) {
+                web_view.set_size_request(width, page_height);
+            }
         }
         catch (GLib.Error e) {
             debug("JavaScript error: %s", e.message);
@@ -146,8 +148,9 @@ public class WelcomeScreen : Gtk.Grid {
     #if !NUVOLA_LITE
     private bool decide_navigation_policy(bool new_window, WebKit.NavigationPolicyDecision decision) {
         string uri = decision.navigation_action.get_request().uri;
-        if (!uri.has_prefix("http://") && !uri.has_prefix("https://") || uri == PATRONS_BOX_URI)
-        return false;
+        if (!uri.has_prefix("http://") && !uri.has_prefix("https://") || uri == PATRONS_BOX_URI) {
+            return false;
+        }
 
         show_uri(uri);
         decision.ignore();

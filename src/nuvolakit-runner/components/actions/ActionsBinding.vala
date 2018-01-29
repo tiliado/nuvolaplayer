@@ -110,11 +110,13 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface> {
         string? icon = request.pop_string();
         string? keybinding = request.pop_string();
         Variant? state = request.pop_variant();
-        if (state != null && state.get_type_string() == "mv")
-        state = null;
+        if (state != null && state.get_type_string() == "mv") {
+            state = null;
+        }
         foreach (ActionsInterface object in objects)
-        if (object.add_action(group, scope, action_name, label, mnemo_label, icon, keybinding, state))
-        break;
+        if (object.add_action(group, scope, action_name, label, mnemo_label, icon, keybinding, state)) {
+            break;
+        }
         request.respond(null);
     }
 
@@ -147,8 +149,9 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface> {
             options[i++] = new Drtgtk.RadioOption(parameter, label, mnemo_label, icon, keybinding);
         }
         foreach (ActionsInterface object in objects)
-        if (object.add_radio_action(group, scope, action_name, state, options))
-        break;
+        if (object.add_radio_action(group, scope, action_name, state, options)) {
+            break;
+        }
         request.respond(null);
     }
 
@@ -157,8 +160,9 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface> {
         string action_name = request.pop_string();
         bool enabled = false;
         foreach (ActionsInterface object in objects)
-        if (object.is_enabled(action_name, ref enabled))
-        break;
+        if (object.is_enabled(action_name, ref enabled)) {
+            break;
+        }
         request.respond(new Variant.boolean(enabled));
     }
 
@@ -167,8 +171,9 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface> {
         string? action_name = request.pop_string();
         bool enabled = request.pop_bool();
         foreach (ActionsInterface object in objects)
-        if (object.set_enabled(action_name, enabled))
-        break;
+        if (object.set_enabled(action_name, enabled)) {
+            break;
+        }
         request.respond(null);
     }
 
@@ -177,8 +182,9 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface> {
         string? action_name = request.pop_string();
         Variant? state = null;
         foreach (ActionsInterface object in objects)
-        if (object.get_state(action_name, ref state))
-        break;
+        if (object.get_state(action_name, ref state)) {
+            break;
+        }
         request.respond(state);
     }
 
@@ -187,8 +193,9 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface> {
         string? action_name = request.pop_string();
         Variant? state = request.pop_variant();
         foreach (ActionsInterface object in objects)
-        if (object.set_state(action_name, state))
-        break;
+        if (object.set_state(action_name, state)) {
+            break;
+        }
         request.respond(null);
     }
 
@@ -198,8 +205,9 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface> {
         Variant? parameter = request.pop_variant();
         bool handled = false;
         foreach (ActionsInterface object in objects)
-        if (handled = object.activate(action_name, parameter))
-        break;
+        if (handled = object.activate(action_name, parameter)) {
+            break;
+        }
 
         request.respond(new Variant.boolean(handled));
     }
@@ -213,8 +221,9 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface> {
             foreach (unowned string group in groups_list)
             groups_set.add(group);
 
-            if (done)
-            break;
+            if (done) {
+                break;
+            }
         }
         var builder = new VariantBuilder(new VariantType ("as"));
         List<unowned string> groups = groups_set.get_values();
@@ -248,8 +257,9 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface> {
                 }
                 builder.close();
             }
-            if (done)
-            break;
+            if (done) {
+                break;
+            }
         }
         request.respond(builder.end());
     }

@@ -66,18 +66,22 @@ public int main(string[] args) {
         : (Args.verbose ? GLib.LogLevelFlags.LEVEL_INFO: GLib.LogLevelFlags.LEVEL_WARNING),
         true, "Runner");
 
-    if (Environment.get_variable("NUVOLA_TEST_ABORT") == "runner")
-    error("App runner abort requested.");
+    if (Environment.get_variable("NUVOLA_TEST_ABORT") == "runner") {
+        error("App runner abort requested.");
+    }
 
     File app_dir = File.new_for_path(Args.app_dir);
-    if (Args.version)
-    return Nuvola.Startup.print_web_app_version(stdout, app_dir);
+    if (Args.version) {
+        return Nuvola.Startup.print_web_app_version(stdout, app_dir);
+    }
 
     try {
-        if (Args.nuvola_dbus)
-        return Nuvola.Startup.run_web_app_with_dbus_handshake(app_dir, args);
-        else
-        return Nuvola.Startup.run_web_app_as_subprocess(app_dir, stdin.read_line(), args);
+        if (Args.nuvola_dbus) {
+            return Nuvola.Startup.run_web_app_with_dbus_handshake(app_dir, args);
+        }
+        else {
+            return Nuvola.Startup.run_web_app_as_subprocess(app_dir, stdin.read_line(), args);
+        }
     }
     catch (WebAppError e) {
         stderr.puts("Failed to load web app!\n");

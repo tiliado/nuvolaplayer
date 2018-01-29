@@ -53,26 +53,32 @@ public class LoginForm: GLib.Object {
 
     public void subscribe() {
         form.add_event_listener("submit", on_form_submitted, false);
-        if (username != null)
-        username.add_event_listener("blur", on_username_changed, false);
-        if (submit != null)
-        submit.add_event_listener("mousedown", on_form_submitted, false);
+        if (username != null) {
+            username.add_event_listener("blur", on_username_changed, false);
+        }
+        if (submit != null) {
+            submit.add_event_listener("mousedown", on_form_submitted, false);
+        }
     }
 
     public void unsubscribe() {
         form.remove_event_listener("submit", LoginForm.on_form_submitted, false);
-        if (submit != null)
-        submit.remove_event_listener("mousedown", LoginForm.on_form_submitted, false);
-        if (username != null)
-        username.remove_event_listener("blur", LoginForm.on_username_changed, false);
+        if (submit != null) {
+            submit.remove_event_listener("mousedown", LoginForm.on_form_submitted, false);
+        }
+        if (username != null) {
+            username.remove_event_listener("blur", LoginForm.on_username_changed, false);
+        }
     }
 
     public void fill(string? username, string? password, bool force) {
         WebKit.DOM.Element? active_element = form.owner_document.active_element;
-        if (this.username != null && username != null && username[0] != '\0' && (force || this.username != active_element))
-        this.username.value = username;
-        if (this.password != null && password != null && password[0] != '\0' && (force || this.password != active_element))
-        this.password.value = password;
+        if (this.username != null && username != null && username[0] != '\0' && (force || this.username != active_element)) {
+            this.username.value = username;
+        }
+        if (this.password != null && password != null && password[0] != '\0' && (force || this.password != active_element)) {
+            this.password.value = password;
+        }
     }
 
     private void on_form_submitted(EventTarget target, Event event) {
@@ -80,19 +86,24 @@ public class LoginForm: GLib.Object {
         if (LoginFormManager.find_login_form_entries(form, out username, out password, out submit)) {
             string? username_value = username != null ? username.value : "";
             string? password_value = password.value;
-            if (this.username != null)
-            this.username.remove_event_listener("blur", LoginForm.on_username_changed, false);
+            if (this.username != null) {
+                this.username.remove_event_listener("blur", LoginForm.on_username_changed, false);
+            }
             this.username = username;
-            if (username != null)
-            username.add_event_listener("blur", on_username_changed, false);
+            if (username != null) {
+                username.add_event_listener("blur", on_username_changed, false);
+            }
             this.password = password;
-            if (this.submit != null)
-            this.username.remove_event_listener("mousedown", LoginForm.on_form_submitted, false);
+            if (this.submit != null) {
+                this.username.remove_event_listener("mousedown", LoginForm.on_form_submitted, false);
+            }
             this.submit = submit;
-            if (this.submit != null)
-            this.username.add_event_listener("mousedown", on_form_submitted, false);
-            if (username_value != null && password_value != null && username_value != "" && password_value != "")
-            new_credentials(this.uri.host, username_value, password_value);
+            if (this.submit != null) {
+                this.username.add_event_listener("mousedown", on_form_submitted, false);
+            }
+            if (username_value != null && password_value != null && username_value != "" && password_value != "") {
+                new_credentials(this.uri.host, username_value, password_value);
+            }
         }
         Timeout.add_seconds(5, refresh_cb);
     }
@@ -100,17 +111,21 @@ public class LoginForm: GLib.Object {
     private bool refresh_cb() {
         HTMLInputElement? username; HTMLInputElement password; HTMLElement? submit;
         if (LoginFormManager.find_login_form_entries(form, out username, out password, out submit)) {
-            if (this.username != null)
-            this.username.remove_event_listener("blur", LoginForm.on_username_changed, false);
+            if (this.username != null) {
+                this.username.remove_event_listener("blur", LoginForm.on_username_changed, false);
+            }
             this.username = username;
-            if (username != null)
-            username.add_event_listener("blur", on_username_changed, false);
+            if (username != null) {
+                username.add_event_listener("blur", on_username_changed, false);
+            }
             this.password = password;
-            if (this.submit != null)
-            this.username.remove_event_listener("mousedown", LoginForm.on_form_submitted, false);
+            if (this.submit != null) {
+                this.username.remove_event_listener("mousedown", LoginForm.on_form_submitted, false);
+            }
             this.submit = submit;
-            if (this.submit != null)
-            this.username.add_event_listener("mousedown", on_form_submitted, false);
+            if (this.submit != null) {
+                this.username.add_event_listener("mousedown", on_form_submitted, false);
+            }
             username_changed(this.uri.host, username != null ? username.value : "");
         }
         return true;

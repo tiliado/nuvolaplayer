@@ -44,8 +44,9 @@ private void check_gstreamer_cache() {
     if (!gstreamer_nuvola_tag.query_exists(null)) {
         debug("Nuvola GStreamer cache tag does not exist. %s", gstreamer_nuvola_tag.get_path());
         try {
-            if (gstreamer_cache_dir.query_exists(null))
-            Drt.System.purge_directory_content(gstreamer_cache_dir, true);
+            if (gstreamer_cache_dir.query_exists(null)) {
+                Drt.System.purge_directory_content(gstreamer_cache_dir, true);
+            }
             Drt.System.make_dirs(gstreamer_cache_dir);
             Drt.System.overwrite_file(gstreamer_nuvola_tag, "Nuvola");
         }

@@ -40,12 +40,14 @@ public class JsEnvironment: GLib.Object, JSExecutor {
             return _main_object;
         }
         set {
-            if (_main_object != null)
-            _main_object.unprotect(context);
+            if (_main_object != null) {
+                _main_object.unprotect(context);
+            }
 
             _main_object = value;
-            if (_main_object != null)
-            _main_object.protect(context);
+            if (_main_object != null) {
+                _main_object.protect(context);
+            }
         }
     }
 
@@ -94,8 +96,9 @@ public class JsEnvironment: GLib.Object, JSExecutor {
     public unowned Value execute_script(string script, string path = "about:blank", int line=1) throws JSError {
         JS.Value exception = null;
         unowned Value value = context.evaluate_script(new JS.String(script), main_object, new JS.String(path), line, out exception);
-        if (exception != null)
-        throw new JSError.EXCEPTION(JSTools.exception_to_string(context, exception));
+        if (exception != null) {
+            throw new JSError.EXCEPTION(JSTools.exception_to_string(context, exception));
+        }
         return value;
     }
 
@@ -103,19 +106,23 @@ public class JsEnvironment: GLib.Object, JSExecutor {
         unowned JS.Context ctx = context;
         string[] names = name.split(".");
         unowned JS.Object? object = main_object;
-        if (object == null)
-        throw new JSError.NOT_FOUND("Main object not found.'");
+        if (object == null) {
+            throw new JSError.NOT_FOUND("Main object not found.'");
+        }
         for (var i = 1; i < names.length - 1; i++) {
             object = o_get_object(ctx, object, names[i]);
-            if (object == null)
-            throw new JSError.NOT_FOUND("Attribute '%s' not found.'", names[i]);
+            if (object == null) {
+                throw new JSError.NOT_FOUND("Attribute '%s' not found.'", names[i]);
+            }
         }
 
         unowned JS.Object? func = o_get_object(ctx, object, names[names.length - 1]);
-        if (func == null)
-        throw new JSError.NOT_FOUND("Attribute '%s' not found.'", names[names.length - 1]);
-        if (!func.is_function(ctx))
-        throw new JSError.WRONG_TYPE("'%s' is not a function.'", name);
+        if (func == null) {
+            throw new JSError.NOT_FOUND("Attribute '%s' not found.'", names[names.length - 1]);
+        }
+        if (!func.is_function(ctx)) {
+            throw new JSError.WRONG_TYPE("'%s' is not a function.'", name);
+        }
 
         //~         debug("Args before: %s", args.print(true));
         (unowned JS.Value)[] params;
@@ -134,8 +141,9 @@ public class JsEnvironment: GLib.Object, JSExecutor {
 
         JS.Value? exception;
         func.call_as_function(ctx, object, params, out exception);
-        if (exception != null)
-        throw new JSError.FUNC_FAILED("Function '%s' failed. %s", name, exception_to_string(ctx, exception) ?? "(null)");
+        if (exception != null) {
+            throw new JSError.FUNC_FAILED("Function '%s' failed. %s", name, exception_to_string(ctx, exception) ?? "(null)");
+        }
 
         if (args != null) {
             Variant[] items = new Variant[size];

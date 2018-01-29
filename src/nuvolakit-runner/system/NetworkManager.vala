@@ -25,8 +25,9 @@
 namespace Nuvola.Nm {
 
 private static T[]? get_proxies<T>(BusType bus, string name, ObjectPath[]? entries) {
-    if (entries == null || entries.length == 0)
-    return null;
+    if (entries == null || entries.length == 0) {
+        return null;
+    }
     try {
         var result = new T[entries.length];
         for (var i = 0; i < entries.length; i++)
@@ -61,8 +62,9 @@ public interface ActiveConnection : GLib.Object {
     [DBus(visible=false)]
     public Ip4Config? get_ip4_config() {
         ObjectPath? path = Ip4Config;
-        if (path == null)
-        return null;
+        if (path == null) {
+            return null;
+        }
         try {
             return Bus.get_proxy_sync<Ip4Config>(BusType.SYSTEM, BUS_NAME, path, 0, null);
         }
@@ -78,8 +80,9 @@ public interface Ip4Config : GLib.Object {
     public uint[]? get_addresses() {
         uint[] result = {};
         Variant? addresses = (this as DBusProxy).get_cached_property("Addresses");
-        if (addresses == null)
-        return null;
+        if (addresses == null) {
+            return null;
+        }
         if (!addresses.is_of_type(new VariantType("aau"))) {
             warning(
                 "Wrong type of the org.freedesktop.NetworkManager.IP4Config.Addresses property: %s. %s",
@@ -102,8 +105,9 @@ public interface Ip4Config : GLib.Object {
 
 public static async NetworkManager? get_client(Cancellable? cancellable) throws GLib.Error {
     NetworkManager? nm = yield Bus.get_proxy<NetworkManager>(BusType.SYSTEM, BUS_NAME, "/org/freedesktop/NetworkManager", 0, cancellable);
-    if (nm != null)
-    nm.check_connectivity();
+    if (nm != null) {
+        nm.check_connectivity();
+    }
     return nm;
 }
 

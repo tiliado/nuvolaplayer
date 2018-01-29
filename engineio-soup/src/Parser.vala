@@ -44,8 +44,9 @@ public errordomain Error {
  * @return a number of UTF-16 code points
  */
 public int utf16_strlen(string? str) {
-    if (str == null)
-    return 0;
+    if (str == null) {
+        return 0;
+    }
     int len = 0;
     unichar c = 0;
     int i = 0;
@@ -63,8 +64,9 @@ public int utf16_strlen(string? str) {
  * @return The payload encoded as a data string or null if there are no packets.
  */
 public string? encode_payload(SList<Packet> packets) {
-    if (packets == null)
-    return null;
+    if (packets == null) {
+        return null;
+    }
 
     var buffer = new StringBuilder();
     foreach (unowned Packet packet in packets) {
@@ -94,8 +96,9 @@ public Bytes? encode_payload_as_bytes(SList<Packet> packets) {
  * @return The packet encoded as a string.
  */
 public string encode_packet(Packet packet) {
-    if (packet.bin_data != null)
-    return "b%d".printf((int) packet.type) + Base64.encode((uchar[]) packet.bin_data.get_data());
+    if (packet.bin_data != null) {
+        return "b%d".printf((int) packet.type) + Base64.encode((uchar[]) packet.bin_data.get_data());
+    }
     string type = ((int) packet.type).to_string();
     return packet.str_data != null ? type + packet.str_data : type;
 }
@@ -111,8 +114,9 @@ public Bytes encode_packet_as_bytes(Packet packet) {
     int data_size = bytes != null ? bytes.length : 0;
     var buffer = new ByteArray.sized(1 + data_size);
     buffer.append(new uint8[] {(uint8) packet.type});
-    if (data_size > 0)
-    buffer.append(bytes.get_data());
+    if (data_size > 0) {
+        buffer.append(bytes.get_data());
+    }
     return ByteArray.free_to_bytes((owned) buffer);
 }
 
@@ -126,13 +130,16 @@ public Bytes encode_packet_as_bytes(Packet packet) {
  * @throw Error on decode failure.
  */
 public Packet decode_packet(owned string data) throws Error {
-    if (data[0] == '\0')
-    throw new Error.EMPTY_DATA("Data string is empty.");
-    if (data[0] == 'b')
-    return decode_base64_packet((owned) data, 1);
+    if (data[0] == '\0') {
+        throw new Error.EMPTY_DATA("Data string is empty.");
+    }
+    if (data[0] == 'b') {
+        return decode_base64_packet((owned) data, 1);
+    }
     int type = int.parse(data.substring(0, 1));
-    if (type < 0 || type > (int) PacketType.NOOP)
-    throw new Error.INVALID_TYPE("Invalid packet type: %d.", type);
+    if (type < 0 || type > (int) PacketType.NOOP) {
+        throw new Error.INVALID_TYPE("Invalid packet type: %d.", type);
+    }
     return new Packet((PacketType) type, data.substring(1), null);
 }
 
@@ -146,11 +153,13 @@ public Packet decode_packet(owned string data) throws Error {
  */
 private Packet decode_base64_packet(owned string data, int offset=0) throws Error {
     int size = data.length;
-    if (offset < 0 || offset >= size)
-    throw new Error.INVALID_OFFSET("Data string offset %d is invalid. Data size is %d.", offset, size);
+    if (offset < 0 || offset >= size) {
+        throw new Error.INVALID_OFFSET("Data string offset %d is invalid. Data size is %d.", offset, size);
+    }
     int type = int.parse(data.substring(offset, 1));
-    if (type < 0 || type > (int) PacketType.NOOP)
-    throw new Error.INVALID_TYPE("Invalid packet type: %d.", type);
+    if (type < 0 || type > (int) PacketType.NOOP) {
+        throw new Error.INVALID_TYPE("Invalid packet type: %d.", type);
+    }
     Bytes? bytes = null;
     if (offset + 1 < size) {
         unowned string cursor = (string)(((uint8*) data) + offset + 1);
@@ -169,12 +178,14 @@ private Packet decode_base64_packet(owned string data, int offset=0) throws Erro
  */
 public Packet decode_packet_from_bytes(Bytes bytes) throws Error {
     int size = bytes.length;
-    if (size == 0)
-    throw new Error.EMPTY_DATA("Data bytes are empty.");
+    if (size == 0) {
+        throw new Error.EMPTY_DATA("Data bytes are empty.");
+    }
     unowned uint8[] data = bytes.get_data();
     uint8 type = data[0];
-    if (type < 0 || type > (int) PacketType.NOOP)
-    throw new Error.INVALID_TYPE("Invalid packet type: %d.", type);
+    if (type < 0 || type > (int) PacketType.NOOP) {
+        throw new Error.INVALID_TYPE("Invalid packet type: %d.", type);
+    }
     return new Packet((PacketType) type, null, size > 1 ? bytes.slice(1, bytes.length - 1) : null);
 }
 
@@ -215,10 +226,12 @@ public class PayloadDecoder {
      * @throw Error on decode error.
      */
     public bool next(out Packet packet) throws Error {
-        if (binary_decoder != null)
-        return binary_decoder.next(out packet);
-        if (string_decoder != null)
-        return string_decoder.next(out packet);
+        if (binary_decoder != null) {
+            return binary_decoder.next(out packet);
+        }
+        if (string_decoder != null) {
+            return string_decoder.next(out packet);
+        }
         packet = null;
         return false;
     }
@@ -255,8 +268,9 @@ public class StringPayloadDecoder {
      */
     public bool next(out Packet packet) throws Error {
         packet = null;
-        if (exhausted || cursor >= size)
-        return false;
+        if (exhausted || cursor >= size) {
+            return false;
+        }
 
         var length = new StringBuilder();
         unowned string data = payload;
@@ -324,16 +338,18 @@ public class BinaryPayloadDecoder {
      */
     public bool next(out Packet packet) throws Error {
         packet = null;
-        if (exhausted || cursor >= size)
-        return false;
+        if (exhausted || cursor >= size) {
+            return false;
+        }
 
         unowned uint8[] data = payload.get_data();
         bool is_string = data[cursor++] == '\0';
         var length = new StringBuilder();
         var length_too_long = false;
         for (int i = cursor; i < size; i++) {
-            if (data[i] == 255)
-            break;
+            if (data[i] == 255) {
+                break;
+            }
             // 310 = char length of Number.MAX_VALUE
             if (length.len > 310) {
                 length_too_long = true;
@@ -353,8 +369,9 @@ public class BinaryPayloadDecoder {
         }
         cursor += 1 + (int) length.len;
 
-        if (packet_len == 0)
-        return next(out packet);
+        if (packet_len == 0) {
+            return next(out packet);
+        }
 
         if (is_string) {
             var buffer = new uint8[packet_len + 1];

@@ -155,8 +155,9 @@ public class JSApi : GLib.Object {
     public void inject(JsEnvironment env, HashTable<string, Variant?>? properties=null) throws JSError {
         this.env = null;
         unowned JS.Context ctx = env.context;
-        if (klass == null)
-        create_class();
+        if (klass == null) {
+            create_class();
+        }
         unowned JS.Object main_object = ctx.make_object(klass, this);
         main_object.protect(ctx);
 
@@ -195,14 +196,16 @@ public class JSApi : GLib.Object {
             main_js = null;
             foreach (File dir in storage.data_dirs) {
                 main_js = dir.get_child(JS_DIR).get_child(MAIN_JS);
-                if (main_js.query_exists())
-                break;
+                if (main_js.query_exists()) {
+                    break;
+                }
                 main_js = null;
             }
         }
 
-        if (main_js == null)
-        throw new JSError.INITIALIZATION_FAILED("Failed to find a core component main.js. This probably means the application has not been installed correctly or that component has been accidentally deleted.");
+        if (main_js == null) {
+            throw new JSError.INITIALIZATION_FAILED("Failed to find a core component main.js. This probably means the application has not been installed correctly or that component has been accidentally deleted.");
+        }
 
         try {
             env.execute_script_from_file(main_js);
@@ -212,8 +215,9 @@ public class JSApi : GLib.Object {
         }
 
         File meta_json = data_dir.get_child(META_JSON);
-        if (!meta_json.query_exists())
-        throw new JSError.INITIALIZATION_FAILED("Failed to find a web app component %s. This probably means the web app integration has not been installed correctly or that component has been accidentally deleted.", META_JSON);
+        if (!meta_json.query_exists()) {
+            throw new JSError.INITIALIZATION_FAILED("Failed to find a web app component %s. This probably means the web app integration has not been installed correctly or that component has been accidentally deleted.", META_JSON);
+        }
 
         string meta_json_data;
         try {
@@ -234,8 +238,9 @@ public class JSApi : GLib.Object {
 
     public void integrate(JsEnvironment env) throws JSError {
         File integrate_js = data_dir.get_child(INTEGRATE_JS);
-        if (!integrate_js.query_exists())
-        throw new JSError.INITIALIZATION_FAILED("Failed to find a web app component %s. This probably means the web app integration has not been installed correctly or that component has been accidentally deleted.", INTEGRATE_JS);
+        if (!integrate_js.query_exists()) {
+            throw new JSError.INITIALIZATION_FAILED("Failed to find a web app component %s. This probably means the web app integration has not been installed correctly or that component has been accidentally deleted.", INTEGRATE_JS);
+        }
 
         try {
             env.execute_script_from_file(integrate_js);

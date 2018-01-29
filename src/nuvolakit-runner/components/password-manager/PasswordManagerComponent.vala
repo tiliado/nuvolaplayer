@@ -64,10 +64,12 @@ public class PasswordManagerComponent: Component {
             warning("Failed to fetch passwords. %s", e.message);
         }
         try {
-            if (ipc_bus.web_worker != null)
-            ipc_bus.web_worker.call_sync("/nuvola/password-manager/enable", null);
-            else
-            ipc_bus.notify["web-worker"].connect_after(on_web_worker_notify);
+            if (ipc_bus.web_worker != null) {
+                ipc_bus.web_worker.call_sync("/nuvola/password-manager/enable", null);
+            }
+            else {
+                ipc_bus.notify["web-worker"].connect_after(on_web_worker_notify);
+            }
         }
         catch (GLib.Error e) {
             warning("Failed to enable the password manager: %s", e.message);
@@ -76,10 +78,12 @@ public class PasswordManagerComponent: Component {
 
     protected override bool deactivate() {
         try {
-            if (ipc_bus.web_worker != null)
-            web_worker.call_sync("/nuvola/password-manager/disable", null);
-            else
-            ipc_bus.notify["web-worker"].connect_after(on_web_worker_notify);
+            if (ipc_bus.web_worker != null) {
+                web_worker.call_sync("/nuvola/password-manager/disable", null);
+            }
+            else {
+                ipc_bus.notify["web-worker"].connect_after(on_web_worker_notify);
+            }
         }
         catch (GLib.Error e) {
             warning("Failed to disable the password manager: %s", e.message);

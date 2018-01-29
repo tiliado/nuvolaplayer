@@ -87,29 +87,33 @@ public abstract class AppRunner : GLib.Object {
     }
 
     public Variant? call_sync(string name, Variant? params) throws GLib.Error {
-        if (channel == null)
-        throw new Drt.RpcError.IOERROR("No connected to app runner '%s'.", app_id);
+        if (channel == null) {
+            throw new Drt.RpcError.IOERROR("No connected to app runner '%s'.", app_id);
+        }
 
         return channel.call_sync(name, params);
     }
 
     public async Variant? call_full(string method, Variant? params, bool allow_private, string flags) throws GLib.Error {
-        if (channel == null)
-        throw new Drt.RpcError.IOERROR("No connected to app runner '%s'.", app_id);
+        if (channel == null) {
+            throw new Drt.RpcError.IOERROR("No connected to app runner '%s'.", app_id);
+        }
 
         return yield channel.call_full(method, params, allow_private, flags);
     }
 
     public Variant? call_full_sync(string method, Variant? params, bool allow_private, string flags) throws GLib.Error {
-        if (channel == null)
-        throw new Drt.RpcError.IOERROR("No connected to app runner '%s'.", app_id);
+        if (channel == null) {
+            throw new Drt.RpcError.IOERROR("No connected to app runner '%s'.", app_id);
+        }
 
         return channel.call_full_sync(method, params, allow_private, flags);
     }
 
     private void on_notification(Drt.RpcRouter router, GLib.Object source, string path, string? detail, Variant? data) {
-        if (source == channel)
-        notification(path, detail, data);
+        if (source == channel) {
+            notification(path, detail, data);
+        }
     }
 }
 
@@ -136,16 +140,20 @@ public class SubprocessAppRunner : AppRunner {
                 string[] lines = str.split("\n");
                 int size = lines.length;
                 if (size == 1) {
-                    if (stderr_last_line != null && stderr_last_line[0] != '\0')
-                    stderr_last_line = stderr_last_line + lines[0];
-                    else
-                    stderr_last_line = lines[0];
+                    if (stderr_last_line != null && stderr_last_line[0] != '\0') {
+                        stderr_last_line = stderr_last_line + lines[0];
+                    }
+                    else {
+                        stderr_last_line = lines[0];
+                    }
                 }
                 else if (size > 1) {
-                    if (stderr_last_line != null && stderr_last_line[0] != '\0')
-                    stderr_print_line(stderr_last_line + lines[0]);
-                    else
-                    stderr_print_line(lines[0]);
+                    if (stderr_last_line != null && stderr_last_line[0] != '\0') {
+                        stderr_print_line(stderr_last_line + lines[0]);
+                    }
+                    else {
+                        stderr_print_line(lines[0]);
+                    }
                     for (var i = 1; i < size - 1; i++)
                     stderr_print_line(lines[i]);
                     stderr_last_line = lines[size - 1];
@@ -159,10 +167,12 @@ public class SubprocessAppRunner : AppRunner {
     }
 
     private void stderr_print_line(string line) {
-        if (line.has_prefix("Worker:") || line.has_prefix("Runner:"))
-        Drt.Logger.puts(line);
-        else
-        Drt.Logger.printf("Runner: %s", line);
+        if (line.has_prefix("Worker:") || line.has_prefix("Runner:")) {
+            Drt.Logger.puts(line);
+        }
+        else {
+            Drt.Logger.printf("Runner: %s", line);
+        }
         Drt.Logger.puts("\n");
     }
 

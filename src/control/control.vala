@@ -121,8 +121,9 @@ public int main(string[] args) {
             Drt.Rpc.check_type_string(response, "ms");
             response.get("ms", out Args.app);
 
-            if (Args.app == null || Args.app == "")
-            return quit(1, "Error: No %s instance is running.\n", Nuvola.get_app_name());
+            if (Args.app == null || Args.app == "") {
+                return quit(1, "Error: No %s instance is running.\n", Nuvola.get_app_name());
+            }
 
             message("Using '%s' as web app id.", Args.app);
         }
@@ -131,8 +132,9 @@ public int main(string[] args) {
         }
     }
 
-    if (Args.command.length < 1)
-    return quit(1, "Error: No command specified. Type `%s --help` for help.\n", args[0]);
+    if (Args.command.length < 1) {
+        return quit(1, "Error: No command specified. Type `%s --help` for help.\n", args[0]);
+    }
 
     Drt.RpcChannel client;
     try {
@@ -148,24 +150,29 @@ public int main(string[] args) {
     try {
         switch (command) {
         case "action":
-            if (Args.command.length < 2)
-            return quit(1, "Error: No action specified.\n");
+            if (Args.command.length < 2) {
+                return quit(1, "Error: No action specified.\n");
+            }
             return control.activate_action(Args.command[1], Args.command.length == 2 ? null : Args.command[2]);
         case "list-actions":
-            if (Args.command.length > 1)
-            return quit(1, "Error: Too many arguments.\n");
+            if (Args.command.length > 1) {
+                return quit(1, "Error: Too many arguments.\n");
+            }
             return control.list_actions();
         case "action-state":
-            if (Args.command.length < 2)
-            return quit(1, "Error: No action specified.\n");
+            if (Args.command.length < 2) {
+                return quit(1, "Error: No action specified.\n");
+            }
             return control.action_state(Args.command[1]);
         case "track-info":
-            if (Args.command.length > 2)
-            return quit(1, "Error: Too many arguments.\n");
+            if (Args.command.length > 2) {
+                return quit(1, "Error: Too many arguments.\n");
+            }
             return control.track_info(Args.command.length == 2 ? Args.command[1] : null);
         case "api-master":
-            if (Args.command.length < 2)
-            return quit(1, "Error: No API method specified.\n");
+            if (Args.command.length < 2) {
+                return quit(1, "Error: No API method specified.\n");
+            }
             try {
                 var master = new Drt.RpcChannel.from_name(1, build_master_ipc_id(), null, null, 500);
                 return call_api_method(master, Args.command, 1);
@@ -174,8 +181,9 @@ public int main(string[] args) {
                 return quit(2, "Error: Communication with %s master instance failed: %s\n", Nuvola.get_app_name(), e.message);
             }
         case "api-app":
-            if (Args.command.length < 2)
-            return quit(1, "Error: No API method specified.\n");
+            if (Args.command.length < 2) {
+                return quit(1, "Error: No API method specified.\n");
+            }
             try {
                 return call_api_method(client, Args.command, 1);
             }
@@ -266,11 +274,13 @@ class Control {
         Variant? response = conn.call_sync("/nuvola/actions/activate",
             new Variant.tuple({new Variant.string(name), parameter}));
         bool handled = false;
-        if (!Drt.variant_bool(response, ref handled))
-        return quit(2, "Got invalid response from %s instance: %s\n", Nuvola.get_app_name(),
-            response == null ? "null" : response.print(true));
-        if (!handled)
-        return quit(3, "%s instance doesn't understand requested action '%s'.\n", Nuvola.get_app_name(), name);
+        if (!Drt.variant_bool(response, ref handled)) {
+            return quit(2, "Got invalid response from %s instance: %s\n", Nuvola.get_app_name(),
+                response == null ? "null" : response.print(true));
+        }
+        if (!handled) {
+            return quit(3, "%s instance doesn't understand requested action '%s'.\n", Nuvola.get_app_name(), name);
+        }
 
         message("Action %s %s was successful.", name, parameter_str);
         return 0;
@@ -278,8 +288,9 @@ class Control {
 
     public int action_state(string name) throws GLib.Error {
         Variant? response = conn.call_sync("/nuvola/actions/get-state", new Variant("(s)", name));
-        if (response != null)
-        stdout.printf("%s\n", response.print(false));
+        if (response != null) {
+            stdout.printf("%s\n", response.print(false));
+        }
         return 0;
     }
 
@@ -294,50 +305,64 @@ class Control {
         double rating = Drt.variant_dict_double(response, "rating", 0.0);
 
         if (key == null || key == "all") {
-            if (title != null)
-            stdout.printf("Title: %s\n", title);
-            if (artist != null )
-            stdout.printf("Artist: %s\n", artist);
-            if (album != null )
-            stdout.printf("Album: %s\n", album);
-            if (state != null )
-            stdout.printf("State: %s\n", state);
-            if (artwork_location != null )
-            stdout.printf("Artwork location: %s\n", artwork_location);
-            if (artwork_file != null )
-            stdout.printf("Artwork file: %s\n", artwork_file);
-            if (rating != 0.0 )
-            stdout.printf("Rating: %s\n", rating.to_string());
+            if (title != null) {
+                stdout.printf("Title: %s\n", title);
+            }
+            if (artist != null ) {
+                stdout.printf("Artist: %s\n", artist);
+            }
+            if (album != null ) {
+                stdout.printf("Album: %s\n", album);
+            }
+            if (state != null ) {
+                stdout.printf("State: %s\n", state);
+            }
+            if (artwork_location != null ) {
+                stdout.printf("Artwork location: %s\n", artwork_location);
+            }
+            if (artwork_file != null ) {
+                stdout.printf("Artwork file: %s\n", artwork_file);
+            }
+            if (rating != 0.0 ) {
+                stdout.printf("Rating: %s\n", rating.to_string());
+            }
         }
         else {
             switch (key) {
             case "title":
-                if (title != null)
-                stdout.printf("%s\n", title);
+                if (title != null) {
+                    stdout.printf("%s\n", title);
+                }
                 break;
             case "artist":
-                if (artist != null)
-                stdout.printf("%s\n", artist);
+                if (artist != null) {
+                    stdout.printf("%s\n", artist);
+                }
                 break;
             case "album":
-                if (album != null)
-                stdout.printf("%s\n", album);
+                if (album != null) {
+                    stdout.printf("%s\n", album);
+                }
                 break;
             case "state":
-                if (state != null)
-                stdout.printf("%s\n", state);
+                if (state != null) {
+                    stdout.printf("%s\n", state);
+                }
                 break;
             case "artwork_location":
-                if (artwork_location != null)
-                stdout.printf("%s\n", artwork_location);
+                if (artwork_location != null) {
+                    stdout.printf("%s\n", artwork_location);
+                }
                 break;
             case "artwork_file":
-                if (artwork_file != null)
-                stdout.printf("%s\n", artwork_file);
+                if (artwork_file != null) {
+                    stdout.printf("%s\n", artwork_file);
+                }
                 break;
             case "rating":
-                if (rating != 0.0 )
-                stdout.printf("Rating: %s\n", rating.to_string());
+                if (rating != 0.0 ) {
+                    stdout.printf("Rating: %s\n", rating.to_string());
+                }
                 break;
             default:
                 return quit(3, "Unknown key '%s'.\n", key);

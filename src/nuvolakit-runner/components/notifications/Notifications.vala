@@ -41,10 +41,12 @@ public class Notification {
     }
 
     public void update(string? summary, string? body, string? icon_name, string? icon_path, bool resident, string category) {
-        if (notification == null)
-        notification = new Notify.Notification(summary ?? "", body ?? "", icon_name ?? "");
-        else
-        notification.update(summary ?? "", body ?? "", icon_name ?? "");
+        if (notification == null) {
+            notification = new Notify.Notification(summary ?? "", body ?? "", icon_name ?? "");
+        }
+        else {
+            notification.update(summary ?? "", body ?? "", icon_name ?? "");
+        }
 
         this.icon_path = icon_path ?? "";
         this.resident = resident;
@@ -60,8 +62,9 @@ public class Notification {
     }
 
     public void show(bool add_actions) {
-        if (notification == null)
-        return;
+        if (notification == null) {
+            return;
+        }
 
         notification.clear_hints();
         notification.clear_actions();
@@ -77,13 +80,16 @@ public class Notification {
             }
         }
 
-        if (resident)
-        notification.set_hint("resident", true);
-        else
-        notification.set_hint("transient", true);
+        if (resident) {
+            notification.set_hint("resident", true);
+        }
+        else {
+            notification.set_hint("transient", true);
+        }
 
-        if (category != null && category != "")
-        notification.set_category(category);
+        if (category != null && category != "") {
+            notification.set_category(category);
+        }
 
         notification.set_hint("desktop-entry", desktop_entry);
 
@@ -91,19 +97,22 @@ public class Notification {
             notification.set_hint("action-icons", true);
 
             foreach (Drtgtk.Action action in actions)
-            if (action.enabled)
-            notification.add_action(action.icon, action.label, () => { action.activate(null); });
+            if (action.enabled) {
+                notification.add_action(action.icon, action.label, () => { action.activate(null); });
+            }
         }
 
-        if (timeout_id != 0)
-        Source.remove(timeout_id);
+        if (timeout_id != 0) {
+            Source.remove(timeout_id);
+        }
         timeout_id = Timeout.add(100, show_cb);
     }
 
     public bool close() {
         try {
-            if (notification != null)
-            notification.close();
+            if (notification != null) {
+                notification.close();
+            }
             return true;
         }
         catch (GLib.Error e) {
@@ -185,10 +194,12 @@ public class Notifications : GLib.Object, NotificationsInterface, NotificationIn
         Drtgtk.Action[] actions_found = {};
         foreach (string action_name in actions) {
             Drtgtk.Action action = app.actions.get_action(action_name);
-            if (action != null)
-            actions_found += action;
-            else
-            warning("Action '%s' not found.", action_name);
+            if (action != null) {
+                actions_found += action;
+            }
+            else {
+                warning("Action '%s' not found.", action_name);
+            }
         }
 
         get_or_create(name).set_actions(actions_found);
@@ -203,8 +214,9 @@ public class Notifications : GLib.Object, NotificationsInterface, NotificationIn
     public bool show(string name, bool force) {
         Notification notification = get_or_create(name);
         bool add_actions = actions_supported && icons_supported;
-        if (force || !app.main_window.is_active || notification.resident)
-        notification.show(add_actions);
+        if (force || !app.main_window.is_active || notification.resident) {
+            notification.show(add_actions);
+        }
         return Binding.CONTINUE;
     }
 
@@ -218,8 +230,9 @@ public class Notifications : GLib.Object, NotificationsInterface, NotificationIn
     }
 
     public bool is_persistence_supported(ref bool supported) {
-        if (!supported && persistence_supported)
-        supported = true;
+        if (!supported && persistence_supported) {
+            supported = true;
+        }
 
         return Binding.CONTINUE;
     }

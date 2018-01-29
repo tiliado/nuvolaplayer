@@ -44,8 +44,9 @@ public class MPRISProvider {
         // Watch out! Bus.own_name takes three references!
         owner_id = Bus.own_name(BusType.SESSION, bus_name, BusNameOwnerFlags.NONE,
             on_bus_acquired, on_name_acquired, on_name_lost);
-        if (owner_id == 0)
-        critical("Unable to obtain bus name %s", bus_name);
+        if (owner_id == 0) {
+            critical("Unable to obtain bus name %s", bus_name);
+        }
     }
 
     public void stop() {

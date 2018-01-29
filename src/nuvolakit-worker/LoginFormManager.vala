@@ -87,10 +87,12 @@ public class LoginFormManager: GLib.Object {
         else {
             var entry = new LoginCredentials(username, password);
             int index = entries.index(entry);
-            if (index >= 0)
-            entries[index] = entry;
-            else
-            entries.prepend(entry);
+            if (index >= 0) {
+                entries[index] = entry;
+            }
+            else {
+                entries.prepend(entry);
+            }
         }
     }
 
@@ -113,20 +115,23 @@ public class LoginFormManager: GLib.Object {
         }
         else {
             Drt.Lst<LoginCredentials> entries = credentials[hostname];
-            if (entries != null)
-            entries.remove(new LoginCredentials(username, null));
+            if (entries != null) {
+                entries.remove(new LoginCredentials(username, null));
+            }
         }
     }
 
     private SList<LoginCredentials>? get_credentials(string hostname, string? username) {
         Drt.Lst<LoginCredentials> entries = credentials[hostname];
         if (entries != null) {
-            if (username == null)
-            return entries.to_slist();
+            if (username == null) {
+                return entries.to_slist();
+            }
             SList<LoginCredentials> result = null;
             foreach (LoginCredentials entry in entries) {
-                if (entry.username == username)
-                result.prepend(entry);
+                if (entry.username == username) {
+                    result.prepend(entry);
+                }
             }
             result.reverse();
             return result;
@@ -169,8 +174,9 @@ public class LoginFormManager: GLib.Object {
         }
         clear_forms();
         look_up_forms_attempts = 0;
-        if (!look_up_forms())
-        look_up_forms_source_id = Timeout.add_seconds(2, look_up_forms_cb);
+        if (!look_up_forms()) {
+            look_up_forms_source_id = Timeout.add_seconds(2, look_up_forms_cb);
+        }
     }
 
     public bool manage_context_menu(WebKit.ContextMenu menu, WebKit.DOM.Node? node) {
@@ -197,8 +203,9 @@ public class LoginFormManager: GLib.Object {
         WebKit.DOM.Document document = page.get_dom_document();
         WebKit.DOM.HTMLCollection forms = document.forms;
         ulong n_forms = forms.length;
-        if (n_forms == 0)
-        return false;
+        if (n_forms == 0) {
+            return false;
+        }
 
         var form_found = false;
         for (var i = 0; i < n_forms; i++) {
@@ -236,8 +243,9 @@ public class LoginFormManager: GLib.Object {
             SList<LoginCredentials>? entries = get_credentials(context_menu_form.uri.host, null);
             if (entries != null) {
                 unowned LoginCredentials credentials = entries.nth_data((uint) index);
-                if (credentials != null)
-                context_menu_form.fill(credentials.username, credentials.password, true);
+                if (credentials != null) {
+                    context_menu_form.fill(credentials.username, credentials.password, true);
+                }
             }
             context_menu_form = null;
         }
@@ -259,19 +267,22 @@ public class LoginFormManager: GLib.Object {
             var input = inputs.item(i) as WebKit.DOM.HTMLInputElement;
             if (input == null) {
                 var button = inputs.item(i) as WebKit.DOM.HTMLButtonElement;
-                if (button.type == "submit")
-                submit_node = button;
+                if (button.type == "submit") {
+                    submit_node = button;
+                }
                 continue;
             }
             string? input_type = input.type;
             if (input_type == "text" || input_type == "tel" || input_type == "email") {
-                if (username_node != null)
-                return false;
+                if (username_node != null) {
+                    return false;
+                }
                 username_node = input;
             }
             else if (input_type == "password") {
-                if (password_node != null)
-                return false;
+                if (password_node != null) {
+                    return false;
+                }
                 password_node = input;
             }
             else if (input_type == "submit") {

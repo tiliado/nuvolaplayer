@@ -47,16 +47,18 @@ public class GlobalKeybinder: GLib.Object {
 
     public bool is_bound(string accelerator) {
         foreach (Keybinding keybinding in keybindings)
-        if (keybinding.accelerator == accelerator)
-        return true;
+        if (keybinding.accelerator == accelerator) {
+            return true;
+        }
         return false;
     }
 
     public bool bind(string accelerator, owned HandlerFunc handler) {
         int keycode;
         Gdk.ModifierType modifiers;
-        if (!grab_ungrab(true, accelerator, out keycode, out modifiers))
-        return false;
+        if (!grab_ungrab(true, accelerator, out keycode, out modifiers)) {
+            return false;
+        }
 
         var keybinding = new Keybinding(accelerator, keycode, modifiers, (owned) handler);
         keybindings.prepend(keybinding);
@@ -64,15 +66,17 @@ public class GlobalKeybinder: GLib.Object {
     }
 
     public bool unbind(string accelerator) {
-        if (!grab_ungrab(false, accelerator, null, null))
-        return false;
+        if (!grab_ungrab(false, accelerator, null, null)) {
+            return false;
+        }
 
         unowned List<Keybinding> iter = keybindings.first();
         while (iter != null) {
             unowned List<Keybinding> next = iter.next;
             unowned Keybinding keybinding = iter.data;
-            if (keybinding.accelerator == accelerator)
-            keybindings.delete_link(iter);
+            if (keybinding.accelerator == accelerator) {
+                keybindings.delete_link(iter);
+            }
             iter = next;
         }
 
@@ -84,8 +88,9 @@ public class GlobalKeybinder: GLib.Object {
         virt_modifiers = 0;
         bool bound = is_bound(accelerator);
 
-        if (grab == bound)
-        return true;
+        if (grab == bound) {
+            return true;
+        }
 
         uint keysym;
         Gtk.accelerator_parse(accelerator, out keysym, out virt_modifiers);
@@ -111,10 +116,12 @@ public class GlobalKeybinder: GLib.Object {
         Gdk.error_trap_push();
 
         foreach (Gdk.ModifierType lock_modifier in lock_modifiers) {
-            if (grab)
-            display.grab_key(keycode, modifiers|lock_modifier, xid, false, X.GrabMode.Async, X.GrabMode.Async);
-            else
-            display.ungrab_key(keycode, modifiers|lock_modifier, xid);
+            if (grab) {
+                display.grab_key(keycode, modifiers|lock_modifier, xid, false, X.GrabMode.Async, X.GrabMode.Async);
+            }
+            else {
+                display.ungrab_key(keycode, modifiers|lock_modifier, xid);
+            }
         }
 
         Gdk.flush();
@@ -136,12 +143,14 @@ public class GlobalKeybinder: GLib.Object {
             /* Ignore insignificant modifiers */
             event_mods &= Gtk.accelerator_get_default_mod_mask();
             /* SUPER + HYPER => SUPER */
-            if ((event_mods & (Gdk.ModifierType.SUPER_MASK | Gdk.ModifierType.HYPER_MASK)) != 0)
-            event_mods &= ~Gdk.ModifierType.HYPER_MASK;
+            if ((event_mods & (Gdk.ModifierType.SUPER_MASK | Gdk.ModifierType.HYPER_MASK)) != 0) {
+                event_mods &= ~Gdk.ModifierType.HYPER_MASK;
+            }
 
             foreach (Keybinding keybinding in keybindings) {
-                if (xevent->xkey.keycode == keybinding.keycode && event_mods == keybinding.modifiers)
-                keybinding.handler(keybinding.accelerator, gdk_event);
+                if (xevent->xkey.keycode == keybinding.keycode && event_mods == keybinding.modifiers) {
+                    keybinding.handler(keybinding.accelerator, gdk_event);
+                }
             }
         }
         return Gdk.FilterReturn.CONTINUE;

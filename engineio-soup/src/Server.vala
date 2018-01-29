@@ -88,8 +88,9 @@ public class Server: GLib.Object {
         clients = new HashTable<string, Socket>(str_hash, str_equal);
         transport_factories = new HashTable<string, TransportFactory>(str_hash, str_equal);
         transport_factories["polling"] = PollingTransport.new_for_request;
-        if (soup != null)
-        attach(soup, path);
+        if (soup != null) {
+            attach(soup, path);
+        }
     }
 
     /**
@@ -118,8 +119,9 @@ public class Server: GLib.Object {
     public void attach(Soup.Server soup, string? path=null) {
         return_if_fail(this.soup == null);
         this.soup = soup;
-        if (path != null)
-        this.path = path.has_suffix("/") ? path : path + "/";
+        if (path != null) {
+            this.path = path.has_suffix("/") ? path : path + "/";
+        }
         soup.add_handler(this.path, engine_io_handler);
     }
 
@@ -134,8 +136,9 @@ public class Server: GLib.Object {
      * @return Array of transport identifiers.
      */
     public string[] list_upgrades(string transport) {
-        if (!allow_upgrades)
-        return {};
+        if (!allow_upgrades) {
+            return {};
+        }
         // TODO: transports[transport].upgradesTo || [];
         return {};
     }
@@ -279,8 +282,9 @@ public class Server: GLib.Object {
     private void on_transport_headers_requested(Transport transport, Request request, HashTable<string, string> headers) {
         if (this.cookie != null) {
             string cookie = this.cookie + "=" + transport.sid;
-            if (cookie_path != null)
-            cookie += "; path=" + cookie_path;
+            if (cookie_path != null) {
+                cookie += "; path=" + cookie_path;
+            }
             headers["Set-Cookie"] = cookie;
         }
     }

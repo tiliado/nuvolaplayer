@@ -99,10 +99,12 @@ public class TiliadoActivationManager : GLib.Object, TiliadoActivation {
     }
 
     public TiliadoApi2.User? update_user_info_sync() {
-        if (tiliado.token == null)
-        return null;
-        else
-        return update_user_info_sync_internal();
+        if (tiliado.token == null) {
+            return null;
+        }
+        else {
+            return update_user_info_sync_internal();
+        }
     }
 
     public void start_activation() {

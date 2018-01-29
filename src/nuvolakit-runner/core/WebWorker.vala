@@ -47,8 +47,9 @@ public class RemoteWebWorker: GLib.Object, JSExecutor, WebWorker {
     }
 
     public Variant? call_sync(string name, Variant? params) throws GLib.Error {
-        if (ipc_bus.web_worker == null)
-        throw new Drt.RpcError.NOT_READY("Web worker process is not ready yet");
+        if (ipc_bus.web_worker == null) {
+            throw new Drt.RpcError.NOT_READY("Web worker process is not ready yet");
+        }
 
         return ipc_bus.web_worker.call_sync(name, params);
     }

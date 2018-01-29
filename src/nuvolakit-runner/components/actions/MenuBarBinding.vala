@@ -43,8 +43,9 @@ public class Nuvola.MenuBarBinding: ObjectBinding<MenuBarInterface> {
         string? label = request.pop_string();
         string[] actions = request.pop_strv();
         foreach (MenuBarInterface object in objects)
-        if (object.set_menu(id, label, actions))
-        break;
+        if (object.set_menu(id, label, actions)) {
+            break;
+        }
         request.respond(null);
     }
 }

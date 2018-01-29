@@ -112,12 +112,14 @@ public class WebExtension: GLib.Object {
             return;
         }
 
-        if (!frame.is_main_frame())
-        return; // TODO: Add api not to ignore non-main frames
+        if (!frame.is_main_frame()) {
+            return;
+        } // TODO: Add api not to ignore non-main frames
 
         debug("Window object cleared for '%s'", frame.get_uri());
-        if (frame.get_uri() == WEB_ENGINE_LOADING_URI)
-        return;
+        if (frame.get_uri() == WEB_ENGINE_LOADING_URI) {
+            return;
+        }
 
         init_frame(world, page, frame);
     }
@@ -131,8 +133,9 @@ public class WebExtension: GLib.Object {
             script = null;
             foreach (File dir in storage.data_dirs) {
                 script = dir.get_child(JSApi.JS_DIR).get_child(WEBKITGTK_FIXES_JS);
-                if (script.query_exists())
-                break;
+                if (script.query_exists()) {
+                    break;
+                }
                 script = null;
             }
         }
@@ -190,10 +193,12 @@ public class WebExtension: GLib.Object {
     }
 
     private bool enable_password_manager_cb() {
-        if (login_form_manager == null)
-        login_form_manager = new LoginFormManager(channel);
-        if (page != null)
-        login_form_manager.manage_forms(page);
+        if (login_form_manager == null) {
+            login_form_manager = new LoginFormManager(channel);
+        }
+        if (page != null) {
+            login_form_manager.manage_forms(page);
+        }
         return false;
     }
 
@@ -247,8 +252,9 @@ public class WebExtension: GLib.Object {
 
     private void on_web_page_created(WebKit.WebExtension extension, WebKit.WebPage web_page) {
         debug("Page %u created for %s", (uint) web_page.get_id(), web_page.get_uri());
-        if (web_page.get_id() != 1)
-        return;
+        if (web_page.get_id() != 1) {
+            return;
+        }
 
         web_page.document_loaded.connect(on_document_loaded);
         web_page.context_menu.connect(on_context_menu);
@@ -293,14 +299,16 @@ public class WebExtension: GLib.Object {
                 show_error("Failed to inject JavaScript API. %s".printf(e.message));
             }
 
-            if (login_form_manager != null)
-            login_form_manager.manage_forms(page);
+            if (login_form_manager != null) {
+                login_form_manager.manage_forms(page);
+            }
         }
     }
 
     private bool on_context_menu(WebKit.ContextMenu menu, WebKit.WebHitTestResult hit_test) {
-        if (login_form_manager != null)
-        return login_form_manager.manage_context_menu(menu, hit_test.node);
+        if (login_form_manager != null) {
+            return login_form_manager.manage_context_menu(menu, hit_test.node);
+        }
         return false;
     }
 }

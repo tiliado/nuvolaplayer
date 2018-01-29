@@ -75,14 +75,18 @@ public class TrayIconComponent: Component {
     }
 
     private void update() {
-        if (use_x11_icon && x11_icon == null)
-        x11_icon = new TrayIcon(controller, bindings.get_model<LauncherModel>());
-        if (!use_x11_icon && x11_icon != null)
-        x11_icon = null;
-        if (use_appindicator && appindicator == null)
-        appindicator = new Appindicator(controller, bindings.get_model<LauncherModel>());
-        if (!use_appindicator && appindicator != null)
-        appindicator = null;
+        if (use_x11_icon && x11_icon == null) {
+            x11_icon = new TrayIcon(controller, bindings.get_model<LauncherModel>());
+        }
+        if (!use_x11_icon && x11_icon != null) {
+            x11_icon = null;
+        }
+        if (use_appindicator && appindicator == null) {
+            appindicator = new Appindicator(controller, bindings.get_model<LauncherModel>());
+        }
+        if (!use_appindicator && appindicator != null) {
+            appindicator = null;
+        }
     }
 
     public override Gtk.Widget? get_settings() {
@@ -94,8 +98,9 @@ public class TrayIconComponent: Component {
     }
 
     private void on_can_quit(ref bool can_quit) {
-        if (always_close_to_tray && is_visible())
-        can_quit = false;
+        if (always_close_to_tray && is_visible()) {
+            can_quit = false;
+        }
     }
     #endif
 }

@@ -117,8 +117,9 @@ public abstract class Transport: GLib.Object {
             Packet packet = binary_payload != null
             ? Parser.decode_packet_from_bytes(binary_payload)
             : Parser.decode_packet(string_payload);
-            if (packet != null)
-            yield handle_incoming_packet(packet);
+            if (packet != null) {
+                yield handle_incoming_packet(packet);
+            }
         }
         catch (Parser.Error e) {
             handle_decode_error(e);

@@ -57,8 +57,9 @@ public class UnityLauncher: GLib.Object {
     }
 
     private void clear_menu() {
-        if (dock_item == null || this.dock_item.quicklist == null)
-        return;
+        if (dock_item == null || this.dock_item.quicklist == null) {
+            return;
+        }
 
         Dbusmenu.Menuitem menu = dock_item.quicklist;
         adaptors = null;
@@ -70,8 +71,9 @@ public class UnityLauncher: GLib.Object {
         Dbusmenu.Menuitem menu = dock_item.quicklist;
         foreach (string action_name in model.actions) {
             Dbusmenu.Menuitem item = create_menu_item(action_name);
-            if (item != null)
-            menu.child_append(item);
+            if (item != null) {
+                menu.child_append(item);
+            }
         }
     }
 
@@ -155,12 +157,14 @@ private class ActionAdaptor {
         case "state":
             Variant? state = action.state;
             if (state != null) {
-                if (state.is_of_type(VariantType.BOOLEAN))
-                item.property_set_int(Dbusmenu.MENUITEM_PROP_TOGGLE_STATE,
-                    state.get_boolean() ? Dbusmenu.MENUITEM_TOGGLE_STATE_CHECKED : Dbusmenu.MENUITEM_TOGGLE_STATE_UNCHECKED);
-                else
-                item.property_set_int(Dbusmenu.MENUITEM_PROP_TOGGLE_STATE,
-                    action.state.equal(parameter) ? Dbusmenu.MENUITEM_TOGGLE_STATE_CHECKED : Dbusmenu.MENUITEM_TOGGLE_STATE_UNCHECKED);
+                if (state.is_of_type(VariantType.BOOLEAN)) {
+                    item.property_set_int(Dbusmenu.MENUITEM_PROP_TOGGLE_STATE,
+                        state.get_boolean() ? Dbusmenu.MENUITEM_TOGGLE_STATE_CHECKED : Dbusmenu.MENUITEM_TOGGLE_STATE_UNCHECKED);
+                }
+                else {
+                    item.property_set_int(Dbusmenu.MENUITEM_PROP_TOGGLE_STATE,
+                        action.state.equal(parameter) ? Dbusmenu.MENUITEM_TOGGLE_STATE_CHECKED : Dbusmenu.MENUITEM_TOGGLE_STATE_UNCHECKED);
+                }
             }
             break;
         }

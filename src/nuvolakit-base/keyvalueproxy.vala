@@ -38,8 +38,9 @@ public class KeyValueProxy: GLib.Object, Drt.KeyValueStorage {
     public bool has_key(string key) {
         try {
             Variant response = channel.call_sync("/nuvola/core/" + prefix + "-has-key", new Variant("(s)", key));
-            if (response.is_of_type(VariantType.BOOLEAN))
-            return response.get_boolean();
+            if (response.is_of_type(VariantType.BOOLEAN)) {
+                return response.get_boolean();
+            }
             critical("Invalid response to KeyValueProxy.has_key: %s", response.print(false));
         }
         catch (GLib.Error e) {

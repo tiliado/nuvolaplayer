@@ -102,8 +102,9 @@ public class TiliadoActivationClient : GLib.Object, TiliadoActivation {
     }
 
     public TiliadoApi2.User? get_user_info() {
-        if (cached_user_set)
-        return cached_user;
+        if (cached_user_set) {
+            return cached_user;
+        }
 
         string METHOD = "/tiliado-activation/get-user-info";
         try {

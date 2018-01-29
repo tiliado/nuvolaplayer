@@ -32,8 +32,9 @@ public class AppCategoriesView : Gtk.TreeView {
         set {
             if (value != _category) {
                 _category = value;
-                if (!internal_category_change)
-                select_category(_category);
+                if (!internal_category_change) {
+                    select_category(_category);
+                }
             }
         }
     }
@@ -66,8 +67,9 @@ public class AppCategoriesView : Gtk.TreeView {
         Gtk.TreeSelection selection = get_selection();
         selection.mode = Gtk.SelectionMode.BROWSE;
         this.category = selected_category;
-        if (selected_category == null)
-        select_category(null);
+        if (selected_category == null) {
+            select_category(null);
+        }
         selection.changed.connect(on_selection_changed);
     }
 
@@ -86,13 +88,15 @@ public class AppCategoriesView : Gtk.TreeView {
     }
 
     private void on_selection_changed(Gtk.TreeSelection selection) {
-        if (internal_category_change)
-        return;
+        if (internal_category_change) {
+            return;
+        }
         Gtk.TreeModel model;
         Gtk.TreeIter iter;
         string? category = null;
-        if (selection.get_selected(out model, out iter))
-        model.get(iter, 0, &category, -1);
+        if (selection.get_selected(out model, out iter)) {
+            model.get(iter, 0, &category, -1);
+        }
 
         if (this.category != category) {
             internal_category_change = true;

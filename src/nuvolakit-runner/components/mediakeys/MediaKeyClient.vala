@@ -39,8 +39,9 @@ public class MediaKeysClient : GLib.Object, MediaKeysInterface {
     }
 
     public void manage() {
-        if (managed)
-        return;
+        if (managed) {
+            return;
+        }
 
         const string METHOD = "/nuvola/mediakeys/manage";
         try {
@@ -54,8 +55,9 @@ public class MediaKeysClient : GLib.Object, MediaKeysInterface {
     }
 
     public void unmanage() {
-        if (!managed)
-        return;
+        if (!managed) {
+            return;
+        }
 
         const string METHOD = "/nuvola/mediakeys/unmanage";
         try {

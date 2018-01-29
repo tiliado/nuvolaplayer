@@ -197,8 +197,9 @@ public class DeveloperSidebar: Gtk.ScrolledWindow {
 
     private void set_actions(SList<string> playback_actions) {
         lock (action_widgets) {
-            if (action_widgets != null)
-            action_widgets.@foreach(unset_button);
+            if (action_widgets != null) {
+                action_widgets.@foreach(unset_button);
+            }
 
             action_widgets = null;
             radios.remove_all();
@@ -272,8 +273,9 @@ public class DeveloperSidebar: Gtk.ScrolledWindow {
         Drtgtk.RadioOption option;
         string detailed_name;
         if (actions_reg.find_and_parse_action(full_name, out detailed_name, out action, out option)
-        && !action.state.equal(option.parameter) && radio.active)
-        action.activate(option.parameter);
+        && !action.state.equal(option.parameter) && radio.active) {
+            action.activate(option.parameter);
+        }
     }
 
     private void on_radio_action_changed(GLib.Object o, ParamSpec p) {
@@ -284,8 +286,9 @@ public class DeveloperSidebar: Gtk.ScrolledWindow {
             string full_name = item.get_data<string>("full-name");
             Drtgtk.RadioOption option;
             if (actions_reg.find_and_parse_action(full_name, null, null, out option)) {
-                if (!item.active && state.equal(option.parameter))
-                item.active = true;
+                if (!item.active && state.equal(option.parameter)) {
+                    item.active = true;
+                }
             }
         }
     }
@@ -299,30 +302,34 @@ public class DeveloperSidebar: Gtk.ScrolledWindow {
             Drtgtk.Action action;
             Drtgtk.RadioOption option;
             string detailed_name;
-            if (actions_reg.find_and_parse_action(full_name, out detailed_name, out action, out option))
-            action.notify["state"].disconnect(on_radio_action_changed);
+            if (actions_reg.find_and_parse_action(full_name, out detailed_name, out action, out option)) {
+                action.notify["state"].disconnect(on_radio_action_changed);
+            }
         }
     }
 
     private void on_time_position_changed() {
         Drtgtk.Action? action = actions_reg.get_action("seek");
-        if (action != null)
-        action.activate(new Variant.double(time_pos.position_sec * 1000000.0));
+        if (action != null) {
+            action.activate(new Variant.double(time_pos.position_sec * 1000000.0));
+        }
     }
 
     private void on_volume_changed() {
         if (player.volume != volume_button.value) {
             Drtgtk.Action action = actions_reg.get_action("change-volume");
-            if (action != null)
-            action.activate(new Variant.double(volume_button.value));
+            if (action != null) {
+                action.activate(new Variant.double(volume_button.value));
+            }
         }
     }
 
     private void on_rating_icon_pressed(Gtk.Entry entry, Gtk.EntryIconPosition position, Gdk.Event event) {
         if (position == Gtk.EntryIconPosition.SECONDARY) {
             double rating = double.parse(entry.text);
-            if (rating >= 0.0 && rating <= 1.0)
-            player.set_rating(rating);
+            if (rating >= 0.0 && rating <= 1.0) {
+                player.set_rating(rating);
+            }
         }
     }
 }

@@ -70,10 +70,12 @@ public class CefEngine : WebEngine {
 
         runner_app.replace_mainloop(new CefMainLoopAdaptor());
 
-        if (connection != null)
-        apply_network_proxy(connection);
-        if (web_app.allow_insecure_content)
-        warning("Not implemented: web_app.allow_insecure_content");
+        if (connection != null) {
+            apply_network_proxy(connection);
+        }
+        if (web_app.allow_insecure_content) {
+            warning("Not implemented: web_app.allow_insecure_content");
+        }
 
         session = new Drt.KeyValueMap();
         register_ipc_handlers();

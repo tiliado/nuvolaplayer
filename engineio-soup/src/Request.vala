@@ -49,8 +49,9 @@ public class Request {
         if (query != null) {
             transport = query["transport"];
             string? jsonp_str = query["j"];
-            if (jsonp_str != null)
-            jsonp_index = int.parse(jsonp_str);
+            if (jsonp_str != null) {
+                jsonp_index = int.parse(jsonp_str);
+            }
             sid = query["sid"];
             base64 = query["b64"] != null && query["b64"] == "1";
         }

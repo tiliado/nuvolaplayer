@@ -61,12 +61,14 @@ public class AZLyricsFetcher : GLib.Object, LyricsFetcher {
         yield;
 
         string response = (string) message.response_body.flatten().data;
-        if (message.status_code != 200 || response == "")
-        throw new LyricsError.NOT_FOUND(@"Song $song was not found on AZ Lyrics");
+        if (message.status_code != 200 || response == "") {
+            throw new LyricsError.NOT_FOUND(@"Song $song was not found on AZ Lyrics");
+        }
 
         response = parse_response(response);
-        if (response == "")
-        throw new LyricsError.NOT_FOUND(@"Song $song was not found on AZ Lyrics");
+        if (response == "") {
+            throw new LyricsError.NOT_FOUND(@"Song $song was not found on AZ Lyrics");
+        }
 
         return response;
     }
@@ -106,8 +108,9 @@ public class AZLyricsFetcher : GLib.Object, LyricsFetcher {
         int i = 0;
         while (normalized.get_next_char(ref i, out c)) {
             c = c.tolower();
-            if (('a' <= c && c <= 'z') || ('0' <= c && c <= '9'))
-            buffer.append_unichar(c);
+            if (('a' <= c && c <= 'z') || ('0' <= c && c <= '9')) {
+                buffer.append_unichar(c);
+            }
         }
         return buffer.str;
     }

@@ -52,8 +52,9 @@ public abstract class Component: GLib.Object {
     public virtual void toggle(bool enabled) {
         if (available) {
             if (enabled) {
-                if (this.enabled != enabled)
-                this.enabled = true;
+                if (this.enabled != enabled) {
+                    this.enabled = true;
+                }
                 if (!loaded) {
                     message("Load %s %s", id, name);
                     load();
@@ -66,8 +67,9 @@ public abstract class Component: GLib.Object {
                     unload();
                     loaded = false;
                 }
-                if (this.enabled != enabled)
-                this.enabled = false;
+                if (this.enabled != enabled) {
+                    this.enabled = false;
+                }
                 this.active = false;
             }
         }
@@ -82,8 +84,9 @@ public abstract class Component: GLib.Object {
     }
 
     protected virtual void load() {
-        if (auto_activate)
-        toggle_active(true);
+        if (auto_activate) {
+            toggle_active(true);
+        }
     }
 
     protected virtual void unload() {
@@ -91,17 +94,20 @@ public abstract class Component: GLib.Object {
     }
 
     public bool toggle_active(bool active) {
-        if (!available || !enabled)
-        return false;
+        if (!available || !enabled) {
+            return false;
+        }
         bool result = false;
         if (this.active != active) {
             message("%s: %s %s", active ? "Activate" : "Deactivate", id, name);
             result = active ? activate() : deactivate();
-            if (!result)
-            warning("Failed to %s: %s %s", active ? "activate" : "deactivate", id, name);
+            if (!result) {
+                warning("Failed to %s: %s %s", active ? "activate" : "deactivate", id, name);
+            }
         }
-        if (result)
-        this.active = active;
+        if (result) {
+            this.active = active;
+        }
         return result;
     }
 

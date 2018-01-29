@@ -89,13 +89,15 @@ public class MediaKeysServer: GLib.Object {
                     warning("Communication with app runner %s for action %s failed. %s", app_id, key, e.message);
                 }
 
-                if (handled)
-                break;
+                if (handled) {
+                    break;
+                }
             }
         }
 
-        if (!handled)
-        warning("MediaKey %s was not handled by any app runner.", key);
+        if (!handled) {
+            warning("MediaKey %s was not handled by any app runner.", key);
+        }
     }
 }
 

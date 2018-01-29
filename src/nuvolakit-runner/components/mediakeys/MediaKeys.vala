@@ -64,8 +64,9 @@ public class MediaKeys: GLib.Object, MediaKeysInterface {
     }
 
     public void manage() {
-        if (managed)
-        return;
+        if (managed) {
+            return;
+        }
 
         // https://bugzilla.gnome.org/show_bug.cgi?id=781326
         gnome_media_keys_daemon_1 = true;
@@ -78,8 +79,9 @@ public class MediaKeys: GLib.Object, MediaKeysInterface {
     }
 
     public void unmanage() {
-        if (!managed)
-        return;
+        if (!managed) {
+            return;
+        }
 
         if (gnome_media_keys == null) {
             ungrab_media_keys();
@@ -114,8 +116,9 @@ public class MediaKeys: GLib.Object, MediaKeysInterface {
             break;
         }
 
-        if (gnome_media_keys != null)
-        return;
+        if (gnome_media_keys != null) {
+            return;
+        }
 
         ungrab_media_keys();
         if (!grab_gnome_media_keys(name)) {
@@ -125,8 +128,9 @@ public class MediaKeys: GLib.Object, MediaKeysInterface {
     }
 
     private bool grab_gnome_media_keys(string dbus_name) {
-        if (debug_keys)
-        return false;
+        if (debug_keys) {
+            return false;
+        }
         try {
             gnome_media_keys = Bus.get_proxy_sync(BusType.SESSION,
                 dbus_name,
@@ -154,8 +158,9 @@ public class MediaKeys: GLib.Object, MediaKeysInterface {
             break;
         }
         if (!gnome_media_keys_daemon_1 && !gnome_media_keys_daemon_2) {
-            if (gnome_media_keys != null)
-            gnome_media_keys.media_player_key_pressed.disconnect(on_media_key_pressed);
+            if (gnome_media_keys != null) {
+                gnome_media_keys.media_player_key_pressed.disconnect(on_media_key_pressed);
+            }
             gnome_media_keys = null;
             grab_media_keys();
         }
@@ -163,8 +168,9 @@ public class MediaKeys: GLib.Object, MediaKeysInterface {
 
     private void on_media_key_pressed(string app_name, string key) {
         debug("Media key pressed: %s, %s", app_name, key);
-        if (app_name != app_id)
-        return;
+        if (app_name != app_id) {
+            return;
+        }
         media_key_pressed(key);
     }
 
@@ -188,8 +194,9 @@ public class MediaKeys: GLib.Object, MediaKeysInterface {
 
     private void on_keybinding_pressed(string accelerator, uint32 time) {
         unowned string name = keymap[accelerator];
-        if (name != null)
-        media_key_pressed(name);
+        if (name != null) {
+            media_key_pressed(name);
+        }
     }
 }
 

@@ -86,8 +86,9 @@ public class AppRunnerController: Drtgtk.Application {
 
     public override bool dbus_register(DBusConnection conn, string object_path)
     throws GLib.Error {
-        if (!base.dbus_register(conn, object_path))
-        return false;
+        if (!base.dbus_register(conn, object_path)) {
+            return false;
+        }
         dbus_api = new AppDbusApi(this);
         dbus_api_id = conn.register_object(object_path, dbus_api);
         return true;
@@ -398,14 +399,17 @@ public class AppRunnerController: Drtgtk.Application {
         main_window.sidebar.add_page.connect_after(on_sidebar_page_added);
         main_window.sidebar.remove_page.connect_after(on_sidebar_page_removed);
 
-        if (config.get_bool(ConfigKey.WINDOW_SIDEBAR_VISIBLE))
-        main_window.sidebar.show();
-        else
-        main_window.sidebar.hide();
+        if (config.get_bool(ConfigKey.WINDOW_SIDEBAR_VISIBLE)) {
+            main_window.sidebar.show();
+        }
+        else {
+            main_window.sidebar.hide();
+        }
         main_window.sidebar_position = (int) config.get_int64(ConfigKey.WINDOW_SIDEBAR_POS);
         string? sidebar_page = config.get_string(ConfigKey.WINDOW_SIDEBAR_PAGE);
-        if (sidebar_page != null)
-        main_window.sidebar.page = sidebar_page;
+        if (sidebar_page != null) {
+            main_window.sidebar.page = sidebar_page;
+        }
         main_window.notify["sidebar-position"].connect_after((o, p) => {
             config.set_int64(ConfigKey.WINDOW_SIDEBAR_POS, (int64) main_window.sidebar_position);
         });
@@ -419,12 +423,15 @@ public class AppRunnerController: Drtgtk.Application {
     }
 
     public override void activate() {
-        if (main_window != null)
-        main_window.present();
-        else if (startup_window != null)
-        startup_window.present();
-        else
-        start();
+        if (main_window != null) {
+            main_window.present();
+        }
+        else if (startup_window != null) {
+            startup_window.present();
+        }
+        else {
+            start();
+        }
     }
 
     private void append_actions() {
@@ -554,10 +561,12 @@ public class AppRunnerController: Drtgtk.Application {
             HashTable<string, Variant> new_values = form.get_values();
             foreach (unowned string? key in new_values.get_keys()) {
                 Variant? new_value = new_values.get(key);
-                if (new_value == null)
-                critical("New value '%s' not found", key);
-                else
-                config.set_value(key, new_value);
+                if (new_value == null) {
+                    critical("New value '%s' not found", key);
+                }
+                else {
+                    config.set_value(key, new_value);
+                }
             }
             NetworkProxyType type;
             string? host;
@@ -602,10 +611,12 @@ public class AppRunnerController: Drtgtk.Application {
 
     private void do_toggle_sidebar() {
         Gtk.Widget sidebar = main_window.sidebar;
-        if (sidebar.visible)
-        sidebar.hide();
-        else
-        sidebar.show();
+        if (sidebar.visible) {
+            sidebar.hide();
+        }
+        else {
+            sidebar.show();
+        }
     }
 
     private void do_help() {
@@ -673,10 +684,12 @@ public class AppRunnerController: Drtgtk.Application {
         components.reverse();
 
         foreach (Component component in components) {
-            if (!component.is_membership_ok(tiliado_activation))
-            component.toggle(false);
-            if (component.available && component.enabled)
-            component.auto_load();
+            if (!component.is_membership_ok(tiliado_activation)) {
+                component.toggle(false);
+            }
+            if (component.available && component.enabled) {
+                component.auto_load();
+            }
             debug("Component %s (%s) %s", component.id, component.name,
                 component.available && component.enabled ? "enabled": "not enabled");
             component.notify["enabled"].connect_after(on_component_enabled_changed);
@@ -758,8 +771,9 @@ public class AppRunnerController: Drtgtk.Application {
     }
 
     private void on_window_is_active_changed(Object o, ParamSpec p) {
-        if (!main_window.is_active)
-        return;
+        if (!main_window.is_active) {
+            return;
+        }
 
         #if !NUVOLA_LITE
         try {
@@ -773,8 +787,9 @@ public class AppRunnerController: Drtgtk.Application {
     }
 
     private bool on_configure_event(Gdk.EventConfigure event) {
-        if (configure_event_cb_id != 0)
-        Source.remove(configure_event_cb_id);
+        if (configure_event_cb_id != 0) {
+            Source.remove(configure_event_cb_id);
+        }
         configure_event_cb_id = Timeout.add(200, on_configure_event_cb);
         return false;
     }
@@ -930,20 +945,24 @@ public class AppRunnerController: Drtgtk.Application {
     private void on_can_quit(ref bool can_quit) {
         if (web_engine != null) {
             try {
-                if (web_engine.web_worker.ready)
-                can_quit = web_engine.web_worker.send_data_request_bool("QuitRequest", "approved", can_quit);
-                else
-                debug("WebWorker not ready");
+                if (web_engine.web_worker.ready) {
+                    can_quit = web_engine.web_worker.send_data_request_bool("QuitRequest", "approved", can_quit);
+                }
+                else {
+                    debug("WebWorker not ready");
+                }
             }
             catch (GLib.Error e) {
                 warning("QuitRequest failed in web worker: %s", e.message);
             }
             try {
 
-                if (web_engine.ready)
-                can_quit = web_engine.send_data_request_bool("QuitRequest", "approved", can_quit);
-                else
-                debug("WebEngine not ready");
+                if (web_engine.ready) {
+                    can_quit = web_engine.send_data_request_bool("QuitRequest", "approved", can_quit);
+                }
+                else {
+                    debug("WebEngine not ready");
+                }
             }
             catch (GLib.Error e) {
                 warning("QuitRequest failed in web engine: %s", e.message);
@@ -986,10 +1005,12 @@ public class AppRunnerController: Drtgtk.Application {
 
         foreach (unowned string key in new_values.get_keys()) {
             Variant? new_value = new_values.get(key);
-            if (new_value == null)
-            critical("New values '%s'' not found", key);
-            else
-            config.set_value(key, new_value);
+            if (new_value == null) {
+                critical("New values '%s'' not found", key);
+            }
+            else {
+                config.set_value(key, new_value);
+            }
         }
 
         web_engine.init_app_runner();
@@ -998,16 +1019,18 @@ public class AppRunnerController: Drtgtk.Application {
     private void on_sidebar_visibility_changed(GLib.Object o, ParamSpec p) {
         bool visible = main_window.sidebar.visible;
         config.set_bool(ConfigKey.WINDOW_SIDEBAR_VISIBLE, visible);
-        if (visible)
-        main_window.sidebar_position = (int) config.get_int64(ConfigKey.WINDOW_SIDEBAR_POS);
+        if (visible) {
+            main_window.sidebar_position = (int) config.get_int64(ConfigKey.WINDOW_SIDEBAR_POS);
+        }
 
         actions.get_action(Actions.TOGGLE_SIDEBAR).state = new Variant.boolean(visible);
     }
 
     private void on_sidebar_page_changed() {
         string? page = main_window.sidebar.page;
-        if (page != null)
-        config.set_string(ConfigKey.WINDOW_SIDEBAR_PAGE, page);
+        if (page != null) {
+            config.set_string(ConfigKey.WINDOW_SIDEBAR_PAGE, page);
+        }
     }
 
     private void on_sidebar_page_added(Sidebar sidebar, string name, string label, Gtk.Widget child) {

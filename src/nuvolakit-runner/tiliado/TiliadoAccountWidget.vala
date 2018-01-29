@@ -58,8 +58,9 @@ public class TiliadoAccountWidget : Gtk.Grid {
         if (current_user == null) {
             get_token();
         }
-        else
-        check_user();
+        else {
+            check_user();
+        }
     }
 
     ~TiliadoAccountWidget() {
@@ -152,8 +153,9 @@ public class TiliadoAccountWidget : Gtk.Grid {
 
     private void on_activate_button_clicked(Gtk.Button button) {
         activate_button.sensitive = false;
-        if (status_label != null)
-        remove(status_label);
+        if (status_label != null) {
+            remove(status_label);
+        }
 
         status_label = new Gtk.Label("Authorization procedure in progress...");
         status_label.hexpand = true;
@@ -192,8 +194,9 @@ public class TiliadoAccountWidget : Gtk.Grid {
     }
 
     private void on_activation_started(string uri) {
-        if (activate_button != null && !activate_button.sensitive)
-        app.show_uri(uri);
+        if (activate_button != null && !activate_button.sensitive) {
+            app.show_uri(uri);
+        }
     }
 
     private void on_activation_failed(string message) {
@@ -297,8 +300,9 @@ public class AccountTypeLabel : Gtk.Label {
             label: membership.get_label(),
             halign: Gtk.Align.CENTER, valign: Gtk.Align.CENTER);
 
-        if (membership >= TiliadoMembership.PREMIUM)
-        get_style_context().add_class("premium");
+        if (membership >= TiliadoMembership.PREMIUM) {
+            get_style_context().add_class("premium");
+        }
     }
 }
 
@@ -311,8 +315,9 @@ public class AccountTypeButton : Gtk.Button {
         label.halign = Gtk.Align.CENTER;
         label.show();
         add(label);
-        if (membership >= TiliadoMembership.PREMIUM)
-        get_style_context().add_class("premium");
+        if (membership >= TiliadoMembership.PREMIUM) {
+            get_style_context().add_class("premium");
+        }
     }
 
 }

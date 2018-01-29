@@ -52,8 +52,9 @@ public class GlobalActionsKeyBinder : GLib.Object, ActionsKeyBinder {
 
         bool result = keybinding == null || grabber.grab(keybinding, false);
         if (result) {
-            if (keybinding != null)
-            keybindings[keybinding] = action;
+            if (keybinding != null) {
+                keybindings[keybinding] = action;
+            }
             config.set_string(CONF_PREFIX + action, keybinding);
         }
         return result;
@@ -61,12 +62,14 @@ public class GlobalActionsKeyBinder : GLib.Object, ActionsKeyBinder {
 
     public bool bind(string action) {
         string? keybinding = get_keybinding(action);
-        if (keybinding == null)
-        return true;
+        if (keybinding == null) {
+            return true;
+        }
 
         string? bound_action = keybindings[keybinding];
-        if (bound_action == action)
-        return true;
+        if (bound_action == action) {
+            return true;
+        }
 
         if (bound_action != null) {
             warning("Action %s has keybinding '%s' that is already bound to action %s.",
@@ -85,8 +88,9 @@ public class GlobalActionsKeyBinder : GLib.Object, ActionsKeyBinder {
 
     public bool unbind(string action) {
         string? keybinding = get_keybinding(action);
-        if (keybinding == null)
-        return true;
+        if (keybinding == null) {
+            return true;
+        }
 
         string? bound_action = keybindings[keybinding];
         if (bound_action != action) {
@@ -115,8 +119,9 @@ public class GlobalActionsKeyBinder : GLib.Object, ActionsKeyBinder {
     private void on_keybinding_pressed(string accelerator, uint32 time) {
         string? name = keybindings[accelerator];
         bool handled = false;
-        if (name != null)
-        action_activated(name, ref handled);
+        if (name != null) {
+            action_activated(name, ref handled);
+        }
     }
 }
 

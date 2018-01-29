@@ -49,8 +49,9 @@ public class WebWindow: Gtk.Window {
         else {
             move(geom.x, geom.y);
             set_default_size(geom.width, geom.height);
-            if (properties.fullscreen)
-            maximize();
+            if (properties.fullscreen) {
+                maximize();
+            }
         }
         web_view.show();
         present();

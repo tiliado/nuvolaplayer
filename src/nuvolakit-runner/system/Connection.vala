@@ -50,8 +50,9 @@ public class Connection : GLib.Object {
         session.queue_message(msg, (session, msg) => {resume();});
         yield;
 
-        if (msg.status_code < 200 && msg.status_code >= 300)
-        return false;
+        if (msg.status_code < 200 && msg.status_code >= 300) {
+            return false;
+        }
 
         unowned Soup.MessageBody body = msg.response_body;
         File dir = local_file.get_parent();
@@ -94,8 +95,9 @@ public class Connection : GLib.Object {
         int port;
         NetworkProxyType type = get_network_proxy(out host, out port);
         if (type != NetworkProxyType.SYSTEM) {
-            if (host == null || host == "")
-            host = "127.0.0.1";
+            if (host == null || host == "") {
+                host = "127.0.0.1";
+            }
             switch (type) {
             case NetworkProxyType.HTTP:
                 proxy_uri = "http://%s:%d/".printf(host, port);

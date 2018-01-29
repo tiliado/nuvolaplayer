@@ -113,8 +113,9 @@ public class ActionsKeyBinderServer : GLib.Object {
             }
         }
 
-        if (!handled)
-        warning("Action %s was not handled by any app runner.", name);
+        if (!handled) {
+            warning("Action %s was not handled by any app runner.", name);
+        }
     }
 }
 

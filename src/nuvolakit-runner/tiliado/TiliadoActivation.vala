@@ -66,8 +66,9 @@ public interface TiliadoActivation : GLib.Object {
 
     public bool has_user_membership(TiliadoMembership membership) {
         TiliadoApi2.User user = get_user_info();
-        if (user == null)
-        return TiliadoMembership.NONE == membership;
+        if (user == null) {
+            return TiliadoMembership.NONE == membership;
+        }
         return user.membership >= membership;
     }
 }

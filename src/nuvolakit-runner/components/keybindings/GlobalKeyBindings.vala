@@ -40,18 +40,21 @@ public class GlobalKeybindings: GLib.Object {
     }
 
     private void update_action(Drtgtk.Action action) {
-        if (!(action is Drtgtk.RadioAction))
-        keybinder.bind(action.name);
+        if (!(action is Drtgtk.RadioAction)) {
+            keybinder.bind(action.name);
+        }
     }
 
     private void on_action_removed(Drtgtk.Action action) {
-        if (!(action is Drtgtk.RadioAction))
-        keybinder.unbind(action.name);
+        if (!(action is Drtgtk.RadioAction)) {
+            keybinder.unbind(action.name);
+        }
     }
 
     private void on_action_activated(string name, ref bool handled) {
-        if (handled)
-        return;
+        if (handled) {
+            return;
+        }
 
         Drtgtk.Action? action = actions.get_action(name);
         return_if_fail(action != null);

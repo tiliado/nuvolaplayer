@@ -76,8 +76,9 @@ public class KeybindingsSettings : Gtk.Grid {
         Gtk.TreeIter iter;
         foreach (Drtgtk.Action action in actions_reg.list_actions()) {
             unowned string? label = action.label;
-            if (action is Drtgtk.RadioAction || label == null)
-            continue;
+            if (action is Drtgtk.RadioAction || label == null) {
+                continue;
+            }
 
             unowned string? keybinding = action.keybinding;
             uint accel_key;
