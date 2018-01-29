@@ -50,8 +50,7 @@ public class ScrobblerSettings: Gtk.Grid {
                 "You have not connected your account yet.", "Connect", Gtk.MessageType.WARNING, 1);
             checkbox.sensitive = false;
             checkbox.active = false;
-        }
-        else {
+        } else {
             add_info_bar(
                 "Connected account: %s".printf(scrobbler.username ?? "(unknown)"),
                 "Disconnect", Gtk.MessageType.OTHER, 3);
@@ -65,8 +64,7 @@ public class ScrobblerSettings: Gtk.Grid {
             checkbox.sensitive = true;
             scrobbler.notify.connect_after(on_notify);
             checkbox.notify.connect_after(on_notify);
-        }
-        else {
+        } else {
             scrobbler.notify.disconnect(on_notify);
             checkbox.notify.disconnect(on_notify);
             checkbox.active = false;

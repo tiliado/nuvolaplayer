@@ -150,8 +150,7 @@ public class DeveloperSidebar: Gtk.ScrolledWindow {
         case "artwork-file":
             if (player.artwork_file == null) {
                 clear_artwork(false);
-            }
-            else {
+            } else {
                 try {
                     var pixbuf = new Gdk.Pixbuf.from_file_at_scale(player.artwork_file, 80, 80, true);
                     artwork.set_from_pixbuf(pixbuf);
@@ -238,8 +237,7 @@ public class DeveloperSidebar: Gtk.ScrolledWindow {
                 button.show();
                 action_widgets.prepend(button);
                 grid.add(button);
-            }
-            else if (action is Drtgtk.ToggleAction) {
+            } else if (action is Drtgtk.ToggleAction) {
                 var button = new Gtk.CheckButton.with_label(action.label);
                 button.action_name = action_name;
                 button.action_target = target_value;
@@ -247,8 +245,7 @@ public class DeveloperSidebar: Gtk.ScrolledWindow {
                 button.show();
                 action_widgets.prepend(button);
                 grid.add(button);
-            }
-            else if (action is Drtgtk.RadioAction) {
+            } else if (action is Drtgtk.RadioAction) {
                 Gtk.RadioButton? radio = radios.lookup(action.name);
                 var button = new Gtk.RadioButton.with_label_from_widget(radio, option.label);
                 if (radio == null) {

@@ -247,8 +247,7 @@ class Control {
                         assert(option.lookup("label", "s", out label));
                         stdout.printf("    %s %s - %s\n", name, parameter.print(false), label != "" ? label : "(No label specified.)");
                     }
-                }
-                else {
+                } else {
                     stdout.printf(" *  %s (%s) - %s\n", name, enabled ? "enabled" : "disabled", label != "" ? label : "(No label specified.)");
                 }
             }
@@ -326,8 +325,7 @@ class Control {
             if (rating != 0.0 ) {
                 stdout.printf("Rating: %s\n", rating.to_string());
             }
-        }
-        else {
+        } else {
             switch (key) {
             case "title":
                 if (title != null) {

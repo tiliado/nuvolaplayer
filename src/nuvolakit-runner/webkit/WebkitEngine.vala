@@ -196,8 +196,7 @@ public class WebkitEngine : WebEngine {
             string url = env.send_data_request_string("HomePageRequest", "url");
             if (url == null) {
                 runner_app.fatal_error("Invalid home page URL", "The web app integration script has provided an empty home page URL.");
-            }
-            else if (!load_uri(url)) {
+            } else if (!load_uri(url)) {
                 runner_app.fatal_error("Invalid home page URL", "The web app integration script has not provided a valid home page URL '%s'.".printf(url));
             }
         }
@@ -552,8 +551,7 @@ public class WebkitEngine : WebEngine {
             WebKit.DownloadError e = (WebKit.DownloadError) err;
             if (e is WebKit.DownloadError.DESTINATION) {
                 warning("Download failed because of destination: %s", e.message);
-            }
-            else {
+            } else {
                 warning("Download failed: %s", e.message);
             }
             try {
@@ -629,13 +627,11 @@ public class WebkitEngine : WebEngine {
                         // Open in current window instead of a new window
                         load_uri = false;
                         Idle.add(() => {web_view.load_uri(uri); return false;});
-                    }
-                    else {
+                    } else {
                         warning("Overriding of new window flag false -> true hasn't been implemented yet.");
                     }
                 }
-            }
-            else {
+            } else {
                 runner_app.show_uri(uri);
                 handled = true;
                 load_uri = false;
@@ -644,8 +640,7 @@ public class WebkitEngine : WebEngine {
         if (handled) {
             if (load_uri) {
                 decision.use();
-            }
-            else {
+            } else {
                 decision.ignore();
             }
         }
@@ -686,8 +681,7 @@ public class WebkitEngine : WebEngine {
         while (iter.next("{smv}", &key, &value)) {
             if (key == "approved") {
                 approved = value != null ? value.get_boolean() : false;
-            }
-            else if (key == "newWindow" && value != null) {
+            } else if (key == "newWindow" && value != null) {
                 new_window = value.get_boolean();
             }
         }

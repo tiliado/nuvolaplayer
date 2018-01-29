@@ -207,12 +207,10 @@ public class PayloadDecoder {
         if (bin_payload != null) {
             binary_decoder = new BinaryPayloadDecoder(bin_payload);
             string_decoder = null;
-        }
-        else if (str_payload != null) {
+        } else if (str_payload != null) {
             string_decoder = new StringPayloadDecoder((owned) str_payload);
             binary_decoder = null;
-        }
-        else {
+        } else {
             string_decoder = null;
             binary_decoder = null;
         }
@@ -277,8 +275,7 @@ public class StringPayloadDecoder {
         for (int i = cursor; i < size; i++) {
             if (data[i] != ':') {
                 length.append_c(data[i]);
-            }
-            else {
+            } else {
                 int packet_len = int.parse(length.str);
                 if (packet_len < 0) {
                     exhausted = true;
@@ -381,8 +378,7 @@ public class BinaryPayloadDecoder {
             buffer[packet_len] = '\0';
             string str =  (string) ((owned) buffer);
             packet = decode_packet((owned) str);
-        }
-        else {
+        } else {
             Bytes bytes = payload.slice(cursor, cursor + packet_len);
             packet = decode_packet_from_bytes(bytes);
         }

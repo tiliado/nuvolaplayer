@@ -71,8 +71,7 @@ public class RequestContext {
 
         if (mime_type == null) {
             mime_type = "application/octet-stream";
-        }
-        else if (mime_type == "text/plain") {
+        } else if (mime_type == "text/plain") {
             mime_type += "; charset=utf8";
         }
         try {

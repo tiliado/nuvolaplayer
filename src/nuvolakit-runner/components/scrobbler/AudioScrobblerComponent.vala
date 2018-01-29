@@ -141,8 +141,7 @@ public class AudioScrobblerComponent: Component {
         case "can-scrobble":
             if (scrobbler.can_scrobble) {
                 schedule_scrobbling(player.title, player.artist, player.album, player.state);
-            }
-            else {
+            } else {
                 cancel_scrobbling();
             }
             break;

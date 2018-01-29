@@ -125,8 +125,7 @@ public class Server: Soup.Server {
         if (running) {
             stop();
             start();
-        }
-        else if (registered_runners.length > 0) {
+        } else if (registered_runners.length > 0) {
             start();
         }
     }
@@ -218,8 +217,7 @@ public class Server: Soup.Server {
             if (slash_pos <= 0) {
                 app_id = app_path;
                 app_path = "";
-            }
-            else {
+            } else {
                 app_id = app_path.substring(0, slash_pos);
                 app_path = app_path.substring(slash_pos);
             }
@@ -268,15 +266,13 @@ public class Server: Soup.Server {
             if (slash_pos <= 0) {
                 app_id = app_path;
                 app_path = "";
-            }
-            else {
+            } else {
                 app_id = app_path.substring(0, slash_pos);
                 app_path = app_path.substring(slash_pos + 1);
             }
             if (!(app_id in registered_runners)) {
                 request.respond_not_found();
-            }
-            else {
+            } else {
                 var app_request = new AppRequest.from_request_context(app_path, request);
                 message("App-specific request %s: %s => %s", app_id, app_path, app_request.to_string());
                 try {
@@ -292,8 +288,7 @@ public class Server: Soup.Server {
                 }
             }
             return;
-        }
-        else if (path.has_prefix("/+api/")) {
+        } else if (path.has_prefix("/+api/")) {
             try {
                 Json.Node data = send_local_request(path.substring(6), request);
                 request.respond_json(200, data);
@@ -324,8 +319,7 @@ public class Server: Soup.Server {
             call_to_subscribe = subscribers.length == 0;
             subscribers.append(subscription);
             socket.closed.connect(subscription.unsubscribe);
-        }
-        else {
+        } else {
             socket.closed.disconnect(subscription.unsubscribe);
             subscribers.remove(subscription);
             call_to_subscribe = subscribers.length == 0;
@@ -342,8 +336,7 @@ public class Server: Soup.Server {
                 }
 
                 yield app.call_full("/nuvola" + path, params, false, "rws");
-            }
-            else {
+            } else {
                 bus.local.call_full_sync("/nuvola" + path, params, false, "rws");
             }
         }

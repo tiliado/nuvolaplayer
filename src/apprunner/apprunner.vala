@@ -78,8 +78,7 @@ public int main(string[] args) {
     try {
         if (Args.nuvola_dbus) {
             return Nuvola.Startup.run_web_app_with_dbus_handshake(app_dir, args);
-        }
-        else {
+        } else {
             return Nuvola.Startup.run_web_app_as_subprocess(app_dir, stdin.read_line(), args);
         }
     }

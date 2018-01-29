@@ -93,8 +93,7 @@ public class UnityLauncher: GLib.Object {
             label = option.label;
             icon = option.icon;
             target = option.parameter;
-        }
-        else {
+        } else {
             label = action.label;
             icon = action.icon;
             target = null;
@@ -107,8 +106,7 @@ public class UnityLauncher: GLib.Object {
             item.property_set(Dbusmenu.MENUITEM_PROP_TOGGLE_TYPE, Dbusmenu.MENUITEM_TOGGLE_CHECK);
             item.property_set_int(Dbusmenu.MENUITEM_PROP_TOGGLE_STATE,
                 action.state.get_boolean() ? Dbusmenu.MENUITEM_TOGGLE_STATE_CHECKED : Dbusmenu.MENUITEM_TOGGLE_STATE_UNCHECKED);
-        }
-        else if (action is Drtgtk.RadioAction) {
+        } else if (action is Drtgtk.RadioAction) {
             item.property_set(Dbusmenu.MENUITEM_PROP_TOGGLE_TYPE, Dbusmenu.MENUITEM_TOGGLE_RADIO);
             item.property_set_int(Dbusmenu.MENUITEM_PROP_TOGGLE_STATE,
                 action.state.equal(target) ? Dbusmenu.MENUITEM_TOGGLE_STATE_CHECKED : Dbusmenu.MENUITEM_TOGGLE_STATE_UNCHECKED);
@@ -160,8 +158,7 @@ private class ActionAdaptor {
                 if (state.is_of_type(VariantType.BOOLEAN)) {
                     item.property_set_int(Dbusmenu.MENUITEM_PROP_TOGGLE_STATE,
                         state.get_boolean() ? Dbusmenu.MENUITEM_TOGGLE_STATE_CHECKED : Dbusmenu.MENUITEM_TOGGLE_STATE_UNCHECKED);
-                }
-                else {
+                } else {
                     item.property_set_int(Dbusmenu.MENUITEM_PROP_TOGGLE_STATE,
                         action.state.equal(parameter) ? Dbusmenu.MENUITEM_TOGGLE_STATE_CHECKED : Dbusmenu.MENUITEM_TOGGLE_STATE_UNCHECKED);
                 }

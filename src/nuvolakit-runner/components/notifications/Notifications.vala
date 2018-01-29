@@ -43,8 +43,7 @@ public class Notification {
     public void update(string? summary, string? body, string? icon_name, string? icon_path, bool resident, string category) {
         if (notification == null) {
             notification = new Notify.Notification(summary ?? "", body ?? "", icon_name ?? "");
-        }
-        else {
+        } else {
             notification.update(summary ?? "", body ?? "", icon_name ?? "");
         }
 
@@ -82,8 +81,7 @@ public class Notification {
 
         if (resident) {
             notification.set_hint("resident", true);
-        }
-        else {
+        } else {
             notification.set_hint("transient", true);
         }
 
@@ -196,8 +194,7 @@ public class Notifications : GLib.Object, NotificationsInterface, NotificationIn
             Drtgtk.Action action = app.actions.get_action(action_name);
             if (action != null) {
                 actions_found += action;
-            }
-            else {
+            } else {
                 warning("Action '%s' not found.", action_name);
             }
         }

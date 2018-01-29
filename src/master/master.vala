@@ -110,8 +110,7 @@ public int main(string[] args) {
     if (Args.apps_dir != null && Args.apps_dir != "") {
         local_only_args = true;
         web_app_reg = new WebAppRegistry(File.new_for_path(Args.apps_dir), {});
-    }
-    else {
+    } else {
         Drt.Storage web_apps_storage = storage.get_child("web_apps");
         web_app_reg = new WebAppRegistry(web_apps_storage.user_data_dir, web_apps_storage.data_dirs);
     }
@@ -128,8 +127,7 @@ public int main(string[] args) {
     if (Args.debug) {
         local_only_args = true;
         exec_cmd += "-D";
-    }
-    else if (Args.verbose) {
+    } else if (Args.verbose) {
         local_only_args = true;
         exec_cmd += "-v";
     }

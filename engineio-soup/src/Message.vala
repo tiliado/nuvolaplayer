@@ -62,8 +62,7 @@ public bool deserialize_message(string message, out MessageType type, out int id
     for (i = 1; i < msg_size; i++) {
         if (message[i] != ':') {
             int_str.append_c((char) message[i]);
-        }
-        else {
+        } else {
             id = int.parse(int_str.str);
             if (id < 0) {
                 return false;
@@ -77,8 +76,7 @@ public bool deserialize_message(string message, out MessageType type, out int id
     for (; i < msg_size; i++) {
         if (message[i] != ':') {
             int_str.append_c((char) message[i]);
-        }
-        else {
+        } else {
             int size = int.parse(int_str.str);
             if (size <= 0) {
                 return false;
@@ -94,8 +92,7 @@ public bool deserialize_message(string message, out MessageType type, out int id
     for (; i < msg_size; i++) {
         if (message[i] != ':') {
             int_str.append_c((char) message[i]);
-        }
-        else {
+        } else {
             int size = int.parse(int_str.str);
             if (size < 0) {
                 return false;
@@ -104,8 +101,7 @@ public bool deserialize_message(string message, out MessageType type, out int id
             i++;
             if (size == 0) {
                 data = null;
-            }
-            else {
+            } else {
                 var parser = new Json.Parser();
                 try {
                     parser.load_from_data(message.substring(i, size));
@@ -116,8 +112,7 @@ public bool deserialize_message(string message, out MessageType type, out int id
                 }
                 if (parser.get_root() == null) {
                     data = null;
-                }
-                else {
+                } else {
                     data = parser.get_root().copy();
                 }
             }

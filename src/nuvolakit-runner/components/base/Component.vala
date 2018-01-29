@@ -60,8 +60,7 @@ public abstract class Component: GLib.Object {
                     load();
                     loaded = true;
                 }
-            }
-            else {
+            } else {
                 if (loaded) {
                     message("Unload %s %s", id, name);
                     unload();

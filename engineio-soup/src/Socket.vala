@@ -370,14 +370,12 @@ public class Socket : GLib.Object {
             case PacketType.MESSAGE:
                 if (packet.str_data != null) {
                     message_received(packet.str_data);
-                }
-                else if (packet.bin_data != null) {
+                } else if (packet.bin_data != null) {
                     bytes_received(packet.bin_data);
                 }
                 break;
             }
-        }
-        else {
+        } else {
             debug("packet received with closed socket");
         }
     }

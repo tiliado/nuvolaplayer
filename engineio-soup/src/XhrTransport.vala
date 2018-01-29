@@ -39,8 +39,7 @@ public class XhrTransport: PollingTransport {
             response.headers["Access-Control-Allow-Headers"] = "Content-Type";
             response.status_code = 200;
             response.end(null);
-        }
-        else {
+        } else {
             yield base.handle_request(request, response);
         }
     }
@@ -50,8 +49,7 @@ public class XhrTransport: PollingTransport {
         if (origin != null) {
             headers["Access-Control-Allow-Credentials"] = "true";
             headers["Access-Control-Allow-Origin"] = origin;
-        }
-        else {
+        } else {
             headers["Access-Control-Allow-Origin"] = "*";
         }
         base.on_headers_requested(request, headers);

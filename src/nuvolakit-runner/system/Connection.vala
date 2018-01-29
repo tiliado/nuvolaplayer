@@ -111,8 +111,7 @@ public class Connection : GLib.Object {
             }
             debug("Network Proxy: '%s'", proxy_uri);
             session.proxy_uri = new Soup.URI(proxy_uri);
-        }
-        else {
+        } else {
             debug("Network Proxy: system settings");
             proxy_uri = null;
             session.add_feature_by_type(typeof(Soup.ProxyResolverDefault));

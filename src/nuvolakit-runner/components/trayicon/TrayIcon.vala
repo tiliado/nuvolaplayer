@@ -90,8 +90,7 @@ public class TrayIcon: GLib.Object {
         if (number < 100) {
             text = number.to_string();
             font_size = 0.5 * size;
-        }
-        else {
+        } else {
             text = "∞";
             font_size = 0.8 * size;
         }

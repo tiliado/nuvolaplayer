@@ -74,14 +74,12 @@ public class PasswordManager {
                 entries = new Drt.Lst<LoginCredentials>(LoginCredentials.username_equals);
                 entries.prepend(new LoginCredentials(username, password));
                 credentials[hostname] = entries;
-            }
-            else {
+            } else {
                 var entry = new LoginCredentials(username, password);
                 int index = entries.index(entry);
                 if (index >= 0) {
                     entries[index] = entry;
-                }
-                else {
+                } else {
                     entries.prepend(entry);
                 }
             }

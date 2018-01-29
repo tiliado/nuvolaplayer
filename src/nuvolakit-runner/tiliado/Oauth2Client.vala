@@ -120,8 +120,7 @@ public class Oauth2Client : GLib.Object {
             parse_error(response, out error_code, out error_description);
             if (error_description == null) {
                 error_description = error_code;
-            }
-            else {
+            } else {
                 error_description = "%s: %s".printf(error_code, error_description);
             }
 
@@ -335,8 +334,7 @@ public class Oauth2Client : GLib.Object {
         if (!response.get_string("error", out error_code)) {
             error_code = "response_error";
             error_description = "The 'error' member is missing.";
-        }
-        else {
+        } else {
             error_description =response.get_string_or("description", null);
         }
     }

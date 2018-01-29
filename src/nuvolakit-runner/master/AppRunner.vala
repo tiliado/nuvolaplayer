@@ -142,16 +142,13 @@ public class SubprocessAppRunner : AppRunner {
                 if (size == 1) {
                     if (stderr_last_line != null && stderr_last_line[0] != '\0') {
                         stderr_last_line = stderr_last_line + lines[0];
-                    }
-                    else {
+                    } else {
                         stderr_last_line = lines[0];
                     }
-                }
-                else if (size > 1) {
+                } else if (size > 1) {
                     if (stderr_last_line != null && stderr_last_line[0] != '\0') {
                         stderr_print_line(stderr_last_line + lines[0]);
-                    }
-                    else {
+                    } else {
                         stderr_print_line(lines[0]);
                     }
                     for (var i = 1; i < size - 1; i++)
@@ -169,8 +166,7 @@ public class SubprocessAppRunner : AppRunner {
     private void stderr_print_line(string line) {
         if (line.has_prefix("Worker:") || line.has_prefix("Runner:")) {
             Drt.Logger.puts(line);
-        }
-        else {
+        } else {
             Drt.Logger.printf("Runner: %s", line);
         }
         Drt.Logger.puts("\n");

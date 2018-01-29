@@ -114,14 +114,11 @@ public class NetworkSettings: Gtk.Grid {
         NetworkProxyType type = NetworkProxyType.SYSTEM;
         if (proxy_types[0].active) {
             type = NetworkProxyType.SYSTEM;
-        }
-        else if (proxy_types[1].active) {
+        } else if (proxy_types[1].active) {
             type = NetworkProxyType.DIRECT;
-        }
-        else if (proxy_types[2].active) {
+        } else if (proxy_types[2].active) {
             type = NetworkProxyType.HTTP;
-        }
-        else if (proxy_types[3].active) {
+        } else if (proxy_types[3].active) {
             type = NetworkProxyType.SOCKS;
         }
         return type;

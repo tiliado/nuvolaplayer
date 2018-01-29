@@ -78,8 +78,7 @@ public class Appindicator: GLib.Object {
 
         if (radio_groups == null) {
             radio_groups = new HashTable<string, Gtk.RadioMenuItem?>(str_hash, str_equal);
-        }
-        else {
+        } else {
             clean_radio_groups();
         }
         menu = new Gtk.Menu();
@@ -111,19 +110,16 @@ public class Appindicator: GLib.Object {
             radio_item.active = action.state != null && Drt.variant_equal(action.state, option.parameter);
             item = radio_item;
             item.set_data<Variant?>("diorite_action_param", option.parameter);
-        }
-        else if (toggle_action != null) {
+        } else if (toggle_action != null) {
             var check_item = new Gtk.CheckMenuItem.with_label(action.label);
             check_item.active = action.state.get_boolean();
             item = check_item;
             item.set_data<Variant?>("diorite_action_param", null);
             action.notify["state"].connect_after(on_toggle_action_state_changed);
-        }
-        else if (action is Drtgtk.SimpleAction) {
+        } else if (action is Drtgtk.SimpleAction) {
             item = new Gtk.MenuItem.with_label(action.label);
             item.set_data<Variant?>("diorite_action_param", null);
-        }
-        else {
+        } else {
             item = null;
             warning("%s %s is not supported yet.", action.get_type().name(), full_name);
             return;

@@ -45,8 +45,7 @@ public class WebAppWindow : Drtgtk.ApplicationWindow {
                     sidebar.get_preferred_width(out width, null);
                     paned.position = allocation.width - width;
                 }
-            }
-            else if (paned.position != value) {
+            } else if (paned.position != value) {
                 paned.position = value;
             }
         }

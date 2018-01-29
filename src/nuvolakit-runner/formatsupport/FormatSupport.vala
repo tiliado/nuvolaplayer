@@ -181,8 +181,7 @@ public class AudioPipeline : GLib.Object {
                 warn("Failed to link pad to sink.");
             }
             sink.sync_state_with_parent();
-        }
-        else {
+        } else {
             Gst.Element? conv = Gst.ElementFactory.make("audioconvert", "converter");
             Gst.Element? sink = Gst.ElementFactory.make("autoaudiosink", "sink");
             pipeline.add_many(conv, sink);

@@ -77,8 +77,7 @@ public class AppIndexWebView : WebView {
             }
             decision.use();
             return true;
-        }
-        else {
+        } else {
             app.show_uri(uri);
             decision.ignore();
             return true;

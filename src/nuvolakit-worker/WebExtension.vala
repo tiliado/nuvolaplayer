@@ -268,8 +268,7 @@ public class WebExtension: GLib.Object {
              * it blocks window_object_cleared and other signals.
              */
             init();
-        }
-        else {
+        } else {
             this.page = page;
             WebKit.Frame frame = page.get_main_frame();
             /*

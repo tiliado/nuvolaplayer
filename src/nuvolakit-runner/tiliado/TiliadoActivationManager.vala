@@ -101,8 +101,7 @@ public class TiliadoActivationManager : GLib.Object, TiliadoActivation {
     public TiliadoApi2.User? update_user_info_sync() {
         if (tiliado.token == null) {
             return null;
-        }
-        else {
+        } else {
             return update_user_info_sync_internal();
         }
     }
@@ -245,8 +244,7 @@ public class TiliadoActivationManager : GLib.Object, TiliadoActivation {
             string signature = tiliado.hmac_sha1_for_string(
                 concat_tiliado_user_info(user.name, user.membership, expires));
             config.set_string(TILIADO_ACCOUNT_SIGNATURE, signature);
-        }
-        else {
+        } else {
             config.unset(TILIADO_ACCOUNT_USER);
             config.unset(TILIADO_ACCOUNT_MEMBERSHIP);
             config.unset(TILIADO_ACCOUNT_EXPIRES);
@@ -265,8 +263,7 @@ public class TiliadoActivationManager : GLib.Object, TiliadoActivation {
             config.set_value(TILIADO_ACCOUNT_ACCESS_TOKEN, token.access_token);
             config.set_value(TILIADO_ACCOUNT_REFRESH_TOKEN, token.refresh_token);
             config.set_value(TILIADO_ACCOUNT_SCOPE, token.scope);
-        }
-        else {
+        } else {
             config.unset(TILIADO_ACCOUNT_TOKEN_TYPE);
             config.unset(TILIADO_ACCOUNT_ACCESS_TOKEN);
             config.unset(TILIADO_ACCOUNT_REFRESH_TOKEN);

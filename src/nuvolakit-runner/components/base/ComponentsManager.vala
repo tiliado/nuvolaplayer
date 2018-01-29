@@ -103,16 +103,13 @@ public class ComponentsManager: Gtk.Stack {
                 this.remove(component_settings.widget);
                 component_settings = null;
             }
-        }
-        else {
+        } else {
             Gtk.Widget? widget;
             if (!is_component_membership_ok(component)) {
                 widget = membership_widget.change_component(component);
-            }
-            else if (!is_component_available(component)) {
+            } else if (!is_component_available(component)) {
                 widget = component_not_available_widget;
-            }
-            else {
+            } else {
                 widget = component.get_settings();
             }
             component_settings = new Settings(this, component, widget);
@@ -156,8 +153,7 @@ public class ComponentsManager: Gtk.Stack {
             if (available) {
                 checkbox.active = component.enabled;
                 checkbox.sensitive = true;
-            }
-            else {
+            } else {
                 checkbox.active = false;
                 checkbox.sensitive = false;
             }
@@ -189,8 +185,7 @@ public class ComponentsManager: Gtk.Stack {
                 button.sensitive = component.enabled || !available;
                 button.clicked.connect(on_settings_clicked);
                 grid.attach(button, 2, row, 1, 1);
-            }
-            else {
+            } else {
                 button = null;
             }
         }
@@ -253,8 +248,7 @@ public class ComponentsManager: Gtk.Stack {
                 scroll.vexpand = scroll.hexpand = true;
                 scroll.add(component_widget);
                 grid.attach(scroll, 0, 1, 2, 1);
-            }
-            else {
+            } else {
                 grid.attach(new Gtk.Label("No settings available"), 0, 1, 2, 1);
             }
             grid.show_all();

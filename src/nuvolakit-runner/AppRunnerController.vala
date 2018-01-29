@@ -129,8 +129,7 @@ public class AppRunnerController: Drtgtk.Application {
                 startup_check.task_finished.disconnect(on_startup_check_task_finished);
                 startup_window.ready_to_continue.connect(on_startup_window_ready_to_continue);
                 startup_check.mark_as_finished();
-            }
-            else {
+            } else {
                 startup_check.task_finished.disconnect(on_startup_check_task_finished);
                 startup_window.ready_to_continue.connect(on_startup_window_ready_to_continue);
                 #if !TILIADO_API
@@ -248,8 +247,7 @@ public class AppRunnerController: Drtgtk.Application {
                     return false;
                 }
                 ipc_bus.connect_master_socket(socket, api_token);
-            }
-            else {
+            } else {
                 bus_name = Environment.get_variable("NUVOLA_IPC_MASTER");
                 assert(bus_name != null);
                 ipc_bus.connect_master(bus_name, api_token);
@@ -401,8 +399,7 @@ public class AppRunnerController: Drtgtk.Application {
 
         if (config.get_bool(ConfigKey.WINDOW_SIDEBAR_VISIBLE)) {
             main_window.sidebar.show();
-        }
-        else {
+        } else {
             main_window.sidebar.hide();
         }
         main_window.sidebar_position = (int) config.get_int64(ConfigKey.WINDOW_SIDEBAR_POS);
@@ -425,11 +422,9 @@ public class AppRunnerController: Drtgtk.Application {
     public override void activate() {
         if (main_window != null) {
             main_window.present();
-        }
-        else if (startup_window != null) {
+        } else if (startup_window != null) {
             startup_window.present();
-        }
-        else {
+        } else {
             start();
         }
     }
@@ -563,8 +558,7 @@ public class AppRunnerController: Drtgtk.Application {
                 Variant? new_value = new_values.get(key);
                 if (new_value == null) {
                     critical("New value '%s' not found", key);
-                }
-                else {
+                } else {
                     config.set_value(key, new_value);
                 }
             }
@@ -613,8 +607,7 @@ public class AppRunnerController: Drtgtk.Application {
         Gtk.Widget sidebar = main_window.sidebar;
         if (sidebar.visible) {
             sidebar.hide();
-        }
-        else {
+        } else {
             sidebar.show();
         }
     }
@@ -947,8 +940,7 @@ public class AppRunnerController: Drtgtk.Application {
             try {
                 if (web_engine.web_worker.ready) {
                     can_quit = web_engine.web_worker.send_data_request_bool("QuitRequest", "approved", can_quit);
-                }
-                else {
+                } else {
                     debug("WebWorker not ready");
                 }
             }
@@ -959,8 +951,7 @@ public class AppRunnerController: Drtgtk.Application {
 
                 if (web_engine.ready) {
                     can_quit = web_engine.send_data_request_bool("QuitRequest", "approved", can_quit);
-                }
-                else {
+                } else {
                     debug("WebEngine not ready");
                 }
             }
@@ -1007,8 +998,7 @@ public class AppRunnerController: Drtgtk.Application {
             Variant? new_value = new_values.get(key);
             if (new_value == null) {
                 critical("New values '%s'' not found", key);
-            }
-            else {
+            } else {
                 config.set_value(key, new_value);
             }
         }

@@ -45,8 +45,7 @@ public class XKeyGrabber: GLib.Object {
         Gdk.Display display = Gdk.Display.get_default();
         if (display != null) {
             setup_display(display);
-        }
-        else {
+        } else {
             Gdk.DisplayManager.get().display_opened.connect(setup_display);
         }
     }
@@ -128,8 +127,7 @@ public class XKeyGrabber: GLib.Object {
         foreach (Gdk.ModifierType lock_modifier in lock_modifiers) {
             if (grab) {
                 display.grab_key(keycode, modifiers|lock_modifier, xid, false, X.GrabMode.Async, X.GrabMode.Async);
-            }
-            else {
+            } else {
                 display.ungrab_key(keycode, modifiers|lock_modifier, xid);
             }
         }
@@ -160,8 +158,7 @@ public class XKeyGrabber: GLib.Object {
             string accelerator = Gtk.accelerator_name(keyval, event_mods);
             if (is_grabbed(accelerator)) {
                 keybinding_pressed(accelerator, gdk_event.get_time());
-            }
-            else {
+            } else {
                 warning("Unknown keybinding %s", accelerator);
             }
         }
@@ -171,13 +168,11 @@ public class XKeyGrabber: GLib.Object {
     private void setup_display(Gdk.Display display) {
         if (root_window != null) {
             warning("A display '%s' appeared but the root window had been already set.", display.get_name());
-        }
-        else {
+        } else {
             root_window = Gdk.get_default_root_window() as Gdk.X11.Window;
             if (root_window == null) {
                 warning("Failed to get a X11 Window for the display '%s'.", display.get_name());
-            }
-            else {
+            } else {
                 debug("Obtained a X11 Window for the display '%s'.", display.get_name());
                 root_window.add_filter(event_filter);
             }

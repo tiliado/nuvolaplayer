@@ -268,8 +268,7 @@ public class FormatSupportScreen: Gtk.Notebook {
                 update_result_text(result);
                 if (result) {
                     add_message("Info", "Playback has been successful.");
-                }
-                else {
+                } else {
                     add_message("Error", "Playback has failed.");
                 }
                 set_button_label();

@@ -56,8 +56,7 @@ public class WebAppRegistry: GLib.Object {
         if (app != null) {
             message("Using web app %s, version %u.%u, data dir %s", app.name, app.version_major, app.version_minor,
                 app.data_dir == null ? "(null)" : app.data_dir.get_path());
-        }
-        else {
+        } else {
             message("Web App %s not found.", id);
         }
 

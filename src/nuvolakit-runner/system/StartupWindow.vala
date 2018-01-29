@@ -158,8 +158,7 @@ public class StartupWindow : Drtgtk.ApplicationWindow {
             foreach (StartupCheck.Status item in StartupCheck.Status.all())
             styles.remove_class(item.get_badge_class());
             styles.add_class(status.get_badge_class());
-        }
-        else if (param.name.has_suffix("-message")) {
+        } else if (param.name.has_suffix("-message")) {
             string? msg = null;
             model.get(param.name, out msg);
             Gtk.Label label = null;
@@ -168,8 +167,7 @@ public class StartupWindow : Drtgtk.ApplicationWindow {
             if (msg != null) {
                 label.show();
                 warning("%s: %s", param.name, msg);
-            }
-            else {
+            } else {
                 label.hide();
             }
         }
@@ -228,8 +226,7 @@ public class StartupWindow : Drtgtk.ApplicationWindow {
             button.hexpand = true;
             button.clicked.connect(on_button_clicked);
             top_grid.attach(button, 0, 3, 1, 1);
-        }
-        else {
+        } else {
             ready_to_continue();
         }
     }

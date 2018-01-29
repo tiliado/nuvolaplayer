@@ -57,8 +57,7 @@ public class TiliadoAccountWidget : Gtk.Grid {
         current_user = activation.get_user_info();
         if (current_user == null) {
             get_token();
-        }
-        else {
+        } else {
             check_user();
         }
     }
@@ -262,8 +261,7 @@ public class TiliadoAccountWidget : Gtk.Grid {
 
             button_box.halign = Gtk.Align.CENTER;
             attach(button_box, 0, 1, 2, 1);
-        }
-        else {
+        } else {
             var label = new Gtk.Label(user.name);
             label.max_width_chars = 15;
             label.ellipsize = Pango.EllipsizeMode.END;

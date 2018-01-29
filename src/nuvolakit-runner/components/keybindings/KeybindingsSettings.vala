@@ -85,8 +85,7 @@ public class KeybindingsSettings : Gtk.Grid {
             Gdk.ModifierType accel_mods;
             if (keybinding != null) {
                 Gtk.accelerator_parse(keybinding, out accel_key, out accel_mods);
-            }
-            else {
+            } else {
                 accel_key = 0;
                 accel_mods = 0;
             }
@@ -96,8 +95,7 @@ public class KeybindingsSettings : Gtk.Grid {
             Gdk.ModifierType glob_accel_mods;
             if (keybinding != null) {
                 Gtk.accelerator_parse(keybinding, out glob_accel_key, out glob_accel_mods);
-            }
-            else {
+            } else {
                 glob_accel_key = 0;
                 glob_accel_mods = 0;
             }
@@ -174,8 +172,7 @@ public class KeybindingsSettings : Gtk.Grid {
         if (global_keybindings.set_keybinding(name, keybinding)) {
             model.set(iter, 4, accel_key, 5, accel_mods, -1);
             set_error(null);
-        }
-        else {
+        } else {
             model.set(iter, 4, 0, 5, 0, -1);
             set_error(
                 ("Failed to set keybinding '%s'. Make sure it is not already used by your system or other"
@@ -199,8 +196,7 @@ public class KeybindingsSettings : Gtk.Grid {
         if (error != null) {
             error_label.label = error;
             info_bar.show();
-        }
-        else {
+        } else {
             info_bar.hide();
         }
     }

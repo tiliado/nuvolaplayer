@@ -45,8 +45,7 @@ public abstract class PollingTransport: Transport {
     public static PollingTransport new_for_request(Request request) {
         if (request.jsonp_index < 0) {
             return new XhrTransport(request);
-        }
-        else {
+        } else {
             return new JsonpTransport(request);
         }
     }
@@ -62,11 +61,9 @@ public abstract class PollingTransport: Transport {
     public override async void handle_request(Request request, Response response) {
         if (request.method == "GET") {
             yield handle_poll_request(request, response);
-        }
-        else if (request.method == "POST") {
+        } else if (request.method == "POST") {
             yield handle_data_request(request, response);
-        }
-        else {
+        } else {
             response.status_code = 500;
             response.end();
         }
@@ -128,8 +125,7 @@ public abstract class PollingTransport: Transport {
 
         if (is_binary) {
             yield handle_incoming_data(null, request.get_data_as_bytes());
-        }
-        else {
+        } else {
             yield handle_incoming_data(request.get_data_as_string(), null);
         }
 
@@ -200,8 +196,7 @@ public abstract class PollingTransport: Transport {
         if (payload != null) {
             var compress = false;
             write(payload, compress);
-        }
-        else {
+        } else {
             writable = true;
         }
     }
@@ -241,8 +236,7 @@ public abstract class PollingTransport: Transport {
             poll_response.status_code = 200;
             if (is_string) {
                 poll_response.end_string(str_data);
-            }
-            else {
+            } else {
                 poll_response.end_bytes(bin_data);
             }
 
@@ -275,15 +269,13 @@ public abstract class PollingTransport: Transport {
                 callback();
             }
             on_close();
-        }
-        else if (discarded) {
+        } else if (discarded) {
             message("transport discarded - closing right away");
             if (callback != null) {
                 callback();
             }
             on_close();
-        }
-        else {
+        } else {
             debug("transport not writable - buffering orderly close");
             this.should_close = true;
             close_timeout_id = Timeout.add(close_timeout, close_timeout_cb);

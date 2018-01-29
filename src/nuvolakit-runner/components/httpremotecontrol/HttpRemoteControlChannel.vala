@@ -61,8 +61,7 @@ public class Channel: Engineio.Channel {
                 } // FIXME: How to avoid this hack
                 builder.add("{smv}", "result", variant_result);
                 result = Json.gvariant_serialize(builder.end());
-            }
-            else {
+            } else {
                 result = Json.gvariant_serialize(variant_result);
             }
             status = "OK";
@@ -89,8 +88,7 @@ public class Channel: Engineio.Channel {
             } // FIXME: How to avoid this hack
             builder.add("{smv}", "result", data);
             result = Json.gvariant_serialize(builder.end());
-        }
-        else {
+        } else {
             result = Json.gvariant_serialize(data);
         }
         string msg = Engineio.serialize_message(Engineio.MessageType.NOTIFICATION, 0, path, result);

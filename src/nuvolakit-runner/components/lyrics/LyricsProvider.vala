@@ -74,8 +74,7 @@ public class LyricsProvider: GLib.Object {
             status = LyricsStatus.NO_SONG;
             lyrics = null;
             no_song_info();
-        }
-        else {
+        } else {
             queue_fetch_lyrics(artist, title);
         }
     }

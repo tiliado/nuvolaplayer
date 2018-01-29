@@ -172,8 +172,7 @@ public class Server: GLib.Object {
                 err = EngineError.BAD_REQUEST;
                 return false;
             }
-        }
-        else if (request.method != "GET") { // handshake is GET only
+        } else if (request.method != "GET") { // handshake is GET only
             err = EngineError.BAD_HANDSHAKE_METHOD;
             return false;
         }
@@ -210,8 +209,7 @@ public class Server: GLib.Object {
         if (request.sid != null) {
             debug("Setting new request for existing client %s", request.sid);
             yield clients[request.sid].transport.handle_request(request, response);
-        }
-        else {
+        } else {
             yield perform_handshake(request.transport, request, response);
         }
     }
@@ -231,8 +229,7 @@ public class Server: GLib.Object {
         if (origin != null) {
             response.headers["Access-Control-Allow-Credentials"] = "true";
             response.headers["Access-Control-Allow-Origin"] = origin;
-        }
-        else {
+        } else {
             response.headers["Access-Control-Allow-Origin"] = "*";
         }
         response.status_code = 400;
@@ -262,8 +259,7 @@ public class Server: GLib.Object {
         if (polling != null) {
             polling.max_http_buffer_size = this.max_http_buffer_size;
             polling.http_compression = this.http_compression;
-        }
-        else if ("websocket" == transport_name) {
+        } else if ("websocket" == transport_name) {
             // TODO: transport.perMessageDeflate = this.perMessageDeflate;
         }
 

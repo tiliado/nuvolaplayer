@@ -618,8 +618,7 @@ public class JSApi : GLib.Object {
         for (var i = 0; i < args.length; i++) {
             if (args[i].is_undefined(ctx)) {
                 debug("Nuvola.log: undefined");
-            }
-            else {
+            } else {
                 try {
                     debug("Nuvola.log: %s", variant_from_value(ctx, args[i]).print(false));
                 }
@@ -636,8 +635,7 @@ public class JSApi : GLib.Object {
         for (var i = 0; i < args.length; i++) {
             if (args[i].is_undefined(ctx)) {
                 warning("Nuvola.warn: undefined");
-            }
-            else {
+            } else {
                 try {
                     warning("Nuvola.warn: %s", variant_from_value(ctx, args[i]).print(false));
                 }

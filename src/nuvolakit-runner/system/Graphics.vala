@@ -49,8 +49,7 @@ public bool is_required_gl_extension_mounted(out string? gl_extension) {
     gl_extension = get_required_gl_extension();
     if (gl_extension == null) {
         return true;
-    }
-    else {
+    } else {
         return File.new_for_path("/usr/lib/GL").get_child(gl_extension).query_exists();
     }
 }

@@ -134,8 +134,7 @@ public class JsEnvironment: GLib.Object, JSExecutor {
             int i = 0;
             foreach (Variant item in args)
             params[i++] = value_from_variant(ctx, item);
-        }
-        else {
+        } else {
             params = {};
         }
 

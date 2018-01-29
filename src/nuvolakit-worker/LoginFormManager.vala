@@ -83,14 +83,12 @@ public class LoginFormManager: GLib.Object {
             entries = new Drt.Lst<LoginCredentials>(LoginCredentials.username_equals);
             entries.prepend(new LoginCredentials(username, password));
             credentials[hostname] = entries;
-        }
-        else {
+        } else {
             var entry = new LoginCredentials(username, password);
             int index = entries.index(entry);
             if (index >= 0) {
                 entries[index] = entry;
-            }
-            else {
+            } else {
                 entries.prepend(entry);
             }
         }
@@ -109,11 +107,9 @@ public class LoginFormManager: GLib.Object {
     public void remove_credentials(string? hostname, string? username) {
         if (hostname == null) {
             credentials.remove_all();
-        }
-        else if (username == null) {
+        } else if (username == null) {
             credentials.remove(hostname);
-        }
-        else {
+        } else {
             Drt.Lst<LoginCredentials> entries = credentials[hostname];
             if (entries != null) {
                 entries.remove(new LoginCredentials(username, null));
@@ -278,14 +274,12 @@ public class LoginFormManager: GLib.Object {
                     return false;
                 }
                 username_node = input;
-            }
-            else if (input_type == "password") {
+            } else if (input_type == "password") {
                 if (password_node != null) {
                     return false;
                 }
                 password_node = input;
-            }
-            else if (input_type == "submit") {
+            } else if (input_type == "submit") {
                 submit_node = input;
             }
         }

@@ -313,12 +313,11 @@ public class WebApp : GLib.Object {
     }
 
     private Gtk.IconInfo? lookup_theme_icon(int size, Gtk.IconLookupFlags flags=0) {
-        /* Any large icon requested */
         if (size <= 0) {
+            /* Any large icon requested */
             size = 1024;
-        }
-        /* Avoid use of SVG icon for small icon sizes because of a too large borders for this icon sizes */
-        else if (size <= 32) {
+        } else if (size <= 32) {
+            /* Avoid use of SVG icon for small icon sizes because of a too large borders for this icon sizes */
             flags |= Gtk.IconLookupFlags.NO_SVG;
         }
 

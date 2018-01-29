@@ -39,8 +39,7 @@ public void webkit_web_extension_initialize_with_user_data(WebKit.WebExtension e
             warning("Run `gdb -p %d` to debug it with gdb.", (int) Posix.getpid());
             GLib.Thread.usleep(seconds * 1000000);
             warning("WebWorker is awake.");
-        }
-        else {
+        } else {
             warning("Invalid NUVOLA_WEB_WORKER_SLEEP variable: %s", debug_sleep);
         }
     }

@@ -118,8 +118,7 @@ public class GlobalKeybinder: GLib.Object {
         foreach (Gdk.ModifierType lock_modifier in lock_modifiers) {
             if (grab) {
                 display.grab_key(keycode, modifiers|lock_modifier, xid, false, X.GrabMode.Async, X.GrabMode.Async);
-            }
-            else {
+            } else {
                 display.ungrab_key(keycode, modifiers|lock_modifier, xid);
             }
         }

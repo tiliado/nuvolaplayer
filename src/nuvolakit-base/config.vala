@@ -116,8 +116,7 @@ public class Config : GLib.Object, Drt.KeyValueStorage {
                 object.remove_member(member_name);
                 changed(key, old_value);
             }
-        }
-        else {
+        } else {
             if (old_value == null || !old_value.equal(value)) {
                 Json.Node? node = Json.gvariant_serialize(value);
                 object.set_member(member_name, (owned) node);
@@ -129,8 +128,7 @@ public class Config : GLib.Object, Drt.KeyValueStorage {
     protected void set_default_value_unboxed(string key, Variant? value) {
         if (value == null) {
             defaults.remove(key);
-        }
-        else {
+        } else {
             defaults.insert(key, value);
         }
     }

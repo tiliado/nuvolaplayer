@@ -217,13 +217,11 @@ public class LastfmCompatibleScrobbler: AudioScrobbler {
         string request = create_signed_request(params) + "&format=json";
         if (method == HTTP_GET) {
             message = new Soup.Message(method, api_root + "?" + request);
-        }
-        else if (method == HTTP_POST) {
+        } else if (method == HTTP_POST) {
             message = new Soup.Message(method, api_root);
             message.set_request("application/x-www-form-urlencoded",
                 Soup.MemoryUse.COPY, request.data);
-        }
-        else {
+        } else {
             message = null;
             error("Last.fm: Unsupported request method: %s", method);
         }
@@ -245,8 +243,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler {
                     var data = (string) request.data;
                     if ("Your request timed out" in data) {
                         throw new AudioScrobblerError.RETRY("%s", data);
-                    }
-                    else {
+                    } else {
                         debug("Send request: %s\n---------\n%s\n----------", data, response);
                         throw new AudioScrobblerError.JSON_PARSE_ERROR(e.message);
                     }

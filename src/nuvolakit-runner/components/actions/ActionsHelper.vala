@@ -87,8 +87,7 @@ public class Nuvola.ActionsHelper: GLib.Object, ActionsInterface {
         Drtgtk.Action action;
         if (state == null) {
             action = simple_action(group, scope, action_name, label, mnemo_label, icon, keybinding, null);
-        }
-        else {
+        } else {
             action = toggle_action(group, scope, action_name, label, mnemo_label, icon, keybinding, null, state);
         }
 
