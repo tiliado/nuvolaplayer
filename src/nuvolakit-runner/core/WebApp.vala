@@ -47,8 +47,7 @@ public class WebApp : GLib.Object {
         if (id_regex == null) {
             try {
                 id_regex = new Regex(ID_REGEX);
-            }
-            catch (RegexError e) {
+            } catch (RegexError e) {
                 error("Unable to compile regular expression /%s/.", ID_REGEX);
             }
         }

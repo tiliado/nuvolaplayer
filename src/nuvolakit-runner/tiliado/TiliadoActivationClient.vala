@@ -34,8 +34,7 @@ public class TiliadoActivationClient : GLib.Object, TiliadoActivation {
         subscribe.begin((o, res) => {
             try {
                 subscribe.end(res);
-            }
-            catch (GLib.Error e) {
+            } catch (GLib.Error e) {
                 warning("Failed to subscribe to notifications. %s", e.message);
             }
         });
