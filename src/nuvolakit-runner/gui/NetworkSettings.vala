@@ -94,8 +94,9 @@ public class NetworkSettings: Gtk.Grid {
         proxy_port.hexpand = true;
         attach(proxy_port, 1, row++, 2, 1);
 
-        foreach (Gtk.RadioButton t in proxy_types)
-        t.toggled.connect(on_proxy_type_toggled);
+        foreach (Gtk.RadioButton t in proxy_types) {
+            t.toggled.connect(on_proxy_type_toggled);
+        }
         proxy_server.changed.connect(on_proxy_server_changed);
         proxy_port.value_changed.connect(on_proxy_port_changed);
 

@@ -155,8 +155,9 @@ public class StartupWindow : Drtgtk.ApplicationWindow {
             this.get(param.name, out label);
             label.label = status.get_blurb();
             Gtk.StyleContext styles = label.get_style_context();
-            foreach (StartupCheck.Status item in StartupCheck.Status.all())
-            styles.remove_class(item.get_badge_class());
+            foreach (StartupCheck.Status item in StartupCheck.Status.all()) {
+                styles.remove_class(item.get_badge_class());
+            }
             styles.add_class(status.get_badge_class());
         } else if (param.name.has_suffix("-message")) {
             string? msg = null;

@@ -146,8 +146,9 @@ public class TiliadoAccountWidget : Gtk.Grid {
             button_box.remove(logout_button);
             logout_button = null;
         }
-        foreach (Gtk.Widget child in get_children())
-        remove(child);
+        foreach (Gtk.Widget child in get_children()) {
+            remove(child);
+        }
     }
 
     private void on_activate_button_clicked(Gtk.Button button) {

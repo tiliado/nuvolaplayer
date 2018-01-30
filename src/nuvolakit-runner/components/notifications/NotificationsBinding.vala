@@ -51,9 +51,10 @@ public class Nuvola.NotificationsBinding: ObjectBinding<NotificationsInterface> 
         string? icon_path = request.pop_string();
         bool force = request.pop_bool();
         string? category = request.pop_string();
-        foreach (NotificationsInterface object in objects)
-        if (object.show_anonymous(title, message, icon_name, icon_path, force, category)) {
-            break;
+        foreach (NotificationsInterface object in objects) {
+            if (object.show_anonymous(title, message, icon_name, icon_path, force, category)) {
+                break;
+            }
         }
         request.respond(null);
     }
@@ -61,9 +62,10 @@ public class Nuvola.NotificationsBinding: ObjectBinding<NotificationsInterface> 
     private void handle_is_persistence_supported(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
         bool supported = false;
-        foreach (NotificationsInterface object in objects)
-        if (object.is_persistence_supported(ref supported)) {
-            break;
+        foreach (NotificationsInterface object in objects) {
+            if (object.is_persistence_supported(ref supported)) {
+                break;
+            }
         }
         request.respond(new Variant.boolean(supported));
     }

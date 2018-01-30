@@ -183,8 +183,9 @@ public class LoginFormManager: GLib.Object {
                     SList<Nuvola.LoginCredentials> entries = get_credentials(form.uri.host, null);
                     if (entries != null) {
                         var builder = new VariantBuilder(new VariantType("as"));
-                        foreach (LoginCredentials entry in entries)
-                        builder.add_value(entry.username);
+                        foreach (LoginCredentials entry in entries) {
+                            builder.add_value(entry.username);
+                        }
                         menu.set_user_data(new Variant("(sas)", "prefill-password", builder));
                         return true;
                     }

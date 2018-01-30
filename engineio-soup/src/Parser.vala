@@ -50,8 +50,9 @@ public int utf16_strlen(string? str) {
     int len = 0;
     unichar c = 0;
     int i = 0;
-    while (str.get_next_char(ref i, out c))
-    len += (uint) c <= 0xFFFF ? 1 : 2;
+    while (str.get_next_char(ref i, out c)) {
+        len += (uint) c <= 0xFFFF ? 1 : 2;
+    }
     return len;
 }
 

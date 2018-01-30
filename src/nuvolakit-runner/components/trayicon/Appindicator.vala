@@ -83,8 +83,9 @@ public class Appindicator: GLib.Object {
         }
         menu = new Gtk.Menu();
         add_menu_item_for_action("activate");
-        foreach (unowned string name in model.actions)
-        add_menu_item_for_action(name);
+        foreach (unowned string name in model.actions) {
+            add_menu_item_for_action(name);
+        }
         menu.show();
         indicator.set_menu(menu);
     }

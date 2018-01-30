@@ -94,9 +94,10 @@ public class Notification {
         if (add_actions) {
             notification.set_hint("action-icons", true);
 
-            foreach (Drtgtk.Action action in actions)
-            if (action.enabled) {
-                notification.add_action(action.icon, action.label, () => { action.activate(null); });
+            foreach (Drtgtk.Action action in actions) {
+                if (action.enabled) {
+                    notification.add_action(action.icon, action.label, () => { action.activate(null); });
+                }
             }
         }
 

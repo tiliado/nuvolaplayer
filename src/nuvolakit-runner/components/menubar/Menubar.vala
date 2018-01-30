@@ -37,8 +37,9 @@ public class MenuBar: GLib.Object, MenuBarInterface {
         GLib.Menu menubar = app.reset_menubar();
         List<unowned string> submenus = menus.get_keys();
         submenus.sort(strcmp);
-        foreach (unowned string submenu in submenus)
-        menus[submenu].append_to_menu(app.actions, menubar);
+        foreach (unowned string submenu in submenus) {
+            menus[submenu].append_to_menu(app.actions, menubar);
+        }
     }
 
     public void set_submenu(string id, SubMenu submenu) {

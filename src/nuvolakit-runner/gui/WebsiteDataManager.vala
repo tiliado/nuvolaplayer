@@ -81,9 +81,10 @@ public class WebsiteDataManager: Gtk.Grid {
     private void on_clear_button_clicked() {
 
         WebKit.WebsiteDataTypes data_to_clear = 0;
-        for (var i = 0; i < check_buttons.length; i++)
-        if (check_buttons[i].active) {
-            data_to_clear |= data_types[i];
+        for (var i = 0; i < check_buttons.length; i++) {
+            if (check_buttons[i].active) {
+                data_to_clear |= data_types[i];
+            }
         }
         if (data_to_clear != 0) {
             clear_button.sensitive = false;

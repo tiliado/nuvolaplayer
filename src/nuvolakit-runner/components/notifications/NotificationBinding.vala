@@ -67,9 +67,10 @@ public class Nuvola.NotificationBinding: ObjectBinding<NotificationInterface> {
         string? icon_path = request.pop_string();
         bool resident = request.pop_bool();
         string? category = request.pop_string();
-        foreach (var object in objects)
-        if (object.update(name, title, message, icon_name, icon_path, resident, category)) {
-            break;
+        foreach (var object in objects) {
+            if (object.update(name, title, message, icon_name, icon_path, resident, category)) {
+                break;
+            }
         }
         request.respond(null);
     }
@@ -78,9 +79,10 @@ public class Nuvola.NotificationBinding: ObjectBinding<NotificationInterface> {
         check_not_empty();
         string? name = request.pop_string();
         string[] actions = request.pop_strv();
-        foreach (NotificationInterface object in objects)
-        if (object.set_actions(name, (owned) actions)) {
-            break;
+        foreach (NotificationInterface object in objects) {
+            if (object.set_actions(name, (owned) actions)) {
+                break;
+            }
         }
         request.respond(null);
     }
@@ -88,9 +90,10 @@ public class Nuvola.NotificationBinding: ObjectBinding<NotificationInterface> {
     private void handle_remove_actions(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
         string? name = request.pop_string();
-        foreach (NotificationInterface object in objects)
-        if (object.remove_actions(name)) {
-            break;
+        foreach (NotificationInterface object in objects) {
+            if (object.remove_actions(name)) {
+                break;
+            }
         }
         request.respond(null);
     }
@@ -99,9 +102,10 @@ public class Nuvola.NotificationBinding: ObjectBinding<NotificationInterface> {
         check_not_empty();
         string? name = request.pop_string();
         bool force = request.pop_bool();
-        foreach (NotificationInterface object in objects)
-        if (object.show(name, force)) {
-            break;
+        foreach (NotificationInterface object in objects) {
+            if (object.show(name, force)) {
+                break;
+            }
         }
         request.respond(null);
     }

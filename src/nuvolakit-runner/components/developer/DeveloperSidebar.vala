@@ -209,8 +209,9 @@ public class DeveloperSidebar: Gtk.ScrolledWindow {
             action_widgets.prepend(label);
             grid.add(label);
 
-            foreach (unowned string full_name in playback_actions)
-            add_action(full_name);
+            foreach (unowned string full_name in playback_actions) {
+                add_action(full_name);
+            }
 
         }
     }

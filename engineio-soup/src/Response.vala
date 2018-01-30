@@ -60,8 +60,9 @@ public class Response {
         unowned string header;
         unowned string value;
         HashTableIter<string, string> iter = HashTableIter<string, string>(headers);
-        while (iter.next(out header, out value))
-        msg.response_headers.replace(header, value);
+        while (iter.next(out header, out value)) {
+            msg.response_headers.replace(header, value);
+        }
         if (buffer != null) {
             msg.response_body.append_take((owned) buffer);
         }

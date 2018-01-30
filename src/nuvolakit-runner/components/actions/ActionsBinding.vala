@@ -113,9 +113,10 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface> {
         if (state != null && state.get_type_string() == "mv") {
             state = null;
         }
-        foreach (ActionsInterface object in objects)
-        if (object.add_action(group, scope, action_name, label, mnemo_label, icon, keybinding, state)) {
-            break;
+        foreach (ActionsInterface object in objects) {
+            if (object.add_action(group, scope, action_name, label, mnemo_label, icon, keybinding, state)) {
+                break;
+            }
         }
         request.respond(null);
     }
@@ -148,9 +149,10 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface> {
             keybinding = value.is_of_type(VariantType.STRING) ? value.get_string() : null;
             options[i++] = new Drtgtk.RadioOption(parameter, label, mnemo_label, icon, keybinding);
         }
-        foreach (ActionsInterface object in objects)
-        if (object.add_radio_action(group, scope, action_name, state, options)) {
-            break;
+        foreach (ActionsInterface object in objects) {
+            if (object.add_radio_action(group, scope, action_name, state, options)) {
+                break;
+            }
         }
         request.respond(null);
     }
@@ -159,9 +161,10 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface> {
         check_not_empty();
         string action_name = request.pop_string();
         bool enabled = false;
-        foreach (ActionsInterface object in objects)
-        if (object.is_enabled(action_name, ref enabled)) {
-            break;
+        foreach (ActionsInterface object in objects) {
+            if (object.is_enabled(action_name, ref enabled)) {
+                break;
+            }
         }
         request.respond(new Variant.boolean(enabled));
     }
@@ -170,9 +173,10 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface> {
         check_not_empty();
         string? action_name = request.pop_string();
         bool enabled = request.pop_bool();
-        foreach (ActionsInterface object in objects)
-        if (object.set_enabled(action_name, enabled)) {
-            break;
+        foreach (ActionsInterface object in objects) {
+            if (object.set_enabled(action_name, enabled)) {
+                break;
+            }
         }
         request.respond(null);
     }
@@ -181,9 +185,10 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface> {
         check_not_empty();
         string? action_name = request.pop_string();
         Variant? state = null;
-        foreach (ActionsInterface object in objects)
-        if (object.get_state(action_name, ref state)) {
-            break;
+        foreach (ActionsInterface object in objects) {
+            if (object.get_state(action_name, ref state)) {
+                break;
+            }
         }
         request.respond(state);
     }
@@ -192,9 +197,10 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface> {
         check_not_empty();
         string? action_name = request.pop_string();
         Variant? state = request.pop_variant();
-        foreach (ActionsInterface object in objects)
-        if (object.set_state(action_name, state)) {
-            break;
+        foreach (ActionsInterface object in objects) {
+            if (object.set_state(action_name, state)) {
+                break;
+            }
         }
         request.respond(null);
     }
@@ -204,9 +210,10 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface> {
         string action_name = request.pop_string();
         Variant? parameter = request.pop_variant();
         bool handled = false;
-        foreach (ActionsInterface object in objects)
-        if (handled = object.activate(action_name, parameter)) {
-            break;
+        foreach (ActionsInterface object in objects) {
+            if (handled = object.activate(action_name, parameter)) {
+                break;
+            }
         }
 
         request.respond(new Variant.boolean(handled));
@@ -218,8 +225,9 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface> {
         foreach (ActionsInterface object in objects) {
             List<unowned string> groups_list;
             bool done = object.list_groups(out groups_list);
-            foreach (unowned string group in groups_list)
-            groups_set.add(group);
+            foreach (unowned string group in groups_list) {
+                groups_set.add(group);
+            }
 
             if (done) {
                 break;
@@ -227,8 +235,9 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface> {
         }
         var builder = new VariantBuilder(new VariantType ("as"));
         List<unowned string> groups = groups_set.get_values();
-        foreach (unowned string name in groups)
-        builder.add_value(new Variant.string(name));
+        foreach (unowned string name in groups) {
+            builder.add_value(new Variant.string(name));
+        }
         request.respond(builder.end());
     }
 

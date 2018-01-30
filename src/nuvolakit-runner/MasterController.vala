@@ -298,8 +298,9 @@ public class MasterController : Drtgtk.Application {
         var builder = new VariantBuilder(new VariantType("aa{sv}"));
         List<unowned string> keys = app_runners_map.get_keys();
         keys.sort(string.collate);
-        foreach (unowned string app_id in keys)
-        builder.add_value(app_runners_map[app_id].query_meta());
+        foreach (unowned string app_id in keys) {
+            builder.add_value(app_runners_map[app_id].query_meta());
+        }
         request.respond(builder.end());
     }
 

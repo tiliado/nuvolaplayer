@@ -90,8 +90,9 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel> {
 
         SList<string> playback_actions = null;
         string[] actions = request.pop_strv();
-        foreach (string action in actions)
-        playback_actions.prepend(action);
+        foreach (string action in actions) {
+            playback_actions.prepend(action);
+        }
         playback_actions.reverse();
         model.playback_actions = (owned) playback_actions;
 

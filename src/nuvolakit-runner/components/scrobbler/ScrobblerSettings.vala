@@ -99,9 +99,10 @@ public class ScrobblerSettings: Gtk.Grid {
     }
 
     private void remove_info_bars() {
-        foreach (Gtk.Widget child in get_children())
-        if (child is Gtk.InfoBar) {
-            remove(child);
+        foreach (Gtk.Widget child in get_children()) {
+            if (child is Gtk.InfoBar) {
+                remove(child);
+            }
         }
     }
 

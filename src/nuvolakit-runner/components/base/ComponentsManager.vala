@@ -68,8 +68,9 @@ public class ComponentsManager: Gtk.Stack {
 
     public void refresh() {
         rows = null;
-        foreach (Gtk.Widget child in grid.get_children())
-        grid.remove(child);
+        foreach (Gtk.Widget child in grid.get_children()) {
+            grid.remove(child);
+        }
 
         List<Component> components = this.components.to_list();
         components.sort_with_data((a, b) => {

@@ -110,8 +110,9 @@ public class WebAppList : Gtk.Grid {
     private void on_selection_changed() {
         List<Gtk.TreePath> items = view.get_selected_items();
         Gtk.TreePath? path = null;
-        foreach (Gtk.TreePath my_path in items)
-        path = my_path;
+        foreach (Gtk.TreePath my_path in items) {
+            path = my_path;
+        }
 
         if (path == null) {
             details.hide();

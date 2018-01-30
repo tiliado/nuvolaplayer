@@ -146,8 +146,9 @@ public int main(string[] args) {
         controller_args += Args.app_id;
     }
     #endif
-    for (var i = 1; i < args.length; i++)
-    controller_args += args[i];
+    for (var i = 1; i < args.length; i++) {
+        controller_args += args[i];
+    }
     int result = controller.run(controller_args);
 
     if (controller.is_remote) {

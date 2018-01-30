@@ -132,8 +132,9 @@ public class JsEnvironment: GLib.Object, JSExecutor {
             size = (int) args.n_children();
             params = new (unowned JS.Value)[size];
             int i = 0;
-            foreach (Variant item in args)
-            params[i++] = value_from_variant(ctx, item);
+            foreach (Variant item in args) {
+                params[i++] = value_from_variant(ctx, item);
+            }
         } else {
             params = {};
         }
@@ -146,8 +147,9 @@ public class JsEnvironment: GLib.Object, JSExecutor {
 
         if (args != null) {
             Variant[] items = new Variant[size];
-            for (var i = 0; i < size; i++)
-            items[i] = variant_from_value(ctx, (JS.Value) params[i]);
+            for (var i = 0; i < size; i++) {
+                items[i] = variant_from_value(ctx, (JS.Value) params[i]);
+            }
             args = new Variant.tuple(items);
         }
         //~        debug("Args after: %s", args.print(true));

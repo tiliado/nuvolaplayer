@@ -49,8 +49,9 @@ public abstract class AppRunner : GLib.Object {
             dict.insert_value("running", new Variant.boolean(true));
             var capatibilities_array = new VariantBuilder(new VariantType("as"));
             List<unowned string> capatibilities = get_capatibilities();
-            foreach (unowned string capability in capatibilities)
-            capatibilities_array.add("s", capability);
+            foreach (unowned string capability in capatibilities) {
+                capatibilities_array.add("s", capability);
+            }
             dict.insert_value("capabilities", capatibilities_array.end());
             return dict.end();
         }
@@ -151,8 +152,9 @@ public class SubprocessAppRunner : AppRunner {
                     } else {
                         stderr_print_line(lines[0]);
                     }
-                    for (var i = 1; i < size - 1; i++)
-                    stderr_print_line(lines[i]);
+                    for (var i = 1; i < size - 1; i++) {
+                        stderr_print_line(lines[i]);
+                    }
                     stderr_last_line = lines[size - 1];
                 }
             }

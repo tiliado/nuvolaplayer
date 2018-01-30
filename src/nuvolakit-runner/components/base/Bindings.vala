@@ -33,16 +33,18 @@ public class Nuvola.Bindings: GLib.Object {
     }
 
     public void add_object(GLib.Object object) {
-        foreach (Binding binding in bindings)
-        if (binding is ObjectBinding) {
-            ((ObjectBinding) binding).add(object);
+        foreach (Binding binding in bindings) {
+            if (binding is ObjectBinding) {
+                ((ObjectBinding) binding).add(object);
+            }
         }
     }
 
     public void remove_object(GLib.Object object) {
-        foreach (Binding binding in bindings)
-        if (binding is ObjectBinding) {
-            ((ObjectBinding) binding).remove(object);
+        foreach (Binding binding in bindings) {
+            if (binding is ObjectBinding) {
+                ((ObjectBinding) binding).remove(object);
+            }
         }
     }
 

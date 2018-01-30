@@ -35,8 +35,9 @@ public class GlobalKeybindings: GLib.Object {
         keybinder.action_activated.connect(on_action_activated);
         actions.action_added.connect(update_action);
         actions.action_removed.connect(on_action_removed);
-        foreach (Drtgtk.Action action in actions.list_actions())
-        update_action(action);
+        foreach (Drtgtk.Action action in actions.list_actions()) {
+            update_action(action);
+        }
     }
 
     private void update_action(Drtgtk.Action action) {

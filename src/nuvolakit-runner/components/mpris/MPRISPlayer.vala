@@ -213,8 +213,9 @@ public class MPRISPlayer : GLib.Object {
         HashTableIter<string, Variant> iter = HashTableIter<string, Variant>(pending_update);
         unowned string name;
         unowned Variant value;
-        while (iter.next(out name, out value))
-        builder.add("{sv}", name, value);
+        while (iter.next(out name, out value)) {
+            builder.add("{sv}", name, value);
+        }
         pending_update.remove_all();
         var invalid_builder = new VariantBuilder(new VariantType ("as"));
         var payload = new Variant("(sa{sv}as)", "org.mpris.MediaPlayer2.Player", builder, invalid_builder);

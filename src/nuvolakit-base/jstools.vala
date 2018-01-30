@@ -277,8 +277,9 @@ public unowned JS.Value value_from_variant(JS.Context ctx, Variant? variant) thr
         variant.get("a{s*}", &iter);
         string key = null;
         Variant value = null;
-        while (iter.next("{s*}", &key, &value))
-        object.set_property(ctx, new JS.String(key), value_from_variant(ctx, value));
+        while (iter.next("{s*}", &key, &value)) {
+            object.set_property(ctx, new JS.String(key), value_from_variant(ctx, value));
+        }
         return object;
     }
 
@@ -313,8 +314,9 @@ public unowned JS.Value value_from_variant(JS.Context ctx, Variant? variant) thr
     if (variant.is_container()) {
         size_t size = variant.n_children();
         void*[] args = new void*[size];
-        for (var i = 0; i < size; i++)
-        args[i] = (void*) value_from_variant(ctx, variant.get_child_value(i));
+        for (var i = 0; i < size; i++) {
+            args[i] = (void*) value_from_variant(ctx, variant.get_child_value(i));
+        }
         return ctx.make_array((JS.Value[]) args);
     }
 
@@ -352,8 +354,9 @@ public Variant variant_from_value(JS.Context ctx, JS.Value val) throws JSError {
         VariantBuilder builder = new VariantBuilder(new VariantType ("av"));
         object = (JS.Object) val;
         int size = (int) o_get_number(ctx, object, "length");
-        for (uint i = 0; i < size; i++)
-        builder.add("v", variant_from_value(ctx, object.get_property_at_index(ctx, i)));
+        for (uint i = 0; i < size; i++) {
+            builder.add("v", variant_from_value(ctx, object.get_property_at_index(ctx, i)));
+        }
 
         return builder.end();
     }

@@ -423,8 +423,9 @@ public class Socket : GLib.Object {
     private void on_draining(Transport transport) {
         flush();
         if (sent_callbacks != null) {
-            foreach (unowned SendAdaptor adaptor in sent_callbacks)
-            Idle.add(adaptor.source_func);
+            foreach (unowned SendAdaptor adaptor in sent_callbacks) {
+                Idle.add(adaptor.source_func);
+            }
         }
     }
 }

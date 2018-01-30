@@ -30,8 +30,9 @@ private static T[]? get_proxies<T>(BusType bus, string name, ObjectPath[]? entri
     }
     try {
         var result = new T[entries.length];
-        for (var i = 0; i < entries.length; i++)
-        result[i] = Bus.get_proxy_sync<T>(bus, name, entries[i], 0, null);
+        for (var i = 0; i < entries.length; i++) {
+            result[i] = Bus.get_proxy_sync<T>(bus, name, entries[i], 0, null);
+        }
         return result;
     }
     catch (GLib.Error e) {

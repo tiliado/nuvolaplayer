@@ -413,8 +413,9 @@ public class Server: Soup.Server {
         builder.begin_object().set_member_name("apps").begin_array();
         List<unowned string> keys = registered_runners.get_values();
         keys.sort(string.collate);
-        foreach (unowned string app_id in keys)
-        builder.add_string_value(app_id);
+        foreach (unowned string app_id in keys) {
+            builder.add_string_value(app_id);
+        }
         builder.end_array().end_object();
         return builder.get_root();
     }
@@ -481,8 +482,9 @@ public class Server: Soup.Server {
             return;
         }
         string path_without_nuvola = "/master" + path.substring(7);
-        foreach (Subscription subscriber in subscribers)
-        eio_channel.send_notification(subscriber.socket, path_without_nuvola, data);
+        foreach (Subscription subscriber in subscribers) {
+            eio_channel.send_notification(subscriber.socket, path_without_nuvola, data);
+        }
     }
 
     private void on_app_notification(AppRunner app, string path, string? detail, Variant? data) {
@@ -493,8 +495,9 @@ public class Server: Soup.Server {
             return;
         }
         string path_without_nuvola = "/app/" + app.app_id + path.substring(7);
-        foreach (Subscription subscriber in subscribers)
-        eio_channel.send_notification(subscriber.socket, path_without_nuvola, data);
+        foreach (Subscription subscriber in subscribers) {
+            eio_channel.send_notification(subscriber.socket, path_without_nuvola, data);
+        }
     }
 
     private void on_nm_client_created(GLib.Object? o, AsyncResult res) {

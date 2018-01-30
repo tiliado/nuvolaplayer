@@ -606,7 +606,7 @@ def build(ctx):
     VALALINT_CHECKS = ("space_indent=4 method_call_no_space space_after_keyword space_after_comma no_space_before_comma"
         " end_of_namespace_comments no_trailing_whitespace space_before_bracket no_nested_namespaces"
         " var_keyword_object_creation var_keyword_array_creation var_keyword_cast var_keyword_literal"
-        " if_else_blocks cuddled_else cuddled_catch")
+        " if_else_blocks cuddled_else cuddled_catch loop_blocks")
     valalint(
         source_dir = 'engineio-soup/src',
         packages = 'uuid libsoup-2.4 json-glib-1.0',

@@ -60,9 +60,11 @@ public class PasswordManagerBinding : ModelBinding<PasswordManager> {
             HashTableIter<string, Drt.Lst<LoginCredentials>> iter = HashTableIter<string, Drt.Lst<LoginCredentials>>(passwords);
             string hostname = null;
             Drt.Lst<LoginCredentials> credentials = null;
-            while (iter.next(out hostname, out credentials))
-            foreach (LoginCredentials item in credentials)
-            builder.add("(sss)", hostname, item.username, item.password);
+            while (iter.next(out hostname, out credentials)) {
+                foreach (LoginCredentials item in credentials) {
+                    builder.add("(sss)", hostname, item.username, item.password);
+                }
+            }
         }
         request.respond(builder.end());
     }

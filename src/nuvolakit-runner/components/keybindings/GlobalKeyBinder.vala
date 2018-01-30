@@ -46,9 +46,10 @@ public class GlobalKeybinder: GLib.Object {
     }
 
     public bool is_bound(string accelerator) {
-        foreach (Keybinding keybinding in keybindings)
-        if (keybinding.accelerator == accelerator) {
-            return true;
+        foreach (Keybinding keybinding in keybindings) {
+            if (keybinding.accelerator == accelerator) {
+                return true;
+            }
         }
         return false;
     }

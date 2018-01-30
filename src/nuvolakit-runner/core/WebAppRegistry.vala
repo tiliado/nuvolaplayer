@@ -72,8 +72,9 @@ public class WebAppRegistry: GLib.Object {
     public HashTable<string, WebApp> list_web_apps(string? filter_id=null) {
         HashTable<string, WebApp> result = new HashTable<string, WebApp>(str_hash, str_equal);
         find_apps(user_storage, filter_id, result);
-        foreach (File dir in system_storage)
-        find_apps(dir, filter_id, result);
+        foreach (File dir in system_storage) {
+            find_apps(dir, filter_id, result);
+        }
         return result;
     }
 

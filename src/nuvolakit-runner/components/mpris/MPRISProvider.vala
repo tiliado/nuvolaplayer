@@ -56,8 +56,9 @@ public class MPRISProvider {
         }
 
         if (conn != null) {
-            foreach (uint registration_id in registered_objects)
-            conn.unregister_object(registration_id);
+            foreach (uint registration_id in registered_objects) {
+                conn.unregister_object(registration_id);
+            }
             conn = null;
         }
     }
