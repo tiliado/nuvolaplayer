@@ -391,10 +391,10 @@ public class AppRunnerController: Drtgtk.Application {
 
     private void init_app_runner() {
         append_actions();
-        #if !NUVOLA_LITE
-        var gakb = new ActionsKeyBinderClient(ipc_bus.master);
-        global_keybindings = new GlobalKeybindings(gakb, actions);
-        #endif
+        if (ipc_bus.master != null) {
+            var gakb = new ActionsKeyBinderClient(ipc_bus.master);
+            global_keybindings = new GlobalKeybindings(gakb, actions);
+        }
         load_extensions();
         web_engine.get_main_web_view().hide();
         main_window.sidebar.hide();
@@ -555,7 +555,7 @@ public class AppRunnerController: Drtgtk.Application {
 
         var dialog = new PreferencesDialog(this, main_window, form);
         dialog.add_tab("Keyboard shortcuts", new KeybindingsSettings(
-            actions, config, global_keybindings != null ? global_keybindings.keybinder : null));
+            this, actions, config, global_keybindings != null ? global_keybindings.keybinder : null));
         var network_settings = new NetworkSettings(connection);
         dialog.add_tab("Network", network_settings);
         dialog.add_tab("Features", new ComponentsManager(this, components, tiliado_activation));

@@ -38,7 +38,7 @@ public class KeybindingsSettings : Gtk.Grid {
      *
      * @param app Application object
      */
-    public KeybindingsSettings(Drtgtk.Actions actions_reg, Config config, ActionsKeyBinder? global_keybindings) {
+    public KeybindingsSettings(Drtgtk.Application app, Drtgtk.Actions actions_reg, Config config, ActionsKeyBinder? global_keybindings) {
 
         this.actions_reg = actions_reg;
         this.config = config;
@@ -58,16 +58,22 @@ public class KeybindingsSettings : Gtk.Grid {
         info_bar.no_show_all = true;
         attach(info_bar, 0, 0, 1, 1);
         var info_text = "Double click a keyboard shortcut and then press a new one to change it or the backspace key to delete it.";
-        if (global_keybindings == null) {
-            info_text += "\n\nGlobal keyboard shortcuts are not available in Nuvola snap packages.";
-        }
         var info_label = new Gtk.Label(info_text);
         info_label.margin = 10;
         info_label.wrap = true;
         info_label.show();
-        attach(info_label, 0, 1, 1, 1);
+        attach(info_label, 0, 2, 1, 1);
+
+        if (global_keybindings == null) {
+            var widget = new RuntimeServiceNotAvailableReason(
+                app, "Global keyboard shortcuts are disabled because Nuvola Runtime Service is not available.");
+            widget.margin = 10;
+            widget.show();
+            attach(widget, 0, 1, 1, 1);
+        }
+
         var scroll = new Gtk.ScrolledWindow(null, null);
-        attach(scroll, 0, 2, 1, 1);
+        attach(scroll, 0, 3, 1, 1);
         scroll.show_all();
 
         model = new Gtk.ListStore(
