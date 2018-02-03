@@ -137,8 +137,24 @@ public int main(string[] args) {
     }
 
     Drt.RpcChannel client;
+    GLib.Socket? socket = null;
     try {
-        client = new Drt.RpcChannel.from_name(2, build_ui_runner_ipc_id(Args.app), null, null, 500);
+        string uid = WebApp.build_uid_from_app_id(Args.app, Nuvola.get_dbus_id());
+        string path = "/" + uid.replace(".", "/");
+        AppDbusIfce app_api = Bus.get_proxy_sync<AppDbusIfce>(
+            BusType.SESSION, uid, path,
+            DBusProxyFlags.DO_NOT_CONNECT_SIGNALS|DBusProxyFlags.DO_NOT_LOAD_PROPERTIES);
+        app_api.get_connection(out socket);
+    }
+    catch (GLib.Error e) {
+        return quit(2, "Error: Failed to connect to %s instance for %s. %s\n", Nuvola.get_app_name(), Args.app, e.message);
+    }
+    if (socket == null) {
+        return quit(2, "Error: Failed to connect to %s instance for %s. Null socket.\n", Nuvola.get_app_name(), Args.app);
+    }
+
+    try {
+        client = new Drt.RpcChannel(2, new Drt.SocketChannel.from_socket(2, socket, 500), null, null);
     }
     catch (GLib.Error e) {
         return quit(2, "Error: Failed to connect to %s instance for %s. %s\n", Nuvola.get_app_name(), Args.app, e.message);

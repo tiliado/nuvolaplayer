@@ -35,6 +35,10 @@ public class AppDbusApi: GLib.Object {
     public void activate() {
         Idle.add(() => {controller.activate(); return false;});
     }
+
+    public void get_connection(out Socket? socket) throws GLib.Error {
+        socket = Drt.SocketChannel.create_socket_from_name(build_ui_runner_ipc_id(controller.web_app.id)).socket;
+    }
 }
 
 

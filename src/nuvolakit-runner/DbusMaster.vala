@@ -45,6 +45,7 @@ public class MasterDbusApi: GLib.Object {
 [DBus(name="eu.tiliado.NuvolaApp")]
 public interface AppDbusIfce: GLib.Object {
     public abstract void activate() throws GLib.Error;
+    public abstract void get_connection(out Socket? socket) throws GLib.Error;
 }
 
 } // namespace Nuvola
