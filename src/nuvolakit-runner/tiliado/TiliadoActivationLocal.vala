@@ -164,8 +164,9 @@ public class TiliadoActivationLocal : GLib.Object, TiliadoActivation {
                 int64 expires = config.get_int64(TILIADO_ACCOUNT_EXPIRES);
                 string? user_name = config.get_string(TILIADO_ACCOUNT_USER);
                 uint membership = (uint) config.get_int64(TILIADO_ACCOUNT_MEMBERSHIP);
-                if (tiliado.hmac_sha1_verify_string(concat_tiliado_user_info(user_name, membership, expires), signature)) {
-                    // FIXME: check expiration
+                string user_info_str = concat_tiliado_user_info(user_name, membership, expires);
+                if (expires >= new DateTime.now_utc().to_unix()
+                && tiliado.hmac_sha1_verify_string(user_info_str, signature)) {
                     var user = new TiliadoApi2.User(0, null, user_name, true, true, new int[] {});
                     user.membership = membership;
                     cached_user = user;
