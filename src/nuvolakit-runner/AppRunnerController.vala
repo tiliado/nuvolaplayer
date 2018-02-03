@@ -138,9 +138,22 @@ public class AppRunnerController: Drtgtk.Application {
                 startup_check.mark_as_finished();
                 #else
                 if (init_ipc(startup_check)) {
-                    tiliado_activation = new TiliadoActivationClient(ipc_bus.master);
-                    startup_check.check_tiliado_account.begin(
-                        tiliado_activation, () => startup_check.mark_as_finished());
+                    if (ipc_bus.master != null) {
+                        tiliado_activation = new TiliadoActivationClient(ipc_bus.master);
+                    } else {
+                        assert(TILIADO_OAUTH2_CLIENT_ID != null && TILIADO_OAUTH2_CLIENT_ID[0] != '\0');
+                        var tiliado = new TiliadoApi2(
+                            TILIADO_OAUTH2_CLIENT_ID, Drt.String.unmask(TILIADO_OAUTH2_CLIENT_SECRET.data),
+                            TILIADO_OAUTH2_API_ENDPOINT, TILIADO_OAUTH2_TOKEN_ENDPOINT, null, "nuvolaplayer");
+                        tiliado_activation = new TiliadoActivationLocal(tiliado, config);
+                        if (tiliado_activation.get_user_info() == null) {
+                            tiliado_activation.update_user_info_sync();
+                        }
+                    }
+                    startup_check.check_tiliado_account.begin(tiliado_activation, (o, res) => {
+                        startup_check.check_tiliado_account.end(res);
+                        startup_check.mark_as_finished();
+                    });
                 }
                 #endif
             }
