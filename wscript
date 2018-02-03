@@ -811,7 +811,6 @@ def build(ctx):
     ctx(features = 'subst',
         source = 'data/templates/launcher.desktop',
         target = "share/applications/%s.desktop" % ctx.env.UNIQUE_NAME,
-        install_path = '${PREFIX}/share/applications',
         BLURB = BLURB,
         APP_NAME = ctx.env.NAME,
         ICON = ctx.env.ICON_NAME,
