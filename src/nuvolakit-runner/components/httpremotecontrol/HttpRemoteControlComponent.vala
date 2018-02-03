@@ -39,6 +39,7 @@ public class Component: Nuvola.Component {
         this.bindings = bindings;
         this.app = app;
         this.ipc_bus = ipc_bus;
+        this.available = ipc_bus.master != null;
         config.bind_object_property("component.httpremotecontrol.", this, "enabled").set_default(false).update_property();
         #else
         available = false;
@@ -48,6 +49,13 @@ public class Component: Nuvola.Component {
     #if EXPERIMENTAL
     public override Gtk.Widget? get_settings() {
         return new Settings(app, ipc_bus);
+    }
+
+    public override Gtk.Widget? get_unavailability_widget() {
+        if (ipc_bus.master == null) {
+            return new RuntimeServiceNotAvailableReason(app);
+        }
+        return null;
     }
 
     protected override bool activate() {
