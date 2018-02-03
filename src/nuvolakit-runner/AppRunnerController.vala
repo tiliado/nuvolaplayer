@@ -675,7 +675,7 @@ public class AppRunnerController: Drtgtk.Application {
         components.prepend(new TrayIconComponent(this, bindings, config));
         components.prepend(new UnityLauncherComponent(this, bindings, config));
         components.prepend(new NotificationsComponent(this, bindings, actions_helper));
-        components.prepend(new MediaKeysComponent(this, bindings, config, ipc_bus.master, web_app.id));
+        components.prepend(new MediaKeysComponent(this, bindings, config, ipc_bus, web_app.id));
 
         bindings.add_object(menu_bar);
 
