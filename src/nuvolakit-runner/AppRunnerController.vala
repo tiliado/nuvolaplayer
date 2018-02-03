@@ -283,26 +283,26 @@ public class AppRunnerController: Drtgtk.Application {
         ipc_bus.router.add_method(IpcApi.CORE_GET_METADATA, Drt.RpcFlags.READABLE|Drt.RpcFlags.PRIVATE,
             "Get web app metadata.", handle_get_metadata, null);
 
-        #if !NUVOLA_LITE
-        try {
-            Variant? response = ipc_bus.master.call_sync("/nuvola/core/runner-started", new Variant("(ss)", web_app.id, ipc_bus.router.hex_token));
-            assert(response.equal(new Variant.boolean(true)));
-        }
-        catch (GLib.Error e) {
-            startup_check.nuvola_service_message = Markup.printf_escaped(
-                "<b>Communication with Nuvola Apps Runtime Service failed.</b>\n\n"
-                + "1. Make sure Nuvola Apps Runtime is installed.\n"
-                + "2. If Nuvola has been updated recently, close all Nuvola Apps and try launching it again.\n\n"
-                + "<i>Error message: %s</i>", e.message);
-            startup_check.nuvola_service_status = StartupCheck.Status.ERROR;
-        }
+        if (ipc_bus.master != null) {
+            try {
+                Variant? response = ipc_bus.master.call_sync("/nuvola/core/runner-started", new Variant("(ss)", web_app.id, ipc_bus.router.hex_token));
+                assert(response.equal(new Variant.boolean(true)));
+            }
+            catch (GLib.Error e) {
+                startup_check.nuvola_service_message = Markup.printf_escaped(
+                    "<b>Communication with Nuvola Apps Runtime Service failed.</b>\n\n"
+                    + "1. Make sure Nuvola Apps Runtime is installed.\n"
+                    + "2. If Nuvola has been updated recently, close all Nuvola Apps and try launching it again.\n\n"
+                    + "<i>Error message: %s</i>", e.message);
+                startup_check.nuvola_service_status = StartupCheck.Status.ERROR;
+            }
 
-        var storage_client = new Drt.KeyValueStorageClient(ipc_bus.master);
-        master_config = storage_client.get_proxy("master.config");
-        startup_check.nuvola_service_status = StartupCheck.Status.OK;
-        #else
-        startup_check.nuvola_service_status = StartupCheck.Status.NOT_APPLICABLE;
-        #endif
+            var storage_client = new Drt.KeyValueStorageClient(ipc_bus.master);
+            master_config = storage_client.get_proxy("master.config");
+            startup_check.nuvola_service_status = StartupCheck.Status.OK;
+        } else {
+            startup_check.nuvola_service_status = StartupCheck.Status.NOT_APPLICABLE;
+        }
 
         ipc_bus.router.add_method("/nuvola/core/get-component-info", Drt.RpcFlags.READABLE,
             "Get info about component.",
