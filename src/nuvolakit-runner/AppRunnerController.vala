@@ -786,15 +786,15 @@ public class AppRunnerController: Drtgtk.Application {
             return;
         }
 
-        #if !NUVOLA_LITE
-        try {
-            Variant? response = ipc_bus.master.call_sync("/nuvola/core/runner-activated", new Variant("(s)", web_app.id));
-            warn_if_fail(response.equal(new Variant.boolean(true)));
+        if (ipc_bus.master != null) {
+            try {
+                Variant? response = ipc_bus.master.call_sync("/nuvola/core/runner-activated", new Variant("(s)", web_app.id));
+                warn_if_fail(response.equal(new Variant.boolean(true)));
+            }
+            catch (GLib.Error e) {
+                critical("Communication with master process failed: %s", e.message);
+            }
         }
-        catch (GLib.Error e) {
-            critical("Communication with master process failed: %s", e.message);
-        }
-        #endif
     }
 
     private bool on_configure_event(Gdk.EventConfigure event) {
