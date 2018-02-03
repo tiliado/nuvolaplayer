@@ -78,6 +78,14 @@ public abstract class Component: GLib.Object {
         return null;
     }
 
+    public virtual string? get_unavailability_reason() {
+        return null;
+    }
+
+    public virtual Gtk.Widget? get_unavailability_widget() {
+        return null;
+    }
+
     public virtual void auto_load() {
         toggle(enabled);
     }

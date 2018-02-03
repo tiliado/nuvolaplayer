@@ -109,7 +109,7 @@ public class ComponentsManager: Gtk.Stack {
             if (!is_component_membership_ok(component)) {
                 widget = membership_widget.change_component(component);
             } else if (!is_component_available(component)) {
-                widget = component_not_available_widget;
+                widget = create_component_not_available_widget(component);
             } else {
                 widget = component.get_settings();
             }
@@ -117,6 +117,17 @@ public class ComponentsManager: Gtk.Stack {
             this.add(component_settings.widget);
             this.visible_child = component_settings.widget;
         }
+    }
+
+    private Gtk.Widget create_component_not_available_widget(Component component) {
+        Gtk.Widget? widget = component.get_unavailability_widget();
+        if (widget == null) {
+            string? reason = component.get_unavailability_reason();
+            if (reason != null) {
+                widget = Drtgtk.Labels.markup(reason);
+            }
+        }
+        return widget ?? component_not_available_widget;
     }
 
     private bool is_component_available(Component component) {
