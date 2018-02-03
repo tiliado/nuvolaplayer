@@ -694,11 +694,15 @@ public class AppRunnerController: Drtgtk.Application {
             if (!component.is_membership_ok(tiliado_activation)) {
                 component.toggle(false);
             }
-            if (component.available && component.enabled) {
-                component.auto_load();
+            if (component.enabled) {
+                if (component.available) {
+                    component.auto_load();
+                } else {
+                    component.toggle(false);
+                }
             }
-            debug("Component %s (%s) %s", component.id, component.name,
-                component.available && component.enabled ? "enabled": "not enabled");
+            debug("Component %s (%s) available=%s, enabled=%s", component.id, component.name,
+                component.available.to_string(), component.enabled.to_string());
             component.notify["enabled"].connect_after(on_component_enabled_changed);
         }
     }

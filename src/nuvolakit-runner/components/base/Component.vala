@@ -50,8 +50,8 @@ public abstract class Component: GLib.Object {
     }
 
     public virtual void toggle(bool enabled) {
-        if (available) {
-            if (enabled) {
+        if (enabled) {
+            if (available) {
                 if (this.enabled != enabled) {
                     this.enabled = true;
                 }
@@ -60,17 +60,17 @@ public abstract class Component: GLib.Object {
                     load();
                     loaded = true;
                 }
-            } else {
-                if (loaded) {
-                    message("Unload %s %s", id, name);
-                    unload();
-                    loaded = false;
-                }
-                if (this.enabled != enabled) {
-                    this.enabled = false;
-                }
-                this.active = false;
             }
+        } else {
+            if (loaded) {
+                message("Unload %s %s", id, name);
+                unload();
+                loaded = false;
+            }
+            if (this.enabled != enabled) {
+                this.enabled = false;
+            }
+            this.active = false;
         }
     }
 
