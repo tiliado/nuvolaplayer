@@ -257,27 +257,24 @@ public class AppRunnerController: Drtgtk.Application {
                         "<b>Nuvola Apps Runtime Service refused connection.</b>\n\n"
                         + "1. Make sure Nuvola Apps Runtime is installed.\n"
                         + "2. If Nuvola has been updated recently, close all Nuvola Apps and try launching it again.");
-                    startup_check.nuvola_service_status = StartupCheck.Status.ERROR;
-                    return false;
+                    startup_check.nuvola_service_status = StartupCheck.Status.NOT_APPLICABLE;
+                } else {
+                    ipc_bus.connect_master_socket(socket, api_token);
                 }
-                ipc_bus.connect_master_socket(socket, api_token);
             } else {
                 bus_name = Environment.get_variable("NUVOLA_IPC_MASTER");
                 assert(bus_name != null);
                 ipc_bus.connect_master(bus_name, api_token);
             }
             #endif
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             startup_check.nuvola_service_message = Markup.printf_escaped(
                 "<b>Failed to connect to Nuvola Apps Runtime Service.</b>\n\n"
                 + "1. Make sure Nuvola Apps Runtime is installed.\n"
                 + "2. If Nuvola has been installed or updated recently,"
                 + " close all Nuvola Apps and try launching it again.\n\n"
                 + "<i>Error message: %s</i>", e.message);
-            startup_check.nuvola_service_status = StartupCheck.Status.ERROR;
-
-            return false;
+            startup_check.nuvola_service_status = StartupCheck.Status.NOT_APPLICABLE;
         }
 
         ipc_bus.router.add_method(IpcApi.CORE_GET_METADATA, Drt.RpcFlags.READABLE|Drt.RpcFlags.PRIVATE,
