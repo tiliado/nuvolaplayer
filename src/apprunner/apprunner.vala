@@ -56,8 +56,7 @@ public int main(string[] args) {
     }
 
     if (Args.app_dir == null) {
-        stderr.printf("No app specified.");
-        return 1;
+        Args.app_dir = ".";
     }
 
     Drt.Logger.init(stderr, Args.debug ? GLib.LogLevelFlags.LEVEL_DEBUG
