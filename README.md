@@ -14,8 +14,8 @@ nd more), but progress is being made to support generic web apps (e.g. Google Ca
 Unity launcher quick list actions, lyrics fetching, Last.fm audio scrobbler, tray icon, desktop notifications,
 media keys binding, password manager, remote control over HTTP and more. Some features may be available only to
 users with premium or patron plans available at https://tiliado.eu/nuvolaplayer/funding/
- 
-**Support:** Users of the genuine Nuvola builds available at https://nuvola.tiliado.eu are eligible for 
+
+**Support:** Users of the genuine Nuvola builds available at https://nuvola.tiliado.eu are eligible for
 a limited user support free of charge. Users of third-party builds should contact the customer care of their distributor
 or order paid support provided by the Nuvola developer.
 
@@ -78,7 +78,7 @@ jump in.
 
   * [**Core development**][4] - development of the Nuvola Apps run-time that loads web app
     integrations and interacts with the Linux desktop components.
-    
+
     *Skills:*
     [Vala](https://wiki.gnome.org/Projects/Vala),
     [GTK+ 3](http://www.gtk.org/),
@@ -88,7 +88,7 @@ jump in.
 
   * [**Service Integrations**][5] - service integration scripts that runs in the web
     interface and communicates with Nuvola Apps run-time.
-    
+
     *Skills:*
     [JavaScript](https://developer.mozilla.org/en/docs/Web/JavaScript),
     [DOM](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model),
@@ -144,7 +144,7 @@ Nuvola's source code. The build script `wscript` may not be compatible with othe
 to port wscript to a newer stable waf release, you may provide us with patches to be merged once we decide
 to update our waf binary. Meantime, you can carry them downstream.
 
-To find out what build parameters can be set run ./waf --help 
+To find out what build parameters can be set run ./waf --help
 
 ### Build
 
@@ -158,7 +158,7 @@ To find out what build parameters can be set run ./waf --help
     # /sbin/ldconfig
     # gtk-update-icon-cache ...
     # gtk-update-icon-cache-3.0 ...
-    
+
 ### Uninstall
 
     # ./waf uninstall [--destdir=...]
