@@ -313,26 +313,7 @@ public class MasterController : Drtgtk.Application {
     public async void start_app(string app_id) {
         hold();
         #if FLATPAK && NUVOLA_RUNTIME
-        try {
-            string uid = WebApp.build_uid_from_app_id(app_id);
-            string path = "/" + uid.replace(".", "/");
-            AppDbusIfce app_api = yield Bus.get_proxy<AppDbusIfce>(
-                BusType.SESSION, uid, path,
-                DBusProxyFlags.DO_NOT_CONNECT_SIGNALS|DBusProxyFlags.DO_NOT_LOAD_PROPERTIES);
-            app_api.activate();
-            debug("DBus activation of %s succeeded.", uid);
-            Timeout.add_seconds(5, () => {release(); return false;});
-        }
-        catch (GLib.Error e) {
-            warning("DBus Activation error: %s", e.message);
-            var dialog = new Drtgtk.ErrorDialog(
-                "Web App Loading Error",
-                ("The web application with id '%s' has not been found.\n\n"
-                    + "DBus Activation has ended with an error:\n%s").printf(app_id, e.message));
-            dialog.run();
-            dialog.destroy();
-            release();
-        }
+        assert_not_reached();
         #else
         WebApp? app_meta = web_app_reg.get_app_meta(app_id);
         if (app_meta == null) {
