@@ -21,61 +21,61 @@ mk_symlinks()
     mkdir -p "$build_datadir"
     datadirs="www"
     for datadir in $datadirs; do
-	if [ ! -e "${build_datadir}/${datadir}" ]; then
-	    ln -sv "../../../data/$datadir" "$build_datadir"
-	fi
+        if [ ! -e "${build_datadir}/${datadir}" ]; then
+            ln -sv "../../../data/$datadir" "$build_datadir"
+        fi
     done
-    for size in 16 22 24 32 48 64 128 256 
+    for size in 16 22 24 32 48 64 128 256
     do
-	icon_dir="$HOME/.local/share/icons/hicolor/${size}x${size}/apps"
-	test -d "$icon_dir" || mkdir -p "$icon_dir"
-	cp "data/icons/${size}.png" "$icon_dir/${NUVOLA_ICON}.png"
-	cp "web_apps/test/icons/${size}.png" "$icon_dir/${NUVOLA_ICON}AppTest.png"
+        icon_dir="$HOME/.local/share/icons/hicolor/${size}x${size}/apps"
+        test -d "$icon_dir" || mkdir -p "$icon_dir"
+        cp "data/icons/${size}.png" "$icon_dir/${NUVOLA_ICON}.png"
+        cp "web_apps/test/icons/${size}.png" "$icon_dir/${NUVOLA_ICON}AppTest.png"
     done
     icon_dir="$HOME/.local/share/icons/hicolor/scalable/apps"
     test -d "$icon_dir" || mkdir -p "$icon_dir"
     cp "data/icons/scalable.svg" "$icon_dir/${NUVOLA_ICON}.svg"
     cp "web_apps/test/icons/scalable.svg" "$icon_dir/${NUVOLA_ICON}AppTest.svg"
-    
+
     if [ ! -z "$XDG_DATA_HOME" ] && [ "$XDG_DATA_HOME" != "$HOME/.local/share" ]
     then
-	for size in 16 22 24 32 48 64 128 256 
-	do
-	    icon_dir="$XDG_DATA_HOME/icons/hicolor/${size}x${size}/apps"
-	    test -d "$icon_dir" || mkdir -p "$icon_dir"
-	    cp "data/icons/${size}.png" "$icon_dir/${NUVOLA_ICON}.png"
-	    cp "web_apps/test/icons/${size}.png" "$icon_dir/${NUVOLA_ICON}AppTest.png"
-	    cp "web_apps/test/icons/${size}.png" "$icon_dir/${NUVOLA_ICON}AppTestmse.png"
-	done
-	icon_dir="$XDG_DATA_HOME/icons/hicolor/scalable/apps"
-	test -d "$icon_dir" || mkdir -p "$icon_dir"
-	cp "data/icons/scalable.svg" "$icon_dir/${NUVOLA_ICON}.svg"
-	cp "web_apps/test/icons/scalable.svg" "$icon_dir/${NUVOLA_ICON}AppTest.svg"
-	cp "web_apps/test/icons/scalable.svg" "$icon_dir/${NUVOLA_ICON}AppTestmse.svg"
+        for size in 16 22 24 32 48 64 128 256
+        do
+            icon_dir="$XDG_DATA_HOME/icons/hicolor/${size}x${size}/apps"
+            test -d "$icon_dir" || mkdir -p "$icon_dir"
+            cp "data/icons/${size}.png" "$icon_dir/${NUVOLA_ICON}.png"
+            cp "web_apps/test/icons/${size}.png" "$icon_dir/${NUVOLA_ICON}AppTest.png"
+            cp "web_apps/test/icons/${size}.png" "$icon_dir/${NUVOLA_ICON}AppTestmse.png"
+        done
+        icon_dir="$XDG_DATA_HOME/icons/hicolor/scalable/apps"
+        test -d "$icon_dir" || mkdir -p "$icon_dir"
+        cp "data/icons/scalable.svg" "$icon_dir/${NUVOLA_ICON}.svg"
+        cp "web_apps/test/icons/scalable.svg" "$icon_dir/${NUVOLA_ICON}AppTest.svg"
+        cp "web_apps/test/icons/scalable.svg" "$icon_dir/${NUVOLA_ICON}AppTestmse.svg"
     fi
-    
+
     test -e "${build_datadir}/www/engine.io.js" || \
-	ln -s "$DATADIR/javascript/engine.io-client/engine.io.js" "${build_datadir}/www/engine.io.js"
+        ln -s "$DATADIR/javascript/engine.io-client/engine.io.js" "${build_datadir}/www/engine.io.js"
 }
 
 reconf()
 {
     python3 ./waf -v distclean configure \
-	    $WAF_CONFIGURE "$@"
+            $WAF_CONFIGURE "$@"
 }
 
 rebuild()
 {
-	python3 ./waf -v distclean configure build \
-	    $WAF_CONFIGURE "$@" \
-	&& NUVOLA_LIBDIR=build build/run-nuvolaruntime-tests
+        python3 ./waf -v distclean configure build \
+            $WAF_CONFIGURE "$@" \
+        && NUVOLA_LIBDIR=build build/run-nuvolaruntime-tests
 }
 
 run()
 {
-	mk_symlinks
-	python3 ./waf -v && XDG_DATA_DIRS="build/share:$XDG_DATA_DIRS" \
-	NUVOLA_LIBDIR=build build/nuvola -D "$@"
+        mk_symlinks
+        python3 ./waf -v && XDG_DATA_DIRS="build/share:$XDG_DATA_DIRS" \
+        NUVOLA_LIBDIR=build build/nuvola -D "$@"
 
 }
 
@@ -113,59 +113,59 @@ ctl()
 
 debug()
 {
-	mk_symlinks
-	python3 ./waf -v && XDG_DATA_DIRS="build/share:$XDG_DATA_DIRS" \
-	NUVOLA_LIBDIR=build gdb --args build/nuvola -D "$@"
+        mk_symlinks
+        python3 ./waf -v && XDG_DATA_DIRS="build/share:$XDG_DATA_DIRS" \
+        NUVOLA_LIBDIR=build gdb --args build/nuvola -D "$@"
 }
 
 debug_criticals()
 {
-	mk_symlinks
-	python3 ./waf -v && XDG_DATA_DIRS="build/share:$XDG_DATA_DIRS" \
-	NUVOLA_LIBDIR=build G_DEBUG=fatal-criticals \
-	gdb  --args build/nuvola -D "$@"
+        mk_symlinks
+        python3 ./waf -v && XDG_DATA_DIRS="build/share:$XDG_DATA_DIRS" \
+        NUVOLA_LIBDIR=build G_DEBUG=fatal-criticals \
+        gdb  --args build/nuvola -D "$@"
 }
 
 debug_app_runner()
 {
-	mk_symlinks
-	python3 ./waf -v && XDG_DATA_DIRS="build/share:$XDG_DATA_DIRS" \
-	NUVOLA_LIBDIR=build NUVOLA_APP_RUNNER_GDB_SERVER='localhost:9090' build/nuvola -D "$@"
+        mk_symlinks
+        python3 ./waf -v && XDG_DATA_DIRS="build/share:$XDG_DATA_DIRS" \
+        NUVOLA_LIBDIR=build NUVOLA_APP_RUNNER_GDB_SERVER='localhost:9090' build/nuvola -D "$@"
 }
 
 debug_app_runner_criticals()
 {
-	mk_symlinks
-	python3 ./waf -v && XDG_DATA_DIRS="build/share:$XDG_DATA_DIRS" \
-	NUVOLA_LIBDIR=build G_DEBUG=fatal-criticals NUVOLA_APP_RUNNER_GDB_SERVER='localhost:9090' \
-	build/nuvola -D "$@"
+        mk_symlinks
+        python3 ./waf -v && XDG_DATA_DIRS="build/share:$XDG_DATA_DIRS" \
+        NUVOLA_LIBDIR=build G_DEBUG=fatal-criticals NUVOLA_APP_RUNNER_GDB_SERVER='localhost:9090' \
+        build/nuvola -D "$@"
 }
 
 debug_app_runner_join()
 {
-	mk_symlinks
-	echo Wait for App Runner process to start, then type "'target remote localhost:9090'" and "'continue'"
-	libtool --mode=execute gdb build/apprunner
+        mk_symlinks
+        echo Wait for App Runner process to start, then type "'target remote localhost:9090'" and "'continue'"
+        libtool --mode=execute gdb build/apprunner
 }
 
 debug_web_worker()
 {
-	mk_symlinks
-	python3 ./waf -v && XDG_DATA_DIRS="build/share:$XDG_DATA_DIRS" \
-	NUVOLA_LIBDIR=build NUVOLA_WEB_WORKER_SLEEP=30 build/nuvola -D "$@"
+        mk_symlinks
+        python3 ./waf -v && XDG_DATA_DIRS="build/share:$XDG_DATA_DIRS" \
+        NUVOLA_LIBDIR=build NUVOLA_WEB_WORKER_SLEEP=30 build/nuvola -D "$@"
 }
 
 debug_web_worker_criticals()
 {
-	mk_symlinks
-	python3 ./waf -v && XDG_DATA_DIRS="build/share:$XDG_DATA_DIRS" \
-	NUVOLA_LIBDIR=build G_DEBUG=fatal-criticals NUVOLA_WEB_WORKER_SLEEP=30 \
-	build/nuvola -D "$@"
+        mk_symlinks
+        python3 ./waf -v && XDG_DATA_DIRS="build/share:$XDG_DATA_DIRS" \
+        NUVOLA_LIBDIR=build G_DEBUG=fatal-criticals NUVOLA_WEB_WORKER_SLEEP=30 \
+        build/nuvola -D "$@"
 }
 
 watch_and_build()
 {
-	while true; do inotifywait -e delete -e create -e modify -r src; sleep 1; ./waf; done
+        while true; do inotifywait -e delete -e create -e modify -r src; sleep 1; ./waf; done
 }
 
 build_webgen_doc()
