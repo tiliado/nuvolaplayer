@@ -96,13 +96,13 @@ tests()
 dbus()
 {
         mk_symlinks
-        python3 ./waf -v && build/apprunner -D -a "$@"
+        python3 ./waf -v && build/nuvolaruntime -D -a "$@"
 }
 
 debug_dbus()
 {
         mk_symlinks
-        python3 ./waf -v && gdb --args build/apprunner -D -a "$@"
+        python3 ./waf -v && gdb --args build/nuvolaruntime -D -a "$@"
 }
 
 ctl()
