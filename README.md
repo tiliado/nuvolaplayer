@@ -124,7 +124,7 @@ Build and Install
   * libuuid
   * libsecret-1 >= 0.16
   * g-ir-compiler
-  * [valalint](https://github.com/tiliado/valalint) for `--lint-vala`
+  * [valalint](https://github.com/tiliado/valalint) or configure with `--no-vala-lint`
   * [ValaCEF](https://github.com/tiliado/valacef) or configure with `--no-cef`
   * unity >= 3.0 or configure with `--no-unity`
   * dbusmenu-glib-0.4 >= 0.4 or configure with `--no-appindicator`
