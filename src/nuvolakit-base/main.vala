@@ -116,7 +116,7 @@ private string? app_runner_path;
 
 public string get_app_runner_path() {
     if (app_runner_path == null) {
-        app_runner_path = Environment.get_variable("NUVOLA_APPRUNNER") ?? (get_libdir() + "/apprunner");
+        app_runner_path = Environment.get_variable("NUVOLA_APPRUNNER") ?? ("nuvolaruntime");
     }
     return app_runner_path;
 }

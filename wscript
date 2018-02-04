@@ -557,7 +557,7 @@ def build(ctx):
     if ctx.options.lint_vala_auto_fix:
         ctx.env.append_unique('VALALINTFLAGS', '--fix')
 
-    APP_RUNNER = "apprunner"
+    APP_RUNNER = "nuvolaruntime"
     ENGINEIO = "engineio"
     NUVOLAKIT_RUNNER = APPNAME + "-runner"
     NUVOLAKIT_BASE = APPNAME + "-base"
@@ -731,7 +731,6 @@ def build(ctx):
         defines = ['G_LOG_DOMAIN="Nuvola"'],
         vapi_dirs = vapi_dirs,
         vala_target_glib = TARGET_GLIB,
-        install_path = ctx.env.NUVOLA_LIBDIR,
     )
 
     valaprog(
