@@ -334,29 +334,21 @@ public class MasterController : Drtgtk.Application {
         argv[j++] = "-a";
         argv[j++] = app_meta.data_dir.get_path();
         argv[j++] = null;
-
-        AppRunner runner;
-        debug("Launch app runner for '%s': %s", app_id, string.joinv(" ", argv));
         try {
-            runner = new SubprocessAppRunner(app_id, argv, server.router.hex_token);
+            GLib.Pid child_pid;
+            debug("Launch app runner for '%s': %s", app_id, string.joinv(" ", argv));
+            GLib.Process.spawn_async(
+                null, argv, null, SpawnFlags.SEARCH_PATH | SpawnFlags.DO_NOT_REAP_CHILD, null, out child_pid);
+            ChildWatch.add(child_pid, (pid, status) => {GLib.Process.close_pid(pid); release();});
         } catch (GLib.Error e) {
             warning("Failed to launch app runner for '%s'. %s", app_id, e.message);
             var dialog = new Drtgtk.ErrorDialog(
                 "Web App Loading Error",
-                "The web application '%s' has failed to load.".printf(app_meta.name));
+                "The web application '%s' has failed to load. %s".printf(app_meta.name, e.message));
             dialog.run();
             dialog.destroy();
             release();
             return;
-        }
-
-        runner.exited.connect(on_runner_exited);
-        app_runners.push_tail(runner);
-
-        if (app_id in app_runners_map) {
-            debug("App runner for '%s' is already running.", app_id);
-        } else {
-            app_runners_map[app_id] = runner;
         }
         #endif
     }

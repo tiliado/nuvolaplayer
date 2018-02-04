@@ -93,16 +93,16 @@ tests()
 
 dbus()
 {
-	mk_symlinks
-	python3 ./waf -v && XDG_DATA_DIRS="build/share:$XDG_DATA_DIRS" \
-	NUVOLA_LIBDIR=build build/apprunner -D --dbus -a "$@"
+        mk_symlinks
+        python3 ./waf -v && XDG_DATA_DIRS="build/share:$XDG_DATA_DIRS" \
+        NUVOLA_LIBDIR=build build/apprunner -D -a "$@"
 }
 
 debug_dbus()
 {
-	mk_symlinks
-	python3 ./waf -v && XDG_DATA_DIRS="build/share:$XDG_DATA_DIRS" \
-	NUVOLA_LIBDIR=build gdb --args build/apprunner -D --dbus -a "$@"
+        mk_symlinks
+        python3 ./waf -v && XDG_DATA_DIRS="build/share:$XDG_DATA_DIRS" \
+        NUVOLA_LIBDIR=build gdb --args build/apprunner -D -a "$@"
 }
 
 ctl()

@@ -32,10 +32,8 @@ struct Args {
     static bool verbose;
     static bool version;
     static string? app_dir;
-    static bool nuvola_dbus;
 
     public const OptionEntry[] options = {
-        { "dbus", 0, 0, OptionArg.NONE, ref Args.nuvola_dbus, "Connect to Nuvola via DBus", null },
         { "app-dir", 'a', 0, GLib.OptionArg.FILENAME, ref Args.app_dir, "Web app to run.", "DIR" },
         { "verbose", 'v', 0, OptionArg.NONE, ref Args.verbose, "Print informational messages", null },
         { "debug", 'D', 0, OptionArg.NONE, ref Args.debug, "Print debugging messages", null },
@@ -76,11 +74,7 @@ public int main(string[] args) {
     }
 
     try {
-        if (Args.nuvola_dbus) {
-            return Nuvola.Startup.run_web_app_with_dbus_handshake(app_dir, args);
-        } else {
-            return Nuvola.Startup.run_web_app_as_subprocess(app_dir, stdin.read_line(), args);
-        }
+        return Nuvola.Startup.run_web_app_with_dbus_handshake(app_dir, args);
     }
     catch (WebAppError e) {
         stderr.puts("Failed to load web app!\n");

@@ -55,8 +55,6 @@ public class AppRunnerController: Drtgtk.Application {
     private Drtgtk.Form? init_form = null;
     private FormatSupport format_support = null;
     private Drt.Lst<Component> components = null;
-    private string? api_token = null;
-    private bool use_nuvola_dbus = false;
     private HashTable<string, Variant>? web_worker_data = null;
     private StartupWindow? startup_window = null;
     private TiliadoActivation? tiliado_activation = null;
@@ -66,8 +64,7 @@ public class AppRunnerController: Drtgtk.Application {
     private WelcomeDialog? welcome_dialog = null;
 
     public AppRunnerController(
-        Drt.Storage storage, WebApp web_app, WebAppStorage app_storage,
-        string? api_token, bool use_nuvola_dbus=false) {
+        Drt.Storage storage, WebApp web_app, WebAppStorage app_storage) {
         string uid = web_app.get_uid();
         string dbus_id = web_app.get_dbus_id();
         base(uid, web_app.name, dbus_id);
@@ -77,8 +74,6 @@ public class AppRunnerController: Drtgtk.Application {
         this.icon = web_app.get_icon_name();
         this.version = "%d.%d".printf(web_app.version_major, web_app.version_minor);
         this.app_storage = app_storage;
-        this.api_token = api_token;
-        this.use_nuvola_dbus = use_nuvola_dbus;
         this.info_bars = new HashTable<string, Gtk.InfoBar>(str_hash, str_equal);
     }
 
@@ -231,41 +226,38 @@ public class AppRunnerController: Drtgtk.Application {
             ipc_bus = new IpcBus(bus_name);
             ipc_bus.start();
             #if !NUVOLA_LITE
-            if (use_nuvola_dbus) {
-                MasterDbusIfce nuvola_api = Bus.get_proxy_sync<MasterDbusIfce>(
-                    BusType.SESSION, Nuvola.get_dbus_id(), Nuvola.get_dbus_path(),
-                    DBusProxyFlags.DO_NOT_CONNECT_SIGNALS|DBusProxyFlags.DO_NOT_LOAD_PROPERTIES);
-                GLib.Socket socket;
-                var allowed_timeouts = 10;
-                while (true) {
-                    try {
-                        // TODO: @async
-                        nuvola_api.get_connection(this.web_app.id, this.dbus_id, out socket, out api_token);
-                        break;
-                    } catch (GLib.IOError e) {
-                        if (allowed_timeouts < 1 || !(e is GLib.IOError.TIMED_OUT)) {
-                            throw e;
-                        } else {
-                            allowed_timeouts--;
-                            warning("Nuvola.get_connection() timed out. Attempts left: %d", allowed_timeouts);
-                        }
+
+            MasterDbusIfce nuvola_api = Bus.get_proxy_sync<MasterDbusIfce>(
+                BusType.SESSION, Nuvola.get_dbus_id(), Nuvola.get_dbus_path(),
+                DBusProxyFlags.DO_NOT_CONNECT_SIGNALS|DBusProxyFlags.DO_NOT_LOAD_PROPERTIES);
+            GLib.Socket socket;
+            string? api_token = null;
+            var allowed_timeouts = 10;
+            while (true) {
+                try {
+                    // TODO: @async
+                    nuvola_api.get_connection(this.web_app.id, this.dbus_id, out socket, out api_token);
+                    break;
+                } catch (GLib.IOError e) {
+                    if (allowed_timeouts < 1 || !(e is GLib.IOError.TIMED_OUT)) {
+                        throw e;
+                    } else {
+                        allowed_timeouts--;
+                        warning("Nuvola.get_connection() timed out. Attempts left: %d", allowed_timeouts);
                     }
                 }
-
-                if (socket == null) {
-                    startup_check.nuvola_service_message = (
-                        "<b>Nuvola Apps Runtime Service refused connection.</b>\n\n"
-                        + "1. Make sure Nuvola Apps Runtime is installed.\n"
-                        + "2. If Nuvola has been updated recently, close all Nuvola Apps and try launching it again.");
-                    startup_check.nuvola_service_status = StartupCheck.Status.NOT_APPLICABLE;
-                } else {
-                    ipc_bus.connect_master_socket(socket, api_token);
-                }
-            } else {
-                bus_name = Environment.get_variable("NUVOLA_IPC_MASTER");
-                assert(bus_name != null);
-                ipc_bus.connect_master(bus_name, api_token);
             }
+
+            if (socket == null) {
+                startup_check.nuvola_service_message = (
+                    "<b>Nuvola Apps Runtime Service refused connection.</b>\n\n"
+                    + "1. Make sure Nuvola Apps Runtime is installed.\n"
+                    + "2. If Nuvola has been updated recently, close all Nuvola Apps and try launching it again.");
+                startup_check.nuvola_service_status = StartupCheck.Status.NOT_APPLICABLE;
+            } else {
+                ipc_bus.connect_master_socket(socket, api_token);
+            }
+
             #endif
         } catch (GLib.Error e) {
             startup_check.nuvola_service_message = Markup.printf_escaped(

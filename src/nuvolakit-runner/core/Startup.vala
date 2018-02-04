@@ -43,14 +43,6 @@ public int print_web_app_version(FileStream output, File web_app_dir) {
 }
 
 public int run_web_app_with_dbus_handshake(File web_app_dir, string[] argv) throws WebAppError {
-    return launch_app_runner(web_app_dir, null, argv);
-}
-
-public int run_web_app_as_subprocess(File web_app_dir, string api_token, string[] argv) throws WebAppError {
-    return launch_app_runner(web_app_dir, api_token, argv);
-}
-
-private int launch_app_runner(File web_app_dir, string? api_token, string[] argv) throws WebAppError {
     /* We are not ready for Wayland yet.
      * https://github.com/tiliado/nuvolaplayer/issues/181
      * https://github.com/tiliado/nuvolaplayer/issues/240
@@ -69,7 +61,7 @@ private int launch_app_runner(File web_app_dir, string? api_token, string[] argv
         storage.user_config_dir.get_child(WEB_APP_DATA_SUBDIR).get_child(web_app.id),
         storage.user_data_dir.get_child(WEB_APP_DATA_SUBDIR).get_child(web_app.id),
         storage.user_cache_dir.get_child(WEB_APP_DATA_SUBDIR).get_child(web_app.id));
-    var controller = new Nuvola.AppRunnerController(storage, web_app, app_storage, api_token, api_token == null);
+    var controller = new Nuvola.AppRunnerController(storage, web_app, app_storage);
     int return_code = controller.run(argv);
     controller.shutdown_engines();
     return return_code;
