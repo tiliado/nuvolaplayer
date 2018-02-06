@@ -32,18 +32,12 @@ struct Args {
     static bool verbose;
     static bool version;
     #if !FLATPAK || !NUVOLA_RUNTIME
-    static string? app_id = null;
     static string? apps_dir = null;
-    static bool list_apps = false;
-    static bool list_apps_json = false;
     #endif
 
     public const OptionEntry[] options = {
         #if !FLATPAK || !NUVOLA_RUNTIME
-        { "app-id", 'a', 0, OptionArg.STRING, ref app_id, "Web app to run, e.g. \"happy_songs\" for Happy Songs web app.", "ID" },
         { "apps-dir", 'A', 0, GLib.OptionArg.FILENAME, ref Args.apps_dir, "Search for web app integrations only in directory DIR and disable service management.", "DIR" },
-        { "list-apps", 'l', 0, OptionArg.NONE, ref list_apps, "List available application.", null },
-        { "list-apps-json", 'j', 0, OptionArg.NONE, ref list_apps_json, "List available application (JSON output).", null },
         #endif
         { "verbose", 'v', 0, OptionArg.NONE, ref Args.verbose, "Print informational messages", null },
         { "debug", 'D', 0, OptionArg.NONE, ref Args.debug, "Print debugging messages", null },
@@ -134,24 +128,12 @@ public int main(string[] args) {
 
     var controller = new MasterController(storage, web_app_reg, (owned) exec_cmd, Args.debug);
     var controller_args = new string[] {args[0]};
-    #if !FLATPAK || !NUVOLA_RUNTIME
-    if (Args.list_apps) {
-        controller_args += "-l";
-    }
-    if (Args.list_apps_json) {
-        controller_args += "-j";
-    }
-    if (Args.app_id != null) {
-        controller_args += "-a";
-        controller_args += Args.app_id;
-    }
-    #endif
     for (var i = 1; i < args.length; i++) {
         controller_args += args[i];
     }
     int result = controller.run(controller_args);
 
-    if (controller.is_remote) {
+    if (controller.is_registered && controller.is_remote) {
         message("%s instance is already running and will be activated.", Nuvola.get_app_name());
         if (local_only_args) {
             warning(

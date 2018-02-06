@@ -56,8 +56,7 @@ public class MasterController : Drtgtk.Application {
 
     public MasterController(Drt.Storage storage, WebAppRegistry? web_app_reg, string[] exec_cmd,
         bool debuging=false) {
-        base(Nuvola.get_app_uid(), Nuvola.get_app_name(), Nuvola.get_dbus_id(),
-            ApplicationFlags.HANDLES_COMMAND_LINE);
+        base(Nuvola.get_app_uid(), Nuvola.get_app_name(), Nuvola.get_dbus_id());
         icon = Nuvola.get_app_icon();
         version = Nuvola.get_version();
         this.storage = storage;
@@ -94,93 +93,6 @@ public class MasterController : Drtgtk.Application {
     public override void apply_custom_styles(Gdk.Screen screen) {
         base.apply_custom_styles(screen);
         Nuvola.Css.apply_custom_styles(screen);
-    }
-
-    public override int command_line(ApplicationCommandLine command_line) {
-        hold();
-        int result = handle_command_line(command_line);
-        release();
-        return result;
-    }
-
-    private int handle_command_line(ApplicationCommandLine command_line) {
-        string? app_id = null;
-        bool list_apps = false;
-        bool list_apps_json = false;
-        OptionEntry[] options = new OptionEntry[4];
-        options[0] = { "app-id", 'a', 0, OptionArg.STRING, ref app_id, "Web app to run.", "ID" };
-        options[1] = { "list-apps", 'l', 0, OptionArg.NONE, ref list_apps, "List available application.", null };
-        options[2] = { "list-apps-json", 'j', 0, OptionArg.NONE, ref list_apps_json, "List available application (JSON output).", null };
-        options[3] = { null };
-
-        // We have to make an extra copy of the array, since .parse assumes
-        // that it can remove strings from the array without freeing them.
-        string[] args = command_line.get_arguments();
-        string*[] _args = new string[args.length];
-        for (int i = 0; i < args.length; i++) {
-            _args[i] = args[i];
-        }
-        try {
-            var opt_context = new OptionContext("- " + Nuvola.get_app_name());
-            opt_context.set_help_enabled(true);
-            opt_context.add_main_entries(options, null);
-            unowned string[] tmp = _args;
-            opt_context.parse(ref tmp);
-            _args.length = tmp.length;
-        } catch (OptionError e) {
-            command_line.printerr("option parsing failed: %s\n", e.message);
-            return 1;
-        }
-
-        if (_args.length >  1) {
-            command_line.printerr("%s", "Too many arguments.\n");
-            return 1;
-        }
-
-        late_init();
-
-        if (list_apps || list_apps_json) {
-            HashTable<string, WebApp> all_apps = web_app_reg.list_web_apps(null);
-            List<unowned string> keys = all_apps.get_keys();
-            keys.sort(strcmp);
-
-            if (list_apps_json) {
-                var builder = new Drt.JsonBuilder();
-                builder.begin_array();
-                foreach (unowned string key in keys) {
-                    builder.begin_object();
-                    builder.set_string("id", key);
-                    WebApp app = all_apps[key];
-                    builder.set_string("name", app.name);
-                    builder.set_printf("version", "%d.%d", app.version_major, app.version_minor);
-                    builder.set_member("datadir");
-                    if (app.data_dir == null) {
-                        builder.add_null();
-                    } else {
-                        builder.add_string(app.data_dir.get_path());
-                    }
-                    builder.end_object();
-                }
-                builder.end_array();
-                command_line.print_literal(builder.to_pretty_string());
-            } else {
-                var buf = new StringBuilder();
-                foreach (unowned string key in keys) {
-                    WebApp app = all_apps[key];
-                    string path = app.data_dir == null ? "" : app.data_dir.get_path();
-                    buf.append_printf("%s | %s | %d.%d | %s\n",
-                        key, app.name, app.version_major, app.version_minor, path);
-                }
-                command_line.print_literal(buf.str);
-            }
-            return 0;
-        }
-        if (app_id != null) {
-            start_app.begin(app_id, (o, res) => start_app.end(res));
-        } else {
-            activate();
-        }
-        return 0;
     }
 
     public unowned MasterUserInterface get_ui() {
