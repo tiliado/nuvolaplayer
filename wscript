@@ -387,7 +387,10 @@ def configure(ctx):
         MIN_WEBKIT = FLATPAK_WEBKIT
     else:
         vala_def(ctx, "NUVOLA_RUNTIME")
-        ctx.env.UNIQUE_NAME = "eu.tiliado.Nuvola"
+        if genuine:
+            ctx.env.UNIQUE_NAME = "eu.tiliado.Nuvola"
+        else:
+            ctx.env.UNIQUE_NAME = "eu.tiliado.WebRuntime"
     ctx.env.ICON_NAME = ctx.env.UNIQUE_NAME
     ctx.env.NUVOLA_LITE = ctx.options.nuvola_lite
     if ctx.env.NUVOLA_LITE:
@@ -831,7 +834,7 @@ def build(ctx):
         VENDOR = ctx.env.VENDOR,
     )
 
-    dbus_name = ctx.env.UNIQUE_NAME if ctx.env.GENUINE else "eu.tiliado.NuvolaOse"
+    dbus_name = ctx.env.UNIQUE_NAME
     ctx(features = 'subst',
         source = 'data/templates/dbus.service',
         target = "share/dbus-1/services/%s.service" % dbus_name,
@@ -882,6 +885,7 @@ def build(ctx):
             "" if ctx.env.GENUINE
             else '<p>{} software is based on the open source code from the Nuvola Apps™ project.</p>'.format(ctx.env.NAME)
         ),
+        UNIQUE_NAME=ctx.env.UNIQUE_NAME,
     )
     ctx.install_as(
         '${PREFIX}/share/metainfo/%s.appdata.xml' % ctx.env.UNIQUE_NAME,

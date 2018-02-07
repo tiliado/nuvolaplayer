@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop">
-  <id>eu.tiliado.Nuvola.desktop</id>
+  <id>@UNIQUE_NAME@.desktop</id>
   <pkgname>nuvolaruntime</pkgname>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>BSD-2-Clause</project_license>
@@ -97,7 +97,8 @@
   <developer_name>Jiří Janoušek</developer_name>
   <provides>
     <binary>nuvola</binary>
+    <binary>nuvolaruntime</binary>
     <binary>nuvolactl</binary>
-    <dbus type="user">eu.tiliado.Nuvola</dbus>
+    <dbus type="user">@UNIQUE_NAME@</dbus>
   </provides>
 </component>
