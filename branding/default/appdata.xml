@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop">
+  <id>@UNIQUE_NAME@.desktop</id>
+  <pkgname>nuvolaruntime</pkgname>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>BSD-2-Clause</project_license>
+  <name>@FULL_NAME@ (web app runtime)</name>
+  <summary>Tight integration of web apps with your desktop.</summary>
+  <description>
+    <p>
+      @FULL_NAME@ is a runtime for semi-sandboxed web apps providing more native user experience and tighter
+      integration with Linux desktop environments than usual web browsers can offer. It tries to feel and look
+      like a native application as much as possible.
+      It mostly specializes on music streaming web apps (e.g. Google Play Music, Spotify, Amazon Music, Deezer,
+      and more), but progress is being made to support generic web apps (e.g. Google Calendar, Google Keep, etc.).
+    </p>
+    <p>
+      Features: desktop launchers, integration with media applets (e.g. in GNOME Shell and Ubuntu sound menu),
+      Unity launcher quick list actions, lyrics fetching, Last.fm audio scrobbler, tray icon, desktop notifications,
+      media keys binding, password manager, remote control over HTTP and more. Some features may be not be available
+      because of missing dependencies or were disabled by your distributor.
+    </p>
+    <p>
+      Support: Users of third-party build should contact the customer care of their distributor.
+    </p>
+  </description>
+  <url type="homepage">https://github.com/tiliado/nuvolaruntime/wiki/Third-Party-Builds</url>
+  <url type="bugtracker">https://github.com/tiliado/nuvolaruntime/wiki/Third-Party-Builds</url>
+  <url type="help">https://github.com/tiliado/nuvolaruntime/wiki/Third-Party-Builds</url>
+  <url type="donation">https://tiliado.eu/nuvolaplayer/funding/</url>
+  <updatecontact>janousek.jiri@gmail.com</updatecontact>
+  <developer_name>Jiří Janoušek</developer_name>
+  <provides>
+    <binary>nuvola</binary>
+    <binary>nuvolaruntime</binary>
+    <binary>nuvolactl</binary>
+    <dbus type="user">@UNIQUE_NAME@</dbus>
+  </provides>
+</component>

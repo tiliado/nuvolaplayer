@@ -34,8 +34,8 @@ NUVOLACTL_BIN = "nuvolactl"
 VERSION = "4.9.0"
 GENERIC_NAME = "Web Apps"
 BLURB = "Tight integration of web apps with your Linux desktop"
-DEFAULT_HELP_URL = "https://github.com/tiliado/nuvolaplayer/wiki/Unofficial"
-DEFAULT_WEB_APP_REQUIREMENTS_HELP_URL = "https://github.com/tiliado/nuvolaplayer/wiki/Web-App-Requirements"
+DEFAULT_HELP_URL = "https://github.com/tiliado/nuvolaruntime/wiki/Third-Party-Builds"
+DEFAULT_WEB_APP_REQUIREMENTS_HELP_URL = DEFAULT_HELP_URL
 
 MIN_DIORITE = "4.9.0"
 MIN_VALA = "0.38.4"
@@ -357,12 +357,20 @@ def configure(ctx):
         if ctx.env.BRANDING != "default":
             ctx.msg("Branding metadata not found", branding_json, color="RED")
         branding = {}
+
     ctx.env.WELCOME_XML = "branding/%s/welcome.xml" % ctx.env.BRANDING
     if os.path.isfile(ctx.env.WELCOME_XML):
         ctx.msg("Welcome screen", ctx.env.WELCOME_XML, color="GREEN")
     else:
         ctx.msg("Welcome screen not found", ctx.env.WELCOME_XML, color="RED")
         ctx.env.WELCOME_XML = "branding/default/welcome.xml"
+
+    ctx.env.APPDATA_XML = "branding/%s/appdata.xml" % ctx.env.BRANDING
+    if os.path.isfile(ctx.env.APPDATA_XML):
+        ctx.msg("Welcome screen", ctx.env.APPDATA_XML, color="GREEN")
+    else:
+        ctx.msg("Welcome screen not found", ctx.env.APPDATA_XML, color="RED")
+        ctx.env.APPDATA_XML = "branding/default/appdata.xml"
 
     genuine = branding.get("genuine", False)
     ctx.env.NAME = branding.get("name", "Web Apps")
@@ -876,7 +884,7 @@ def build(ctx):
 
     ctx(
         features = 'subst',
-        source=ctx.path.find_node("data/nuvolaplayer3.appdata.xml"),
+        source=ctx.path.find_node(ctx.env.APPDATA_XML),
         target=ctx.path.get_bld().make_node(ctx.env.UNIQUE_NAME + '.appdata.xml'),
         install_path='${PREFIX}/share/appdata',
         encoding="utf-8",
