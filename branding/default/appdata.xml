@@ -4,15 +4,13 @@
   <pkgname>nuvolaruntime</pkgname>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>BSD-2-Clause</project_license>
-  <name>@FULL_NAME@ (web app runtime)</name>
+  <name>@FULL_NAME@ Runtime</name>
   <summary>Tight integration of web apps with your desktop.</summary>
   <description>
     <p>
-      @FULL_NAME@ is a runtime for semi-sandboxed web apps providing more native user experience and tighter
-      integration with Linux desktop environments than usual web browsers can offer. It tries to feel and look
-      like a native application as much as possible.
-      It mostly specializes on music streaming web apps (e.g. Google Play Music, Spotify, Amazon Music, Deezer,
-      and more), but progress is being made to support generic web apps (e.g. Google Calendar, Google Keep, etc.).
+      @FULL_NAME@ Runtime provides web apps with more native user experience
+      and tighter integration with Linux desktop environments than usual web browsers can offer. It tries to feel and
+      look like a native application as much as possible.
     </p>
     <p>
       Features: desktop launchers, integration with media applets (e.g. in GNOME Shell and Ubuntu sound menu),
@@ -31,6 +29,7 @@
   <updatecontact>janousek.jiri@gmail.com</updatecontact>
   <developer_name>Jiří Janoušek</developer_name>
   <provides>
+    <binary>nuvolaserviceinfo</binary>
     <binary>nuvola</binary>
     <binary>nuvolaruntime</binary>
     <binary>nuvolactl</binary>

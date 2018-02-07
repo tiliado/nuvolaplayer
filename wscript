@@ -570,6 +570,7 @@ def build(ctx):
 
     APP_RUNNER = "nuvolaruntime"
     ENGINEIO = "engineio"
+    NUVOLA_SERVICE_INFO = "nuvolaserviceinfo"
     NUVOLAKIT_RUNNER = APPNAME + "-runner"
     NUVOLAKIT_BASE = APPNAME + "-base"
     NUVOLAKIT_WORKER = APPNAME + "-worker"
@@ -652,6 +653,13 @@ def build(ctx):
         checks=VALALINT_CHECKS
     )
     valalint(
+        source_dir = 'src/' + NUVOLA_SERVICE_INFO,
+        vala_defines = vala_defines,
+        vapi_dirs = vapi_dirs,
+        vala_target_glib = TARGET_GLIB,
+        checks=VALALINT_CHECKS
+    )
+    valalint(
         source_dir = 'src/apprunner',
         vala_defines = vala_defines,
         vapi_dirs = vapi_dirs,
@@ -723,6 +731,18 @@ def build(ctx):
     valaprog(
         target = NUVOLA_BIN,
         source_dir = 'src/master',
+        packages = "",
+        uselib = uselib + " SOUP WEBKIT",
+        use = [NUVOLAKIT_BASE, NUVOLAKIT_RUNNER],
+        vala_defines = vala_defines,
+        defines = ['G_LOG_DOMAIN="Nuvola"'],
+        vapi_dirs = vapi_dirs,
+        vala_target_glib = TARGET_GLIB,
+    )
+
+    valaprog(
+        target = NUVOLA_SERVICE_INFO,
+        source_dir = 'src/' + NUVOLA_SERVICE_INFO,
         packages = "",
         uselib = uselib + " SOUP WEBKIT",
         use = [NUVOLAKIT_BASE, NUVOLAKIT_RUNNER],
@@ -821,10 +841,11 @@ def build(ctx):
     ctx(features = 'subst',
         source = 'data/templates/launcher.desktop',
         target = "share/applications/%s.desktop" % ctx.env.UNIQUE_NAME,
+        install_path = '${PREFIX}/share/applications',
         BLURB = BLURB,
-        APP_NAME = ctx.env.NAME,
+        APP_NAME = (ctx.env.NAME + " Service") if ctx.env.GENUINE else ctx.env.NAME,
         ICON = ctx.env.ICON_NAME,
-        EXEC = NUVOLA_BIN if not ctx.env.ADK else "lxterminal",
+        EXEC = "lxterminal" if ctx.env.ADK else (NUVOLA_SERVICE_INFO if ctx.env.GENUINE else NUVOLA_BIN),
         GENERIC_NAME=GENERIC_NAME,
         WMCLASS = ctx.env.UNIQUE_NAME,
     )
