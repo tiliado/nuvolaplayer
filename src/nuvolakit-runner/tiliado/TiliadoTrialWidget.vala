@@ -26,7 +26,6 @@ namespace Nuvola {
 
 public class TiliadoTrialWidget : Gtk.Grid {
     private Gtk.Button? purchase_button = null;
-    private Gtk.Button? free_button = null;
     private TiliadoApi2.User? current_user = null;
     private Drtgtk.Application app;
     TiliadoMembership required_membership;
@@ -84,12 +83,9 @@ public class TiliadoTrialWidget : Gtk.Grid {
                 label.vexpand = true;
                 label.show();
                 add(label);
-                purchase_button = new Gtk.Button.with_label("Purchase Nuvola");
+                purchase_button = new Gtk.Button.with_label("Purchase Nuvola Apps Runtime");
                 purchase_button.clicked.connect(on_purchase_button_clicked);
                 add_button(purchase_button, "suggested-action");
-                free_button = new Gtk.Button.with_label("Get Nuvola for free");
-                free_button.clicked.connect(on_free_button_clicked);
-                add_button(free_button);
             }
             show();
         } else if (popover == null || !popover.visible) {
@@ -103,11 +99,6 @@ public class TiliadoTrialWidget : Gtk.Grid {
             purchase_button.clicked.disconnect(on_purchase_button_clicked);
             remove(purchase_button);
             purchase_button = null;
-        }
-        if (free_button != null) {
-            free_button.clicked.disconnect(on_free_button_clicked);
-            remove(free_button);
-            free_button = null;
         }
         foreach (Gtk.Widget child in get_children()) {
             remove(child);
@@ -282,10 +273,6 @@ public class TiliadoTrialWidget : Gtk.Grid {
     private void on_progress_back_clicked(Gtk.Button button) {
         stack.visible_child = activate_view;
         activation.cancel_activation();
-    }
-
-    private void on_free_button_clicked(Gtk.Button button) {
-        app.show_uri("https://github.com/tiliado/nuvolaruntime/wiki/Get-Nuvola-for-Free");
     }
 
     private void on_activation_started(string uri) {
