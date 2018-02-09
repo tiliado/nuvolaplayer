@@ -113,6 +113,21 @@ public int main(string[] args) {
         : (Args.verbose ? GLib.LogLevelFlags.LEVEL_INFO: GLib.LogLevelFlags.LEVEL_WARNING),
         true, "Control");
 
+    if (Args.command.length < 1) {
+        #if FLATPAK
+        // It might happen that nuvolactl is launched from the Nuvola Apps Service entry in GNOME Software.
+        stderr.printf("Error: No command specified. Type `%s --help` for help.\nLaunching service info...\n", args[0]);
+        try {
+            Process.spawn_sync(null, {"nuvolaserviceinfo", null}, null, SpawnFlags.SEARCH_PATH, null, null, null, null);
+        } catch (GLib.Error e) {
+            warning("Failed to spawn nuvolaserviceinfo: %s", e.message);
+        }
+        return 1;
+        #else
+        return quit(1, "Error: No command specified. Type `%s --help` for help.\n", args[0]);
+        #endif
+    }
+
     if (Args.app == null) {
         try {
             var master = new Drt.RpcChannel.from_name(1, build_master_ipc_id(), null, null, 500);
@@ -130,10 +145,6 @@ public int main(string[] args) {
         catch (GLib.Error e) {
             return quit(2, "Error: Communication with %s master instance failed: %s\n", Nuvola.get_app_name(), e.message);
         }
-    }
-
-    if (Args.command.length < 1) {
-        return quit(1, "Error: No command specified. Type `%s --help` for help.\n", args[0]);
     }
 
     Drt.RpcChannel client;
