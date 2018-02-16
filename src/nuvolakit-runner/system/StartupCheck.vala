@@ -230,12 +230,11 @@ public class StartupCheck : GLib.Object {
 
         /* If there is no engine without an unsupported requirement, abort early. */
         if (n_engines_without_unsupported == 0) {
-            Drt.String.append(ref result_message, "\n", Markup.printf_escaped(
+            Drt.String.append(ref result_message, "\n",
                 "This web app requires certain technologies to function properly but these requirements "
-                + "have not been satisfied.\n\nFailed requirements: <i>%s</i>\n\n"
-                + "<a href=\"%s\">Get help with installation</a>",
-                checks[0].parser.failed_requirements ?? "", WEB_APP_REQUIREMENTS_HELP_URL));
+                + "have not been satisfied.\n\nContact your distributor to get assistance.");
             check_app_requirements_finished(Status.ERROR, (owned) result_message, available_web_options);
+            warning("Failed requirements: %s", checks[0].parser.failed_requirements ?? "");
             return;
         }
 
@@ -265,12 +264,11 @@ public class StartupCheck : GLib.Object {
         }
 
         /* No engine satisfies requirements */
-        Drt.String.append(ref result_message, "\n", Markup.printf_escaped(
+        Drt.String.append(ref result_message, "\n",
             "This web app requires certain technologies to function properly but these requirements "
-            + "have not been satisfied.\n\nFailed requirements: <i>%s %s</i>\n\n"
-            + "<a href=\"%s\">Get help with installation</a>",
-            checks[0].parser.failed_requirements ?? "", checks[0].parser.unknown_requirements ?? "",
-            WEB_APP_REQUIREMENTS_HELP_URL));
+            + "have not been satisfied.\n\nContact your distributor to get assistance.");
+        warning("Failed requirements: %s", checks[0].parser.failed_requirements ?? "");
+        warning("Unknown requirements: %s", checks[0].parser.unknown_requirements ?? "");
         check_app_requirements_finished(Status.ERROR, (owned) result_message, available_web_options);
     }
 
@@ -279,11 +277,8 @@ public class StartupCheck : GLib.Object {
         foreach (WebOptions web_opt in web_options) {
             string[] warnings = web_opt.get_format_support_warnings();
             if (warnings.length > 0) {
-                if (status < Status.WARNING) {
-                    status = Status.WARNING;
-                }
                 foreach (unowned string entry in warnings) {
-                    Drt.String.append(ref msg, "\n\n", "%s: %s".printf(web_opt.get_name(), entry));
+                    warning("%s: %s", web_opt.get_name(), entry);
                 }
             }
         }
