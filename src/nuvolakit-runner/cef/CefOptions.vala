@@ -31,8 +31,8 @@ public class CefOptions : WebOptions {
     public bool widevine_required {get; set; default = false;}
     public bool flash_required {get; private set; default = false;}
 
-    public CefOptions(WebAppStorage storage) {
-        base(storage);
+    public CefOptions(WebAppStorage storage, Connection? connection) {
+        base(storage, connection);
     }
 
     construct {

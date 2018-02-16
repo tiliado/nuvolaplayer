@@ -37,8 +37,8 @@ public class WebkitOptions : WebOptions {
     public bool h264_supported {get; private set; default = false;}
     public FormatSupport format_support {get; set;}
 
-    public WebkitOptions(WebAppStorage storage) {
-        base(storage);
+    public WebkitOptions(WebAppStorage storage, Connection? connection) {
+        base(storage, connection);
     }
 
     construct {

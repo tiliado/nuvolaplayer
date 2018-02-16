@@ -25,15 +25,16 @@
 namespace Nuvola {
 
 public abstract class WebOptions : GLib.Object {
-    public static WebOptions? create(Type type, WebAppStorage storage) {
-        return GLib.Object.@new(type, "storage", storage) as WebOptions;
+    public static WebOptions? create(Type type, WebAppStorage storage, Connection? connection) {
+        return GLib.Object.@new(type, "storage", storage, "connection", connection) as WebOptions;
     }
 
     public WebAppStorage storage {get; construct;}
+    public Connection? connection {get; construct;}
     public abstract VersionTuple engine_version {get; protected set;}
 
-    public WebOptions(WebAppStorage storage) {
-        GLib.Object(storage: storage);
+    public WebOptions(WebAppStorage storage, Connection? connection) {
+        GLib.Object(storage: storage, connection: connection);
     }
 
     public virtual async void gather_format_support_info(WebApp web_app) {

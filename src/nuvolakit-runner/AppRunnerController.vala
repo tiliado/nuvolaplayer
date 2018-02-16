@@ -185,22 +185,22 @@ public class AppRunnerController: Drtgtk.Application {
         config = new Config(app_storage.config_dir.get_child("config.json"), default_config);
         config.changed.connect(on_config_changed);
         gtk_settings.gtk_application_prefer_dark_theme = config.get_bool(ConfigKey.DARK_THEME);
+        connection = new Connection(new Soup.Session(), app_storage.cache_dir.get_child("conn"), config);
 
         #if HAVE_CEF
         if (Environment.get_variable("NUVOLA_USE_CEF") == "true"
         || CEF_DEFAULT && Environment.get_variable("NUVOLA_USE_CEF") != "false") {
             available_web_options = {
-                WebOptions.create(typeof(CefOptions), app_storage),
-                WebOptions.create(typeof(WebkitOptions), app_storage)};
+                WebOptions.create(typeof(CefOptions), app_storage, connection),
+                WebOptions.create(typeof(WebkitOptions), app_storage, connection)};
         } else {
             available_web_options = {
-                WebOptions.create(typeof(WebkitOptions), app_storage),
-                WebOptions.create(typeof(CefOptions), app_storage)};
+                WebOptions.create(typeof(WebkitOptions), app_storage, connection),
+                WebOptions.create(typeof(CefOptions), app_storage, connection)};
         }
         #else
-        available_web_options = {WebOptions.create(typeof(WebkitOptions), app_storage)};
+        available_web_options = {WebOptions.create(typeof(WebkitOptions), app_storage, connection)};
         #endif
-        connection = new Connection(new Soup.Session(), app_storage.cache_dir.get_child("conn"), config);
     }
 
     private void init_base_actions() {
@@ -348,7 +348,7 @@ public class AppRunnerController: Drtgtk.Application {
     }
 
     private void init_web_engine() {
-        webkit_options = (web_options as WebkitOptions) ?? new WebkitOptions(app_storage);
+        webkit_options = (web_options as WebkitOptions) ?? new WebkitOptions(app_storage, connection);
         web_engine = web_options.create_web_engine(web_app);
         if (web_options.get_name() == "Chromium") {
             string msg = "Experimental %s web engine is in use. <a href=\"%s\">More info</a>. <a href=\"%s\">Report bug</a>.".printf(

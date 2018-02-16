@@ -56,7 +56,7 @@ public class MasterUserInterface: GLib.Object {
     private void create_main_window() {
         Drt.Storage storage = controller.storage;
         var app_storage = new WebAppStorage(storage.user_config_dir, storage.user_data_dir, storage.user_cache_dir);
-        webkit_options = new WebkitOptions(app_storage);
+        webkit_options = new WebkitOptions(app_storage, null);
         main_window = new MasterWindow(controller);
         main_window.page_changed.connect(on_master_stack_page_changed);
 
@@ -148,7 +148,7 @@ public class MasterUserInterface: GLib.Object {
     private void do_about() {
         var dialog = new AboutDialog(main_window, null, {
             #if HAVE_CEF
-            new CefOptions(webkit_options.storage),
+            new CefOptions(webkit_options.storage, null),
             #endif
             webkit_options,
         });
