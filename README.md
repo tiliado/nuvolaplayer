@@ -123,6 +123,7 @@ Build and Install
   * [libdrm](https://dri.freedesktop.org/libdrm/) >= 2.2
   * libuuid
   * libsecret-1 >= 0.16
+  * libarchive >= 3.2
   * g-ir-compiler
   * [valalint](https://github.com/tiliado/valalint) or configure with `--no-vala-lint`
   * [ValaCEF](https://github.com/tiliado/valacef) or configure with `--no-cef`

@@ -434,6 +434,7 @@ def configure(ctx):
     pkgconfig(ctx, 'libsoup-2.4', 'SOUP', '0') # Engine.io
     pkgconfig(ctx, 'dri2', 'DRI2', '1.0')
     pkgconfig(ctx, 'libdrm', 'DRM', '2.2')
+    pkgconfig(ctx, 'libarchive', 'LIBARCHIVE', '3.2')
 
     ctx.env.BUILD_GIR = ctx.options.build_gir
     if ctx.env.BUILD_GIR:
@@ -711,8 +712,8 @@ def build(ctx):
         target = NUVOLAKIT_RUNNER,
         gir = "NuvolaRunner-1.0",
         source_dir = 'src/nuvolakit-runner',
-        packages = packages + ' webkit2gtk-4.0 javascriptcoregtk-4.0 gstreamer-1.0 libsecret-1 dri2 libdrm',
-        uselib =  uselib + ' JSCORE WEBKIT GST SECRET DRI2 DRM',
+        packages = packages + ' webkit2gtk-4.0 javascriptcoregtk-4.0 gstreamer-1.0 libsecret-1 dri2 libdrm libarchive',
+        uselib =  uselib + ' JSCORE WEBKIT GST SECRET DRI2 DRM LIBARCHIVE',
         use = [NUVOLAKIT_BASE, ENGINEIO],
         lib = ['m'],
         includes = ["build"],

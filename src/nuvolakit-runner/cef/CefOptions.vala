@@ -30,6 +30,7 @@ public class CefOptions : WebOptions {
     public CefGtk.WebContext default_context {get; private set; default = null;}
     public bool widevine_required {get; set; default = false;}
     public bool flash_required {get; private set; default = false;}
+    public File widevine_dir {get; private set;}
 
     public CefOptions(WebAppStorage storage, Connection? connection) {
         base(storage, connection);
@@ -37,6 +38,7 @@ public class CefOptions : WebOptions {
 
     construct {
         engine_version = VersionTuple.parse(Cef.get_chromium_version());
+        widevine_dir = storage.data_dir.get_child("widevine");
     }
 
     public override string get_name_version() {
@@ -48,6 +50,14 @@ public class CefOptions : WebOptions {
     }
 
     public override async void gather_format_support_info(WebApp web_app) {
+        if (widevine_required && connection != null) {
+            var wd = new CefWidevineDownloader(connection, widevine_dir);
+            if (!wd.exists()) {
+                var dialog = new CefWidevineDownloaderDialog(wd, web_app.name);
+                yield dialog.wait_for_result();
+                dialog.destroy();
+            }
+        }
         init(web_app);
         CefGtk.InitializationResult result = CefGtk.get_init_result();
         CefGtk.WidevinePlugin widevine = result.widevine_plugin;
@@ -66,7 +76,11 @@ public class CefOptions : WebOptions {
                 user_agent += " Nuvola/" + Nuvola.get_short_version();
             }
             string? product = "Chrome/%s Nuvola/%s".printf(Cef.get_chromium_version(), Nuvola.get_short_version());
-            CefGtk.init(web_app.scale_factor, widevine_required, flash_required, user_agent, product);
+            CefGtk.init(
+                web_app.scale_factor,
+                widevine_required ? widevine_dir.get_path() : null,
+                flash_required,
+                user_agent, product);
             default_context = new CefGtk.WebContext(storage.create_data_subdir("cef").get_path());
         }
     }
