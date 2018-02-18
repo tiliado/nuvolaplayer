@@ -164,6 +164,9 @@ public class AppRunnerController: Drtgtk.Application {
             init_gui();
             init_web_engine();
             break;
+        default:
+            do_quit();
+            break;
         }
         startup_window.destroy();
         startup_window = null;
