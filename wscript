@@ -256,27 +256,10 @@ class valalint(Task.Task):
     color = 'BLUE'
     def __init__(self, *k, **kw):
         Task.Task.__init__(self, *k, **kw)
-        self.output_dir = ''
-        self.package_name = ''
-        self.package_version = ''
-        self.vapi_dirs = []
-        self.vala_defines = []
-        self.vala_target_glib = None
         self.valalint_checks = []
 
     def run(self):
         cmd = [Utils.subst_vars('${VALALINT}', self.env)]
-        if getattr(self, 'packages', None):
-            for package in self.packages:
-                cmd.append ('--pkg %s' % package)
-        if getattr(self, 'vapi_dirs', None):
-            for vapi_dir in self.vapi_dirs:
-                cmd.append ('--vapidir %s' % vapi_dir)
-        if getattr(self, 'vala_defines', None):
-            for define in self.vala_defines:
-                cmd.append ('--define %s' % define)
-        if getattr(self, 'vala_target_glib', None):
-            cmd.append ('--target-glib=%s' % self.vala_target_glib)
         if getattr(self, 'valalint_checks', None):
             for check in self.valalint_checks:
                 cmd.append ('-c %s' % check)
@@ -622,64 +605,34 @@ def build(ctx):
         " if_else_blocks cuddled_else cuddled_catch loop_blocks")
     valalint(
         source_dir = 'engineio-soup/src',
-        packages = 'uuid libsoup-2.4 json-glib-1.0',
-        defines = ['G_LOG_DOMAIN="Engineio"'],
-        vapi_dirs = vapi_dirs,
-        vala_target_glib = TARGET_GLIB,
         checks=VALALINT_CHECKS
     )
     valalint(
         source_dir = 'src/nuvolakit-base',
-        packages = packages + ' gstreamer-1.0',
-        vala_defines = vala_defines,
-        defines = ['G_LOG_DOMAIN="Nuvola"'],
-        vapi_dirs = vapi_dirs,
-        vala_target_glib = TARGET_GLIB,
         checks=VALALINT_CHECKS
     )
     valalint(
         source_dir = 'src/nuvolakit-runner',
-        packages = packages + ' webkit2gtk-4.0 javascriptcoregtk-4.0 gstreamer-1.0 libsecret-1 dri2 libdrm',
-        vala_defines = vala_defines,
-        defines = ['G_LOG_DOMAIN="Nuvola"'],
-        vapi_dirs = vapi_dirs,
-        vala_target_glib = TARGET_GLIB,
         checks=VALALINT_CHECKS
     )
     valalint(
         source_dir = 'src/master',
-        vala_defines = vala_defines,
-        vapi_dirs = vapi_dirs,
-        vala_target_glib = TARGET_GLIB,
         checks=VALALINT_CHECKS
     )
     valalint(
         source_dir = 'src/' + NUVOLA_SERVICE_INFO,
-        vala_defines = vala_defines,
-        vapi_dirs = vapi_dirs,
-        vala_target_glib = TARGET_GLIB,
         checks=VALALINT_CHECKS
     )
     valalint(
         source_dir = 'src/apprunner',
-        vala_defines = vala_defines,
-        vapi_dirs = vapi_dirs,
-        vala_target_glib = TARGET_GLIB,
         checks=VALALINT_CHECKS
     )
     valalint(
         source_dir = 'src/control',
-        vala_defines = vala_defines,
-        vapi_dirs = vapi_dirs,
-        vala_target_glib = TARGET_GLIB,
         checks=VALALINT_CHECKS
     )
     valalint(
         source_dir = 'src/nuvolakit-worker',
-        packages = "dioriteglib{0} {1} {2}".format(TARGET_DIORITE, 'webkit2gtk-web-extension-4.0', 'javascriptcoregtk-4.0'),
-        vala_defines = vala_defines,
-        vapi_dirs = vapi_dirs,
-        vala_target_glib = TARGET_GLIB,
         checks=VALALINT_CHECKS
     )
 
