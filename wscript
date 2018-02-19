@@ -876,10 +876,6 @@ def build(ctx):
 
     ctx.symlink_as('${PREFIX}/share/%s/www/engine.io.js' % APPNAME, ctx.env.JSDIR + '/engine.io-client/engine.io.js')
 
-    web_apps = ctx.path.find_dir("web_apps")
-    ctx.install_files('${PREFIX}/share/' + APPNAME, web_apps.ant_glob('**'), cwd=web_apps.parent, relative_trick=True)
-    ctx.symlink_as('${PREFIX}/share/%s/web_apps/test/unit.js' % APPNAME, ctx.env.JSDIR + '/unitjs/unit.js')
-
     www = ctx.path.find_dir("data/www")
     ctx.install_files('${PREFIX}/share/' + APPNAME, www.ant_glob('**'), cwd=www.parent, relative_trick=True)
 
