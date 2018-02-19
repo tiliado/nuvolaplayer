@@ -199,7 +199,11 @@ public class StartupWindow : Drtgtk.ApplicationWindow {
         switch (final_status) {
         case StartupCheck.Status.ERROR:
             header = Drtgtk.Labels.header(app.app_name + " cannot start");
-            label = Drtgtk.Labels.markup("<big>Look at the table bellow to find out the reason.</big>");
+            string text = "<big>Look at the table bellow to find out the reason.</big>";
+            #if !GENUINE
+            text += "\n\n<big><a href=\"https://nuvola.tiliado.eu\">Get genuine builds of Nuvola Apps Runtime</a>.</big>";
+            #endif
+            label = Drtgtk.Labels.markup(text);
             button = new Gtk.Button.with_label("Quit");
             break;
         case StartupCheck.Status.WARNING:
