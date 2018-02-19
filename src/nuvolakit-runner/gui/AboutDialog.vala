@@ -111,15 +111,15 @@ public class AboutDialog: Gtk.Dialog {
         if (pixbuf != null) {
             img = new Gtk.Image.from_pixbuf(pixbuf);
             img.valign = img.halign = Gtk.Align.CENTER;
-            title.attach(img, 0, 0, 1, 2);
+            title.attach(img, 0, 0, 1, 3);
         }
 
         string name = Nuvola.get_app_name();
-        var subtitle = "Web App Integration Runtime\n";
+        var subtitle = "Web App Integration Runtime";
         #if GENUINE
-        subtitle += "Genuine flatpak build";
+        grid.attach(new Gtk.Label("Genuine flatpak build"), 0, 2, 1, 1);
         #else
-        subtitle += "based on Nuvola Apps™ project";
+        title.attach(new Gtk.LinkButton.with_label("https://nuvola.tiliado.eu", "Get genuine Nuvola Apps Runtime"), 1, 2, 1, 1);
         #endif
         label = new Gtk.Label(name);
         attributes = new Pango.AttrList() ;
@@ -129,24 +129,24 @@ public class AboutDialog: Gtk.Dialog {
         title.attach(label, 1, 0, 1, 1);
         title.attach(new Gtk.Label(subtitle), 1, 1, 1, 1);
         grid.attach(title, 0, 0, 2, 1);
-        grid.attach(new Gtk.Label("Version"), 0, 2, 1, 1);
+        grid.attach(new Gtk.Label("Version"), 0, 3, 1, 1);
         label = new Gtk.Label(Nuvola.get_version());
         label.selectable = true;
-        grid.attach(label, 1, 2, 1, 1);
-        grid.attach(new Gtk.Label("Revision"), 0, 3, 1, 1);
+        grid.attach(label, 1, 3, 1, 1);
+        grid.attach(new Gtk.Label("Revision"), 0, 4, 1, 1);
         string revision = Nuvola.get_revision();
         if (revision.length > 20) {
             revision = revision[0:20];
         }
         label = new Gtk.Label(revision);
         label.selectable = true;
-        grid.attach(label, 1, 3, 1, 1);
-        grid.attach(new Gtk.Label("Copyright"), 0, 4, 1, 1);
+        grid.attach(label, 1, 4, 1, 1);
+        grid.attach(new Gtk.Label("Copyright"), 0, 5, 1, 1);
         label = new Gtk.Label(Markup.printf_escaped("© 2011-2018 <a href=\"%s\">%s</a>", "https://github.com/fenryxo", "Jiří Janoušek"));
         label.use_markup = true;
-        grid.attach(label, 1, 4, 1, 1);
+        grid.attach(label, 1, 5, 1, 1);
 
-        var line = 5;
+        var line = 6;
         label = new Gtk.Label("Diorite: %s".printf(Drt.get_version()));
         label.selectable = true;
         label.margin_top = 10;
