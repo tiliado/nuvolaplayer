@@ -550,7 +550,7 @@ public class AppRunnerController: Drtgtk.Application {
             dialog.add_tab("Format Support", new FormatSupportScreen(this, format_support, storage, webkit_options.default_context));
         }
 
-        Variant? response = dialog.run();
+        int response = dialog.run();
         if (response == Gtk.ResponseType.OK) {
             HashTable<string, Variant> new_values = form.get_values();
             foreach (unowned string? key in new_values.get_keys()) {
