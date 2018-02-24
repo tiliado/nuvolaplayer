@@ -353,13 +353,6 @@ public class AppRunnerController: Drtgtk.Application {
     private void init_web_engine() {
         webkit_options = (web_options as WebkitOptions) ?? new WebkitOptions(app_storage, connection);
         web_engine = web_options.create_web_engine(web_app);
-        if (web_options.get_name() == "Chromium") {
-            string msg = "Experimental %s web engine is in use. <a href=\"%s\">More info</a>. <a href=\"%s\">Report bug</a>.".printf(
-                web_options.get_name_version(),
-                "https://medium.com/nuvola-news/nuvola-chromium-port-status-3b1648b29c77",
-                "https://github.com/tiliado/nuvolaruntime/issues/372");
-            show_info_bar("engine-warning", Gtk.MessageType.WARNING, msg);
-        }
         web_worker_data["JS_ENGINE"] = web_options.get_name_version();
         web_worker_data["JS_ENGINE_NAME"] = web_options.get_name();
         web_worker_data["JS_ENGINE_VERSION"] = web_options.engine_version.to_string();
