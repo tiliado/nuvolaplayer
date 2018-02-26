@@ -76,11 +76,33 @@ public class CefOptions : WebOptions {
                 user_agent += " Nuvola/" + Nuvola.get_short_version();
             }
             string? product = "Chrome/%s Nuvola/%s".printf(Cef.get_chromium_version(), Nuvola.get_short_version());
+
+            CefGtk.ProxyType proxy_type = CefGtk.ProxyType.SYSTEM;
+            string? proxy_server = null;
+            int proxy_port = 0;
+            if (connection != null) {
+                switch(connection.get_network_proxy(out proxy_server, out proxy_port)) {
+                case NetworkProxyType.DIRECT:
+                    proxy_type = CefGtk.ProxyType.NONE;
+                    break;
+                case NetworkProxyType.SOCKS:
+                    proxy_type = CefGtk.ProxyType.SOCKS;
+                    break;
+                case NetworkProxyType.HTTP:
+                    proxy_type = CefGtk.ProxyType.HTTP;
+                    break;
+                default:
+                    proxy_type = CefGtk.ProxyType.SYSTEM;
+                    break;
+                }
+            }
+
             CefGtk.init(
                 web_app.scale_factor,
                 widevine_required ? widevine_dir.get_path() : null,
                 flash_required,
-                user_agent, product);
+                user_agent, product,
+                proxy_type, proxy_server, (uint) proxy_port);
             default_context = new CefGtk.WebContext(storage.create_data_subdir("cef").get_path());
         }
     }
