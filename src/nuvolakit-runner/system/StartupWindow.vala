@@ -60,10 +60,11 @@ public class StartupWindow : Drtgtk.ApplicationWindow {
     public StartupCheck model {get; private set;}
     private Gtk.ScrolledWindow scroll;
     private Gtk.Grid grid;
-    private Gtk.Label? header = null;
-    private Gtk.Label? label = null;
     private Gtk.Button? bottom_button = null;
     private int grid_line = 2;
+    private Gtk.Stack stack;
+    private Gtk.Label status_label;
+    private Gtk.Widget status_widget;
 
     /**
      * Create new StartupWindow
@@ -81,12 +82,18 @@ public class StartupWindow : Drtgtk.ApplicationWindow {
         catch (Error e) {
             warning("Unable to load application icon.");
         }
-        set_default_size(500, 500);
+
+        stack = new Gtk.Stack();
+        stack.margin = 10;
+        stack.hexpand = true;
+        stack.transition_type  = Gtk.StackTransitionType.SLIDE_LEFT_RIGHT;
+        var about = new AboutScreen(app.web_app);
+        about.show();
+        stack.add_titled(about, "About", "About");
 
         grid = new Gtk.Grid();
         grid.orientation = Gtk.Orientation.VERTICAL;
         grid.column_spacing = grid.row_spacing = 10;
-        grid.margin = 15;
 
         add_line(ref grid_line, "Web App Requirements", "app_requirements");
         add_line(ref grid_line, "Nuvola Service", "nuvola_service");
@@ -102,10 +109,38 @@ public class StartupWindow : Drtgtk.ApplicationWindow {
         scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC);
         scroll.hexpand = scroll.vexpand = true;
         scroll.add(grid);
-        top_grid.attach(scroll, 0, 2, 1, 1);
-        grid.show();
+
+        var switcher = new Gtk.StackSwitcher();
+        switcher.margin = 5;
+        switcher.stack = stack;
+        switcher.hexpand = true;
+        switcher.halign = Gtk.Align.CENTER;
+        switcher.show();
+        top_grid.attach(switcher, 0, 3, 2, 1);
+
+        stack.add_titled(scroll, "Start-up", "Start-up");
+        top_grid.attach(stack, 0, 4, 2, 1);
         scroll.show();
+        stack.show_all();
         model.finished.connect(on_checks_finished);
+
+        status_label = Drtgtk.Labels.markup("%s web app script performs start-up checks...", app.app_name);
+        status_label.hexpand = true;
+        status_label.margin = 10;
+        status_label.halign = Gtk.Align.CENTER;
+        status_label.valign = Gtk.Align.CENTER;
+        status_label.justify = Gtk.Justification.CENTER;
+        status_label.show();
+        top_grid.attach(status_label, 0, 2, 1, 1);
+        var spinner = new Gtk.Spinner();
+        spinner.start();
+        spinner.show();
+        status_widget = spinner;
+        status_widget.hexpand = true;
+        status_widget.valign = Gtk.Align.CENTER;
+        status_widget.halign = Gtk.Align.CENTER;
+        status_widget.margin = 10;
+        top_grid.attach(status_widget, 1, 2, 1, 1);
     }
 
     ~StartupWindow() {
@@ -180,62 +215,49 @@ public class StartupWindow : Drtgtk.ApplicationWindow {
     }
 
     private void on_checks_finished(StartupCheck.Status final_status) {
-        if (header != null) {
-            header.get_parent().remove(header);
-            header = null;
-        }
-        if (label != null) {
-            label.get_parent().remove(label);
-            label = null;
-        }
         if (bottom_button != null) {
             bottom_button.get_parent().remove(bottom_button);
             bottom_button.clicked.disconnect(on_button_clicked);
             bottom_button = null;
         }
 
-
         Gtk.Button? button = null;
         switch (final_status) {
         case StartupCheck.Status.ERROR:
-            header = Drtgtk.Labels.header(app.app_name + " cannot start");
-            string text = "<big>Look at the table bellow to find out the reason.</big>";
-            #if !GENUINE
-            text += "\n\n<big><a href=\"https://nuvola.tiliado.eu\">Get genuine builds of Nuvola Apps Runtime</a>.</big>";
+            #if GENUINE
+            status_label.label = Markup.printf_escaped(
+                "<b>%s script cannot start.</b> <a href=\"%s\">Get help</a>.",
+                app.app_name, Nuvola.HELP_URL);
+            #else
+            status_label.label = Markup.printf_escaped(
+                "<b>%s script cannot start.</b>\n<a href=\"%s\">Get genuine Nuvola Apps Runtime</a>"
+                + " or contact your distributor.", app.app_name, "https://nuvola.tiliado.eu");
             #endif
-            label = Drtgtk.Labels.markup(text);
             button = new Gtk.Button.with_label("Quit");
             break;
         case StartupCheck.Status.WARNING:
-            header = Drtgtk.Labels.header("There are a few issues");
-            label = Drtgtk.Labels.markup("<big>You can continue using %s but take a look at the table bellow first.</big>", app.app_name);
+            status_label.label = Markup.printf_escaped("%s script has a few issues but it can start.", app.app_name);
             button = new Gtk.Button.with_label("Continue");
             break;
         case StartupCheck.Status.OK:
-            header = Drtgtk.Labels.header("Everything is OK");
-            label = Drtgtk.Labels.markup("<big>%s will load in a few seconds.</big>", app.app_name);
+            status_label.label = Markup.printf_escaped("%s will load in a few seconds.", app.app_name);
             break;
         }
 
-        header.margin = 5;
-        header.show();
-        grid.attach(header, 0, 0, 2, 1);
-        label.margin = 5;
-        label.halign = Gtk.Align.CENTER;
-        label.show();
-        grid.attach(label, 0, 1, 2, 1);
         if (button != null) {
             bottom_button = button;
             button.show();
             button.vexpand = false;
             button.hexpand = true;
             button.clicked.connect(on_button_clicked);
-            top_grid.attach(button, 0, 3, 1, 1);
+            top_grid.attach(button, 0, 5, 2, 1);
+            top_grid.remove(status_widget);
+            stack.visible_child = scroll;
+            status_widget = null;
         } else {
             ready_to_continue();
         }
     }
-
 }
 
 } // namespace Nuvola

@@ -232,7 +232,7 @@ public class StartupCheck : GLib.Object {
         if (n_engines_without_unsupported == 0) {
             Drt.String.append(ref result_message, "\n",
                 "This web app requires certain technologies to function properly but these requirements "
-                + "have not been satisfied.\n\nContact your distributor to get assistance.");
+                + "have not been satisfied.");
             check_app_requirements_finished(Status.ERROR, (owned) result_message, available_web_options);
             warning("Failed requirements: %s", checks[0].parser.failed_requirements ?? "");
             return;
