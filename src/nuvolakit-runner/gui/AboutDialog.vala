@@ -50,118 +50,29 @@ public void print_version_info(FileStream output, WebApp? web_app) {
 
 public class AboutDialog: Gtk.Dialog {
     public AboutDialog(Gtk.Window? parent, WebApp? web_app, WebOptions[]? web_options) {
-        GLib.Object(title: "About", transient_for: parent);
+        GLib.Object(title: "About", transient_for: parent, use_header_bar: 1);
         resizable = false;
         add_button("_Close", Gtk.ResponseType.CLOSE);
+
         Gtk.Container box = get_content_area();
-        Pango.AttrList attributes = null;
-        Gtk.Grid grid, title;
-        Gtk.Label label;
-        Gtk.Image? img = null;
-        var icon_size = 64;
-
-        if (web_app != null) {
-            grid = new Gtk.Grid();
-            grid.margin = 10;
-            grid.halign = Gtk.Align.FILL;
-            grid.hexpand = true;
-            title = new Gtk.Grid();
-            title.column_spacing = 10;
-            title.margin = 10;
-
-            Gdk.Pixbuf? pixbuf = web_app.get_icon_pixbuf(icon_size);
-            if (pixbuf != null) {
-                img = new Gtk.Image.from_pixbuf(pixbuf);
-                img.valign = img.halign = Gtk.Align.CENTER;
-                title.attach(img, 0, 0, 1, 2);
-            }
-
-            label = new Gtk.Label(web_app.name);
-            attributes = new Pango.AttrList() ;
-            attributes.insert(new Pango.AttrSize(18*1000));
-            attributes.insert(new Pango.AttrFontDesc(Pango.FontDescription.from_string("bold")));
-            label.attributes = (owned) attributes;
-            title.attach(label, 1, 0, 1, 1);
-            title.attach(new Gtk.Label("Web App Integration Script"), 1, 1, 1, 1);
-            grid.attach(title, 0, 0, 2, 1);
-            grid.attach(new Gtk.Label("Version"), 0, 2, 1, 1);
-            grid.attach(new Gtk.Label("%u.%u".printf(web_app.version_major, web_app.version_minor)), 1, 2, 1, 1);
-            grid.attach(new Gtk.Label("Maintainer"), 0, 3, 1, 1);
-            label = new Gtk.Label(Markup.printf_escaped("<a href=\"%s\">%s</a>", web_app.maintainer_link, web_app.maintainer_name));
-            label.use_markup = true;
-            grid.attach(label, 1, 3, 1, 1);
-            grid.show_all();
-            box.add(grid);
-
-            label = new Gtk.Label("Powered by");
-            label.margin = 10;
-            label.show();
-            box.add(label);
-        }
-
-        grid = new Gtk.Grid();
-        grid.margin = 10;
-        grid.halign = Gtk.Align.FILL;
-        grid.hexpand = true;
-        title = new Gtk.Grid();
-        title.column_spacing = 10;
-        title.margin = 10;
-
-        Gdk.Pixbuf? pixbuf = Drtgtk.Icons.load_theme_icon({Nuvola.get_app_icon()}, icon_size);
-        if (pixbuf != null) {
-            img = new Gtk.Image.from_pixbuf(pixbuf);
-            img.valign = img.halign = Gtk.Align.CENTER;
-            title.attach(img, 0, 0, 1, 3);
-        }
-
-        string name = Nuvola.get_app_name();
-        var subtitle = "Web App Integration Runtime";
-        #if GENUINE
-        grid.attach(new Gtk.Label("Genuine flatpak build"), 0, 2, 1, 1);
-        #else
-        title.attach(new Gtk.LinkButton.with_label("https://nuvola.tiliado.eu", "Get genuine Nuvola Apps Runtime"), 1, 2, 1, 1);
-        #endif
-        label = new Gtk.Label(name);
-        attributes = new Pango.AttrList() ;
-        attributes.insert(new Pango.AttrSize(18*1000));
-        attributes.insert(new Pango.AttrFontDesc(Pango.FontDescription.from_string("bold")));
-        label.attributes = (owned) attributes;
-        title.attach(label, 1, 0, 1, 1);
-        title.attach(new Gtk.Label(subtitle), 1, 1, 1, 1);
-        grid.attach(title, 0, 0, 2, 1);
-        grid.attach(new Gtk.Label("Version"), 0, 3, 1, 1);
-        label = new Gtk.Label(Nuvola.get_version());
-        label.selectable = true;
-        grid.attach(label, 1, 3, 1, 1);
-        grid.attach(new Gtk.Label("Revision"), 0, 4, 1, 1);
-        string revision = Nuvola.get_revision();
-        if (revision.length > 20) {
-            revision = revision[0:20];
-        }
-        label = new Gtk.Label(revision);
-        label.selectable = true;
-        grid.attach(label, 1, 4, 1, 1);
-        grid.attach(new Gtk.Label("Copyright"), 0, 5, 1, 1);
-        label = new Gtk.Label(Markup.printf_escaped("© 2011-2018 <a href=\"%s\">%s</a>", "https://github.com/fenryxo", "Jiří Janoušek"));
-        label.use_markup = true;
-        grid.attach(label, 1, 5, 1, 1);
-
-        var line = 6;
-        label = new Gtk.Label("Diorite: %s".printf(Drt.get_version()));
-        label.selectable = true;
-        label.margin_top = 10;
-        grid.attach(label, 0, line++, 2, 1);
-        foreach (WebOptions entry in web_options) {
-            label = new Gtk.Label("Web Engine: " + entry.get_name_version());
-            label.selectable = true;
-            grid.attach(label, 0, line++, 2, 1);
-        }
-        label = new Gtk.Label("Network Library: libsoup %u.%u.%u".printf(
-            Soup.get_major_version(), Soup.get_minor_version(), Soup.get_micro_version()));
-        label.selectable = true;
-        grid.attach(label, 0, line++, 2, 1);
-        grid.show_all();
-        box.add(grid);
+        var stack = new Gtk.Stack();
+        stack.margin = 10;
+        stack.hexpand = true;
+        stack.transition_type  = Gtk.StackTransitionType.SLIDE_LEFT_RIGHT;
+        Gtk.Widget screen = new AboutScreen(web_app);
+        screen.show();
+        stack.add_titled(screen, "About", "About");
+        screen = new LibrariesScreen(web_options);
+        screen.show();
+        stack.add_titled(screen, "Libraries", "Libraries");
+        var switcher = new Gtk.StackSwitcher();
+        switcher.stack = stack;
+        switcher.hexpand = true;
+        switcher.halign = Gtk.Align.CENTER;
+        switcher.show();
+        ((Gtk.HeaderBar) get_header_bar()).custom_title = switcher;
+        box.add(stack);
+        box.show_all();
     }
 }
 
