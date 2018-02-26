@@ -57,7 +57,9 @@ public abstract class WebEngine : GLib.Object, JSExecutor {
 
     public abstract void go_home();
 
-    public abstract void apply_network_proxy(Connection connection);
+    public virtual bool apply_network_proxy(Connection connection) {
+        return false;
+    }
 
     public abstract void go_back();
 

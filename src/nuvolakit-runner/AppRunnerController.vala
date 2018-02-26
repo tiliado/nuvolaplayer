@@ -567,7 +567,11 @@ public class AppRunnerController: Drtgtk.Application {
             if (network_settings.get_proxy_settings(out type, out host, out port)) {
                 debug("New network proxy settings: %s %s %d", type.to_string(), host, port);
                 connection.set_network_proxy(type, host, port);
-                web_engine.apply_network_proxy(connection);
+                if (!web_engine.apply_network_proxy(connection)) {
+                    show_info_bar(
+                        "proxy-warning", Gtk.MessageType.WARNING,
+                        "You need to restart the application to apply new network proxy settings.");
+                }
             }
         }
         // Don't destroy dialog before form data are retrieved

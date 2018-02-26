@@ -205,7 +205,7 @@ public class WebkitEngine : WebEngine {
         }
     }
 
-    public override void apply_network_proxy(Connection connection) {
+    public override bool apply_network_proxy(Connection connection) {
         WebKit.NetworkProxyMode proxy_mode;
         WebKit.NetworkProxySettings? proxy_settings = null;
         string? host;
@@ -227,6 +227,7 @@ public class WebkitEngine : WebEngine {
             break;
         }
         web_context.set_network_proxy_settings(proxy_mode, proxy_settings);
+        return true;
     }
 
     public override string? get_url() {

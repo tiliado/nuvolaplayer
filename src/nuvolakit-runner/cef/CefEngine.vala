@@ -70,9 +70,6 @@ public class CefEngine : WebEngine {
 
         runner_app.replace_mainloop(new CefMainLoopAdaptor());
 
-        if (connection != null) {
-            apply_network_proxy(connection);
-        }
         if (web_app.allow_insecure_content) {
             warning("Not implemented: web_app.allow_insecure_content");
         }
@@ -186,10 +183,6 @@ public class CefEngine : WebEngine {
                 "%s failed to retrieve a home page of  a web app. Initialization exited with error:\n\n%s".printf(
                     runner_app.app_name, e.message));
         }
-    }
-
-    public override void apply_network_proxy(Connection connection) {
-        warning("Not implemented: apply_network_proxy()");
     }
 
     public override string? get_url() {
