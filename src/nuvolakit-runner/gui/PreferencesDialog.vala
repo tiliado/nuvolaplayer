@@ -36,7 +36,7 @@ public class PreferencesDialog : Gtk.Dialog {
      *
      * @param app Application object
      */
-    public PreferencesDialog(Drtgtk.Application app, Gtk.Window? parent, Drtgtk.Form form) {
+    public PreferencesDialog(Drtgtk.Application app, Gtk.Window? parent, Gtk.Widget form) {
         this.app = app;
 
         window_position = Gtk.WindowPosition.CENTER;
@@ -64,7 +64,6 @@ public class PreferencesDialog : Gtk.Dialog {
         scroll.show_all();
         notebook.append_page(scroll, new Gtk.Label("General"));
         get_content_area().add(notebook);
-        form.check_toggles();
         notebook.show();
     }
 

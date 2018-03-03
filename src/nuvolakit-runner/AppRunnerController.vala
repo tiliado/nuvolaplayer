@@ -62,6 +62,7 @@ public class AppRunnerController: Drtgtk.Application {
     private HashTable<string, Gtk.InfoBar> info_bars;
     private MainLoopAdaptor? mainloop = null;
     private WelcomeDialog? welcome_dialog = null;
+    bool fallback_theme_set = false;
 
     public AppRunnerController(
         Drt.Storage storage, WebApp web_app, WebAppStorage app_storage) {
@@ -203,6 +204,24 @@ public class AppRunnerController: Drtgtk.Application {
         }
         #else
         available_web_options = {WebOptions.create(typeof(WebkitOptions), app_storage, connection)};
+        #endif
+
+        config.set_default_value(ConfigKey.GTK_THEME, Drtgtk.DesktopShell.get_gtk_theme());
+        if (config.has_key(ConfigKey.GTK_THEME)) {
+            string theme_name = config.get_string(ConfigKey.GTK_THEME);
+            if (theme_name != null && theme_name != "") {
+                Drtgtk.DesktopShell.set_gtk_theme(theme_name);
+            }
+        }
+
+        #if FLATPAK
+        string theme = Drtgtk.DesktopShell.get_gtk_theme();
+        if (!Drtgtk.DesktopShell.gtk_theme_exists(theme)) {
+            warning("GTK+ theme '%s' does not exist, using Greybird theme instead.", theme);
+            Drtgtk.DesktopShell.set_gtk_theme("Greybird");
+            config.set_string(ConfigKey.GTK_THEME, "Greybird");
+            fallback_theme_set = true;
+        }
         #endif
     }
 
@@ -348,6 +367,13 @@ public class AppRunnerController: Drtgtk.Application {
         fatal_error.connect(on_fatal_error);
         show_error.connect(on_show_error);
         show_warning.connect(on_show_warning);
+        info_bar_response.connect(on_info_bar_response);
+
+        if (fallback_theme_set) {
+            string text = "A fallback GTK+ theme is in use because '%s' theme for Flatpak has not been found.".printf(
+                config.get_string(ConfigKey.GTK_THEME));
+            show_info_bar("theme-warning", Gtk.MessageType.WARNING, text, {"Change theme", "Install themes"});
+        }
     }
 
     private void init_web_engine() {
@@ -511,20 +537,7 @@ public class AppRunnerController: Drtgtk.Application {
     private void do_preferences() {
         var values = new HashTable<string, Variant>(str_hash, str_equal);
         values.insert(ConfigKey.DARK_THEME, config.get_value(ConfigKey.DARK_THEME));
-        Drtgtk.Form form;
-        try {
-            form = Drtgtk.Form.create_from_spec(values, new Variant.tuple({
-                new Variant.tuple({new Variant.string("header"), new Variant.string("Basic settings")}),
-                new Variant.tuple({new Variant.string("bool"), new Variant.string(ConfigKey.DARK_THEME), new Variant.string("Prefer dark theme")})
-            }));
-        }
-        catch (Drtgtk.FormError e) {
-            show_error("Preferences form error",
-                "Preferences form hasn't been shown because of malformed form specification: %s"
-                .printf(e.message));
-            return;
-        }
-
+        var form = new Drtgtk.Form(values);
         try {
             Variant? extra_values = null;
             Variant? extra_entries = null;
@@ -538,7 +551,38 @@ public class AppRunnerController: Drtgtk.Application {
                 .printf(e.message));
         }
 
-        var dialog = new PreferencesDialog(this, main_window, form);
+        var basic_settings = new Gtk.Grid();
+        basic_settings.row_spacing = basic_settings.column_spacing = basic_settings.margin = 10;
+        basic_settings.vexpand = basic_settings.hexpand = true;
+        form.vexpand = form.hexpand = true;
+        form.halign = Gtk.Align.FILL;
+        var line = 0;
+        var label = new Gtk.Label("Basic Settings");
+        basic_settings.attach(label, 0, line, 2, 1);
+
+        var theme_selector = new Drtgtk.GtkThemeSelector(true, config.get_string(ConfigKey.GTK_THEME) ?? "");
+        theme_selector.hexpand = false;
+        theme_selector.halign = Gtk.Align.START;
+        label = new Gtk.Label("GTK+ theme");
+        label.halign = Gtk.Align.START;
+        label.hexpand = false;
+        basic_settings.attach(label, 0, ++line, 1, 1);
+        basic_settings.attach(theme_selector, 1, line, 1, 1);
+        #if FLATPAK
+        var link_button = new Gtk.LinkButton.with_label("https://github.com/tiliado/nuvolaruntime/wiki/GTK-Themes", "Install themes");
+        link_button.halign = Gtk.Align.START;
+        link_button.hexpand = true;
+        basic_settings.attach(link_button, 2, line, 1, 1);
+        #endif
+
+        var dark_theme = new Gtk.CheckButton.with_label("Prefer dark theme");
+        dark_theme.active = config.get_bool(ConfigKey.DARK_THEME);
+        basic_settings.attach(dark_theme, 0, ++line, 3, 1);
+        basic_settings.attach(form, 0, ++line, 3, 1);
+        var dialog = new PreferencesDialog(this, main_window, basic_settings);
+        form.check_toggles();
+
+
         dialog.add_tab("Keyboard shortcuts", new KeybindingsSettings(
             this, actions, config, global_keybindings != null ? global_keybindings.keybinder : null));
         var network_settings = new NetworkSettings(connection);
@@ -552,6 +596,9 @@ public class AppRunnerController: Drtgtk.Application {
 
         int response = dialog.run();
         if (response == Gtk.ResponseType.OK) {
+            config.set_bool(ConfigKey.DARK_THEME, dark_theme.active);
+            config.set_string(ConfigKey.GTK_THEME, theme_selector.active_id);
+
             HashTable<string, Variant> new_values = form.get_values();
             foreach (unowned string? key in new_values.get_keys()) {
                 Variant? new_value = new_values.get(key);
@@ -730,6 +777,21 @@ public class AppRunnerController: Drtgtk.Application {
         info_bar.response.connect(on_close_warning);
         info_bar.show_all();
         main_window.info_bars.add(info_bar);
+    }
+
+    private void on_info_bar_response(string id, int response) {
+        switch (id) {
+        case "theme-warning":
+            switch (response) {
+            case 0:
+                do_preferences();
+                break;
+            case 1:
+                show_uri("https://github.com/tiliado/nuvolaruntime/wiki/GTK-Themes");
+                break;
+            }
+            break;
+        }
     }
 
     public bool show_info_bar(string id, Gtk.MessageType type, string text, string[]? buttons = null) {
