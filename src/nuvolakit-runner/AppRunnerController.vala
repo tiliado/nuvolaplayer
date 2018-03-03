@@ -732,7 +732,7 @@ public class AppRunnerController: Drtgtk.Application {
         main_window.info_bars.add(info_bar);
     }
 
-    public bool show_info_bar(string id, Gtk.MessageType type, string text) {
+    public bool show_info_bar(string id, Gtk.MessageType type, string text, string[]? buttons = null) {
         if (id in info_bars) {
             return false;
         }
@@ -747,15 +747,22 @@ public class AppRunnerController: Drtgtk.Application {
         label.halign = Gtk.Align.START;
         label.set_line_wrap(true);
         (info_bar.get_content_area() as Gtk.Container).add(label);
+        if (buttons != null) {
+            for (var i = 0; i < buttons.length; i++) {
+                info_bar.add_button(buttons[i], i);
+            }
+        }
         info_bar.show_all();
         main_window.info_bars.add(info_bar);
         ulong handler_id = 0;
         handler_id = info_bar.response.connect((emitter, response_id) => {
             info_bar_response(id, response_id);
-            emitter.disconnect(handler_id);
-            (emitter.get_parent() as Gtk.Container).remove(emitter);
-            info_bars.remove(id);
-            emitter.destroy();
+            if (response_id == Gtk.ResponseType.CLOSE) {
+                emitter.disconnect(handler_id);
+                (emitter.get_parent() as Gtk.Container).remove(emitter);
+                info_bars.remove(id);
+                emitter.destroy();
+            }
         });
         return true;
     }
