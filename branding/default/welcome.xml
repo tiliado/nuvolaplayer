@@ -1,9 +1,9 @@
 <h1>@NAME@ @VERSION@</h1>
 <p>
-  You have installed <b>@NAME@ @VERSION@</b>. This software is based on the open source code
-  from <a href="https://tiliado.eu/nuvolaplayer/">Nuvola Apps™ project</a>, but may lack some of 
-  <a href="https://tiliado.github.io/nuvolaplayer/documentation/4/explore.html">the features available in the
-  genuine flatpak builds of Nuvola Apps</a>.
+  You have installed <b>@NAME@ @VERSION@</b>. Although this software is based on the open source code
+  from <a href="https://tiliado.eu/nuvolaplayer/">Nuvola Apps project</a>, this third-party build is not affiliated
+  with, endorsed by nor supported by the Nuvola Apps project, which provides
+  <a href="https://nuvola.tiliado.eu">the genuine Flatpak builds of Nuvola Apps</a>.
 </p>
 
 <h2>About Nuvola</h2>
@@ -13,6 +13,13 @@
   like a native application as much as possible.
   Nuvola mostly specializes on music streaming web apps (e.g. Google Play Music, Spotify, Amazon Music, Deezer,
   and more), but progress is being made to support generic web apps (e.g. Google Calendar, Google Keep, etc.).
+</p>
+
+<p>
+  The <a href="https://nuvola.tiliado.eu">genuine Flatpak builds of Nuvola Apps</a> provide all features listed
+  in <a href="https://tiliado.github.io/nuvolaplayer/documentation/4/explore.html">Nuvola Apps documentation</a>.
+  This third-party build may lack some features. In that case, please contact your distributor to find out
+  the reason for that.
 </p>
 
 <h2>Installation of Scripts</h2>
