@@ -40,6 +40,7 @@ public class CefRendererExtension : GLib.Object {
     private HashTable<string, Variant>? js_properties;
     private Drt.XdgStorage storage;
     private CefJSApi js_api;
+    private Drt.Event js_api_ready = new Drt.Event();
 
     public CefRendererExtension(CefGtk.RendererContext ctx, int browser_id, Drt.RpcChannel channel,
     HashTable<string, Variant> worker_data) {
@@ -51,6 +52,7 @@ public class CefRendererExtension : GLib.Object {
         this.storage = new Drt.XdgStorage.for_project(Nuvola.get_app_id());
         ctx.js_context_created.connect(on_js_context_created);
         ctx.js_context_released.connect(on_js_context_released);
+        ctx.event_loop.add_idle(() => {init(); return false;});
     }
 
     private void init() {
@@ -116,6 +118,7 @@ public class CefRendererExtension : GLib.Object {
             webkit_version, libsoup_version, true);
         js_api.call_ipc_method_void.connect(on_call_ipc_method_void);
         js_api.call_ipc_method_async.connect(on_call_ipc_method_async);
+        js_api_ready.set();
 
         channel.call.begin("/nuvola/core/web-worker-initialized", null, (o, res) => {
             try {
@@ -151,9 +154,10 @@ public class CefRendererExtension : GLib.Object {
 
     private void init_frame(Cef.Browser browser, Cef.Frame frame, Cef.V8context context) {
         Assert.on_js_thread();
-        if (WEB_ENGINE_LOADING_URI == frame.get_url()) {
-            ctx.event_loop.add_idle(() => {init(); return false;});
-        } else {
+        /* Don't depend on WEB_ENGINE_LOADING_URI page because it is never loaded in renderer processes
+         * after a cross-domain transition! It leads to bugs such as tiliado/nuvola-app-spotify#24 */
+        if (WEB_ENGINE_LOADING_URI != frame.get_url()) {
+            js_api_ready.wait();
             context.enter();
             try {
                 js_api.inject(context, js_properties);
