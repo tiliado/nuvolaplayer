@@ -7,6 +7,47 @@ Nuvola Apps Changelog
     [Nuvola Devel mailing list](https://groups.google.com/d/forum/nuvola-player-devel)
     to receive more technical announcements and important information about future development.
 
+Release 4.10.0 - March 4th, 2018
+--------------------------------
+
+New features:
+
+* Nuvola introduces a new experimental backend based on Chromium Embedded Framework, which facilitates a switch to audio
+  playback without Flash plugin. At present, only Spotify, Deezer, YouTube, Mixcloud, and BBC iPlayer use the new
+  engine, mostly because these scripts simply does not work with the old WebKitGTK backend. However, the goal of the
+  project is to eventually port all scripts from Flash plugin to HTML5-Audio-based playback.
+
+Enhancements:
+
+* **Amazon Cloud Player 5.6** by Andrew Stubbs: Updated album name extraction, added thumbs up/down actions and fixed
+  compatibility with CEF backend.
+* **BBC iPlayer 1.4** by Andrew Stubbs: Update live TV & radio integration; fixed compatibility with CEF backend.
+* **Deezer 2.8** by Jiří Janoušek: Switched to HTML5 Audio playback instead of the Flash plugin; fixed
+  "Add to Favorite tracks" action.
+* **Micxloud 4.1** adopted by Jiří Janoušek: Ported to support the new interface and added CEF backend requirement.
+* **Spotify 3.0** adopted by Jiří Janoušek: Updated to support new Spotify web player. Requires CEF backend.
+* **YouTube 2.0** adopted by Jiří Janoušek: Fixed metadata parsing and ported to use HTML5 Audio/Video.
+  Requires CEF backend.
+
+Under the hood:
+
+* `Nuvola.parseTimeUsec` now supports negative time specs.
+* Increased requirements: Vala >= 0.38.4.
+* New mandatory dependency: libarchive >= 3.2
+* New optional dependencies: ValaCEF (`--no-cef`), Vala linter (`--no-vala-lint`).
+* Source code was refactored to use a united coding style which is checked with Vala linter.
+* Some configure options were renamed (e.g. `--noxxx` → `--no-xxx`)
+* GIR generation is now optional, you can pass `--no-gir` to disable it.
+* Welcome screen is now shown from App Runner process instead of the Nuvola Service process, which makes start-up
+  faster.
+* App Runner is now installed as `bin/nuvolaruntime` and can be invoked independently on Nuvola Service. However, some
+  features are not available if the service cannot be launched via DBus activation.
+* Nuvola Service lost most of command line parameters and cannot be used to launch scripts with `nuvola -a ID`. Use
+ `nuvolaruntime` instead.
+* The default unique id is now `eu.tiliado.WebRuntime`, which is used consistently.
+* Test scripts from `web_apps` directory are no longer installed. You may install them manually if you deem it
+  necessary.
+
 Release 4.9.0 - December 17th, 2017
 -------------------------------
 
@@ -83,7 +124,7 @@ Under the Hood:
     AppRunner processes with asynchronous variants. This should improve the performance of the WebKit WebProcess,
     reduce lags and prevent occasional deadlocks. However, scripts must use the newly-introduced async JavaScript API
     to reach the full potential. Google Play Music is the first one.
-  
+
 Release 4.7.0 - September 1st, 2017
 --------------------------------
 
@@ -131,12 +172,12 @@ Bug fixes:
     X Server.  Issue: tiliado/nuvolaruntime#359
   * Fixed typo in Nuvola.parseTimeUsec. Issue: tiliado/nuvolaruntime#357
   * int64 is used for track position to avoid integer overflow. Issue: tiliado/nuvolaruntime#358
-    
+
 News for Script Maintainers:
 
   * Developer sidebar can now change track rating.
   * Media player API documentation was updated with track rating.
-  
+
 Under the Hood:
 
   * New dependency: [unit.js](https://github.com/unitjs/unit.js/releases/tag/v2.0.0) 2.0.0
@@ -145,8 +186,8 @@ Under the Hood:
   * Added support for org.gnome.SettingsDaemon.MediaKeys D-Bus name.
     [Upstream ticket](https://bugzilla.gnome.org/show_bug.cgi?id=781326).
   * The content of format support dialog was moved to Preferences dialog and various toggles were removed.
-  * The content of bindings, models and interfaces directories was merged into components directory. 
-    
+  * The content of bindings, models and interfaces directories was merged into components directory.
+
 Release 4.5.0 - 24th June, 2017
 -------------------------------
 
@@ -157,7 +198,7 @@ New Features:
     user to change that remotely, e.g. from Media Player GNOME Shell extension. At the present, only Deezer
     and Google Play Music scripts use these features but others will follow.
     Issue: tiliado/nuvolaruntime#22 Issue: tiliado/nuvolaruntime#155
-  * If Nuvola Apps Runtime detect a Nvidia graphics card, it checks whether the flatpak extension with 
+  * If Nuvola Apps Runtime detect a Nvidia graphics card, it checks whether the flatpak extension with
     corresponding graphics driver is installed. If it isn't, e.g. because of a bug in GNOME Software,
     an error message is shown to provide the user with installation instructions. Issue: tiliado/nuvolaruntime#342
   * After a lot of effort, a workaround for the instability of Flash plugin was found out and is used until
@@ -243,7 +284,7 @@ Under the Hood:
   * Nuvola no longer supports web app scripts without a desktop file.
   * Test suite was reintroduced (build/run-nuvolaruntime-tests). Issue: tiliado/nuvolaplayer#335
   * A lot of refactoring and removal of obsolete code and other improvements.
-    
+
 Milestone 3.1.3 - April 30, 2017
 --------------------------------
 
@@ -277,7 +318,7 @@ Under the Hood:
   * Modernisation has begun. Dependencies were raised and legacy code is being removed.
   * All Python scripts require Python >= 3.4.
   * Code has been ported to Valac 0.36.
-  
+
 Milestone 3.1.2 - March 26, 2017
 --------------------------------
 
@@ -354,7 +395,7 @@ Bug Fixes:
 
   * Remove config option `--with-appindicator` as the AppIndicator integration is currently unmaintained.
     Issue: tiliado/nuvolaplayer#201, tiliado/nuvolaplayer#45
-  * Add missing `-a/--app-id` command-line argument to the `--help` screen. Issue: tiliado/nuvolaplayer#147 
+  * Add missing `-a/--app-id` command-line argument to the `--help` screen. Issue: tiliado/nuvolaplayer#147
   * MPRIS implementation of CanPlay and CanPause flags has been fixed. Issue: tiliado/nuvolaplayer#224
   * Warnings when Notifications is being disabled has been removed. Issue: tiliado/nuvolaplayer#227
   * Don't use notifications API if disabled as it produces critical warnings. Issue: tiliado/nuvolaplayer#227
@@ -375,13 +416,13 @@ News for Script Maintainers:
   * It is possible to enable access to insecure content. This happens when a web page loaded over HTTPS protocol loads
     any content over HTTP protocol.
   * Developer documentation and guidelines have been updated.
-  
+
 Changes in Dependencies:
 
   * Increased: WebKitGTK >= 2.6.2, Valac >= 0.26.1, GLib >= 2.42.1 and GTK+ >= 3.14.5.
   * New: libuuid and libnm-(util/glib)
-  
-  
+
+
 Release 3.0.0 - December 30, 2015
 ---------------------------------
 

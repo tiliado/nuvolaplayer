@@ -31,13 +31,13 @@ out = 'build'
 APPNAME = "nuvolaruntime"
 NUVOLA_BIN = "nuvola"
 NUVOLACTL_BIN = "nuvolactl"
-VERSION = "4.9.0"
+VERSION = "4.10.0"
 GENERIC_NAME = "Web Apps"
 BLURB = "Tight integration of web apps with your Linux desktop"
 DEFAULT_HELP_URL = "https://github.com/tiliado/nuvolaruntime/wiki/Third-Party-Builds"
 DEFAULT_WEB_APP_REQUIREMENTS_HELP_URL = DEFAULT_HELP_URL
 
-MIN_DIORITE = "4.9.0"
+MIN_DIORITE = "4.10.0"
 MIN_VALA = "0.38.4"
 MIN_GLIB = "2.52.0"
 MIN_GTK = "3.22.0"
