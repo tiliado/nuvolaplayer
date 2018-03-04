@@ -1,121 +1,121 @@
 <html>
-	<head>
-		<meta charset="utf-8" />
-		<title>Test</title>
-		<style type="text/css">
-		td, th {border: 1px solid black; padding: 5px;}
-		tbody tr {cursor: pointer;}
-		.playing td {font-weight: bold; background-color: yellow;}
-		#nowplaying {display:none;}
-		#progressbar {border: 1px solid green; background-color: #666; width: 500px; display: none; position: relative;}
-		#progresstext {color: white; font-weight: bold; text-align: center; display: block; z-index: 10; position: relative; cursor: pointer;}
-		#progressmark {display: block; background-color: green; width: 80%; height: 100%; position: absolute; z-index: 5;}
-		</style>
-		<script src="unit.js" type="text/javascript"></script>
-	</head>
-	<body>
-		<h1>Test</h1>
-		<div style="float: right; width: 200px;">
-			<form method="post">
-				Username: <input name="username" /><br />
-				Password: <input type="password" name="password" /><br />
-				<input type="submit" value="Log in" />
-			</form>
-		</div>
-		<script type="text/javascript">true;</script>
-		<p>[Volume <span id="volume">100</span>%]
-		<strong id="status"></strong>
-		<span id="timer"></span>
-		<span id="nowplaying">
-			<i id="track"></i> by <i id="artist"></i> from <i id="album"></i> rated <i id="rating"></i>
-		</span>
-		</p>
-		<p id="progressbar">
-			<span id="progressmark"></span>
-			<span id="progresstext"><span id="timeelapsed"></span> / <span id="timetotal"></span></span>
-		</p>
-		<p>
-		<button id="pp" onclick="player.togglePlay();">Play</button>
-		<button id="prev" onclick="player.prev();">Prev</button>
-		<button id="next" onclick="player.next();">Next</button>
-		</p>
-		<table>
-			<thead>
-				<tr><th>Id</th><th>Song</th><th>Artist</th><th>Album</th><th>Rating</th></tr>
-			</thead>
-			<tbody id="playlist"></tbody>
-		</table>
-		
-		<p>
-			Google.com:
-		</p>
-		<ul>
-			<li><a href="http://google.com" >Current window</a></li>
-			<li><a href="http://google.com" target="_blank">New window</a></li>
-			<li><a href="#" onclick="window.open('http://google.com', '_blank'); return false;">Pop-up window</a></li>
-			<li><a href="#" onclick="window.open('http://google.com', '_blank', 'fullscreen=yes'); return false;">Pop-up window full-screen</a></li>
-			<li><a href="#" onclick="window.open('http://google.com', '_blank', 'width=100,height=100'); return false;">Pop-up window 100×100</a></li>
-			<li><a href="#" onclick="window.open('http://google.com', '_blank', 'left=0,top=0,width=100,height=100'); return false;">Pop-up window 0,0+100×100</a></li>
-			<li><a href="#" onclick="window.open('http://google.com', '_blank', 'left=200,top=100,width=400,height=200'); return false;">Pop-up window 200,100+400×200</a></li>
-		</ul>
-		
-		<p>Misc</p>
-		<ul>
-			<li>
-				<a href="javascript:_config_set_object();">Try Nuvola.config.set(object)</a>
-				(should produce error in console)
-			</li>
-		</ul>
-		
-		<p>
-			<a href="http://www.adobe.com/software/flash/about/">Adobe Flash</a>
-			<a href="http://yt-dash-mse-test.commondatastorage.googleapis.com/unit-tests/2016.html">MSE Tests 2017</a>
-			<a href="http://yt-dash-mse-test.commondatastorage.googleapis.com/unit-tests/2017.html">MSE Tests 2017</a>
-			<a href="https://www.youtube.com/html5">YouTube HTML5</a>
-			<a href="http://www.bbc.co.uk/html5">BBC HTML5</a>
-			<a href="https://nuvola.tiliado.eu">Flatpaks</a>
-		</p>
-		<script src="./webcomponents.js"></script>
-		<div style="background-image: url(&quot;blob:http://plex.skyghis.me:32400/b6c7b622-5810-4431-a1bd-a9f87b2eb69e&quot;);" class="media-poster">
-		[Check ther is no blob: error in console]
-		</div>
-		<div>
-			<button onclick="alert('Alert form JavaScript!');">Alert</button>
-			<button onclick="if (!document.webkitIsFullScreen) document.documentElement.webkitRequestFullscreen(); else document.webkitCancelFullScreen();">Fullscreen</button>
-		</div>
+    <head>
+        <meta charset="utf-8" />
+        <title>Test</title>
+        <style type="text/css">
+        td, th {border: 1px solid black; padding: 5px;}
+        tbody tr {cursor: pointer;}
+        .playing td {font-weight: bold; background-color: yellow;}
+        #nowplaying {display:none;}
+        #progressbar {border: 1px solid green; background-color: #666; width: 500px; display: none; position: relative;}
+        #progresstext {color: white; font-weight: bold; text-align: center; display: block; z-index: 10; position: relative; cursor: pointer;}
+        #progressmark {display: block; background-color: green; width: 80%; height: 100%; position: absolute; z-index: 5;}
+        </style>
+        <script src="unit.js" type="text/javascript"></script>
+    </head>
+    <body>
+        <h1>Test</h1>
+        <div style="float: right; width: 200px;">
+            <form method="post">
+                Username: <input name="username" /><br />
+                Password: <input type="password" name="password" /><br />
+                <input type="submit" value="Log in" />
+            </form>
+        </div>
+        <script type="text/javascript">true;</script>
+        <p>[Volume <span id="volume">100</span>%]
+        <strong id="status"></strong>
+        <span id="timer"></span>
+        <span id="nowplaying">
+            <i id="track"></i> by <i id="artist"></i> from <i id="album"></i> rated <i id="rating"></i>
+        </span>
+        </p>
+        <p id="progressbar">
+            <span id="progressmark"></span>
+            <span id="progresstext"><span id="timeelapsed"></span> / <span id="timetotal"></span></span>
+        </p>
+        <p>
+        <button id="pp" onclick="player.togglePlay();">Play</button>
+        <button id="prev" onclick="player.prev();">Prev</button>
+        <button id="next" onclick="player.next();">Next</button>
+        </p>
+        <table>
+            <thead>
+                <tr><th>Id</th><th>Song</th><th>Artist</th><th>Album</th><th>Rating</th></tr>
+            </thead>
+            <tbody id="playlist"></tbody>
+        </table>
+
+        <p>
+            Google.com:
+        </p>
+        <ul>
+            <li><a href="http://google.com" >Current window</a></li>
+            <li><a href="http://google.com" target="_blank">New window</a></li>
+            <li><a href="#" onclick="window.open('http://google.com', '_blank'); return false;">Pop-up window</a></li>
+            <li><a href="#" onclick="window.open('http://google.com', '_blank', 'fullscreen=yes'); return false;">Pop-up window full-screen</a></li>
+            <li><a href="#" onclick="window.open('http://google.com', '_blank', 'width=100,height=100'); return false;">Pop-up window 100×100</a></li>
+            <li><a href="#" onclick="window.open('http://google.com', '_blank', 'left=0,top=0,width=100,height=100'); return false;">Pop-up window 0,0+100×100</a></li>
+            <li><a href="#" onclick="window.open('http://google.com', '_blank', 'left=200,top=100,width=400,height=200'); return false;">Pop-up window 200,100+400×200</a></li>
+        </ul>
+
+        <p>Misc</p>
+        <ul>
+            <li>
+                <a href="javascript:_config_set_object();">Try Nuvola.config.set(object)</a>
+                (should produce error in console)
+            </li>
+        </ul>
+
+        <p>
+            <a href="http://www.adobe.com/software/flash/about/">Adobe Flash</a>
+            <a href="http://yt-dash-mse-test.commondatastorage.googleapis.com/unit-tests/2016.html">MSE Tests 2017</a>
+            <a href="http://yt-dash-mse-test.commondatastorage.googleapis.com/unit-tests/2017.html">MSE Tests 2017</a>
+            <a href="https://www.youtube.com/html5">YouTube HTML5</a>
+            <a href="http://www.bbc.co.uk/html5">BBC HTML5</a>
+            <a href="https://nuvola.tiliado.eu">Flatpaks</a>
+        </p>
+        <script src="./webcomponents.js"></script>
+        <div style="background-image: url(&quot;blob:http://plex.skyghis.me:32400/b6c7b622-5810-4431-a1bd-a9f87b2eb69e&quot;);" class="media-poster">
+        [Check ther is no blob: error in console]
+        </div>
+        <div>
+            <button onclick="alert('Alert form JavaScript!');">Alert</button>
+            <button onclick="if (!document.webkitIsFullScreen) document.documentElement.webkitRequestFullscreen(); else document.webkitCancelFullScreen();">Fullscreen</button>
+        </div>
 
 <script type="text/javascript">
 var Nuvola = {};
 /**
  * Creates HTML text node
- * @param text	text of the node
- * @return		new text node
+ * @param text  text of the node
+ * @return      new text node
  */
 Nuvola.makeText = function(text)
 {
-	return document.createTextNode(text);
+    return document.createTextNode(text);
 }
 
 /**
  * Creates HTML element
- * @param name			element name
- * @param attributes	element attributes (optional)
- * @param text			text of the element (optional)
- * @return				new HTML element
+ * @param name          element name
+ * @param attributes    element attributes (optional)
+ * @param text          text of the element (optional)
+ * @return              new HTML element
  */
 Nuvola.makeElement = function(name, attributes, text)
 {
-	var elm = document.createElement(name);
-	attributes = attributes || {};
-	for (var key in attributes)
-	{
-		elm.setAttribute(key, attributes[key]);
-	}
-	if (text !== undefined && text !== null)
-	{
-		elm.appendChild(Nuvola.makeText(text));
-	}
-	return elm;
+    var elm = document.createElement(name);
+    attributes = attributes || {};
+    for (var key in attributes)
+    {
+        elm.setAttribute(key, attributes[key]);
+    }
+    if (text !== undefined && text !== null)
+    {
+        elm.appendChild(Nuvola.makeText(text));
+    }
+    return elm;
 }
 
 
@@ -123,287 +123,287 @@ var RATING_TEXT = ["bad", "-", "good"];
 
 var Player = function()
 {
-	this.playlist = document.getElementById("playlist");
-	var self = this;
-	
-	for (var i = 0; i < Player.songs.length; i++)
-	{
-		var song = Player.songs[i];
-		var tr = Nuvola.makeElement("tr");
-		tr.appendChild(Nuvola.makeElement("td", null, i));
-		tr.appendChild(Nuvola.makeElement("td", null, song.name));
-		tr.appendChild(Nuvola.makeElement("td", null, song.artist));
-		tr.appendChild(Nuvola.makeElement("td", null, song.album));
-		tr.appendChild(Nuvola.makeElement("td", null, RATING_TEXT[song.rating + 1]));
-		tr.setAttribute("data-i", i);
-		tr.onclick = function()
-		{
-			self.setPos(this.getAttribute("data-i") * 1);
-			self.play();
-		};
-		this.playlist.appendChild(tr);
-	}
-	
-	this.elm = {
-		pp: document.getElementById("pp"),
-		prev: document.getElementById("prev"),
-		next: document.getElementById("next"),
-		status: document.getElementById("status"),
-		timer: document.getElementById("timer"),
-		nowplaying: document.getElementById("nowplaying"),
-		track: document.getElementById("track"),
-		artist: document.getElementById("artist"),
-		album: document.getElementById("album"),
-		rating: document.getElementById("rating"),
-		progressbar: document.getElementById("progressbar"),
-		progressmark: document.getElementById("progressmark"),
-		progresstext: document.getElementById("progresstext"),
-		timeelapsed: document.getElementById("timeelapsed"),
-		timetotal: document.getElementById("timetotal"),
-		volume: document.getElementById("volume"),
-	}
-	
-	this.elm.progresstext.onclick = function(event)
-	{
-		self._onProgressBarClicked(this, event);
-	};
-	
-	this.elm.prev.disabled = true;
-	this.elm.next.disabled = true;
-	this.setStatus(0);
-	this.pos = -1;
-	this.timer = -1;
-	this.timerId = 0;
+    this.playlist = document.getElementById("playlist");
+    var self = this;
+
+    for (var i = 0; i < Player.songs.length; i++)
+    {
+        var song = Player.songs[i];
+        var tr = Nuvola.makeElement("tr");
+        tr.appendChild(Nuvola.makeElement("td", null, i));
+        tr.appendChild(Nuvola.makeElement("td", null, song.name));
+        tr.appendChild(Nuvola.makeElement("td", null, song.artist));
+        tr.appendChild(Nuvola.makeElement("td", null, song.album));
+        tr.appendChild(Nuvola.makeElement("td", null, RATING_TEXT[song.rating + 1]));
+        tr.setAttribute("data-i", i);
+        tr.onclick = function()
+        {
+            self.setPos(this.getAttribute("data-i") * 1);
+            self.play();
+        };
+        this.playlist.appendChild(tr);
+    }
+
+    this.elm = {
+        pp: document.getElementById("pp"),
+        prev: document.getElementById("prev"),
+        next: document.getElementById("next"),
+        status: document.getElementById("status"),
+        timer: document.getElementById("timer"),
+        nowplaying: document.getElementById("nowplaying"),
+        track: document.getElementById("track"),
+        artist: document.getElementById("artist"),
+        album: document.getElementById("album"),
+        rating: document.getElementById("rating"),
+        progressbar: document.getElementById("progressbar"),
+        progressmark: document.getElementById("progressmark"),
+        progresstext: document.getElementById("progresstext"),
+        timeelapsed: document.getElementById("timeelapsed"),
+        timetotal: document.getElementById("timetotal"),
+        volume: document.getElementById("volume"),
+    }
+
+    this.elm.progresstext.onclick = function(event)
+    {
+        self._onProgressBarClicked(this, event);
+    };
+
+    this.elm.prev.disabled = true;
+    this.elm.next.disabled = true;
+    this.setStatus(0);
+    this.pos = -1;
+    this.timer = -1;
+    this.timerId = 0;
 }
 
-Player.songs = 
+Player.songs =
 [
-	{
-		name: "Surrender",
-		artist: "Billy Talent",
-		album: "Billy Talent II",
-		rating: 1,
-		time: 25
-	},
-	{
-		name: "Holiday",
-		artist: "Green Day",
-		album: "American Idiot",
-		rating: -1,
-		time: 8
-	},
-	{
-		name: "Fallen Leaves",
-		artist: "Billy Talent",
-		album: "Billy Talent II",
-		rating: 0,
-		time: 10
-	},
-	{
-		name: "Boten Anna",
-		artist: "Basshunter",
-		album: "LOL",
-		rating: 1,
-		time: 5
-	},
-	{
-		name: "Set Your Monster Free",
-		artist: "Quiet Company",
-		album: "We Are All Where We Belong",
-		rating: 1,
-		time: 5
-	},
-	{
-		name: "Come Home",
-		artist: "Morandi",
-		album: "Mindfields",
-		rating: -1,
-		time: 5
-	},
-	{
-		name: "Dancer in the Dark",
-		artist: "The Rasmus",
-		album: "Hide From the Sun",
-		rating: -1,
-		time: 5
-	},
-	{
-		name: "Have You Ever",
-		artist: "The Offspring",
-		album: "Americana",
-		rating: 0,
-		time: 5
-	},
-	{
-		name: "Pushing Me Away",
-		artist: "Linkin Park",
-		album: "Hybrid Theory",
-		rating: 0,
-		time: 5
-	}
+    {
+        name: "Surrender",
+        artist: "Billy Talent",
+        album: "Billy Talent II",
+        rating: 1,
+        time: 25
+    },
+    {
+        name: "Holiday",
+        artist: "Green Day",
+        album: "American Idiot",
+        rating: -1,
+        time: 8
+    },
+    {
+        name: "Fallen Leaves",
+        artist: "Billy Talent",
+        album: "Billy Talent II",
+        rating: 0,
+        time: 10
+    },
+    {
+        name: "Boten Anna",
+        artist: "Basshunter",
+        album: "LOL",
+        rating: 1,
+        time: 5
+    },
+    {
+        name: "Set Your Monster Free",
+        artist: "Quiet Company",
+        album: "We Are All Where We Belong",
+        rating: 1,
+        time: 5
+    },
+    {
+        name: "Come Home",
+        artist: "Morandi",
+        album: "Mindfields",
+        rating: -1,
+        time: 5
+    },
+    {
+        name: "Dancer in the Dark",
+        artist: "The Rasmus",
+        album: "Hide From the Sun",
+        rating: -1,
+        time: 5
+    },
+    {
+        name: "Have You Ever",
+        artist: "The Offspring",
+        album: "Americana",
+        rating: 0,
+        time: 5
+    },
+    {
+        name: "Pushing Me Away",
+        artist: "Linkin Park",
+        album: "Hybrid Theory",
+        rating: 0,
+        time: 5
+    }
 ];
 
 Player.statuses = ["Not playing", "Playing", "Paused"];
 Player.STOPPED = 0;
 Player.PLAYING = 1;
 Player.PAUSED = 2;
-	
+
 Player.prototype.setStatus = function(status)
 {
-	this.status = status;
-	this.elm.status.innerText = Player.statuses[status];
-	this.elm.pp.innerText = status == 1 ? "Pause" : "Play";
+    this.status = status;
+    this.elm.status.innerText = Player.statuses[status];
+    this.elm.pp.innerText = status == 1 ? "Pause" : "Play";
 }
 
 Player.prototype.setPos = function(pos)
 {
-	this.pos = pos;
-	var rows = document.querySelectorAll("#playlist tr");
-	for (var i = 0; i < rows.length; i++)
-		rows[i].className = i == pos ? "playing" : "";
-	
-	this.elm.prev.disabled = pos <= 0;
-	this.elm.next.disabled = pos < 0 || pos == Player.songs.length - 1;
-	this.timer = 5;
-	
-	if (pos >= 0)
-	{
-		var track = Player.songs[pos];
-		this.timer = track.time;
-		this.elm.timer.innerText = this.timer;
-		this.elm.track.innerText = track.name;
-		this.elm.artist.innerText = track.artist;
-		this.elm.album.innerText = track.album;
-		this.elm.rating.innerText = RATING_TEXT[track.rating + 1];
-		this.elm.nowplaying.style.display = "inline";
-		this.elm.progressbar.style.display = "block";
-		var totaltime = track.time < 10 ? "0" + track.time : track.time;
-		this.elm.timetotal.innerText = "00:" + totaltime;
-		this.elm.timeelapsed.innerText = "00:00";
-		this.elm.progressmark.style.width = 0 + "%";
-	}
-	else
-	{
-		this.elm.timer.innerText = "";
-		this.elm.track.innerText = "";
-		this.elm.artist.innerText = "";
-		this.elm.album.innerText = "";
-		this.elm.nowplaying.style.display = "none";
-		this.elm.progressbar.style.display = "none";
-	}
+    this.pos = pos;
+    var rows = document.querySelectorAll("#playlist tr");
+    for (var i = 0; i < rows.length; i++)
+        rows[i].className = i == pos ? "playing" : "";
+
+    this.elm.prev.disabled = pos <= 0;
+    this.elm.next.disabled = pos < 0 || pos == Player.songs.length - 1;
+    this.timer = 5;
+
+    if (pos >= 0)
+    {
+        var track = Player.songs[pos];
+        this.timer = track.time;
+        this.elm.timer.innerText = this.timer;
+        this.elm.track.innerText = track.name;
+        this.elm.artist.innerText = track.artist;
+        this.elm.album.innerText = track.album;
+        this.elm.rating.innerText = RATING_TEXT[track.rating + 1];
+        this.elm.nowplaying.style.display = "inline";
+        this.elm.progressbar.style.display = "block";
+        var totaltime = track.time < 10 ? "0" + track.time : track.time;
+        this.elm.timetotal.innerText = "00:" + totaltime;
+        this.elm.timeelapsed.innerText = "00:00";
+        this.elm.progressmark.style.width = 0 + "%";
+    }
+    else
+    {
+        this.elm.timer.innerText = "";
+        this.elm.track.innerText = "";
+        this.elm.artist.innerText = "";
+        this.elm.album.innerText = "";
+        this.elm.nowplaying.style.display = "none";
+        this.elm.progressbar.style.display = "none";
+    }
 }
 
 Player.prototype.play = function()
 {
-	if (this.status == Player.PAUSED)
-	{
-		this.setStatus(Player.PLAYING);
-		this.timerId = setTimeout(this.tick.bind(this), 1000);
-	}
-	else if (this.status == Player.STOPPED)
-	{
-		if (this.pos < 0)
-			this.setPos(0);
-		this.setStatus(Player.PLAYING);
-		this.startTimer();
-	}
+    if (this.status == Player.PAUSED)
+    {
+        this.setStatus(Player.PLAYING);
+        this.timerId = setTimeout(this.tick.bind(this), 1000);
+    }
+    else if (this.status == Player.STOPPED)
+    {
+        if (this.pos < 0)
+            this.setPos(0);
+        this.setStatus(Player.PLAYING);
+        this.startTimer();
+    }
 }
 
 Player.prototype.pause = function()
 {
-	if (this.status == Player.PLAYING)
-	{
-		this.setStatus(Player.PAUSED);
-		clearTimeout(this.timerId);
-		this.timerId = 0;
-	}
+    if (this.status == Player.PLAYING)
+    {
+        this.setStatus(Player.PAUSED);
+        clearTimeout(this.timerId);
+        this.timerId = 0;
+    }
 }
 
 Player.prototype.togglePlay = function()
 {
-	if (this.status == Player.PLAYING)
-		this.pause();
-	else
-		this.play();
+    if (this.status == Player.PLAYING)
+        this.pause();
+    else
+        this.play();
 }
 
 Player.prototype.next = function()
 {
-	if (this.pos < Player.songs.length - 1)
-	{
-		this.setPos(this.pos + 1);
-		return true;
-	}
-	return false;
+    if (this.pos < Player.songs.length - 1)
+    {
+        this.setPos(this.pos + 1);
+        return true;
+    }
+    return false;
 }
 
 Player.prototype.prev = function()
 {
-	if (this.pos > 0)
-	{
-		this.setPos(this.pos - 1);
-		return true;
-	}
-	return false;
+    if (this.pos > 0)
+    {
+        this.setPos(this.pos - 1);
+        return true;
+    }
+    return false;
 }
 
 Player.prototype.startTimer = function()
 {
-	if (this.timer <= 0)
-		this.timer = 5;
-	this.tick();
+    if (this.timer <= 0)
+        this.timer = 5;
+    this.tick();
 }
 
 Player.prototype.tick = function()
 {
-	if (this.timer > 0)
-	{
-		this.elm.timer.innerText = this.timer--;
-		this.updateProgressBar();
-		this.timerId = setTimeout(this.tick.bind(this), 1000);
-	}
-	else
-	{
-		if(this.next())
-			this.startTimer();
-		else
-			this.reset();
-	}
+    if (this.timer > 0)
+    {
+        this.elm.timer.innerText = this.timer--;
+        this.updateProgressBar();
+        this.timerId = setTimeout(this.tick.bind(this), 1000);
+    }
+    else
+    {
+        if(this.next())
+            this.startTimer();
+        else
+            this.reset();
+    }
 }
 
 Player.prototype.reset = function()
 {
-	this.setPos(-1);
-	this.setStatus(0);
-	this.elm.timer.innerText = "";
-	this.timerId = 0;
+    this.setPos(-1);
+    this.setStatus(0);
+    this.elm.timer.innerText = "";
+    this.timerId = 0;
 }
 
 Player.prototype.updateProgressBar = function()
 {
-	var total = Player.songs[this.pos].time;
-	var elapsed = total - this.timer;
-	this.elm.progressmark.style.width = (elapsed / total * 100) + "%";
-	elapsed = elapsed < 10 ? "0" + elapsed : elapsed;
-	this.elm.timeelapsed.innerText = "00:" + elapsed;
+    var total = Player.songs[this.pos].time;
+    var elapsed = total - this.timer;
+    this.elm.progressmark.style.width = (elapsed / total * 100) + "%";
+    elapsed = elapsed < 10 ? "0" + elapsed : elapsed;
+    this.elm.timeelapsed.innerText = "00:" + elapsed;
 }
 
 Player.prototype._onProgressBarClicked = function(button, event)
 {
-	if (event.button === 0)
-	{
-		var x = event.clientX;
-		var rect = button.getBoundingClientRect();
-		var pos = (x - rect.left) / rect.width;
-		var total = Player.songs[this.pos].time;
-		this.timer = total - Math.round(pos * total);
-		this.updateProgressBar();
-	}
+    if (event.button === 0)
+    {
+        var x = event.clientX;
+        var rect = button.getBoundingClientRect();
+        var pos = (x - rect.left) / rect.width;
+        var total = Player.songs[this.pos].time;
+        this.timer = total - Math.round(pos * total);
+        this.updateProgressBar();
+    }
 }
 
 var player = new Player();
 
 
 </script>
-	</body>
+    </body>
 </html>
