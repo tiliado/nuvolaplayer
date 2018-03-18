@@ -709,6 +709,7 @@ public class AppRunnerController: Drtgtk.Application {
 
         components = new Drt.Lst<Component>();
         components.prepend(new TrayIconComponent(this, bindings, config));
+        components.prepend(new AudioTweaksComponent(this, bindings, config));
         components.prepend(new UnityLauncherComponent(this, bindings, config));
         components.prepend(new NotificationsComponent(this, bindings, actions_helper));
         components.prepend(new MediaKeysComponent(this, bindings, config, ipc_bus, web_app.id));
