@@ -418,6 +418,8 @@ def configure(ctx):
     pkgconfig(ctx, 'dri2', 'DRI2', '1.0')
     pkgconfig(ctx, 'libdrm', 'DRM', '2.2')
     pkgconfig(ctx, 'libarchive', 'LIBARCHIVE', '3.2')
+    pkgconfig(ctx, 'libpulse', 'LIBPULSE', '0.0')
+    pkgconfig(ctx, 'libpulse-mainloop-glib', 'LIBPULSE-GLIB', '0.0')
 
     ctx.env.BUILD_GIR = ctx.options.build_gir
     if ctx.env.BUILD_GIR:
@@ -566,7 +568,8 @@ def build(ctx):
 
     packages = 'dioritegtk{0} dioriteglib{0} '.format(TARGET_DIORITE)
     packages += 'javascriptcoregtk-4.0 libnotify libarchive gtk+-3.0 gdk-3.0 gdk-x11-3.0 x11 posix json-glib-1.0 glib-2.0 gio-2.0'
-    uselib = 'NOTIFY JSCORE LIBARCHIVE DIORITEGTK DIORITEGLIB GTK+ GDK GDKX11 X11 JSON-GLIB GLIB GIO'
+    packages += ' libpulse-mainloop-glib'
+    uselib = 'NOTIFY JSCORE LIBARCHIVE DIORITEGTK DIORITEGLIB GTK+ GDK GDKX11 X11 JSON-GLIB GLIB GIO LIBPULSE LIBPULSE-GLIB'
 
     vapi_dirs = ['build', 'vapi', 'engineio-soup/vapi']
     env_vapi_dir = os.environ.get("VAPIDIR")
