@@ -35,7 +35,7 @@ public class AudioTweaksComponent: Component {
     public AudioTweaksComponent(AppRunnerController controller, Bindings bindings, Drt.KeyValueStorage config) {
         base("audio_tweaks", "Audio Tweaks (beta)", "Tweaks for PulseAudio integration.");
         this.required_membership = TiliadoMembership.PREMIUM;
-        this.has_settings = false;
+        this.has_settings = true;
         this.bindings = bindings;
         this.controller = controller;
         config.bind_object_property(NAMESPACE, this, "enabled").set_default(false).update_property();
@@ -49,16 +49,28 @@ public class AudioTweaksComponent: Component {
             audio_client.start();
         }
         headphones_watch = new HeadPhonesWatch(audio_client);
+        headphones_watch.notify["headphones-plugged"].connect_after(on_headphones_plugged_changed);
         return true;
     }
 
     protected override bool deactivate() {
+        headphones_watch.notify["headphones-plugged"].disconnect(on_headphones_plugged_changed);
         headphones_watch = null;
+        audio_client.global_mute = false;
         return true;
     }
 
     public override Gtk.Widget? get_settings() {
         return new AudioTweaksSettings(this);
+    }
+
+    private void on_headphones_plugged_changed(GLib.Object o, ParamSpec p) {
+        debug("Headphones plugged in: %s", headphones_watch.headphones_plugged.to_string());
+        if (mute_on_headphones_disconnect) {
+            if (headphones_watch.headphones_plugged == audio_client.global_mute) {
+                audio_client.global_mute = !headphones_watch.headphones_plugged;
+            }
+        }
     }
 }
 

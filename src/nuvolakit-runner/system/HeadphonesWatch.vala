@@ -31,17 +31,12 @@ public class HeadPhonesWatch: GLib.Object {
 
     public HeadPhonesWatch(AudioClient client) {
         GLib.Object(client: client);
-        notify["headphones-plugged"].connect_after(on_headphones_plugged_changed);
         if (client.state == PulseAudio.Context.State.READY) {
             start();
         }
         else {
             client.notify["state"].connect_after(on_client_state_changed);
         }
-    }
-
-    ~HeadPhonesWatch() {
-        notify["headphones-plugged"].disconnect(on_headphones_plugged_changed);
     }
 
     private void start() {
@@ -112,10 +107,6 @@ public class HeadPhonesWatch: GLib.Object {
             client.notify["state"].disconnect(on_client_state_changed);
             start();
         }
-    }
-
-    private void on_headphones_plugged_changed(GLib.Object o, ParamSpec p) {
-        debug("Headphones plugged in: %s", headphones_plugged.to_string());
     }
 }
 
