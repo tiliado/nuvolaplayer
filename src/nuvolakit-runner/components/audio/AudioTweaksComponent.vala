@@ -27,6 +27,8 @@ namespace Nuvola {
 public class AudioTweaksComponent: Component {
     private const string NAMESPACE = "component.audio_tweaks.";
     public bool mute_on_headphones_disconnect {get; set; default = false;}
+    public bool pause_on_headphones_disconnect {get; set; default = false;}
+    public bool play_on_headphones_connect {get; set; default = false;}
     private AppRunnerController controller;
     private Bindings bindings;
     private AudioClient? audio_client = null;
@@ -40,6 +42,10 @@ public class AudioTweaksComponent: Component {
         this.controller = controller;
         config.bind_object_property(NAMESPACE, this, "enabled").set_default(false).update_property();
         config.bind_object_property(NAMESPACE, this, "mute_on_headphones_disconnect")
+        .set_default(false).update_property();
+        config.bind_object_property(NAMESPACE, this, "pause_on_headphones_disconnect")
+        .set_default(false).update_property();
+        config.bind_object_property(NAMESPACE, this, "play_on_headphones_connect")
         .set_default(false).update_property();
     }
 
@@ -71,11 +77,25 @@ public class AudioTweaksComponent: Component {
                 audio_client.global_mute = !headphones_watch.headphones_plugged;
             }
         }
+        if (pause_on_headphones_disconnect && !headphones_watch.headphones_plugged) {
+            Drtgtk.Action? action = controller.actions.get_action("pause");
+            if (action != null) {
+                action.activate(null);
+            }
+        }
+        if (play_on_headphones_connect && headphones_watch.headphones_plugged) {
+            Drtgtk.Action? action = controller.actions.get_action("play");
+            if (action != null) {
+                action.activate(null);
+            }
+        }
     }
 }
 
 public class AudioTweaksSettings : Gtk.Grid {
     private Gtk.Switch mute_on_headphones_disconnect;
+    private Gtk.Switch pause_on_headphones_disconnect;
+    private Gtk.Switch play_on_headphones_connect;
 
     public AudioTweaksSettings(AudioTweaksComponent component) {
         orientation = Gtk.Orientation.VERTICAL;
@@ -90,6 +110,24 @@ public class AudioTweaksSettings : Gtk.Grid {
         component.bind_property("mute-on-headphones-disconnect", mute_on_headphones_disconnect, "active", bind_flags);
         attach(mute_on_headphones_disconnect, 0, line, 1, 1);
         mute_on_headphones_disconnect.show();
+
+        line++;
+        label = Drtgtk.Labels.plain("Pause playback when headphones are unplugged.");
+        attach(label, 1, line, 1, 1);
+        label.show();
+        pause_on_headphones_disconnect = new Gtk.Switch();
+        component.bind_property("pause-on-headphones-disconnect", pause_on_headphones_disconnect, "active", bind_flags);
+        attach(pause_on_headphones_disconnect, 0, line, 1, 1);
+        pause_on_headphones_disconnect.show();
+
+        line++;
+        label = Drtgtk.Labels.plain("Resume playback when headphones are plugged.");
+        attach(label, 1, line, 1, 1);
+        label.show();
+        play_on_headphones_connect = new Gtk.Switch();
+        component.bind_property("play-on-headphones-connect", play_on_headphones_connect, "active", bind_flags);
+        attach(play_on_headphones_connect, 0, line, 1, 1);
+        play_on_headphones_connect.show();
     }
 }
 
