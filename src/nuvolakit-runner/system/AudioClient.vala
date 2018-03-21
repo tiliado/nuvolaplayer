@@ -26,6 +26,7 @@ namespace Nuvola {
 
 public class AudioClient: GLib.Object {
     public PulseAudio.Context.State state {get; private set; default = PulseAudio.Context.State.UNCONNECTED;}
+    public bool global_mute {get; set; default = false;}
     private PulseAudio.GLibMainLoop pa_loop;
     private PulseAudio.Context pa_context {get; private set; default = null;}
 
@@ -35,6 +36,11 @@ public class AudioClient: GLib.Object {
         pa_context.set_state_callback(on_pa_state_changed);
         pa_context.set_event_callback(on_pa_event);
         pa_context.set_subscribe_callback(on_pa_subscription);
+        notify["global-mute"].connect_after(on_global_mute_changed);
+    }
+
+    ~AudioClient() {
+        notify["global-mute"].disconnect(on_global_mute_changed);
     }
 
     public void start() throws AudioError {
@@ -69,6 +75,34 @@ public class AudioClient: GLib.Object {
         return op.get_result();
     }
 
+    public async SList<AudioSinkInput?> list_own_sink_inputs() {
+        SList<AudioSinkInput?>  inputs = yield list_sink_inputs();
+        stdout.printf("inputs: %u\n", inputs.length());
+        int own_pid = (int) Posix.getpid();
+        SList<AudioSinkInput?>  own_inputs = null;
+        foreach (unowned AudioSinkInput? input in inputs) {
+            debug("Input %u.%u %s %s %i",
+                input.sink, input.index, input.name, input.app_process_binary, input.app_process_id);
+            int pid = input.app_process_id;
+            do {
+                if (pid == own_pid) {
+                    own_inputs.prepend(input);
+                    break;
+                }
+                pid = get_ppid(pid);
+            } while (pid > 0);
+        }
+        own_inputs.reverse();
+        return (owned) own_inputs;
+    }
+
+    public async int mute_sink_input(uint32 idx, bool mute) {
+        var op = new AudioSinkInputMuteOperation(mute_sink_input.callback);
+        op.run(pa_context, idx, mute);
+        yield;
+        return op.get_result();
+    }
+
     public async int subscribe(PulseAudio.Context.SubscriptionMask mask) {
         var op = new AudioSubscribeOperation(subscribe.callback);
         op.run(pa_context, mask);
@@ -84,7 +118,7 @@ public class AudioClient: GLib.Object {
     }
 
     private void on_pa_event(PulseAudio.Context context, string name, PulseAudio.Proplist? proplist) {
-//~         debug("PulseAudio Event %s: %s", name, proplist != null ? proplist.to_string() : null);
+        debug("PulseAudio Event %s: %s", name, proplist != null ? proplist.to_string() : null);
     }
 
     public static void parse_pulse_event(PulseAudio.Context.SubscriptionEventType event, out string facility, out string type) {
@@ -142,6 +176,29 @@ public class AudioClient: GLib.Object {
         string type = null;
         parse_pulse_event(event, out facility, out type);
         pulse_event(event, id, facility, type);
+        switch (event & PulseAudio.Context.SubscriptionEventType.FACILITY_MASK) {
+        case PulseAudio.Context.SubscriptionEventType.SINK_INPUT:
+            switch (event & PulseAudio.Context.SubscriptionEventType.TYPE_MASK) {
+            case PulseAudio.Context.SubscriptionEventType.NEW:
+                // PulseAudio remembers mute state, let's do reset.
+                apply_global_mute.begin((o, res) => apply_global_mute.end(res));
+                break;
+            }
+            break;
+        }
+    }
+
+    private void on_global_mute_changed(GLib.Object? emitter, ParamSpec parameter) {
+        apply_global_mute.begin((o, res) => apply_global_mute.end(res));
+    }
+
+    private async void apply_global_mute() {
+        SList<AudioSinkInput?> inputs = yield list_own_sink_inputs();
+        bool mute = global_mute;
+        debug("Global mute: %s", mute.to_string());
+        foreach (unowned AudioSinkInput? input in inputs) {
+            yield mute_sink_input(input.index, mute);
+        }
     }
 }
 

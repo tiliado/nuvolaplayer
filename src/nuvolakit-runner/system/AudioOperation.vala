@@ -157,4 +157,25 @@ public class AudioSubscribeOperation: AudioOperation {
     }
 }
 
+public class AudioSinkInputMuteOperation: AudioOperation {
+    private int success = -1;
+
+    public AudioSinkInputMuteOperation(owned SourceFunc callback) {
+        base((owned) callback);
+    }
+
+    public void run(PulseAudio.Context context, uint32 idx, bool mute) {
+        operation = context.set_sink_input_mute(idx, mute, on_done);
+    }
+
+    private void on_done(PulseAudio.Context context, int success) {
+        this.success = success;
+        finished();
+    }
+
+    public int get_result() {
+        return success;
+    }
+}
+
 } // namespace Nuvola
