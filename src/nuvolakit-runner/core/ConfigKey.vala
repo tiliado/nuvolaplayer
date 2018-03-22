@@ -32,7 +32,6 @@ public const string WINDOW_MAXIMIZED = "nuvola.window.maximized";
 public const string WINDOW_SIDEBAR_POS = "nuvola.window.sidebar.position";
 public const string WINDOW_SIDEBAR_VISIBLE = "nuvola.window.sidebar.visible";
 public const string WINDOW_SIDEBAR_PAGE = "nuvola.window.sidebar.page";
-public const string DARK_THEME = "nuvola.dark_theme";
 public const string GTK_THEME = "nuvola.gtk_theme";
 
 } // namespace Nuvola.ConfigKey
