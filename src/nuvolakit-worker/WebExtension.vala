@@ -33,7 +33,6 @@ public class WebExtension: GLib.Object {
     private string? api_token = null;
     private HashTable<string, Variant>? worker_data;
     private HashTable<string, Variant>? js_properties;
-    private LoginFormManager login_form_manager = null;
     private unowned WebKit.WebPage page = null;
     private FrameBridge bridge = null;
     private Drt.XdgStorage storage;
@@ -60,10 +59,6 @@ public class WebExtension: GLib.Object {
                 new Drt.VariantParam("params", true, true, null, "Function parameters."),
                 new Drt.BoolParam("propagate_error", true, true, "Whether to propagate error.")
             });
-        router.add_method("/nuvola/password-manager/enable", Drt.RpcFlags.WRITABLE,
-            "Enable Password Manager", handle_enable_password_manager, null);
-        router.add_method("/nuvola/password-manager/disable", Drt.RpcFlags.WRITABLE,
-            "Disable Password Manager", handle_disable_password_manager, null);
 
         Variant response;
         try {
@@ -187,29 +182,6 @@ public class WebExtension: GLib.Object {
         request.respond(func_params);
     }
 
-    private void handle_enable_password_manager(Drt.RpcRequest request) throws Drt.RpcError {
-        Idle.add(enable_password_manager_cb);
-        request.respond(null);
-    }
-
-    private bool enable_password_manager_cb() {
-        if (login_form_manager == null) {
-            login_form_manager = new LoginFormManager(channel);
-        }
-        if (page != null) {
-            login_form_manager.manage_forms(page);
-        }
-        return false;
-    }
-
-    private void handle_disable_password_manager(Drt.RpcRequest request) throws Drt.RpcError {
-        if (login_form_manager != null) {
-            login_form_manager.clear_forms();
-            login_form_manager = null;
-        }
-        request.respond(null);
-    }
-
     private void show_error(string message) {
         channel.call.begin("/nuvola/core/show-error", new Variant("(s)", message), (o, res) => {
             try {
@@ -297,17 +269,10 @@ public class WebExtension: GLib.Object {
             catch (GLib.Error e) {
                 show_error("Failed to inject JavaScript API. %s".printf(e.message));
             }
-
-            if (login_form_manager != null) {
-                login_form_manager.manage_forms(page);
-            }
         }
     }
 
     private bool on_context_menu(WebKit.ContextMenu menu, WebKit.WebHitTestResult hit_test) {
-        if (login_form_manager != null) {
-            return login_form_manager.manage_context_menu(menu, hit_test.node);
-        }
         return false;
     }
 }

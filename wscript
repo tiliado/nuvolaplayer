@@ -588,7 +588,7 @@ def build(ctx):
         packages += " valacef valacefgtk"
         uselib += " VALACEF VALACEFGTK"
 
-    for vapi in ("glib-2.0", "webkit2gtk-web-extension-4.0"):
+    for vapi in ("glib-2.0",):
         vapi_dir = '/usr/share/vala-0.38/vapi'
         for d in vapi_dirs:
             if d not in ("vapi", "build") and os.path.isfile("%s/%s.vapi" % (d, vapi)):

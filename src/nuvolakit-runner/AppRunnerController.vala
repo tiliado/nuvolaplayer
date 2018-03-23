@@ -709,10 +709,6 @@ public class AppRunnerController: Drtgtk.Application {
 
         bindings.add_object(menu_bar);
 
-        var webkit_engine = web_engine as WebkitEngine;
-        if (webkit_engine != null) {
-            components.prepend(new PasswordManagerComponent(config, ipc_bus, web_worker, web_app.id, webkit_engine));
-        }
         components.prepend(new AudioScrobblerComponent(this, bindings, master_config ?? config, config, connection.session));
         components.prepend(new MPRISComponent(this, bindings, config));
         components.prepend(new HttpRemoteControl.Component(this, bindings, config, ipc_bus));
