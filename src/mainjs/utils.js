@@ -244,3 +244,35 @@ Nuvola.checkVersion = function(major, minor, micro)
     var v2 = Nuvola.encodeVersion(Nuvola.VERSION_MAJOR, Nuvola.VERSION_MINOR, Nuvola.VERSION_MICRO);
     return v2 >= v1;
 }
+
+/**
+ * Query element and return text content or null.
+ *
+ * @since API 4.11
+ * @param String selector    CSS selector for element
+ * @param Function func      Optional function to modify resulting text.
+ * @return Text content of the element, possibly modified with func, null if element is not found.
+ */
+Nuvola.queryText = function (selector, func) {
+    var elm = document.querySelector(selector)
+    var value = elm ? elm.textContent.trim() || null : null;
+    return (value && func) ? func(value, elm) : value
+}
+
+/**
+ * Query element and return its attribute or null.
+ *
+ * @since API 4.11
+ * @param String selector     CSS selector for element
+ * @param String attribute    Attribute name.
+ * @param Function func      Optional function to modify resulting value.
+ * @return The attribute of the element, possibly modified with func, null if element is not found.
+ */
+Nuvola.queryAttribute = function (selector, attribute, func) {
+    var elm = document.querySelector(selector)
+    if (!elm) {
+        return null
+    }
+    var value = elm.getAttribute(attribute)
+    return func ? func(value, elm) : value
+}
