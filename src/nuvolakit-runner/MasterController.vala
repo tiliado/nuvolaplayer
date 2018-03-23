@@ -162,7 +162,7 @@ public class MasterController : Drtgtk.Application {
         storage.assert_data_file("www/engine.io.js");
         var www_root_dirname = "www";
         File[] www_roots = {storage.user_data_dir.get_child(www_root_dirname)};
-        foreach (File data_dir in storage.data_dirs) {
+        foreach (File data_dir in storage.data_dirs()) {
             www_roots += data_dir.get_child(www_root_dirname);
         }
         http_remote_control = new HttpRemoteControl.Server(

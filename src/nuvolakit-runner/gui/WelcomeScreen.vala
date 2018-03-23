@@ -57,7 +57,7 @@ public class WelcomeScreen : Gtk.Grid {
         }
 
         welcome_text = new Drtgtk.RichTextView(buffer);
-        welcome_text.link_opener = show_uri;
+        welcome_text.set_link_opener(show_uri);
         welcome_text.margin = 18;
         welcome_text.vexpand = welcome_text.hexpand = true;
         welcome_text.motion_notify_event.connect(on_motion_notify);

@@ -131,7 +131,7 @@ public class WebExtension: GLib.Object {
         File? script = storage.user_data_dir.get_child(JSApi.JS_DIR).get_child(WEBKITGTK_FIXES_JS);
         if (!script.query_exists()) {
             script = null;
-            foreach (File dir in storage.data_dirs) {
+            foreach (File dir in storage.data_dirs()) {
                 script = dir.get_child(JSApi.JS_DIR).get_child(WEBKITGTK_FIXES_JS);
                 if (script.query_exists()) {
                     break;

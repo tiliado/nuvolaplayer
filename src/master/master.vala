@@ -106,7 +106,7 @@ public int main(string[] args) {
         web_app_reg = new WebAppRegistry(File.new_for_path(Args.apps_dir), {});
     } else {
         Drt.Storage web_apps_storage = storage.get_child("web_apps");
-        web_app_reg = new WebAppRegistry(web_apps_storage.user_data_dir, web_apps_storage.data_dirs);
+        web_app_reg = new WebAppRegistry(web_apps_storage.user_data_dir, web_apps_storage.data_dirs());
     }
     #endif
 

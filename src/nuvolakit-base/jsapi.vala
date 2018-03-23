@@ -194,7 +194,7 @@ public class JSApi : GLib.Object {
         File? main_js = storage.user_data_dir.get_child(JS_DIR).get_child(MAIN_JS);
         if (!main_js.query_exists()) {
             main_js = null;
-            foreach (File dir in storage.data_dirs) {
+            foreach (File dir in storage.data_dirs()) {
                 main_js = dir.get_child(JS_DIR).get_child(MAIN_JS);
                 if (main_js.query_exists()) {
                     break;
