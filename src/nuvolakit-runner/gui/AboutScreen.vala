@@ -50,7 +50,9 @@ public class AboutScreen: Gtk.Grid {
             attach(label, 1, line, 2, 1);
             line++;
             attach(new Gtk.Label("Version"), 1, line, 1, 1);
-            label = new Gtk.Label("%u.%u".printf(web_app.version_major, web_app.version_minor));
+            label = new Gtk.Label("%u.%u.%u (%s)".printf(
+                web_app.version_major, web_app.version_minor, web_app.version_micro,
+                web_app.version_revision ?? "unknown revision"));
             label.selectable = true;
             attach(label, 2, line, 1, 1);
             line++;

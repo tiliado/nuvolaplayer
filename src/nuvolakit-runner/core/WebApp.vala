@@ -72,6 +72,8 @@ public class WebApp : GLib.Object {
     public string maintainer_link {get; construct; default = null;}
     public int version_major {get; construct; default = 0;}
     public int version_minor {get; construct; default = 0;}
+    public int version_micro {get; construct; default = 0;}
+    public string? version_revision {get; construct; default = null;}
     public int api_major {get; construct; default = 0;}
     public int api_minor {get; construct; default = 0;}
     public string? user_agent {get; set; default = null;}
@@ -105,7 +107,8 @@ public class WebApp : GLib.Object {
      * @param window_height     default window height
      **/
     public WebApp(string id, string name, string maintainer_name, string maintainer_link,
-        int version_major, int version_minor, int api_major, int api_minor, File? data_dir,
+        int version_major, int version_minor, int version_micro, string? version_revision,
+        int api_major, int api_minor, File? data_dir,
         string? requirements, GenericSet<string>? categories, int window_width, int window_height,
         string? home_url=null) throws WebAppError {
         if (!WebApp.validate_id(id)) {
@@ -119,6 +122,9 @@ public class WebApp : GLib.Object {
         }
         if (version_minor < 0) {
             throw new WebAppError.INVALID_METADATA("Minor version must be greater or equal to zero");
+        }
+        if (version_micro < 0) {
+            throw new WebAppError.INVALID_METADATA("Micro version must be greater or equal to zero");
         }
         if (api_major <= 0) {
             throw new WebAppError.INVALID_METADATA("Major api_version must be greater than zero");
@@ -146,7 +152,8 @@ public class WebApp : GLib.Object {
         }
 
         GLib.Object(id: id, name: name, maintainer_name: maintainer_name, maintainer_link: maintainer_link,
-            version_major: version_major, version_minor: version_minor, api_major: api_major, api_minor: api_minor,
+            version_major: version_major, version_minor: version_minor, version_micro: version_micro,
+            version_revision: version_revision, api_major: api_major, api_minor: api_minor,
             data_dir: data_dir, window_width: window_width, window_height: window_height,
             categories: categories ?? new GenericSet<string>(str_hash, str_equal),
             requirements: requirements, home_url: home_url);
@@ -216,6 +223,14 @@ public class WebApp : GLib.Object {
         if (!meta.get_int("version_minor", out version_minor)) {
             throw new WebAppError.INVALID_METADATA("The version_minor key is missing or is not an integer.");
         }
+        int version_micro;
+        if (!meta.get_int("version_micro", out version_micro)) {
+            version_micro = 0;
+        }
+        string? version_revision = null;
+        if (!meta.get_string("version_revision", out version_revision)) {
+            version_revision = null;
+        }
         int api_major;
         if (!meta.get_int("api_major", out api_major)) {
             throw new WebAppError.INVALID_METADATA("The api_major key is missing or is not an integer.");
@@ -239,7 +254,7 @@ public class WebApp : GLib.Object {
         }
 
         this(id, name, maintainer_name, maintainer_link,
-            version_major, version_minor, api_major, api_minor, data_dir,
+            version_major, version_minor, version_micro, version_revision, api_major, api_minor, data_dir,
             requirements, Drt.String.semicolon_separated_set(categories, true),
             meta.get_int_or("window_width"), meta.get_int_or("window_height"),
             meta.get_string_or("home_url"));

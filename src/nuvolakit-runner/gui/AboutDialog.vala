@@ -26,7 +26,9 @@ namespace Nuvola {
 
 public void print_version_info(FileStream output, WebApp? web_app) {
     if (web_app != null) {
-        output.printf("%s script %d.%d\n", web_app.name, web_app.version_major, web_app.version_minor);
+        output.printf("%s script\n", web_app.name);
+        output.printf("Version: %d.%d.%d\n", web_app.version_major, web_app.version_minor, web_app.version_micro);
+        output.printf("Revision: %s\n", web_app.version_revision ?? "unknown");
         output.printf("Maintainer: %s\n", web_app.maintainer_name);
         output.printf("\n--- Powered by ---\n\n");
     }
