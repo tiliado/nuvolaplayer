@@ -80,6 +80,7 @@ public class CefEngine : WebEngine {
         config.set_default_value(ZOOM_LEVEL_CONF, 0.0);
         web_view.zoom_level = config.get_double(ZOOM_LEVEL_CONF);
         web_view.load_started.connect(on_load_started);
+        web_view.alert_dialog.connect(on_alert_dialog);
 
         HashTable<string, Variant> data = worker_data;
         uint size = data.size();
@@ -540,6 +541,14 @@ public class CefEngine : WebEngine {
                 }
             }
             break;
+        }
+    }
+
+    private void on_alert_dialog(ref bool handled, string? url, string? message_text, Cef.JsdialogCallback callback) {
+        if (!handled) {
+            var dialog = new CefScriptDialogModel(Cef.JsdialogType.ALERT, callback, url, message_text, null, web_view.get_snapshot());
+            show_script_dialog(dialog);
+            handled = dialog.handled;
         }
     }
 }

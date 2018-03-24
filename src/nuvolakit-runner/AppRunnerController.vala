@@ -384,6 +384,7 @@ public class AppRunnerController: Drtgtk.Application {
         web_engine.init_form.connect(on_init_form);
         web_engine.notify.connect_after(on_web_engine_notify);
         web_engine.show_alert_dialog.connect(on_show_alert_dialog);
+        web_engine.show_script_dialog.connect(on_show_script_dialog);
         actions.action_changed.connect(on_action_changed);
         Gtk.Widget widget = web_engine.get_main_web_view();
         widget.hexpand = widget.vexpand = true;
@@ -1094,6 +1095,16 @@ public class AppRunnerController: Drtgtk.Application {
     private void on_show_alert_dialog(ref bool handled, string text) {
         main_window.show_overlay_alert(text);
         handled = true;
+    }
+
+    private void on_show_script_dialog(ScriptDialogModel model) {
+        var dialog = new ScriptOverlayDialog(model);
+        model.handled = true;
+        if (dialog.snapshot != null) {
+            main_window.overlay.add_overlay(dialog.snapshot);
+        }
+        main_window.add_overlay_widget(dialog);
+        dialog.reveal();
     }
 }
 

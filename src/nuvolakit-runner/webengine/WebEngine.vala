@@ -44,6 +44,7 @@ public abstract class WebEngine : GLib.Object, JSExecutor {
     public signal void app_runner_ready();
     public signal void init_form(HashTable<string, Variant> values, Variant entries);
     public signal void show_alert_dialog(ref bool handled, string message);
+    public signal void show_script_dialog(ScriptDialogModel script_dialog);
     public signal void context_menu(bool whatewer_fixme_in_future);
 
     public abstract void early_init(AppRunnerController runner_app, IpcBus ipc_bus,

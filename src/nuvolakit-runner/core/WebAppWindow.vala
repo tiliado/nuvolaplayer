@@ -26,7 +26,7 @@ namespace Nuvola {
 
 public class WebAppWindow : Drtgtk.ApplicationWindow {
     public Gtk.Grid grid {get; private set;}
-    public Gtk.Overlay overlay {get; private set;}
+    public Drtgtk.Overlay overlay {get; private set;}
     public Sidebar sidebar {get; private set;}
     public Drtgtk.HeaderBarTitle headerbar_title {get; private set;}
     public bool is_fullscreen {get; private set; default = false;}
@@ -89,8 +89,7 @@ public class WebAppWindow : Drtgtk.ApplicationWindow {
 
         grid = new Gtk.Grid();
         grid.orientation = Gtk.Orientation.VERTICAL;
-        overlay = new Gtk.Overlay();
-        overlay.add(grid);
+        overlay = new Drtgtk.Overlay(grid);
         overlay.show_all();
         sidebar = new Sidebar();
         paned = new Gtk.Paned(Gtk.Orientation.HORIZONTAL);
@@ -142,6 +141,10 @@ public class WebAppWindow : Drtgtk.ApplicationWindow {
         overlay.add_overlay(outer_box);
         loop.run();
         overlay.remove(outer_box);
+    }
+
+    public void add_overlay_widget(Gtk.Widget widget) {
+        overlay.add_overlay(widget);
     }
 
     public bool on_delete_event(Gdk.EventAny event) {
