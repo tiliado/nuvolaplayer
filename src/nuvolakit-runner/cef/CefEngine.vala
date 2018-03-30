@@ -47,7 +47,14 @@ public class CefEngine : WebEngine {
     private Config config;
     private Drt.KeyValueStorage session;
     private HashTable<string, Variant> worker_data;
+    private static string[] allowed_url_prefixes;
 
+    static construct {
+        allowed_url_prefixes = {
+            "https://www.facebook.com/v2.8/dialog/oauth",
+            "https://accounts.google.com/o/oauth2/",
+        };
+    }
     public CefEngine(CefOptions web_options, WebApp web_app) {
         base(web_options, web_app);
         web_context = web_options.default_context;
@@ -81,6 +88,7 @@ public class CefEngine : WebEngine {
         web_view.zoom_level = config.get_double(ZOOM_LEVEL_CONF);
         web_view.load_started.connect(on_load_started);
         web_view.alert_dialog.connect(on_alert_dialog);
+        web_view.navigation_request.connect(on_navigation_request);
 
         HashTable<string, Variant> data = worker_data;
         uint size = data.size();
@@ -550,6 +558,79 @@ public class CefEngine : WebEngine {
             show_script_dialog(dialog);
             handled = dialog.handled;
         }
+    }
+
+    private void on_navigation_request(CefGtk.NavigationRequest request) {
+        if (!request.new_window && (request.frame == null || request.frame.is_main() == 0)) {
+            return;
+        }
+        unowned string? uri = request.target_url;
+        if (uri == null || (!uri.has_prefix("http://") && !uri.has_prefix("https://"))) {
+            debug("ignore uri %s", uri);
+            return;
+        }
+
+        request.allow();
+        bool new_window_override = request.new_window;
+        bool approved = navigation_request(uri, ref new_window_override);
+        debug("Navigation: %s window: uri = %s, approved = %s, frame = %s, type = %s, user gesture %s",
+            new_window_override ? "new" : "current", uri, approved.to_string(), request.target_frame_name,
+            request.transition_type.to_string(), request.user_gesture.to_string());
+
+        if (request.new_window) {
+            foreach (unowned string prefix in allowed_url_prefixes) {
+                if (uri.has_prefix(prefix)) {
+                    return;
+                }
+            }
+        }
+
+        // We care only about user clicks
+        if (request.transition_type == Cef.TransitionType.LINK || request.user_gesture) {
+            if (approved) {
+                if (request.new_window != new_window_override) {
+                    if (!new_window_override) {
+                        // Open in current window instead of a new window
+                        Idle.add(() => {web_view.load_uri(uri); return false;});
+                        request.cancel();
+                    } else {
+                        warning("Overriding of new window flag false -> true hasn't been implemented yet.");
+                    }
+                }
+            } else {
+                runner_app.show_uri(uri);
+                request.cancel();
+            }
+        }
+    }
+
+    private bool navigation_request(string url, ref bool new_window) {
+        var builder = new VariantBuilder(new VariantType("a{smv}"));
+        builder.add("{smv}", "url", new Variant.string(url));
+        builder.add("{smv}", "approved", new Variant.boolean(true));
+        builder.add("{smv}", "newWindow", new Variant.boolean(new_window));
+        var args = new Variant("(s@a{smv})", "NavigationRequest", builder.end());
+        try {
+            env.call_function_sync("Nuvola.core.emit", ref args);
+        }
+        catch (GLib.Error e) {
+            runner_app.show_error("Integration script error", "The web app integration script has not provided a valid response and caused an error: %s".printf(e.message));
+            return true;
+        }
+        VariantIter iter = args.iterator();
+        assert(iter.next("s", null));
+        assert(iter.next("a{smv}", &iter));
+        string key = null;
+        Variant value = null;
+        bool approved = false;
+        while (iter.next("{smv}", &key, &value)) {
+            if (key == "approved") {
+                approved = value != null ? value.get_boolean() : false;
+            } else if (key == "newWindow" && value != null) {
+                new_window = value.get_boolean();
+            }
+        }
+        return approved;
     }
 }
 
