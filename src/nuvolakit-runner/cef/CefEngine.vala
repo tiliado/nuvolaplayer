@@ -592,7 +592,8 @@ public class CefEngine : WebEngine {
                 if (request.new_window != new_window_override) {
                     if (!new_window_override) {
                         // Open in current window instead of a new window
-                        Idle.add(() => {web_view.load_uri(uri); return false;});
+                        string owned_uri = uri;
+                        Idle.add(() => {web_view.load_uri(owned_uri); return false;});
                         request.cancel();
                     } else {
                         warning("Overriding of new window flag false -> true hasn't been implemented yet.");
