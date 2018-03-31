@@ -1104,6 +1104,7 @@ public class AppRunnerController: Drtgtk.Application {
             main_window.overlay.add_overlay(dialog.snapshot);
         }
         main_window.add_overlay_widget(dialog);
+        main_window.present();
         dialog.reveal();
     }
 }
