@@ -573,8 +573,9 @@ public class CefEngine : WebEngine {
         request.allow();
         bool new_window_override = request.new_window;
         bool approved = navigation_request(uri, ref new_window_override);
-        debug("Navigation: %s window: uri = %s, approved = %s, frame = %s, type = %s, user gesture %s",
-            new_window_override ? "new" : "current", uri, approved.to_string(), request.target_frame_name,
+        debug("Navigation: new window %s → %s, uri = '%s', approved = %s, frame = %s, type = %s, user gesture %s",
+            request.new_window.to_string(), new_window_override .to_string(), uri,
+            approved.to_string(), request.target_frame_name,
             request.transition_type.to_string(), request.user_gesture.to_string());
 
         if (request.new_window) {
