@@ -1,1 +1,1 @@
-console.log("WebComponents not replaced");
+console.log('WebComponents not replaced')

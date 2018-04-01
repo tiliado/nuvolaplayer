@@ -1,1 +1,1 @@
-console.log("WebComponents2");
+console.log('WebComponents2')
