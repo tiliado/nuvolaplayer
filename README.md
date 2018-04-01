@@ -126,6 +126,7 @@ Build and Install
   * libarchive >= 3.2
   * g-ir-compiler
   * [valalint](https://github.com/tiliado/valalint) or configure with `--no-vala-lint`
+  * [standardjs](https://standardjs.com) or configure with `--no-js-lint`
   * [ValaCEF](https://github.com/tiliado/valacef) or configure with `--no-cef`
   * unity >= 3.0 or configure with `--no-unity`
   * dbusmenu-glib-0.4 >= 0.4 or configure with `--no-appindicator`

@@ -2,14 +2,14 @@
  * Copyright 2014-2018 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met: 
- * 
+ * modification, are permitted provided that the following conditions are met:
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
+ *    list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution. 
- * 
+ *    and/or other materials provided with the distribution.
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -22,8 +22,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-require("prototype");
-require("signals");
+require('prototype')
+require('signals')
 
 /**
  * @enum Identifiers of media keys
@@ -32,48 +32,47 @@ var MediaKey = {
     /**
      * Play key
      */
-    PLAY: "Play",
+  PLAY: 'Play',
     /**
      * Pause key
      */
-    PAUSE: "Pause",
+  PAUSE: 'Pause',
     /**
      * Stop key
      */
-    STOP: "Stop",
+  STOP: 'Stop',
     /**
      * Go to the previous track key
      */
-    PREV: "Previous",
+  PREV: 'Previous',
     /**
      * Go to the next track key
      */
-    NEXT: "Next"
-};
+  NEXT: 'Next'
+}
 
 /**
  * Prototype object integrating media keys handling
  */
-var MediaKeys = $prototype(null, SignalsMixin);
+var MediaKeys = Nuvola.$prototype(null, Nuvola.SignalsMixin)
 
 /**
  * Initializes new MediaKeys object.
  */
-MediaKeys.$init = function()
-{
+MediaKeys.$init = function () {
     /**
      * Emitted when a media key is pressed.
-     * 
+     *
      * @param MediaKey key    the pressed key
      */
-    this.addSignal("MediaKeyPressed");
+  this.addSignal('MediaKeyPressed')
 }
 
 // export public items
-Nuvola.MediaKey = MediaKey;
-Nuvola.MediaKeys = MediaKeys;
+Nuvola.MediaKey = MediaKey
+Nuvola.MediaKeys = MediaKeys
 
 /**
  * Instance object of @link{MediaKeys} prototype connected to Nuvola backend.
  */
-Nuvola.mediaKeys = $object(MediaKeys);
+Nuvola.mediaKeys = Nuvola.$object(MediaKeys)

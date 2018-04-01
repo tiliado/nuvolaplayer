@@ -2,14 +2,14 @@
  * Copyright 2014-2018 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met: 
- * 
+ * modification, are permitted provided that the following conditions are met:
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
+ *    list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution. 
- * 
+ *    and/or other materials provided with the distribution.
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -24,19 +24,19 @@
 
 /**
  * Global JavaScript Object
- * 
+ *
  * Note that only the web worker process has global ``window`` object provided by a web browser engine.
  * The app runner process has bare global object.
  */
-Nuvola.global = global;
+Nuvola.global = global
 
 try {
-    window; // ReferenceError with bare Global Object
-    Nuvola.checkMSE = function() {
-        if (!window.MediaSource) {
-            throw new Error("Media Source Extension is not supported.")
-        }
+  Nuvola.window = window // ReferenceError with bare Global Object
+  Nuvola.checkMSE = function () {
+    if (!window.MediaSource) {
+      throw new Error('Media Source Extension is not supported.')
     }
+  }
 } catch (e) {
-    global.window = null;
+  global.window = null
 }

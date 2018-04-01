@@ -2,14 +2,14 @@
  * Copyright 2014-2018 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met: 
- * 
+ * modification, are permitted provided that the following conditions are met:
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
+ *    list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution. 
- * 
+ *    and/or other materials provided with the distribution.
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -22,44 +22,42 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-require("utils");
+require('utils')
 
 /**
  * Log message to terminal
- * 
+ *
  * Note: This function doesn't print to JavaScript console of WebKit Web Inspector, but to real console/terminal.
- * 
+ *
  * @param String template    template string, see @link{Nuvola.format} for details
  * @param Variant data...    other arguments will be used as data for replacement
  */
-Nuvola.log = function(template)
-{
-    var args = Array.prototype.slice.call(arguments);
-    var message = Nuvola.format.apply(Nuvola, args);
-    Nuvola._log(message);
+Nuvola.log = function (template) {
+  var args = Array.prototype.slice.call(arguments)
+  var message = Nuvola.format.apply(Nuvola, args)
+  Nuvola._log(message)
 }
 
 /**
  * Log warning to terminal
- * 
+ *
  * Note: This function doesn't print to JavaScript console of WebKit Web Inspector, but to real console/terminal.
- * 
+ *
  * @param String template    template string, see @link{Nuvola.format} for details
  * @param Variant data...    other arguments will be used as data for replacement
  */
-Nuvola.warn = function(template)
-{
-    var args = Array.prototype.slice.call(arguments);
-    var message = Nuvola.format.apply(Nuvola, args);
-    Nuvola._warn(message);
+Nuvola.warn = function (template) {
+  var args = Array.prototype.slice.call(arguments)
+  var message = Nuvola.format.apply(Nuvola, args)
+  Nuvola._warn(message)
 }
 
 /**
  * Log exception to terminal
- * 
+ *
  * @since Nuvola 4.8
  * @param Exception e    The exception to log.
  */
-Nuvola.logException = function(e) {
-   console.log(e);
+Nuvola.logException = function (e) {
+  console.log(e)
 }

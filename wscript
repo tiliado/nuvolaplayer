@@ -269,6 +269,43 @@ class valalint(Task.Task):
         return self.generator.bld.exec_command(' '.join(cmd))
 
 
+@TaskGen.feature('jslint')
+@TaskGen.before_method('process_source', 'process_rule')
+def jslint_taskgen(self):
+    source = Utils.to_list(getattr(self, 'source', []))
+    if isinstance(source, Node.Node):
+        source = [source]
+    if not source:
+        raise Errors.WafError('no input file')
+    for i, item in enumerate(source):
+        if isinstance(item, str):
+            source[i] =  self.path.find_resource(item)
+        elif not isinstance(item, Node.Node):
+            raise Errors.WafError('invalid source for %r' % self)
+
+    self.source = []
+    task = self.create_task('jslint', source, None)
+    if getattr(self, 'global_vars', None):
+        task.global_vars.extend(self.global_vars)
+
+
+class jslint(Task.Task):
+    vars  = ['JSLINT', 'JSLINTFLAGS']
+    color = 'BLUE'
+    def __init__(self, *k, **kw):
+        Task.Task.__init__(self, *k, **kw)
+        self.global_vars = []
+
+    def run(self):
+        cmd = [Utils.subst_vars('${JSLINT}', self.env)]
+        if self.env.JSLINTFLAGS:
+            cmd.extend(self.env.JSLINTFLAGS)
+        for name in self.global_vars:
+            cmd.extend(('--global', name))
+        cmd.append (' '.join ([i.abspath() for i in self.inputs]))
+        return self.generator.bld.exec_command(' '.join(cmd))
+
+
 # Actions #
 #=========#
 
@@ -307,7 +344,12 @@ def options(ctx):
         '--no-vala-lint', action='store_false', default=True, dest='lint_vala', help="Don't use Vala linter.")
     ctx.add_option(
         '--lint-vala-auto-fix', action='store_true', default=False,
-        dest='lint_vala_auto_fix', help="Use Vala linter and automatically fix errrors (dangerous).")
+        dest='lint_vala_auto_fix', help="Use Vala linter and automatically fix errors (dangerous).")
+    ctx.add_option(
+        '--no-js-lint', action='store_false', default=True, dest='lint_js', help="Don't use JavaScript linter.")
+    ctx.add_option(
+        '--lint-js-auto-fix', action='store_true', default=False,
+        dest='lint_js_auto_fix', help="Use JavaScript linter and automatically fix errors (dangerous).")
 
 def configure(ctx):
     add_version_info(ctx)
@@ -429,6 +471,10 @@ def configure(ctx):
     if ctx.env.LINT_VALA:
         ctx.find_program('valalint', var='VALALINT')
 
+    ctx.env.LINT_JS = ctx.options.lint_js
+    if ctx.env.LINT_JS:
+        ctx.find_program('standard', var='JSLINT')
+
     # For tests
     ctx.find_program("diorite-testgen{}".format(TARGET_DIORITE), var="DIORITE_TESTGEN")
 
@@ -525,6 +571,13 @@ def build(ctx):
             kwargs["source"] = ctx.path.ant_glob(source_dir + '/**/*.vala')
         return ctx(features="valalint", **kwargs)
 
+    def jslint(source_dir=None, **kwargs):
+        if not ctx.env.LINT_JS:
+            return
+        if source_dir is not None:
+            kwargs["source"] = ctx.path.ant_glob(source_dir + '/**/*.js')
+        return ctx(features="jslint", **kwargs)
+
     def valalib(source_dir=None, **kwargs):
         if source_dir is not None:
             kwargs["source"] = ctx.path.ant_glob(source_dir + '/**/*.vala') + ctx.path.ant_glob(source_dir + '/**/*.vapi')
@@ -553,6 +606,8 @@ def build(ctx):
     vala_defines = ctx.env.VALA_DEFINES
     if ctx.options.lint_vala_auto_fix:
         ctx.env.append_unique('VALALINTFLAGS', '--fix')
+    if ctx.options.lint_js_auto_fix:
+        ctx.env.append_unique('JSLINTFLAGS', '--fix')
 
     APP_RUNNER = "nuvolaruntime"
     ENGINEIO = "engineio"
@@ -598,7 +653,7 @@ def build(ctx):
         patch("%s/%s.vapi" % (vapi_dir, vapi), "vapi/%s.patch" % vapi, '%s.vapi' %  vapi)
         cp_if_found("%s/%s.deps" % (vapi_dir, vapi), '%s.deps' %  vapi)
 
-    ctx(features = "checkvaladefs", source = ctx.path.ant_glob('**/*.vala'),
+    ctx(features = "checkvaladefs", source = ctx.path.ant_glob('src/**/*.vala'),
         definitions="FLATPAK TILIADO_API WEBKIT_SUPPORTS_MSE GENUINE UNITY APPINDICATOR EXPERIMENTAL NUVOLA_RUNTIME"
         + " NUVOLA_ADK NUVOLA_CDK HAVE_CEF FALSE TRUE NUVOLA_LITE")
 
@@ -907,6 +962,10 @@ def build(ctx):
         target = 'share/%s/audio/audiotest.mp3' % APPNAME,
         install_path = '${PREFIX}/share/%s/audio' % APPNAME
     )
+
+    ctx.add_group()
+    jslint(source_dir = 'src/mainjs', global_vars=['Nuvola'])
+    jslint(source = ['web_apps/test/home.js', 'web_apps/test/integrate.js'])
 
 def dist(ctx):
     ctx.algo = "tar.gz"
