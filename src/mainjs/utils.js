@@ -110,6 +110,19 @@ Nuvola.clickOnElement = function (elm, x, y) {
 }
 
 /**
+ * Simulates input event
+ *
+ * @since API 4.11
+ *
+ * @param HTMLInputElement elm    Input element object
+ * @param Var value               The value to set
+ */
+Nuvola.setInputValueWithEvent = function (elm, value) {
+  elm.value = value
+  elm.dispatchEvent(new window.Event('input', {'bubbles': true, 'cancelable': true}))
+}
+
+/**
  * Creates HTML text node
  *
  * @param String text    text of the node
