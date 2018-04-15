@@ -77,8 +77,11 @@ public class TiliadoTrialWidget : Gtk.Grid {
     private void toggle_trial() {
         if (!check_user()) {
             if (purchase_button == null) {
-                Gtk.Label label = Drtgtk.Labels.markup("<b>%s free trial</b>", Nuvola.get_app_name());
+                Gtk.Label label = Drtgtk.Labels.markup(
+                    "<b>%s free trial</b> • The trial will change, <a href=\"%s\">provide feedback</a>.",
+                    Nuvola.get_app_name(), "https://github.com/tiliado/nuvolaruntime/issues/422");
                 label.halign = Gtk.Align.CENTER;
+                label.valign = Gtk.Align.CENTER;
                 label.hexpand = true;
                 label.vexpand = true;
                 label.show();
@@ -111,8 +114,8 @@ public class TiliadoTrialWidget : Gtk.Grid {
     private void add_button(Gtk.Button button, string? style_class=null) {
         button.hexpand = false;
         button.vexpand = true;
-        button.halign = Gtk.Align.CENTER;
-        button.valign = Gtk.Align.END;
+        button.halign = Gtk.Align.END;
+        button.valign = Gtk.Align.CENTER;
         if (style_class != null) {
             button.get_style_context().add_class(style_class);
         }
