@@ -260,3 +260,34 @@ Nuvola.queryAttribute = function (selector, attribute, func) {
   var value = elm.getAttribute(attribute)
   return func ? func(value, elm) : value
 }
+
+/**
+ * Download image and export it as base64 data-URI
+ *
+ * @since API 4.11
+ * @param String url         The image URL
+ * @param Function callback    The function to be called when the image is exported. The first argument is null
+ *     if any error occurred, base64 data-URI otgerwise.
+ */
+Nuvola.exportImageAsBase64 = function (url, callback) {
+  var img = new window.Image()
+  img.onload = function () {
+    var canvas = document.createElement('canvas')
+    var ctx = canvas.getContext('2d')
+    canvas.height = img.height
+    canvas.width = img.width
+    ctx.drawImage(img, 0, 0)
+    callback(canvas.toDataURL('image/jpeg', 0.95))
+    canvas = null
+    this.onerror = null
+    this.onload = null
+    this.src = ''
+  }
+  img.onerror = function () {
+    callback(null)
+    this.onload = null
+    this.error = null
+    this.src = ''
+  }
+  img.src = url
+}
