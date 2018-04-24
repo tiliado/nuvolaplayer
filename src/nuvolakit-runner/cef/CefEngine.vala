@@ -586,8 +586,10 @@ public class CefEngine : WebEngine {
             }
         }
 
-        // We care only about user clicks
-        if (request.transition_type == Cef.TransitionType.LINK || request.user_gesture) {
+        // LINK => link navigation
+        // CLIENT_REDIRECT_FLAG => `window.location = ...` Issue: tiliado/nuvolaruntime#425
+        Cef.TransitionType type_mask = Cef.TransitionType.LINK | Cef.TransitionType.CLIENT_REDIRECT_FLAG;
+        if ((request.transition_type & type_mask) != 0 || request.user_gesture) {
             if (approved) {
                 if (request.new_window != new_window_override) {
                     if (!new_window_override) {
