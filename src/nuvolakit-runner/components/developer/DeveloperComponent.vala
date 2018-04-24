@@ -27,7 +27,8 @@ namespace Nuvola {
 public class DeveloperComponent: Component {
     private Bindings bindings;
     private AppRunnerController app;
-    private DeveloperSidebar? sidebar = null;
+    private DeveloperSidebar? developer_sidebar = null;
+    private WebViewSidebar? web_view_sidebar = null;
 
     public DeveloperComponent(AppRunnerController app, Bindings bindings, Drt.KeyValueStorage config) {
         base("developer", "Developer's tools", "Enables developer's sidebar ");
@@ -37,14 +38,18 @@ public class DeveloperComponent: Component {
     }
 
     protected override bool activate() {
-        sidebar = new DeveloperSidebar(app, bindings.get_model<MediaPlayerModel>());
-        app.main_window.sidebar.add_page("developersidebar", _("Developer"), sidebar);
+        developer_sidebar = new DeveloperSidebar(app, bindings.get_model<MediaPlayerModel>());
+        app.main_window.sidebar.add_page("developersidebar", _("Developer"), developer_sidebar);
+        web_view_sidebar = new WebViewSidebar(app);
+        app.main_window.sidebar.add_page("webviewsidebar", _("Web View"), web_view_sidebar);
         return true;
     }
 
     protected override bool deactivate() {
-        app.main_window.sidebar.remove_page(sidebar);
-        sidebar = null;
+        app.main_window.sidebar.remove_page(developer_sidebar);
+        developer_sidebar = null;
+        app.main_window.sidebar.remove_page(web_view_sidebar);
+        web_view_sidebar = null;
         return true;
     }
 }
