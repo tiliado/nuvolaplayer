@@ -46,9 +46,12 @@
             <tbody id="playlist"></tbody>
         </table>
 
-        <p>
-            Google.com:
-        </p>
+        <table>
+            <tr>
+                <th>Google.com</th><th>Tiliado</th>
+            </tr>
+            <tr>
+                <td>
         <ul>
             <li><a href="http://google.com" >Current window</a></li>
             <li><a href="http://google.com" target="_blank">New window</a></li>
@@ -58,6 +61,20 @@
             <li><a href="#" onclick="window.open('http://google.com', '_blank', 'left=0,top=0,width=100,height=100'); return false;">Pop-up window 0,0+100×100</a></li>
             <li><a href="#" onclick="window.open('http://google.com', '_blank', 'left=200,top=100,width=400,height=200'); return false;">Pop-up window 200,100+400×200</a></li>
         </ul>
+        </td>
+        <td>
+            <ul>
+            <li><a href="http://tiliado.eu" >Current window</a> (<a href="http://tiliado.eu" onclick="_openURI(this.href); return false;">window.location</a>)</li>
+            <li><a href="http://tiliado.eu" target="_blank">New window</a></li>
+            <li><a href="#" onclick="window.open('http://tiliado.eu', '_blank'); return false;">Pop-up window</a></li>
+            <li><a href="#" onclick="window.open('http://tiliado.eu', '_blank', 'fullscreen=yes'); return false;">Pop-up window full-screen</a></li>
+            <li><a href="#" onclick="window.open('http://tiliado.eu', '_blank', 'width=100,height=100'); return false;">Pop-up window 100×100</a></li>
+            <li><a href="#" onclick="window.open('http://tiliado.eu', '_blank', 'left=0,top=0,width=100,height=100'); return false;">Pop-up window 0,0+100×100</a></li>
+            <li><a href="#" onclick="window.open('http://tiliado.eu', '_blank', 'left=200,top=100,width=400,height=200'); return false;">Pop-up window 200,100+400×200</a></li>
+        </ul>
+        </td>
+        </tr>
+        </table>
 
         <p>Misc</p>
         <ul>

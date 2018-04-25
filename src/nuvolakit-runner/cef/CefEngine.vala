@@ -47,6 +47,7 @@ public class CefEngine : WebEngine {
     private Config config;
     private Drt.KeyValueStorage session;
     private HashTable<string, Variant> worker_data;
+    private GenericSet<string> recent_external_uris;
     private static string[] allowed_url_prefixes;
 
     static construct {
@@ -66,6 +67,7 @@ public class CefEngine : WebEngine {
         this.runner_app = runner_app;
         this.config = config;
         this.web_worker = new RemoteWebWorker(ipc_bus);
+        this.recent_external_uris = new GenericSet<string>(str_hash, str_equal);
         this.worker_data = worker_data;
         worker_data["NUVOLA_API_ROUTER_TOKEN"] = ipc_bus.router.hex_token;
         worker_data["WEBKITGTK_MAJOR"] = WebKit.get_major_version();
@@ -602,9 +604,22 @@ public class CefEngine : WebEngine {
                     }
                 }
             } else {
-                runner_app.show_uri(uri);
+                open_external_uri(uri);
                 request.cancel();
             }
+        }
+    }
+
+    private void open_external_uri(string uri) {
+        if (!(uri in recent_external_uris)) {
+            runner_app.show_uri(uri);
+            recent_external_uris.add(uri);
+            Timeout.add(300, () => {
+                recent_external_uris.remove(uri);
+                return false;
+            });
+        } else {
+            debug("External URI '%s' ignored because it was opened recently.", uri);
         }
     }
 

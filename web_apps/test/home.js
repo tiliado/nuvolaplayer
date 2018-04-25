@@ -280,3 +280,13 @@ Player.prototype._onProgressBarClicked = function (button, event) {
 }
 
 window.player = new Player()
+
+window._openURI = function (uri, step) {
+  step = step || 0
+  if (step < 5) {
+    setTimeout(() => {
+      window.location = uri
+      window._openURI(uri, step + 1)
+    }, 50)
+  }
+}
