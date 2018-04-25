@@ -117,18 +117,20 @@ public class WebViewSidebar: Gtk.Grid {
             filter.set_filter_name("PNG images");
             filter.add_pattern("*.png");
             dialog.add_filter(filter);
-            if (dialog.run() == Gtk.ResponseType.ACCEPT) {
-                try {
-                    snapshot.save(dialog.get_filename(), "png", "compression", "9", null);
-                } catch (GLib.Error e) {
-                    app.show_warning("Failed to save snapshot", e.message);
+            dialog.response.connect((response_id) => {
+                if (response_id == Gtk.ResponseType.ACCEPT) {
+                    try {
+                        snapshot.save(dialog.get_filename(), "png", "compression", "9", null);
+                    } catch (GLib.Error e) {
+                        app.show_warning("Failed to save snapshot", e.message);
+                    }
                 }
-            }
-            dialog.destroy();
+                dialog.destroy();
+            });
+            dialog.show();
         } else {
             app.show_warning("Snapshot failure", "Failed to take a snapshot.");
         }
-
     }
     #endif
 }
