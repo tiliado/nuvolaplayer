@@ -109,7 +109,9 @@ public class WebViewSidebar: Gtk.Grid {
         Gdk.Pixbuf? snapshot = ((CefGtk.WebView) web_view).get_snapshot();
         if (snapshot != null) {
             var dialog = new Gtk.FileChooserNative(
-                "Save snapshot", get_toplevel() as Gtk.Window, Gtk.FileChooserAction.SAVE, "Save snapshot", "Cancel");
+                "Save snapshot",
+                /* TODO use (get_toplevel() as Gtk.Window) when https://gitlab.gnome.org/GNOME/gtk/issues/83 lands */
+                null, Gtk.FileChooserAction.SAVE, "Save snapshot", "Cancel");
             dialog.do_overwrite_confirmation = true;
             var filter = new Gtk.FileFilter();
             filter.set_filter_name("PNG images");
