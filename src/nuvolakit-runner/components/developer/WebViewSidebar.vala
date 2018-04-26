@@ -28,6 +28,11 @@ public class WebViewSidebar: Gtk.Grid {
     private Gtk.Entry? width_entry = null;
     private Gtk.Entry? height_entry = null;
     private Gtk.Widget web_view;
+    #if HAVE_CEF
+    private Gtk.SpinButton delay_spin;
+    private int delay_remaining = -1;
+    private Gtk.Button snapshot_button;
+    #endif
     private unowned AppRunnerController app;
 
     public WebViewSidebar(AppRunnerController app) {
@@ -35,40 +40,51 @@ public class WebViewSidebar: Gtk.Grid {
         web_view = app.web_engine.get_main_web_view();
         orientation = Gtk.Orientation.VERTICAL;
         hexpand = vexpand = true;
-        row_spacing = 5;
+        row_spacing = column_spacing = 5;
 
+        var row = 0;
         var label = new Gtk.Label("Width:");
         label.halign = Gtk.Align.START;
-        add(label);
+        attach(label, 0, row, 1, 1);
         width_entry = new Gtk.Entry();
         width_entry.max_width_chars = 4;
         width_entry.input_purpose = Gtk.InputPurpose.NUMBER;
         width_entry.halign = Gtk.Align.END;
         width_entry.hexpand = false;
-        attach_next_to(width_entry, label, Gtk.PositionType.BOTTOM, 1, 1);
+        attach(width_entry, 1, row, 1, 1);
 
         label = new Gtk.Label("Height:");
         label.halign = Gtk.Align.START;
-        add(label);
+        attach(label, 0, ++row, 1, 1);
         height_entry = new Gtk.Entry();
         height_entry.max_width_chars = 4;
         height_entry.hexpand = false;
         height_entry.input_purpose = Gtk.InputPurpose.NUMBER;
         height_entry.halign = Gtk.Align.END;
-        attach_next_to(height_entry, label, Gtk.PositionType.BOTTOM, 1, 1);
+        attach(height_entry, 1, row, 1, 1);
 
-        var button = new Gtk.Button.with_label("Refresh");
+        var button = new Gtk.Button.with_label("Update dimensions");
         button.clicked.connect(update);
-        add(button);
-        button = new Gtk.Button.with_label("Resize");
+        attach(button, 0, ++row, 2, 1);
+        button = new Gtk.Button.with_label("Resize web view");
         button.clicked.connect(apply);
-        add(button);
+        attach(button, 0, ++row, 2, 1);
 
         #if HAVE_CEF
         if (web_view is CefGtk.WebView) {
+            label = new Gtk.Label("Delay:");
+            label.halign = Gtk.Align.START;
+            attach(label, 0, ++row, 1, 1);
+            delay_spin = new Gtk.SpinButton.with_range(0, 3600, 1);
+            delay_spin.numeric = true;
+            delay_spin.digits = 0;
+            delay_spin.snap_to_ticks = true;
+            attach(delay_spin, 1, row, 1, 1);
+
             button = new Gtk.Button.with_label("Take snapshot");
-            button.clicked.connect(take_snapshot);
-            add(button);
+            button.clicked.connect(take_cancel_snapshot);
+            attach(button, 0, ++row, 2, 1);
+            snapshot_button = button;
         }
         #endif
 
@@ -105,7 +121,25 @@ public class WebViewSidebar: Gtk.Grid {
     }
 
     #if HAVE_CEF
+    private void take_cancel_snapshot() {
+        if (delay_remaining < 0) {
+            delay_remaining = delay_spin.get_value_as_int();
+            take_snapshot();
+        } else {
+            delay_remaining = 0;
+        }
+    }
+
     private void take_snapshot() {
+        if (delay_remaining > 0) {
+            Timeout.add(1000, () => { take_snapshot(); return false; });
+            snapshot_button.label = "Take snapshot ... %d".printf(delay_remaining);
+            delay_remaining--;
+            return;
+        }
+        snapshot_button.label = "Take snapshot";
+        delay_remaining = -1;
+
         Gdk.Pixbuf? snapshot = ((CefGtk.WebView) web_view).get_snapshot();
         if (snapshot != null) {
             var dialog = new Gtk.FileChooserNative(
