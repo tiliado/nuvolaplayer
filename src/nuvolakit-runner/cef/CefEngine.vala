@@ -48,12 +48,12 @@ public class CefEngine : WebEngine {
     private Drt.KeyValueStorage session;
     private HashTable<string, Variant> worker_data;
     private GenericSet<string> recent_external_uris;
-    private static string[] allowed_url_prefixes;
+    private static GLib.PatternSpec[] allowed_uri_patterns;
 
     static construct {
-        allowed_url_prefixes = {
-            "https://www.facebook.com/v2.8/dialog/oauth",
-            "https://accounts.google.com/o/oauth2/",
+        allowed_uri_patterns = {
+            new PatternSpec("https://www.facebook.com/v*/dialog/oauth*"),
+            new PatternSpec("https://accounts.google.com/o/oauth2/*"),
         };
     }
     public CefEngine(CefOptions web_options, WebApp web_app) {
@@ -581,8 +581,11 @@ public class CefEngine : WebEngine {
             request.transition_type.to_string(), request.user_gesture.to_string());
 
         if (request.new_window) {
-            foreach (unowned string prefix in allowed_url_prefixes) {
-                if (uri.has_prefix(prefix)) {
+            string reversed_uri = uri.reverse();
+            uint uri_length = uri.length;
+            foreach (unowned GLib.PatternSpec pattern in allowed_uri_patterns) {
+                if (pattern.match(uri_length, uri, reversed_uri)) {
+                    debug("Allowed because it matches one of global allowed URIS: '%s'.", uri);
                     return;
                 }
             }
