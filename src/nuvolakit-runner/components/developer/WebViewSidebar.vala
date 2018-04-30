@@ -28,6 +28,9 @@ public class WebViewSidebar: Gtk.Grid {
     private Gtk.Entry? width_entry = null;
     private Gtk.Entry? height_entry = null;
     private Gtk.Widget web_view;
+    private int resize_delay_remaining = -1;
+    private Gtk.SpinButton resize_delay_spin;
+    private Gtk.Button resize_button;
     #if HAVE_CEF
     private Gtk.SpinButton delay_spin;
     private int delay_remaining = -1;
@@ -52,7 +55,6 @@ public class WebViewSidebar: Gtk.Grid {
         width_entry.halign = Gtk.Align.END;
         width_entry.hexpand = false;
         attach(width_entry, 1, row, 1, 1);
-
         label = new Gtk.Label("Height:");
         label.halign = Gtk.Align.START;
         attach(label, 0, ++row, 1, 1);
@@ -62,12 +64,21 @@ public class WebViewSidebar: Gtk.Grid {
         height_entry.input_purpose = Gtk.InputPurpose.NUMBER;
         height_entry.halign = Gtk.Align.END;
         attach(height_entry, 1, row, 1, 1);
-
         var button = new Gtk.Button.with_label("Update dimensions");
         button.clicked.connect(update);
         attach(button, 0, ++row, 2, 1);
+
+        label = new Gtk.Label("Delay:");
+        label.halign = Gtk.Align.START;
+        attach(label, 0, ++row, 1, 1);
+        resize_delay_spin = new Gtk.SpinButton.with_range(0, 3600, 1);
+        resize_delay_spin.numeric = true;
+        resize_delay_spin.digits = 0;
+        resize_delay_spin.snap_to_ticks = true;
+        attach(resize_delay_spin, 1, row, 1, 1);
         button = new Gtk.Button.with_label("Resize web view");
-        button.clicked.connect(apply);
+        button.clicked.connect(resize_or_cancel);
+        resize_button = button;
         attach(button, 0, ++row, 2, 1);
 
         #if HAVE_CEF
@@ -101,11 +112,29 @@ public class WebViewSidebar: Gtk.Grid {
         width_entry.text = web_view.get_allocated_width().to_string();
     }
 
+    private void resize_or_cancel() {
+        if (resize_delay_remaining < 0) {
+            resize_delay_remaining = resize_delay_spin.get_value_as_int();
+            apply();
+        } else {
+            resize_delay_remaining = 0;
+        }
+    }
+
     private void apply() {
+        if (resize_delay_remaining > 0) {
+            Timeout.add(1000, () => {apply(); return false; });
+            resize_button.label = "Resize web view ... %d".printf(resize_delay_remaining);
+            resize_delay_remaining--;
+            return;
+        }
+        resize_button.label = "Resize web view";
+        resize_delay_remaining = -1;
+
         Gtk.Allocation allocation;
         web_view.get_allocation(out allocation);
-        var width = int.parse(width_entry.text);
-        var height = int.parse(height_entry.text);
+        int width = int.parse(width_entry.text);
+        int height = int.parse(height_entry.text);
         web_view.set_size_request(width, height);
         if (height < allocation.height || width < allocation.width) {
             var window = get_toplevel() as Gtk.Window;
