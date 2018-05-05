@@ -4,6 +4,6 @@ from common_conf import *
 
 SITEURL = ".."
 TEMPLATE = "doc/theme/templates/jsdoc.html"
-TITLE = "NuvolaKit 3.0 JavaScript API Reference"
+TITLE = "NuvolaKit 4 JavaScript API Reference"
 
 INTERLINKS["doc"] = "../"
