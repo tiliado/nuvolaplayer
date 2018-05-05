@@ -303,6 +303,7 @@ class HtmlPrinter(object):
         self.strip_ns = lambda s: s[ns_len:]
         self.markdown = markdown
         self.interlinks = interlinks if interlinks is not None else {}
+        self.changelog = []
 
     def process(self):
         tree = self.tree
@@ -339,6 +340,8 @@ class HtmlPrinter(object):
 
             index.append("</ul>")
             body.append("</ul>")
+
+        self.process_changelog()
 
         return "".join(self.index), "".join(self.body)
 
@@ -497,8 +500,14 @@ class HtmlPrinter(object):
                 '<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises">Using '
                 'Promises</a> to learn how to work with them.</p>\n')
         if since:
+            since = self.process_versioned_items(since)
+            for item in since:
+                self.changelog.append(item + (node, 'new'))
             self.process_doc_since(since, buf)
         if deprecated:
+            deprecated = self.process_versioned_items(deprecated)
+            for item in deprecated:
+                self.changelog.append(item + (node, 'deprecated'))
             self.process_doc_deprecated(deprecated, buf)
         if params:
             self.process_doc_params(params, buf)
@@ -561,6 +570,17 @@ class HtmlPrinter(object):
 
         buf.append('</ul>\n')
 
+    def process_versioned_items(self, items):
+        result = []
+        for item in items:
+            version = ' '.join(s.strip() for s in item)
+            try:
+                version, text = [s.strip() for s in version.split(':', 1)]
+            except ValueError:
+                text = None
+            result.append((version, text))
+        return result
+
     def process_doc_since(self, items, buf):
         self.process_doc_version("Available", items, buf)
 
@@ -568,13 +588,8 @@ class HtmlPrinter(object):
         self.process_doc_version("Deprecated", items, buf)
 
     def process_doc_version(self, label, items, buf):
-        for item in items:
+        for version, text in items:
             buf.append('<p><b>{} since</b> '.format(label))
-            version = ' '.join(s.strip() for s in item)
-            try:
-                version, text = [s.strip() for s in version.split(':', 1)]
-            except ValueError:
-                text = None
             buf.append(version)
             if text:
                 buf.append(": " + self.replace_links(text))
@@ -585,6 +600,37 @@ class HtmlPrinter(object):
         if not text:
             text = symbol
         return '<a href="#{0}">{1}</a>'.format(escape(canonical), escape(text)) if canonical else escape(text)
+
+    def process_changelog(self):
+        index, body, tree = self.index, self.body, self.tree
+        index.append("<h3>Changelog</h3><ul>")
+        body.append("<h2>Changelog</h2>")
+        def key_func(i):
+            key = i[0].replace('.', ' ').split()[1:] + tree.get_symbol_name(i[2]).replace('.', ' ').split()
+            keys = []
+            for k in key:
+                try:
+                    keys.append(int(k))
+                except ValueError:
+                    keys.append(k)
+            return keys
+        self.changelog.sort(key=key_func)
+        changelog = defaultdict(list)
+        for version, text, node, label in self.changelog:
+            changelog[version].append((node, text, label))
+        for version, items in changelog.items():
+            version = version.split()[1]
+            anchor = 'x-changelog-' + version.replace(' ', '-').replace('.', '-')
+            index.append('<li><a href="#%s">%s</a></li>' % (anchor, version))
+            body.append('<h3 id="%s">Since %s</h3><ul>' % (anchor, version))
+            for node, text, label in items:
+                link = self.link_symbol(tree.get_symbol_name(node))
+                if text:
+                    body.append('<li>%s <i>(%s)</i>: %s</li>' % (link, label, text))
+                else:
+                    body.append('<li>%s <i>(%s)</i></li>' % (link, label))
+            body.append("</ul>")
+        index.append("</ul>")
 
     def interlink(self, interlink, target, text=None):
         prefix = self.interlinks[interlink]
