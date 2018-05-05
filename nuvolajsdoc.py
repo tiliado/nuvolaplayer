@@ -4,14 +4,14 @@
 # Copyright 2014-2018 Jiří Janoušek <janousek.jiri@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are met: 
-# 
+# modification, are permitted provided that the following conditions are met:
+#
 # 1. Redistributions of source code must retain the above copyright notice, this
-#    list of conditions and the following disclaimer. 
+#    list of conditions and the following disclaimer.
 # 2. Redistributions in binary form must reproduce the above copyright notice,
 #    this list of conditions and the following disclaimer in the documentation
-#    and/or other materials provided with the distribution. 
-# 
+#    and/or other materials provided with the distribution.
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -70,17 +70,17 @@ class Node(object):
         self.doc = doc
         self.container = container
         self.sep = sep
-    
+
     def append(self, child):
         pass
-    
+
     @property
     def type(self):
         type = self.__class__.__name__.lower()
         if type.endswith("symbol"):
             return type[:-6]
         return type
-    
+
     def __str__(self):
         return "%s %s %s [%s:%s]" % (self.type, self.parent, self.name, self.source, self.lineno)
 
@@ -91,48 +91,48 @@ class Symbols(object):
         self.symbols = {}
         self.canonical = {}
         self.ns = ns
-    
+
     def get_symbol_name(self, node):
         parent = node.parent
         if parent is True:
             return None
-        
+
         if not parent:
             return node.name
-        
+
         parent = self.get_canonical(parent) or parent
         return parent + node.sep + node.name
-    
+
     def get_last_container(self):
         return self.last_container
-    
+
     def get_symbol(self, symbol):
         return self.symbols[symbol]
-    
+
     def is_canonical(self, symbol):
         try:
             return self.canonical[symbol] == symbol
         except KeyError:
             return False
-        
+
     def get_canonical(self, symbol):
         try:
             return self.canonical[symbol]
         except KeyError:
             return None
-    
+
     def add_symbol(self, node):
         if node.parent is True:
             node.parent = self.get_last_container()
-        
+
         symbol = self.get_symbol_name(node)
         if node.container:
             self.last_container = symbol
-        
+
         if symbol:
             self.symbols[symbol] = node
             self.canonical[symbol] = symbol
-        
+
         if node.parent:
             try:
                 parent = self.get_symbol(node.parent)
@@ -140,13 +140,13 @@ class Symbols(object):
             except KeyError as e:
                 if node.parent != self.ns:
                     print("Error: Parent not found for %s" % node)
-    
+
     def add_alias(self, canonical, alias):
         node = self.symbols[alias]
         self.symbols[canonical] = node
         self.canonical[canonical] = canonical
         self.canonical[alias] = canonical
-        
+
         append_symbols = []
         for symbol, node in self.symbols.items():
             if node.parent == alias:
@@ -154,7 +154,7 @@ class Symbols(object):
                 self.canonical[symbol] = canonical
                 self.canonical[canonical] = canonical
                 append_symbols.append((canonical, node))
-        
+
         for canonical, node in append_symbols:
             self.symbols[canonical] = node
 
@@ -164,7 +164,7 @@ class FunctionSymbol(Node):
         parent, name = rdotsplit(parts[0])
         Node.__init__(self, source, lineno, parent, name, doc, container=False)
         self.params = parts[1]
-    
+
     def _str__(self):
         if self.parent:
             return '%s <b id="%s">%s</b>(%s)' % ("method", self.symbol, self.name, self.symbol_parts[1])
@@ -177,18 +177,18 @@ class EnumSymbol(Node):
         parent, name = rdotsplit(parts[0])
         Node.__init__(self, source, lineno, parent, name, doc)
         self.items = []
-    
+
     def append(self, child):
         self.items.append(child)
         self.items.sort(key=lambda i: i.name)
-        
+
     def html(self):
         buffer = ['<li>enumeration <b id="%s">%s</b><ul>' % (self.symbol, self.symbol)]
         for item in self.items:
             buffer.append('<li><b id="%s">%s</b> - </li>' % (self.symbol + "." + item.name, item.name))
         buffer.append("</ul></li>")
         return "\n".join(buffer)
-    
+
     def _str__(self):
         buffer = ['enumeration %s' % (self.symbol)]
         for item in self.items:
@@ -201,7 +201,7 @@ class MixinSymbol(Node):
         parent, name = rdotsplit(parts[0])
         Node.__init__(self, source, lineno, parent, name, doc)
         self.methods = []
-    
+
     def append(self, child):
         if isinstance(child, FunctionSymbol):
             self.methods.append(child)
@@ -214,7 +214,7 @@ class NamespaceSymbol(Node):
         parent, name = rdotsplit(parts[0])
         Node.__init__(self, source, lineno, parent, name, doc)
         self.methods = []
-    
+
     def append(self, child):
         if isinstance(child, FunctionSymbol):
             self.methods.append(child)
@@ -230,11 +230,11 @@ class PrototypeSymbol(Node):
         self.inherits = [s.strip()  for s in parts[1].split(",")]
         if self.inherits[0] == "null":
             self.inherits[0] = "Object"
-        
+
         self.signals = []
         self.methods = []
         self.properties = []
-    
+
     def append(self, child):
         if isinstance(child, FunctionSymbol):
             self.methods.append(child)
@@ -245,7 +245,7 @@ class PrototypeSymbol(Node):
         else:
             self.properties.append(child)
             self.properties.sort(key=lambda i: i.name)
-    
+
     def html(self):
         buffer = ['<li>prototype  <b id="%s">%s</b> inherits %s<ul>' % (self.symbol, self.symbol, ", ".join(["<b>%s</b>" %i for i in self.inherits]))]
         for method in self.methods:
@@ -262,7 +262,7 @@ class SignalSymbol(Node):
     def __init__(self, source, lineno, line, parts, doc):
         parent, name = True, parts[0][1:-1]
         Node.__init__(self, source, lineno, parent, name, doc, "::", container=False)
-    
+
     def set_parent(self, parent):
         self.parent = parent.parent if parent.parent else parent.symbol
 
@@ -271,7 +271,7 @@ class PropertySymbol(Node):
     def __init__(self, source, lineno, line, parts, doc):
         parent, name = True, parts[0]
         Node.__init__(self, source, lineno, parent, name, doc, container=False)
-        
+
     def set_parent(self, parent):
         self.parent = parent.symbol
 
@@ -288,7 +288,7 @@ class Alias(object):
         self.alias = alias
         self.source = source
         self.lineno = lineno
-    
+
     def __str__(self):
         return "alias %s -> %s [%s:%s]" % (self.alias, self.canonical, self.source, self.lineno)
 
@@ -303,7 +303,7 @@ class HtmlPrinter(object):
         self.strip_ns = lambda s: s[ns_len:]
         self.markdown = markdown
         self.interlinks = interlinks if interlinks is not None else {}
-    
+
     def process(self):
         tree = self.tree
         ns = (None, self.ns)
@@ -311,20 +311,20 @@ class HtmlPrinter(object):
         for symbol, node in tree.symbols.items():
             if node.parent in ns and tree.is_canonical(symbol):
                 symbols[node.type].append(symbol)
-        
+
         index = self.index
         body = self.body
-        
+
         index.append("<h3>Namespace {0}</h3>".format(escape(self.ns)))
         body.append("<h2>Namespace {0}</h2>".format(escape(self.ns)))
-        
+
         types = ("field", "function", "prototype", "namespace", "mixin", "enum")
         types_names = ("Fields", "Functions", "Prototypes", "Namespaces", "Mixins", "Enums")
         for i in range(len(types)):
             type_name = escape(types_names[i])
             index.append('<h4>{0}</h4>\n<ul>\n'.format(type_name))
             body.append('<h3>{0}</h3>\n<ul>\n'.format(type_name))
-            
+
             for symbol in sorted(symbols[types[i]]):
                 node = tree.get_symbol(symbol)
                 type = node.type
@@ -334,61 +334,61 @@ class HtmlPrinter(object):
                 except AttributeError as e:
                     print(e)
                     continue
-                
+
                 method(symbol, node, index, body)
-        
+
             index.append("</ul>")
             body.append("</ul>")
-        
+
         return "".join(self.index), "".join(self.body)
-    
+
     def process_function(self, symbol, node, index, body):
         html_symbol = escape(symbol)
         html_bare_symbol = escape(self.strip_ns(symbol))
         html_params = escape(node.params)
         func_type = "async " if node.doc.get(DOC_ASYNC) else ""
-        
+
         index.append('<li><a href="#{0}">{1}</a></li>\n'.format(html_symbol, html_bare_symbol))
         body.append('<li><small>{0} function</small> <b id="{1}">{1}</b>({2})<br />\n'.format(
             func_type, html_symbol, html_params))
         body.extend(self.process_doc(node))
         body.append("</li>\n\n")
-    
+
     def process_method(self, symbol, node, index, body):
         html_symbol = escape(symbol)
         html_name = escape(node.name)
         html_params = escape(node.params)
-        
+
         index.append('<li><a href="#{0}">{1}</a></li>\n'.format(html_symbol, html_name))
         method_type = "async " if node.doc.get(DOC_ASYNC) else ""
         body.append('<li><small>{0} method</small> <b id="{1}">{2}</b>({3})<br />\n'.format(
             method_type, html_symbol, html_name, html_params))
         body.extend(self.process_doc(node))
         body.append("</li>\n\n")
-        
+
     def process_signal(self, symbol, node, index, body):
         html_symbol = escape(symbol)
         html_name = escape(node.name)
         params = [(node.parent, "emitter", "object that emitted the signal")] + node.doc.get(DOC_PARAM, [])
         node.doc[DOC_PARAM] = params
-        
+
         unique_params = []
         for p in params:
             p = p[1].split(".")[0].strip()
             if not p in unique_params:
                 unique_params.append(p)
-        
+
         html_params = ", ".join(escape(p) for p in unique_params)
         index.append('<li><a href="#{0}">{1}</a></li>\n'.format(html_symbol, html_name))
         body.append('<li><small>signal</small> <b id="{0}">{1}</b>({2})<br />\n'.format(html_symbol, html_name, html_params))
         body.extend(self.process_doc(node))
         body.append("</li>\n\n")
-        
+
     def process_prototype(self, symbol, node, index, body):
         html_symbol = escape(symbol)
         html_bare_symbol = escape(self.strip_ns(symbol))
         index.append('<li><a href="#{0}">{1}</a>\n<ul>'.format(html_symbol, html_bare_symbol))
-        
+
         inherits = []
         if node.inherits:
             for i in node.inherits:
@@ -397,12 +397,12 @@ class HtmlPrinter(object):
                     inherits.append('<a href="#{0}">{1}</a>'.format(escape(canonical), escape(i)))
                 else:
                     inherits.append(escape(i))
-            
+
             extends = inherits[0]
             inherits = inherits[1:]
         else:
             extends = None
-        
+
         body.append('<li> <small>prototype</small> <b id="{0}">{0}</b>'.format(html_symbol))
         if extends:
             body.append(' extends {0}'.format(extends))
@@ -411,16 +411,16 @@ class HtmlPrinter(object):
         body.append("<br />\n")
         body.extend(self.process_doc(node))
         body.append("<ul>\n\n")
-        
+
         for item in node.methods:
             self.process_method(self.tree.get_symbol_name(item), item, index, body)
-        
+
         for item in node.signals:
             self.process_signal(self.tree.get_symbol_name(item), item, index, body)
-            
+
         index.append('</ul></li>\n')
         body.append('</ul></li>\n')
-    
+
     def process_enum(self, symbol, node, index, body):
         html_symbol = escape(symbol)
         html_bare_symbol = escape(self.strip_ns(symbol))
@@ -429,12 +429,12 @@ class HtmlPrinter(object):
         body.append('<li><small>enumeration</small> <b id="{0}">{0}</b><br />\n'.format(html_symbol))
         body.extend(self.process_doc(node))
         body.append("<ul>\n\n")
-        
+
         for item in node.items:
             body.append('<li><b id="{0}">{1}</b> - {2}</li>\n'.format(escape(self.tree.get_symbol_name(item)), escape(item.name), self.replace_links(escape(" ".join(self.join_buffers(item.doc[DOC_DESC]))))))
-        
+
         body.append('</ul></li>\n')
-    
+
     def process_namespace(self, symbol, node, index, body):
         html_symbol = escape(symbol)
         html_bare_symbol = escape(self.strip_ns(symbol))
@@ -443,13 +443,13 @@ class HtmlPrinter(object):
         body.append('<li><small>namespace</small> <b id="{0}">{0}</b>\n<br />'.format(html_symbol))
         body.extend(self.process_doc(node))
         body.append("<ul>\n\n")
-        
+
         for method in node.methods:
             self.process_method(self.tree.get_symbol_name(method), method, index, body)
-        
+
         index.append('</ul></li>\n')
         body.append('</ul></li>\n')
-    
+
     def process_mixin(self, symbol, node, index, body):
         html_symbol = escape(symbol)
         html_bare_symbol = escape(self.strip_ns(symbol))
@@ -458,13 +458,13 @@ class HtmlPrinter(object):
         body.append('<li><small>mixin</small> <b id="{0}">{0}</b>\n<br />'.format(html_symbol))
         body.extend(self.process_doc(node))
         body.append("<ul>\n\n")
-        
+
         for method in node.methods:
             self.process_method(self.tree.get_symbol_name(method), method, index, body)
-        
+
         index.append('</ul></li>\n')
         body.append('</ul></li>\n')
-    
+
     def process_field(self, symbol, node, index, body):
         html_symbol = escape(symbol)
         html_bare_symbol = escape(self.strip_ns(symbol))
@@ -473,7 +473,7 @@ class HtmlPrinter(object):
         body.append('<li><small>field</small> <b id="{0}">{0}</b><br />\n'.format(html_symbol))
         body.extend(self.process_doc(node))
         body.append("</li>\n\n")
-    
+
     def process_doc(self, node):
         doc = node.doc
         buf = []
@@ -485,10 +485,10 @@ class HtmlPrinter(object):
         is_async = doc.pop(DOC_ASYNC, None)
         since = doc.pop(DOC_SINCE, None)
         deprecated = doc.pop(DOC_DEPRECATED, None)
-        
+
         if desc:
             self.process_doc_text("Description", self.join_buffers(desc), buf)
-        
+
         if is_async:
             buf.append(
                 '<p><b>Asynchronous:</b> This function returns '
@@ -502,71 +502,71 @@ class HtmlPrinter(object):
             self.process_doc_deprecated(deprecated, buf)
         if params:
             self.process_doc_params(params, buf)
-        
+
         if returns:
             self.process_doc_returns(returns, buf)
-        
+
         if throws:
             self.process_doc_throws(throws, buf)
-        
+
         if text:
             self.process_doc_text("Additional documentation", self.join_buffers(text), buf)
-        
+
         for key in doc:
             print("Error: extra doc key '{0}' for {1}.".format(key, str(node)))
-        
+
         return buf
-    
+
     def join_buffers(self, buffers):
         if len( buffers) > 1:
             result = []
             for i in  buffers:
                 result.extend(i)
             return result
-        
+
         if buffers:
             return buffers[0]
-        
+
         return []
-    
+
     def process_doc_text(self, header, desc, buf):
         text = '\n'.join(desc)
         text = text.replace("\n```\n", '\n```js\n')
         text = text.replace("\\/", '/')
         buf.append(self.replace_links(self.mkd(text)))
-    
+
     def process_doc_params(self, params, buf):
         buf.append('<p><b>Parameters</b></p>\n<ul>\n')
-        
+
         for type, name, desc in params:
             type = " ".join(self.link_symbol(s) for s in type.split(" "))
             desc = self.mkd(desc)[3:-4]
             buf.append('<li>{0} <b>{1}</b> - {2}</li>\n'.format(type, escape(name), self.replace_links(desc)))
-        
+
         buf.append('</ul>\n')
-        
+
     def process_doc_throws(self, items, buf):
         buf.append('<p><b>Throws</b></p>\n<ul>\n')
-        
+
         for item in items:
             buf.extend(('<li>', self.replace_links(self.mkd(' '.join(s.strip() for s in item))), '</li>\n'))
-        
+
         buf.append('</ul>\n')
-        
+
     def process_doc_returns(self, items, buf):
         buf.append('<p><b>Returns</b></p>\n<ul>\n')
-        
+
         for item in items:
             buf.extend(('<li>', self.replace_links(self.mkd(' '.join(s.strip() for s in item))), '</li>\n'))
-        
+
         buf.append('</ul>\n')
-    
+
     def process_doc_since(self, items, buf):
         self.process_doc_version("Available", items, buf)
-            
+
     def process_doc_deprecated(self, items, buf):
         self.process_doc_version("Deprecated", items, buf)
-        
+
     def process_doc_version(self, label, items, buf):
         for item in items:
             buf.append('<p><b>{} since</b> '.format(label))
@@ -579,25 +579,25 @@ class HtmlPrinter(object):
             if text:
                 buf.append(": " + self.replace_links(text))
             buf.append("</p>\n")
-    
+
     def link_symbol(self, symbol, text=None):
         canonical = self.tree.get_canonical(symbol)
         if not text:
             text = symbol
         return '<a href="#{0}">{1}</a>'.format(escape(canonical), escape(text)) if canonical else escape(text)
-    
+
     def interlink(self, interlink, target, text=None):
         prefix = self.interlinks[interlink]
         return '<a href="{0}">{1}</a>'.format(escape(prefix + target), escape(text or target))
-        
+
     def replace_link(self, interlink, target, text=None):
         if interlink:
             return self.interlink(interlink, target, text)
         return self.link_symbol(target, text)
-        
+
     def replace_links(self, text):
         return LINK_RE.sub(lambda m: self.replace_link(m.group(1), m.group(2), m.group(3)), text)
-    
+
     def mkd(self, s):
         return self.markdown.convert(s)
 
@@ -616,7 +616,7 @@ def parse_doc_comment(doc):
     result = defaultdict(list)
     buf = []
     result[DOC_DESC].append(buf)
-    
+
     for line in doc:
         for tag in (DOC_PARAM, DOC_RETURN, DOC_THROW, DOC_ASYNC, DOC_SINCE, DOC_DEPRECATED):
             if line.startswith(tag):
@@ -624,20 +624,20 @@ def parse_doc_comment(doc):
                 buf = [line[len(tag):].strip()]
                 result[tag].append(buf)
                 break
-            
+
         else:
-            
+
             if mode not in (DOC_DESC, DOC_TEXT) and not line.startswith(" "):
                 mode = DOC_TEXT
                 buf = []
                 result[DOC_TEXT].append(buf)
-            
+
             for tag in DOC_IGNORE:
                 if line.startswith(tag):
                     line = line[len(tag)+1:]
-            
+
             buf.append(line)
-    
+
     try:
         params = result[DOC_PARAM]
         valid_params = []
@@ -647,11 +647,11 @@ def parse_doc_comment(doc):
                 print("Error: Invalid @param '%s'." % param)
             else:
                 valid_params.append(res)
-        
+
         result[DOC_PARAM] = valid_params
     except KeyError:
         pass
-    
+
     return result
 
 def parse_param(param):
@@ -660,50 +660,50 @@ def parse_param(param):
     if m:
         optional, type1, type2, name, desc = m.groups()
         type = type1 or type2
-        
+
         if optional:
             type = optional.strip() + " " + type
-        
+
         return type, name, desc
-    
+
     return None
 
 def parse_symbol(symbol, doc_head):
     m = METHOD_RE.match(symbol)
     if m:
         return FunctionSymbol, m.groups()
-    
+
     m = OBJECT_RE.match(symbol)
     if m:
         if "@enum" in doc_head:
             return EnumSymbol, m.groups()
-        
+
         if "@mixin" in doc_head:
             return MixinSymbol, m.groups()
-            
+
         if "@namespace" in doc_head:
             return NamespaceSymbol, m.groups()
-    
+
     m = PROTOTYPE_RE.match(symbol)
     if m:
         return PrototypeSymbol, m.groups()
-    
+
     m = SIGNAL_RE.match(symbol)
     if m:
         return SignalSymbol, m.groups()
-    
+
     m = PROPERTY_RE.match(symbol)
     if m:
         return PropertySymbol, m.groups()
-    
+
     m = FUNCTION_RE.match(symbol)
     if m:
         return FunctionSymbol, m.groups()
-    
+
     m = FIELD_RE.match(symbol)
     if m:
         return FieldSymbol, m.groups()
-        
+
     return None, None
 
 
@@ -716,7 +716,7 @@ def parse_source(source):
         for line in f:
             bare = line.strip()
             lineno += 1
-            if mode == MODE_CODE: 
+            if mode == MODE_CODE:
                 level = line.find("/**")
                 if level >= 0:
                     mode = MODE_DOC
@@ -725,12 +725,12 @@ def parse_source(source):
                     m = ALIAS_RE.match(line)
                     if m:
                         yield Alias(source, lineno, m.group(1), m.group(2))
-                        
+
             elif mode == MODE_DOC:
                 if line[level:level+2] != " *":
                     print("Error: Wrong level: %s:%s: %r" % (source, lineno, line))
-                
-                
+
+
                 if bare == "*/":
                     mode = MODE_SYMBOL
                 else:
@@ -764,7 +764,7 @@ def load_config(config_file):
     config = import_module(os.path.basename(config_file).rsplit(".", 1)[0])
     sys.path.pop(0)
     return config
-    
+
 def generate_doc(ns, out_file, sources_dir, config_file, template=None):
     config = load_config(config_file)
     if template is None:
@@ -772,13 +772,13 @@ def generate_doc(ns, out_file, sources_dir, config_file, template=None):
             template = config.TEMPLATE
         except AttributeError:
             raise ValueError("Template not specified")
-    
+
     tree = Symbols(ns)
-    
+
     for source in gather_sources(sources_dir):
         make_tree(tree, parse_source(source))
-    
-    
+
+
     markdown = Markdown(
         extensions = ['sane_lists', 'fenced_code', 'codehilite', 'def_list', 'attr_list', 'abbr', 'admonition'],
         safe_mode='escape',
@@ -787,11 +787,11 @@ def generate_doc(ns, out_file, sources_dir, config_file, template=None):
     interlinks = getattr(config, "INTERLINKS", defaultdict(str))
     printer = HtmlPrinter(tree, ns, markdown, interlinks=interlinks)
     index, body = printer.process()
-    
+
     data = {key: getattr(config, key) for key in dir(config) if not key.startswith("_")}
     data["index"] = index
     data["body"] = body
-    
+
     try:
         os.makedirs(os.path.dirname(out_file))
     except OSError:
