@@ -41,12 +41,12 @@ MODE_SYMBOL = 2
 
 FUNCTION_RE = re.compile(r"^\s*var\s+(\$?\w+(?:\.\$?\w+)*)\s+=\s+function\s*\((.*)\)\s*\{?$")
 METHOD_RE = re.compile(r"^\s*(\$?\w+(?:\.\$?\w+)*)\s+=\s+function\s*\((.*)\)\s*\{?$")
-PROTOTYPE_RE = re.compile(r"^\s*var\s+(\$?\w+(?:\.\$?\w+)*)\s+=\s+(?:Nuvola\.)?\$prototype\s*\((.*)\);$")
-OBJECT_RE = re.compile(r"^\s*var\s+(\$?\w+(?:\.\$?\w+)*)\s+=\s+\{\s*(?:\};)?$")
-SIGNAL_RE = re.compile(r"^this\.addSignal\s*\((.*)\);$")
+PROTOTYPE_RE = re.compile(r"^\s*var\s+(\$?\w+(?:\.\$?\w+)*)\s+=\s+(?:Nuvola\.)?\$prototype\s*\((.*)\)$")
+OBJECT_RE = re.compile(r"^\s*var\s+(\$?\w+(?:\.\$?\w+)*)\s+=\s+\{\s*(?:\})?$")
+SIGNAL_RE = re.compile(r"^this\.addSignal\s*\((.*)\)$")
 PROPERTY_RE = re.compile(r'^["\']?(\w+)["\']?\s*:\s*(.+)$')
-FIELD_RE = re.compile(r"^\s*(\$?\w+(?:\.\$?\w+)*)\s+=\s+(.*)\s*;$")
-ALIAS_RE = re.compile(r"^(\$?\w+(?:\.\$?\w+)*)\s+=\s+(\$?\w+(?:\.\$?\w+)*)\s*;$")
+FIELD_RE = re.compile(r"^\s*(\$?\w+(?:\.\$?\w+)*)\s+=\s+(.*)\s*$")
+ALIAS_RE = re.compile(r"^(\$?\w+(?:\.\$?\w+)*)\s+=\s+(\$?\w+(?:\.\$?\w+)*)\s*$")
 LINK_RE = re.compile(r'@link\{(?:(\w+?)&gt;)?(.+?)(?:\|(.+?))?\}')
 PARAM_RE = re.compile(r'^(optional\s+)?(?:[\'"](.+?)[\'"]\s*|([^\'"].*?)\s+)(.+?)\s+(.*)$')
 
