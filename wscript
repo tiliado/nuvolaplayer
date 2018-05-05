@@ -38,7 +38,7 @@ DEFAULT_HELP_URL = "https://github.com/tiliado/nuvolaruntime/wiki/Third-Party-Bu
 DEFAULT_WEB_APP_REQUIREMENTS_HELP_URL = DEFAULT_HELP_URL
 
 MIN_DIORITE = "4.10.0"
-MIN_VALA = "0.38.4"
+MIN_VALA = "0.40.4"
 MIN_GLIB = "2.52.0"
 MIN_GTK = "3.22.0"
 LEGACY_WEBKIT = "2.18.0"
@@ -644,7 +644,7 @@ def build(ctx):
         uselib += " VALACEF VALACEFGTK"
 
     for vapi in ("glib-2.0",):
-        vapi_dir = '/usr/share/vala-0.38/vapi'
+        vapi_dir = '/usr/share/vala-0.40/vapi'
         for d in vapi_dirs:
             if d not in ("vapi", "build") and os.path.isfile("%s/%s.vapi" % (d, vapi)):
                 vapi_dir = d

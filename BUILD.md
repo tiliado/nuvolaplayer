@@ -65,8 +65,8 @@ Dependencies
 ------------
 
   * [Python 3](http://python.org) >= 3.4
-  * [Vala](https://wiki.gnome.org/Projects/Vala) >= 0.38.4 && < 0.39.
-    If you use Vala >= 0.39, modify `wscript` and check that the `vapi/*.patch`
+  * [Vala](https://wiki.gnome.org/Projects/Vala) >= 0.40.4 && < 0.41.
+    If you use Vala >= 0.41, modify `wscript` and check that the `vapi/*.patch`
     patches still apply cleanly.
   * [Diorite library](https://github.com/tiliado/diorite) (version number is in sync with Nuvola)
   * [glib-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.52.0
