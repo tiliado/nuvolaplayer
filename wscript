@@ -492,7 +492,7 @@ def configure(ctx):
         vala_def(ctx, "UNITY")
     ctx.env.with_appindicator = ctx.options.appindicator and not ctx.env.NUVOLA_LITE
     if ctx.env.with_appindicator:
-        pkgconfig(ctx, 'appindicator3-0.1', 'APPINDICATOR', '0.4')
+        pkgconfig(ctx, 'ayatana-appindicator3-0.1', 'APPINDICATOR', '0.4')
         vala_def(ctx, "APPINDICATOR")
     if ctx.options.cef_default:
         ctx.options.cef = True
@@ -637,7 +637,7 @@ def build(ctx):
         packages += " unity Dbusmenu-0.4"
         uselib += " UNITY DBUSMENU"
     if ctx.env.with_appindicator:
-        packages += " appindicator3-0.1"
+        packages += " ayatana-appindicator3-0.1"
         uselib += " APPINDICATOR"
     if ctx.env.have_cef:
         packages += " valacef valacefgtk"
