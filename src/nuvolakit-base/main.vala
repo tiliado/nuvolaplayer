@@ -97,6 +97,18 @@ public int[] get_versions() {
     return {VERSION_MAJOR, VERSION_MINOR, VERSION_BUGFIX};
 }
 
+public int get_version_major() {
+    return VERSION_MAJOR;
+}
+
+public int get_version_minor() {
+    return VERSION_MINOR;
+}
+
+public int get_version_micro() {
+    return VERSION_BUGFIX;
+}
+
 /**
  * Returns versions encoded as integer, e.g. 30105 for 3.1.5.
  */
