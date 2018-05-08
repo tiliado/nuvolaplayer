@@ -40,7 +40,7 @@ Formal Rules
     [Example with a few released releases](https://raw.githubusercontent.com/tiliado/nuvola-app-siriusxm/0d8432f18f6164b19b58b5b68b1ca4f3d260179d/CHANGELOG.md).
 
 License
-======= 
+=======
 
 You should use the same license as Nuvola Player does
 ([BSD 2-Clause "Simplified" or "FreeBSD" license](http://opensource.org/licenses/BSD-2-Clause))
@@ -121,7 +121,7 @@ Git & GitHub Guidelines
     ([example](https://raw.githubusercontent.com/tiliado/nuvola-app-google-play-music/09a31c87133e036671441fbad5557c2ef6c74e45/CHANGELOG.md)).
   * **Don't mix unrelated changes in a single commit.** As a rule of thumb, if your commit adds more then a single entry
     to the CHANGELOG.md file, you should split it into more commits.
-    
+
 ### Commit Messages
 
 Commit messages should follow this template:
@@ -137,7 +137,7 @@ the two together.
 
 Further paragraphs come after blank lines. Also don't
 forget to link to issues.
-    
+
 Issue: tiliado/nuvolaplayer#128
 ```
 
@@ -150,7 +150,7 @@ Issue: tiliado/nuvolaplayer#128
     + You can use shortcuts "w/" = with, "w/o" = without, etc.
 * If short summary is not clear enough, add one or a few paragraphs with **description** about what you
   changed and why.
-* Add link to a **Github issue**, e.g. `tiliado/nuvolaplayer#128`, if there is any. See 
+* Add link to a **Github issue**, e.g. `tiliado/nuvolaplayer#128`, if there is any. See
   [Writing on GitHub](https://help.github.com/articles/writing-on-github/#references) for details.
 
 ### Pull Requests
@@ -171,7 +171,7 @@ the two together.
 
 Further paragraphs come after blank lines. Also don't
 forget to link to issues.
-    
+
 - Author: Pull Request Author Name <your@email>
 - Reviewed by: FIXME <FIXME>
 - Issue: tiliado/nuvolaplayer#128
@@ -228,7 +228,7 @@ forget to link to issues.
  -  It creates a commit summary like "Merge pull request #1 from fenryxo/mybranch.". That has
     **zero** information **value**.
  -  It provides only a basic text box to fill in a commit description. No control of line wrapping
-    at 75 characters. 
+    at 75 characters.
 
 ![no_github_merge](https://cloud.githubusercontent.com/assets/853706/8862021/fb68290e-318d-11e5-8e5e-5989d7df0a83.png)
 
@@ -238,7 +238,7 @@ Always **merge** pull requests **via command line**:
    `git remote add gh-USER https://github.com/USER/REPO.git; git fetch gh-USER`
  * Switch to the branch of the pull request: `git checkout gh-USER/BRANCH`
  * Review and test changes.
- * Switch to the master branch: `git checkout master` 
+ * Switch to the master branch: `git checkout master`
  * Use `git merge --no-ff --no-commit gh-USER/BRANCH` instead of a plain `git merge` to merge the
    pull request.
  * Use `git commit --author "Pull Request Author Name <author@email>"` to commit the merge on
