@@ -282,11 +282,9 @@ In order to provide users with the current rating state, use these API calls:
   * [MediaPlayer.setTrack()](apiref>Nuvola.MediaPlayer.setTrack) method accepts `track.rating` property, which holds
     track rating as a number in range from `0.0` to `1.0` as in
     [the MPRIS/xesam specification](https://www.freedesktop.org/wiki/Specifications/mpris-spec/metadata/#index22h4).
-    This property is ignored in Nuvola < 3.1.
   * [MediaPlayer.setCanRate()](apiref>Nuvola.MediaPlayer.setCanRate) controls whether
-    it is allowed to change rating remotely or not. This method is not available in Nuvola < 3.1 and results in error.
+    it is allowed to change rating remotely or not.
   * [MediaPlayer::RatingSet](apiref>Nuvola.MediaPlayer%3A%3ARatingSet) is emitted when rating is changed remotely.
-    This signal is not available in Nuvola < 3.1 and results in error.
 
 It's up to you to decide **how to map the double value to the rating system of your web app**.
 Here are some suggestions:
@@ -309,10 +307,7 @@ WebApp._onPageReady = function () {
   // Connect handler for signal ActionActivated
   Nuvola.actions.connect('ActionActivated', this)
 
-  // Connect rating handler if supported
-  if (Nuvola.checkVersion && Nuvola.checkVersion(3, 1)) {  // @API 3.1
-    player.connect('RatingSet', this)
-  }
+  player.connect('RatingSet', this)
 
   // Start update routine
   this.update()
@@ -348,9 +343,7 @@ WebApp.update = function () {
 
   player.setPlaybackState(state)
 
-  if (Nuvola.checkVersion && Nuvola.checkVersion(3.1)) { // @API 3.1
-    player.setCanRate(state !== PlaybackState.UNKNOWN)
-  }
+  player.setCanRate(state !== PlaybackState.UNKNOWN)
 }
 
 ...
@@ -383,10 +376,9 @@ older versions, use respective [Nuvola.checkVersion](apiref>Nuvola.checkVersion)
 In order to extract track length and position, use these API calls:
 
   * [MediaPlayer.setTrack](apiref>Nuvola.MediaPlayer.setTrack) supports `track.length` property, which holds track
-    length either as a string 'mm:ss' or number of microseconds. This property is ignored in Nuvola < 4.5.
+    length either as a string 'mm:ss' or number of microseconds.
   * [MediaPlayer.setTrackPosition](apiref>Nuvola.MediaPlayer.setTrackPosition) is used to update track position.
-    This method is not available in Nuvola < 4.5 and results in error.
-  * [Nuvola.parseTimeUsec](apiref>Nuvola.parseTimeUsec) (in Nuvola >= 4.5) can be used to convert track length string (e.g. '2:35')
+  * [Nuvola.parseTimeUsec](apiref>Nuvola.parseTimeUsec) can be used to convert track length string (e.g. '2:35')
     into the number of microseconds. [MediaPlayer.setTrack](apiref>Nuvola.MediaPlayer.setTrack) does that automatically
     for the `track.length` property.
 
@@ -394,17 +386,14 @@ In order to extract track length and position, use these API calls:
 WebApp.update = function () {
     ...
 
-  // @API 4.5: track.length ignored in Nuvola < 4.5
   var elm = document.getElementById('timetotal')
   track.length = elm ? elm.innerText || null : null
   player.setTrack(track)
 
   ...
 
-  if (Nuvola.checkVersion && Nuvola.checkVersion(4, 4, 18)) { // @API 4.5
-    var elm = document.getElementById('timeelapsed')
-    player.setTrackPosition(elm ? elm.innerText || null : null)
-  }
+  var elm = document.getElementById('timeelapsed')
+  player.setTrackPosition(elm ? elm.innerText || null : null)
 
   ...
 }
@@ -413,10 +402,8 @@ WebApp.update = function () {
 If you wish to let user change track position, use this API:
 
   * [MediaPlayer.setCanSeek](apiref>Nuvola.MediaPlayer.setCanSeek) is used to enable/disable remote seek.
-    This method is not available in Nuvola < 4.5 and results in error.
   * Then the [PlayerAction.SEEK](apiref>Nuvola.PlayerAction) is emitted whenever a remote seek is requested.
-    The action parameter contains a track position in microseconds. `PlayerAction.SEEK` is undefined in
-    Nuvola < 4.5 and the handler is never executed.
+    The action parameter contains a track position in microseconds.
   * You may need to use [Nuvola.clickOnElement](apiref>Nuvola.clickOnElement) with coordinates to trigger a click
     event at the position of progress bar corresponding to the track position,
     e.g. `Nuvola.clickOnElement(progressBar, param/Nuvola.parseTimeUsec(trackLength), 0.5)`.
@@ -424,9 +411,7 @@ If you wish to let user change track position, use this API:
 ```js
 WebApp.update = function () {
   ...
-  if (Nuvola.checkVersion && Nuvola.checkVersion(4, 4, 18)) { // @API 4.5
-    player.setCanSeek(state !== PlaybackState.UNKNOWN)
-  }
+  player.setCanSeek(state !== PlaybackState.UNKNOWN)
   ...
 }
 
@@ -435,7 +420,7 @@ WebApp.update = function () {
 WebApp._onActionActivated = function (emitter, name, param) {
   switch (name) {
     ...
-    case PlayerAction.SEEK:  // @API 4.5: undefined & ignored in Nuvola < 4.5
+    case PlayerAction.SEEK:
         var elm = document.getElementById('timetotal')
         var total = Nuvola.parseTimeUsec(elm ? elm.innerText : null)
         if (param > 0 && param <= total) {
@@ -458,16 +443,14 @@ Since **Nuvola 4.5**, it is also possible to integrate volume management. If you
 older versions, use respective [Nuvola.checkVersion](apiref>Nuvola.checkVersion) condition as shown in examples bellow.
 
 In order to extract volume, use [MediaPlayer.updateVolume](apiref>Nuvola.MediaPlayer.updateVolume) with the parameter
-in range 0.0-1.0 (i.e. 0-100%). This method is not available in Nuvola < 4.5 and results in error.
+in range 0.0-1.0 (i.e. 0-100%).
 
 ```js
 WebApp.update = function () {
     ...
 
-    if (Nuvola.checkVersion && Nuvola.checkVersion(4, 4, 18)) { // @API 4.5
-      var elm = document.getElementById('volume')
-      player.updateVolume(elm ? elm.innerText / 100 || null : null)
-    }
+    var elm = document.getElementById('volume')
+   player.updateVolume(elm ? elm.innerText / 100 || null : null)
 
     ...
 }
@@ -476,10 +459,9 @@ WebApp.update = function () {
 If you wish to let user change volume, use this API:
 
   * [MediaPlayer.setCanChangeVolume](apiref>Nuvola.MediaPlayer.setCanChangeVolume) is used to enable/disable remote
-    volume managementThis method is not available in Nuvola < 4.5 and results in error.
+    volume management.
   * Then the [PlayerAction.CHANGE_VOLUME](apiref>Nuvola.PlayerAction) is emitted whenever a remote volume change
     requested. The action parameter contains new volume as a double value in range 0.0-1.0.
-    `PlayerAction.CHANGE_VOLUME` is undefined in Nuvola < 4.5 and the handler is never executed.
   * You may need to use [Nuvola.clickOnElement](apiref>Nuvola.clickOnElement) with coordinates to trigger a click
     event at the position of volume bar corresponding to the desired volume,
     e.g. `Nuvola.clickOnElement(volumeBar, param, 0.5)`.
@@ -487,9 +469,7 @@ If you wish to let user change volume, use this API:
 ```js
 WebApp.update = function () {
   ...
-  if (Nuvola.checkVersion && Nuvola.checkVersion(4, 4, 18)) { // @API 4.5
-    player.setCanChangeVolume(state !== PlaybackState.UNKNOWN)
-  }
+  player.setCanChangeVolume(state !== PlaybackState.UNKNOWN)
   ...
 }
 
@@ -498,7 +478,7 @@ WebApp.update = function () {
 WebApp._onActionActivated = function (emitter, name, param) {
   switch (name) {
     ...
-    case PlayerAction.CHANGE_VOLUME:  // @API 4.5: undefined & ignored in Nuvola < 4.5
+    case PlayerAction.CHANGE_VOLUME:
       document.getElementById('volume').innerText = Math.round(param * 100)
       break
     ...
