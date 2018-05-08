@@ -7,6 +7,80 @@ Nuvola Apps Changelog
     [Nuvola Devel mailing list](https://groups.google.com/d/forum/nuvola-player-devel)
     to receive more technical announcements and important information about future development.
 
+Release 4.11.0 - May 8th, 2018
+------------------------------
+
+### Changes for Users
+
+  * [Nuvola Adds Detection of Headphones and Changes Approach to GTK Theming](https://medium.com/nuvola-news/nuvola-adds-detection-of-headphones-and-changes-approach-to-gtk-theming-274cab6772fe):
+    Nuvola can detect when **headphones are (un)plugged** and mute, pause or resume playback accordingly.
+    Theming has changed: **Greybird** is used as a fallback theme instead of Adwaita, and Nuvola no longer bundles
+    other GTK+ themes but embraces Flatpak **GTK+ theme extensions** instead.
+  * [Nuvola Updates 8tracks, Bandcamp, Google Play Music, and Google Calendar](https://medium.com/nuvola-news/nuvola-4-10-23-325c54a9d494):
+    Flatpaks of **8tracks, Bandcamp, and Google Play Music**were updated to use Chromium-based backend for music
+    playback without Flash plugin. **Google Calendar** also uses Chromium engine for better performance and desktop
+    notifications instead of web app alerts.
+  * [Nuvola Supports Ubuntu 18.04; Updates OwnCloud Music, Plex Music, Pocket Casts, and SiriusXM](https://medium.com/nuvola-news/nuvola-4-10-29-784f90063b44):
+    Flatpaks of **OwnCloud Music, Plex Music, Pocket Casts, and SiriusXM** were updated to use Chromium-based backend
+    for music playback without Flash plugin and to improve desktop integration features such as a track progress bar
+    and volume slider. [Installation instructions](https://nuvola.tiliado.eu/nuvola/ubuntu/bionic/) were updated
+    for **Ubuntu 18.04 LTS**.
+  * [Nuvola Updates Amazon Cloud Player, BBC iPlayer & Jupiter Broadcasting; Supports Fedora 28](https://medium.com/nuvola-news/nuvola-updates-amazon-cloud-player-bbc-iplayer-jupiter-broadcasting-supports-fedora-28-38c809a08639):
+    Flatpaks of** Amazon Cloud Player, BBC iPlayer & Jupiter Broadcasting **— all maintained by Andrew Stubbs — were
+    updated to use Chromium-based backend for music playback without Flash plugin whenever possible.
+    [Installation instructions](https://nuvola.tiliado.eu/nuvola/ubuntu/bionic/) were updated for **Fedora 28**,
+    and **Nuvola Runtime** received a few tweaks.
+
+### Changes for Script Maintainers
+
+  * New utility function `Nuvola.queryText()`
+    ([doc](https://tiliado.github.io/nuvolaplayer/development/apps/api_reference.html#Nuvola.queryText))
+    used to query an element by a CSS selector expression and return text content or null.
+  * New utility function `Nuvola.queryAttribute()`
+    ([doc](https://tiliado.github.io/nuvolaplayer/development/apps/api_reference.html#Nuvola.queryAttribute))
+    used to query an element by a CSS selector expression and return its attribute or null.
+  * New utility function `Nuvola.setInputValueWithEvent()`
+    ([doc](https://tiliado.github.io/nuvolaplayer/development/apps/api_reference.html#Nuvola.setInputValueWithEvent))
+    used to set the value of an input element and then emit an`input` event.
+  * New utility function `Nuvola.exportImageAsBase64()`
+    ([doc](https://tiliado.github.io/nuvolaplayer/development/apps/api_reference.html#Nuvola.exportImageAsBase64))
+    used to load and export an image as base64 data URI, e.g., in the case of `blob://` resources.
+  * The Chromium-based backend now supports URL filtering for external links, which is more powerful than that of
+    WebKitGTK backend, e.g., it can detect JavaScript redirects in initially empty pop-up windows.
+  * Developer tools add the WebView sidebar to retrieve and change the dimensions of the web view or to take a snapshot.
+    It will be used to provide
+    [AppStream metadata with per-app screenshots](https://github.com/tiliado/nuvolasdk/issues/5)
+    to be shown in GNOME Software, for example.
+  * Nuvola ADK includes [Standard JavaScript code style checker](https://standardjs.com/). You can use the `standard`
+    command to check the style of your script or use `standard --fix` to convert it.
+  * [NuvolaKit JavaScript API Reference](https://tiliado.github.io/nuvolaplayer/development/apps/api_reference.html)
+    was updated with new symbols and
+    [changelogs](https://tiliado.github.io/nuvolaplayer/development/apps/api_reference.html#x-changelog-4-11)
+    were added to track changes more easily.
+  * Nuvola SDK calculates a micro version number from git as the number of commits from the last tag and adds it to
+    `metadata.json`. The micro version number is shown in the About dialog.
+  * Nuvola SDK uses two spaces for the indentation of JSON files.
+
+### Changes for Third-Party Packagers
+
+  * Nuvola can still be
+    [built without the Chromium-based backend](https://github.com/tiliado/nuvolaruntime/blob/master/BUILD.md#web-engines).
+    Please let us know whether you still need that possibility or the WebKitGTK-based backend can be removed.
+  * Vala ≥ 0.40.4 is required and all compatibility issues with Valac 0.40 were fixed.
+    [[GitHub 1](https://github.com/tiliado/diorite/issues/19), [GitHub 2](https://github.com/tiliado/diorite/issues/23)]
+  * New dependencies: libpulse and libpulse-mainloop-glib.
+  * Canonical’s appindicator3 was replaced with a better maintained fork (libayatana-appindicator3) from
+    [Ayatana Indicators project](https://ayatanaindicators.github.io/).
+  * The WebKitGTK+ VAPI patch was dropped.
+  * WAF build system was upgraded to 2.0.6.
+  * Build instructions were updated and moved to a`BUILD.md` file
+    [[GitHub](https://github.com/tiliado/nuvolaruntime/blob/master/BUILD.md#web-engines)].
+  * Another batch of scripts was ported to use the Chromium-based backend: 8tracks, Bandcamp, Google Calendar,
+    OwnCloud Music, Plex Music, Pocket Casts, SiriusXM, Amazon Cloud Player, BBC iPlayer, and Jupiter Broadcasting.
+    If you still support only the WebKitGTK-based backend, you can try to remove `Chromium[] Feature[MSE]` flags from
+    their requirements and add `Feature[Flash]` when necessary. However, this should be done on a case-by-case basis
+    and only after careful testing. We do not test and support these modifications though.
+
 Release 4.10.0 - March 4th, 2018
 --------------------------------
 
