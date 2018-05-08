@@ -21,8 +21,7 @@ Formal Rules
 
  3. You must provide contact e-mail in `README.md`, e.g. inside Copyright section.
 
- 4. You must use a consistent coding style of ``integrate.json``, preferably the coding style of
-    Nuvola Player.
+ 4. You must use [Standard JS coding style](https://standardjs.com/) for ``integrate.json``.
 
  5. You must use [strict JavaScript mode][JS_STRICT] and [self-executing anonymous function][JS_SEAF].
     (See [tutorial](:apps/tutorial.html).)
@@ -253,135 +252,6 @@ Always **merge** pull requests **via command line**:
  * Finally, ``git push``.
  * *Optionally*, you can remove remote repository: `git remote remove gh-USER/BRANCH`
 
-
-Coding Style
-============
-
-Service integrations are maintained in separate repositories as more or less independent sub-projects.
-Therefore, you can use different coding style that the main Nuvola Player project. However, your
-coding style have to be consistent. You can get inspired by coding style of Nuvola Player:
-
-Basics
-------
-
- *  Source lines may be up to 100 characters long.
- *  Variables should be declared at the point where they are first needed rather than at the top of
-    a block or function.
-
-Naming
-------
-
-  * Prototype objects ("classes") are named in camel case: ``MediaPlayer``.
-  * Constants (and values of enumerations) are all uppercase, with underscores between words: ``CONSTANT_NAME``
-  * Other variables and method/function names are in camel case with the first letter lower-cased: ``methodName()``, ``myVariable``.
-  * Usage of single-letter variables or abbreviations is discouraged except for temporary variables in loops (``i``, ``j``, etc.).
-
-```js
-
-// Prototype name
-var ConfigStorage = Nuvola.$prototype(KeyValueStorage, SignalsMixin);
-
-// Enumeration
-var PlaybackState = {
-    UNKNOWN: 0,
-    PAUSED: 1,
-    PLAYING: 2,
-}
-
-// Constant
-var PI_VALUE = "3.14";
-
-var myVariable = 5;
-var myFunction = function(){};
-```
-
-Braces
-------
-
-  * Both opening and closing curly braces of code blocks appear on the new line. The code is more fluffy.
-  * The opening curly brace of an object literal appears on the same line as a preceding assignment operator.
-  * If body of ``if``, ``else``, ``while`` or ``for`` only one statement, it can be optionally surrounded by braces. However, it should always be on a new line with proper indentation.
-  * If one branch of ``if-else`` block is braced, all should be braced.
-  * To not put space between function name and opening brace.
-
-```js
-
-var foo = function()
-{
-    for (var i = 0 ; i < 10 ; ++i)
-    {
-        ...
-    }
-}
-
-if (x == 4)
-{
-    ...
-}
-else
-{
-    ...
-}
-
-// Preferred
-if (x >= 0)
-    y = x;
-else
-    y = -x;
-
-// Also possible
-if (x >= 0)
-{
-    y = x;
-}
-else
-{
-    y = -x;
-}
-
-try
-{
-    ...
-}
-catch (e)
-{
-    ...
-}
-
-var person = {
-    name: "Jiří",
-    surname: "Janoušek",
-}
-
-```
-Spaces
-------
-
-  * Indentation level is four spaces. Use a clever editor that can treat spaces as tabs, i.e. it
-    inserts four spaces when you press TAB.
-  * A blank line should be padded to the “natural” indentation level of the surrounding lines. 
-  * Don't put spaces between function name and opening brace.
-  * Don't put spaces between variable name and opening square brace.
-  * Keywords like ``if``, ``for``, ``while`` and ``catch`` are followed by a space and opening bracket.
-  * Don't use inner spaces of brackets.
-  * Use spaces around binary operators.
-  * Don't use spaces around unary and increment/decrement operators (e.g. ``++``, ``--``, ``!``, ``!!``, ``-``). 
-  
-```js
-
-document.getElementById("foo");
-
-myArray[1];
-
-if (true)
-    ...
-
-var c = a + b;
-var c = -b;
-var c = --b;
-var success = !failed;
-
-```
 
 [github]: https://github.com
 [JS_STRICT]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions_and_function_scope/Strict_mode
