@@ -26,7 +26,7 @@ Formal Rules
  5. You must use [strict JavaScript mode][JS_STRICT] and [self-executing anonymous function][JS_SEAF].
     (See [tutorial](:apps/tutorial.html).)
 
- 6. You have to use Nuvola Player JavaScript API >= 4.6.
+ 6. You have to use [NuvolaKit JavaScript API](apiref>x-changelog) >= 4.11.
 
  7. You have to [mark translatable strings](:apps/translations.html) in ``integrate.js``.
 
