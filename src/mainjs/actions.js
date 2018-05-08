@@ -48,14 +48,12 @@ Actions.$init = function () {
      * @param Variant param    action parameter, usually null
      *
      * ```
-     * MyObject.$init = function()
-     * {
-     *     Nuvola.actions.connect("ActionActivated", this);
+     * MyObject.$init = function () {
+     *   Nuvola.actions.connect('ActionActivated', this)
      * }
      *
-     * MyObject._onActionActivated = function(emitter, name, param)
-     * {
-     *     console.log("Action activated: " + name);
+     * MyObject._onActionActivated = function (emitter, name, param) {
+     *   console.log('Action activated: ' + name)
      * }
      * ```
      */
@@ -68,14 +66,12 @@ Actions.$init = function () {
      * @param Boolean enabled    true if the action is enabled
      *
      * ```
-     * MyObject.$init = function()
-     * {
-     *     Nuvola.actions.connect("ActionEnabledChanged", this);
+     * MyObject.$init = function () {
+     *   Nuvola.actions.connect('ActionEnabledChanged', this)
      * }
      *
-     * MyObject._ActionEnabledChanged = function(emitter, name, enabled)
-     * {
-     *     console.log("Action " + name + " " + (enabled ? "enabled" : "disabled") + ".");
+     * MyObject._ActionEnabledChanged = function (emitter, name, enabled) {
+     *   console.log('Action ' + name + ' ' + (enabled ? 'enabled' : 'disabled') + '.')
      * }
      * ```
      */
@@ -92,8 +88,8 @@ Actions.$init = function () {
  *
  * when action is activated, signal ActionActivated is emitted.
  *
- * @param String group               action group, e.g. "playback"
- * @param String scope               action scope, use "win" for window-specific actions (preferred) or "app" for
+ * @param String group               action group, e.g. 'playback'
+ * @param String scope               action scope, use 'win' for window-specific actions (preferred) or 'app' for
  *                                   app-specific actions
  * @param String name                action name, should be in ``dash-separated-lower-case``, e.g. ``toggle-play``
  * @param String|null label          label shown in user interface, e.g. ``Play``
@@ -105,10 +101,10 @@ Actions.$init = function () {
  *
  * ```
  * // Add new simple action ``play`` with icon ``media-playback-start``
- * Nuvola.actions.addAction("playback", "win", "play", "Play", null, "media-playback-start", null);
+ * Nuvola.actions.addAction('playback', 'win', 'play', 'Play', null, 'media-playback-start', null)
  *
  * // Add new toggle action ``thumbs-up`` with initial state ``true`` (on)
- * Nuvola.actions.addAction("playback", "win", "thumbs-up", "Thumbs up", null, null, null, true);
+ * Nuvola.actions.addAction('playback', 'win', 'thumbs-up', 'Thumbs up', null, null, null, true)
  * ```
  */
 Actions.addAction = function (group, scope, name, label, mnemoLabel, icon, keybinding, state) {
@@ -122,8 +118,8 @@ Actions.addAction = function (group, scope, name, label, mnemoLabel, icon, keybi
  *
  * when action is activated, signal ActionActivated is emitted.
  *
- * @param String group       action group, e.g. "playback"
- * @param String scope       action scope, use "win" for window-specific actions (preferred) or "app" for
+ * @param String group       action group, e.g. 'playback'
+ * @param String scope       action scope, use 'win' for window-specific actions (preferred) or 'app' for
  *                           app-specific actions
  * @param String name        action name, should be in ``dash-separated-lower-case``, e.g. ``toggle-play``
  * @param variant stateId    initial state of the action. must be one of states specified in ``options`` array
@@ -134,17 +130,17 @@ Actions.addAction = function (group, scope, name, label, mnemoLabel, icon, keybi
  * ```
  * // define rating options - 5 states with state id 0-5 representing 0-5 stars
  * var ratingOptions = [
- *     // stateId, label, mnemo_label, icon, keybinding
- *     [0, "Rating: 0 stars", null, null, null, null],
- *     [1, "Rating: 1 star", null, null, null, null],
- *     [2, "Rating: 2 stars", null, null, null, null],
- *     [3, "Rating: 3 stars", null, null, null, null],
- *     [4, "Rating: 4 stars", null, null, null, null],
- *     [5, "Rating: 5 stars", null, null, null, null]
- * ];
+ *   // stateId, label, mnemo_label, icon, keybinding
+ *   [0, 'Rating: 0 stars', null, null, null, null],
+ *   [1, 'Rating: 1 star', null, null, null, null],
+ *   [2, 'Rating: 2 stars', null, null, null, null],
+ *   [3, 'Rating: 3 stars', null, null, null, null],
+ *   [4, 'Rating: 4 stars', null, null, null, null],
+ *   [5, 'Rating: 5 stars', null, null, null, null]
+ * ]
  *
  * // Add new radio action named ``rating`` with initial state ``0`` (0 stars)
- * Nuvola.actions.addRadioAction("playback", "win", "rating", 0, ratingOptions);
+ * Nuvola.actions.addRadioAction('playback', 'win', 'rating', 0, ratingOptions)
  * ```
  */
 Actions.addRadioAction = function (group, scope, name, stateId, options) {
@@ -226,11 +222,11 @@ Actions.updateEnabledFlags = function (enabledFlags) {
  * @return current state: ``true/false`` for toggle actions, one of stateId entries of radio actions
  *
  * ```
- * var thumbsUp = Nuvola.actions.getState("thumbs-up");
- * console.log("Thumbs up is toggled " + (thumbsUp ? "on" : "off"));
+ * var thumbsUp = Nuvola.actions.getState('thumbs-up')
+ * console.log('Thumbs up is toggled ' + (thumbsUp ? 'on' : 'off'))
  *
- * var stars = Nuvola.actions.getState("rating");
- * console.log("Number of stars: " + stars);
+ * var stars = Nuvola.actions.getState('rating')
+ * console.log('Number of stars: ' + stars)
  * ```
  */
 Actions.getState = function (name) {
@@ -247,13 +243,13 @@ Actions.getState = function (name) {
  * @return current state: ``true/false`` for toggle actions, one of stateId entries of radio actions
  *
  * ```
- * Nuvola.actions.getStateAsync("thumbs-up").then(function(state) {
- *     console.log("Thumbs up is toggled " + (state ? "on" : "off"));
- * });
+ * Nuvola.actions.getStateAsync('thumbs-up').then(function (state) {
+ *   console.log('Thumbs up is toggled ' + (state ? 'on' : 'off'));
+ * })
  *
- * Nuvola.actions.getStateAsync("rating").then(function(stars) {
- *     console.log("Number of stars: " + stars);
- * });
+ * Nuvola.actions.getStateAsync('rating').then(function (stars) {
+ *   console.log('Number of stars: ' + stars)
+ * })
  * ```
  */
 Actions.getStateAsync = function (name) {
@@ -271,10 +267,10 @@ Actions.getStateAsync = function (name) {
  *
  * ```
  * // toggle thumbs-up off
- * Nuvola.actions.setState("thumbs-up", false);
+ * Nuvola.actions.setState('thumbs-up', false)
  *
  * // Set 5 stars
- * Nuvola.actions.setState("rating", 5);
+ * Nuvola.actions.setState('rating', 5)
  * ```
  */
 Actions.setState = function (name, state) {
@@ -327,10 +323,10 @@ Actions.activate = function (name, parameter) {
  * @param optional Variant parameter    parameter to the action
  *
  * ```
- * var navigateBack = Nuvola.makeElement("button", null, "<");
- * var elm = document.getElementById("bar");
- * elm.appendChild(navigateBack);
- * Nuvola.actions.bindButton(navigateBack, Nuvola.BrowserAction.GO_BACK);
+ * var navigateBack = Nuvola.makeElement('button', null, '<')
+ * var elm = document.getElementById('bar')
+ * elm.appendChild(navigateBack)
+ * Nuvola.actions.bindButton(navigateBack, Nuvola.BrowserAction.GO_BACK)
  * ```
  */
 Actions.bindButton = function (button, name, parameter) {

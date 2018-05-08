@@ -15,18 +15,18 @@ Prepare development environment
 
  2. Create a project directory `~/projects/nuvola-apps` (or any other name, but don't forget to
     adjust paths in this tutorial).
-    
+
         mkdir -p ~/projects/nuvola-apps
- 
+
  3. [Launch and set up Nuvola ADK](https://github.com/tiliado/nuvolaruntime/wiki/Nuvola-App-Developer-Kit#running-and-set-up)
-     
+
  4. Create a new project with "nuvola://home.html" as a home URL.
-    
+
         $ cd ~/projects/nuvola-apps
         $ nuvolasdk new-project --name "Happy Songs" --url "nuvola://home.html"
         ...
         Finished!
-        
+
         ./nuvola-app-happy-songs
         total 52
         drwxr-sr-x 1 fenryxo fenryxo   244 Dec  4 18:39 .
@@ -42,9 +42,9 @@ Prepare development environment
         -rw-r--r-- 1 fenryxo fenryxo   541 Dec  4 18:39 metadata.in.json
         -rw-r--r-- 1 fenryxo fenryxo  1079 Dec  4 18:39 README.md
         drwxr-sr-x 1 fenryxo fenryxo    60 Dec  3 18:57 src
-    
+
  5. Copy a dumb example of a streaming website.
-    
+
         :::sh
         cd ~/projects/nuvola-apps/nuvola-app-happy-songs
         cp "$(nuvolasdk data-dir)/examples/home.html" .
@@ -62,25 +62,25 @@ Let's look at the example:
 
     :::json
     {
-        "id": "happy_songs",
-        "name": "Happy Songs",
-        "maintainer_name": "Jiří Janoušek",
-        "maintainer_link": "https://github.com/fenryxo",
-        "version_major": 1,
-        "version_minor": 0,
-        "api_major": 4,
-        "api_minor": 6,
-        "categories": "AudioVideo;Audio;",
-        "requirements": "Feature[Flash] Codec[MP3]",
-        "home_url": "nuvola://home.html",
-        "license": "2-Clause BSD, CC-BY-3.0",
-        "build": {
-            "icons": [
-                "src/icon.svg SCALABLE 64 128 256", 
-                "src/icon-xs.svg 16 22 24", 
-                "src/icon-sm.svg 32 48"
-                ]
-        }
+      "id": "happy_songs",
+      "name": "Happy Songs",
+      "maintainer_name": "Jiří Janoušek",
+      "maintainer_link": "https://github.com/fenryxo",
+      "version_major": 1,
+      "version_minor": 0,
+      "api_major": 4,
+      "api_minor": 6,
+      "categories": "AudioVideo;Audio;",
+      "requirements": "Feature[Flash] Codec[MP3]",
+      "home_url": "nuvola://home.html",
+      "license": "2-Clause BSD, CC-BY-3.0",
+      "build": {
+        "icons": [
+          "src/icon.svg SCALABLE 64 128 256",
+          "src/icon-xs.svg 16 22 24",
+          "src/icon-sm.svg 32 48"
+        ]
+      }
 
 This file contains several mandatory fields:
 
@@ -102,9 +102,9 @@ This file contains several mandatory fields:
 
 :   A minor version of service integration, an integer >= 0.  This field should
     be increased only when a new release is made. Never increase version number
-    in regular commits nor pull requests, but only in release commits with 
+    in regular commits nor pull requests, but only in release commits with
     a commit message "Release X.Y".
-    
+
 `maintainer_name`
 
 :   A name of the maintainer of the service integration.
@@ -133,7 +133,7 @@ This file contains several mandatory fields:
 :   Home page of your service. The dump example of a streaming website contains file `home.html`, which
     has a special address `nuvola://home.html`. You will use a real homepage later in your own
     service integration (e.g. `https://play.google.com/music/` for Google Play Music).
-    
+
     This field is not required if you use custom function to handle home page request.
     See [Web apps with a variable home page URL](:apps/variable-home-page-url.html).
 
@@ -189,14 +189,14 @@ modifications.
  * Copyright 2017 Your name <your e-mail>
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met: 
- * 
+ * modification, are permitted provided that the following conditions are met:
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
+ *    list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution. 
- * 
+ *    and/or other materials provided with the distribution.
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -209,69 +209,65 @@ modifications.
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-"use strict";
+'use strict'
 
-(function(Nuvola)
-{
+(function (Nuvola) {
 
-// Create media player component
-var player = Nuvola.$object(Nuvola.MediaPlayer);
+  // Create media player component
+  var player = Nuvola.$object(Nuvola.MediaPlayer)
 
-// Handy aliases
-var PlaybackState = Nuvola.PlaybackState;
-var PlayerAction = Nuvola.PlayerAction;
+  // Handy aliases
+  var PlaybackState = Nuvola.PlaybackState
+  var PlayerAction = Nuvola.PlayerAction
 
-// Create new WebApp prototype
-var WebApp = Nuvola.$WebApp();
+  // Create new WebApp prototype
+  var WebApp = Nuvola.$WebApp()
 
-// Initialization routines
-WebApp._onInitWebWorker = function(emitter)
-{
-    Nuvola.WebApp._onInitWebWorker.call(this, emitter);
-    
-    var state = document.readyState;
-    if (state === "interactive" || state === "complete")
-        this._onPageReady();
-    else
-        document.addEventListener("DOMContentLoaded", this._onPageReady.bind(this));
-}
+  // Initialization routines
+  WebApp._onInitWebWorker = function (emitter) {
+    Nuvola.WebApp._onInitWebWorker.call(this, emitter)
 
-// Page is ready for magic
-WebApp._onPageReady = function()
-{
-    // Connect handler for signal ActionActivated
-    Nuvola.actions.connect("ActionActivated", this);
-    
-    // Start update routine
-    this.update();
-}
-
-// Extract data from the web page
-WebApp.update = function()
-{
-    var track = {
-        title: null,
-        artist: null,
-        album: null,
-        artLocation: null,
-        rating: null
+    var state = document.readyState
+    if (state === 'interactive' || state === 'complete') {
+      this._onPageReady()
+    } else {
+      document.addEventListener('DOMContentLoaded', this._onPageReady.bind(this))
     }
-    
-    player.setTrack(track);
-    player.setPlaybackState(PlaybackState.UNKNOWN);
-    
+  }
+
+  // Page is ready for magic
+  WebApp._onPageReady = function () {
+    // Connect handler for signal ActionActivated
+    Nuvola.actions.connect('ActionActivated', this)
+
+    // Start update routine
+    this.update()
+  }
+
+  // Extract data from the web page
+  WebApp.update = function () {
+    var track = {
+      title: null,
+      artist: null,
+      album: null,
+      artLocation: null,
+      rating: null
+    }
+
+    player.setTrack(track)
+    player.setPlaybackState(PlaybackState.UNKNOWN)
+
     // Schedule the next update
-    setTimeout(this.update.bind(this), 500);
-}
+    setTimeout(this.update.bind(this), 500)
+  }
 
-// Handler of playback actions
-WebApp._onActionActivated = function(emitter, name, param)
-{
-}
+  // Handler of playback actions
+  WebApp._onActionActivated = function (emitter, name, param) {
+  }
 
-WebApp.start();
+  WebApp.start();
 
-})(this);  // function(Nuvola)
+})(this)  // function (Nuvola)
 ```
 
 Lines 2-22
@@ -296,7 +292,7 @@ Line 31
 Line 38
 
 :   Create new WebApp prototype object derived from the [Nuvola.WebApp](apiref>Nuvola.WebApp) prototype that contains
-    handy default handlers for initialization routines and signals from Nuvola core. 
+    handy default handlers for initialization routines and signals from Nuvola core.
     You can override them if your web app requires more magic ;-)
 
 Lines 41-50
@@ -334,15 +330,15 @@ Nuvola Apps Runtime uses two processes for each service (web app):
     is executed in a **bare JavaScript environment**, which means there are no `window`, `document`
     or other common object provided by a web browser engine. Therefore, make sure you don't use any of these
     objects in your top-level code.
-    
+
     In **the previous example**, there is not any handler for the
     [Nuvola.Core::InitAppRunner signal](apiref>Nuvola.Core::InitAppRunner).
     It usually is used only for extra features such as
     [Web apps with a variable home page URL]({filename}apps/variable-home-page-url.md),
     [Initialization and Preferences Forms]({filename}apps/initialization-and-preferences-forms.md)
     or [Custom Actions]({filename}apps/custom-actions.md).
-    
- 
+
+
   * **Web Worker process** is created by WebKitGtk WebView and it's the place where the web
     interface of a web app lives, i.e. where the website is loaded. Nuvola Runtime executes the
     integration script in the Web Worker process everytime a web page is loaded in it to integrate
@@ -369,7 +365,7 @@ Finally, execute following commands:
 After the project have been built, you can run Nuvola Runtime from terminal with following command and you will see a list with only one
 service Happy Songs, because we told Nuvola to load service integrations only from directory
 `~/projects/nuvola-apps`.
-    
+
     $ nuvola -D -A ~/projects/nuvola-apps
     ...
     [Master:DEBUG    Nuvola] WebAppRegistry.vala:128: Found web app Happy Songs at /home/fenryxo/projects/nuvola-aps/nuvola-app-happy-songs, version 1.0
@@ -380,8 +376,8 @@ service Happy Songs, because we told Nuvola to load service integrations only fr
 !!! danger "Make sure all Nuvola Apps instances have been closed"
     If you see following warning in terminal, there is a running instance of Nuvola Apps
     that must be closed. Otherwise, the `-A` parameter is ignored.
-    
-    
+
+
         [Master:INFO     Nuvola] master.vala:135: Nuvola App instance is already running
         and will be activated.
         [Master:WARNING  Nuvola] master.vala:137: Some command line parameters (-D, -v, -A, -L) are
@@ -391,7 +387,7 @@ service Happy Songs, because we told Nuvola to load service integrations only fr
 ![A list with single service integration](:images/guide/app_list_one_service.png)
 
 Launch your service integration and a new window will be opened with the test service. First of all,
-show **developer's sidebar** (Gear menu → Show sidebar → select "Developer" in the right 
+show **developer's sidebar** (Gear menu → Show sidebar → select "Developer" in the right
 sidebar), then enable **WebKit Web Inspector** (right-click the web page anywhere and select
 "Inspect element").
 
@@ -419,7 +415,7 @@ However, this will change for Nuvola 4.x in the future and you should not count 
 in `metadata.in.json`. It can contain a space separated list of following requirements:
 
   * `Codec[MP3]`: The web app can play audio with HTML5 audio technology and requires a MP3 codec.
-  * `Feature[Flash]`: The web app requires Adobe Flash plugin. Use only if your app cannot use 
+  * `Feature[Flash]`: The web app requires Adobe Flash plugin. Use only if your app cannot use
     HTML5 Audio.
   * `WebKitGTK[X.Y.Z]`: The web app doesn't work properly in WebKitGTK < X.Y.Z. While the genuine flatpak
     builds of Nuvola always contain the latest stable release of WebKitGTK, this may not be true for
@@ -524,7 +520,7 @@ If you would like to have your service integration **maintained as a part of Nuv
 Apps project** and distributed in Nuvola Player repository, follow these steps:
 
   * Make sure your script follows the [Service Integration Guidelines](:apps/guidelines.html).
-  * Make sure your ``integrate.js`` contain proper copyright information 
+  * Make sure your ``integrate.js`` contain proper copyright information
     "Copyright 2017 Your name &lt;your e-mail&gt;".
   * The test service used in tutorial and guide contains 2-Clause BSD license. If you have severe
     reasons to choose a different license, update license text in both ``integrate.js`` and
@@ -532,7 +528,7 @@ Apps project** and distributed in Nuvola Player repository, follow these steps:
   *  Create an empty remote repository named "nuvola-app-{app-id}" on GitHub.
      See [GitHub For Beginners: Don't Get Scared, Get Started][A1] for help.
   * Push content of your local repository to the remote repository.
-    
+
         :::sh
         git remote add origin git@github.com:fenryxo/nuvola-app-test.git
         git push -u origin master
@@ -541,7 +537,7 @@ Apps project** and distributed in Nuvola Player repository, follow these steps:
   * Create new issue at [Nuvola Apps Runtime repository](https://github.com/tiliado/nuvolapruntime/issues/new)
     with subject "Code review: You Service Name integration" and post a link the the issue created
     above.
- 
+
 [A1]: http://readwrite.com/2013/09/30/understanding-github-a-journey-for-beginners-part-1
 [A2]: http://readwrite.com/2013/10/02/github-for-beginners-part-2
 
@@ -561,7 +557,7 @@ integration. You are encouraged to take a look at articles in advanced section t
     This article covers Web apps that don't have a single (constant) home page URL, so their home page has to be specified by user.
   * [Custom Actions](:apps/custom-actions.html):
     This article covers API that allows you to add custom actions like thumbs up/down rating.
-  * [Translations](:apps/translations.html): How to mark translatable strings for 
+  * [Translations](:apps/translations.html): How to mark translatable strings for
     [Gettext-based](http://www.gnu.org/software/gettext/manual/gettext.html)
     translations framework for service integration scripts.
 

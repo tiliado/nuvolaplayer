@@ -16,7 +16,7 @@ from letters, digits and dash. Then we create the actions in
     with scope ``win`` and label ``Alert!``. Other parameters (mnemo_label, icon, keybinding, state)
     are null.
   * We create two **toggle actions** (on/off, checked/unchecked) ``ACTION_THUMBS_UP`` and
-    ``ACTION_THUMBS_DOWN`` with the same method 
+    ``ACTION_THUMBS_DOWN`` with the same method
     [Nuvola.Actions.addAction](apiref>Nuvola.Actions.addAction), but we specify initial state to be
     ``true`` (on, checked).
   * We create one **radio action** (action with multiple options/states) ``ACTION_RATING`` with method
@@ -30,39 +30,39 @@ singular and plural forms.
 ```js
 ...
 // Translations
-var C_ = Nuvola.Translate.pgettext;
-var ngettext = Nuvola.Translate.ngettext;
+var C_ = Nuvola.Translate.pgettext
+var ngettext = Nuvola.Translate.ngettext
 ...
-var ACTION_ALERT = "x-alert";
-var ACTION_THUMBS_UP = "thumbs-up";
-var ACTION_THUMBS_DOWN = "thumbs-down";
-var ACTION_RATING = "rating";
+var ACTION_ALERT = 'x-alert'
+var ACTION_THUMBS_UP = 'thumbs-up'
+var ACTION_THUMBS_DOWN = 'thumbs-down'
+var ACTION_RATING = 'rating'
 
 ...
 
-var WebApp = Nuvola.$WebApp();
+var WebApp = Nuvola.$WebApp()
 
-WebApp._onInitAppRunner = function(emitter)
-{
-    Nuvola.WebApp._onInitAppRunner.call(this, emitter);
-    
-    Nuvola.actions.addAction("playback", "win", ACTION_ALERT, C_("Action", "Alert!"),
-        null, null, null, null);
-    Nuvola.actions.addAction("playback", "win", ACTION_THUMBS_UP, C_("Action", "Thumbs up"),
-        null, null, null, true);
-    Nuvola.actions.addAction("playback", "win", ACTION_THUMBS_DOWN, C_("Action", "Thumbs down"),
-        null, null, null, true);
-    var ratingOptions = [];
-    for (var stars = 0; stars < 6; stars++)
-        ratingOptions.push([
-            stars, // stateId
-            /// Star rating, {1} is a placeholder for a number 
-            Nuvola.format(ngettext("Rating: {1} star", "Rating: {1} stars", stars), stars), // label
-            null, // mnemo_label
-            null, // icon
-            null  // keybinding
-            ]);
-    Nuvola.actions.addRadioAction("playback", "win", ACTION_RATING, 0, ratingOptions);
+WebApp._onInitAppRunner = function (emitter) {
+  Nuvola.WebApp._onInitAppRunner.call(this, emitter)
+
+  Nuvola.actions.addAction('playback', 'win', ACTION_ALERT, C_('Action', 'Alert!'),
+    null, null, null, null)
+  Nuvola.actions.addAction('playback', 'win', ACTION_THUMBS_UP, C_('Action', 'Thumbs up'),
+    null, null, null, true)
+  Nuvola.actions.addAction('playback', 'win', ACTION_THUMBS_DOWN, C_('Action', 'Thumbs down'),
+    null, null, null, true)
+  var ratingOptions = []
+  for (var stars = 0; stars < 6; stars++) {
+    ratingOptions.push([
+      stars, // stateId
+      /// Star rating, {1} is a placeholder for a number
+      Nuvola.format(ngettext('Rating: {1} star', 'Rating: {1} stars', stars), stars), // label
+      null, // mnemo_label
+      null, // icon
+      null  // keybinding
+    ])
+  }
+  Nuvola.actions.addRadioAction('playback', 'win', ACTION_RATING, 0, ratingOptions)
 }
 
 ...
@@ -87,22 +87,22 @@ action name and the option id separated by two colons ``::``.
 ```js
 ...
 
-var player = Nuvola.$object(Nuvola.MediaPlayer);
+var player = Nuvola.$object(Nuvola.MediaPlayer)
 
 ...
 
-var WebApp = Nuvola.$WebApp();
+var WebApp = Nuvola.$WebApp()
 
 ...
 
-WebApp._onPageReady = function()
-{
-    var actions = [ACTION_ALERT, ACTION_THUMBS_UP, ACTION_THUMBS_DOWN];
-    for (var i=0; i <= 5; i++)
-        actions.push(ACTION_RATING + "::" + i);
-        
-    player.addExtraActions(actions);
-    this.update();
+WebApp._onPageReady = function () {
+  var actions = [ACTION_ALERT, ACTION_THUMBS_UP, ACTION_THUMBS_DOWN]
+  for (var i=0; i <= 5; i++) {
+    actions.push(ACTION_RATING + '::' + i)
+  }
+
+  player.addExtraActions(actions)
+  this.update()
 }
 
 ...
@@ -120,37 +120,36 @@ Your task is to examine the web page whether the a particular action is availabl
 and to extract state of toggle and radio actions. Then update enabled flag with method
 [Nuvola.actions.updateEnabledFlag](apiref>Nuvola.Actions.updateEnabledFlag) or
 [Nuvola.actions.updateEnabledFlags](apiref>Nuvola.Actions.updateEnabledFlags) and
-state of radio and toggle actions with method 
+state of radio and toggle actions with method
 [Nuvola.actions.updateState](apiref>Nuvola.Actions.updateState) or
 [Nuvola.actions.updateStates](apiref>Nuvola.Actions.updateStates).
 
 ```js
 ...
 
-WebApp.update = function()
-{
-    ...
-    
-    // Extract whether the action is enabled and its state from a web page
-    var actionsEnabled = {};
-    var actionsStates = {};
-    
-    actionsEnabled[ACTION_ALERT] = true;
-    
-    actionsEnabled[ACTION_THUMBS_UP] = true;
-    actionsStates[ACTION_THUMBS_UP] = true; // on/checked
-    
-    actionsEnabled[ACTION_THUMBS_DOWN] = true;
-    actionsStates[ACTION_THUMBS_DOWN] = false; // off/unchecked
-    
-    actionsEnabled[ACTION_RATING] = true;
-    actionsStates[ACTION_RATING] = 3; // three stars
-    
-    // Compare with previous values and update if necessary
-    Nuvola.actions.updateEnabledFlags(actionsEnabled);
-    Nuvola.actions.updateStates(actionsStates);
-    
-    ...
+WebApp.update = function () {
+  ...
+
+  // Extract whether the action is enabled and its state from a web page
+  var actionsEnabled = {}
+  var actionsStates = {}
+
+  actionsEnabled[ACTION_ALERT] = true
+
+  actionsEnabled[ACTION_THUMBS_UP] = true
+  actionsStates[ACTION_THUMBS_UP] = true;// on/checked
+
+  actionsEnabled[ACTION_THUMBS_DOWN] = true
+  actionsStates[ACTION_THUMBS_DOWN] = false // off/unchecked
+
+  actionsEnabled[ACTION_RATING] = true
+  actionsStates[ACTION_RATING] = 3 // three stars
+
+  // Compare with previous values and update if necessary
+  Nuvola.actions.updateEnabledFlags(actionsEnabled)
+  Nuvola.actions.updateStates(actionsStates)
+
+  ...
 }
 
 ...
@@ -167,43 +166,41 @@ from [tutorial](:apps/tutorial.html).
 ```js
 ...
 
-WebApp._onActionActivated = function(emitter, name, param)
-{
-    switch (name)
-    {
+WebApp._onActionActivated = function (emitter, name, param) {
+  switch (name) {
     /* Base media player actions */
     case PlayerAction.TOGGLE_PLAY:
-        ...
-        break;
+      ...
+      break
     case PlayerAction.PLAY:
-        ...
-        break;
+      ...
+      break
     case PlayerAction.PAUSE:
     case PlayerAction.STOP:
-        ...
-        break;
+      ...
+      break
     case PlayerAction.PREV_SONG:
-        ...
-        break;
+      ...
+      break
     case PlayerAction.NEXT_SONG:
-        ...
-        break;
-    
+      ...
+      break
+
     /* Custom actions */
     case ACTION_ALERT:
-        alert("Alert!");
-        break;
+      window.alert('Alert!');
+      break
     case ACTION_THUMBS_UP:
-        Nuvola.clickOnElement(document.getElementById("thumbs-up"));
-        break;
+      Nuvola.clickOnElement(document.getElementById('thumbs-up'))
+      break
     case ACTION_THUMBS_DOWN:
-        Nuvola.clickOnElement(document.getElementById("thumbs-down"));
-        break;
+      Nuvola.clickOnElement(document.getElementById('thumbs-down'))
+      break
     case ACTION_RATING:
-        // param contains action's state, i.e. number of stars
-        Nuvola.clickOnElement(document.getElementById("star-" + param));
-        break;
-    }
+      // param contains action's state, i.e. number of stars
+      Nuvola.clickOnElement(document.getElementById('star-' + param))
+      break
+  }
 }
 
 ...
@@ -232,92 +229,74 @@ and adds actions accordingly.
 
 ```js
 
-var THUMBS_ACTIONS = [ACTION_THUMBS_UP, ACTION_THUMBS_DOWN];
-var STARS_ACTIONS = [];
-for (var i=0; i <= 5; i++)
-    STARS_ACTIONS.push(ACTION_RATING + "::" + i);
+var THUMBS_ACTIONS = [ACTION_THUMBS_UP, ACTION_THUMBS_DOWN]
+var STARS_ACTIONS = []
+for (var i=0; i <= 5; i++) {
+  STARS_ACTIONS.push(ACTION_RATING + '::' + i)
+}
 
 ...
 
-var WebApp = Nuvola.$WebApp();
+var WebApp = Nuvola.$WebApp()
 
 ...
 
-WebApp.getThumbs = function()
-{
-    var elm = document.querySelector("#player-right-wrapper .thumbs.rating-container");
-    return [elm, elm.childNodes[0], elm.childNodes[1]];
+WebApp.getThumbs = function () {
+  var elm = document.querySelector('#player-right-wrapper .thumbs.rating-container')
+  return [elm, elm.childNodes[0], elm.childNodes[1]]
 }
 
-WebApp.getStars = function()
-{
-    return document.querySelector("#player-right-wrapper .stars.rating-container");
+WebApp.getStars = function () {
+  return document.querySelector('#player-right-wrapper .stars.rating-container')
 }
 
-WebApp.update = function()
-{
-    ...
-    
-    // null = disabled; true/false toggled on/off
-    var thumbsUp, thumbsDown;
-    try
-    {
-        var thumbs = this.getThumbs();
-        if (thumbs[0].style.visibility == "hidden")
-        {
-            thumbsUp = thumbsDown = null;
-        }
-        else
-        {
-            this.toggleThumbRating(true);
-            thumbsUp = thumbs[1].className == "selected";
-            thumbsDown = thumbs[2].className == "selected";
-        }
+WebApp.update = function () {
+  ...
+
+  // null = disabled; true/false toggled on/off
+  var thumbsUp, thumbsDown
+  try {
+    var thumbs = this.getThumbs()
+    if (thumbs[0].style.visibility === 'hidden') {
+      thumbsUp = thumbsDown = null
+    } else {
+      this.toggleThumbRating(true);
+      thumbsUp = thumbs[1].className === 'selected'
+      thumbsDown = thumbs[2].className === 'selected'
     }
-    catch (e)
-    {
-        thumbsUp = thumbsDown = null;
-    }
-    
-    // null = disabled
-    var starRating;
-    try
-    {
-        var stars = this.getStars();
-        if (stars.style.visibility == "hidden")
-        {
-            starRating = null;
-        }
-        else
-        {
-            this.toggleStarRating(true);
-            starRating = stars.childNodes[0].getAttribute("data-rating") * 1;
-        }
-    }
-    catch (e)
-    {
-        starRating = null;
-    }
-    
-    ...
+  } catch (e) {
+    thumbsUp = thumbsDown = null
+  }
+
+  // null = disabled
+  var starRating
+  try {
+      var stars = this.getStars()
+      if (stars.style.visibility == 'hidden') {
+        starRating = null
+      } else {
+        this.toggleStarRating(true)
+        starRating = stars.childNodes[0].getAttribute('data-rating') * 1
+      }
+  } catch (e) {
+    starRating = null
+  }
+
+  ...
 }
 
-WebApp.toggleStarRating = function(enabled)
-{
-    if (enabled && this.starRatingEnabled !== true)
-    {
-        player.addExtraActions(STARS_ACTIONS);
-        this.starRatingEnabled = true;
-    }
+WebApp.toggleStarRating = function (enabled) {
+  if (enabled && this.starRatingEnabled !== true) {
+    player.addExtraActions(STARS_ACTIONS)
+    this.starRatingEnabled = true
+  }
 }
 
-WebApp.toggleThumbRating = function(enabled)
-{
-    if (enabled && this.thumbRatingEnabled !== true)
-    {
-        player.addExtraActions(THUMBS_ACTIONS);
-        this.thumbRatingEnabled = true;
-    }
+WebApp.toggleThumbRating = function (enabled) {
+  if (enabled && this.thumbRatingEnabled !== true) {
+    player.addExtraActions(THUMBS_ACTIONS)
+    this.thumbRatingEnabled = true
+  }
 }
 ```
 

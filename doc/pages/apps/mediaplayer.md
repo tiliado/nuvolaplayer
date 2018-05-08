@@ -13,13 +13,13 @@ Before continuing, make sure you are familiar with following topics:
   * [Service Integration Tutorial](tutorial.html): Generic information how to set up Nuvola ADK, create a basic skeleton of your
     script and open web inspector tools.
   * [Document Object Model][DOM]: Methods how to extract metadata from a web page, e.g.
-	[document.getElementById](https://developer.mozilla.org/en-US/docs/Web/API/document.getElementById),
+  [document.getElementById](https://developer.mozilla.org/en-US/docs/Web/API/document.getElementById),
     [document.getElementsByName](https://developer.mozilla.org/en-US/docs/Web/API/Document.getElementsByName),
     [document.getElementsByClassName](https://developer.mozilla.org/en-US/docs/Web/API/document.getElementsByClassName),
     [document.getElementsByTagName](https://developer.mozilla.org/en-US/docs/Web/API/document.getElementsByTagName),
     [document.querySelector](https://developer.mozilla.org/en-US/docs/Web/API/document.querySelector),
     [document.querySelectorAll](https://developer.mozilla.org/en-US/docs/Web/API/document.querySelectorAll).
-  
+
 [DOM]: https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model
 
 Metadata
@@ -32,7 +32,7 @@ Media player scripts generally contain these metadata:
   * `"requirements": "Codec[MP3]"` - if your web app requires HTML5 Audio with MP3 codec for media playback
   * `"requirements": "Feature[MSE] Codec[MP3]"` - if your web app requires HTML5 Media Source Extension (MSE)
     with MP3 codec for media playback
-  
+
 
 Integration Script
 ==================
@@ -50,61 +50,57 @@ Save the code bellow as a `integrate.js` file. It performs following actions:
 
 ```
 #!js
-"use strict";
+'use strict'
 
-(function(Nuvola)
-{
+(function (Nuvola) {
 
 // Create media player component
-var player = Nuvola.$object(Nuvola.MediaPlayer);
+var player = Nuvola.$object(Nuvola.MediaPlayer)
 
 // Handy aliases
-var PlaybackState = Nuvola.PlaybackState;
-var PlayerAction = Nuvola.PlayerAction;
+var PlaybackState = Nuvola.PlaybackState
+var PlayerAction = Nuvola.PlayerAction
 
 // Create new WebApp prototype
-var WebApp = Nuvola.$WebApp();
+var WebApp = Nuvola.$WebApp()
 
 // Initialization routines
-WebApp._onInitWebWorker = function(emitter)
-{
-    Nuvola.WebApp._onInitWebWorker.call(this, emitter);
-    var state = document.readyState;
-    if (state === "interactive" || state === "complete")
-        this._onPageReady();
-    else
-        document.addEventListener("DOMContentLoaded", this._onPageReady.bind(this));
+WebApp._onInitWebWorker = function (emitter) {
+  Nuvola.WebApp._onInitWebWorker.call(this, emitter)
+  var state = document.readyState
+  if (state === 'interactive' || state === 'complete') {
+    this._onPageReady()
+  } else {
+    document.addEventListener('DOMContentLoaded', this._onPageReady.bind(this))
+  }
 }
 
 // Page is ready for magic
-WebApp._onPageReady = function()
-{
+WebApp._onPageReady = function () {
     // Connect handler for signal ActionActivated
-    Nuvola.actions.connect("ActionActivated", this);
-    
+    Nuvola.actions.connect('ActionActivated', this)
+
     // Start update routine
-    this.update();
+    this.update()
 }
 
 // Extract data from the web page
-WebApp.update = function()
-{
+WebApp.update = function () {
     // ...
-    
+
     // Schedule the next update
-    setTimeout(this.update.bind(this), 500);
+    setTimeout(this.update.bind(this), 500)
 }
 
 // Handler of playback actions
-WebApp._onActionActivated = function(emitter, name, param)
-{
+WebApp._onActionActivated = function (emitter, name, param) {
 }
 
-WebApp.start();
+WebApp.start()
 
-})(this);  // function(Nuvola)
+})(this)  // function (Nuvola)
 ```
- 
+
 Playback state
 --------------
 
@@ -115,37 +111,32 @@ might be. Playback states are defined in an enumeration
 
 ```js
 ...
-var PlaybackState = Nuvola.PlaybackState;
+var PlaybackState = Nuvola.PlaybackState
 ...
 
-WebApp.update = function()
-{
-    ...
-    
-    try
-    {
-        switch(document.getElementById("status").innerText)
-        {
-            case "Playing":
-                var state = PlaybackState.PLAYING;
-                break;
-            case "Paused":
-                var state = PlaybackState.PAUSED;
-                break;
-            default:
-                var state = PlaybackState.UNKNOWN;
-                break;
-        }
+WebApp.update = function () {
+  ...
+
+  try {
+    switch(document.getElementById('status').innerText) {
+      case 'Playing':
+        var state = PlaybackState.PLAYING
+        break
+      case 'Paused':
+        state = PlaybackState.PAUSED
+        break
+      default:
+        state = PlaybackState.UNKNOWN
+        break
     }
-    catch(e)
-    {
-        // Always expect errors, e.g. document.getElementById("status") might be null
-        var state = PlaybackState.UNKNOWN;
-    }
-    
-    player.setPlaybackState(state);
-    
-    ...
+  } catch(e) {
+    // Always expect errors, e.g. document.getElementById('status') might be null
+    state = PlaybackState.UNKNOWN
+  }
+
+  player.setPlaybackState(state)
+
+  ...
 }
 ```
 ![Playback state](:images/guide/playback_state.png)
@@ -156,32 +147,27 @@ Track details
 Similarly, we can obtain track details and pass them to method [player.setTrack()](apiref>Nuvola.MediaPlayer.setTrack)
 
 ```js
-WebApp.update = function()
-{
-    ...
-    
-    var track = {
-        artLocation: null, // always null
-        rating: null // same
+WebApp.update = function () {
+  ...
+
+  var track = {
+    artLocation: null, // always null
+    rating: null // same
+  }
+
+  var idMap = {title: 'track', artist: 'artist', album: 'album'}
+  for (var key in idMap) {
+    try {
+      track[key] = document.getElementById(idMap[key]).innerText || null
+    } catch(e) {
+      // Always expect errors, e.g. document.getElementById() might return null
+      track[key] = null
     }
-    
-    var idMap = {title: "track", artist: "artist", album: "album"}
-    for (var key in idMap)
-    {
-        try
-        {
-            track[key] = document.getElementById(idMap[key]).innerText || null;
-        }
-        catch(e)
-        {
-            // Always expect errors, e.g. document.getElementById() might return null
-            track[key] = null;
-        }
-    }
-    
-    player.setTrack(track);
-    
-    ...
+  }
+
+  player.setTrack(track)
+
+  ...
 }
 ```
 
@@ -201,53 +187,40 @@ The first part is done via calls [player.setCanPause()](apiref>Nuvola.MediaPlaye
 [player.setCanGoNext()](apiref>Nuvola.MediaPlayer.setCanGoNext):
 
 ```js
-WebApp.update = function()
-{
-    ...
-    
-    var enabled;
-    try
-    {
-        enabled = !document.getElementById("prev").disabled;
-    }
-    catch(e)
-    {
-        enabled = false;
-    }
-    player.setCanGoPrev(enabled);
-    
-    try
-    {
-        enabled  = !document.getElementById("next").disabled;
-    }
-    catch(e)
-    {
-        enabled = false;
-    }
-    player.setCanGoNext(enabled);
-    
-    var playPause = document.getElementById("pp");
-    try
-    {
-        enabled  = playPause.innerText == "Play";
-    }
-    catch(e)
-    {
-        enabled = false;
-    }
-    player.setCanPlay(enabled);
-    
-    try
-    {
-        enabled  = playPause.innerText == "Pause";
-    }
-    catch(e)
-    {
-        enabled = false;
-    }
-    player.setCanPause(enabled);
-    
-    ...
+WebApp.update = function () {
+  ...
+
+  var enabled;
+  try {
+    enabled = !document.getElementById('prev').disabled
+  } catch (e) {
+    enabled = false
+  }
+  player.setCanGoPrev(enabled)
+
+  try {
+    enabled  = !document.getElementById('next').disabled
+  } catch (e) {
+    enabled = false
+  }
+  player.setCanGoNext(enabled)
+
+  var playPause = document.getElementById('pp')
+  try {
+    enabled  = playPause.innerText == 'Play'
+  } catch (e) {
+    enabled = false
+  }
+  player.setCanPlay(enabled)
+
+  try {
+    enabled  = playPause.innerText == 'Pause'
+  } catch (e) {
+    enabled = false
+  }
+  player.setCanPause(enabled)
+
+  ...
 }
 ```
 
@@ -259,38 +232,35 @@ You can use a convenient function [Nuvola.clickOnElement()](apiref>Nuvola.clickO
 simulate clicking.
 
 ```js
-var PlayerAction = Nuvola.PlayerAction;
+var PlayerAction = Nuvola.PlayerAction
 
 ...
 
-WebApp._onPageReady = function()
-{
-    // Connect handler for signal ActionActivated
-    Nuvola.actions.connect("ActionActivated", this);
-    
-    // Start update routine
-    this.update();
+WebApp._onPageReady = function () {
+  // Connect handler for signal ActionActivated
+  Nuvola.actions.connect('ActionActivated', this)
+
+  // Start update routine
+  this.update()
 }
 
 ...
 
-WebApp._onActionActivated = function(emitter, name, param)
-{
-    switch (name)
-    {
+WebApp._onActionActivated = function (emitter, name, param) {
+  switch (name) {
     case PlayerAction.TOGGLE_PLAY:
     case PlayerAction.PLAY:
     case PlayerAction.PAUSE:
     case PlayerAction.STOP:
-        Nuvola.clickOnElement(document.getElementById("pp"));
-        break;
+      Nuvola.clickOnElement(document.getElementById('pp'))
+      break
     case PlayerAction.PREV_SONG:
-        Nuvola.clickOnElement(document.getElementById("prev"));
-        break;
+      Nuvola.clickOnElement(document.getElementById('prev'))
+      break
     case PlayerAction.NEXT_SONG:
-        Nuvola.clickOnElement(document.getElementById("next"));
-        break;
-    }
+      Nuvola.clickOnElement(document.getElementById('next'))
+      break
+  }
 }
 ```
 
@@ -310,7 +280,7 @@ older versions, use respective [Nuvola.checkVersion](apiref>Nuvola.checkVersion)
 In order to provide users with the current rating state, use these API calls:
 
   * [MediaPlayer.setTrack()](apiref>Nuvola.MediaPlayer.setTrack) method accepts `track.rating` property, which holds
-    track rating as a number in range from `0.0` to `1.0` as in 
+    track rating as a number in range from `0.0` to `1.0` as in
     [the MPRIS/xesam specification](https://www.freedesktop.org/wiki/Specifications/mpris-spec/metadata/#index22h4).
     This property is ignored in Nuvola < 3.1.
   * [MediaPlayer.setCanRate()](apiref>Nuvola.MediaPlayer.setCanRate) controls whether
@@ -326,7 +296,7 @@ Here are some suggestions:
   * **Thumb up/down rating** is a bit tricky. You can use rating `0.2` for thumb down and `1.0` for thumb up in the
     `track.rating` property and interpret rating <= `0.41` (0-2 stars) as thumb down and rating >= `0.79` (4-5 stars)
     as thumb up in the `RatingSet` signal handler.
-    
+
 
 In this example, a track can be rated as *good* (thumb up) or *bad* (thumb down).
 
@@ -335,69 +305,68 @@ In this example, a track can be rated as *good* (thumb up) or *bad* (thumb down)
 ...
 
 // Page is ready for magic
-WebApp._onPageReady = function()
-{
-    // Connect handler for signal ActionActivated
-    Nuvola.actions.connect("ActionActivated", this);
-    
-    // Connect rating handler if supported
-    if (Nuvola.checkVersion && Nuvola.checkVersion(3, 1))  // @API 3.1
-        player.connect("RatingSet", this);
+WebApp._onPageReady = function () {
+  // Connect handler for signal ActionActivated
+  Nuvola.actions.connect('ActionActivated', this)
 
-    // Start update routine
-    this.update();
+  // Connect rating handler if supported
+  if (Nuvola.checkVersion && Nuvola.checkVersion(3, 1)) {  // @API 3.1
+    player.connect('RatingSet', this)
+  }
+
+  // Start update routine
+  this.update()
 }
 
 // Extract data from the web page
-WebApp.update = function()
-{
-    var track = {
-        ...
-    }
-
+WebApp.update = function () {
+  var track = {
     ...
-    
-    // Parse rating
-    switch (document.getElementById("rating").innerText || null)
-    {
-    case "good":
-        track.rating = 1.0; // five stars
-        break;
-    case "bad":
-        track.rating = 0.2; // one star
-        break;
+  }
+
+  ...
+
+  // Parse rating
+  switch (document.getElementById('rating').innerText || null) {
+    case 'good':
+      track.rating = 1.0 // five stars
+      break
+    case 'bad':
+      track.rating = 0.2 // one star
+      break
     default:
-        track.rating = 0.0; // zero star
-        break;
-    }
+      track.rating = 0.0 // zero star
+      break
+  }
 
-    player.setTrack(track);
-    
-    ...
-    
-    var state = PlaybackState.UNKNOWN;
-    state = ...
+  player.setTrack(track)
 
-    player.setPlaybackState(state);
-    
-    if (Nuvola.checkVersion && Nuvola.checkVersion(3.1))  // @API 3.1
-        player.setCanRate(state !== PlaybackState.UNKNOWN);
+  ...
+
+  var state = PlaybackState.UNKNOWN
+  state = ...
+
+  player.setPlaybackState(state)
+
+  if (Nuvola.checkVersion && Nuvola.checkVersion(3.1)) { // @API 3.1
+    player.setCanRate(state !== PlaybackState.UNKNOWN)
+  }
 }
 
 ...
 
 // Handler for rating
-WebApp._onRatingSet = function(emitter, rating)
-{
-    Nuvola.log("Rating set: {1}", rating);
-    var current = document.getElementById("rating").innerText;
-    if (rating <= 0.4) // 0-2 stars
-        document.getElementById("rating").innerText = current === "bad" ? "-" : "bad";
-    else if (rating >= 0.8) // 4-5 stars
-        document.getElementById("rating").innerText = current === "good" ? "-" : "good";
-    else // three stars
-        throw new Error("Invalid rating: " + rating + ".\n\n" 
-        + "Have you clicked the three-star button? It isn't supported.");
+WebApp._onRatingSet = function (emitter, rating) {
+    Nuvola.log('Rating set: {1}', rating)
+    var current = document.getElementById('rating').innerText
+    if (rating <= 0.4) { // 0-2 stars
+      document.getElementById('rating').innerText = current === 'bad' ? '-' : 'bad'
+    } else if (rating >= 0.8) { // 4-5 stars
+        document.getElementById('rating').innerText = current === 'good' ? '-' : 'good'
+    } else { // three stars
+      throw new Error('Invalid rating: ' + rating + '.\n\n'
+        + 'Have you clicked the three-star button? It isn't supported.')
+    }
 }
 
 ...
@@ -414,32 +383,30 @@ older versions, use respective [Nuvola.checkVersion](apiref>Nuvola.checkVersion)
 In order to extract track length and position, use these API calls:
 
   * [MediaPlayer.setTrack](apiref>Nuvola.MediaPlayer.setTrack) supports `track.length` property, which holds track
-    length either as a string "mm:ss" or number of microseconds. This property is ignored in Nuvola < 4.5.
+    length either as a string 'mm:ss' or number of microseconds. This property is ignored in Nuvola < 4.5.
   * [MediaPlayer.setTrackPosition](apiref>Nuvola.MediaPlayer.setTrackPosition) is used to update track position.
     This method is not available in Nuvola < 4.5 and results in error.
-  * [Nuvola.parseTimeUsec](apiref>Nuvola.parseTimeUsec) (in Nuvola >= 4.5) can be used to convert track length string (e.g. "2:35")
+  * [Nuvola.parseTimeUsec](apiref>Nuvola.parseTimeUsec) (in Nuvola >= 4.5) can be used to convert track length string (e.g. '2:35')
     into the number of microseconds. [MediaPlayer.setTrack](apiref>Nuvola.MediaPlayer.setTrack) does that automatically
     for the `track.length` property.
-    
+
 ```js
-WebApp.update = function()
-{
+WebApp.update = function () {
     ...
-    
-    // @API 4.5: track.length ignored in Nuvola < 4.5
-    var elm = document.getElementById("timetotal");
-    track.length = elm ? elm.innerText || null : null;
-    player.setTrack(track);
-    
-    ...
-    
-    if (Nuvola.checkVersion && Nuvola.checkVersion(4, 4, 18))  // @API 4.5
-    {
-        var elm = document.getElementById("timeelapsed");
-        player.setTrackPosition(elm ? elm.innerText || null : null);
-    }
-    
-    ...
+
+  // @API 4.5: track.length ignored in Nuvola < 4.5
+  var elm = document.getElementById('timetotal')
+  track.length = elm ? elm.innerText || null : null
+  player.setTrack(track)
+
+  ...
+
+  if (Nuvola.checkVersion && Nuvola.checkVersion(4, 4, 18)) { // @API 4.5
+    var elm = document.getElementById('timeelapsed')
+    player.setTrackPosition(elm ? elm.innerText || null : null)
+  }
+
+  ...
 }
 ```
 
@@ -455,31 +422,28 @@ If you wish to let user change track position, use this API:
     e.g. `Nuvola.clickOnElement(progressBar, param/Nuvola.parseTimeUsec(trackLength), 0.5)`.
 
 ```js
-WebApp.update = function()
-{
-    ...
-    if (Nuvola.checkVersion && Nuvola.checkVersion(4, 4, 18))  // @API 4.5
-    {
-        player.setCanSeek(state !== PlaybackState.UNKNOWN);
-    }
-    ...
+WebApp.update = function () {
+  ...
+  if (Nuvola.checkVersion && Nuvola.checkVersion(4, 4, 18)) { // @API 4.5
+    player.setCanSeek(state !== PlaybackState.UNKNOWN)
+  }
+  ...
 }
 
 ...
 
-WebApp._onActionActivated = function(emitter, name, param)
-{
-    switch (name)
-    {
+WebApp._onActionActivated = function (emitter, name, param) {
+  switch (name) {
     ...
     case PlayerAction.SEEK:  // @API 4.5: undefined & ignored in Nuvola < 4.5
-        var elm = document.getElementById("timetotal");
-        var total = Nuvola.parseTimeUsec(elm ? elm.innerText : null);
-        if (param > 0 && param <= total)
-            Nuvola.clickOnElement(document.getElementById("progresstext"), param/total, 0.5);
-        break;
+        var elm = document.getElementById('timetotal')
+        var total = Nuvola.parseTimeUsec(elm ? elm.innerText : null)
+        if (param > 0 && param <= total) {
+          Nuvola.clickOnElement(document.getElementById('progresstext'), param/total, 0.5)
+        }
+        break
     ...
-    }
+  }
 }
 
 ...
@@ -495,18 +459,16 @@ older versions, use respective [Nuvola.checkVersion](apiref>Nuvola.checkVersion)
 
 In order to extract volume, use [MediaPlayer.updateVolume](apiref>Nuvola.MediaPlayer.updateVolume) with the parameter
 in range 0.0-1.0 (i.e. 0-100%). This method is not available in Nuvola < 4.5 and results in error.
-    
+
 ```js
-WebApp.update = function()
-{
+WebApp.update = function () {
     ...
-    
-    if (Nuvola.checkVersion && Nuvola.checkVersion(4, 4, 18))  // @API 4.5
-    {
-        var elm = document.getElementById("volume");
-        player.updateVolume(elm ? elm.innerText / 100 || null : null);
+
+    if (Nuvola.checkVersion && Nuvola.checkVersion(4, 4, 18)) { // @API 4.5
+      var elm = document.getElementById('volume')
+      player.updateVolume(elm ? elm.innerText / 100 || null : null)
     }
-    
+
     ...
 }
 ```
@@ -521,29 +483,26 @@ If you wish to let user change volume, use this API:
   * You may need to use [Nuvola.clickOnElement](apiref>Nuvola.clickOnElement) with coordinates to trigger a click
     event at the position of volume bar corresponding to the desired volume,
     e.g. `Nuvola.clickOnElement(volumeBar, param, 0.5)`.
+
 ```js
-WebApp.update = function()
-{
-    ...
-    if (Nuvola.checkVersion && Nuvola.checkVersion(4, 4, 18))  // @API 4.5
-    {
-        player.setCanChangeVolume(state !== PlaybackState.UNKNOWN);
-    }
-    ...
+WebApp.update = function () {
+  ...
+  if (Nuvola.checkVersion && Nuvola.checkVersion(4, 4, 18)) { // @API 4.5
+    player.setCanChangeVolume(state !== PlaybackState.UNKNOWN)
+  }
+  ...
 }
 
 ...
 
-WebApp._onActionActivated = function(emitter, name, param)
-{
-    switch (name)
-    {
+WebApp._onActionActivated = function (emitter, name, param) {
+  switch (name) {
     ...
     case PlayerAction.CHANGE_VOLUME:  // @API 4.5: undefined & ignored in Nuvola < 4.5
-        document.getElementById("volume").innerText = Math.round(param * 100);
-        break;
+      document.getElementById('volume').innerText = Math.round(param * 100)
+      break
     ...
-    }
+  }
 }
 
 ...

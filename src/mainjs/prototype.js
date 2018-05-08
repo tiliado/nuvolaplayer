@@ -34,29 +34,25 @@
  * @return new prototype object
  *
  * ```
- * var Building = Nuvola.$prototype(null);
+ * var Building = Nuvola.$prototype(null)
  *
- * Building.$init = function(address)
- * {
- *     this.address = address;
+ * Building.$init = function (address) {
+ *   this.address = address
  * }
  *
- * Building.printAddress = function()
- * {
- *     console.log(this.address);
+ * Building.printAddress = function () {
+ *   console.log(this.address)
  * }
  *
- * var Shop = Nuvola.$prototype(Building);
+ * var Shop = Nuvola.$prototype(Building)
  *
- * Shop.$init = function(address, goods)
- * {
- *     Building.$init.call(this, address)
- *     this.goods = goods;
+ * Shop.$init = function (address, goods) {
+ *   Building.$init.call(this, address)
+ *   this.goods = goods
  * }
  *
- * Shop.printGoods = function()
- * {
- *     console.log(this.goods);
+ * Shop.printGoods = function() {
+ *   console.log(this.goods)
  * }
  * ```
  */
@@ -86,12 +82,12 @@ var $prototype = function (proto, mixins) {
  * @return new initialized object
  *
  * ```
- * var house = Nuvola.$object(Building, "King Street 1024, London");
- * house.printAddress();
+ * var house = Nuvola.$object(Building, 'King Street 1024, London')
+ * house.printAddress()
  *
- * var candyShop = Nuvola.$object(Shop, "King Street 1024, London", "candies");
- * candyShop.printAddress();
- * candyShop.printGoods();
+ * var candyShop = Nuvola.$object(Shop, 'King Street 1024, London', 'candies')
+ * candyShop.printAddress()
+ * candyShop.printGoods()
  * ```
  */
 var $object = function (proto, initArgs) {

@@ -50,13 +50,12 @@ KeyValueStorage.$init = function (index) {
  * @param Variant value    value of the key
  *
  * ```
- * WebApp._onInitAppRunner = function(emitter)
- * {
- *     Nuvola.WebApp._onInitAppRunner.call(this, emitter);
+ * WebApp._onInitAppRunner = function (emitter) {
+ *   Nuvola.WebApp._onInitAppRunner.call(this, emitter)
  *
- *     var ADDRESS = "app.address";
- *     // Nuvola.config is a KeyValueStorage
- *     Nuvola.config.setDefault(ADDRESS, "default");
+ *   var ADDRESS = 'app.address'
+ *   // Nuvola.config is a KeyValueStorage
+ *   Nuvola.config.setDefault(ADDRESS, 'default')
  * }
  * ```
  */
@@ -75,13 +74,12 @@ KeyValueStorage.setDefault = function (key, value) {
  * @param Variant value    value of the key
  *
  * ```
- * WebApp._onInitAppRunner = function(emitter)
- * {
- *     Nuvola.WebApp._onInitAppRunner.call(this, emitter);
+ * WebApp._onInitAppRunner = function(emitter) {
+ *   Nuvola.WebApp._onInitAppRunner.call(this, emitter)
  *
- *     var ADDRESS = "app.address";
- *     // Nuvola.config is a KeyValueStorage
- *     Nuvola.config.setDefaultAsync(ADDRESS, "default").catch(console.log.bind(console));
+ *   var ADDRESS = 'app.address'
+ *   // Nuvola.config is a KeyValueStorage
+ *   Nuvola.config.setDefaultAsync(ADDRESS, 'default').catch(console.log.bind(console))
  * }
  * ```
  */
@@ -120,7 +118,7 @@ KeyValueStorage.hasKeyAsync = function (key) {
  * Get value by key name
  *
  * Note that behavior on a key without an assigned value nor @link{KeyValueStorage.setDefault|the default value}
- * is undefined - it may return *anything* or throw and error. (The current implementation returns string ``"<UNDEFINED>"``
+ * is undefined - it may return *anything* or throw and error. (The current implementation returns string ``'<UNDEFINED>'``
  * as it helps to identify unwanted manipulation with ``undefined`` value type.)
  *
  * @deprecated Nuvola 4.8: Use async variant instead.
@@ -135,7 +133,7 @@ KeyValueStorage.get = function (key) {
  * Get value by key name
  *
  * Note that behavior on a key without an assigned value nor @link{KeyValueStorage.setDefault|the default value}
- * is undefined - it may return *anything* or throw and error. (The current implementation returns string ``"<UNDEFINED>"``
+ * is undefined - it may return *anything* or throw and error. (The current implementation returns string ``'<UNDEFINED>'``
  * as it helps to identify unwanted manipulation with ``undefined`` value type.)
  *
  * @since Nuvola 4.8

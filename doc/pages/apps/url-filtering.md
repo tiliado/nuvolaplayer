@@ -16,8 +16,8 @@ browser.
 
 ```js
 {
-    ...
-    "allowed_uri": "^https?://(play\\.google\\.com/)"
+  ...
+  "allowed_uri": "^https?://(play\\.google\\.com/)"
 }
 ```
 
@@ -32,22 +32,18 @@ is a handler for [Nuvola.Core::NavigationRequest signal](apiref>Nuvola.Core%3A%3
 
 ```js
 
-var WebApp = Nuvola.$WebApp();
+var WebApp = Nuvola.$WebApp()
 
 ...
 
-WebApp._onNavigationRequest = function(emitter, request)
-{
-    Nuvola.log("Open in a new window? {1}", request.newWindow);
-    if (request.url.length > 40)
-    {
-        Nuvola.log("I hate long URLS: {1} has {2} characters!", request.url, request.url.length);
-        request.approved = false;
-    }
-    else
-    {
-        request.approved = true;
-    }
+WebApp._onNavigationRequest = function (emitter, request) {
+  Nuvola.log('Open in a new window? {1}', request.newWindow)
+  if (request.url.length > 40) {
+    Nuvola.log('I hate long URLS: {1} has {2} characters!', request.url, request.url.length)
+    request.approved = false
+  } else {
+    request.approved = true
+  }
 }
 
 ...

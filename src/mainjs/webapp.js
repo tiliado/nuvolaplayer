@@ -56,11 +56,11 @@ WebApp.$init = function () {
  * Convenience function to create new WebApp object linked to Nuvola API.
  *
  * ```
- * var WebApp = Nuvola.$WebApp();
+ * var WebApp = Nuvola.$WebApp()
  *
  * ...
  *
- * WebApp.start();
+ * WebApp.start()
  * ```
  */
 WebApp.start = function () {
@@ -106,20 +106,19 @@ WebApp._onInitAppRunner = function (emitter) {
  * Signal handler for @link{Core::InitWebWorker}. Override this method to integrate the web page.
  *
  * ```
- * WebApp._onInitWebWorker = function(emitter)
- * {
- *     Nuvola.WebApp._onInitWebWorker.call(this, emitter);
+ * WebApp._onInitWebWorker = function (emitter) {
+ *     Nuvola.WebApp._onInitWebWorker.call(this, emitter)
  *
- *     var state = document.readyState;
- *     if (state === "interactive" || state === "complete")
- *         this._onPageReady();
- *     else
- *         document.addEventListener("DOMContentLoaded", this._onPageReady.bind(this));
+ *     var state = document.readyState
+ *     if (state === 'interactive' || state === 'complete') {
+ *       this._onPageReady()
+ *     } else {
+ *       document.addEventListener('DOMContentLoaded', this._onPageReady.bind(this))
+ *     }
  * }
  *
- * WebApp._onPageReady = function(event)
- * {
- *     ...
+ * WebApp._onPageReady = function (event) {
+ *   ...
  * }
  * ```
  */
@@ -142,7 +141,7 @@ Nuvola.WebApp = WebApp
  * @return new prototype object extending @link{WebApp}
  *
  * ```
- * var WebApp = Nuvola.$WebApp();
+ * var WebApp = Nuvola.$WebApp()
  * ```
  */
 Nuvola.$WebApp = function () {

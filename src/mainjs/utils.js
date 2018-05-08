@@ -33,12 +33,12 @@
  * @return String
  *
  * ```js
- * alert(Nuvola.format("My name is {2}. {1} {2}!", "James", "Bond"));
- * // "My name is Bond. James Bond!"
+ * alert(Nuvola.format('My name is {2}. {1} {2}!', 'James', 'Bond'))
+ * // 'My name is Bond. James Bond!'
  *
  * // You can create an alias
  * var $fmt = Nuvola.format;
- * alert($fmt("My name is {2}. {1} {2}!", "James", "Bond"));
+ * alert($fmt('My name is {2}. {1} {2}!', 'James', 'Bond'))
  * ```
  */
 Nuvola.format = function () {
@@ -217,9 +217,8 @@ Nuvola.encodeVersion = function (major, minor, micro) {
  * @return true if Nuvola's version is greater than or equal to the required version
  *
  * ```js
- * if (Nuvola.checkVersion && Nuvola.checkVersion(4, 5))
- * {
- *     // Safe to use API >= 4.5
+ * if (Nuvola.checkVersion && Nuvola.checkVersion(4, 5)) {
+ *   // Safe to use API >= 4.5
  * }
  * ```
  */

@@ -73,9 +73,8 @@ Core.$init = function () {
      * @param String request.url    property to assign home page url to
      *
      * ```
-     * var _onHomePageRequest = function(emitter, request)
-     * {
-     *     request.url = "http://tiliado.eu";
+     * var _onHomePageRequest = function (emitter, request) {
+     *   request.url = "http://tiliado.eu"
      * }
      * ```
      */
@@ -90,9 +89,8 @@ Core.$init = function () {
      *     the ``request.url`` should be opened in user's default web browser
      *
      * ```
-     * var _onNavigationRequest = function(object, request)
-     * {
-     *     request.approved = isAddressAllowed(request.url);
+     * var _onNavigationRequest = function (object, request) {
+     *   request.approved = isAddressAllowed(request.url)
      * }
      * ```
      */
@@ -107,13 +105,12 @@ Core.$init = function () {
      * @param String request.userAgent       whether to override user agent string
      *
      * ```
-     * var _onPageSettings = function(object, request)
-     * {
-     *     request.userAgent = (
-     *         request.url.startsWith("https://accounts.google.com/")
-     *         || request.url.startsWith("https://accounts.youtube.com/")
-     *         ? "WEBKIT" : null
-     *     );
+     * var _onPageSettings = function (object, request) {
+     *   request.userAgent = (
+     *     request.url.startsWith("https://accounts.google.com/")
+     *     || request.url.startsWith("https://accounts.youtube.com/")
+     *     ? "WEBKIT" : null
+     *     )
      * }
      * ```
      */
@@ -126,9 +123,8 @@ Core.$init = function () {
      * @param Boolean request.approved     whether the resource loading is approved
      *
      * ```
-     * var _onResourceRequest = function(emitter, request)
-     * {
-     *     request.url = request.url.replace("webcomponents.js", "webcomponents2.js");
+     * var _onResourceRequest = function (emitter, request) {
+     *   request.url = request.url.replace("webcomponents.js", "webcomponents2.js")
      * }
      * ```
      */
@@ -140,9 +136,8 @@ Core.$init = function () {
      * @param String|null result.url    property to assign the last visited URL to
      *
      * ```
-     * var _onLastPageRequest = function(emitter, result)
-     * {
-     *     request.url = Nuvola.config.get("last_uri") || null;
+     * var _onLastPageRequest = function (emitter, result) {
+     *   request.url = Nuvola.config.get("last_uri") || null
      * }
      * ```
      */
@@ -157,10 +152,10 @@ Core.$init = function () {
      *     running in background.
      *
      * ```
-     * var _onQuitRequest = function(emitter, result)
-     * {
-     *      if (Nuvola.config.get("myapp.run_in_background"))
-     *          result.approved = false;
+     * var _onQuitRequest = function (emitter, result) {
+     *   if (Nuvola.config.get("myapp.run_in_background")) {
+     *     result.approved = false
+     *   }
      * }
      * ```
      */
@@ -172,9 +167,8 @@ Core.$init = function () {
      * @param string uri    URI of the new page
      *
      * ```
-     * var _onUriChanged = function(emitter, uri)
-     * {
-     *     Nuvola.config.set("last_uri", uri);
+     * var _onUriChanged = function(emitter, uri) {
+     *   Nuvola.config.set("last_uri", uri)
      * }
      * ```
      */

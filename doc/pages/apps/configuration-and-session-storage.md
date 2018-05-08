@@ -14,18 +14,16 @@ Define configuration key names
 ------------------------------
 
 Define "constants" with names of configuration key.
-    
+
     :::js
     ...
-    
-    (function(Nuvola)
-    {
-    
-    
-    var ADDRESS = "app.address";
-    var HOST = "app.host";
-    var PORT = "app.port";
-    
+
+    (function (Nuvola) {
+
+    var ADDRESS = 'app.address'
+    var HOST = 'app.host'
+    var PORT = 'app.port'
+
     ...
 
 Set default values
@@ -37,18 +35,17 @@ only once at start-up.
 
     :::js
     ...
-    
+
     var WebApp = Nuvola.$WebApp();
-    
-    WebApp._onInitAppRunner = function(emitter)
-    {
-        Nuvola.WebApp._onInitAppRunner.call(this, emitter);
-        
-        Nuvola.config.setDefault(ADDRESS, "default");
-        Nuvola.config.setDefault(HOST, "");
-        Nuvola.config.setDefault(PORT, "");
+
+    WebApp._onInitAppRunner = function (emitter) {
+      Nuvola.WebApp._onInitAppRunner.call(this, emitter)
+
+      Nuvola.config.setDefault(ADDRESS, 'default')
+      Nuvola.config.setDefault(HOST, '')
+      Nuvola.config.setDefault(PORT, '')
     }
-    
+
     ...
 
 !!! danger "Global window object not available"
@@ -56,38 +53,37 @@ only once at start-up.
     pure JavaScript environment without [Window object](https://developer.mozilla.org/en/docs/Web/API/Window).
     Use [Nuvola.log()](apiref>Nuvola.log) to print logging and debugging messages to terminal
     instead of [console.log()](https://developer.mozilla.org/en-US/docs/Web/API/console.log).
-    
+
 Get/set values
 --------------
 
 Get/set values anywhere in your integration script with
 [Nuvola.config.get](apiref>Nuvola.KeyValueStorage.get) or
 [Nuvola.config.set](apiref>Nuvola.KeyValueStorage.set).
-    
+
     :::js
     ...
 
-    WebApp._onInitWebWorker = function(emitter)
-    {
-        Nuvola.WebApp._onInitWebWorker.call(this, emitter);
-        
-        /* Start of example */
-        console.log(Nuvola.format("Current value {1} = '{2}'", HOST, Nuvola.config.get(HOST)));
-        console.log(Nuvola.format("Current value {1} = '{2}'", PORT, Nuvola.config.get(PORT)));
-        if (!Nuvola.config.hasKey(HOST))
-        {
-            Nuvola.config.set(HOST, "localhost");
-            Nuvola.config.set(PORT, "8000");
-            console.log(Nuvola.format("New value {1} = '{2}'", HOST, Nuvola.config.get(HOST)));
-            console.log(Nuvola.format("New value {1} = '{2}'", PORT, Nuvola.config.get(PORT)));
-        }
-        /* End of example */
-        
-        var state = document.readyState;
-        if (state === "interactive" || state === "complete")
-            this._onPageReady();
-        else
-            document.addEventListener("DOMContentLoaded", this._onPageReady.bind(this));
+    WebApp._onInitWebWorker = function (emitter) {
+      Nuvola.WebApp._onInitWebWorker.call(this, emitter)
+
+      /* Start of example */
+      console.log(Nuvola.format('Current value {1} = "{2}"', HOST, Nuvola.config.get(HOST)))
+      console.log(Nuvola.format('Current value {1} = "{2}"', PORT, Nuvola.config.get(PORT)))
+      if (!Nuvola.config.hasKey(HOST)) {
+        Nuvola.config.set(HOST, 'localhost')
+        Nuvola.config.set(PORT, '8000')
+        console.log(Nuvola.format('New value {1} = "{2}"', HOST, Nuvola.config.get(HOST)))
+        console.log(Nuvola.format('New value {1} = "{2}"', PORT, Nuvola.config.get(PORT)))
+      }
+      /* End of example */
+
+      var state = document.readyState;
+      if (state === 'interactive' || state === 'complete') {
+        this._onPageReady();
+      } else {
+        document.addEventListener('DOMContentLoaded', this._onPageReady.bind(this))
+      }
     }
 
 If you open JavaScript console in WebKit Web Inspector, you see following output:
@@ -98,7 +94,7 @@ If you open JavaScript console in WebKit Web Inspector, you see following output
     Current value app.port = '' (integrate.js, line 77)
     New value app.host = 'localhost' (integrate.js, line 82)
     New value app.port = '8000' (integrate.js, line 83)
-    
+
     # The second and other runs
     Current value app.host = 'localhost' (integrate.js, line 76)
     Current value app.port = '8000' (integrate.js, line 77)
@@ -124,18 +120,16 @@ Define configuration key names
 ------------------------------
 
 Define constants with names of session keys.
-    
+
     :::js
     ...
-    
-    (function(Nuvola)
-    {
-    
-    
-    var ADDRESS = "app.address";
-    var HOST = "app.host";
-    var PORT = "app.port";
-    
+
+    (function (Nuvola) {
+
+    var ADDRESS = 'app.address'
+    var HOST = 'app.host'
+    var PORT = 'app.port'
+
     ...
 
 Set default values
@@ -147,18 +141,17 @@ only once at start-up.
 
     :::js
     ...
-    
-    var WebApp = Nuvola.$WebApp();
-    
-    WebApp._onInitAppRunner = function(emitter)
-    {
-        Nuvola.WebApp._onInitAppRunner.call(this, emitter);
-        
-        Nuvola.session.setDefault(ADDRESS, "default");
-        Nuvola.session.setDefault(HOST, "");
-        Nuvola.session.setDefault(PORT, "");
+
+    var WebApp = Nuvola.$WebApp()
+
+    WebApp._onInitAppRunner = function (emitter) {
+        Nuvola.WebApp._onInitAppRunner.call(this, emitter)
+
+        Nuvola.session.setDefault(ADDRESS, 'default')
+        Nuvola.session.setDefault(HOST, '')
+        Nuvola.session.setDefault(PORT, '')
     }
-    
+
     ...
 
 !!! danger "Global window object not available"
@@ -166,38 +159,37 @@ only once at start-up.
     pure JavaScript environment without [Window object](https://developer.mozilla.org/en/docs/Web/API/Window).
     Use [Nuvola.log()](apiref>Nuvola.log) to print logging and debugging messages to terminal
     instead of [console.log()](https://developer.mozilla.org/en-US/docs/Web/API/console.log).
-    
+
 Get/set values
 --------------
 
 Get/set values anywhere in your integration script with
 [Nuvola.session.get](apiref>Nuvola.KeyValueStorage.get) or
 [Nuvola.session.set](apiref>Nuvola.KeyValueStorage.set).
-    
+
     :::js
     ...
 
-    WebApp._onInitWebWorker = function(emitter)
-    {
-        Nuvola.WebApp._onInitWebWorker.call(this, emitter);
-        
-        /* Start of example */
-        console.log(Nuvola.format("Current value {1} = '{2}'", HOST, Nuvola.session.get(HOST)));
-        console.log(Nuvola.format("Current value {1} = '{2}'", PORT, Nuvola.session.get(PORT)));
-        if (!Nuvola.session.hasKey(HOST))
-        {
-            Nuvola.session.set(HOST, "localhost");
-            Nuvola.session.set(PORT, "8000");
-            console.log(Nuvola.format("New value {1} = '{2}'", HOST, Nuvola.session.get(HOST)));
-            console.log(Nuvola.format("New value {1} = '{2}'", PORT, Nuvola.session.get(PORT)));
-        }
-        /* End of example */
-        
-        var state = document.readyState;
-        if (state === "interactive" || state === "complete")
-            this._onPageReady();
-        else
-            document.addEventListener("DOMContentLoaded", this._onPageReady.bind(this));
+    WebApp._onInitWebWorker = function (emitter) {
+      Nuvola.WebApp._onInitWebWorker.call(this, emitter)
+
+      /* Start of example */
+      console.log(Nuvola.format('Current value {1} = "{2}"', HOST, Nuvola.session.get(HOST)))
+      console.log(Nuvola.format('Current value {1} = "{2}"', PORT, Nuvola.session.get(PORT)))
+      if (!Nuvola.session.hasKey(HOST)) {
+          Nuvola.session.set(HOST, 'localhost')
+          Nuvola.session.set(PORT, '8000')
+          console.log(Nuvola.format('New value {1} = "{2}"', HOST, Nuvola.session.get(HOST)))
+          console.log(Nuvola.format('New value {1} = "{2}"', PORT, Nuvola.session.get(PORT)))
+      }
+      /* End of example */
+
+      var state = document.readyState;
+      if (state === 'interactive' || state === 'complete') {
+        this._onPageReady();
+      } else {
+        document.addEventListener('DOMContentLoaded', this._onPageReady.bind(this))
+      }
     }
 
 If you open JavaScript console in WebKit Web Inspector, you see following output:
@@ -208,7 +200,7 @@ If you open JavaScript console in WebKit Web Inspector, you see following output
     Current value app.port = '' (integrate.js, line 77)
     New value app.host = 'localhost' (integrate.js, line 82)
     New value app.port = '8000' (integrate.js, line 83)
-    
+
     # When the page is reloaded
     Current value app.host = 'localhost' (integrate.js, line 76)
     Current value app.port = '8000' (integrate.js, line 77)

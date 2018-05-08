@@ -23,79 +23,79 @@ i. e. it cannot be translated differently depending on a message context.
   * Use function [Translate.gettext](apiref>Nuvola.Translate.gettext).
 
         :::js
-        console.log(Nuvola.Translate.gettext("Bye World!"));
-  
+        console.log(Nuvola.Translate.gettext('Bye World!'))
+
   * It's common to create a short alias ``_``. (Note that other aliases won't be recognized by
     a translation extraction tool.)
-    
+
         :::js
-        var _ = Nuvola.Translate.gettext;
-        console.log(_("Hello world!"));
-  
+        var _ = Nuvola.Translate.gettext
+        console.log(_('Hello world!'))
+
   * Note that you have to provide a string literal, not variable nor expression, because the
     translation extraction tool doesn't expand variables.
-  
+
         :::js
-        var greeting = "Hello world!";
-        console.log(_(greeting)); // Wrong!
-        
-        var greeting = _("Hello world!"); // Right
+        var greeting = 'Hello world!'
+        console.log(_(greeting)) // Wrong!
+
+        var greeting = _('Hello world!') // Right
         console.log(greeting)
-  
+
   * If you need to compose message with variables, use [Nuvola.format](apiref>Nuvola.format).
-    
+
         :::js
-        var name = "John";
-        console.log(_("Hello " + name + "!")); // Wrong!
-        console.log(Nuvola.format(_("Hello {1}!"), name)); // Right
-        var $fmt = Nuvola.format;
-        console.log($fmt(_("Hello {1}!"), name)); // Right
-        
+        var name = 'John'
+        console.log(_('Hello ' + name + '!')) // Wrong!
+        console.log(Nuvola.format(_('Hello {1}!'), name)) // Right
+        var $fmt = Nuvola.format
+        console.log($fmt(_('Hello {1}!'), name)) // Right
+
   * You can optionally add a comment for translators after tree slashes. It has to be on a line
     preceding the translated string though.
-    
+
         :::js
-        var name = "John";
+        var name = 'John'
         /// {1} is a placeholder for user name
-        console.log(Nuvola.format(_("Hello {1}!"), name));
+        console.log(Nuvola.format(_('Hello {1}!'), name))
 
 
 Disambiguating message context
 ------------------------------
 
 You might sometimes have short strings that could be translated differently depending on a context.
-For example, "Back" string in navigation or in a body part. You should use this function for
+For example, 'Back' string in navigation or in a body part. You should use this function for
 labels of [custom actions](:apps/custom-actions.html) or entries of
 [initialization and preferences forms](:apps/initialization-and-preferences-forms.html).
 
 
   * Use function [Translate.pgettext](apiref>Nuvola.Translate.pgettext).
-  
+
         :::js
-        console.log(Nuvola.Translate.pgettext("Action label", "Show notification"));
-        console.log(Nuvola.Translate.pgettext("Checkbox label", "Show notification"));
-  
+        console.log(Nuvola.Translate.pgettext('Action label', 'Show notification'))
+        console.log(Nuvola.Translate.pgettext('Checkbox label', 'Show notification'))
+
   * It's common to create a short alias ``C_``. (Note that other aliases won't be recognized by
     a translation extraction tool.)
-    
+
         :::js
-        var C_ = Nuvola.Translate.pgettext;
-        console.log(C_("Action label", "Show notification"));
-        console.log(C_("Checkbox label", "Show notification"));
-    
+        var C_ = Nuvola.Translate.pgettext
+        console.log(C_('Action label', 'Show notification'))
+        console.log(C_('Checkbox label', 'Show notification'))
+
   * You can optionally add a comment for translators after tree slashes. It has to be on a line
     preceding the translated string though.
-    
+
         :::js
         /// My comment
-        console.log(C_("Action label", "Show notification"));
-        
+        console.log(C_('Action label', 'Show notification'))
+
         console.log(C_(
-            "Checkbox label",
-            /// My comment
-            "Show notification"
-            ));
-  
+          'Checkbox label',
+          /// My comment
+          'Show notification'
+          ))
+
 Singular and plural form
 ------------------------
 
@@ -106,45 +106,45 @@ Gettext also support messages with a singular and a plural form.
         :::js
         var eggs = 5;
         var text = Nuvola.Translate.ngettext(
-            "There is {1} egg in the fridge.",
-            "There are {1} eggs in the fridge.",
-            eggs);
-        console.log(Nuvola.format(text, eggs));
-        
-        var $fmt = Nuvola.format;
-        console.log($fmt(text, eggs));
-  
+          'There is {1} egg in the fridge.',
+          'There are {1} eggs in the fridge.',
+          eggs)
+        console.log(Nuvola.format(text, eggs))
+
+        var $fmt = Nuvola.format
+        console.log($fmt(text, eggs))
+
   * It's common to create an  alias ``ngettext``. (Note that other aliases won't be recognized by
     a translation extraction tool.)
-    
+
         :::js
-        var ngettext = Nuvola.Translate.ngettext;
-        var eggs = 5;
+        var ngettext = Nuvola.Translate.ngettext
+        var eggs = 5
         var text = ngettext(
-            "There is {1} egg in the fridge.",
-            "There are {1} eggs in the fridge.",
-            eggs);
-        console.log(Nuvola.format(text, eggs));
-  
+          'There is {1} egg in the fridge.',
+          'There are {1} eggs in the fridge.',
+          eggs)
+        console.log(Nuvola.format(text, eggs))
+
   * It's possible to replace placeholder in the singular form with ``one``.
-    
+
         :::js
         var text = ngettext(
-            "There is one egg in the fridge.",
-            "There are {1} eggs in the fridge.",
-            eggs);
-        console.log(Nuvola.format(text, eggs));
-    
+          'There is one egg in the fridge.',
+          'There are {1} eggs in the fridge.',
+          eggs)
+        console.log(Nuvola.format(text, eggs))
+
   * You can optionally add a comment for translators after tree slashes. It has to be on a line
     preceding the singular string though.
-    
+
         :::js
         var text = ngettext(
-            /// {1} is a placeholder for a number
-            "There is one egg in the fridge.",
-            "There are {1} eggs in the fridge.",
-            eggs);
-        console.log(Nuvola.format(text, eggs));
+          /// {1} is a placeholder for a number
+          'There is one egg in the fridge.',
+          'There are {1} eggs in the fridge.',
+          eggs)
+        console.log(Nuvola.format(text, eggs))
 
 Extract translations
 ====================
@@ -161,42 +161,42 @@ Example
 -------
 
 ```js
-var _ = Nuvola.Translate.gettext;
-var C_ = Nuvola.Translate.pgettext;
-var ngettext = Nuvola.Translate.ngettext;
-var $fmt = Nuvola.format;
+var _ = Nuvola.Translate.gettext
+var C_ = Nuvola.Translate.pgettext
+var ngettext = Nuvola.Translate.ngettext
+var $fmt = Nuvola.format
 
-var greeting = _("Hello world!");
+var greeting = _('Hello world!')
 console.log(greeting)
 
-var name = "John";
+var name = 'John'
 /// {1} is a placeholder for user name
-console.log(Nuvola.format(_("Hello {1}!"), name));
-console.log($fmt(_("Hello {1}!"), name));
+console.log(Nuvola.format(_('Hello {1}!'), name))
+console.log($fmt(_('Hello {1}!'), name))
 
 /// My comment
-console.log(C_("Action label", "Show notification"));
+console.log(C_('Action label', 'Show notification'))
 console.log(C_(
-    "Checkbox label",
-    /// My comment
-    "Show notification"
-    ));
+  'Checkbox label',
+  /// My comment
+  'Show notification'
+  ))
 
-var eggs = 1;
+var eggs = 1
 var text = ngettext(
-    "There is {1} egg in the fridge.",
-    "There are {1} eggs in the fridge.",
-    eggs);
-console.log(Nuvola.format(text, eggs));
-console.log($fmt(text, eggs));
+    'There is {1} egg in the fridge.',
+    'There are {1} eggs in the fridge.',
+    eggs)
+console.log(Nuvola.format(text, eggs))
+console.log($fmt(text, eggs))
 
-var eggs = 5;
+var eggs = 5
 var text = ngettext(
-    /// {1} is a placeholder for a number
-    "There is one egg in the fridge.",
-    "There are {1} eggs in the fridge.",
-    eggs);
-console.log(Nuvola.format(text, eggs));
+  /// {1} is a placeholder for a number
+  'There is one egg in the fridge.',
+  'There are {1} eggs in the fridge.',
+  eggs)
+console.log(Nuvola.format(text, eggs))
 ```
 
 ```sh

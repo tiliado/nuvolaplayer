@@ -44,27 +44,27 @@ var Translate = {}
  *
  * **Usage notes**
  *
- *   * It is usual to create alias ``var _ = Nuvola.Translate.gettext;``
+ *   * It is usual to create alias ``var _ = Nuvola.Translate.gettext``
  *   * You have to pass plain string literals, not expressions nor variables.
  *
  * @param String text    text to translate
  * @return String        translated string
  *
  * ```
- * var _ = Nuvola.Translate.gettext;
+ * var _ = Nuvola.Translate.gettext
  * /// You can use tree slashes to add comment for translators.
  * /// It has to be on a line preceding the translated string though.
- * console.log(_("Hello world!")); // Right
+ * console.log(_('Hello world!')) // Right
  *
- * var greeting = "Hello world!";
- * console.log(_(greeting)); // Wrong!
+ * var greeting = 'Hello world!'
+ * console.log(_(greeting)) // Wrong!
  *
- * var greeting = _("Hello world!"); // Right
- * console.log(greeting);
+ * var greeting = _('Hello world!') // Right
+ * console.log(greeting)
  *
- * var name = "John";
- * console.log(_("Hello " + name + "!")); // Wrong!
- * console.log(Nuvola.format(_("Hello {1}!"), name)); // Right
+ * var name = 'John'
+ * console.log(_('Hello ' + name + '!')) // Wrong!
+ * console.log(Nuvola.format(_('Hello {1}!'), name)) // Right
  * ```
  */
 Translate.gettext = function (text) {
@@ -76,14 +76,14 @@ Translate.gettext = function (text) {
  * Translate string with support of a disambiguating message context.
  *
  * This is mainly useful for short strings which may need different translations, depending on the context in which they
- * are used. e.g.: ``pgettext("Navigation", "Back")`` vs ``pgettext("Body part", "Back")``.
+ * are used. e.g.: ``pgettext('Navigation', 'Back')`` vs ``pgettext('Body part', 'Back')``.
  *
  * **Placeholder**: This function is only a placeholder for future functionality, but you can use it to mark
  * translatable strings.
  *
  * **Usage notes**
  *
- *   * It is usual to create alias ``var C_ = Nuvola.Translate.pgettext;``
+ *   * It is usual to create alias ``var C_ = Nuvola.Translate.pgettext``
  *   * You have to pass plain string literals, not expressions nor variables.
  *
  * @param String context    the message context
@@ -91,16 +91,16 @@ Translate.gettext = function (text) {
  * @return String           translated string
  *
  * ```
- * var C_ = Nuvola.Translate.pgettext;
+ * var C_ = Nuvola.Translate.pgettext
  * /// You can use tree slashes to add comment for translators.
  * /// It has to be on a line preceding the translated string though.
- * console.log(C_("Navigation", "Back"));
- * console.log(C_("Body part", "Back"));
+ * console.log(C_('Navigation', 'Back'))
+ * console.log(C_('Body part', 'Back'))
  * ```
  */
 Translate.pgettext = function (context, text) {
   if (!context) {
-    Nuvola.warn("Context information passed to Translate.pgettext is invalid: {1}, '{2}'", context, text)
+    Nuvola.warn('Context information passed to Translate.pgettext is invalid: {1}, "{2}"', context, text)
     return Translate.gettext(text)
   }
 
@@ -117,7 +117,7 @@ Translate.pgettext = function (context, text) {
  *
  * **Usage notes**
  *
- *   * It is usual to create alias ``var ngettext = Nuvola.Translate.ngettext;``
+ *   * It is usual to create alias ``var ngettext = Nuvola.Translate.ngettext``
  *   * You have to pass plain string literals, not expressions nor variables.
  *
  * @param String text1      singular form
@@ -126,22 +126,22 @@ Translate.pgettext = function (context, text) {
  * @return String           translated string
  *
  * ```
- * var ngettext = Nuvola.Translate.ngettext;
- * var eggs = 5;
+ * var ngettext = Nuvola.Translate.ngettext
+ * var eggs = 5
  * var text = ngettext(
- *     "There is {1} egg in the fridge.",
- *     "There are {1} eggs in the fridge.",
- *     eggs);
- * console.log(Nuvola.format(text, eggs));
+ *   'There is {1} egg in the fridge.',
+ *   'There are {1} eggs in the fridge.',
+ *   eggs)
+ * console.log(Nuvola.format(text, eggs))
  *
  * var text = ngettext(
- *     /// You can use tree slashes to add comment for translators.
- *     /// It has to be on a line preceding the singular string though.
- *     /// {1} will be replaced by number of eggs in both forms,
- *     /// but can be omitted as shown in singular form.
- *     "There is one egg in the fridge.",
- *     "There are {1} eggs in the fridge.",
- *     eggs);
+ *   /// You can use tree slashes to add comment for translators.
+ *   /// It has to be on a line preceding the singular string though.
+ *   /// {1} will be replaced by number of eggs in both forms,
+ *   /// but can be omitted as shown in singular form.
+ *   'There is one egg in the fridge.',
+ *   'There are {1} eggs in the fridge.',
+ *   eggs)
  * ```
  */
 Translate.ngettext = function (text1, text2, n) {

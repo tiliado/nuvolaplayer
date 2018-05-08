@@ -33,14 +33,13 @@ var SignalsMixin = {}
  * @param String name    signal name, should be in CamelCase
  *
  * ```
- * BookStore.$init = function()
- * {
- *     /**
- *      * Emitted when a book is added.
- *      *
- *      * @param Book book    book that has been added
- *      *\/
- *     this.addSignal("BookAdded");
+ * BookStore.$init = function() {
+ *   /**
+ *    * Emitted when a book is added.
+ *    *
+ *    * @param Book book    book that has been added
+ *    *\/
+ *   this.addSignal('BookAdded')
  * }
  * ```
  */
@@ -71,15 +70,13 @@ SignalsMixin.registerSignals = function (signals) {
  * @throws Error if signal doesn't exist
  *
  * ```
- * Logger._onBookAdded = function(emitter, book)
- * {
- *     console.log("New book: " + book.title + ".");
+ * Logger._onBookAdded = function(emitter, book) {
+ *   console.log('New book: ' + book.title + '.')
  * }
  *
- * Logger.$init = function()
- * {
- *     bookStore.connect("BookAdded", this);
- *     // equivalent: bookStore.connect("BookAdded", this, "_onBookAdded");
+ * Logger.$init = function() {
+ *   bookStore.connect('BookAdded', this)
+ *   // equivalent: bookStore.connect('BookAdded', this, '_onBookAdded')
  * }
  * ```
  */
@@ -120,10 +117,9 @@ SignalsMixin.disconnect = function (name, object, handlerName) {
  * @throws Error if signal doesn't exist
  *
  * ```
- * BookStore.addBook = function(book)
- * {
- *     this.books.push(book);
- *     this.emit("book-added", book)
+ * BookStore.addBook = function(book) {
+ *   this.books.push(book)
+ *   this.emit('book-added', book)
  * }
  * ```
  */
