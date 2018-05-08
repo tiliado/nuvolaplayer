@@ -604,7 +604,7 @@ class HtmlPrinter(object):
     def process_changelog(self):
         index, body, tree = self.index, self.body, self.tree
         index.append("<h3>Changelog</h3><ul>")
-        body.append("<h2>Changelog</h2>")
+        body.append("<h2 id=\"x-changelog\">Changelog</h2>")
         def key_func(i):
             key = i[0].replace('.', ' ').split()[1:] + tree.get_symbol_name(i[2]).replace('.', ' ').split()
             keys = []
