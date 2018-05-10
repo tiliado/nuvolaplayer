@@ -22,6 +22,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#if HAVE_CEF
 namespace Nuvola {
 
 public class CefScriptDialogModel : ScriptDialogModel {
@@ -56,3 +57,4 @@ public class CefScriptDialogModel : ScriptDialogModel {
 }
 
 } // namespace Nuvola
+#endif

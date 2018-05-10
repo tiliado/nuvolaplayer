@@ -22,6 +22,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#if HAVE_CEF
 namespace Nuvola {
 
 public errordomain CefWidevineDownloaderError {
@@ -162,3 +163,4 @@ public class CefWidevineDownloader : GLib.Object {
 }
 
 } // namespace Nuvola
+#endif

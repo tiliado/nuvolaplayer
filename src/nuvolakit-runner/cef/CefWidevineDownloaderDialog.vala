@@ -22,6 +22,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#if HAVE_CEF
 namespace Nuvola {
 
 public class CefWidevineDownloaderDialog : Gtk.Dialog {
@@ -183,3 +184,4 @@ public class CefWidevineDownloaderDialog : Gtk.Dialog {
 }
 
 } // namespace Nuvola
+#endif
