@@ -387,6 +387,7 @@ public class AppRunnerController: Drtgtk.Application {
         web_engine.show_script_dialog.connect(on_show_script_dialog);
         actions.action_changed.connect(on_action_changed);
         Gtk.Widget widget = web_engine.get_main_web_view();
+        widget.margin_top = 1;
         widget.hexpand = widget.vexpand = true;
         main_window.grid.add(widget);
         widget.show();
