@@ -71,7 +71,7 @@ Let's look at the example:
       "api_major": 4,
       "api_minor": 6,
       "categories": "AudioVideo;Audio;",
-      "requirements": "Feature[Flash] Codec[MP3]",
+      "requirements": "Chromium[65] Codec[MP3] Feature[MSE]",
       "home_url": "nuvola://home.html",
       "license": "2-Clause BSD, CC-BY-3.0",
       "build": {
@@ -417,11 +417,13 @@ in `metadata.in.json`. It can contain a space separated list of following requir
   * `Codec[MP3]`: The web app can play audio with HTML5 audio technology and requires a MP3 codec.
   * `Feature[Flash]`: The web app requires Adobe Flash plugin. Use only if your app cannot use
     HTML5 Audio.
-  * `WebKitGTK[X.Y.Z]`: The web app doesn't work properly in WebKitGTK < X.Y.Z. While the genuine flatpak
-    builds of Nuvola always contain the latest stable release of WebKitGTK, this may not be true for
-    unofficial third-party builds.
+  * `WebKitGTK[X.Y.Z]`: The web app requires WebKitGTK >= X.Y.Z.
+  * `Chromium[X]`: The web app requires Chromium Embedded Framework from Chromium release X.
   * `Feature[MSE]`: The web app requires Media Source extension for HTML5 Audio playback.
   * `Codec[H264]`: The web app requires h264 codec for HTML5 Audio playback.
+
+If you integrate **a media player**, start with `Chromium[65] Codec[MP3] Feature[MSE]`. If it complains about Flash plugin,
+use `Chromium[65] Codec[MP3] Feature[MSE] Feature[Flash]`.
 
 User Agent Quirks
 -----------------
