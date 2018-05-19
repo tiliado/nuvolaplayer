@@ -37,12 +37,14 @@ var WebApp = Nuvola.$WebApp()
 ...
 
 WebApp._onNavigationRequest = function (emitter, request) {
-  Nuvola.log('Open in a new window? {1}', request.newWindow)
-  if (request.url.length > 40) {
-    Nuvola.log('I hate long URLS: {1} has {2} characters!', request.url, request.url.length)
-    request.approved = false
-  } else {
+  if (request.url === 'https://www.npr.org/') {
+    // choice.npr.org redirects to 'https://www.npr.org/' regardless of the original domain (one.npr.org)
+    // Let's go to the home page instead of showing www.npr.org in a new window.
+    request.url = 'https://one.npr.org/'
     request.approved = true
+  } else {
+    // Apply URL filter otherwise
+    Nuvola.WebApp._onNavigationRequest.call(this, emitter, request)
   }
 }
 

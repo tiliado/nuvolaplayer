@@ -83,13 +83,14 @@ Core.$init = function () {
     /**
      * Emitted on request for navigation to a new web page.
      *
-     * @param String request.url           URL of the new page
+     * @since Nuvola 4.12: You can overwrite  `request.url` field to force redirect.
+     * @param String request.url           URL of the new page, you can overwrite this field to force redirect
      * @param Boolean request.newWindow    whether to open request in a new window, you can overwrite this field
      * @param Boolean request.approved     whether the navigation is approved, set to ``false`` when
      *     the ``request.url`` should be opened in user's default web browser
      *
      * ```
-     * var _onNavigationRequest = function (object, request) {
+     * var _onNavigationRequest = function (emitter, request) {
      *   request.approved = isAddressAllowed(request.url)
      * }
      * ```
@@ -105,7 +106,7 @@ Core.$init = function () {
      * @param String request.userAgent       whether to override user agent string
      *
      * ```
-     * var _onPageSettings = function (object, request) {
+     * var _onPageSettings = function (emitter, request) {
      *   request.userAgent = (
      *     request.url.startsWith("https://accounts.google.com/")
      *     || request.url.startsWith("https://accounts.youtube.com/")

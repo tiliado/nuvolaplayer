@@ -574,11 +574,15 @@ public class CefEngine : WebEngine {
 
         request.allow();
         bool new_window_override = request.new_window;
-        bool approved = navigation_request(uri, ref new_window_override);
-        debug("Navigation: new window %s → %s, uri = '%s', approved = %s, frame = %s, type = %s, user gesture %s",
-            request.new_window.to_string(), new_window_override .to_string(), uri,
+        string uri_override = uri;
+        bool approved = navigation_request(ref uri_override, ref new_window_override);
+        debug("Navigation: new window: %s → %s, uri: '%s' → '%s', approved: %s, frame: %s, type: %s, user gesture: %s",
+            request.new_window.to_string(), new_window_override .to_string(), uri, uri_override,
             approved.to_string(), request.target_frame_name,
             request.transition_type.to_string(), request.user_gesture.to_string());
+        if (uri_override == null || uri_override == "") {
+            uri_override = uri;
+        }
 
         if (request.new_window) {
             string reversed_uri = uri.reverse();
@@ -596,15 +600,13 @@ public class CefEngine : WebEngine {
         Cef.TransitionType type_mask = Cef.TransitionType.LINK | Cef.TransitionType.CLIENT_REDIRECT_FLAG;
         if ((request.transition_type & type_mask) != 0 || request.user_gesture) {
             if (approved) {
-                if (request.new_window != new_window_override) {
-                    if (!new_window_override) {
-                        // Open in current window instead of a new window
-                        string owned_uri = uri;
-                        Idle.add(() => {web_view.load_uri(owned_uri); return false;});
-                        request.cancel();
-                    } else {
+                if (request.new_window != new_window_override || uri_override != uri) {
+                    if (request.new_window != new_window_override && new_window_override) {
                         warning("Overriding of new window flag false -> true hasn't been implemented yet.");
                     }
+                    // Open in current window instead of a new window or load a different URL
+                    Idle.add(() => {web_view.load_uri(uri_override); return false;});
+                    request.cancel();
                 }
             } else {
                 open_external_uri(uri);
@@ -626,7 +628,7 @@ public class CefEngine : WebEngine {
         }
     }
 
-    private bool navigation_request(string url, ref bool new_window) {
+    private bool navigation_request(ref string url, ref bool new_window) {
         var builder = new VariantBuilder(new VariantType("a{smv}"));
         builder.add("{smv}", "url", new Variant.string(url));
         builder.add("{smv}", "approved", new Variant.boolean(true));
@@ -650,6 +652,8 @@ public class CefEngine : WebEngine {
                 approved = value != null ? value.get_boolean() : false;
             } else if (key == "newWindow" && value != null) {
                 new_window = value.get_boolean();
+            } else if (key == "url" && value != null) {
+                url = value.get_string();
             }
         }
         return approved;
