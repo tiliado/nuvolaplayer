@@ -362,44 +362,19 @@ Finally, execute following commands:
   * `./configure` to generate `Makefile` and `metadata.json` from `metadata.in.json`
   * `make all` to build the project
 
-After the project have been built, you can run Nuvola Runtime from terminal with following command and you will see a list with only one
-service Happy Songs, because we told Nuvola to load service integrations only from directory
-`~/projects/nuvola-apps`.
+After the project have been built, you can run your script with Nuvola Runtime from terminal with following command.
 
-    $ nuvola -D -A ~/projects/nuvola-apps
-    ...
-    [Master:DEBUG    Nuvola] WebAppRegistry.vala:128: Found web app Happy Songs at /home/fenryxo/projects/nuvola-aps/nuvola-app-happy-songs, version 1.0
-    ...
+    $ nuvolaruntime -D
 
-
-
-!!! danger "Make sure all Nuvola Apps instances have been closed"
-    If you see following warning in terminal, there is a running instance of Nuvola Apps
-    that must be closed. Otherwise, the `-A` parameter is ignored.
-
-
-        [Master:INFO     Nuvola] master.vala:135: Nuvola App instance is already running
-        and will be activated.
-        [Master:WARNING  Nuvola] master.vala:137: Some command line parameters (-D, -v, -A, -L) are
-        ignored because they apply only to a new instance. You might want to close all Nuvola Apps
-        instances and run it again with your parameters.
-
-![A list with single service integration](:images/guide/app_list_one_service.png)
-
-Launch your service integration and a new window will be opened with the test service. First of all,
-show **developer's sidebar** (Gear menu → Show sidebar → select "Developer" in the right
-sidebar), then enable **WebKit Web Inspector** (right-click the web page anywhere and select
-"Inspect element").
+First of all, show **developer's sidebar** (Gear menu → Show sidebar → select "Developer" in the right
+sidebar), then enable **Web Inspector** (click Open Dev Tools button for Chromium-based backend or
+right-click the web page anywhere and select "Inspect element" for WebKitGTK backend).
 
 ![Show sidebar - GNOME Shell](:images/guide/show_sidebar_gnome_shell.png)
 
 ![Inspect element](:images/guide/inspect_element.png)
 
 ![WebKit Web Inspector](:images/guide/webkit_web_inspector.png)
-
-You can also launch your service integration with id `happy_songs` directly.
-
-    nuvola -D -A ~/projects/nuvola-apps -a happy_songs
 
 Web Compatibility Issues
 ========================
