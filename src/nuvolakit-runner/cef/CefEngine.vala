@@ -91,6 +91,9 @@ public class CefEngine : WebEngine {
         web_view.load_started.connect(on_load_started);
         web_view.alert_dialog.connect(on_alert_dialog);
         web_view.navigation_request.connect(on_navigation_request);
+        if (web_view.rendering_mode != CefGtk.RenderingMode.OFFSCREEN) {
+            web_view.margin_top = 1;
+        }
 
         HashTable<string, Variant> data = worker_data;
         uint size = data.size();
