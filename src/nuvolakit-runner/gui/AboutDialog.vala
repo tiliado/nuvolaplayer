@@ -50,6 +50,19 @@ public void print_version_info(FileStream output, WebApp? web_app) {
     output.printf("libsoup %u.%u.%u\n", Soup.get_major_version(), Soup.get_minor_version(), Soup.get_micro_version());
 }
 
+public void debug_print_version_info(WebApp? web_app) {
+    debug("%s %s (%s)", Nuvola.get_app_name(), Nuvola.get_version(), Nuvola.get_revision());
+    if (web_app != null) {
+        debug("%s script %d.%d.%d (%s)",
+            web_app.name, web_app.version_major, web_app.version_minor, web_app.version_micro,
+            web_app.version_revision ?? "unknown");
+    }
+    debug("Diorite %s", Drt.get_version());
+    #if HAVE_CEF
+    debug("Chromium %s", Cef.get_chromium_version());
+    #endif
+}
+
 public class AboutDialog: Gtk.Dialog {
     public AboutDialog(Gtk.Window? parent, WebApp? web_app, WebOptions[]? web_options) {
         GLib.Object(title: "About", transient_for: parent, use_header_bar: 1);

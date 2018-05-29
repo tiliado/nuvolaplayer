@@ -63,6 +63,7 @@ public int run_web_app_with_dbus_handshake(File web_app_dir, string[] argv) thro
     var storage = new Drt.XdgStorage.for_project(Nuvola.get_app_id());
     move_old_xdg_dirs(new Drt.XdgStorage.for_project(Nuvola.get_old_id()), storage);
     var web_app = new WebApp.from_dir(web_app_dir);
+    debug_print_version_info(web_app);
     var app_storage = new WebAppStorage(
         storage.user_config_dir.get_child(WEB_APP_DATA_SUBDIR).get_child(web_app.id),
         storage.user_data_dir.get_child(WEB_APP_DATA_SUBDIR).get_child(web_app.id),
