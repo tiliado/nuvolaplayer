@@ -43,8 +43,6 @@ public class MPRISPlayer : GLib.Object {
         can_go_next = player.can_go_next;
         can_go_previous = player.can_go_previous;
         can_seek = player.can_seek;
-        update_can_play();
-        update_can_pause();
     }
 
     public string playback_status {get; private set;}
@@ -66,12 +64,22 @@ public class MPRISPlayer : GLib.Object {
     public int64 position {get; private set; default = 0;}
     public bool can_go_next {get; private set; default = false;}
     public bool can_go_previous {get; private set; default = false;}
-    public bool can_play {get; private set; default = false;}
-    public bool can_pause {get; private set; default = false;}
     public bool can_seek {get; private set; default = false;}
     public bool can_control {get {return true;}}
     public bool nuvola_can_rate {get; private set; default = false;}
     public HashTable<string, Variant> metadata {get; private set; default = null;}
+
+    /*
+     * CanPlay/CanPause MPRIS flags have different meaning than Player.can_pause flag in Nuvola Player!
+     *
+     * MPRIS: Whether playback can be started/paused using Play, Pause or PlayPause. Note that this is an intrinsic property of
+     * the current track: its value should not depend on whether the track is currently paused or playing. In fact,
+     * if playback is currently playing/paused (and CanControl is true), this should be true.
+     *
+     * Let it always be true: tiliado/nuvolaruntime#439
+     */
+    public bool can_play {get {return true;}}
+    public bool can_pause {get {return true;}}
 
     private double _volume = 1.0;
     public double volume {
@@ -150,12 +158,6 @@ public class MPRISPlayer : GLib.Object {
             }
             break;
         case "state":
-            if (update_can_play()) {
-                pending_update["CanPlay"] = can_play;
-            }
-            if (update_can_pause()) {
-                pending_update["CanPause"] = can_pause;
-            }
             string status = map_playback_state();
             if (playback_status == status) {
                 return;
@@ -174,18 +176,6 @@ public class MPRISPlayer : GLib.Object {
             }
             pending_update["CanGoPrevious"] = can_go_previous = player.can_go_previous;
             break;
-        case "can-play":
-            if (!update_can_play()) {
-                return;
-            }
-            pending_update["CanPlay"] = can_play;
-            break;
-        case "can-pause":
-            if (!update_can_pause()) {
-                return;
-            }
-            pending_update["CanPause"] = can_pause;
-            break;
         case "can-rate":
             if (nuvola_can_rate == player.can_rate) {
                 return;
@@ -203,7 +193,7 @@ public class MPRISPlayer : GLib.Object {
         }
 
         if (pending_update_id == 0) {
-            pending_update_id = Timeout.add(300, update_cb);
+            pending_update_id = Timeout.add(200, update_cb);
         }
     }
 
@@ -260,38 +250,6 @@ public class MPRISPlayer : GLib.Object {
             metadata.insert("xesam:genre", new Variant.array(VariantType.STRING, {}));
         }
         return metadata;
-    }
-
-    /*
-     * CanPlay MPRIS flag has different meaning than Player.can_play flag in Nuvola Player!
-     *
-     * MPRIS: Whether playback can be started using Play or PlayPause. Note that this is related to whether there
-     * is a "current track": the value should not depend on whether the track is currently paused or playing. In fact,
-     * if a track is currently playing (and CanControl is true), this should be true.
-     */
-    private bool update_can_play() {
-        bool can_play = player.can_play || player.state != "unknown";
-        if (this.can_play != can_play) {
-            this.can_play = can_play;
-            return true;
-        }
-        return false;
-    }
-
-    /*
-     * CanPause MPRIS flag has different meaning than Player.can_pause flag in Nuvola Player!
-     *
-     * MPRIS: Whether playback can be paused using Pause or PlayPause. Note that this is an intrinsic property of
-     * the current track: its value should not depend on whether the track is currently paused or playing. In fact,
-     * if playback is currently paused (and CanControl is true), this should be true.
-     */
-    private bool update_can_pause() {
-        bool can_pause = player.can_pause || player.state != "unknown";
-        if (this.can_pause != can_pause) {
-            this.can_pause = can_pause;
-            return true;
-        }
-        return false;
     }
 
     private string map_playback_state() {
