@@ -31,6 +31,7 @@ public class CefOptions : WebOptions {
     public bool widevine_required {get; set; default = false;}
     public bool flash_required {get; private set; default = false;}
     public File widevine_dir {get; private set;}
+    public CefGtk.InitFlags flags {get; private set;}
 
     public CefOptions(WebAppStorage storage, Connection? connection) {
         base(storage, connection);
@@ -39,6 +40,8 @@ public class CefOptions : WebOptions {
     construct {
         engine_version = VersionTuple.parse(Cef.get_chromium_version());
         widevine_dir = storage.data_dir.get_child("widevine");
+        flags = new CefGtk.InitFlags();
+        flags.auto_play_policy = CefGtk.AutoPlayPolicy.NO_USER_GESTURE_REQUIRED;
     }
 
     public override string get_name_version() {
@@ -98,6 +101,7 @@ public class CefOptions : WebOptions {
             }
 
             CefGtk.init(
+                flags,
                 web_app.scale_factor,
                 widevine_required ? widevine_dir.get_path() : null,
                 flash_required,
