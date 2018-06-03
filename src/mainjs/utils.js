@@ -110,9 +110,10 @@ Nuvola.clickOnElement = function (elm, x, y) {
 }
 
 /**
- * Simulates input event
+ * Simulates input and change event
  *
  * @since API 4.11
+ * @since API 4.12: The change event is emitted as well.
  *
  * @param HTMLInputElement elm    Input element object
  * @param Var value               The value to set
@@ -120,6 +121,7 @@ Nuvola.clickOnElement = function (elm, x, y) {
 Nuvola.setInputValueWithEvent = function (elm, value) {
   elm.value = value
   elm.dispatchEvent(new window.Event('input', {'bubbles': true, 'cancelable': true}))
+  elm.dispatchEvent(new window.Event('change', {'bubbles': true, 'cancelable': true}))
 }
 
 /**
