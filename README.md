@@ -1,4 +1,4 @@
-Nuvola Apps Runtime
+Nuvola Apps Runtime [![CircleCI](https://circleci.com/gh/tiliado/nuvolaruntime.svg?style=svg)](https://circleci.com/gh/tiliado/nuvolaruntime)
 ===================
 
 About Nuvola

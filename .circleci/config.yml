@@ -11,17 +11,37 @@ jobs:
             dnf update -y > /dev/null
             dnf install -y git openssh-clients \
               gcc vala gobject-introspection-devel 'pkgconfig(python3)' \
-              'pkgconfig(gtk+-3.0)' sqlite-devel python3-pyparsing valadoc
+              'pkgconfig(gtk+-3.0)' sqlite-devel python3-pyparsing valadoc \
+              desktop-file-utils 'pkgconfig(gstreamer-1.0)' 'pkgconfig(json-glib-1.0)' \
+              'pkgconfig(libnotify)' 'pkgconfig(libsoup-2.4)' 'pkgconfig(libsecret-1)' \
+              'pkgconfig(uuid)' 'pkgconfig(webkit2gtk-4.0)' 'pkgconfig(sqlite3)' \
+              'pkgconfig(libarchive)' 'pkgconfig(libpulse)' libappstream-glib \
+              xorg-x11-util-macros libdrm-devel make patch \
+              'pkgconfig(x11)' 'pkgconfig(xext)' 'pkgconfig(xextproto)' 
             dnf clean all > /dev/null
+            git clone https://github.com/robclark/libdri2.git
+            cd libdri2
+            ./autogen.sh --prefix=/usr
+            make all
+            make install
+            /sbin/ldconfig
+            rm -rf ../libdri2
       - run: 
           name: Checkout Diorite
-          command: git clone git@github.com:tiliado/diorite.git
+          command: git clone https://github.com/tiliado/diorite.git
       - run: 
           name: Build and run tests of Diorite
           working_directory: ~/workdir/diorite
           command: |
-            ./waf configure build install
+            ./waf configure build install --prefix=/usr
             /sbin/ldconfig
             LD_LIBRARY_PATH=./build ./build/run-dioritetests
       - checkout:
           path: ~/workdir/nuvolaruntime
+      - run: 
+          name: Build and run Nuvola
+          working_directory: ~/workdir/nuvolaruntime
+          command: |
+            ./waf configure build install \
+              --no-vala-lint --no-unity --no-appindicator --no-cef --no-js-lint
+            LD_LIBRARY_PATH=./build ./build/run-nuvolaruntime-tests
