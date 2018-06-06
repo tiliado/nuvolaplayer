@@ -23,5 +23,5 @@ jobs:
             ./waf configure build install
             /sbin/ldconfig
             LD_LIBRARY_PATH=./build ./build/run-dioritetests
-       - checkout:
+      - checkout:
           path: ~/workdir/nuvolaruntime
