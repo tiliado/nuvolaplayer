@@ -1,0 +1,27 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: fedora:latest
+    working_directory: ~/workdir
+    steps:
+      - run: 
+          name: Install deps
+          command: |
+            dnf update -y > /dev/null
+            dnf install -y git openssh-clients \
+              gcc vala gobject-introspection-devel 'pkgconfig(python3)' \
+              'pkgconfig(gtk+-3.0)' sqlite-devel python3-pyparsing valadoc
+            dnf clean all > /dev/null
+      - run: 
+          name: Checkout Diorite
+          command: git clone git@github.com:tiliado/diorite.git
+      - run: 
+          name: Build and run tests of Diorite
+          working_directory: ~/workdir/diorite
+          command: |
+            ./waf configure build install
+            /sbin/ldconfig
+            LD_LIBRARY_PATH=./build ./build/run-dioritetests
+       - checkout:
+          path: ~/workdir/nuvolaruntime
