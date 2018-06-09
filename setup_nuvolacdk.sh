@@ -23,3 +23,7 @@ if [ ! -f web_apps/test/unit.js ]
 then
 	ln -sv "$DATADIR/javascript/unitjs/unit.js" web_apps/test/unit.js
 fi
+
+bootstrap_demo_player() {
+    "$(python3 -m nuvolasdk data-dir)/demo/bootstrap.sh"
+}
