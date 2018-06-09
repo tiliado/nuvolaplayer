@@ -3,7 +3,7 @@ Title: Service Integrations Tutorial
 [TOC]
 
 This tutorial briefly describes creation of **a new web app script for Nuvola Apps Runtime from
-scratch**. The goal is to write an integration script for *fake Happy Songs  service* shipped with
+scratch**. The goal is to write an integration script for *demo player website* shipped with
 Nuvola SDK and to prepare you to create your own service integration.
 I'm looking forward to a code review ;-)
 
@@ -20,10 +20,10 @@ Prepare development environment
 
  3. [Launch and set up Nuvola ADK](https://github.com/tiliado/nuvolaruntime/wiki/Nuvola-App-Developer-Kit#running-and-set-up)
 
- 4. Create a new project with "nuvola://home.html" as a home URL.
+ 4. Create a new project with "nuvola://demo/main.html" as a home URL.
 
         $ cd ~/projects/nuvola-apps
-        $ nuvolasdk new-project --name "Happy Songs" --url "nuvola://home.html"
+        $ nuvolasdk new-project --name "Happy Songs" --url "nuvola://demo/main.html"
         ...
         Finished!
 
@@ -43,11 +43,11 @@ Prepare development environment
         -rw-r--r-- 1 fenryxo fenryxo  1079 Dec  4 18:39 README.md
         drwxr-sr-x 1 fenryxo fenryxo    60 Dec  3 18:57 src
 
- 5. Copy a dumb example of a streaming website.
+ 5. Copy a demo player - an example of a streaming website.
 
         :::sh
         cd ~/projects/nuvola-apps/nuvola-app-happy-songs
-        cp "$(nuvolasdk data-dir)/examples/home.html" .
+        cp -r "$(nuvolasdk data-dir)/demo/demo" .
 
  6. If you are not familiar with the [Git version control system][git],
     check [Git tutorial](https://try.github.io/levels/1/challenges/1)
@@ -72,7 +72,7 @@ Let's look at the example:
       "api_minor": 6,
       "categories": "AudioVideo;Audio;",
       "requirements": "Chromium[65] Codec[MP3] Feature[MSE]",
-      "home_url": "nuvola://home.html",
+      "home_url": "nuvola://demo/main.html",
       "license": "2-Clause BSD, CC-BY-3.0",
       "build": {
         "icons": [
@@ -130,8 +130,8 @@ This file contains several mandatory fields:
 
 `home_url`
 
-:   Home page of your service. The dump example of a streaming website contains file `home.html`, which
-    has a special address `nuvola://home.html`. You will use a real homepage later in your own
+:   Home page of your service. The dump example of a streaming website contains file `demo/main.html`, which
+    has a special address `nuvola://demo/main.html`. You will use a real homepage later in your own
     service integration (e.g. `https://play.google.com/music/` for Google Play Music).
 
     This field is not required if you use custom function to handle home page request.
@@ -186,7 +186,7 @@ modifications.
 ```
 #!js
 /*
- * Copyright 2017 Your name <your e-mail>
+ * Copyright 2018 Your name <your e-mail>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -348,8 +348,12 @@ Nuvola Apps Runtime uses two processes for each service (web app):
 Check, Build and Run Your Script
 ================================
 
-First of all, make sure you have [installed all dependencies](https://github.com/tiliado/nuvolasdk#build-a-project-using-nuvola-sdk).
-Then run `nuvolasdk check-project` to check there are no common errors.
+First of all, make sure you have upgraded to the latest
+[Nuvola App Developer Kit (ADK)](https://github.com/tiliado/nuvolaruntime/wiki/Nuvola-App-Developer-Kit)
+because it is updated between Nuvola releases. I always recommend running
+`flatpak update --system; flatpak update --user` before doing any work.
+
+Then run `nuvolasdk check-project` (inside Nuvola ADK environment) to check there are no common errors.
 
 ```
 $ nuvolasdk check-project
@@ -372,9 +376,9 @@ right-click the web page anywhere and select "Inspect element" for WebKitGTK bac
 
 ![Show sidebar - GNOME Shell](:images/guide/show_sidebar_gnome_shell.png)
 
-![Inspect element](:images/guide/inspect_element.png)
+![Open Dev tools in CHromium](:images/guide/open_dev_tools.png)
 
-![WebKit Web Inspector](:images/guide/webkit_web_inspector.png)
+![Inspect element in WebKitGTK](:images/guide/inspect_element.png)
 
 Web Compatibility Issues
 ========================

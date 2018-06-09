@@ -101,12 +101,59 @@ WebApp.start()
 })(this)  // function (Nuvola)
 ```
 
+
+Interesting elements
+--------------------
+
+It might be useful to create a mapping of interesting web page elements to reference them later easily.
+This code snippet first creates mapping of the elements, then removes those with the `disabled` attribute,
+and finally splits the combined play/pause button.
+
+```js
+
+WebApp.update = function () {
+    var elms = this._getElements()
+    ...
+}
+
+...
+
+WebApp._getElements = function () {
+  // Interesting elements
+  var elms = {
+    play: document.getElementById('pp'),
+    pause: null,
+    next: document.getElementById('next'),
+    prev: document.getElementById('prev'),
+    repeat: document.getElementById('repeat'),
+    shuffle: document.getElementById('shuffle'),
+    progressbar: document.getElementById('progressbar'),
+    volumebar: document.getElementById('volume-bar')
+  }
+
+  // Ignore disabled buttons
+  for (var key in elms) {
+    if (elms[key] && elms[key].disabled) {
+      elms[key] = null
+    }
+  }
+
+  // Distinguish between play and pause action
+  if (elms.play && elms.play.firstChild && elms.play.firstChild.src.includes('pause')) {
+    elms.pause = elms.play
+    elms.play = null
+  }
+  return elms
+}
+```
+
+![Interesting elements](:images/guide/interesting_elements.png)
+
 Playback state
 --------------
 
-Looking at the code of a web page shown in the picture bellow, the code to extract playback state
-might be. Playback states are defined in an enumeration
-[Nuvola.PlaybackState](apiref>Nuvola.PlaybackState) and set by method
+Looking at the web page, can use the state of the combined play/pause button to figure out playback state.
+Playback states are defined in an enumeration [Nuvola.PlaybackState](apiref>Nuvola.PlaybackState) and set by method
 [player.setPlaybackState()](apiref>Nuvola.MediaPlayer.setPlaybackState).
 
 ```js
@@ -117,23 +164,14 @@ var PlaybackState = Nuvola.PlaybackState
 WebApp.update = function () {
   ...
 
-  try {
-    switch(document.getElementById('status').innerText) {
-      case 'Playing':
-        var state = PlaybackState.PLAYING
-        break
-      case 'Paused':
-        state = PlaybackState.PAUSED
-        break
-      default:
-        state = PlaybackState.UNKNOWN
-        break
-    }
-  } catch(e) {
-    // Always expect errors, e.g. document.getElementById('status') might be null
+  var state
+  if (elms.pause) {
+    state = PlaybackState.PLAYING
+  } else if (elms.play) {
+    state = PlaybackState.PAUSED
+  } else {
     state = PlaybackState.UNKNOWN
   }
-
   player.setPlaybackState(state)
 
   ...
@@ -144,26 +182,25 @@ WebApp.update = function () {
 Track details
 -------------
 
-Similarly, we can obtain track details and pass them to method [player.setTrack()](apiref>Nuvola.MediaPlayer.setTrack)
+In the demo player, track details are mostly available as a plain text content of the respective elements. We can use
+[Nuvola.queryText()](apiref>Nuvola.queryText) utility function to do that. The album art is a bit more complicated
+as it is available as the `src` attribute and the address is not absolute. We can use
+[Nuvola.queryAttribute()](apiref>Nuvola.queryAttribute) to obtain the content of the `src` attribute and a custom
+callback to convert the relative URL to the absolute one. Finally, we pass
+track details to method [player.setTrack()](apiref>Nuvola.MediaPlayer.setTrack).
 
 ```js
 WebApp.update = function () {
   ...
 
   var track = {
-    artLocation: null, // always null
-    rating: null // same
-  }
-
-  var idMap = {title: 'track', artist: 'artist', album: 'album'}
-  for (var key in idMap) {
-    try {
-      track[key] = document.getElementById(idMap[key]).innerText || null
-    } catch(e) {
-      // Always expect errors, e.g. document.getElementById() might return null
-      track[key] = null
+      title: Nuvola.queryText('#track-title'),
+      artist: Nuvola.queryText('#track-artist'),
+      album: Nuvola.queryText('#track-album'),
+      artLocation: Nuvola.queryAttribute('#track-cover', 'src', (src) => (
+        src ? window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1) + src : null
+      )),
     }
-  }
 
   player.setTrack(track)
 
@@ -184,41 +221,19 @@ The second responsibility of a service integration is to **manage media player a
 The first part is done via calls [player.setCanPause()](apiref>Nuvola.MediaPlayer.setCanPause),
 [player.setCanPlay()](apiref>Nuvola.MediaPlayer.setCanPlay),
 [player.setCanGoPrev()](apiref>Nuvola.MediaPlayer.setCanGoPrev) and
-[player.setCanGoNext()](apiref>Nuvola.MediaPlayer.setCanGoNext):
+[player.setCanGoNext()](apiref>Nuvola.MediaPlayer.setCanGoNext).
+We can take advantage of the `WebApp._getElements()` utility functions defined earlier. It contains only buttons that
+are available and not disabled.
 
 ```js
 WebApp.update = function () {
   ...
-
-  var enabled;
-  try {
-    enabled = !document.getElementById('prev').disabled
-  } catch (e) {
-    enabled = false
-  }
-  player.setCanGoPrev(enabled)
-
-  try {
-    enabled  = !document.getElementById('next').disabled
-  } catch (e) {
-    enabled = false
-  }
-  player.setCanGoNext(enabled)
-
-  var playPause = document.getElementById('pp')
-  try {
-    enabled  = playPause.innerText == 'Play'
-  } catch (e) {
-    enabled = false
-  }
-  player.setCanPlay(enabled)
-
-  try {
-    enabled  = playPause.innerText == 'Pause'
-  } catch (e) {
-    enabled = false
-  }
-  player.setCanPause(enabled)
+  var elms = this._getElements()
+  ...
+  player.setCanGoPrev(!!elms.prev)
+  player.setCanGoNext(!!elms.next)
+  player.setCanPlay(!!elms.play)
+  player.setCanPause(!!elms.pause)
 
   ...
 }
@@ -247,18 +262,27 @@ WebApp._onPageReady = function () {
 ...
 
 WebApp._onActionActivated = function (emitter, name, param) {
+  var elms = this._getElements()
   switch (name) {
     case PlayerAction.TOGGLE_PLAY:
+      if (elms.play) {
+        Nuvola.clickOnElement(elms.play)
+      } else {
+        Nuvola.clickOnElement(elms.pause)
+      }
+      break
     case PlayerAction.PLAY:
+      Nuvola.clickOnElement(elms.play)
+      break
     case PlayerAction.PAUSE:
     case PlayerAction.STOP:
-      Nuvola.clickOnElement(document.getElementById('pp'))
+      Nuvola.clickOnElement(elms.pause)
       break
     case PlayerAction.PREV_SONG:
-      Nuvola.clickOnElement(document.getElementById('prev'))
+      Nuvola.clickOnElement(elms.prev)
       break
     case PlayerAction.NEXT_SONG:
-      Nuvola.clickOnElement(document.getElementById('next'))
+      Nuvola.clickOnElement(elms.next)
       break
   }
 }
@@ -267,15 +291,10 @@ WebApp._onActionActivated = function (emitter, name, param) {
 !!! danger "Always test playback actions"
     You should click action buttons in the developer's sidebar to be sure they are working as expected.
 
-!!! info "Custom actions"
-    Service integrations can also create [custom Actions](:apps/custom-actions.html) like thumbs
-    up/down or star rating.
-
 Track Rating
 ------------
 
-Since **Nuvola 3.1**, it is also possible to integrate track rating. If you wish to make your script compatible with
-older versions, use respective [Nuvola.checkVersion](apiref>Nuvola.checkVersion) condition as shown in examples bellow.
+Since **Nuvola 3.1**, it is also possible to integrate track rating.
 
 In order to provide users with the current rating state, use these API calls:
 
@@ -295,8 +314,7 @@ Here are some suggestions:
     `track.rating` property and interpret rating <= `0.41` (0-2 stars) as thumb down and rating >= `0.79` (4-5 stars)
     as thumb up in the `RatingSet` signal handler.
 
-
-In this example, a track can be rated as *good* (thumb up) or *bad* (thumb down).
+The demo app supports five-star rating:
 
 ```js
 
@@ -322,17 +340,16 @@ WebApp.update = function () {
   ...
 
   // Parse rating
-  switch (document.getElementById('rating').innerText || null) {
-    case 'good':
-      track.rating = 1.0 // five stars
-      break
-    case 'bad':
-      track.rating = 0.2 // one star
-      break
-    default:
-      track.rating = 0.0 // zero star
-      break
-  }
+  var rating = document.getElementById('rating')
+    var stars = 0
+    if (rating) {
+      for (; stars < rating.childNodes.length; stars++) {
+        if (rating.childNodes[stars].src.includes('star_border_white')) {
+          break
+        }
+      }
+      track.rating = stars / 5.0
+    }
 
   player.setTrack(track)
 
@@ -340,9 +357,6 @@ WebApp.update = function () {
 
   var state = PlaybackState.UNKNOWN
   state = ...
-
-  player.setPlaybackState(state)
-
   player.setCanRate(state !== PlaybackState.UNKNOWN)
 }
 
@@ -350,16 +364,43 @@ WebApp.update = function () {
 
 // Handler for rating
 WebApp._onRatingSet = function (emitter, rating) {
-    Nuvola.log('Rating set: {1}', rating)
-    var current = document.getElementById('rating').innerText
-    if (rating <= 0.4) { // 0-2 stars
-      document.getElementById('rating').innerText = current === 'bad' ? '-' : 'bad'
-    } else if (rating >= 0.8) { // 4-5 stars
-        document.getElementById('rating').innerText = current === 'good' ? '-' : 'good'
-    } else { // three stars
-      throw new Error('Invalid rating: ' + rating + '.\n\n'
-        + 'Have you clicked the three-star button? It isn't supported.')
+  var stars
+  if (rating < 0.1) {
+    stars = 0
+  } else if (rating < 0.3) {
+    stars = 1
+  } else if (rating < 0.5) {
+    stars = 2
+  } else if (rating < 0.7) {
+    stars = 3
+  } else if (rating < 0.9) {
+    stars = 4
+  } else if (rating < 1.1) {
+    stars = 5
+  } else {
+    stars = 0
+  }
+  this._setRating(stars)
+}
+
+WebApp._setRating = function (stars) {
+  var elm = document.getElementById('rating-change')
+  if (elm) {
+    if (stars === 0) {
+      // Click on the current star to erase it
+      var rating = document.getElementById('rating')
+      if (rating) {
+        for (stars = 0; stars < rating.childNodes.length; stars++) {
+          if (rating.childNodes[stars].src.includes('star_border_white')) {
+            break
+          }
+        }
+      }
     }
+    if (stars > 0 && stars < 6) {
+      Nuvola.clickOnElement(elm.childNodes[stars - 1])
+    }
+  }
 }
 
 ...
@@ -370,10 +411,8 @@ WebApp._onRatingSet = function (emitter, rating) {
 Progress bar
 ------------
 
-Since **Nuvola 4.5**, it is also possible to integrate progress bar. If you wish to make your script compatible with
-older versions, use respective [Nuvola.checkVersion](apiref>Nuvola.checkVersion) condition as shown in examples bellow.
-
-In order to extract track length and position, use these API calls:
+Since **Nuvola 4.5**, it is also possible to integrate progress bar. In order to extract track length and position,
+use these API calls:
 
   * [MediaPlayer.setTrack](apiref>Nuvola.MediaPlayer.setTrack) supports `track.length` property, which holds track
     length either as a string 'mm:ss' or number of microseconds.
@@ -382,19 +421,18 @@ In order to extract track length and position, use these API calls:
     into the number of microseconds. [MediaPlayer.setTrack](apiref>Nuvola.MediaPlayer.setTrack) does that automatically
     for the `track.length` property.
 
+The necessary information is available as a plain text in the Demo player, so we can use
+[Nuvola.queryText()](apiref>Nuvola.queryText) utility function for that.
+
 ```js
 WebApp.update = function () {
-    ...
-
-  var elm = document.getElementById('timetotal')
-  track.length = elm ? elm.innerText || null : null
-  player.setTrack(track)
-
   ...
-
-  var elm = document.getElementById('timeelapsed')
-  player.setTrackPosition(elm ? elm.innerText || null : null)
-
+  var track = {}
+  ...
+  track.length = Nuvola.queryText('#timetotal')
+  player.setTrack(track)
+  ...
+  player.setTrackPosition(Nuvola.queryText('#timeelapsed'))
   ...
 }
 ```
@@ -411,20 +449,20 @@ If you wish to let user change track position, use this API:
 ```js
 WebApp.update = function () {
   ...
-  player.setCanSeek(state !== PlaybackState.UNKNOWN)
+  player.setCanSeek(state !== PlaybackState.UNKNOWN && elms.progressbar)
   ...
 }
 
 ...
 
 WebApp._onActionActivated = function (emitter, name, param) {
+  var elms = this._getElements()
   switch (name) {
     ...
     case PlayerAction.SEEK:
-        var elm = document.getElementById('timetotal')
-        var total = Nuvola.parseTimeUsec(elm ? elm.innerText : null)
+        var total = Nuvola.parseTimeUsec(Nuvola.queryText('#timetotal'))
         if (param > 0 && param <= total) {
-          Nuvola.clickOnElement(document.getElementById('progresstext'), param/total, 0.5)
+          Nuvola.clickOnElement(elms.progressbar, param / total, 0.5)
         }
         break
     ...
@@ -439,20 +477,17 @@ WebApp._onActionActivated = function (emitter, name, param) {
 Volume management
 -----------------
 
-Since **Nuvola 4.5**, it is also possible to integrate volume management. If you wish to make your script compatible with
-older versions, use respective [Nuvola.checkVersion](apiref>Nuvola.checkVersion) condition as shown in examples bellow.
+Since **Nuvola 4.5**, it is also possible to integrate volume management. In order to extract volume, use
+[MediaPlayer.updateVolume](apiref>Nuvola.MediaPlayer.updateVolume) with the parameter in range 0.0-1.0 (i.e. 0-100%).
 
-In order to extract volume, use [MediaPlayer.updateVolume](apiref>Nuvola.MediaPlayer.updateVolume) with the parameter
-in range 0.0-1.0 (i.e. 0-100%).
+The volume is stored as an `aria-valuenow` attribute in the demo app, so we can use
+[Nuvola.queryAttribute()](apiref>Nuvola.queryAttribute) for that.
 
 ```js
 WebApp.update = function () {
-    ...
-
-    var elm = document.getElementById('volume')
-   player.updateVolume(elm ? elm.innerText / 100 || null : null)
-
-    ...
+  ...
+  player.updateVolume(Nuvola.queryAttribute('#volume-mark', 'aria-valuenow', (volume) => volume / 100))
+  ...
 }
 ```
 
@@ -469,17 +504,18 @@ If you wish to let user change volume, use this API:
 ```js
 WebApp.update = function () {
   ...
-  player.setCanChangeVolume(state !== PlaybackState.UNKNOWN)
+  player.setCanChangeVolume(!!elms.volumebar)
   ...
 }
 
 ...
 
 WebApp._onActionActivated = function (emitter, name, param) {
+  var elms = this._getElements()
   switch (name) {
     ...
     case PlayerAction.CHANGE_VOLUME:
-      document.getElementById('volume').innerText = Math.round(param * 100)
+      Nuvola.clickOnElement(elms.volumebar, param, 0.5)
       break
     ...
   }
@@ -489,3 +525,62 @@ WebApp._onActionActivated = function (emitter, name, param) {
 ```
 
 ![Playback volume](:images/guide/volume_management.png)
+
+
+Custom Actions
+--------------
+
+Service integrations can also create [custom Actions](:apps/custom-actions.html) like thumbs up/down or star rating.
+Let's add custom actions for 5 star rating:
+
+```js
+...
+var player = Nuvola.$object(Nuvola.MediaPlayer)
+var _ = Nuvola.Translate.gettext
+...
+// Define rating options - 5 states with state id 0-5 representing 0-5 stars
+var ratingOptions = [
+  // stateId, label, mnemo_label, icon, keybinding
+  [0, _('Rating: 0 stars'), null, null, null, null],
+  [1, _('Rating: 1 star'), null, null, null, null],
+  [2, _('Rating: 2 stars'), null, null, null, null],
+  [3, _('Rating: 3 stars'), null, null, null, null],
+  [4, _('Rating: 4 stars'), null, null, null, null],
+  [5, _('Rating: 5 stars'), null, null, null, null]
+]
+// Add new radio action named `rating` with initial state `3` (3 stars)
+var ACTION_RATING = 'rating'
+Nuvola.actions.addRadioAction('playback', 'win', ACTION_RATING, 3, ratingOptions)
+
+
+WebApp._onPageReady = function () {
+  // Add extra actions
+  var actions = []
+  for (var i = 0; i <= 5; i++) {
+    actions.push(ACTION_RATING + '::' + i)
+  }
+  player.addExtraActions(actions)
+  ...
+}
+
+WebApp.update = function () {
+  ...
+  stars = ...
+  state = ...
+  ...
+  Nuvola.actions.updateEnabledFlag(ACTION_RATING, state !== PlaybackState.UNKNOWN)
+  Nuvola.actions.updateState(ACTION_RATING, stars)
+  ...
+}
+
+WebApp._onActionActivated = function (emitter, name, param) {
+  switch (name) {
+    ...
+    case ACTION_RATING:
+      this._setRating(param)
+      break
+    ...
+  }
+}
+```
+
