@@ -291,123 +291,6 @@ WebApp._onActionActivated = function (emitter, name, param) {
 !!! danger "Always test playback actions"
     You should click action buttons in the developer's sidebar to be sure they are working as expected.
 
-Track Rating
-------------
-
-Since **Nuvola 3.1**, it is also possible to integrate track rating.
-
-In order to provide users with the current rating state, use these API calls:
-
-  * [MediaPlayer.setTrack()](apiref>Nuvola.MediaPlayer.setTrack) method accepts `track.rating` property, which holds
-    track rating as a number in range from `0.0` to `1.0` as in
-    [the MPRIS/xesam specification](https://www.freedesktop.org/wiki/Specifications/mpris-spec/metadata/#index22h4).
-  * [MediaPlayer.setCanRate()](apiref>Nuvola.MediaPlayer.setCanRate) controls whether
-    it is allowed to change rating remotely or not.
-  * [MediaPlayer::RatingSet](apiref>Nuvola.MediaPlayer%3A%3ARatingSet) is emitted when rating is changed remotely.
-
-It's up to you to decide **how to map the double value to the rating system of your web app**.
-Here are some suggestions:
-
-  * **Percentage rating** is the simplest case mapping the range `0.0-1.0` to percentage 0%-100%.
-  * **Five-star rating** may calculate the number of stars as `stars = rating / 5.0`.
-  * **Thumb up/down rating** is a bit tricky. You can use rating `0.2` for thumb down and `1.0` for thumb up in the
-    `track.rating` property and interpret rating <= `0.41` (0-2 stars) as thumb down and rating >= `0.79` (4-5 stars)
-    as thumb up in the `RatingSet` signal handler.
-
-The demo app supports five-star rating:
-
-```js
-
-...
-
-// Page is ready for magic
-WebApp._onPageReady = function () {
-  // Connect handler for signal ActionActivated
-  Nuvola.actions.connect('ActionActivated', this)
-
-  player.connect('RatingSet', this)
-
-  // Start update routine
-  this.update()
-}
-
-// Extract data from the web page
-WebApp.update = function () {
-  var track = {
-    ...
-  }
-
-  ...
-
-  // Parse rating
-  var rating = document.getElementById('rating')
-    var stars = 0
-    if (rating) {
-      for (; stars < rating.childNodes.length; stars++) {
-        if (rating.childNodes[stars].src.includes('star_border_white')) {
-          break
-        }
-      }
-      track.rating = stars / 5.0
-    }
-
-  player.setTrack(track)
-
-  ...
-
-  var state = PlaybackState.UNKNOWN
-  state = ...
-  player.setCanRate(state !== PlaybackState.UNKNOWN)
-}
-
-...
-
-// Handler for rating
-WebApp._onRatingSet = function (emitter, rating) {
-  var stars
-  if (rating < 0.1) {
-    stars = 0
-  } else if (rating < 0.3) {
-    stars = 1
-  } else if (rating < 0.5) {
-    stars = 2
-  } else if (rating < 0.7) {
-    stars = 3
-  } else if (rating < 0.9) {
-    stars = 4
-  } else if (rating < 1.1) {
-    stars = 5
-  } else {
-    stars = 0
-  }
-  this._setRating(stars)
-}
-
-WebApp._setRating = function (stars) {
-  var elm = document.getElementById('rating-change')
-  if (elm) {
-    if (stars === 0) {
-      // Click on the current star to erase it
-      var rating = document.getElementById('rating')
-      if (rating) {
-        for (stars = 0; stars < rating.childNodes.length; stars++) {
-          if (rating.childNodes[stars].src.includes('star_border_white')) {
-            break
-          }
-        }
-      }
-    }
-    if (stars > 0 && stars < 6) {
-      Nuvola.clickOnElement(elm.childNodes[stars - 1])
-    }
-  }
-}
-
-...
-```
-
-![Track Rating](:images/guide/track_rating.png)
-
 Progress bar
 ------------
 
@@ -526,12 +409,139 @@ WebApp._onActionActivated = function (emitter, name, param) {
 
 ![Playback volume](:images/guide/volume_management.png)
 
+Track Rating
+------------
+
+Since **Nuvola 3.1**, it is also possible to integrate track rating. One of consumers of this metadata is
+[GNOME Shell Media Player extension](https://extensions.gnome.org/extension/55/media-player-indicator/), for example:
+
+![Example of MPRIS rating](:images/guide/example_mpris_rating.png)
+
+In order to provide users with the current rating state, use these API calls:
+
+  * [MediaPlayer.setTrack()](apiref>Nuvola.MediaPlayer.setTrack) method accepts `track.rating` property, which holds
+    track rating as a number in range from `0.0` to `1.0` as in
+    [the MPRIS/xesam specification](https://www.freedesktop.org/wiki/Specifications/mpris-spec/metadata/#index22h4).
+  * [MediaPlayer.setCanRate()](apiref>Nuvola.MediaPlayer.setCanRate) controls whether
+    it is allowed to change rating remotely or not.
+  * [MediaPlayer::RatingSet](apiref>Nuvola.MediaPlayer%3A%3ARatingSet) is emitted when rating is changed remotely.
+
+It's up to you to decide **how to map the double value to the rating system of your web app**.
+Here are some suggestions:
+
+  * **Percentage rating** is the simplest case mapping the range `0.0-1.0` to percentage 0%-100%.
+  * **Five-star rating** may calculate the number of stars as `stars = rating / 5.0`.
+  * **Thumb up/down rating** is a bit tricky. You can use rating `0.2` for thumb down and `1.0` for thumb up in the
+    `track.rating` property and interpret rating <= `0.41` (0-2 stars) as thumb down and rating >= `0.79` (4-5 stars)
+    as thumb up in the `RatingSet` signal handler.
+
+The demo app supports five-star rating:
+
+```js
+
+...
+
+// Page is ready for magic
+WebApp._onPageReady = function () {
+  // Connect handler for signal ActionActivated
+  Nuvola.actions.connect('ActionActivated', this)
+
+  player.connect('RatingSet', this)
+
+  // Start update routine
+  this.update()
+}
+
+// Extract data from the web page
+WebApp.update = function () {
+  var track = {
+    ...
+  }
+
+  ...
+
+  // Parse rating
+  var rating = document.getElementById('rating')
+    var stars = 0
+    if (rating) {
+      for (; stars < rating.childNodes.length; stars++) {
+        if (rating.childNodes[stars].src.includes('star_border_white')) {
+          break
+        }
+      }
+      track.rating = stars / 5.0
+    }
+
+  player.setTrack(track)
+
+  ...
+
+  var state = PlaybackState.UNKNOWN
+  state = ...
+  player.setCanRate(state !== PlaybackState.UNKNOWN)
+}
+
+...
+
+// Handler for rating
+WebApp._onRatingSet = function (emitter, rating) {
+  var stars
+  if (rating < 0.1) {
+    stars = 0
+  } else if (rating < 0.3) {
+    stars = 1
+  } else if (rating < 0.5) {
+    stars = 2
+  } else if (rating < 0.7) {
+    stars = 3
+  } else if (rating < 0.9) {
+    stars = 4
+  } else if (rating < 1.1) {
+    stars = 5
+  } else {
+    stars = 0
+  }
+  this._setRating(stars)
+}
+
+WebApp._setRating = function (stars) {
+  var elm = document.getElementById('rating-change')
+  if (elm) {
+    if (stars === 0) {
+      // Click on the current star to erase it
+      var rating = document.getElementById('rating')
+      if (rating) {
+        for (stars = 0; stars < rating.childNodes.length; stars++) {
+          if (rating.childNodes[stars].src.includes('star_border_white')) {
+            break
+          }
+        }
+      }
+    }
+    if (stars > 0 && stars < 6) {
+      Nuvola.clickOnElement(elm.childNodes[stars - 1])
+    }
+  }
+}
+
+...
+```
+
+![Track Rating](:images/guide/track_rating.png)
 
 Custom Actions
 --------------
 
-Service integrations can also create [custom Actions](:apps/custom-actions.html) like thumbs up/down or star rating.
-Let's add custom actions for 5 star rating:
+Service integrations can also create [custom Actions](:apps/custom-actions.html) like **thumbs up/down**,
+**star rating** or whatever might be useful. These actions are typically exported as menu items of a tray icon or
+a dock item, or can have a keyboard shortcut:
+
+![Custom actions in AppIndicators](:images/guide/example_gnome_appindicator_custom_actions.png)
+![Custom actions in Pantheon dock](:images/guide/example_pantheon_dock_custom_actions.png)
+![Custom actions in Unity launcher](:images/guide/example_unity_launcher_custom_actions.png)
+![Custom actions inKeybindings](:images/guide/example_keybindings_custom_actions.png)
+
+Let's enhance our current integration of track rating with custom actions for that:
 
 ```js
 ...
