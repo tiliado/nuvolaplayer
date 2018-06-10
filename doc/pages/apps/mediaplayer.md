@@ -539,7 +539,7 @@ a dock item, or can have a keyboard shortcut:
 ![Custom actions in AppIndicators](:images/guide/example_gnome_appindicator_custom_actions.png)
 ![Custom actions in Pantheon dock](:images/guide/example_pantheon_dock_custom_actions.png)
 ![Custom actions in Unity launcher](:images/guide/example_unity_launcher_custom_actions.png)
-![Custom actions inKeybindings](:images/guide/example_keybindings_custom_actions.png)
+![Custom actions in keybindings](:images/guide/example_keybindings_custom_actions.png)
 
 Let's enhance our current integration of track rating with custom actions for that:
 
@@ -594,3 +594,4 @@ WebApp._onActionActivated = function (emitter, name, param) {
 }
 ```
 
+![Custom actions](:images/guide/custom_actions.png)
