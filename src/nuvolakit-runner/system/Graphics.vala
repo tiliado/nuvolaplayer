@@ -26,6 +26,18 @@ namespace Nuvola.Graphics {
 
 #if FLATPAK
 public string? get_required_gl_extension() {
+    unowned string? flatpak_gl_drivers_list = Environment.get_variable("FLATPAK_GL_DRIVERS");
+    if (flatpak_gl_drivers_list != null) {
+        debug("FLATPAK_GL_DRIVERS: '%s'", flatpak_gl_drivers_list);
+        string[] flatpak_gl_drivers = flatpak_gl_drivers_list.split(":");
+        foreach (unowned string driver in flatpak_gl_drivers) {
+            string norm_driver = driver.strip();
+            if (norm_driver.has_prefix("nvidia-")) {
+                return norm_driver;
+            }
+        }
+        return null;
+    }
     try {
         string nvidia_version = Drt.System.read_file(File.new_for_path("/sys/module/nvidia/version")).strip();
         if (nvidia_version != "") {
