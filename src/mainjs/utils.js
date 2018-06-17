@@ -234,12 +234,21 @@ Nuvola.checkVersion = function (major, minor, micro) {
  * Query element and return text content or null.
  *
  * @since API 4.11
- * @param String selector    CSS selector for element
- * @param Function func      Optional function to modify resulting text.
+ * @since API 4.12: You can specify a parent element and a relative selector as an array of [parent element, selector].
+ * @param String|Array selector     CSS selector for element or an array containing [parent element, selector].
+ * @param Function func             Optional function to modify resulting text.
  * @return Text content of the element, possibly modified with func, null if element is not found.
  */
 Nuvola.queryText = function (selector, func) {
-  var elm = document.querySelector(selector)
+  var parent = document
+  if (Array.isArray(selector)) {
+    parent = selector[0]
+    selector = selector[1]
+  }
+  if (!parent) {
+    return null
+  }
+  var elm = parent.querySelector(selector)
   var value = elm ? elm.textContent.trim() || null : null
   return (value && func) ? func(value, elm) : value
 }
@@ -248,13 +257,22 @@ Nuvola.queryText = function (selector, func) {
  * Query element and return its attribute or null.
  *
  * @since API 4.11
- * @param String selector     CSS selector for element
- * @param String attribute    Attribute name.
- * @param Function func      Optional function to modify resulting value.
+ * @since API 4.12: You can specify a parent element and a relative selector as an array of [parent element, selector].
+ * @param String|Array selector     CSS selector for element or an array containing [parent element, selector].
+ * @param String attribute          Attribute name.
+ * @param Function func             Optional function to modify resulting value.
  * @return The attribute of the element, possibly modified with func, null if element is not found.
  */
 Nuvola.queryAttribute = function (selector, attribute, func) {
-  var elm = document.querySelector(selector)
+  var parent = document
+  if (Array.isArray(selector)) {
+    parent = selector[0]
+    selector = selector[1]
+  }
+  if (!parent) {
+    return null
+  }
+  var elm = parent.querySelector(selector)
   if (!elm) {
     return null
   }
