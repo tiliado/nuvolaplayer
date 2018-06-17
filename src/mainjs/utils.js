@@ -107,6 +107,7 @@ Nuvola.clickOnElement = function (elm, x, y) {
   Nuvola.triggerMouseEvent(elm, 'mousedown', x, y)
   Nuvola.triggerMouseEvent(elm, 'mouseup', x, y)
   Nuvola.triggerMouseEvent(elm, 'click', x, y)
+  Nuvola.triggerMouseEvent(elm, 'mouseout', x, y)
 }
 
 /**
