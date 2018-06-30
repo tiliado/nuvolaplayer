@@ -189,16 +189,7 @@ public class AppRunnerController: Drtgtk.Application {
         connection = new Connection(new Soup.Session(), app_storage.cache_dir.get_child("conn"), config);
 
         #if HAVE_CEF
-        if (Environment.get_variable("NUVOLA_USE_CEF") == "true"
-        || CEF_DEFAULT && Environment.get_variable("NUVOLA_USE_CEF") != "false") {
-            available_web_options = {
-                WebOptions.create(typeof(CefOptions), app_storage, connection),
-                WebOptions.create(typeof(WebkitOptions), app_storage, connection)};
-        } else {
-            available_web_options = {
-                WebOptions.create(typeof(WebkitOptions), app_storage, connection),
-                WebOptions.create(typeof(CefOptions), app_storage, connection)};
-        }
+        available_web_options = {WebOptions.create(typeof(CefOptions), app_storage, connection)};
         #else
         available_web_options = {WebOptions.create(typeof(WebkitOptions), app_storage, connection)};
         #endif
