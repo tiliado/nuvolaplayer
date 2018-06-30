@@ -589,14 +589,12 @@ public class CefEngine : WebEngine {
             uri_override = uri;
         }
 
-        if (request.new_window) {
-            string reversed_uri = uri.reverse();
-            uint uri_length = uri.length;
-            foreach (unowned GLib.PatternSpec pattern in allowed_uri_patterns) {
-                if (pattern.match(uri_length, uri, reversed_uri)) {
-                    debug("Allowed because it matches one of global allowed URIS: '%s'.", uri);
-                    return;
-                }
+        string reversed_uri = uri.reverse();
+        uint uri_length = uri.length;
+        foreach (unowned GLib.PatternSpec pattern in allowed_uri_patterns) {
+            if (pattern.match(uri_length, uri, reversed_uri)) {
+                debug("Allowed because it matches one of global allowed URIS: '%s'.", uri);
+                return;
             }
         }
 
