@@ -443,7 +443,9 @@ public class StartupCheck : GLib.Object {
         }
 
         public void check_requirements() throws Drt.RequirementError {
-            parser.eval(web_app.requirements);
+            if (web_app.requirements != null) {
+                parser.eval(web_app.requirements);
+            }
         }
     }
 }

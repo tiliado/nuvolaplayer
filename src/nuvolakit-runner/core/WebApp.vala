@@ -248,10 +248,6 @@ public class WebApp : GLib.Object {
             categories = DEFAULT_CATEGORY;
         }
         string? requirements = meta.get_string_or("requirements");
-        if (requirements == null) {
-            requirements = "Feature[flash] Codec[mp3]";
-            warning("No requirements specified. '%s' used by default but that may change in the future.", requirements);
-        }
 
         this(id, name, maintainer_name, maintainer_link,
             version_major, version_minor, version_micro, version_revision, api_major, api_minor, data_dir,
