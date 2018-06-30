@@ -10,3 +10,7 @@ sync:
 	git checkout master
 	git push && git push --tags
 	git checkout devel
+merge:
+	git checkout master
+	git merge --ff-only devel
+	git checkout devel
