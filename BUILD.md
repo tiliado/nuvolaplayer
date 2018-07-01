@@ -51,15 +51,15 @@ your custom Nuvola build. Otherwise, they may refuse to start.
 Web Engines
 -----------
 
-Nuvola can be built with two web engines: **WebKitGTK** (default) and **Chromium Embedded Framework (CEF)**
-(can be disabled with `--no-cef` configure option). While the Chromium engine is optional, bear in mind that
+Nuvola can be built with two web engines: **Chromium Embedded Framework (CEF)** and **WebKitGTK**.
+While the Chromium engine is still optional (can be disabled with `--no-cef` configure option), bear in mind that
 **some websites no longer work with the old WebKitGTK backend** (Spotify, YouTube, Mixcloud) because they dropped
 Flash-based player and require HTML5 Audio with MSE or even Widevine DRM plugin.
 
-The goal of Nuvola is to switch all scripts from Flash to HTML5 Audio sooner then we are forced to by the websites
-dropping Flash player. That's why some scripts (e.g. Deezer) already depend on CEF while Flash-based playback is still
-possible. If you are stuck with the WebKitGTK backend, you can try to set their requirements back to `Feature[Flash]`.
-This should be done on a case-by-case basis and after careful testing.
+In addition, most scripts are tested only with the Chromium backend and specify `Chromium[X.Y.Z]` requirement
+for that reason. If you are stuck with the WebKitGTK backend, you may remove `Chromium[X.Y.Z] Feature[MSE]` requirements
+to make the script run with WebKitGTK+ backend and add `Feature[Flash]` to use Flash plugin for audio playback.
+However, this should be done on a case-by-case basis and after careful testing.
 
 Dependencies
 ------------
