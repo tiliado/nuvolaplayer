@@ -88,14 +88,27 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel> {
         double length = request.pop_double();
         model.set_track_info(title, artist, album, state, artwork_location, artwork_file, rating, (int64) length);
 
-        SList<string> playback_actions = null;
         string[] actions = request.pop_strv();
-        foreach (string action in actions) {
-            playback_actions.prepend(action);
+        bool actions_changed = false;
+        if (actions.length != model.playback_actions.length()) {
+            actions_changed = true;
+        } else {
+            int i = 0;
+            foreach (unowned string action in model.playback_actions) {
+                if (action != actions[i++]) {
+                    actions_changed = true;
+                    break;
+                }
+            }
         }
-        playback_actions.reverse();
-        model.playback_actions = (owned) playback_actions;
-
+        if (actions_changed) {
+            SList<string> playback_actions = null;
+            foreach (unowned string action in actions) {
+                playback_actions.prepend(action);
+            }
+            playback_actions.reverse();
+            model.playback_actions = (owned) playback_actions;
+        }
         emit(TRACK_INFO_CHANGED);
         request.respond(new Variant.boolean(true));
     }
