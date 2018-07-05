@@ -48,6 +48,7 @@ public class DeveloperSidebar: Gtk.ScrolledWindow {
     private SList<Gtk.Widget> action_widgets = null;
     private HashTable<string, Gtk.RadioButton>? radios = null;
     private MediaPlayerModel player;
+    private bool radios_frozen = false;
 
     public DeveloperSidebar(AppRunnerController app, MediaPlayerModel player) {
         vexpand = true;
@@ -209,10 +210,11 @@ public class DeveloperSidebar: Gtk.ScrolledWindow {
             action_widgets.prepend(label);
             grid.add(label);
 
+            radios_frozen = true;
             foreach (unowned string full_name in playback_actions) {
                 add_action(full_name);
             }
-
+            radios_frozen = false;
         }
     }
 
@@ -259,12 +261,15 @@ public class DeveloperSidebar: Gtk.ScrolledWindow {
                 grid.add(button);
                 button.set_active(action.state.equal(target_value));
                 button.set_data<string>("full-name", full_name);
-                button.clicked.connect_after(on_radio_clicked);
+                button.toggled.connect_after(on_radio_toggled);
             }
         }
     }
 
-    private void on_radio_clicked(Gtk.Button button) {
+    private void on_radio_toggled(Gtk.Button button) {
+        if (radios_frozen) {
+            return;
+        }
         var radio = button as Gtk.RadioButton;
         string full_name = button.get_data<string>("full-name");
         Drtgtk.Action action;
@@ -277,6 +282,7 @@ public class DeveloperSidebar: Gtk.ScrolledWindow {
     }
 
     private void on_radio_action_changed(GLib.Object o, ParamSpec p) {
+        radios_frozen = true;
         var action = o as Drtgtk.RadioAction;
         Variant state = action.state;
         Gtk.RadioButton radio = radios.lookup(action.name);
@@ -289,18 +295,20 @@ public class DeveloperSidebar: Gtk.ScrolledWindow {
                 }
             }
         }
+        radios_frozen = false;
     }
 
     private void unset_button(Gtk.Widget widget) {
         grid.remove(widget);
         var radio = widget as Gtk.RadioButton;
         if (radio != null) {
-            radio.clicked.disconnect(on_radio_clicked);
+            radio.toggled.disconnect(on_radio_toggled);
             string full_name = radio.get_data<string>("full-name");
             Drtgtk.Action action;
             Drtgtk.RadioOption option;
             string detailed_name;
             if (actions_reg.find_and_parse_action(full_name, out detailed_name, out action, out option)) {
+                radios.remove(action.name);
                 action.notify["state"].disconnect(on_radio_action_changed);
             }
         }
