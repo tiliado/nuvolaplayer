@@ -38,6 +38,7 @@ Formal Rules
  9. You have to create a `CHANGELOG.md` file with a limited subset of Markdown syntax (headings, links, bullet points).
     [Example with an unreleased initial release](https://raw.githubusercontent.com/tiliado/nuvolasdk/master/nuvolasdk/data/template/CHANGELOG.md).
     [Example with a few released releases](https://raw.githubusercontent.com/tiliado/nuvola-app-siriusxm/0d8432f18f6164b19b58b5b68b1ca4f3d260179d/CHANGELOG.md).
+10. You need to provide a [web view snapshot](:apps/screenshots.html).
 
 License
 =======
