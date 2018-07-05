@@ -83,7 +83,7 @@ Core.$init = function () {
     /**
      * Emitted on request for navigation to a new web page.
      *
-     * @since Nuvola 4.12: You can overwrite  `request.url` field to force redirect.
+     * @since API 4.12: You can overwrite  `request.url` field to force redirect.
      * @param String request.url           URL of the new page, you can overwrite this field to force redirect
      * @param Boolean request.newWindow    whether to open request in a new window, you can overwrite this field
      * @param Boolean request.approved     whether the navigation is approved, set to ``false`` when
