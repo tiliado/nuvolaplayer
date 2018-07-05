@@ -32,6 +32,8 @@ Basic
 Advanced
 --------
 
+  * [Web View Snapshot](apps/screenshots.html): Web view snapshots are combined with base screenshots of Nuvola
+    integration features to create final screenshots for AppStream metadata.
   * [URL Filtering (URL Sandbox)]({filename}apps/url-filtering.md):
     Decide which urls are opened in a default web browser instead of Nuvola Player.
   * [Configuration and session storage]({filename}apps/configuration-and-session-storage.md):
