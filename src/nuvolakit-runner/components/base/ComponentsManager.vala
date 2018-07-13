@@ -140,12 +140,22 @@ public class ComponentsManager : PreferencesDialog.SelectorGroup {
 
         }
 
+        private Gtk.Widget? adjust_margin(Gtk.Widget? widget) {
+            if (widget != null) {
+                widget.margin_top = 15;
+                widget.margin_bottom = 15;
+                widget.margin_start = 20;
+                widget.margin_end = 20;
+            }
+            return widget;
+        }
+
         public override Gtk.Widget? get_widget() {
-            return component.get_settings();
+            return adjust_margin(component.get_settings());
         }
 
         public override Gtk.Widget? get_alert_widget() {
-            return manager.get_alert_widget(component);
+            return adjust_margin(manager.get_alert_widget(component));
         }
 
         public override unowned string get_title() {

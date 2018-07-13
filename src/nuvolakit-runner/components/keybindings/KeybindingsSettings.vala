@@ -46,7 +46,7 @@ public class KeybindingsSettings : Gtk.Grid {
 
         vexpand = hexpand = true;
         row_spacing = 5;
-        margin = 1;
+        margin = 15;
 
         error_label = new Gtk.Label("");
         error_label.set_line_wrap(true);

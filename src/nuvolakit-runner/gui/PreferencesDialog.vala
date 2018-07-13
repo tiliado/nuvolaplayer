@@ -95,7 +95,7 @@ public class PreferencesDialog : Gtk.Dialog {
             parent.add(header_bar);
             header_bar.show_close_button = false;
             header_bar.margin = 0;
-            header_bar.margin_bottom = 15;
+            header_bar.margin_bottom = 5;
             header_bar.show();
         }
 
@@ -124,6 +124,7 @@ public class PreferencesDialog : Gtk.Dialog {
             "Keyboard Shortcuts", "Modify or disable in-app and global keyboard shortcuts.", keybindings));
 
         // Web App form
+        web_app_form.margin = 15;
         web_app_form.vexpand =  web_app_form.hexpand = true;
         web_app_form.halign = Gtk.Align.FILL;
         web_app_form.check_toggles();
@@ -135,7 +136,7 @@ public class PreferencesDialog : Gtk.Dialog {
 
         // Add panels
         var grid = new Gtk.Grid();
-        grid.margin = 10;
+        grid.margin = 15;
         grid.orientation = Gtk.Orientation.VERTICAL;
         grid.row_spacing = 10;
         foreach (unowned SelectorGroup group in groups) {
@@ -357,8 +358,8 @@ public class PreferencesDialog : Gtk.Dialog {
         construct {
             panel.notify.connect_after(on_notify);
             grid = new Gtk.Grid();
-            grid.margin = 5;
-            grid.column_spacing = 10;
+            grid.margin = 10;
+            grid.column_spacing = 15;
             grid.orientation = Gtk.Orientation.HORIZONTAL;
             create_toggle();
             create_label();
