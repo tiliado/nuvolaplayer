@@ -977,10 +977,10 @@ public class AppRunnerController: Drtgtk.Application {
                 var spinner = new Gtk.Spinner();
                 spinner.start();
                 spinner.show();
-                title_bar.set_start_widget(spinner);
+                title_bar.start_widget = spinner;
                 title_bar.set_subtitle("loading...");
             } else {
-                title_bar.set_start_widget(null);
+                title_bar.start_widget = null;
                 title_bar.set_subtitle(null);
             }
             break;
