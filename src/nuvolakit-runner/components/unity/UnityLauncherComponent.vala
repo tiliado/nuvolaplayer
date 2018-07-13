@@ -33,7 +33,9 @@ public class UnityLauncherComponent: Component {
     #endif
 
     public UnityLauncherComponent(Drtgtk.Application app, Bindings bindings, Drt.KeyValueStorage config) {
-        base("unity_launcher", "Unity Laucher", "Adds quick list (menu) to the icon on Unity Launcher.");
+        base(
+            "unity_launcher", "Dock Menu Items",
+            "Adds extra menu items to the application icon in Unity Launcher or elementaryOS dock.");
         #if UNITY
         this.bindings = bindings;
         this.app = app;
