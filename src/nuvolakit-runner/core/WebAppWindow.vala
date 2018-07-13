@@ -92,6 +92,7 @@ public class WebAppWindow : Drtgtk.ApplicationWindow {
         overlay = new Drtgtk.Overlay(grid);
         overlay.show_all();
         sidebar = new Sidebar();
+        sidebar.no_show_all = true;
         paned = new Gtk.Paned(Gtk.Orientation.HORIZONTAL);
         paned.vexpand = true;
         paned.valign = Gtk.Align.FILL;

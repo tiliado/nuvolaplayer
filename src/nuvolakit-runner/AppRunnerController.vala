@@ -360,6 +360,15 @@ public class AppRunnerController: Drtgtk.Application {
         main_window.configure_event.connect(on_configure_event);
         main_window.notify["is-active"].connect_after(on_window_is_active_changed);
         main_window.sidebar.hide();
+        main_window.sidebar_position = (int) config.get_int64(ConfigKey.WINDOW_SIDEBAR_POS);
+        main_window.notify["sidebar-position"].connect_after((o, p) => {
+            config.set_int64(ConfigKey.WINDOW_SIDEBAR_POS, (int64) main_window.sidebar_position);
+        });
+        main_window.sidebar.add_page.connect_after(on_sidebar_page_added);
+        main_window.sidebar.remove_page.connect_after(on_sidebar_page_removed);
+        main_window.sidebar.notify["visible"].connect_after(on_sidebar_visibility_changed);
+        main_window.sidebar.page_changed.connect(on_sidebar_page_changed);
+
         fatal_error.connect(on_fatal_error);
         show_error.connect(on_show_error);
         show_warning.connect(on_show_warning);
@@ -406,7 +415,6 @@ public class AppRunnerController: Drtgtk.Application {
         }
         load_extensions();
         web_engine.get_main_web_view().hide();
-        main_window.sidebar.hide();
         web_engine.init_app_runner();
     }
 
@@ -416,25 +424,6 @@ public class AppRunnerController: Drtgtk.Application {
             Actions.ZOOM_IN, Actions.ZOOM_OUT, Actions.ZOOM_RESET, "|",
             Actions.TOGGLE_SIDEBAR, "|", Actions.GO_LOAD_URL});
         main_window.create_toolbar({Actions.GO_BACK, Actions.GO_FORWARD, Actions.GO_RELOAD, Actions.GO_HOME});
-
-        main_window.sidebar.add_page.connect_after(on_sidebar_page_added);
-        main_window.sidebar.remove_page.connect_after(on_sidebar_page_removed);
-
-        if (config.get_bool(ConfigKey.WINDOW_SIDEBAR_VISIBLE)) {
-            main_window.sidebar.show();
-        } else {
-            main_window.sidebar.hide();
-        }
-        main_window.sidebar_position = (int) config.get_int64(ConfigKey.WINDOW_SIDEBAR_POS);
-        string? sidebar_page = config.get_string(ConfigKey.WINDOW_SIDEBAR_PAGE);
-        if (sidebar_page != null) {
-            main_window.sidebar.page = sidebar_page;
-        }
-        main_window.notify["sidebar-position"].connect_after((o, p) => {
-            config.set_int64(ConfigKey.WINDOW_SIDEBAR_POS, (int64) main_window.sidebar_position);
-        });
-        main_window.sidebar.notify["visible"].connect_after(on_sidebar_visibility_changed);
-        main_window.sidebar.page_changed.connect(on_sidebar_page_changed);
         web_engine.get_main_web_view().show();
 
         menu_bar.set_menu("01_go", "_Go", {Actions.GO_HOME, Actions.GO_RELOAD, Actions.GO_BACK, Actions.GO_FORWARD});
@@ -456,7 +445,7 @@ public class AppRunnerController: Drtgtk.Application {
         unowned ActionsHelper ah = actions_helper;
         Drtgtk.Action[] actions_spec = {
             ah.simple_action("main", "app", Actions.PREFERENCES, "Preferences", "_Preferences", null, null, do_preferences),
-            ah.toggle_action("main", "win", Actions.TOGGLE_SIDEBAR, "Show sidebar", "Show _sidebar", null, null, do_toggle_sidebar, config.get_value(ConfigKey.WINDOW_SIDEBAR_VISIBLE)),
+            ah.toggle_action("main", "win", Actions.TOGGLE_SIDEBAR, "Show sidebar", "Show _sidebar", null, null, do_toggle_sidebar, false),
             ah.simple_action("go", "app", Actions.GO_HOME, "Home", "_Home", "go-home", "<alt>Home", web_engine.go_home),
             ah.simple_action("go", "app", Actions.GO_BACK, "Back", "_Back", "go-previous", "<alt>Left", web_engine.go_back),
             ah.simple_action("go", "app", Actions.GO_FORWARD, "Forward", "_Forward", "go-next", "<alt>Right", web_engine.go_forward),
@@ -621,11 +610,15 @@ public class AppRunnerController: Drtgtk.Application {
     }
 
     private void do_toggle_sidebar() {
-        Gtk.Widget sidebar = main_window.sidebar;
+        Sidebar sidebar = main_window.sidebar;
         if (sidebar.visible) {
             sidebar.hide();
         } else {
             sidebar.show();
+            string? sidebar_page = config.get_string(ConfigKey.WINDOW_SIDEBAR_PAGE);
+            if (sidebar_page != null && sidebar.has_page(sidebar_page) && sidebar.page != sidebar_page) {
+                sidebar.page = sidebar_page;
+            }
         }
     }
 
@@ -1059,14 +1052,25 @@ public class AppRunnerController: Drtgtk.Application {
     }
 
     private void on_sidebar_page_changed() {
-        string? page = main_window.sidebar.page;
-        if (page != null) {
-            config.set_string(ConfigKey.WINDOW_SIDEBAR_PAGE, page);
+        unowned Sidebar sidebar = main_window.sidebar;
+        if (sidebar.visible) {
+            string? page = sidebar.page;
+            if (page != null) {
+                config.set_string(ConfigKey.WINDOW_SIDEBAR_PAGE, page);
+            }
         }
     }
 
     private void on_sidebar_page_added(Sidebar sidebar, string name, string label, Gtk.Widget child) {
         actions.get_action(Actions.TOGGLE_SIDEBAR).enabled = !sidebar.is_empty();
+        bool should_be_visible = config.get_bool(ConfigKey.WINDOW_SIDEBAR_VISIBLE);
+        if (!sidebar.visible && should_be_visible) {
+            string? sidebar_page = config.get_string(ConfigKey.WINDOW_SIDEBAR_PAGE);
+            if (sidebar_page != null && sidebar.has_page(sidebar_page)) {
+                sidebar.page = sidebar_page;
+                sidebar.show();
+            }
+        }
     }
 
     private void on_sidebar_page_removed(Sidebar sidebar, Gtk.Widget child) {

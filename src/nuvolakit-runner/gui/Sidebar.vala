@@ -30,8 +30,7 @@ public class Sidebar : Gtk.Grid {
         get {return stack.visible_child_name;}
         set {stack.visible_child_name = value;}
     }
-
-    private Gtk.Stack stack;
+    public Gtk.Stack stack {get; private set;}
     private Drtgtk.StackMenuButton header;
 
     public Sidebar() {
@@ -65,10 +64,13 @@ public class Sidebar : Gtk.Grid {
         base.show();
     }
 
+    public bool has_page(string name) {
+        return stack.get_child_by_name(name) != null;
+    }
+
     public virtual signal void add_page(string name, string label, Gtk.Widget page) {
         stack.add_titled(page, name, label);
         page.show();
-        show();
     }
 
     public virtual signal void remove_page(Gtk.Widget page) {
