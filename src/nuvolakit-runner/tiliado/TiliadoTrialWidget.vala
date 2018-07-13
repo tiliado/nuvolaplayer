@@ -92,8 +92,12 @@ public class TiliadoTrialWidget : Gtk.Grid {
             }
             show();
         } else if (popover == null || !popover.visible) {
-            clear_all();
-            hide();
+            // Add a delay not to hit tiliado/nuvolaruntime#448
+            Timeout.add(100, () => {
+                clear_all();
+                hide();
+                return false;
+            });
         }
     }
 
@@ -270,7 +274,9 @@ public class TiliadoTrialWidget : Gtk.Grid {
     }
 
     private void on_explore_back_clicked(Gtk.Button button) {
-        popover.hide();
+        if (popover != null) {
+            popover.hide();
+        }
     }
 
     private void on_progress_back_clicked(Gtk.Button button) {
