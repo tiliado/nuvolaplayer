@@ -28,7 +28,7 @@ namespace Nuvola {
 public class PreferencesDialog : Gtk.Dialog {
     public Drtgtk.Application app {get; construct;}
     public NetworkSettings network_settings {get; construct;}
-    public Drtgtk.GtkThemeSelector theme_selector {get; construct;}
+    public AppearanceSettings appearance {get; construct;}
     public KeybindingsSettings keybindings {get; construct;}
     public ComponentsManager components_manager {get; construct;}
     public Drtgtk.Form web_app_form {get; construct;}
@@ -46,11 +46,11 @@ public class PreferencesDialog : Gtk.Dialog {
      */
     public PreferencesDialog(
         Drtgtk.Application app, Gtk.Window? parent, NetworkSettings network_settings,
-        Drtgtk.GtkThemeSelector theme_selector, KeybindingsSettings keybindings,
+        AppearanceSettings appearance, KeybindingsSettings keybindings,
         ComponentsManager components_manager, Drtgtk.Form web_app_form
     ) {
         GLib.Object(
-            use_header_bar: 1, app: app, network_settings: network_settings, theme_selector: theme_selector,
+            use_header_bar: 1, app: app, network_settings: network_settings, appearance: appearance,
             keybindings: keybindings, components_manager: components_manager, web_app_form: web_app_form);
         if (parent != null) {
             set_transient_for(parent);
@@ -97,28 +97,8 @@ public class PreferencesDialog : Gtk.Dialog {
         };
 
         // Appearance
-        var appearance_grid = new Gtk.Grid();
-        appearance_grid.margin = 10;
-        appearance_grid.hexpand = appearance_grid.vexpand = true;
-        appearance_grid.halign = Gtk.Align.FILL;
-        theme_selector.hexpand = true;
-        theme_selector.halign = Gtk.Align.START;
-        var label = new Gtk.Label("User interface theme");
-        label.halign = Gtk.Align.START;
-        label.hexpand = true;
-        int line = 0;
-        appearance_grid.attach(label, 0, ++line, 1, 1);
-        appearance_grid.attach(theme_selector, 1, line, 1, 1);
-        #if FLATPAK
-        var link_button = new Gtk.LinkButton.with_label(
-            "https://github.com/tiliado/nuvolaruntime/wiki/GTK-Themes", "Install themes");
-        link_button.halign = Gtk.Align.START;
-        link_button.hexpand = true;
-        appearance_grid.attach(link_button, 2, line, 1, 1);
-        #endif
-        appearance_grid.show_all();
         groups[0].add(new SimplePanel(
-            "Appearance", "Change user interface theme and window decoration preferences.", appearance_grid));
+            "Appearance", "Change user interface theme and window decoration preferences.", appearance));
 
         // Network settings
         groups[0].add(new SimplePanel(
@@ -146,7 +126,7 @@ public class PreferencesDialog : Gtk.Dialog {
         foreach (unowned SelectorGroup group in groups) {
             unowned string? title = group.title;
             if (title != null) {
-                label = Drtgtk.Labels.markup("<b>%s</b>", title);
+                Gtk.Label label = Drtgtk.Labels.markup("<b>%s</b>", title);
                 label.halign = Gtk.Align.CENTER;
                 label.show();
                 grid.add(label);

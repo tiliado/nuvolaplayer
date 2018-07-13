@@ -186,8 +186,11 @@ public class AppRunnerController: Drtgtk.Application {
         default_config.insert(ConfigKey.WINDOW_Y, new Variant.int64(-1));
         default_config.insert(ConfigKey.WINDOW_SIDEBAR_POS, new Variant.int64(-1));
         default_config.insert(ConfigKey.WINDOW_SIDEBAR_VISIBLE, new Variant.boolean(false));
+        default_config.insert(
+            ConfigKey.DARK_THEME, new Variant.boolean(gtk_settings.gtk_application_prefer_dark_theme));
         config = new Config(app_storage.config_dir.get_child("config.json"), default_config);
         config.changed.connect(on_config_changed);
+        gtk_settings.gtk_application_prefer_dark_theme = config.get_bool(ConfigKey.DARK_THEME);
         connection = new Connection(new Soup.Session(), app_storage.cache_dir.get_child("conn"), config);
 
         #if HAVE_CEF
@@ -547,8 +550,7 @@ public class AppRunnerController: Drtgtk.Application {
         }
 
         preferences_dialog = new PreferencesDialog(
-            this, main_window, new NetworkSettings(connection),
-            new Drtgtk.GtkThemeSelector(true, config.get_string(ConfigKey.GTK_THEME) ?? ""),
+            this, main_window, new NetworkSettings(connection), new AppearanceSettings(config),
             new KeybindingsSettings(
                 this, actions, config, global_keybindings != null ? global_keybindings.keybinder : null),
             new ComponentsManager(this, components, tiliado_activation), form);
@@ -558,7 +560,6 @@ public class AppRunnerController: Drtgtk.Application {
 
     private void on_preferences_dialog_response(int response_id) {
         assert(preferences_dialog != null);
-        config.set_string(ConfigKey.GTK_THEME, preferences_dialog.theme_selector.active_id);
 
         HashTable<string, Variant> new_values = preferences_dialog.web_app_form.get_values();
         foreach (unowned string? key in new_values.get_keys()) {
@@ -929,6 +930,11 @@ public class AppRunnerController: Drtgtk.Application {
     }
 
     private void on_config_changed(string key, Variant? old_value) {
+        switch (key) {
+        case ConfigKey.DARK_THEME:
+            Gtk.Settings.get_default().gtk_application_prefer_dark_theme = config.get_bool(ConfigKey.DARK_THEME);
+            break;
+        }
         if (web_engine.web_worker.ready) {
             var payload = new Variant("(ss)", "ConfigChanged", key);
             web_engine.web_worker.call_function.begin("Nuvola.config.emit", payload, false, (o, res) => {
