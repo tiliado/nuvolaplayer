@@ -33,6 +33,7 @@ public class PreferencesDialog : Gtk.Dialog {
     public ComponentsManager components_manager {get; construct;}
     public Drtgtk.Form web_app_form {get; construct;}
     private Drtgtk.HeaderBarTitle title_bar;
+    private Gtk.HeaderBar header_bar;
     private Gtk.Button back_button;
     private Gtk.Button help_button;
     private Gtk.Stack stack;
@@ -50,7 +51,8 @@ public class PreferencesDialog : Gtk.Dialog {
         ComponentsManager components_manager, Drtgtk.Form web_app_form
     ) {
         GLib.Object(
-            use_header_bar: 1, app: app, network_settings: network_settings, appearance: appearance,
+            use_header_bar: (int) app.shell.client_side_decorations, app: app,
+            network_settings: network_settings, appearance: appearance,
             keybindings: keybindings, components_manager: components_manager, web_app_form: web_app_form);
         if (parent != null) {
             set_transient_for(parent);
@@ -59,8 +61,9 @@ public class PreferencesDialog : Gtk.Dialog {
 
     construct {
         // Window properties
+        title = "Preferences";
         window_position = Gtk.WindowPosition.CENTER;
-        border_width = 5;
+        border_width = 0;
         try {
             icon = Gtk.IconTheme.get_default().load_icon(app.icon, 48, 0);
         } catch (Error e) {
@@ -78,11 +81,23 @@ public class PreferencesDialog : Gtk.Dialog {
         help_button = new Gtk.Button.from_icon_name("dialog-question-symbolic");
         help_button.no_show_all = true;
         help_button.clicked.connect(on_help_button_clicked);
-        var header_bar = get_header_bar() as Gtk.HeaderBar;
+        header_bar = (Gtk.HeaderBar) get_header_bar();
         header_bar.show_close_button = true;
         header_bar.pack_start(back_button);
         header_bar.pack_end(help_button);
         header_bar.custom_title = title_bar;
+
+        if (use_header_bar == 0) {
+            remove(header_bar);
+            Gtk.Container parent = get_content_area();
+            parent.margin = 0;
+            parent.border_width = 0;
+            parent.add(header_bar);
+            header_bar.show_close_button = false;
+            header_bar.margin = 0;
+            header_bar.margin_bottom = 15;
+            header_bar.show();
+        }
 
         // Content
         stack = new Gtk.Stack();
@@ -144,7 +159,6 @@ public class PreferencesDialog : Gtk.Dialog {
     private void change_panel(Panel panel, bool forward) {
         back_button.hide();
         help_button.hide();
-        this.title = panel.get_title();
         title_bar.set_title(panel.get_title());
         title_bar.set_subtitle(panel.get_subtitle());
         if (panel.has_widget || panel.has_alert) {
@@ -164,6 +178,9 @@ public class PreferencesDialog : Gtk.Dialog {
                 stack.visible_child = widget;
                 if (panel != main_panel) {
                     back_button.show();
+                    header_bar.show();
+                } else if (use_header_bar == 0) {
+                    header_bar.hide();
                 }
                 if (panel.has_help) {
                     help_button.show();

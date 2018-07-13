@@ -188,9 +188,12 @@ public class AppRunnerController: Drtgtk.Application {
         default_config.insert(ConfigKey.WINDOW_SIDEBAR_VISIBLE, new Variant.boolean(false));
         default_config.insert(
             ConfigKey.DARK_THEME, new Variant.boolean(gtk_settings.gtk_application_prefer_dark_theme));
+        default_config.insert(
+            ConfigKey.SYSTEM_DECORATIONS, new Variant.boolean(!shell.client_side_decorations));
         config = new Config(app_storage.config_dir.get_child("config.json"), default_config);
         config.changed.connect(on_config_changed);
         gtk_settings.gtk_application_prefer_dark_theme = config.get_bool(ConfigKey.DARK_THEME);
+        shell.client_side_decorations = !config.get_bool(ConfigKey.SYSTEM_DECORATIONS);
         connection = new Connection(new Soup.Session(), app_storage.cache_dir.get_child("conn"), config);
 
         #if HAVE_CEF
@@ -931,6 +934,9 @@ public class AppRunnerController: Drtgtk.Application {
 
     private void on_config_changed(string key, Variant? old_value) {
         switch (key) {
+        case ConfigKey.SYSTEM_DECORATIONS:
+            shell.client_side_decorations = !config.get_bool(ConfigKey.SYSTEM_DECORATIONS);
+            break;
         case ConfigKey.DARK_THEME:
             Gtk.Settings.get_default().gtk_application_prefer_dark_theme = config.get_bool(ConfigKey.DARK_THEME);
             break;
