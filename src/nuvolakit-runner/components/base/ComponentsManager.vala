@@ -24,21 +24,16 @@
 
 namespace Nuvola {
 
-public class ComponentsManager: Gtk.Stack {
-    public Drt.Lst<Component> components {get; construct;}
-    private SList<Row> rows = null;
-    private Gtk.Grid grid;
-    private Settings? component_settings = null;
+public class ComponentsManager : PreferencesDialog.SelectorGroup {
+    private Drt.Lst<Component> components;
     private Gtk.Widget component_not_available_widget;
     private TiliadoUserWidget? membership_widget;
     private TiliadoActivation? tiliado_activation = null;
 
     public ComponentsManager(Drtgtk.Application app, Drt.Lst<Component> components, TiliadoActivation? tiliado_activation) {
-        GLib.Object(components: components, transition_type: Gtk.StackTransitionType.SLIDE_LEFT_RIGHT);
+        base("Optional Features", null);
+        this.components = components;
         this.tiliado_activation = tiliado_activation;
-        grid = new Gtk.Grid();
-        grid.margin = 10;
-        grid.column_spacing = 15;
         #if !NUVOLA_LITE
         component_not_available_widget = Drtgtk.Labels.markup(
             "Your distributor has not enabled this feature. It is available in <a href=\"%s\">the genuine flatpak "
@@ -49,74 +44,51 @@ public class ComponentsManager: Gtk.Stack {
             + "the genuine <i>flatpak</i> builds of Nuvola Apps Runtime</a> instead.", "https://nuvola.tiliado.eu");
         #endif
         membership_widget = tiliado_activation != null ? new TiliadoUserWidget(tiliado_activation, app) : null;
-        refresh();
-        var scroll = new Gtk.ScrolledWindow(null, null);
-        scroll.hexpand = scroll.vexpand = true;
-        scroll.add(grid);
-        scroll.show();
-        add_named(scroll, "list");
+        add_components_to_group();
         if (tiliado_activation != null) {
             tiliado_activation.user_info_updated.connect(on_user_info_updated);
         }
     }
 
-    ~ComponentsManager() {
-        if (tiliado_activation != null) {
-            tiliado_activation.user_info_updated.disconnect(on_user_info_updated);
+    public void refresh() {
+        foreach (unowned PreferencesDialog.Panel item in panels) {
+            var panel = item as Panel;
+            if (panel != null) {
+                panel.refresh();
+            }
         }
     }
 
-    public void refresh() {
-        rows = null;
-        foreach (Gtk.Widget child in grid.get_children()) {
-            grid.remove(child);
-        }
+    public int component_sort_func(Component a, Component b) {
+        bool a_available = is_component_available(a);
+        bool b_available = is_component_available(b);
+        return (a_available != b_available) ? (a_available ? -1 : 1) : strcmp(a.name, b.name);
+    }
 
+    public override int sort_list_box(Gtk.ListBoxRow row1, Gtk.ListBoxRow row2) {
+        return component_sort_func(
+            ((Panel) ((PreferencesDialog.Row) row1).panel).component,
+            ((Panel) ((PreferencesDialog.Row) row2).panel).component);
+    }
+
+    private void add_components_to_group() {
         List<Component> components = this.components.to_list();
-        components.sort_with_data((a, b) => {
-            bool a_available = is_component_available(a);
-            bool b_available = is_component_available(b);
-            return (a_available != b_available) ? (a_available ? -1 : 1) : strcmp(a.name, b.name);
-        });
-
-        var row = 0;
-        foreach (Component component in components) {
+        foreach (unowned Component component in components) {
             if (component.hidden && !component.enabled) {
                 continue;
             }
-            if (row > 0) {
-                var separator = new Gtk.Separator(Gtk.Orientation.HORIZONTAL);
-                separator.hexpand = true;
-                separator.vexpand = false;
-                separator.margin_top = separator.margin_bottom = 10;
-                grid.attach(separator, 0, row++, 3, 1);
-            }
-
-            rows.prepend(new Row(grid, row++, this, component));
+            add(new Panel(this, component));
         }
-        grid.show_all();
     }
 
-    public void show_settings(Component? component) {
-        if (component == null) {
-            if (component_settings != null) {
-                this.visible_child_name = "list";
-                this.remove(component_settings.widget);
-                component_settings = null;
-            }
-        } else {
-            Gtk.Widget? widget;
-            if (!is_component_membership_ok(component)) {
-                widget = membership_widget.change_component(component);
-            } else if (!is_component_available(component)) {
-                widget = create_component_not_available_widget(component);
-            } else {
-                widget = component.get_settings();
-            }
-            component_settings = new Settings(this, component, widget);
-            this.add(component_settings.widget);
-            this.visible_child = component_settings.widget;
+    public Gtk.Widget? get_alert_widget(Component component) {
+        Gtk.Widget? widget = null;
+        if (!is_component_membership_ok(component)) {
+            widget = membership_widget.change_component(component);
+        } else if (!is_component_available(component)) {
+            widget = create_component_not_available_widget(component);
         }
+        return widget;
     }
 
     private Gtk.Widget create_component_not_available_widget(Component component) {
@@ -141,133 +113,65 @@ public class ComponentsManager: Gtk.Stack {
     }
 
     private void on_user_info_updated(TiliadoApi2.User? user) {
-        if (component_settings != null
-        && component_settings.component_widget == membership_widget
-        && membership_widget.component.is_membership_ok(tiliado_activation)) {
-            show_settings(null);
-            refresh();
-        }
+        refresh();
     }
 
-    [Compact]
-    private class Row {
-        public unowned ComponentsManager manager;
+    private class Panel : PreferencesDialog.Panel {
+        private unowned ComponentsManager manager;
         public unowned Component component;
-        public Gtk.Button? button;
-        public Gtk.Switch checkbox;
 
-        public Row(Gtk.Grid grid, int row, ComponentsManager manager, Component component) {
-            this.manager = manager;
+        public Panel(ComponentsManager manager, Component component) {
             this.component = component;
+            this.manager = manager;
+            is_toggle = true;
+            refresh();
+            notify.connect_after(on_notify);
+            component.notify.connect_after(on_component_notify);
+        }
 
-            checkbox = new Gtk.Switch();
+        public void refresh() {
+            is_enabled = component.enabled;
             bool available = manager.is_component_available(component);
-            if (available) {
-                checkbox.active = component.enabled;
-                checkbox.sensitive = true;
-            } else {
-                checkbox.active = false;
-                checkbox.sensitive = false;
+            if (is_available != available) {
+                is_available = available;
             }
+            has_alert = !available;
+            has_widget = component.has_settings;
 
-            checkbox.vexpand = checkbox.hexpand = false;
-            checkbox.halign = checkbox.valign = Gtk.Align.CENTER;
-            component.notify.connect_after(on_notify);
-            checkbox.notify.connect_after(on_notify);
-            grid.attach(checkbox, 0, row, 1, 1);
-
-            var label = new Gtk.Label(Markup.printf_escaped(
-                "<span size='medium'><b>%s</b></span>\n<span foreground='#666666' size='small'>%s</span>",
-                component.name, component.description));
-            label.use_markup = true;
-            label.sensitive = available;
-            label.vexpand = false;
-            label.hexpand = true;
-            label.halign = Gtk.Align.START;
-            ((Gtk.Misc) label).yalign = 0.0f;
-            ((Gtk.Misc) label).xalign = 0.0f;
-            label.set_line_wrap(true);
-            grid.attach(label, 1, row, 1, 1);
-
-            if (!available || component.has_settings) {
-                button = new Gtk.Button.from_icon_name(
-                    available ? "emblem-system-symbolic" : "dialog-warning-symbolic", Gtk.IconSize.BUTTON);
-                button.vexpand = button.hexpand = false;
-                button.halign = button.valign = Gtk.Align.CENTER;
-                button.sensitive = component.enabled || !available;
-                button.clicked.connect(on_settings_clicked);
-                grid.attach(button, 2, row, 1, 1);
-            } else {
-                button = null;
-            }
         }
 
-        ~Row() {
-            component.notify.disconnect(on_notify);
-            checkbox.notify.disconnect(on_notify);
-            if (button != null) {
-                button.clicked.disconnect(on_settings_clicked);
-            }
+        public override Gtk.Widget? get_widget() {
+            return component.get_settings();
         }
 
-        private void on_notify(GLib.Object o, ParamSpec p) {
-            switch (p.name) {
+        public override Gtk.Widget? get_alert_widget() {
+            return manager.get_alert_widget(component);
+        }
+
+        public override unowned string get_title() {
+            return component.name;
+        }
+
+        public override unowned string? get_subtitle() {
+            return component.description;
+        }
+
+        private void on_component_notify(GLib.Object emitter, ParamSpec param) {
+            switch (param.name) {
             case "enabled":
-                if (checkbox.active != component.enabled) {
-                    checkbox.active = component.enabled;
+                if (is_enabled != component.enabled) {
+                    is_enabled = component.enabled;
                 }
-                if (button != null) {
-                    button.sensitive = checkbox.active;
-                }
-                break;
-            case "active":
-                component.toggle(checkbox.active);
                 break;
             }
         }
 
-        private void on_settings_clicked() {
-            manager.show_settings(component);
-        }
-    }
-
-    [Compact]
-    private class Settings {
-        public Gtk.Container widget;
-        public unowned ComponentsManager manager;
-        public Component component;
-        public Gtk.Widget? component_widget;
-
-        public Settings(ComponentsManager manager, Component component, Gtk.Widget? component_widget) {
-            this.manager = manager;
-            this.component = component;
-            this.component_widget = component_widget;
-            var grid = new Gtk.Grid();
-            grid.column_spacing = grid.row_spacing = grid.margin = 10;
-            this.widget = grid;
-            var button = new Gtk.Button.from_icon_name("go-previous-symbolic", Gtk.IconSize.SMALL_TOOLBAR);
-            button.vexpand = button.hexpand = false;
-            button.valign = button.halign = Gtk.Align.CENTER;
-            button.clicked.connect(on_back_clicked);
-            grid.attach(button, 0, 0, 1, 1);
-            Gtk.Label label = Drtgtk.Labels.markup(
-                "<span size='medium'><b>%s</b></span>\n<span foreground='#444' size='small'>%s</span>",
-                component.name, component.description);
-            grid.attach(label, 1, 0, 1, 1);
-
-            if (component_widget != null) {
-                var scroll = new Gtk.ScrolledWindow(null, null);
-                scroll.vexpand = scroll.hexpand = true;
-                scroll.add(component_widget);
-                grid.attach(scroll, 0, 1, 2, 1);
-            } else {
-                grid.attach(new Gtk.Label("No settings available"), 0, 1, 2, 1);
+        private void on_notify(GLib.Object emitter, ParamSpec param) {
+            switch (param.name) {
+            case "is-enabled":
+                component.toggle(is_enabled);
+                break;
             }
-            grid.show_all();
-        }
-
-        private void on_back_clicked() {
-            manager.show_settings(null);
         }
     }
 }

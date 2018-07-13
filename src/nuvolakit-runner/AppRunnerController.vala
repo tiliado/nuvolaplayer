@@ -62,6 +62,7 @@ public class AppRunnerController: Drtgtk.Application {
     private HashTable<string, Gtk.InfoBar> info_bars;
     private MainLoopAdaptor? mainloop = null;
     private WelcomeDialog? welcome_dialog = null;
+    private PreferencesDialog? preferences_dialog = null;
     string? theme_not_found = null;
 
     public AppRunnerController(
@@ -525,14 +526,18 @@ public class AppRunnerController: Drtgtk.Application {
     }
 
     private void do_preferences() {
-        var values = new HashTable<string, Variant>(str_hash, str_equal);
-        var form = new Drtgtk.Form(values);
+        if (preferences_dialog != null) {
+            preferences_dialog.present();
+            return;
+        }
+        var form_values = new HashTable<string, Variant>(str_hash, str_equal);
+        var form = new Drtgtk.Form(form_values);
         try {
-            Variant? extra_values = null;
-            Variant? extra_entries = null;
-            web_engine.get_preferences(out extra_values, out extra_entries);
-            form.add_values(Drt.variant_to_hashtable(extra_values));
-            form.add_entries(extra_entries);
+            Variant? extra_form_values = null;
+            Variant? extra_form_entries = null;
+            web_engine.get_preferences(out extra_form_values, out extra_form_entries);
+            form.add_values(Drt.variant_to_hashtable(extra_form_values));
+            form.add_entries(extra_form_entries);
         }
         catch (Drtgtk.FormError e) {
             show_error("Preferences form error",
@@ -540,74 +545,46 @@ public class AppRunnerController: Drtgtk.Application {
                 .printf(e.message));
         }
 
-        var basic_settings = new Gtk.Grid();
-        basic_settings.row_spacing = basic_settings.column_spacing = basic_settings.margin = 10;
-        basic_settings.vexpand = basic_settings.hexpand = true;
-        form.vexpand = form.hexpand = true;
-        form.halign = Gtk.Align.FILL;
-        var line = 0;
-        var label = new Gtk.Label("Basic Settings");
-        basic_settings.attach(label, 0, line, 2, 1);
+        preferences_dialog = new PreferencesDialog(
+            this, main_window, new NetworkSettings(connection),
+            new Drtgtk.GtkThemeSelector(true, config.get_string(ConfigKey.GTK_THEME) ?? ""),
+            new KeybindingsSettings(
+                this, actions, config, global_keybindings != null ? global_keybindings.keybinder : null),
+            new ComponentsManager(this, components, tiliado_activation), form);
+        preferences_dialog.response.connect(on_preferences_dialog_response);
+        preferences_dialog.present();
+    }
 
-        var theme_selector = new Drtgtk.GtkThemeSelector(true, config.get_string(ConfigKey.GTK_THEME) ?? "");
-        theme_selector.hexpand = false;
-        theme_selector.halign = Gtk.Align.START;
-        label = new Gtk.Label("GTK+ theme");
-        label.halign = Gtk.Align.START;
-        label.hexpand = false;
-        basic_settings.attach(label, 0, ++line, 1, 1);
-        basic_settings.attach(theme_selector, 1, line, 1, 1);
-        #if FLATPAK
-        var link_button = new Gtk.LinkButton.with_label("https://github.com/tiliado/nuvolaruntime/wiki/GTK-Themes", "Install themes");
-        link_button.halign = Gtk.Align.START;
-        link_button.hexpand = true;
-        basic_settings.attach(link_button, 2, line, 1, 1);
-        #endif
+    private void on_preferences_dialog_response(int response_id) {
+        assert(preferences_dialog != null);
+        config.set_string(ConfigKey.GTK_THEME, preferences_dialog.theme_selector.active_id);
 
-        basic_settings.attach(form, 0, ++line, 3, 1);
-        var dialog = new PreferencesDialog(this, main_window, basic_settings);
-        form.check_toggles();
-
-
-        dialog.add_tab("Keyboard shortcuts", new KeybindingsSettings(
-            this, actions, config, global_keybindings != null ? global_keybindings.keybinder : null));
-        var network_settings = new NetworkSettings(connection);
-        dialog.add_tab("Network", network_settings);
-        dialog.add_tab("Features", new ComponentsManager(this, components, tiliado_activation));
-        var webkit_engine = web_engine as WebkitEngine;
-        if (webkit_engine != null) {
-            dialog.add_tab("Website Data", new WebsiteDataManager(webkit_options.default_context.get_website_data_manager()));
-            dialog.add_tab("Format Support", new FormatSupportScreen(this, format_support, storage, webkit_options.default_context));
-        }
-
-        int response = dialog.run();
-        if (response == Gtk.ResponseType.OK) {
-            config.set_string(ConfigKey.GTK_THEME, theme_selector.active_id);
-
-            HashTable<string, Variant> new_values = form.get_values();
-            foreach (unowned string? key in new_values.get_keys()) {
-                Variant? new_value = new_values.get(key);
-                if (new_value == null) {
-                    critical("New value '%s' not found", key);
-                } else {
-                    config.set_value(key, new_value);
-                }
-            }
-            NetworkProxyType type;
-            string? host;
-            int port;
-            if (network_settings.get_proxy_settings(out type, out host, out port)) {
-                debug("New network proxy settings: %s %s %d", type.to_string(), host, port);
-                connection.set_network_proxy(type, host, port);
-                if (!web_engine.apply_network_proxy(connection)) {
-                    show_info_bar(
-                        "proxy-warning", Gtk.MessageType.WARNING,
-                        "You need to restart the application to apply new network proxy settings.");
-                }
+        HashTable<string, Variant> new_values = preferences_dialog.web_app_form.get_values();
+        foreach (unowned string? key in new_values.get_keys()) {
+            Variant? new_value = new_values.get(key);
+            if (new_value == null) {
+                critical("New value '%s' not found", key);
+            } else {
+                config.set_value(key, new_value);
             }
         }
+        NetworkProxyType type;
+        string? host;
+        int port;
+        if (preferences_dialog.network_settings.get_proxy_settings(out type, out host, out port)) {
+            debug("New network proxy settings: %s %s %d", type.to_string(), host, port);
+            connection.set_network_proxy(type, host, port);
+            if (!web_engine.apply_network_proxy(connection)) {
+                show_info_bar(
+                    "proxy-warning", Gtk.MessageType.WARNING,
+                    "You need to restart the application to apply new network proxy settings.");
+            }
+        }
+
         // Don't destroy dialog before form data are retrieved
-        dialog.destroy();
+        preferences_dialog.response.disconnect(on_preferences_dialog_response);
+        preferences_dialog.destroy();
+        preferences_dialog = null;
     }
 
     private void do_show_welcome_dialog() {
