@@ -105,6 +105,7 @@ public class AppRunnerController: Drtgtk.Application {
     }
 
     private void start() {
+        window_removed.connect(on_window_removed);
         init_settings();
         init_base_actions();
         format_support = new FormatSupport(storage.require_data_file("audio/audiotest.mp3").get_path());
@@ -1074,6 +1075,12 @@ public class AppRunnerController: Drtgtk.Application {
         main_window.add_overlay_widget(dialog);
         main_window.present();
         dialog.reveal();
+    }
+
+    private void on_window_removed(Gtk.Window window) {
+        if (window == main_window) {
+            quit_mainloop();
+        }
     }
 }
 
