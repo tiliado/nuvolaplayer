@@ -32,44 +32,53 @@ public class AppearanceSettings: Gtk.Grid {
         margin = 20;
         hexpand = vexpand = true;
         halign = Gtk.Align.FILL;
-        row_spacing = 20;
+        row_spacing = 25;
+        column_spacing = 10;
         var theme_selector = new Drtgtk.GtkThemeSelector(true, config.get_string(ConfigKey.GTK_THEME) ?? "");
         theme_selector.hexpand = true;
-        theme_selector.halign = Gtk.Align.START;
+        theme_selector.vexpand = false;
+        theme_selector.halign = Gtk.Align.CENTER;
+        theme_selector.valign = Gtk.Align.CENTER;
         theme_selector.changed.connect_after(on_theme_selector_changed);
-        var label = new Gtk.Label("User interface theme");
+        Gtk.Label label = Drtgtk.Labels.markup("<b>%s</b>\n<small>%s</small>",
+            "User interface theme", "This option has no effect on the theme of the web app itself.");
         label.halign = Gtk.Align.START;
         label.hexpand = true;
         int line = 0;
         attach(label, 0, ++line, 1, 1);
         attach(theme_selector, 1, line, 1, 1);
         #if FLATPAK
+        label = Drtgtk.Labels.markup("<b>%s</b>\n<small>%s</small>",
+            "Get more themes",
+            "Themes for Flatpak applications can be found on Flathub, the store for Flatpak apps."
+            + " A restart is required after the installation of a new theme.");
+        attach(label, 0, ++line, 1, 1);
         var link_button = new Gtk.LinkButton.with_label(
             "https://github.com/tiliado/nuvolaruntime/wiki/GTK-Themes", "Install themes");
-        link_button.halign = Gtk.Align.START;
+        link_button.halign = Gtk.Align.CENTER;
         link_button.hexpand = true;
-        attach(link_button, 2, line, 1, 1);
+        attach(link_button, 1, line, 1, 1);
         #endif
 
         var dark_theme = new Gtk.Switch();
         label = Drtgtk.Labels.markup("<b>%s</b>\n<small>%s</small>",
-            "Prefer a dark variant if the theme provides it.",
+            "Prefer a dark variant if the theme provides it",
             "If no dark variant is available, this option has no effect.");
         dark_theme.active = config.get_bool(ConfigKey.DARK_THEME);
         dark_theme.notify["active"].connect_after(on_dark_theme_toggled);
         dark_theme.valign = dark_theme.halign = Gtk.Align.CENTER;
-        attach(label, 0, ++line, 2, 1);
-        attach(dark_theme, 2, line, 1, 1);
+        attach(label, 0, ++line, 1, 1);
+        attach(dark_theme, 1, line, 1, 1);
 
         var system_decorations = new Gtk.Switch();
         label = Drtgtk.Labels.markup("<b>%s</b>\n<small>%s</small>",
-            "Use system window decorations (requires restart).",
+            "Use system window decorations (requires restart)",
             "It may cause a visual inconsistency if the system theme differs from the application's theme.");
         system_decorations.active = config.get_bool(ConfigKey.SYSTEM_DECORATIONS);
         system_decorations.notify["active"].connect_after(on_system_decorations_toggled);
         system_decorations.valign = system_decorations.halign = Gtk.Align.CENTER;
-        attach(label, 0, ++line, 2, 1);
-        attach(system_decorations, 2, line, 1, 1);
+        attach(label, 0, ++line, 1, 1);
+        attach(system_decorations, 1, line, 1, 1);
 
         show_all();
     }
