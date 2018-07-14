@@ -78,8 +78,8 @@ public class TiliadoTrialWidget : Gtk.Grid {
         if (!check_user()) {
             if (purchase_button == null) {
                 Gtk.Label label = Drtgtk.Labels.markup(
-                    "<b>%s free trial</b> • The trial will change, <a href=\"%s\">provide feedback</a>.",
-                    Nuvola.get_app_name(), "https://github.com/tiliado/nuvolaruntime/issues/422");
+                    "<b>%s free tier</b> • Some features are locked.",
+                    Nuvola.get_app_name());
                 label.halign = Gtk.Align.CENTER;
                 label.valign = Gtk.Align.CENTER;
                 label.hexpand = true;
