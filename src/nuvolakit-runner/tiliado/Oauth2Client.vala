@@ -218,20 +218,19 @@ public class Oauth2Client : GLib.Object {
     }
 
     public string? hmac_sha1_for_string(string data) {
-        return hmac_for_string(ChecksumType.SHA1, data);
+        return client_secret != null ? Hmac.for_string(ChecksumType.SHA1, client_secret, data) : null;
     }
 
     public string? hmac_for_string(ChecksumType checksum, string data) {
-        return client_secret != null ? Hmac.compute_for_string(checksum, client_secret.data, data) : null;
+        return client_secret != null ? Hmac.for_string(checksum, client_secret, data) : null;
     }
 
     public bool hmac_sha1_verify_string(string data, string hmac) {
-        return hmac_verify_string(ChecksumType.SHA1, data, hmac);
+        return client_secret != null ? Hmac.verify_string(ChecksumType.SHA1, client_secret, data, hmac) : false;
     }
 
     public bool hmac_verify_string(ChecksumType checksum, string data, string hmac) {
-        string expected_hmac = hmac_for_string(checksum, data);
-        return expected_hmac != null ? Drt.Utils.const_time_byte_equal(expected_hmac.data, hmac.data) : false;
+        return client_secret != null ? Hmac.verify_string(checksum, client_secret, data, hmac): false;
     }
 
     private async Drt.JsonObject send_message(Soup.Message msg, bool retry)
