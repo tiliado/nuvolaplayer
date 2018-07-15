@@ -30,6 +30,7 @@ public errordomain Oauth2Error {
     INVALID_CLIENT,
     INVALID_REQUEST,
     HTTP_ERROR,
+    HTTP_NOT_FOUND,
     HTTP_UNAUTHORIZED,
     INVALID_GRANT,
     UNAUTHORIZED_CLIENT,
@@ -141,8 +142,14 @@ public class Oauth2Client : GLib.Object {
                 token = null;
                 throw new Oauth2Error.UNSUPPORTED_GRANT_TYPE(error_description);
             default:
-                throw new Oauth2Error.UNKNOWN("%s. %u: %s".printf(
-                    error_description, msg.status_code, Soup.Status.get_phrase(msg.status_code)));
+                switch (msg.status_code) {
+                case 404:
+                    throw new Oauth2Error.HTTP_NOT_FOUND("%s. %u: %s".printf(
+                        error_description, msg.status_code, Soup.Status.get_phrase(msg.status_code)));
+                default:
+                    throw new Oauth2Error.UNKNOWN("%s. %u: %s".printf(
+                        error_description, msg.status_code, Soup.Status.get_phrase(msg.status_code)));
+                }
             }
         }
 
@@ -246,6 +253,8 @@ public class Oauth2Client : GLib.Object {
             string http_error = "%u: %s".printf(msg.status_code, Soup.Status.get_phrase(msg.status_code));
             warning("Oauth2 Response error. %s.\n%s", http_error, response_data);
             switch (msg.status_code) {
+            case 404:
+                throw new Oauth2Error.HTTP_NOT_FOUND(http_error);
             case 401:
                 assert(token != null);
                 if (token != null && retry) {
