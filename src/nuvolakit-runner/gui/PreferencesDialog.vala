@@ -151,6 +151,10 @@ public class PreferencesDialog : Gtk.Dialog {
                 label.show();
                 grid.add(label);
             }
+            unowned Gtk.Widget? extra_widget = group.extra_widget;
+            if (extra_widget != null) {
+                grid.add(extra_widget);
+            }
             var selector = new SelectorList(group);
             selector.panel_selected.connect((panel) => {change_panel(panel, true);});
             selector.open_help.connect(on_open_help);
@@ -331,6 +335,7 @@ public class PreferencesDialog : Gtk.Dialog {
 
     public class SelectorGroup {
         public string? title;
+        public Gtk.Widget? extra_widget = null;
         public SList<Panel> panels;
 
         public SelectorGroup(owned string? title, owned SList<Panel>? panels = null) {
