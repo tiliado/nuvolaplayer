@@ -250,7 +250,16 @@ public class Oauth2Client : GLib.Object {
         yield;
         unowned string response_data = (string) msg.response_body.flatten().data;
         if (msg.status_code < 200 || msg.status_code >= 300) {
-            string http_error = "%u: %s".printf(msg.status_code, Soup.Status.get_phrase(msg.status_code));
+            string? err_str = null;
+            try {
+                Drt.JsonArray array = Drt.JsonParser.load_array(response_data);
+                if (array.length > 0 && !array.get_string(0, out err_str)) {
+                    err_str = null;
+                }
+            }
+            catch (GLib.Error e) {
+            }
+            string http_error = "%u: %s".printf(msg.status_code, err_str ?? Soup.Status.get_phrase(msg.status_code));
             warning("Oauth2 Response error. %s.\n%s", http_error, response_data);
             switch (msg.status_code) {
             case 404:
