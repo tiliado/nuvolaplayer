@@ -92,6 +92,21 @@ public class Oauth2Client : GLib.Object {
         return yield send_message(msg, true);
     }
 
+    public virtual async Drt.JsonObject post(string? method, HashTable<string, string>? params=null,
+        HashTable<string, string>? headers=null)
+    throws Oauth2Error {
+        var uri = new Soup.URI(api_endpoint + (method ?? ""));
+        if (params != null) {
+            uri.set_query_from_form(params);
+        }
+        var msg = new Soup.Message.from_uri("POST", uri);
+        debug("Oauth2 POST %s", uri.to_string(false));
+        if (headers != null) {
+            headers.for_each(msg.request_headers.replace);
+        }
+        return yield send_message(msg, true);
+    }
+
     public async bool refresh_token()
     throws Oauth2Error {
         if (token == null || token.refresh_token == null) {
