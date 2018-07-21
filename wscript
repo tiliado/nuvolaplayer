@@ -646,6 +646,7 @@ def build(ctx):
     vapi_to_patch = ["glib-2.0"]
     if ctx.env.with_unity:
         vapi_to_patch.append('unity')
+        vapi_to_patch.append('gee-1.0')
     for vapi in vapi_to_patch:
         all_vapi_dirs = ['/usr/share/vala-0.40/vapi', '/app/share/vala/vapi', '/usr/share/vala/vapi']
         all_vapi_dirs.extend(d for d in vapi_dirs if d not in ("vapi", "build"))
