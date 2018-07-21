@@ -7,6 +7,84 @@ Nuvola Apps Changelog
     [Nuvola Devel mailing list](https://groups.google.com/d/forum/nuvola-player-devel)
     to receive more technical announcements and important information about future development.
 
+Release 4.12.0 - July 21st, 2018
+--------------------------------
+
+### What’s New for Users
+
+Nuvola 4.12 gathers all goodies that were continuously released to
+[the genuine flatpak builds of Nuvola](https://nuvola.tiliado.eu/) since May 8th, 2018. There were too many
+changes to list them here again, so I’m kindly asking you to read the previous announcements instead.
+
+  * [Nuvola Adds Three New Scripts: Brain.fm, Focus@Will, and NPR One](https://medium.com/nuvola-news/nuvola-adds-three-new-scripts-brain-fm-focus-will-and-npr-one-ca989ad0530a)
+    (May 20th, 2018): Three new scripts were added to the stable Flatpak repository: **Brain.fm**, **Focus@Will**,
+    and **NPR One**.
+  * [Nuvola Adds Pandora Radio, Updates Sound Cloud & Sirius XM](https://medium.com/nuvola-news/nuvola-adds-pandora-radio-updates-sound-cloud-sirius-xm-1691822ef1fe)
+    (June 3rd, 2018): A new script was added to the stable Flatpak repository: **Pandora Radio**. **Sound Cloud** got
+    a new maintainer and was significantly improved. **Sirius XM** was adjusted to recent changes in its web interface.
+    Finally, **Nuvola Runtime** received a few tweaks.
+  * [Nuvola Adds Qobuz, Updates KEXP Radio and Yandex Music](https://medium.com/nuvola-news/nuvola-adds-qobuz-updates-kexp-radio-and-yandex-music-a67c9ee8d783)
+    (June 17th, 2018): A new script was added to the stable Flatpak repository: **Qobuz**. **KEXP Radio** got a new
+    maintainer and was adjusted to new player interface. **Yandex Music** was ported to Chromium-based backend for
+    audio playback without Flash plugin. Finally, **Nuvola Runtime** received a few tweaks.
+  * [Nuvola Adds YouTube Music, Updates Jango & Tune In, Drops Logitech Media Server](https://medium.com/nuvola-news/nuvola-adds-youtube-music-updates-jango-tune-in-drops-logitech-media-server-37dfc73bc6f9)
+    (June 30th, 2018): A new script was added to the stable Flatpak repository: **YouTube Music**. **Jango & Tune In**
+    integrations got a new maintainer, were ported to the Chromium-based backend for audio playback without Flash
+    plugin and updated to the latest Nuvola standards. **Logitech Media Server** script is now unsupported until a new
+    maintainer is found. Finally, **Nuvola Runtime** received a few tweaks.
+  * [Nuvola Brings Redesigned Preferences Dialog, More Appearance Settings, and Bug Fixes](https://medium.com/nuvola-news/nuvola-brings-redesigned-preferences-dialog-more-appearance-settings-and-bug-fixes-6545325b35f3)
+    (July 14th, 2018): The latest flatpak builds of Nuvola Apps bring redesigned Preferences dialog with expanded
+    Appearance section as well as a few bug fixes.
+
+### What’s New for Script Maintainers
+
+  * Commands `nuvolasdk new-project`, `nuvolasdk convert-project` and `nuvolasdk check-project` were updated to follow
+    the latest Nuvola standards: two space indentations and no trailing whitespace are used for `metadata.in.json` and
+    [Standard JS code style](https://wiki.gnome.org/Design/Whiteboards/AppMenuMigration) is enforced for `integrate.js`.
+  * The `README.md`template was updated and the command `nuvolasdk convert-project`creates `template--README.md` &
+    `template--README.md.diff` files to help with the update of your `README.md`file.
+  * Nuvola SDK build system: If `src/webview.png` image is found, it is used to generate screenshots combining that web
+    view snapshot image with [base Nuvola screenshots](https://github.com/tiliado/nuvolasdk/tree/master/nuvolasdk/data/screenshots).
+    The resulting images can be found in the screenshots subdirectory. More screenshot types will be added in the next
+    development cycle. [[GitHub ticket](https://github.com/tiliado/nuvolasdk/issues/5)]
+  * Changes in [guidelines](https://tiliado.github.io/nuvolaplayer/development/apps/guidelines.html):
+    [Web view snapshots](https://tiliado.github.io/nuvolaplayer/development/apps/screenshots.html) are mandatory,
+    [Standard JS coding style](https://standardjs.com/) for `integrate.json` is mandatory,
+    the minimal API level was raised to 4.11.
+  * [Nuvola.Core::NavigationRequest](https://tiliado.github.io/nuvolaplayer/development/apps/api_reference.html#Nuvola.Core::NavigationRequest):
+    You can overwrite `request.url` field to force redirect during
+    [URL filtering](https://tiliado.github.io/nuvolaplayer/development/apps/url-filtering.html).
+  * [Nuvola.queryAttribute](https://tiliado.github.io/nuvolaplayer/development/apps/api_reference.html#Nuvola.queryAttribute):
+    You can specify a parent element and a relative selector as an array of [parent element, selector].
+  * [Nuvola.queryText](https://tiliado.github.io/nuvolaplayer/development/apps/api_reference.html#Nuvola.queryText):
+    You can specify a parent element and a relative selector as an array of [parent element, selector].
+  * [Nuvola.setInputValueWithEvent](https://tiliado.github.io/nuvolaplayer/development/apps/api_reference.html#Nuvola.setInputValueWithEvent):
+    The change event is emitted as well.
+  * Nuvola ADK is no longer built with the WebKitGTK+ backend.
+  * The default web app requirements `Feature[Flash] Codec[MP3]`were dropped.
+  * An issue with radio actions in developer sidebar toggling themselves without user interaction was fixed.
+    [[GitHub ticket](https://github.com/tiliado/nuvolaruntime/issues/440)]
+  * [Service Integrations Tutorial](https://tiliado.github.io/nuvolaplayer/development/apps/tutorial.html) and
+    [Media Player Integration](https://tiliado.github.io/nuvolaplayer/development/apps/mediaplayer.html) pages were
+    updated to use [a new demo player](https://groups.google.com/d/msg/nuvola-player-devel/xGOeh7hN0VE/xdIbhnHiAwAJ). 
+
+### What’s New for Third-Party Packagers
+
+  * A **build error** with`--no-cef` flag was fixed and a **continuous integration** task was set up to test a build
+    configuration with this flag after each commit. [[GitHub ticket](https://github.com/tiliado/nuvolaruntime/issues/435)]
+  * Since the genuine flatpak builds of Nuvola no longer use WebKitGTK+ backend, **all scripts are tested only with
+    the Chromium backend** and specify `Chromium[X.Y.Z]` requirement for that reason. If you are stuck with
+    the WebKitGTK backend, you may remove `Chromium[X.Y.Z] Feature[MSE]` requirements to make the script run with
+    the WebKitGTK+ backend and add `Feature[Flash]` to use Flash plugin for audio playback. However, this should be
+    done on a case-by-case basis and after careful testing.
+  * Nuvola SDK build system: **New dependency** for building Nuvola scripts:
+    [Pillow](https://pypi.org/project/Pillow/) ≥ 4.3.
+  * Nuvola SDK build system: If `src/webview.png` image is found, it is used to generate screenshots combining that
+    **web view snapshot image** with
+    [base Nuvola screenshots](https://github.com/tiliado/nuvolasdk/tree/master/nuvolasdk/data/screenshots).
+    The resulting images can be found in the screenshots subdirectory. More screenshot types will be added in the next
+    development cycle. [[GitHub ticket](https://github.com/tiliado/nuvolasdk/issues/5)]
+
 Release 4.11.0 - May 8th, 2018
 ------------------------------
 
@@ -26,7 +104,7 @@ Release 4.11.0 - May 8th, 2018
     and volume slider. [Installation instructions](https://nuvola.tiliado.eu/nuvola/ubuntu/bionic/) were updated
     for **Ubuntu 18.04 LTS**.
   * [Nuvola Updates Amazon Cloud Player, BBC iPlayer & Jupiter Broadcasting; Supports Fedora 28](https://medium.com/nuvola-news/nuvola-updates-amazon-cloud-player-bbc-iplayer-jupiter-broadcasting-supports-fedora-28-38c809a08639):
-    Flatpaks of** Amazon Cloud Player, BBC iPlayer & Jupiter Broadcasting **— all maintained by Andrew Stubbs — were
+    Flatpaks of **Amazon Cloud Player, BBC iPlayer & Jupiter Broadcasting **— all maintained by Andrew Stubbs — were
     updated to use Chromium-based backend for music playback without Flash plugin whenever possible.
     [Installation instructions](https://nuvola.tiliado.eu/nuvola/ubuntu/bionic/) were updated for **Fedora 28**,
     and **Nuvola Runtime** received a few tweaks.
