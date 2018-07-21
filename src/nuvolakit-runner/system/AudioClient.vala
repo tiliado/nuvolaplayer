@@ -41,6 +41,10 @@ public class AudioClient: GLib.Object {
 
     ~AudioClient() {
         notify["global-mute"].disconnect(on_global_mute_changed);
+        pa_context.set_state_callback(null);
+        pa_context.set_event_callback(null);
+        pa_context.set_subscribe_callback(null);
+        pa_context.disconnect();
     }
 
     public void start() throws AudioError {
