@@ -158,6 +158,10 @@ public class AudioScrobblerComponent: Component {
 
         track_info_cb_id = Timeout.add_seconds(1, () => {
             track_info_cb_id = 0;
+            if (scrobbler == null) {
+                // Scrobbling had been disabled before this callback was dispatched.
+                return false;
+            }
             if (scrobbler.can_update_now_playing) {
                 if (title != null && artist != null && state == "playing" ) {
                     scrobbler.update_now_playing.begin(title, artist, on_update_now_playing_done);
