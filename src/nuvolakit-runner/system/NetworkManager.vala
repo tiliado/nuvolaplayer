@@ -78,7 +78,7 @@ public interface ActiveConnection : GLib.Object {
 
 [DBus(name = "org.freedesktop.NetworkManager.IP4Config")]
 public interface Ip4Config : GLib.Object {
-    public uint[]? get_addresses() {
+    public uint[]? get_addresses() throws GLib.DBusError, GLib.IOError {
         uint[] result = {};
         Variant? addresses = (this as DBusProxy).get_cached_property("Addresses");
         if (addresses == null) {

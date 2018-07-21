@@ -204,8 +204,8 @@ public class MediaKeys: GLib.Object, MediaKeysInterface {
 
 [DBus(name = "org.gnome.SettingsDaemon.MediaKeys")]
 public interface GnomeMediaKeys: Object {
-    public abstract void grab_media_player_keys(string app, uint32 time) throws IOError;
-    public abstract void release_media_player_keys(string app) throws IOError;
+    public abstract void grab_media_player_keys(string app, uint32 time) throws GLib.DBusError, GLib.IOError;
+    public abstract void release_media_player_keys(string app) throws GLib.DBusError, GLib.IOError;
     public signal void media_player_key_pressed(string app, string key);
 }
 

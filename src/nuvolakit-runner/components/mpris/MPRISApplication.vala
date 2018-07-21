@@ -46,11 +46,11 @@ public class MPRISApplication: GLib.Object {
     /* Extra properties */
     public int nuvola_version {get {return Nuvola.get_encoded_version();}}
 
-    public void raise() {
+    public void raise() throws GLib.DBusError, GLib.IOError {
         app.activate();
     }
 
-    public void quit() {
+    public void quit() throws GLib.DBusError, GLib.IOError {
         app.quit();
     }
 }

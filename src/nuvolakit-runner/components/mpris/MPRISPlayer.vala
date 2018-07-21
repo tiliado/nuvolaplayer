@@ -55,7 +55,7 @@ public class MPRISPlayer : GLib.Object {
         }
         set {
             if (value == 0.0) {
-                pause();
+                player.pause();
             }
         }
     }
@@ -89,44 +89,44 @@ public class MPRISPlayer : GLib.Object {
 
     public signal void seeked(int64 position);
 
-    public void next() {
+    public void next() throws GLib.DBusError, GLib.IOError {
         player.next_song();
     }
 
-    public void previous() {
+    public void previous() throws GLib.DBusError, GLib.IOError {
         player.prev_song();
     }
 
-    public void pause() {
+    public void pause() throws GLib.DBusError, GLib.IOError {
         player.pause();
     }
 
-    public void play_pause() {
+    public void play_pause() throws GLib.DBusError, GLib.IOError {
         player.toggle_play();
     }
 
-    public void stop() {
+    public void stop() throws GLib.DBusError, GLib.IOError {
         player.stop();
     }
 
-    public void play() {
+    public void play() throws GLib.DBusError, GLib.IOError {
         player.play();
     }
 
-    public void seek(int64 offset) {
+    public void seek(int64 offset) throws GLib.DBusError, GLib.IOError {
         if (can_seek) {
             player.seek(player.track_position + offset);
         }
     }
 
-    public void SetPosition(ObjectPath track_id, int64 position) {
+    public void SetPosition(ObjectPath track_id, int64 position) throws GLib.DBusError, GLib.IOError {
         player.seek(position);
     }
 
-    public void open_uri(string uri) {
+    public void open_uri(string uri) throws GLib.DBusError, GLib.IOError {
     }
 
-    public void nuvola_set_rating(double rating) {
+    public void nuvola_set_rating(double rating) throws GLib.DBusError, GLib.IOError {
         player.set_rating(rating);
     }
 

@@ -32,7 +32,7 @@ public class AppDbusApi: GLib.Object {
         this.controller = controller;
     }
 
-    public void activate() {
+    public void activate() throws GLib.DBusError, GLib.IOError {
         Idle.add(() => {controller.activate(); return false;});
     }
 
