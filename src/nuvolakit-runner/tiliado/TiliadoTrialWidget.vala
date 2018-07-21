@@ -157,7 +157,7 @@ public class TiliadoTrialWidget : Gtk.Grid {
         stack.add(get_account_view);
 
         activate_view = new View("Later", null, "Activate Nuvola", Drtgtk.Labels.markup(
-            "<b>Gumroad should have sent you an email with instructions. Please read them carefully.</b>\n\n"
+            "<b>You should have received a payment confirmation from Gumroad and activation instructions from Tiliado. Please read them carefully.</b>\n\n"
             + "Once a Nuvola developer confirms that your Gumroad and Tiliado accounts were linked, you can activate Nuvola with the button below."));
         activate_view.action_button.clicked.connect(on_activate_action_clicked);
         activate_view.back_button.clicked.connect(on_activate_back_clicked);
