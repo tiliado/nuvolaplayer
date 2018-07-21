@@ -125,27 +125,6 @@ def mask(string):
     shift = int(1.0 * os.urandom(1)[0] / 255 * 85 + 15)
     return [shift] + [c + shift for c in string.encode("utf-8")]
 
-@conf
-def gir_compile(ctx, name, lib, dirname=".", merge=None, params=""):
-    if merge:
-        new_gir = ctx.path.find_or_declare(dirname + "/" + name + ".gir")
-        tasks = [
-            ctx(
-                rule='../mergegir.py ${TGT} ${SRC}',
-                source=[ctx.path.find_or_declare(entry) for entry in merge],
-                target=new_gir),
-            ctx(
-                rule='${GIR_COMPILER} ${SRC} --output=${TGT} --shared-library="lib%s.so" %s' % (lib, params),
-                source=new_gir,
-                target=ctx.path.find_or_declare(dirname + "/" + name + ".typelib"),
-                install_path="${LIBDIR}/girepository-1.0")
-        ]
-    else:
-        return ctx(
-        rule='${GIR_COMPILER} ${SRC} --output=${TGT} --shared-library="lib%s.so" %s' % (lib, params),
-            source=ctx.path.find_or_declare(dirname + "/" + name + ".gir"),
-            target=ctx.path.find_or_declare(dirname + "/" + name + ".typelib"),
-            install_path="${LIBDIR}/girepository-1.0")
 
 @TaskGen.feature('mergejs')
 @TaskGen.before_method('process_source', 'process_rule')
@@ -339,8 +318,6 @@ def options(ctx):
         '--nuvola-lite', action='store_true', default=False, dest='nuvola_lite',
         help="Lite version of Nuvola.")
     ctx.add_option(
-        '--no-gir', action='store_false', default=True, dest='build_gir', help="Don't build GIR.")
-    ctx.add_option(
         '--no-vala-lint', action='store_false', default=True, dest='lint_vala', help="Don't use Vala linter.")
     ctx.add_option(
         '--lint-vala-auto-fix', action='store_true', default=False,
@@ -462,10 +439,6 @@ def configure(ctx):
     pkgconfig(ctx, 'libarchive', 'LIBARCHIVE', '3.2')
     pkgconfig(ctx, 'libpulse', 'LIBPULSE', '0.0')
     pkgconfig(ctx, 'libpulse-mainloop-glib', 'LIBPULSE-GLIB', '0.0')
-
-    ctx.env.BUILD_GIR = ctx.options.build_gir
-    if ctx.env.BUILD_GIR:
-        ctx.find_program('g-ir-compiler', var='GIR_COMPILER')
 
     ctx.env.LINT_VALA = ctx.options.lint_vala
     if ctx.env.LINT_VALA:
@@ -703,7 +676,6 @@ def build(ctx):
 
     valalib(
         target = ENGINEIO,
-        gir = "Engineio-1.0",
         source_dir = 'engineio-soup/src',
         packages = 'uuid libsoup-2.4 json-glib-1.0',
         uselib = 'UUID SOUP JSON-GLIB',
@@ -714,7 +686,6 @@ def build(ctx):
 
     valalib(
         target = NUVOLAKIT_BASE,
-        gir = "NuvolaBase-1.0",
         source_dir = 'src/nuvolakit-base',
         packages = packages + ' gstreamer-1.0',
         uselib = uselib + " GST",
@@ -726,7 +697,6 @@ def build(ctx):
 
     valalib(
         target = NUVOLAKIT_RUNNER,
-        gir = "NuvolaRunner-1.0",
         source_dir = 'src/nuvolakit-runner',
         packages = packages + ' webkit2gtk-4.0 javascriptcoregtk-4.0 gstreamer-1.0 libsecret-1 dri2 libdrm libarchive prctl',
         uselib =  uselib + ' JSCORE WEBKIT GST SECRET DRI2 DRM LIBARCHIVE',
@@ -738,12 +708,6 @@ def build(ctx):
         vapi_dirs = vapi_dirs,
         vala_target_glib = TARGET_GLIB,
     )
-
-    if ctx.env.BUILD_GIR:
-        ctx.gir_compile("Engineio-1.0", ENGINEIO, "engineio-soup/src")
-        ctx.gir_compile("Nuvola-1.0", NUVOLAKIT_RUNNER, ".",
-            ["src/nuvolakit-base/NuvolaBase-1.0.gir", "src/nuvolakit-runner/NuvolaRunner-1.0.gir"],
-            params="--includedir='engineio-soup/src' --includedir='%s/build'" % os.environ.get("DIORITE_PATH", '.'))
 
     valaprog(
         target = NUVOLA_BIN,
