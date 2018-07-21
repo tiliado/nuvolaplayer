@@ -1,0 +1,11 @@
+--- /app/share/vala/vapi/unity.vapi	1970-01-01 01:00:00.000000000 +0100
++++ unity.vapi	2018-07-21 10:54:41.966112032 +0200
+@@ -32,8 +32,6 @@
+ 		public void clear ();
+ 		public unowned string[]? get_categories (string id);
+ 		public static Unity.AppInfoManager get_default ();
+-		[Deprecated (replacement = "AppInfoManager.get_default")]
+-		public static Unity.AppInfoManager get_instance ();
+ 		public unowned string[]? get_keywords (string id);
+ 		public string? get_path (string id);
+ 		public GLib.AppInfo? lookup (string id);

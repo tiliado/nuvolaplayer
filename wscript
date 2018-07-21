@@ -643,15 +643,19 @@ def build(ctx):
         packages += " valacef valacefgtk"
         uselib += " VALACEF VALACEFGTK"
 
-    for vapi in ("glib-2.0",):
-        vapi_dir = '/usr/share/vala-0.40/vapi'
-        for d in vapi_dirs:
-            if d not in ("vapi", "build") and os.path.isfile("%s/%s.vapi" % (d, vapi)):
-                vapi_dir = d
+    vapi_to_patch = ["glib-2.0"]
+    if ctx.env.with_unity:
+        vapi_to_patch.append('unity')
+    for vapi in vapi_to_patch:
+        all_vapi_dirs = ['/usr/share/vala-0.40/vapi', '/app/share/vala/vapi', '/usr/share/vala/vapi']
+        all_vapi_dirs.extend(d for d in vapi_dirs if d not in ("vapi", "build"))
+        for vapi_dir in all_vapi_dirs:
+            if os.path.isfile("%s/%s.vapi" % (vapi_dir, vapi)):
+                patch("%s/%s.vapi" % (vapi_dir, vapi), "vapi/%s.patch" % vapi, '%s.vapi' %  vapi)
+                cp_if_found("%s/%s.deps" % (vapi_dir, vapi), '%s.deps' %  vapi)
                 break
-
-        patch("%s/%s.vapi" % (vapi_dir, vapi), "vapi/%s.patch" % vapi, '%s.vapi' %  vapi)
-        cp_if_found("%s/%s.deps" % (vapi_dir, vapi), '%s.deps' %  vapi)
+        else:
+            ctx.fatal('Cannot find "%s.vapi" in %s.' % (vapi, all_vapi_dirs))
 
     ctx(features = "checkvaladefs", source = ctx.path.ant_glob('src/**/*.vala'),
         definitions="FLATPAK TILIADO_API WEBKIT_SUPPORTS_MSE GENUINE UNITY APPINDICATOR EXPERIMENTAL NUVOLA_RUNTIME"
