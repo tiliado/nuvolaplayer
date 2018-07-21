@@ -51,7 +51,7 @@ public class CefScriptDialogModel : ScriptDialogModel {
         case Cef.JsdialogType.ALERT: return ScriptDialogType.ALERT;
         case Cef.JsdialogType.CONFIRM: return ScriptDialogType.CONFIRM;
         case Cef.JsdialogType.PROMPT: return ScriptDialogType.PROMPT;
-        default: assert_not_reached(); break;
+        default: assert_not_reached();
         }
     }
 }
