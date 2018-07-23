@@ -248,14 +248,35 @@ public class AppRunnerController: Drtgtk.Application {
             MasterDbusIfce nuvola_api = Bus.get_proxy_sync<MasterDbusIfce>(
                 BusType.SESSION, Nuvola.get_dbus_id(), Nuvola.get_dbus_path(),
                 DBusProxyFlags.DO_NOT_CONNECT_SIGNALS|DBusProxyFlags.DO_NOT_LOAD_PROPERTIES);
-            GLib.Socket socket;
+            GLib.Socket? socket = null;
             string? api_token = null;
             var allowed_timeouts = 10;
+            string? error_reason = null;
             while (true) {
                 try {
                     // TODO: @async
-                    nuvola_api.get_connection(this.web_app.id, this.dbus_id, out socket, out api_token);
+                    int major = -1;
+                    int minor = -1;
+                    int micro = -1;
+                    string? revision = null;
+                    if (nuvola_api.get_version(out major, out minor, out micro, out revision)) {
+                        if (major == Nuvola.get_version_major()
+                        && minor == Nuvola.get_version_minor()
+                        && micro == Nuvola.get_version_micro()
+                        ) {
+                            nuvola_api.get_connection(this.web_app.id, this.dbus_id, out socket, out api_token);
+                        } else {
+                            error_reason = (
+                                "Version mismatch: Nuvola Service %d.%d.%d (%s) != Nuvola Runtime %s (%s)"
+                            ).printf(
+                                major, minor, micro, revision,
+                                Nuvola.get_version(), Nuvola.get_revision());
+                        }
+                    } else {
+                        error_reason = "Failed to get Nuvola Service version. Update Nuvola Runtime Service.";
+                    }
                     break;
+
                 } catch (GLib.IOError e) {
                     if (allowed_timeouts < 1 || !(e is GLib.IOError.TIMED_OUT)) {
                         throw e;
@@ -267,11 +288,14 @@ public class AppRunnerController: Drtgtk.Application {
             }
 
             if (socket == null) {
-                startup_check.nuvola_service_message = (
-                    "<b>Nuvola Apps Runtime Service refused connection.</b>\n\n"
-                    + "1. Make sure Nuvola Apps Runtime is installed.\n"
-                    + "2. If Nuvola has been updated recently, close all Nuvola Apps and try launching it again.");
-                startup_check.nuvola_service_status = StartupCheck.Status.NOT_APPLICABLE;
+                startup_check.nuvola_service_message = Markup.printf_escaped(
+                    "<b>Nuvola Apps Service refused connection.</b>\n\n"
+                    + "1. Make sure Nuvola Apps Service is installed as well as all updates.\n"
+                    + "2. If Nuvola has been updated recently,"
+                    + " close all Nuvola Apps and try launching it again.\n\n"
+                    + "<i>Error message: %s</i>", error_reason ?? "Nuvola Service returned invalid socket.");
+                startup_check.nuvola_service_status = StartupCheck.Status.WARNING;
+
             } else {
                 ipc_bus.connect_master_socket(socket, api_token);
             }
@@ -279,8 +303,8 @@ public class AppRunnerController: Drtgtk.Application {
             #endif
         } catch (GLib.Error e) {
             startup_check.nuvola_service_message = Markup.printf_escaped(
-                "<b>Failed to connect to Nuvola Apps Runtime Service.</b>\n\n"
-                + "1. Make sure Nuvola Apps Runtime is installed.\n"
+                "<b>Failed to connect to Nuvola Apps Service.</b>\n\n"
+                + "1. Make sure Nuvola Apps Service is installed as well as all updates.\n"
                 + "2. If Nuvola has been installed or updated recently,"
                 + " close all Nuvola Apps and try launching it again.\n\n"
                 + "<i>Error message: %s</i>", e.message);
@@ -297,8 +321,8 @@ public class AppRunnerController: Drtgtk.Application {
             }
             catch (GLib.Error e) {
                 startup_check.nuvola_service_message = Markup.printf_escaped(
-                    "<b>Communication with Nuvola Apps Runtime Service failed.</b>\n\n"
-                    + "1. Make sure Nuvola Apps Runtime is installed.\n"
+                    "<b>Communication with Nuvola Apps Service failed.</b>\n\n"
+                    + "1. Make sure Nuvola Apps Service is installed as well as all updates.\n"
                     + "2. If Nuvola has been updated recently, close all Nuvola Apps and try launching it again.\n\n"
                     + "<i>Error message: %s</i>", e.message);
                 startup_check.nuvola_service_status = StartupCheck.Status.ERROR;
@@ -307,7 +331,7 @@ public class AppRunnerController: Drtgtk.Application {
             var storage_client = new Drt.KeyValueStorageClient(ipc_bus.master);
             master_config = storage_client.get_proxy("master.config");
             startup_check.nuvola_service_status = StartupCheck.Status.OK;
-        } else {
+        } else if (startup_check.nuvola_service_status != StartupCheck.Status.WARNING) {
             startup_check.nuvola_service_status = StartupCheck.Status.NOT_APPLICABLE;
         }
 
