@@ -36,12 +36,11 @@ public class AppDbusApi: GLib.Object {
         Idle.add(() => {controller.activate(); return false;});
     }
 
-    public bool get_version(out int major, out int minor, out int micro, out string? revision) throws GLib.Error {
+    public void get_version(out int major, out int minor, out int micro, out string? revision) throws GLib.Error {
         major = Nuvola.get_version_major();
         minor = Nuvola.get_version_minor();
         micro = Nuvola.get_version_micro();
         revision = Nuvola.get_revision();
-        return true;
     }
 
     public void get_connection(out Socket? socket) throws GLib.Error {
@@ -52,7 +51,7 @@ public class AppDbusApi: GLib.Object {
 
 [DBus(name="eu.tiliado.Nuvola")]
 public interface MasterDbusIfce: GLib.Object {
-    public abstract bool get_version(out int major, out int minor, out int micro, out string? revision) throws GLib.Error;
+    public abstract void get_version(out int major, out int minor, out int micro, out string? revision) throws GLib.Error;
     public abstract void get_connection(string app_id, string dbus_id, out GLib.Socket? socket, out string? token)
     throws GLib.Error;
 }

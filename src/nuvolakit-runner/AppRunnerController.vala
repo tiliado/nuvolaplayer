@@ -38,11 +38,11 @@ public class AppRunnerController: Drtgtk.Application {
     public WebApp web_app {get; protected set;}
     public WebAppStorage app_storage {get; protected set;}
     public string dbus_id {get; private set;}
+    public MasterService master {get; private set;}
     private WebOptions[] available_web_options;
     private WebOptions web_options;
     private WebkitOptions webkit_options;
     public WebEngine web_engine {get; private set;}
-    public Drt.KeyValueStorage? master_config {get; private set;}
     public Bindings bindings {get; private set;}
     public IpcBus ipc_bus {get; private set; default=null;}
     public ActionsHelper actions_helper {get; private set; default = null;}
@@ -237,103 +237,32 @@ public class AppRunnerController: Drtgtk.Application {
     }
 
     private bool init_ipc(StartupCheck startup_check) {
-        try {
-            string bus_name = build_ui_runner_ipc_id(web_app.id);
-            web_worker_data["WEB_APP_ID"] = web_app.id;
-            web_worker_data["RUNNER_BUS_NAME"] = bus_name;
-            ipc_bus = new IpcBus(bus_name);
-            ipc_bus.start();
-            #if !NUVOLA_LITE
-
-            MasterDbusIfce nuvola_api = Bus.get_proxy_sync<MasterDbusIfce>(
-                BusType.SESSION, Nuvola.get_dbus_id(), Nuvola.get_dbus_path(),
-                DBusProxyFlags.DO_NOT_CONNECT_SIGNALS|DBusProxyFlags.DO_NOT_LOAD_PROPERTIES);
-            GLib.Socket? socket = null;
-            string? api_token = null;
-            var allowed_timeouts = 10;
-            string? error_reason = null;
-            while (true) {
-                try {
-                    // TODO: @async
-                    int major = -1;
-                    int minor = -1;
-                    int micro = -1;
-                    string? revision = null;
-                    if (nuvola_api.get_version(out major, out minor, out micro, out revision)) {
-                        if (major == Nuvola.get_version_major()
-                        && minor == Nuvola.get_version_minor()
-                        && micro == Nuvola.get_version_micro()
-                        ) {
-                            nuvola_api.get_connection(this.web_app.id, this.dbus_id, out socket, out api_token);
-                        } else {
-                            error_reason = (
-                                "Version mismatch: Nuvola Service %d.%d.%d (%s) != Nuvola Runtime %s (%s)"
-                            ).printf(
-                                major, minor, micro, revision,
-                                Nuvola.get_version(), Nuvola.get_revision());
-                        }
-                    } else {
-                        error_reason = "Failed to get Nuvola Service version. Update Nuvola Runtime Service.";
-                    }
-                    break;
-
-                } catch (GLib.IOError e) {
-                    if (allowed_timeouts < 1 || !(e is GLib.IOError.TIMED_OUT)) {
-                        throw e;
-                    } else {
-                        allowed_timeouts--;
-                        warning("Nuvola.get_connection() timed out. Attempts left: %d", allowed_timeouts);
-                    }
-                }
-            }
-
-            if (socket == null) {
-                startup_check.nuvola_service_message = Markup.printf_escaped(
-                    "<b>Nuvola Apps Service refused connection.</b>\n\n"
-                    + "1. Make sure Nuvola Apps Service is installed as well as all updates.\n"
-                    + "2. If Nuvola has been updated recently,"
-                    + " close all Nuvola Apps and try launching it again.\n\n"
-                    + "<i>Error message: %s</i>", error_reason ?? "Nuvola Service returned invalid socket.");
-                startup_check.nuvola_service_status = StartupCheck.Status.WARNING;
-
-            } else {
-                ipc_bus.connect_master_socket(socket, api_token);
-            }
-
-            #endif
-        } catch (GLib.Error e) {
-            startup_check.nuvola_service_message = Markup.printf_escaped(
-                "<b>Failed to connect to Nuvola Apps Service.</b>\n\n"
-                + "1. Make sure Nuvola Apps Service is installed as well as all updates.\n"
-                + "2. If Nuvola has been installed or updated recently,"
-                + " close all Nuvola Apps and try launching it again.\n\n"
-                + "<i>Error message: %s</i>", e.message);
-            startup_check.nuvola_service_status = StartupCheck.Status.NOT_APPLICABLE;
-        }
-
+        string bus_name = build_ui_runner_ipc_id(web_app.id);
+        web_worker_data["WEB_APP_ID"] = web_app.id;
+        web_worker_data["RUNNER_BUS_NAME"] = bus_name;
+        ipc_bus = new IpcBus(bus_name);
         ipc_bus.router.add_method(IpcApi.CORE_GET_METADATA, Drt.RpcFlags.READABLE|Drt.RpcFlags.PRIVATE,
             "Get web app metadata.", handle_get_metadata, null);
+        ipc_bus.start();
 
-        if (ipc_bus.master != null) {
-            try {
-                Variant? response = ipc_bus.master.call_sync("/nuvola/core/runner-started", new Variant("(ss)", web_app.id, ipc_bus.router.hex_token));
-                assert(response.equal(new Variant.boolean(true)));
-            }
-            catch (GLib.Error e) {
-                startup_check.nuvola_service_message = Markup.printf_escaped(
-                    "<b>Communication with Nuvola Apps Service failed.</b>\n\n"
-                    + "1. Make sure Nuvola Apps Service is installed as well as all updates.\n"
-                    + "2. If Nuvola has been updated recently, close all Nuvola Apps and try launching it again.\n\n"
-                    + "<i>Error message: %s</i>", e.message);
-                startup_check.nuvola_service_status = StartupCheck.Status.ERROR;
-            }
-
-            var storage_client = new Drt.KeyValueStorageClient(ipc_bus.master);
-            master_config = storage_client.get_proxy("master.config");
+        #if !NUVOLA_LITE
+        var master = new MasterService();
+        if (master.init(ipc_bus, this.web_app.id, this.dbus_id)) {
             startup_check.nuvola_service_status = StartupCheck.Status.OK;
-        } else if (startup_check.nuvola_service_status != StartupCheck.Status.WARNING) {
-            startup_check.nuvola_service_status = StartupCheck.Status.NOT_APPLICABLE;
+        } else {
+            startup_check.nuvola_service_message = Markup.printf_escaped(
+                "<b>Failed to connect to Nuvola Apps Service.</b>\n\n"
+                + "1. Make sure Nuvola Apps Service is installed.\n"
+                + "2. Make sure Nuvola Apps Service and individual Nuvola Apps are up-to-date.\n"
+                + "3. Close all Nuvola Apps and try launching it again.\n\n"
+                + "<i>Error message: %s</i>", master.error.message);
+            startup_check.nuvola_service_status = ((master.error is MasterServiceError.OTHER)
+                ? StartupCheck.Status.NOT_APPLICABLE : StartupCheck.Status.WARNING);
         }
+        this.master = master;
+        #else
+        startup_check.nuvola_service_status = StartupCheck.Status.NOT_APPLICABLE;
+        #endif
 
         ipc_bus.router.add_method("/nuvola/core/get-component-info", Drt.RpcFlags.READABLE,
             "Get info about component.",
@@ -618,7 +547,7 @@ public class AppRunnerController: Drtgtk.Application {
      * Show welcome screen only if criteria are met.
      */
     private void show_welcome_screen() {
-        Drt.KeyValueStorage config = this.master_config ?? this.config;
+        Drt.KeyValueStorage config = this.master.config ?? this.config;
         if (config.get_string("nuvola.welcome_screen") != get_welcome_screen_name()) {
             do_show_welcome_dialog();
             config.set_string("nuvola.welcome_screen", get_welcome_screen_name());
@@ -700,7 +629,7 @@ public class AppRunnerController: Drtgtk.Application {
 
         bindings.add_object(menu_bar);
 
-        components.prepend(new AudioScrobblerComponent(this, bindings, master_config ?? config, config, connection.session));
+        components.prepend(new AudioScrobblerComponent(this, bindings, master != null ? master.config : null, config, connection.session));
         components.prepend(new MPRISComponent(this, bindings, config));
         components.prepend(new HttpRemoteControl.Component(this, bindings, config, ipc_bus));
         components.prepend(new LyricsComponent(this, bindings, config));

@@ -42,11 +42,11 @@ public class AudioScrobblerComponent: Component {
     private uint track_info_cb_id = 0;
 
     public AudioScrobblerComponent(
-        Drtgtk.Application app, Bindings bindings, Drt.KeyValueStorage global_config, Drt.KeyValueStorage config, Soup.Session connection) {
+        Drtgtk.Application app, Bindings bindings, Drt.KeyValueStorage? global_config, Drt.KeyValueStorage config, Soup.Session connection) {
         base("scrobbler", "Audio Scrobbler Services", "Integration with an audio scrobbling service - Last FM.");
         this.bindings = bindings;
         this.app = app;
-        this.global_config = global_config;
+        this.global_config = global_config ?? config;
         this.config = config;
         this.connection = connection;
         has_settings = true;
