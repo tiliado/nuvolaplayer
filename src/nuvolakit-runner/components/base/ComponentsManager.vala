@@ -34,15 +34,9 @@ public class ComponentsManager : PreferencesDialog.SelectorGroup {
         base("Optional Features", null);
         this.components = components;
         this.tiliado_activation = tiliado_activation;
-        #if !NUVOLA_LITE
         component_not_available_widget = Drtgtk.Labels.markup(
             "Your distributor has not enabled this feature. It is available in <a href=\"%s\">the genuine flatpak "
             + "builds of Nuvola Apps Runtime</a> though.", "https://nuvola.tiliado.eu");
-        #else
-        component_not_available_widget = Drtgtk.Labels.markup(
-            "This feature is not yet available in Nuvola Apps <i>snap packages</i>. You may switch to <a href=\"%s\">"
-            + "the genuine <i>flatpak</i> builds of Nuvola Apps Runtime</a> instead.", "https://nuvola.tiliado.eu");
-        #endif
         membership_widget = tiliado_activation != null ? new TiliadoUserWidget(tiliado_activation, app) : null;
         add_components_to_group();
         if (tiliado_activation != null) {

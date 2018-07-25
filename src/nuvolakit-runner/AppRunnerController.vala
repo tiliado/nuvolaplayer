@@ -245,7 +245,6 @@ public class AppRunnerController: Drtgtk.Application {
             "Get web app metadata.", handle_get_metadata, null);
         ipc_bus.start();
 
-        #if !NUVOLA_LITE
         var master = new MasterService();
         if (master.init(ipc_bus, this.web_app.id, this.dbus_id)) {
             startup_check.nuvola_service_status = StartupCheck.Status.OK;
@@ -260,9 +259,6 @@ public class AppRunnerController: Drtgtk.Application {
                 ? StartupCheck.Status.NOT_APPLICABLE : StartupCheck.Status.WARNING);
         }
         this.master = master;
-        #else
-        startup_check.nuvola_service_status = StartupCheck.Status.NOT_APPLICABLE;
-        #endif
 
         ipc_bus.router.add_method("/nuvola/core/get-component-info", Drt.RpcFlags.READABLE,
             "Get info about component.",

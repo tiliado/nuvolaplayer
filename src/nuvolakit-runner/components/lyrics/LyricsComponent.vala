@@ -25,25 +25,18 @@
 namespace Nuvola {
 
 public class LyricsComponent: Component {
-    #if !NUVOLA_LITE
     private Bindings bindings;
     private AppRunnerController app;
     private LyricsSidebar? sidebar = null;
-    #endif
 
     public LyricsComponent(AppRunnerController app, Bindings bindings, Drt.KeyValueStorage config) {
         base("lyrics", "Lyrics", "Shows lyrics for the current song.");
-        #if !NUVOLA_LITE
         this.bindings = bindings;
         this.app = app;
         config.bind_object_property("component.%s.".printf(id), this, "enabled").set_default(true).update_property();
         auto_activate = false;
-        #else
-        available = false;
-        #endif
     }
 
-    #if !NUVOLA_LITE
     protected override bool activate() {
         SList<LyricsFetcher> fetchers = null;
         fetchers.append(new LyricsFetcherCache(app.storage.get_cache_path("lyrics")));
@@ -59,7 +52,6 @@ public class LyricsComponent: Component {
         sidebar = null;
         return true;
     }
-    #endif
 }
 
 } // namespace Nuvola

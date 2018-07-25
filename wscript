@@ -315,9 +315,6 @@ def options(ctx):
         '--cef-default', action='store_true', default=False, dest='cef_default',
         help="Whether the CEF engine should be default.")
     ctx.add_option(
-        '--nuvola-lite', action='store_true', default=False, dest='nuvola_lite',
-        help="Lite version of Nuvola.")
-    ctx.add_option(
         '--no-vala-lint', action='store_false', default=True, dest='lint_vala', help="Don't use Vala linter.")
     ctx.add_option(
         '--lint-vala-auto-fix', action='store_true', default=False,
@@ -402,9 +399,6 @@ def configure(ctx):
         else:
             ctx.env.UNIQUE_NAME = "eu.tiliado.WebRuntime"
     ctx.env.ICON_NAME = ctx.env.UNIQUE_NAME
-    ctx.env.NUVOLA_LITE = ctx.options.nuvola_lite
-    if ctx.env.NUVOLA_LITE:
-        vala_def(ctx, "NUVOLA_LITE")
 
     # Flatpak
     if ctx.env.FLATPAK:
@@ -458,12 +452,12 @@ def configure(ctx):
     ctx.env.WEBKIT_MSE = ctx.options.webkit_mse
     if ctx.options.webkit_mse:
         vala_def(ctx, "WEBKIT_SUPPORTS_MSE")
-    ctx.env.with_unity = ctx.options.unity and not ctx.env.NUVOLA_LITE
+    ctx.env.with_unity = ctx.options.unity
     if ctx.env.with_unity:
         pkgconfig(ctx, 'unity', 'UNITY', '3.0')
         pkgconfig(ctx, 'dbusmenu-glib-0.4', 'DBUSMENU', '0.4')
         vala_def(ctx, "UNITY")
-    ctx.env.with_appindicator = ctx.options.appindicator and not ctx.env.NUVOLA_LITE
+    ctx.env.with_appindicator = ctx.options.appindicator
     if ctx.env.with_appindicator:
         pkgconfig(ctx, 'ayatana-appindicator3-0.1', 'APPINDICATOR', '0.4')
         vala_def(ctx, "APPINDICATOR")
@@ -486,7 +480,7 @@ def configure(ctx):
     ctx.env.GENUINE = genuine
     if genuine:
         vala_def(ctx, "GENUINE")
-    if any((ctx.env.GENUINE, ctx.env.CDK, ctx.env.ADK)) and not ctx.env.NUVOLA_LITE:
+    if any((ctx.env.GENUINE, ctx.env.CDK, ctx.env.ADK)):
         vala_def(ctx, "EXPERIMENTAL")
     if tiliado_api.get("enabled", False):
         vala_def(ctx, "TILIADO_API")
@@ -633,7 +627,7 @@ def build(ctx):
 
     ctx(features = "checkvaladefs", source = ctx.path.ant_glob('src/**/*.vala'),
         definitions="FLATPAK TILIADO_API WEBKIT_SUPPORTS_MSE GENUINE UNITY APPINDICATOR EXPERIMENTAL NUVOLA_RUNTIME"
-        + " NUVOLA_ADK NUVOLA_CDK HAVE_CEF FALSE TRUE NUVOLA_LITE")
+        + " NUVOLA_ADK NUVOLA_CDK HAVE_CEF FALSE TRUE")
 
     VALALINT_CHECKS = ("space_indent=4 method_call_no_space space_after_keyword space_after_comma no_space_before_comma"
         " end_of_namespace_comments no_trailing_whitespace space_before_bracket no_nested_namespaces"

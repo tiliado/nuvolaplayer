@@ -25,17 +25,14 @@
 namespace Nuvola {
 
 public class MediaKeysComponent: Component {
-    #if !NUVOLA_LITE
     private Bindings bindings;
     private Drtgtk.Application app;
     private MediaKeysClient? media_keys = null;
     private IpcBus bus;
     private string web_app_id;
-    #endif
 
     public MediaKeysComponent(Drtgtk.Application app, Bindings bindings, Drt.KeyValueStorage config, IpcBus bus, string web_app_id) {
         base("mediakeys", "Media keys", "Handles multimedia keys of your keyboard.");
-        #if !NUVOLA_LITE
         this.bindings = bindings;
         this.app = app;
         this.bus = bus;
@@ -43,9 +40,6 @@ public class MediaKeysComponent: Component {
         this.available = bus.master != null;
         config.bind_object_property("component.mediakeys.", this, "enabled").set_default(true).update_property();
         auto_activate = false;
-        #else
-        available = false;
-        #endif
     }
 
     public override Gtk.Widget? get_unavailability_widget() {
@@ -55,7 +49,6 @@ public class MediaKeysComponent: Component {
         return null;
     }
 
-    #if !NUVOLA_LITE
     protected override bool activate() {
         media_keys = new MediaKeysClient(web_app_id, bus.master);
         bindings.add_object(media_keys);
@@ -69,7 +62,6 @@ public class MediaKeysComponent: Component {
         media_keys = null;
         return true;
     }
-    #endif
 }
 
 } // namespace Nuvola
