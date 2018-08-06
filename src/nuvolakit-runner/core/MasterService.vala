@@ -78,9 +78,9 @@ public class MasterService : GLib.Object {
                 this.version_micro = micro;
                 this.revision = (owned) revision;
                 version_compatible = (
-                    major == Nuvola.get_version_major()
-                    && minor == Nuvola.get_version_minor()
-                    && micro == Nuvola.get_version_micro());
+                    major == Nuvola.get_version_major() &&
+                    minor == Nuvola.get_version_minor() &&
+                    micro == Nuvola.get_version_micro());
                 if (!version_compatible) {
                     throw new MasterServiceError.INCOMPATIBLE_VERSION(
                         "Version mismatch: Nuvola Service %d.%d.%d (%s) != Nuvola Runtime %s (%s).",
@@ -108,7 +108,7 @@ public class MasterService : GLib.Object {
             // TODO: @async
             dbus.get_connection(web_app_id, dbus_id, out socket, out api_token);
         } catch (GLib.Error e) {
-            throw new MasterServiceError.OTHER("Failed to get Nuvola Service socket. %s",  e.message);
+            throw new MasterServiceError.OTHER("Failed to get Nuvola Service socket. %s", e.message);
         }
         if (socket == null) {
             throw new MasterServiceError.NULL_SOCKET("Nuvola Service refused to provide socket.");
