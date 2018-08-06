@@ -114,46 +114,39 @@ public class AppRunnerController: Drtgtk.Application {
         startup_window.present();
         web_app.scale_factor = startup_window.scale_factor * 1.0;
         debug("Scale factor: %d", startup_window.scale_factor);
+        startup_check.task_finished.connect_after(on_startup_check_task_finished);
         startup_check.check_desktop_portal_available.begin((o, res) => startup_check.check_desktop_portal_available.end(res));
         startup_check.check_app_requirements.begin(available_web_options, (o, res) => startup_check.check_app_requirements.end(res));
         startup_check.check_graphics_drivers.begin((o, res) => startup_check.check_graphics_drivers.end(res));
-        startup_check.task_finished.connect_after(on_startup_check_task_finished);
     }
 
-    private void on_startup_check_task_finished(GLib.Object emitter, string task_name) {
-        var startup_check = emitter as StartupCheck;
-        assert(startup_check != null);
+    private void on_startup_check_task_finished(StartupCheck startup_check, StartupCheck.Task task) {
         if (startup_check.finished_tasks == 3 && startup_check.running_tasks == 0) {
+            startup_window.ready_to_continue.connect(on_startup_window_ready_to_continue);
+            startup_check.task_finished.disconnect(on_startup_check_task_finished);
             if (startup_check.get_overall_status() == StartupCheck.Status.ERROR) {
-                startup_check.task_finished.disconnect(on_startup_check_task_finished);
-                startup_window.ready_to_continue.connect(on_startup_window_ready_to_continue);
                 startup_check.mark_as_finished();
             } else {
-                startup_check.task_finished.disconnect(on_startup_check_task_finished);
-                startup_window.ready_to_continue.connect(on_startup_window_ready_to_continue);
-                #if !TILIADO_API
-                init_ipc(startup_check);
-                startup_check.mark_as_finished();
-                #else
-                if (init_ipc(startup_check)) {
-                    if (ipc_bus.master != null) {
-                        tiliado_activation = new TiliadoActivationClient(ipc_bus.master);
-                    } else {
-                        assert(TILIADO_OAUTH2_CLIENT_ID != null && TILIADO_OAUTH2_CLIENT_ID[0] != '\0');
-                        var tiliado = new TiliadoApi2(
-                            TILIADO_OAUTH2_CLIENT_ID, Drt.String.unmask(TILIADO_OAUTH2_CLIENT_SECRET.data),
-                            TILIADO_OAUTH2_API_ENDPOINT, TILIADO_OAUTH2_TOKEN_ENDPOINT, null, "nuvolaplayer");
-                        tiliado_activation = new TiliadoActivationLocal(tiliado, config);
-                        if (tiliado_activation.get_user_info() == null) {
-                            tiliado_activation.update_user_info_sync();
-                        }
+                init_ipc();
+                connect_master_service(startup_check);
+                #if TILIADO_API
+                if (ipc_bus.master != null) {
+                    tiliado_activation = new TiliadoActivationClient(ipc_bus.master);
+                } else {
+                    assert(TILIADO_OAUTH2_CLIENT_ID != null && TILIADO_OAUTH2_CLIENT_ID[0] != '\0');
+                    var tiliado = new TiliadoApi2(
+                        TILIADO_OAUTH2_CLIENT_ID, Drt.String.unmask(TILIADO_OAUTH2_CLIENT_SECRET.data),
+                        TILIADO_OAUTH2_API_ENDPOINT, TILIADO_OAUTH2_TOKEN_ENDPOINT, null, "nuvolaplayer");
+                    tiliado_activation = new TiliadoActivationLocal(tiliado, config);
+                    if (tiliado_activation.get_user_info() == null) {
+                        tiliado_activation.update_user_info_sync();
                     }
-                    startup_check.check_tiliado_account.begin(tiliado_activation, (o, res) => {
-                        startup_check.check_tiliado_account.end(res);
-                        startup_check.mark_as_finished();
-                    });
                 }
                 #endif
+                startup_check.check_tiliado_account.begin(tiliado_activation, (o, res) => {
+                    startup_check.check_tiliado_account.end(res);
+                    startup_check.mark_as_finished();
+                });
             }
         }
     }
@@ -236,30 +229,13 @@ public class AppRunnerController: Drtgtk.Application {
         set_app_menu_items({Actions.HELP, Actions.ABOUT, Actions.QUIT});
     }
 
-    private bool init_ipc(StartupCheck startup_check) {
+    private void init_ipc() {
         string bus_name = build_ui_runner_ipc_id(web_app.id);
         web_worker_data["WEB_APP_ID"] = web_app.id;
         web_worker_data["RUNNER_BUS_NAME"] = bus_name;
         ipc_bus = new IpcBus(bus_name);
         ipc_bus.router.add_method(IpcApi.CORE_GET_METADATA, Drt.RpcFlags.READABLE|Drt.RpcFlags.PRIVATE,
             "Get web app metadata.", handle_get_metadata, null);
-        ipc_bus.start();
-
-        var master = new MasterService();
-        if (master.init(ipc_bus, this.web_app.id, this.dbus_id)) {
-            startup_check.nuvola_service_status = StartupCheck.Status.OK;
-        } else {
-            startup_check.nuvola_service_message = Markup.printf_escaped(
-                "<b>Failed to connect to Nuvola Apps Service.</b>\n\n"
-                + "1. Make sure Nuvola Apps Service is installed.\n"
-                + "2. Make sure Nuvola Apps Service and individual Nuvola Apps are up-to-date.\n"
-                + "3. Close all Nuvola Apps and try launching it again.\n\n"
-                + "<i>Error message: %s</i>", master.error.message);
-            startup_check.nuvola_service_status = ((master.error is MasterServiceError.OTHER)
-                ? StartupCheck.Status.NOT_APPLICABLE : StartupCheck.Status.WARNING);
-        }
-        this.master = master;
-
         ipc_bus.router.add_method("/nuvola/core/get-component-info", Drt.RpcFlags.READABLE,
             "Get info about component.",
             handle_get_component_info, {
@@ -278,8 +254,28 @@ public class AppRunnerController: Drtgtk.Application {
                 new Drt.DoubleParam("type", true, null, "Info bar type."),
                 new Drt.StringParam("name", true, false, null, "Info bar text.")
             });
+        try {
+            ipc_bus.start();
+        } catch (Drt.IOError e) {
+            error("Failed to start IPC server. %s", e.message);
+        }
+    }
 
-        return true;
+    private void connect_master_service(StartupCheck startup_check) {
+        var master = new MasterService();
+        if (master.init(ipc_bus, this.web_app.id, this.dbus_id)) {
+            startup_check.nuvola_service_status = StartupCheck.Status.OK;
+        } else {
+            startup_check.nuvola_service_message = Markup.printf_escaped(
+                "<b>Failed to connect to Nuvola Apps Service.</b>\n\n"
+                + "1. Make sure Nuvola Apps Service is installed.\n"
+                + "2. Make sure Nuvola Apps Service and individual Nuvola Apps are up-to-date.\n"
+                + "3. Close all Nuvola Apps and try launching it again.\n\n"
+                + "<i>Error message: %s</i>", master.error.message);
+            startup_check.nuvola_service_status = ((master.error is MasterServiceError.OTHER)
+                ? StartupCheck.Status.NOT_APPLICABLE : StartupCheck.Status.WARNING);
+        }
+        this.master = master;
     }
 
     private void init_gui() {

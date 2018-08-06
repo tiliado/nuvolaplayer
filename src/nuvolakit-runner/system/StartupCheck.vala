@@ -69,7 +69,7 @@ public class StartupCheck : GLib.Object {
     [Description (nick="Tiliado Account message", blurb="Null unless the check went wrong.")]
     public string? tiliado_account_message {get; set; default = null;}
     [Description (nick="Tiliado activation", blurb="Tiliado account activation.")]
-    public TiliadoActivation activation {get; private set;}
+    public TiliadoActivation? activation {get; private set;}
     #endif
     [Description (nick="Web App object", blurb="Currently loaded web application")]
     public WebApp web_app {get; construct;}
@@ -93,7 +93,7 @@ public class StartupCheck : GLib.Object {
      *
      * @param name    The name of the check.
      */
-    public virtual signal void task_started(string name) {
+    public virtual signal void task_started(Task task) {
         running_tasks++;
     }
 
@@ -102,7 +102,7 @@ public class StartupCheck : GLib.Object {
      *
      * @param name    The name of the check.
      */
-    public virtual signal void task_finished(string name) {
+    public virtual signal void task_finished(Task task) {
         running_tasks--;
         finished_tasks++;
     }
@@ -157,8 +157,7 @@ public class StartupCheck : GLib.Object {
      * The {@link xdg_desktop_portal_status} property is populated with the result of this check.
      */
     public async void check_desktop_portal_available() {
-        const string NAME = "XDG Desktop Portal";
-        task_started(NAME);
+        task_started(Task.DESKTOP_PORTAL);
         #if FLATPAK
         xdg_desktop_portal_status = Status.IN_PROGRESS;
         try {
@@ -178,7 +177,7 @@ public class StartupCheck : GLib.Object {
         xdg_desktop_portal_status = Status.NOT_APPLICABLE;
         #endif
         yield Drt.EventLoop.resume_later();
-        task_finished(NAME);
+        task_finished(Task.DESKTOP_PORTAL);
     }
 
     /**
@@ -187,8 +186,7 @@ public class StartupCheck : GLib.Object {
      * The {@link app_requirements_status} property is populated with the result of this check.
      */
     public async void check_app_requirements(WebOptions[] available_web_options) {
-        const string NAME = "Web App Requirements";
-        task_started(NAME);
+        task_started(Task.APP_REQUIREMENTS);
 
         app_requirements_status = Status.IN_PROGRESS;
         string? result_message = null;
@@ -284,7 +282,7 @@ public class StartupCheck : GLib.Object {
         }
         app_requirements_message = (owned) msg;
         app_requirements_status = status;
-        task_finished("Web App Requirements");
+        task_finished(Task.APP_REQUIREMENTS);
     }
 
     /**
@@ -294,8 +292,7 @@ public class StartupCheck : GLib.Object {
      * properties are populated with the result of this check.
      */
     public async void check_graphics_drivers() {
-        const string NAME = "Graphics drivers";
-        task_started(NAME);
+        task_started(Task.GRAPHICS_DRIVERS);
         opengl_driver_status = Status.IN_PROGRESS;
         vaapi_driver_status = Status.IN_PROGRESS;
         vdpau_driver_status = Status.IN_PROGRESS;
@@ -321,34 +318,44 @@ public class StartupCheck : GLib.Object {
         vaapi_driver_status = Status.NOT_APPLICABLE;
 
         yield Drt.EventLoop.resume_later();
-        task_finished(NAME);
+        task_finished(Task.GRAPHICS_DRIVERS);
     }
 
-    #if TILIADO_API
     /**
      * Check whether sufficient Tiliado account is available.
      *
      * The {@link tiliado_account_status} property is populated with the result of this check.
      */
-    public async void check_tiliado_account(TiliadoActivation activation) {
-        const string NAME = "Tiliado account";
-        task_started(NAME);
+    public async void check_tiliado_account(TiliadoActivation? activation) {
+        task_started(Task.TILIADO_ACCOUNT);
+        #if TILIADO_API
         tiliado_account_status = Status.IN_PROGRESS;
         yield Drt.EventLoop.resume_later();
-        this.activation = activation;
-        TiliadoApi2.User? user = activation.get_user_info();
-        if (user != null) {
-            tiliado_account_message = Markup.printf_escaped("Tiliado account: %s", user.name);
-            tiliado_account_status = Status.OK;
+        if (activation != null) {
+            this.activation = activation;
+            TiliadoApi2.User? user = activation.get_user_info();
+            if (user != null) {
+                tiliado_account_message = Markup.printf_escaped("Tiliado account: %s", user.name);
+                tiliado_account_status = Status.OK;
+            } else {
+                tiliado_account_message ="No Tiliado account.";
+                tiliado_account_status = Status.OK;
+            }
         } else {
-            tiliado_account_message ="No Tiliado account.";
-            tiliado_account_status = Status.OK;
+            tiliado_account_status = Status.NOT_APPLICABLE;
         }
         yield Drt.EventLoop.resume_later();
-        task_finished(NAME);
+        #endif
+        task_finished(Task.TILIADO_ACCOUNT);
     }
 
-    #endif
+    public enum Task {
+        DESKTOP_PORTAL,
+        APP_REQUIREMENTS,
+        GRAPHICS_DRIVERS,
+        TILIADO_ACCOUNT,
+        NUVOLA_SERVICE;
+    }
 
     /**
      * Statuses of {@link StartupCheck}s.
