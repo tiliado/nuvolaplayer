@@ -17,6 +17,7 @@ else
     export GI_TYPELIB_PATH="$PWD/build:$PWD/build/engineio-soup/src:$DIORITE_PATH/build:$GI_TYPELIB_PATH"
     export CEF_SUBPROCESS_PATH="$VALACEF_PATH/build/ValacefSubprocess"
     export NUVOLA_USE_CEF="true"
+    export VALACEF_WIDEVINE_MANIFEST_PATH="$VALACEF_PATH/widevine/manifest.json"
 fi
 
 if [ ! -f web_apps/test/unit.js ]
