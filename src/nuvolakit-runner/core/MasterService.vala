@@ -87,6 +87,8 @@ public class MasterService : GLib.Object {
                         major, minor, micro, this.revision, Nuvola.get_version(), Nuvola.get_revision());
                 }
                 break;
+            } catch (MasterServiceError e) {
+                throw e;
             } catch (GLib.Error e) {
                 if (e is GLib.DBusError.UNKNOWN_METHOD) {
                     throw new MasterServiceError.NO_VERSION_INFO(
