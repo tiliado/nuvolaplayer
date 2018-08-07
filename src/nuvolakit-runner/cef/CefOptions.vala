@@ -146,7 +146,7 @@ public class CefOptions : WebOptions {
                 }
                 uint_versions[i] = (uint) version;
             }
-            return (engine_version.gte(VersionTuple.uintv(uint_versions))
+            return (engine_version.is_greater_or_equal_to(VersionTuple.uintv(uint_versions))
                 ? Drt.RequirementState.SUPPORTED : Drt.RequirementState.UNSUPPORTED);
         default:
             return Drt.RequirementState.UNSUPPORTED;

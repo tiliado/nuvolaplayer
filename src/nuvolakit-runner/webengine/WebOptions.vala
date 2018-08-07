@@ -42,7 +42,7 @@ public abstract class WebOptions : GLib.Object {
 
     public bool check_engine_version(VersionTuple min, VersionTuple max= {0, 0, 0, 0}) {
         VersionTuple  version = engine_version;
-        return version.gte(min) && (max.empty() || version.lt(max));
+        return version.is_greater_or_equal_to(min) && (max.empty() || version.is_lesser_than(max));
     }
 
     public abstract string get_name_version();

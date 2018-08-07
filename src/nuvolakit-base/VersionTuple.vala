@@ -91,12 +91,22 @@ public struct VersionTuple {
     }
 
     /**
+     * Check whether this version is equal to the other.
+     *
+     * @param other    The other version.
+     * @return The result of this == other.
+     */
+    public bool is_equal_to(VersionTuple other) {
+        return compare(other) == 0;
+    }
+
+    /**
      * Check whether this version is greater than the other.
      *
      * @param other    The other version.
      * @return The result of this > other.
      */
-    public bool gt(VersionTuple other) {
+    public bool is_greater_than(VersionTuple other) {
         return compare(other) > 0;
     }
 
@@ -106,7 +116,7 @@ public struct VersionTuple {
      * @param other    The other version.
      * @return The result of this >= other.
      */
-    public bool gte(VersionTuple other) {
+    public bool is_greater_or_equal_to(VersionTuple other) {
         return compare(other) >= 0;
     }
 
@@ -116,7 +126,7 @@ public struct VersionTuple {
      * @param other    The other version.
      * @return The result of this < other.
      */
-    public bool lt(VersionTuple other) {
+    public bool is_lesser_than(VersionTuple other) {
         return compare(other) < 0;
     }
 
@@ -126,7 +136,7 @@ public struct VersionTuple {
      * @param other    The other version.
      * @return The result of this <= other.
      */
-    public bool lte(VersionTuple other) {
+    public bool is_lesser_or_equal_to(VersionTuple other) {
         return compare(other) <= 0;
     }
 
