@@ -83,6 +83,7 @@ public class WebApp : GLib.Object {
     public int window_height {get; construct; default = 0;}
     public File? data_dir {get; construct; default = null;}
     public bool hidden {get; set; default = false;}
+    public bool dark_theme {get; set; default = false;}
     public bool allow_insecure_content {get; set; default = false;}
     public double scale_factor {get; set; default = 0.0;}
     public GenericSet<string> categories {get; construct;}
@@ -256,6 +257,7 @@ public class WebApp : GLib.Object {
             meta.get_string_or("home_url"));
 
         hidden = meta.get_bool_or("hidden", false);
+        dark_theme = meta.get_bool_or("dark_theme", false);
         allow_insecure_content = meta.get_bool_or("allow_insecure_content", false);
         user_agent = meta.get_string_or("user_agent");
     }
