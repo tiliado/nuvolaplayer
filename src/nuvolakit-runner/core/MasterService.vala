@@ -84,7 +84,7 @@ public class MasterService : GLib.Object {
                 if (!version_compatible) {
                     throw new MasterServiceError.INCOMPATIBLE_VERSION(
                         "Version mismatch: Nuvola Service %d.%d.%d (%s) != Nuvola Runtime %s (%s).",
-                        major, minor, micro, revision, Nuvola.get_version(), Nuvola.get_revision());
+                        major, minor, micro, this.revision, Nuvola.get_version(), Nuvola.get_revision());
                 }
                 break;
             } catch (GLib.Error e) {
