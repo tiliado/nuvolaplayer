@@ -70,6 +70,16 @@ public class AppearanceSettings: Gtk.Grid {
         attach(label, 0, ++line, 1, 1);
         attach(dark_theme, 1, line, 1, 1);
 
+        var dark_scrollbar = new Gtk.Switch();
+        label = Drtgtk.Labels.markup("<b>%s</b>\n<small>%s</small>",
+            "Use dark scrollbars for web view",
+            "This option applies only on the web app itself.");
+        dark_scrollbar.active = config.get_bool(ConfigKey.DARK_SCROLLBAR);
+        dark_scrollbar.notify["active"].connect_after(on_dark_scrollbar_toggled);
+        dark_scrollbar.valign = dark_scrollbar.halign = Gtk.Align.CENTER;
+        attach(label, 0, ++line, 1, 1);
+        attach(dark_scrollbar, 1, line, 1, 1);
+
         var system_decorations = new Gtk.Switch();
         label = Drtgtk.Labels.markup("<b>%s</b>\n<small>%s</small>",
             "Use system window decorations (requires restart)",
@@ -85,6 +95,10 @@ public class AppearanceSettings: Gtk.Grid {
 
     private void on_dark_theme_toggled(GLib.Object toggle, ParamSpec param) {
         config.set_bool(ConfigKey.DARK_THEME, ((Gtk.Switch) toggle).active);
+    }
+
+    private void on_dark_scrollbar_toggled(GLib.Object toggle, ParamSpec param) {
+        config.set_bool(ConfigKey.DARK_SCROLLBAR, ((Gtk.Switch) toggle).active);
     }
 
     private void on_system_decorations_toggled(GLib.Object toggle, ParamSpec param) {

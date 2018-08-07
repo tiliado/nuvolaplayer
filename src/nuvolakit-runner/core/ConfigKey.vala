@@ -34,6 +34,7 @@ public const string WINDOW_SIDEBAR_VISIBLE = "nuvola.window.sidebar.visible";
 public const string WINDOW_SIDEBAR_PAGE = "nuvola.window.sidebar.page";
 public const string GTK_THEME = "nuvola.gtk_theme";
 public const string DARK_THEME = "nuvola.dark_theme";
+public const string DARK_SCROLLBAR = "nuvola.dark_scrollbar";
 public const string SYSTEM_DECORATIONS = "nuvola.system_decorations";
 
 } // namespace Nuvola.ConfigKey

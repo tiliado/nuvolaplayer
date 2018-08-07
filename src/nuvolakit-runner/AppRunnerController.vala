@@ -182,6 +182,8 @@ public class AppRunnerController: Drtgtk.Application {
         default_config.insert(
             ConfigKey.DARK_THEME, new Variant.boolean(web_app.dark_theme));
         default_config.insert(
+            ConfigKey.DARK_SCROLLBAR, new Variant.boolean(web_app.dark_theme));
+        default_config.insert(
             ConfigKey.SYSTEM_DECORATIONS, new Variant.boolean(!shell.client_side_decorations));
         config = new Config(app_storage.config_dir.get_child("config.json"), default_config);
         config.changed.connect(on_config_changed);
