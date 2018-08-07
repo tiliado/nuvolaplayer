@@ -40,8 +40,14 @@ public class CefWidevineDownloaderDialog : Gtk.Dialog {
     private Gtk.ScrolledWindow view;
 
     public CefWidevineDownloaderDialog(CefWidevineDownloader downloader, string web_app_name) {
+        bool needs_update = downloader.needs_update();
         this.downloader = downloader;
-        this.title = "Widevine Plugin Required";
+        this.title = needs_update ? "Widevine Plugin Update Required" : "Widevine Plugin Required";
+        if (needs_update) {
+            warning("Widevine needs update from %s.", downloader.chrome_version);
+        } else {
+            debug("Need to install Widevine.");
+        }
         set_default_size(400, -1);
         grid = new Gtk.Grid();
         grid.margin = 10;
@@ -66,7 +72,7 @@ public class CefWidevineDownloaderDialog : Gtk.Dialog {
         box.pack_start(view, true, true, 0);
 
         add_button("Cancel", Gtk.ResponseType.CLOSE);
-        download_button = add_button("Install plugin", Gtk.ResponseType.APPLY);
+        download_button = add_button(needs_update ? "Update plugin" : "Install plugin", Gtk.ResponseType.APPLY);
         eula.bind_property("active", download_button, "sensitive", BindingFlags.SYNC_CREATE);
         progress  = new Gtk.Spinner();
         progress.margin = 10;
@@ -154,6 +160,7 @@ public class CefWidevineDownloaderDialog : Gtk.Dialog {
             cancellable = new Cancellable();
             downloader.download.begin(cancellable, on_download_finished);
         } else {
+            warning("Widevine installation cancelled.");
             if (cancellable != null) {
                 cancellable.cancel();
             } else {

@@ -32,6 +32,7 @@ public class CefOptions : WebOptions {
     public bool flash_required {get; private set; default = false;}
     public File widevine_dir {get; private set;}
     public CefGtk.InitFlags flags {get; private set;}
+    public bool widevine_found {get; private set; default = false;}
 
     public CefOptions(WebAppStorage storage, Connection? connection) {
         base(storage, connection);
@@ -55,11 +56,15 @@ public class CefOptions : WebOptions {
     public override async void gather_format_support_info(WebApp web_app) {
         if (widevine_required && connection != null) {
             var wd = new CefWidevineDownloader(connection, widevine_dir);
-            if (!wd.exists()) {
+            widevine_found = wd.exists() && !wd.needs_update();
+            if (!widevine_found) {
                 var dialog = new CefWidevineDownloaderDialog(wd, web_app.name);
                 yield dialog.wait_for_result();
                 dialog.destroy();
+                widevine_found = wd.exists() && !wd.needs_update();
             }
+        } else {
+            widevine_found = true;
         }
         init(web_app);
         CefGtk.InitializationResult result = CefGtk.get_init_result();
@@ -103,7 +108,7 @@ public class CefOptions : WebOptions {
             CefGtk.init(
                 flags,
                 web_app.scale_factor,
-                widevine_required ? widevine_dir.get_path() : null,
+                widevine_required && widevine_found ? widevine_dir.get_path() : null,
                 flash_required,
                 user_agent, product,
                 proxy_type, proxy_server, (uint) proxy_port);
