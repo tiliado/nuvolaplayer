@@ -120,7 +120,7 @@ public class WebExtension: GLib.Object {
     }
 
     private void apply_javascript_fixes(WebKit.ScriptWorld world, WebKit.WebPage page, WebKit.Frame frame) {
-        unowned JS.GlobalContext context = (JS.GlobalContext) frame.get_javascript_context_for_script_world(world);
+        unowned JsCore.GlobalContext context = (JsCore.GlobalContext) frame.get_javascript_context_for_script_world(world);
         var env = new JsEnvironment(context, null);
         const string WEBKITGTK_FIXES_JS = "webkitgtk-fixes.js";
         File? script = storage.user_data_dir.get_child(JSApi.JS_DIR).get_child(WEBKITGTK_FIXES_JS);
@@ -149,7 +149,7 @@ public class WebExtension: GLib.Object {
 
     private void init_frame(WebKit.ScriptWorld world, WebKit.WebPage page, WebKit.Frame frame) {
         this.bridge = null;
-        unowned JS.GlobalContext context = (JS.GlobalContext) frame.get_javascript_context_for_script_world(world);
+        unowned JsCore.GlobalContext context = (JsCore.GlobalContext) frame.get_javascript_context_for_script_world(world);
         debug("Init frame: %s, %p, %p, %p", frame.get_uri(), frame, page, context);
         var bridge = new FrameBridge(frame, context);
         try {
@@ -247,7 +247,7 @@ public class WebExtension: GLib.Object {
              * If a page doesn't contain any JavaScript, `window_object_cleared` is never called because no JavaScript
              * GlobalContext is created. Following line ensures GlobalContext is created if it hasn't been before.
              */
-            unowned JS.GlobalContext? context = (JS.GlobalContext) frame.get_javascript_context_for_script_world(
+            unowned JsCore.GlobalContext? context = (JsCore.GlobalContext) frame.get_javascript_context_for_script_world(
                 WebKit.ScriptWorld.get_default());
             return_if_fail(context != null);
             /*

@@ -27,7 +27,7 @@ namespace Nuvola {
 private class FrameBridge : JsEnvironment {
     private unowned WebKit.Frame frame;
 
-    internal FrameBridge(WebKit.Frame frame, JS.GlobalContext context) {
+    internal FrameBridge(WebKit.Frame frame, JsCore.GlobalContext context) {
         base(context, null);
         this.frame = frame;
     }

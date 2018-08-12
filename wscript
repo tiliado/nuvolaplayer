@@ -476,6 +476,9 @@ def configure(ctx):
         vala_def(ctx, "HAVE_WEBKIT_%d_%d" % version)
         version = (version[0], version[1] + 2)
 
+    vala_series = ctx.env.VALAC_VERSION[:2]
+    ctx.env.VALAC_SERIES = '%s.%s' % (vala_series[0], vala_series[1] + 1 if vala_series[1] % 2 else vala_series[1])
+
     # Definitions
     ctx.env.GENUINE = genuine
     if genuine:
@@ -589,7 +592,7 @@ def build(ctx):
     DIORITE_GTK = 'dioriteglib' + TARGET_DIORITE
 
     packages = 'dioritegtk{0} dioriteglib{0} '.format(TARGET_DIORITE)
-    packages += 'javascriptcoregtk-4.0 libnotify libarchive gtk+-3.0 gdk-3.0 gdk-x11-3.0 x11 posix json-glib-1.0 glib-2.0 gio-2.0'
+    packages += 'javascriptcore javascriptcoregtk-4.0 libnotify libarchive gtk+-3.0 gdk-3.0 gdk-x11-3.0 x11 posix json-glib-1.0 glib-2.0 gio-2.0'
     packages += ' libpulse-mainloop-glib'
     uselib = 'NOTIFY JSCORE LIBARCHIVE DIORITEGTK DIORITEGLIB GTK+ GDK GDKX11 X11 JSON-GLIB GLIB GIO LIBPULSE LIBPULSE-GLIB'
 
@@ -615,7 +618,9 @@ def build(ctx):
         vapi_to_patch.append('unity')
         vapi_to_patch.append('gee-1.0')
     for vapi in vapi_to_patch:
-        all_vapi_dirs = ['/usr/share/vala-0.40/vapi', '/app/share/vala/vapi', '/usr/share/vala/vapi']
+        all_vapi_dirs = [path.format(vala=ctx.env.VALAC_SERIES) for path in (
+            '/app/share/vala-{vala}/vapi', '/usr/share/vala-{vala}/vapi', '/app/share/vala/vapi', '/usr/share/vala/vapi'
+        )]
         all_vapi_dirs.extend(d for d in vapi_dirs if d not in ("vapi", "build"))
         for vapi_dir in all_vapi_dirs:
             if os.path.isfile("%s/%s.vapi" % (vapi_dir, vapi)):

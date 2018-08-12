@@ -33,9 +33,9 @@ public enum ValueType {
 }
 
 public class JsEnvironment: GLib.Object, JSExecutor {
-    public unowned JS.GlobalContext context {get; private set;}
-    private unowned JS.Object? _main_object = null;
-    public unowned JS.Object? main_object {
+    public unowned JsCore.GlobalContext context {get; private set;}
+    private unowned JsCore.Object? _main_object = null;
+    public unowned JsCore.Object? main_object {
         get {
             return _main_object;
         }
@@ -51,7 +51,7 @@ public class JsEnvironment: GLib.Object, JSExecutor {
         }
     }
 
-    public JsEnvironment(JS.GlobalContext context, JS.Object? main_object) {
+    public JsEnvironment(JsCore.GlobalContext context, JsCore.Object? main_object) {
         this.context = context;
         this.main_object = main_object;
     }
@@ -94,8 +94,8 @@ public class JsEnvironment: GLib.Object, JSExecutor {
      * @throw           JSError on failure
      */
     public unowned Value execute_script(string script, string path = "about:blank", int line=1) throws JSError {
-        JS.Value exception = null;
-        unowned Value value = context.evaluate_script(new JS.String(script), main_object, new JS.String(path), line, out exception);
+        JsCore.Value exception = null;
+        unowned Value value = context.evaluate_script(new JsCore.String(script), main_object, new JsCore.String(path), line, out exception);
         if (exception != null) {
             throw new JSError.EXCEPTION(JSTools.exception_to_string(context, exception));
         }
@@ -103,9 +103,9 @@ public class JsEnvironment: GLib.Object, JSExecutor {
     }
 
     public void call_function_sync(string name, ref Variant? args, bool propagate_error) throws GLib.Error {
-        unowned JS.Context ctx = context;
+        unowned JsCore.Context ctx = context;
         string[] names = name.split(".");
-        unowned JS.Object? object = main_object;
+        unowned JsCore.Object? object = main_object;
         if (object == null) {
             throw new JSError.NOT_FOUND("Main object not found.'");
         }
@@ -116,7 +116,7 @@ public class JsEnvironment: GLib.Object, JSExecutor {
             }
         }
 
-        unowned JS.Object? func = o_get_object(ctx, object, names[names.length - 1]);
+        unowned JsCore.Object? func = o_get_object(ctx, object, names[names.length - 1]);
         if (func == null) {
             throw new JSError.NOT_FOUND("Attribute '%s' not found.'", names[names.length - 1]);
         }
@@ -125,30 +125,32 @@ public class JsEnvironment: GLib.Object, JSExecutor {
         }
 
         //~         debug("Args before: %s", args.print(true));
-        (unowned JS.Value)[] params;
+        (unowned JsCore.Value)[] params;
         var size = 0;
         if (args != null) {
             assert(args.is_container()); // FIXME
             size = (int) args.n_children();
-            params = new (unowned JS.Value)[size];
+            params = new (unowned JsCore.Value)[size];
             int i = 0;
-            foreach (Variant item in args) {
+            VariantIter iter = args.iterator();
+            Variant? item = null;
+            while ((item = iter.next_value()) != null) {
                 params[i++] = value_from_variant(ctx, item);
             }
+            assert(i == size);
         } else {
             params = {};
         }
 
-        JS.Value? exception;
+        JsCore.Value? exception;
         func.call_as_function(ctx, object, params, out exception);
         if (exception != null) {
             throw new JSError.FUNC_FAILED("Function '%s' failed. %s", name, exception_to_string(ctx, exception) ?? "(null)");
         }
-
         if (args != null) {
             Variant[] items = new Variant[size];
             for (var i = 0; i < size; i++) {
-                items[i] = variant_from_value(ctx, (JS.Value) params[i]);
+                items[i] = variant_from_value(ctx, (JsCore.Value) params[i]);
             }
             args = new Variant.tuple(items);
         }

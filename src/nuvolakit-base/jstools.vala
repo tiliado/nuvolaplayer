@@ -21,7 +21,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-using JS;
 
 namespace Nuvola.JSTools {
 /**
@@ -30,7 +29,7 @@ namespace Nuvola.JSTools {
  * @param jsstring JavaScriptCore string
  * @return Vala UTF-8 string
  */
-public static string utf8_string(JS.String jsstring) {
+public static string utf8_string(JsCore.String jsstring) {
     size_t max_size = jsstring.get_maximum_utf8_string_size();
     uint8[] buffer = new uint8[max_size];
     jsstring.get_utf8_string(buffer);
@@ -44,8 +43,8 @@ public static string utf8_string(JS.String jsstring) {
  * @param json  object in JSON notation
  * @return  JavaScript object
  */
-public unowned JS.Value object_from_JSON(JS.Context ctx, string json) {
-    unowned JS.Value? result = JS.Value.from_JSON(ctx, new JS.String(json == "" ? "{}" : json));
+public unowned JsCore.Value object_from_JSON(JsCore.Context ctx, string json) {
+    unowned JsCore.Value? result = JsCore.Value.from_JSON(ctx, new JsCore.String(json == "" ? "{}" : json));
     if (result == null || !result.is_object(ctx)) {
         result = ctx.make_object();
     }
@@ -59,7 +58,7 @@ public unowned JS.Value object_from_JSON(JS.Context ctx, string json) {
  * @param message   Error message (single line);
  * @return  JavaScript object
  */
-public unowned JS.Value create_exception(JS.Context ctx, string message) {
+public unowned JsCore.Value create_exception(JsCore.Context ctx, string message) {
     string exception = """{"type":"NuvolaError", "message":"%s"}""".printf(message.replace("\"", "\\\""));
     debug(exception);
     return object_from_JSON(ctx, exception);
@@ -73,8 +72,8 @@ public unowned JS.Value create_exception(JS.Context ctx, string message) {
  * @param property property name
  * @return string value or null if property is not a string
  */
-public static string? o_get_string(Context ctx, JS.Object obj, string property) {
-    unowned JS.Value value = obj.get_property(ctx, new JS.String(property));
+public static string? o_get_string(JsCore.Context ctx, JsCore.Object obj, string property) {
+    unowned JsCore.Value value = obj.get_property(ctx, new JsCore.String(property));
     if (value.is_string(ctx)) {
         return utf8_string(value.to_jsstring(ctx));
     }
@@ -89,8 +88,8 @@ public static string? o_get_string(Context ctx, JS.Object obj, string property) 
  * @param property property name
  * @return double value or 0.0 if property is not a number
  */
-public static double o_get_number(Context ctx, JS.Object obj, string property) {
-    unowned JS.Value value = obj.get_property(ctx, new JS.String(property));
+public static double o_get_number(JsCore.Context ctx, JsCore.Object obj, string property) {
+    unowned JsCore.Value value = obj.get_property(ctx, new JsCore.String(property));
     if (value.is_number(ctx)) {
         return value.to_number(ctx);
     }
@@ -105,8 +104,8 @@ public static double o_get_number(Context ctx, JS.Object obj, string property) {
  * @param property property name
  * @param value property value
  */
-public static void o_set_string(Context ctx, JS.Object obj, string property, string value) {
-    obj.set_property(ctx, new JS.String(property), JS.Value.string(ctx, new JS.String(value)));
+public static void o_set_string(JsCore.Context ctx, JsCore.Object obj, string property, string value) {
+    obj.set_property(ctx, new JsCore.String(property), JsCore.Value.string(ctx, new JsCore.String(value)));
 }
 
 /**
@@ -117,8 +116,8 @@ public static void o_set_string(Context ctx, JS.Object obj, string property, str
  * @param property property name
  * @param value property value
  */
-public static void o_set_number(Context ctx, JS.Object obj, string property, double value) {
-    obj.set_property(ctx, new JS.String(property), JS.Value.number(ctx, value));
+public static void o_set_number(JsCore.Context ctx, JsCore.Object obj, string property, double value) {
+    obj.set_property(ctx, new JsCore.String(property), JsCore.Value.number(ctx, value));
 }
 
 /**
@@ -128,8 +127,8 @@ public static void o_set_number(Context ctx, JS.Object obj, string property, dou
  * @param obj JavaScript object
  * @param property property name
  */
-public static void o_set_null(Context ctx, JS.Object obj, string property) {
-    obj.set_property(ctx, new JS.String(property), JS.Value.null(ctx));
+public static void o_set_null(JsCore.Context ctx, JsCore.Object obj, string property) {
+    obj.set_property(ctx, new JsCore.String(property), JsCore.Value.null(ctx));
 }
 
 /**
@@ -140,8 +139,8 @@ public static void o_set_null(Context ctx, JS.Object obj, string property) {
  * @param property property name
  * @param value property value
  */
-public static void o_set_bool(Context ctx, JS.Object obj, string property, bool value) {
-    obj.set_property(ctx, new JS.String(property), JS.Value.boolean(ctx, value));
+public static void o_set_bool(JsCore.Context ctx, JsCore.Object obj, string property, bool value) {
+    obj.set_property(ctx, new JsCore.String(property), JsCore.Value.boolean(ctx, value));
 }
 
 /**
@@ -152,8 +151,8 @@ public static void o_set_bool(Context ctx, JS.Object obj, string property, bool 
  * @param property property name
  * @return object or null if property is not a object
  */
-public static unowned JS.Object? o_get_object(Context ctx, JS.Object obj, string property) {
-    unowned JS.Value value = obj.get_property(ctx, new JS.String(property));
+public static unowned JsCore.Object? o_get_object(JsCore.Context ctx, JsCore.Object obj, string property) {
+    unowned JsCore.Value value = obj.get_property(ctx, new JsCore.String(property));
     if (value.is_object(ctx)) {
         return value.to_object(ctx);
     }
@@ -168,7 +167,7 @@ public static unowned JS.Object? o_get_object(Context ctx, JS.Object obj, string
  * @param allow_empty    if false null will be returned for empty string
  * @return string value or null if value is not a string
  */
-public static string? string_or_null(JS.Context ctx, JS.Value val, bool allow_empty=false) {
+public static string? string_or_null(JsCore.Context ctx, JsCore.Value val, bool allow_empty=false) {
     if (val.is_string(ctx)) {
         string str = utf8_string(val.to_jsstring(ctx));
         return (str == "" && !allow_empty) ? null : str;
@@ -176,7 +175,7 @@ public static string? string_or_null(JS.Context ctx, JS.Value val, bool allow_em
     return null;
 }
 
-public string? value_to_string(JS.Context ctx, JS.Value value) {
+public string? value_to_string(JsCore.Context ctx, JsCore.Value value) {
     if (value.is_string(ctx)) {
         return utf8_string(value.to_jsstring(ctx));
     }
@@ -189,9 +188,9 @@ public string? value_to_string(JS.Context ctx, JS.Value value) {
     return null;
 }
 
-public string? exception_to_string(JS.Context ctx, JS.Value value) {
+public string? exception_to_string(JsCore.Context ctx, JsCore.Value value) {
     if (value.is_object(ctx)) {
-        unowned JS.Object obj = value.to_object(ctx);
+        unowned JsCore.Object obj = value.to_object(ctx);
         string? message = o_get_string(ctx, obj, "message");
         if (message != null) {
             string? name = o_get_string(ctx, obj, "name");
@@ -206,53 +205,53 @@ public string? exception_to_string(JS.Context ctx, JS.Value value) {
     return value_to_string(ctx, value);
 }
 
-public unowned JS.Value get_gobject_property_named(JS.Context ctx, GLib.Object o, string name) {
+public unowned JsCore.Value get_gobject_property_named(JsCore.Context ctx, GLib.Object o, string name) {
     ObjectClass klass = (ObjectClass) o.get_type().class_ref();
     unowned ParamSpec? p = klass.find_property(name);
     if (p == null) {
-        return JS.Value.undefined(ctx);
+        return JsCore.Value.undefined(ctx);
     }
     return get_gobject_property(ctx, o, p);
 }
 
-public unowned JS.Value get_gobject_property(JS.Context ctx, GLib.Object o, ParamSpec p) {
+public unowned JsCore.Value get_gobject_property(JsCore.Context ctx, GLib.Object o, ParamSpec p) {
     GLib.Type type = p.value_type;
     if (type == typeof(string)) {
         string str_val;
         o.@get(p.name, out str_val);
-        return JS.Value.string(ctx, new JS.String(str_val));
+        return JsCore.Value.string(ctx, new JsCore.String(str_val));
     }
 
     if (type == typeof(int)) {
         int int_val;
         o.@get(p.name, out int_val);
-        return JS.Value.number(ctx, (double) int_val);
+        return JsCore.Value.number(ctx, (double) int_val);
     }
 
     if (type == typeof(float)) {
         float float_val;
         o.@get(p.name, out float_val);
-        return JS.Value.number(ctx, (double) float_val);
+        return JsCore.Value.number(ctx, (double) float_val);
     }
 
     if (type == typeof(double)) {
         double double_val;
         o.@get(p.name, out double_val);
-        return JS.Value.number(ctx, (double) double_val);
+        return JsCore.Value.number(ctx, (double) double_val);
     }
 
     if (type == typeof(bool)) {
         bool bool_val;
         o.@get(p.name, out bool_val);
-        return JS.Value.boolean(ctx, bool_val);
+        return JsCore.Value.boolean(ctx, bool_val);
     }
 
-    return JS.Value.undefined(ctx);
+    return JsCore.Value.undefined(ctx);
 }
 
-public unowned JS.Value value_from_variant(JS.Context ctx, Variant? variant) throws JSError {
+public unowned JsCore.Value value_from_variant(JsCore.Context ctx, Variant? variant) throws JSError {
     if (variant == null) {
-        return JS.Value.null(ctx);
+        return JsCore.Value.null(ctx);
     }
 
     VariantType type = variant.get_type();
@@ -265,50 +264,50 @@ public unowned JS.Value value_from_variant(JS.Context ctx, Variant? variant) thr
         Variant? maybe_variant = null;
         variant.get("m*", &maybe_variant);
         if (maybe_variant == null) {
-            return JS.Value.null(ctx);
+            return JsCore.Value.null(ctx);
         }
         return value_from_variant(ctx, maybe_variant);
     }
 
     var object_type = new VariantType("a{s*}");
     if (type.is_subtype_of(object_type)) {
-        unowned JS.Object object = ctx.make_object();
+        unowned JsCore.Object object = ctx.make_object();
         VariantIter iter = null;
         variant.get("a{s*}", &iter);
         string key = null;
         Variant value = null;
         while (iter.next("{s*}", &key, &value)) {
-            object.set_property(ctx, new JS.String(key), value_from_variant(ctx, value));
+            object.set_property(ctx, new JsCore.String(key), value_from_variant(ctx, value));
         }
         return object;
     }
 
     if (variant.is_of_type(VariantType.STRING)) {
-        return JS.Value.string(ctx, new JS.String(variant.get_string()));
+        return JsCore.Value.string(ctx, new JsCore.String(variant.get_string()));
     }
 
     if (variant.is_of_type(VariantType.BOOLEAN)) {
-        return JS.Value.boolean(ctx, variant.get_boolean());
+        return JsCore.Value.boolean(ctx, variant.get_boolean());
     }
 
     if (variant.is_of_type(VariantType.DOUBLE)) {
-        return JS.Value.number(ctx, variant.get_double());
+        return JsCore.Value.number(ctx, variant.get_double());
     }
 
     if (variant.is_of_type(VariantType.INT32)) {
-        return JS.Value.number(ctx, (double) variant.get_int32());
+        return JsCore.Value.number(ctx, (double) variant.get_int32());
     }
 
     if (variant.is_of_type(VariantType.UINT32)) {
-        return JS.Value.number(ctx, (double) variant.get_uint32());
+        return JsCore.Value.number(ctx, (double) variant.get_uint32());
     }
 
     if (variant.is_of_type(VariantType.INT64)) {
-        return JS.Value.number(ctx, (double) variant.get_int64());
+        return JsCore.Value.number(ctx, (double) variant.get_int64());
     }
 
     if (variant.is_of_type(VariantType.UINT64)) {
-        return JS.Value.number(ctx, (double) variant.get_uint64());
+        return JsCore.Value.number(ctx, (double) variant.get_uint64());
     }
 
     if (variant.is_container()) {
@@ -317,13 +316,13 @@ public unowned JS.Value value_from_variant(JS.Context ctx, Variant? variant) thr
         for (var i = 0; i < size; i++) {
             args[i] = (void*) value_from_variant(ctx, variant.get_child_value(i));
         }
-        return ctx.make_array((JS.Value[]) args);
+        return ctx.make_array((JsCore.Value[]) args);
     }
 
     throw new JSError.WRONG_TYPE("Unsupported type '%s'. Content: %s", variant.get_type_string(), variant.print(true));
 }
 
-public Variant variant_from_value(JS.Context ctx, JS.Value val) throws JSError {
+public Variant variant_from_value(JsCore.Context ctx, JsCore.Value val) throws JSError {
     if (val.is_null(ctx)) {
         return new Variant("mv", null);
     }
@@ -340,19 +339,19 @@ public Variant variant_from_value(JS.Context ctx, JS.Value val) throws JSError {
         return new Variant.boolean(val.to_boolean(ctx));
     }
 
-    unowned JS.Object glob_object = ctx.get_global_object();
-    unowned JS.Object object = o_get_object(ctx, glob_object, "Array");
+    unowned JsCore.Object glob_object = ctx.get_global_object();
+    unowned JsCore.Object object = o_get_object(ctx, glob_object, "Array");
     object = o_get_object(ctx, object, "isArray");
     void*[] params = new void*[1];
     params[0] = (void*) val;
-    JS.Value? exception;
-    unowned JS.Value result = object.call_as_function(ctx, glob_object, (JS.Value[]) params, out exception);
+    JsCore.Value? exception;
+    unowned JsCore.Value result = object.call_as_function(ctx, glob_object, (JsCore.Value[]) params, out exception);
     if (exception != null) {
         throw new JSError.WRONG_TYPE("Unsupported type. %s", exception_to_string(ctx, exception) ?? "(null)");
     }
     if (result.to_boolean(ctx)) {
         VariantBuilder builder = new VariantBuilder(new VariantType ("av"));
-        object = (JS.Object) val;
+        object = (JsCore.Object) val;
         int size = (int) o_get_number(ctx, object, "length");
         for (uint i = 0; i < size; i++) {
             builder.add("v", variant_from_value(ctx, object.get_property_at_index(ctx, i)));
@@ -362,12 +361,12 @@ public Variant variant_from_value(JS.Context ctx, JS.Value val) throws JSError {
     }
 
     if (val.is_object(ctx)) {
-        object = (JS.Object) val;
-        JS.Properties properties = object.get_properties(ctx);
+        object = (JsCore.Object) val;
+        JsCore.Properties properties = object.get_properties(ctx);
         size_t size = properties.get_count();
         var builder = new VariantBuilder(new VariantType("a{smv}"));
         for (size_t i = 0; i < size; i++) {
-            unowned JS.String js_property = properties.get(i);
+            unowned JsCore.String js_property = properties.get(i);
             Variant? value = variant_from_value(ctx, object.get_property(ctx, js_property));
             builder.add("{smv}", utf8_string(js_property), value);
         }

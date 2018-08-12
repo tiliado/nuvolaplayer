@@ -25,10 +25,10 @@
 namespace Nuvola {
 
 public class JsRuntime : JsEnvironment {
-    private JS.GlobalContext? ctx_ref;
+    private JsCore.GlobalContext? ctx_ref;
 
     public JsRuntime() {
-        JS.GlobalContext ctx = JS.GlobalContext.create();
+        JsCore.GlobalContext ctx = JsCore.GlobalContext.create();
         base(ctx, null);
         ctx_ref = (owned) ctx;
     }

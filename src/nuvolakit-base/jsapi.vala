@@ -21,7 +21,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-using JS;
+
 using Nuvola.JSTools;
 
 namespace Nuvola {
@@ -87,7 +87,7 @@ public class JSApi : GLib.Object {
     public const int API_VERSION_MINOR = VERSION_MINOR;
     public const int API_VERSION = API_VERSION_MAJOR * 100 + API_VERSION_MINOR;
 
-    private static unowned JS.Class klass;
+    private static unowned JsCore.Class klass;
     /**
      * Identifier of the main frame
      */
@@ -154,11 +154,11 @@ public class JSApi : GLib.Object {
      */
     public void inject(JsEnvironment env, HashTable<string, Variant?>? properties=null) throws JSError {
         this.env = null;
-        unowned JS.Context ctx = env.context;
+        unowned JsCore.Context ctx = env.context;
         if (klass == null) {
             create_class();
         }
-        unowned JS.Object main_object = ctx.make_object(klass, this);
+        unowned JsCore.Object main_object = ctx.make_object(klass, this);
         main_object.protect(ctx);
 
         o_set_number(ctx, main_object, "API_VERSION_MAJOR", (double)API_VERSION_MAJOR);
@@ -184,7 +184,7 @@ public class JSApi : GLib.Object {
             unowned string key;
             unowned Variant? val;
             while (iter.next(out key, out val)) {
-                main_object.set_property(ctx, new JS.String(key), value_from_variant(ctx, val));
+                main_object.set_property(ctx, new JsCore.String(key), value_from_variant(ctx, val));
             }
         }
 
@@ -227,8 +227,8 @@ public class JSApi : GLib.Object {
             throw new JSError.INITIALIZATION_FAILED("Failed load a web app component %s. This probably means the web app integration has not been installed correctly or that component has been accidentally deleted.\n\n%s", META_JSON, e.message);
         }
 
-        unowned JS.Value meta = object_from_JSON(ctx, meta_json_data);
-        env.main_object.set_property(ctx, new JS.String(META_PROPERTY), meta);
+        unowned JsCore.Value meta = object_from_JSON(ctx, meta_json_data);
+        env.main_object.set_property(ctx, new JsCore.String(META_PROPERTY), meta);
         this.env = env;
     }
 
@@ -254,7 +254,7 @@ public class JSApi : GLib.Object {
      * Default methods of the main object. Other functions are implemented in JavaScript,
      * see file main.js
      */
-    private const JS.StaticFunction[] static_functions = {
+    private const JsCore.StaticFunction[] static_functions = {
         {"_callIpcMethodVoid", call_ipc_method_void_func, 0},
         {"_callIpcMethodSync", call_ipc_method_sync_func, 0},
         {"_callIpcMethodAsync", call_ipc_method_async_func, 0},
@@ -275,9 +275,9 @@ public class JSApi : GLib.Object {
      * Creates Nuvola Player main object class description
      */
     private static void create_class() {
-        unowned ClassDefinition class_def = {
+        unowned JsCore.ClassDefinition class_def = {
             1,
-            JS.ClassAttribute.None,
+            JsCore.ClassAttribute.None,
             "Nuvola JavaScript API",
             null,
             null,
@@ -294,28 +294,28 @@ public class JSApi : GLib.Object {
             null,
             null
         };
-        klass = JS.create_class(class_def);
+        klass = JsCore.create_class(class_def);
         klass.retain();
     }
 
-    static unowned JS.Value call_ipc_method_void_func(Context ctx, JS.Object function, JS.Object self,
-        JS.Value[] args, out unowned JS.Value exception) {
+    static unowned JsCore.Value call_ipc_method_void_func(JsCore.Context ctx, JsCore.Object function, JsCore.Object self,
+        JsCore.Value[] args, out unowned JsCore.Value exception) {
         return call_ipc_method_func(ctx, function, self, args, out exception, JsFuncCallType.VOID);
     }
 
-    static unowned JS.Value call_ipc_method_sync_func(Context ctx, JS.Object function, JS.Object self,
-        JS.Value[] args, out unowned JS.Value exception) {
+    static unowned JsCore.Value call_ipc_method_sync_func(JsCore.Context ctx, JsCore.Object function, JsCore.Object self,
+        JsCore.Value[] args, out unowned JsCore.Value exception) {
         return call_ipc_method_func(ctx, function, self, args, out exception, JsFuncCallType.SYNC);
     }
 
-    static unowned JS.Value call_ipc_method_async_func(Context ctx, JS.Object function, JS.Object self,
-        JS.Value[] args, out unowned JS.Value exception) {
+    static unowned JsCore.Value call_ipc_method_async_func(JsCore.Context ctx, JsCore.Object function, JsCore.Object self,
+        JsCore.Value[] args, out unowned JsCore.Value exception) {
         return call_ipc_method_func(ctx, function, self, args, out exception, JsFuncCallType.ASYNC);
     }
 
-    static unowned JS.Value call_ipc_method_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args,
-        out unowned JS.Value exception, JsFuncCallType type) {
-        unowned JS.Value undefined = JS.Value.undefined(ctx);
+    static unowned JsCore.Value call_ipc_method_func(JsCore.Context ctx, JsCore.Object function, JsCore.Object self, JsCore.Value[] args,
+        out unowned JsCore.Value exception, JsFuncCallType type) {
+        unowned JsCore.Value undefined = JsCore.Value.undefined(ctx);
         exception = null;
         if (args.length == 0) {
             exception = create_exception(ctx, "At least one argument required.");
@@ -378,19 +378,19 @@ public class JSApi : GLib.Object {
         }
     }
 
-    static unowned JS.Value key_value_storage_has_key_sync_func(Context ctx, JS.Object function, JS.Object self,
-        JS.Value[] args, out unowned JS.Value exception) {
+    static unowned JsCore.Value key_value_storage_has_key_sync_func(JsCore.Context ctx, JsCore.Object function, JsCore.Object self,
+        JsCore.Value[] args, out unowned JsCore.Value exception) {
         return key_value_storage_has_key_func(ctx, function, self, args, out exception, JsFuncCallType.SYNC);
     }
 
-    static unowned JS.Value key_value_storage_has_key_async_func(Context ctx, JS.Object function, JS.Object self,
-        JS.Value[] args, out unowned JS.Value exception) {
+    static unowned JsCore.Value key_value_storage_has_key_async_func(JsCore.Context ctx, JsCore.Object function, JsCore.Object self,
+        JsCore.Value[] args, out unowned JsCore.Value exception) {
         return key_value_storage_has_key_func(ctx, function, self, args, out exception, JsFuncCallType.ASYNC);
     }
 
-    static unowned JS.Value key_value_storage_has_key_func(Context ctx, JS.Object function, JS.Object self,
-        JS.Value[] args, out unowned JS.Value exception, JsFuncCallType type) {
-        unowned JS.Value _false = JS.Value.boolean(ctx, false);
+    static unowned JsCore.Value key_value_storage_has_key_func(JsCore.Context ctx, JsCore.Object function, JsCore.Object self,
+        JsCore.Value[] args, out unowned JsCore.Value exception, JsFuncCallType type) {
+        unowned JsCore.Value _false = JsCore.Value.boolean(ctx, false);
         exception = null;
         if (args.length != (type == JsFuncCallType.ASYNC ? 3 : 2)) {
             exception = create_exception(ctx, "Two arguments required.");
@@ -420,7 +420,7 @@ public class JSApi : GLib.Object {
         Drt.KeyValueStorage storage = js_api.key_value_storages[index];
         if (type == JsFuncCallType.SYNC) {
             js_api.warn_sync_func("key_value_storage_has_key(%d, '%s')".printf(index, key));
-            return JS.Value.boolean(ctx, storage.has_key(key));
+            return JsCore.Value.boolean(ctx, storage.has_key(key));
         } else {
             var id = (int) args[2].to_number(ctx);
             storage.has_key_async.begin(key, (o, res) => {
@@ -431,19 +431,19 @@ public class JSApi : GLib.Object {
         return _false;
     }
 
-    static unowned JS.Value key_value_storage_get_value_sync_func(Context ctx, JS.Object function, JS.Object self,
-        JS.Value[] args, out unowned JS.Value exception) {
+    static unowned JsCore.Value key_value_storage_get_value_sync_func(JsCore.Context ctx, JsCore.Object function, JsCore.Object self,
+        JsCore.Value[] args, out unowned JsCore.Value exception) {
         return key_value_storage_get_value_func(ctx, function, self, args, out exception, JsFuncCallType.SYNC);
     }
 
-    static unowned JS.Value key_value_storage_get_value_async_func(Context ctx, JS.Object function, JS.Object self,
-        JS.Value[] args, out unowned JS.Value exception) {
+    static unowned JsCore.Value key_value_storage_get_value_async_func(JsCore.Context ctx, JsCore.Object function, JsCore.Object self,
+        JsCore.Value[] args, out unowned JsCore.Value exception) {
         return key_value_storage_get_value_func(ctx, function, self, args, out exception, JsFuncCallType.ASYNC);
     }
 
-    static unowned JS.Value key_value_storage_get_value_func(Context ctx, JS.Object function, JS.Object self,
-        JS.Value[] args, out unowned JS.Value exception, JsFuncCallType type) {
-        unowned JS.Value undefined = JS.Value.undefined(ctx);
+    static unowned JsCore.Value key_value_storage_get_value_func(JsCore.Context ctx, JsCore.Object function, JsCore.Object self,
+        JsCore.Value[] args, out unowned JsCore.Value exception, JsFuncCallType type) {
+        unowned JsCore.Value undefined = JsCore.Value.undefined(ctx);
         exception = null;
         if (args.length != (type == JsFuncCallType.ASYNC ? 3 : 2)) {
             exception = create_exception(ctx, "Two arguments required.");
@@ -490,19 +490,19 @@ public class JSApi : GLib.Object {
         return undefined;
     }
 
-    static unowned JS.Value key_value_storage_set_value_sync_func(Context ctx, JS.Object function, JS.Object self,
-        JS.Value[] args, out unowned JS.Value exception) {
+    static unowned JsCore.Value key_value_storage_set_value_sync_func(JsCore.Context ctx, JsCore.Object function, JsCore.Object self,
+        JsCore.Value[] args, out unowned JsCore.Value exception) {
         return key_value_storage_set_value_func(ctx, function, self, args, out exception, JsFuncCallType.SYNC);
     }
 
-    static unowned JS.Value key_value_storage_set_value_async_func(Context ctx, JS.Object function, JS.Object self,
-        JS.Value[] args, out unowned JS.Value exception) {
+    static unowned JsCore.Value key_value_storage_set_value_async_func(JsCore.Context ctx, JsCore.Object function, JsCore.Object self,
+        JsCore.Value[] args, out unowned JsCore.Value exception) {
         return key_value_storage_set_value_func(ctx, function, self, args, out exception, JsFuncCallType.ASYNC);
     }
 
-    static unowned JS.Value key_value_storage_set_value_func(Context ctx, JS.Object function, JS.Object self,
-        JS.Value[] args, out unowned JS.Value exception, JsFuncCallType type) {
-        unowned JS.Value undefined = JS.Value.undefined(ctx);
+    static unowned JsCore.Value key_value_storage_set_value_func(JsCore.Context ctx, JsCore.Object function, JsCore.Object self,
+        JsCore.Value[] args, out unowned JsCore.Value exception, JsFuncCallType type) {
+        unowned JsCore.Value undefined = JsCore.Value.undefined(ctx);
         exception = null;
         if (args.length != (type == JsFuncCallType.ASYNC ? 4 : 3)) {
             exception = create_exception(ctx, "%d arguments required. %d received.".printf(
@@ -551,21 +551,21 @@ public class JSApi : GLib.Object {
         return undefined;
     }
 
-    static unowned JS.Value key_value_storage_set_default_value_sync_func(Context ctx, JS.Object function,
-        JS.Object self, JS.Value[] args, out unowned JS.Value exception) {
+    static unowned JsCore.Value key_value_storage_set_default_value_sync_func(JsCore.Context ctx, JsCore.Object function,
+        JsCore.Object self, JsCore.Value[] args, out unowned JsCore.Value exception) {
         return key_value_storage_set_default_value_func(
             ctx, function, self, args, out exception, JsFuncCallType.SYNC);
     }
 
-    static unowned JS.Value key_value_storage_set_default_value_async_func(Context ctx, JS.Object function,
-        JS.Object self, JS.Value[] args, out unowned JS.Value exception) {
+    static unowned JsCore.Value key_value_storage_set_default_value_async_func(JsCore.Context ctx, JsCore.Object function,
+        JsCore.Object self, JsCore.Value[] args, out unowned JsCore.Value exception) {
         return key_value_storage_set_default_value_func(
             ctx, function, self, args, out exception, JsFuncCallType.ASYNC);
     }
 
-    static unowned JS.Value key_value_storage_set_default_value_func(Context ctx, JS.Object function, JS.Object self,
-        JS.Value[] args, out unowned JS.Value exception, JsFuncCallType type) {
-        unowned JS.Value undefined = JS.Value.undefined(ctx);
+    static unowned JsCore.Value key_value_storage_set_default_value_func(JsCore.Context ctx, JsCore.Object function, JsCore.Object self,
+        JsCore.Value[] args, out unowned JsCore.Value exception, JsFuncCallType type) {
+        unowned JsCore.Value undefined = JsCore.Value.undefined(ctx);
         exception = null;
         if (args.length != (type == JsFuncCallType.ASYNC ? 4 : 3)) {
             exception = create_exception(ctx, "%d arguments required. %d received.".printf(
@@ -613,7 +613,7 @@ public class JSApi : GLib.Object {
         return undefined;
     }
 
-    static unowned JS.Value log_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception) {
+    static unowned JsCore.Value log_func(JsCore.Context ctx, JsCore.Object function, JsCore.Object self, JsCore.Value[] args, out unowned JsCore.Value exception) {
         exception = null;
         for (var i = 0; i < args.length; i++) {
             if (args[i].is_undefined(ctx)) {
@@ -627,10 +627,10 @@ public class JSApi : GLib.Object {
                 }
             }
         }
-        return JS.Value.undefined(ctx);
+        return JsCore.Value.undefined(ctx);
     }
 
-    static unowned JS.Value warn_func(Context ctx, JS.Object function, JS.Object self, JS.Value[] args, out unowned JS.Value exception) {
+    static unowned JsCore.Value warn_func(JsCore.Context ctx, JsCore.Object function, JsCore.Object self, JsCore.Value[] args, out unowned JsCore.Value exception) {
         exception = null;
         for (var i = 0; i < args.length; i++) {
             if (args[i].is_undefined(ctx)) {
@@ -644,7 +644,7 @@ public class JSApi : GLib.Object {
                 }
             }
         }
-        return JS.Value.undefined(ctx);
+        return JsCore.Value.undefined(ctx);
     }
 
     private void warn_sync_func(string message) {
