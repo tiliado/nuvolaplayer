@@ -1,6 +1,6 @@
 .waf*
 .lock*
-build
+/build*
 *.pyc
 web_apps/template/icons
 branding/tiliado.json
