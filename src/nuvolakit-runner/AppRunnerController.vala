@@ -38,6 +38,7 @@ public class AppRunnerController: Drtgtk.Application {
     public WebApp web_app {get; protected set;}
     public WebAppStorage app_storage {get; protected set;}
     public string dbus_id {get; private set;}
+    public string? machine_hash {get; private set; default = null;}
     public MasterService master {get; private set;}
     private WebOptions[] available_web_options;
     private WebOptions web_options;
@@ -112,6 +113,11 @@ public class AppRunnerController: Drtgtk.Application {
         var startup_check = new StartupCheck(web_app, format_support);
         startup_window = new StartupWindow(this, startup_check);
         startup_window.present();
+        start_startup_check.begin(startup_check, (o, res) => {start_startup_check.end(res);});
+    }
+
+    private async void start_startup_check(StartupCheck startup_check) {
+        machine_hash = yield Nuvola.get_machine_hash();
         web_app.scale_factor = startup_window.scale_factor * 1.0;
         debug("Scale factor: %d", startup_window.scale_factor);
         startup_check.task_finished.connect_after(on_startup_check_task_finished);

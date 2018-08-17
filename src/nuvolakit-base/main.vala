@@ -133,4 +133,8 @@ public string get_welcome_screen_name() {
     return WELCOME_SCREEN_NAME;
 }
 
+public async string? get_machine_hash() {
+    return yield Drt.System.get_machine_id_hash("nuvolaruntime".data, GLib.ChecksumType.SHA256);
+}
+
 } // namespace Nuvola

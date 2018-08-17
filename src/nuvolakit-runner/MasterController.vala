@@ -37,6 +37,7 @@ public class MasterController : Drtgtk.Application {
     public Config config {get; private set; default = null;}
     public TiliadoActivation? activation {get; private set; default = null;}
     public bool debuging {get; private set; default = false;}
+    public string? machine_hash {get; private set; default = null;}
     private string[] exec_cmd;
     private Queue<AppRunner> app_runners = null;
     private HashTable<string, AppRunner> app_runners_map = null;
@@ -107,6 +108,13 @@ public class MasterController : Drtgtk.Application {
         if (initialized) {
             return;
         }
+
+        var loop = new MainLoop();
+        Nuvola.get_machine_hash.begin((o, res) => {
+            machine_hash = Nuvola.get_machine_hash.end(res);
+            loop.quit();
+        });
+        loop.run();
 
         app_runners = new Queue<AppRunner>();
         app_runners_map = new HashTable<string, AppRunner>(str_hash, str_equal);
