@@ -120,7 +120,7 @@ public class KeybindingsSettings : Gtk.Grid {
         accel_cell.accel_mode = Gtk.CellRendererAccelMode.GTK;
         accel_cell.accel_edited.connect(on_accel_edited);
         accel_cell.accel_cleared.connect(on_accel_cleared);
-        view.insert_column_with_attributes(-1, "Shortcut", accel_cell, "accel-key", 2, "accel-mods", 3);
+        view.insert_column_with_attributes(-1, "In-App", accel_cell, "accel-key", 2, "accel-mods", 3);
 
         if (global_keybindings != null) {
             accel_cell = new Gtk.CellRendererAccel();
@@ -128,7 +128,7 @@ public class KeybindingsSettings : Gtk.Grid {
             accel_cell.accel_mode = Gtk.CellRendererAccelMode.GTK;
             accel_cell.accel_edited.connect(on_glob_accel_edited);
             accel_cell.accel_cleared.connect(on_glob_accel_cleared);
-            view.insert_column_with_attributes(-1, "Global Shortcut", accel_cell, "accel-key", 4, "accel-mods", 5);
+            view.insert_column_with_attributes(-1, "Global", accel_cell, "accel-key", 4, "accel-mods", 5);
         }
         scroll.vexpand = scroll.hexpand = true;
         scroll.add(view);
