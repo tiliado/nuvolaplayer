@@ -78,7 +78,7 @@ public class PreferencesDialog : Gtk.Dialog {
         back_button = new Gtk.Button.from_icon_name("go-previous-symbolic");
         back_button.no_show_all = true;
         back_button.clicked.connect(on_back_button_clicked);
-        help_button = new Gtk.Button.from_icon_name("dialog-question-symbolic");
+        help_button = new Gtk.Button.from_icon_name("system-help-symbolic");
         help_button.no_show_all = true;
         help_button.clicked.connect(on_help_button_clicked);
         header_bar = (Gtk.HeaderBar) get_header_bar();
@@ -432,7 +432,7 @@ public class PreferencesDialog : Gtk.Dialog {
             Gtk.Button? button = this.help_button;
             if (panel.has_help) {
                 if (button == null) {
-                    button = new Gtk.Button.from_icon_name("dialog-question-symbolic");
+                    button = new Gtk.Button.from_icon_name("system-help-symbolic");
                     button.vexpand = button.hexpand = false;
                     button.halign = button.valign = Gtk.Align.CENTER;
                     button.clicked.connect(on_help_button_clicked);
