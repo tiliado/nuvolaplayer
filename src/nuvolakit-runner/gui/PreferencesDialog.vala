@@ -113,7 +113,7 @@ public class PreferencesDialog : Gtk.Dialog {
 
         // Appearance
         groups[0].add(new SimplePanel(
-            "Appearance", "Change user interface theme and window decoration preferences.", appearance));
+            "Appearance Tweaks", "Change user interface theme and window decoration preferences.", appearance));
 
         // Network settings
         groups[0].add(new SimplePanel(
