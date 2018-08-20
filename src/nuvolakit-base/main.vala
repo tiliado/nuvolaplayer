@@ -38,6 +38,7 @@ private extern const string VERSION_SUFFIX;
 private extern const string LIBDIR;
 
 public extern const string HELP_URL;
+public extern const string HELP_URL_TEMPLATE;
 public extern const string WEB_APP_REQUIREMENTS_HELP_URL;
 public extern const string REPOSITORY_INDEX;
 public extern const string REPOSITORY_ROOT;
@@ -135,6 +136,13 @@ public string get_welcome_screen_name() {
 
 public async string? get_machine_hash() {
     return yield Drt.System.get_machine_id_hash("nuvolaruntime".data, GLib.ChecksumType.SHA256);
+}
+
+public string? create_help_url(string? page) {
+    if (page == null) {
+        return null;
+    }
+    return page.has_prefix("https://") ? page : HELP_URL_TEMPLATE.replace("{page}", page);
 }
 
 } // namespace Nuvola

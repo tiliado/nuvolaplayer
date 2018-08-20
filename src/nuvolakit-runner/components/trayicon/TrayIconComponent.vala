@@ -37,7 +37,7 @@ public class TrayIconComponent: Component {
     #endif
 
     public TrayIconComponent(AppRunnerController controller, Bindings bindings, Drt.KeyValueStorage config) {
-        base("tray_icon", "Tray Icon", "Small icon with menu shown in the notification area.");
+        base("tray_icon", "Tray Icon", "Small icon with menu shown in the notification area.", "tray_icon");
         this.required_membership = TiliadoMembership.NONE;
         this.has_settings = true;
         #if APPINDICATOR

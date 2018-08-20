@@ -376,6 +376,7 @@ def configure(ctx):
     ctx.env.SHORT_NAME = branding.get("short_name", ctx.env.NAME)
     ctx.env.VENDOR = branding.get("vendor", "unknown")
     ctx.env.HELP_URL = branding.get("help_url", DEFAULT_HELP_URL)
+    ctx.env.HELP_URL_TEMPLATE = branding.get("help_url_template", "https://nuvola.tiliado.eu/docs/4/{page}.html?genuine=false")
     ctx.env.WEB_APP_REQUIREMENTS_HELP_URL = branding.get("requirements_help_url", DEFAULT_WEB_APP_REQUIREMENTS_HELP_URL)
     tiliado_api = branding.get("tiliado_api", {})
 
@@ -512,6 +513,7 @@ def configure(ctx):
     ctx.define("NUVOLA_REPOSITORY_ROOT", repo_root)
     ctx.define("NUVOLA_WEB_APP_REQUIREMENTS_HELP_URL", ctx.env.WEB_APP_REQUIREMENTS_HELP_URL)
     ctx.define("NUVOLA_HELP_URL", ctx.env.HELP_URL)
+    ctx.define("NUVOLA_HELP_URL_TEMPLATE", ctx.env.HELP_URL_TEMPLATE)
     ctx.define("NUVOLA_LIBDIR", ctx.env.NUVOLA_LIBDIR)
     ctx.define("NUVOLA_CEF_DEFAULT", int(ctx.options.cef_default))
 

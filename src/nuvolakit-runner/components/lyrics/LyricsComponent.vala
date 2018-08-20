@@ -30,7 +30,7 @@ public class LyricsComponent: Component {
     private LyricsSidebar? sidebar = null;
 
     public LyricsComponent(AppRunnerController app, Bindings bindings, Drt.KeyValueStorage config) {
-        base("lyrics", "Lyrics", "Shows lyrics for the current song.");
+        base("lyrics", "Lyrics", "Shows lyrics for the current song.", "lyrics");
         this.bindings = bindings;
         this.app = app;
         config.bind_object_property("component.%s.".printf(id), this, "enabled").set_default(true).update_property();

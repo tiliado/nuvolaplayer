@@ -15,11 +15,12 @@ branding files.
 
 A file in JSON format. All keys are optional.
 
-  * "name": The name of your Nuvola derivative, e.g. "Cloud Apps".
-  * "help_url": The web page to be opened when users activates a Help menu item or command. It should provide
+  * `"name"`: The name of your Nuvola derivative, e.g. "Cloud Apps".
+  * `"help_url"`: The web page to be opened when users activates a Help menu item or command. It should provide
     basic documentation.
     [Default page](https://github.com/tiliado/nuvolaplayer/wiki/Unofficial).
-  * "requirements_help_url": The web page to be opened when system fails to satisfy requirements of a particular app.
+  * `"help_url_template"`: Help URL for individual features. `{page}` is replaced with a page name.
+  * `"requirements_help_url"`: The web page to be opened when system fails to satisfy requirements of a particular app.
     It should provide information on how to install missing requirements (e.g. Adobe Flash plugin).
     [Default page](https://github.com/tiliado/nuvolaplayer/wiki/Web-App-Requirements).
 

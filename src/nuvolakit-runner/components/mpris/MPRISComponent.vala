@@ -32,7 +32,8 @@ public class MPRISComponent: Component {
     public MPRISComponent(Drtgtk.Application app, Bindings bindings, Drt.KeyValueStorage config) {
         base(
             "mpris", "Media Player DBus Interface",
-            "Implementation of Media Player Remote Interface Specification (MPRIS 2) used by various applets.");
+            "Implementation of Media Player Remote Interface Specification (MPRIS 2) used by various applets.",
+            "mpris");
         this.bindings = bindings;
         this.app = app;
         config.bind_object_property("component.mpris.", this, "enabled").set_default(true).update_property();

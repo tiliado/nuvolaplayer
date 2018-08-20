@@ -31,7 +31,9 @@ public class DeveloperComponent: Component {
     private WebViewSidebar? web_view_sidebar = null;
 
     public DeveloperComponent(AppRunnerController app, Bindings bindings, Drt.KeyValueStorage config) {
-        base("developer", "Developer's tools", "Enables developer's sidebar ");
+        base(
+            "developer", "Developer's tools", "Enables developer's sidebar.",
+            "https://tiliado.github.io/nuvolaplayer/development/");
         this.bindings = bindings;
         this.app = app;
         config.bind_object_property("component.%s.".printf(id), this, "enabled").set_default(false).update_property();

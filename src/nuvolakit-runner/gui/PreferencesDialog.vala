@@ -113,15 +113,17 @@ public class PreferencesDialog : Gtk.Dialog {
 
         // Appearance
         groups[0].add(new SimplePanel(
-            "Appearance Tweaks", "Change user interface theme and window decoration preferences.", appearance));
+            "Appearance Tweaks", "Change user interface theme and window decoration preferences.",
+            appearance, "appearance"));
 
         // Network settings
         groups[0].add(new SimplePanel(
-            "Network Proxy", "Change network proxy settings for this web app.", network_settings));
+            "Network Proxy", "Change network proxy settings for this web app.", network_settings, "network"));
 
         // Keybindings
         groups[0].add(new SimplePanel(
-            "Keyboard Shortcuts", "Modify or disable in-app and global keyboard shortcuts.", keybindings));
+            "Keyboard Shortcuts", "Modify or disable in-app and global keyboard shortcuts.",
+            keybindings, "keyboard_shortcuts"));
 
         // Web App form
         web_app_form.margin = 15;
@@ -132,7 +134,8 @@ public class PreferencesDialog : Gtk.Dialog {
         scroll.add(web_app_form);
         scroll.show_all();
         groups[0].add(new SimplePanel(
-            "Web App Settings", "Extra settings provided by the web app integration script.", scroll));
+            "Web App Settings", "Extra settings provided by the web app integration script.",
+            scroll, "web_app_settings"));
 
         // Add panels
         var grid = new Gtk.Grid();
@@ -287,7 +290,7 @@ public class PreferencesDialog : Gtk.Dialog {
         private Gtk.Widget? widget;
 
         public SimplePanel(
-            owned string title, owned string? subtitle=null, Gtk.Widget? widget=null, string? help_url=null
+            owned string title, owned string? subtitle=null, Gtk.Widget? widget=null, string? help_page=null
         ) {
             this.title = (owned) title;
             this.subtitle = (owned) subtitle;
@@ -302,8 +305,8 @@ public class PreferencesDialog : Gtk.Dialog {
                 scroll.show();
                 this.widget = scroll;
             }
-            if (help_url != null) {
-                this.help_url = help_url;
+            if (help_page != null) {
+                this.help_url = create_help_url(help_page);
                 has_help = true;
             }
         }

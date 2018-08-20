@@ -31,6 +31,7 @@ public abstract class Component: GLib.Object {
     public string id {get; construct;}
     public string name {get; construct;}
     public string description {get; construct;}
+    public string? help_url {get; construct;}
     public bool hidden {get; protected set; default = false;}
     public bool enabled {get; protected set; default = false;}
     public bool loaded {get; protected set; default = false;}
@@ -40,8 +41,10 @@ public abstract class Component: GLib.Object {
     public bool available {get; protected set; default = true;}
     public TiliadoMembership required_membership {get; protected set; default = TiliadoMembership.NONE;}
 
-    public Component(string id, string name, string description) {
-        GLib.Object(id: id, name: name, description: description);
+    public Component(string id, string name, string description, string? help_page) {
+        GLib.Object(
+            id: id, name: name, description: description,
+            help_url: create_help_url(help_page));
     }
 
     public bool is_membership_ok(TiliadoActivation? activation) {

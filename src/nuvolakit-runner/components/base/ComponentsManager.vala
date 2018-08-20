@@ -117,6 +117,7 @@ public class ComponentsManager : PreferencesDialog.SelectorGroup {
         public Panel(ComponentsManager manager, Component component) {
             this.component = component;
             this.manager = manager;
+            has_help = get_help_url() != null;
             is_toggle = true;
             refresh();
             notify.connect_after(on_notify);
@@ -158,6 +159,10 @@ public class ComponentsManager : PreferencesDialog.SelectorGroup {
 
         public override unowned string? get_subtitle() {
             return component.description;
+        }
+
+        public override unowned string? get_help_url() {
+            return component.help_url;
         }
 
         private void on_component_notify(GLib.Object emitter, ParamSpec param) {

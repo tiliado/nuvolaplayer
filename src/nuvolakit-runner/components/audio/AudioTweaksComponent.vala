@@ -35,7 +35,7 @@ public class AudioTweaksComponent: Component {
     private HeadPhonesWatch? headphones_watch = null;
 
     public AudioTweaksComponent(AppRunnerController controller, Bindings bindings, Drt.KeyValueStorage config) {
-        base("audio_tweaks", "Audio Tweaks", "Tweaks for PulseAudio integration.");
+        base("audio_tweaks", "Audio Tweaks", "Tweaks for PulseAudio integration.", "audio_tweaks");
         this.required_membership = TiliadoMembership.PREMIUM;
         this.has_settings = true;
         this.bindings = bindings;
