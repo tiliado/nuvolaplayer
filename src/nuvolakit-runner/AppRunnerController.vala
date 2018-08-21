@@ -61,7 +61,7 @@ public class AppRunnerController: Drtgtk.Application {
     private URLBar? url_bar = null;
     private HashTable<string, Gtk.InfoBar> info_bars;
     private MainLoopAdaptor? mainloop = null;
-    private WelcomeDialog? welcome_dialog = null;
+    private AboutDialog? about_dialog = null;
     private PreferencesDialog? preferences_dialog = null;
     string? theme_not_found = null;
 
@@ -229,7 +229,6 @@ public class AppRunnerController: Drtgtk.Application {
             ah.simple_action("main", "app", Actions.ACTIVATE, "Activate main window", null, null, null, do_activate),
             ah.simple_action("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
             ah.simple_action("main", "app", Actions.ABOUT, "About", "_About", null, null, do_about),
-            ah.simple_action("main", "app", Actions.WELCOME, "Welcome screen", null, null, null, do_show_welcome_dialog),
             ah.simple_action("main", "app", Actions.HELP, "Help", "_Help", null, "F1", do_help),
         };
         actions.add_actions(actions_spec);
@@ -466,12 +465,6 @@ public class AppRunnerController: Drtgtk.Application {
         activate();
     }
 
-    private void do_about() {
-        var dialog = new AboutDialog(main_window, web_app, {web_options});
-        dialog.run();
-        dialog.destroy();
-    }
-
     private void do_preferences() {
         if (preferences_dialog != null) {
             preferences_dialog.present();
@@ -532,13 +525,12 @@ public class AppRunnerController: Drtgtk.Application {
         preferences_dialog = null;
     }
 
-    private void do_show_welcome_dialog() {
-        if (welcome_dialog == null) {
-            var welcome_screen = new WelcomeScreen(this, storage);
-            welcome_dialog = new WelcomeDialog(main_window, welcome_screen);
-            welcome_dialog.response.connect(on_dialog_response);
+    private void do_about() {
+        if (about_dialog == null) {
+            about_dialog = new AboutDialog(main_window, web_app, {web_options}, new PatronBox());
+            about_dialog.response.connect(on_dialog_response);
         }
-        welcome_dialog.present();
+        about_dialog.present();
     }
 
     /**
@@ -547,14 +539,14 @@ public class AppRunnerController: Drtgtk.Application {
     private void show_welcome_screen() {
         Drt.KeyValueStorage config = this.master.config ?? this.config;
         if (config.get_string("nuvola.welcome_screen") != get_welcome_screen_name()) {
-            do_show_welcome_dialog();
+            do_about();
             config.set_string("nuvola.welcome_screen", get_welcome_screen_name());
         }
     }
 
     private void on_dialog_response(Gtk.Dialog dialog, int response_id) {
-        if (dialog == welcome_dialog) {
-            welcome_dialog = null;
+        if (dialog == about_dialog) {
+            about_dialog = null;
         }
         dialog.response.disconnect(on_dialog_response);
         dialog.destroy();

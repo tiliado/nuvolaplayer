@@ -87,7 +87,7 @@ public class StartupWindow : Drtgtk.ApplicationWindow {
         stack.margin = 10;
         stack.hexpand = true;
         stack.transition_type  = Gtk.StackTransitionType.SLIDE_LEFT_RIGHT;
-        var about = new AboutScreen(app.web_app);
+        var about = new AboutScreen(app.web_app, null);
         about.show();
         stack.add_titled(about, "About", "About");
 

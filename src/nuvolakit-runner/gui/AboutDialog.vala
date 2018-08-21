@@ -64,29 +64,33 @@ public void debug_print_version_info(WebApp? web_app) {
 }
 
 public class AboutDialog: Gtk.Dialog {
-    public AboutDialog(Gtk.Window? parent, WebApp? web_app, WebOptions[]? web_options) {
+    public AboutDialog(Gtk.Window? parent, WebApp? web_app, WebOptions[]? web_options, Gtk.Widget? sidebar) {
         GLib.Object(title: "About", transient_for: parent, use_header_bar: 1);
-        resizable = false;
+        set_default_size(300, -1);
         add_button("_Close", Gtk.ResponseType.CLOSE);
+        var grid = new Gtk.Grid();
+        grid.orientation = Gtk.Orientation.HORIZONTAL;
 
         Gtk.Container box = get_content_area();
         var stack = new Gtk.Stack();
         stack.margin = 10;
         stack.hexpand = true;
         stack.transition_type  = Gtk.StackTransitionType.SLIDE_LEFT_RIGHT;
-        Gtk.Widget screen = new AboutScreen(web_app);
+        Gtk.Widget screen = new AboutScreen(web_app, web_options);
         screen.show();
         stack.add_titled(screen, "About", "About");
-        screen = new LibrariesScreen(web_options);
-        screen.show();
-        stack.add_titled(screen, "Libraries", "Libraries");
         var switcher = new Gtk.StackSwitcher();
         switcher.stack = stack;
         switcher.hexpand = true;
         switcher.halign = Gtk.Align.CENTER;
         switcher.show();
         ((Gtk.HeaderBar) get_header_bar()).custom_title = switcher;
-        box.add(stack);
+        box.add(grid);
+        grid.add(stack);
+        if (sidebar != null) {
+            grid.add(sidebar);
+            sidebar.set_size_request(150, -1);
+        }
         box.show_all();
     }
 }

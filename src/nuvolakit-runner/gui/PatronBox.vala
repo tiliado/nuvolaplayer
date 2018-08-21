@@ -29,10 +29,8 @@ public class PatronBox : Gtk.Grid {
         orientation = Gtk.Orientation.VERTICAL;
         margin = 10;
         row_spacing = 20;
-        hexpand = false;
-        vexpand = true;
-        valign = Gtk.Align.CENTER;
-        halign = Gtk.Align.CENTER;
+        hexpand = vexpand = false;
+        valign = halign = Gtk.Align.CENTER;
         string?[] patrons = {
             "Andrew Azores", null,
             "Christian Dannie Storgaard", null,
@@ -68,6 +66,7 @@ public class PatronBox : Gtk.Grid {
         add(label);
         label = Drtgtk.Labels.plain(buffer.str, true, true);
         label.max_width_chars = 20;
+        label.halign = Gtk.Align.CENTER;
         add(label);
         var button = new Gtk.LinkButton.with_label(
             "https://tiliado.eu/nuvolaplayer/funding/", "Become Patron");

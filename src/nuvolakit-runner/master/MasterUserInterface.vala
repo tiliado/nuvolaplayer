@@ -25,7 +25,6 @@
 namespace Nuvola {
 
 public class MasterUserInterface: GLib.Object {
-    public const string PAGE_WELCOME = "welcome";
     public const string START_APP = "start-app";
     public const string QUIT = "quit";
 
@@ -35,6 +34,7 @@ public class MasterUserInterface: GLib.Object {
     private TiliadoUserAccountWidget? tiliado_widget = null;
     private TiliadoTrialWidget? tiliado_trial = null;
     private WebAppStorage app_storage;
+    private Drt.Storage storage;
 
     public MasterUserInterface(MasterController controller) {
         this.controller = controller;
@@ -54,14 +54,10 @@ public class MasterUserInterface: GLib.Object {
     }
 
     private void create_main_window() {
-        Drt.Storage storage = controller.storage;
+        storage = controller.storage;
         app_storage = new WebAppStorage(storage.user_config_dir, storage.user_data_dir, storage.user_cache_dir);
         main_window = new MasterWindow(controller);
         main_window.page_changed.connect(on_master_stack_page_changed);
-
-        var welcome_screen = new WelcomeScreen(controller, storage);
-        welcome_screen.show();
-        main_window.add_page(welcome_screen, PAGE_WELCOME, "Welcome");
 
         if (controller.web_app_reg != null) {
             var model = new WebAppListFilter(new WebAppListModel(controller.web_app_reg), controller.debuging, null);
@@ -143,7 +139,7 @@ public class MasterUserInterface: GLib.Object {
             new CefOptions(app_storage, null),
             #endif
             new WebkitOptions(app_storage, null),
-        });
+        }, new PatronBox());
         dialog.run();
         dialog.destroy();
     }

@@ -25,7 +25,7 @@
 namespace Nuvola {
 
 public class AboutScreen: Gtk.Grid {
-    public AboutScreen(WebApp? web_app) {
+    public AboutScreen(WebApp? web_app, WebOptions[]? web_options) {
         Pango.AttrList attributes = null;
         Gtk.Label label;
         Gtk.Image? img = null;
@@ -66,7 +66,7 @@ public class AboutScreen: Gtk.Grid {
                 "<small>This script is not affiliated with nor endorsed by the {name} website and its operators/owners."
                 + " {name} may be a trademark or a registered trademark owned by the operators/owners of the {name}"
                 + " website.</small>").replace("{name}", app_name));
-            label.margin = 10;
+            label.margin = 20;
             label.use_markup = true;
             label.set_line_wrap(true);
             label.max_width_chars = 50;
@@ -103,8 +103,10 @@ public class AboutScreen: Gtk.Grid {
 
         #if !GENUINE
         label = new Gtk.Label(
-            "This third-party build is not affiliated with, endorsed by nor supported by the Nuvola Apps Project.");
-        label.margin = 10;
+            "<small>This third-party build is not affiliated with, endorsed by nor supported by the Nuvola Apps Project.</small>");
+        label.use_markup = true;
+        label.margin = 20;
+        label.margin_bottom = 10;
         label.set_line_wrap(true);
         label.max_width_chars = 50;
         label.show();
@@ -114,6 +116,25 @@ public class AboutScreen: Gtk.Grid {
         line++;
         attach(button, 0, line, 3, 1);
         #endif
+
+        label = Drtgtk.Labels.markup("<b>Libraries</b>");
+        label.margin_top = 20;
+        label.halign = Gtk.Align.CENTER;
+        attach(label, 0, ++line, 3, 1);
+        label = new Gtk.Label("Diorite: %s".printf(Drt.get_version()));
+        label.selectable = true;
+        attach(label, 0, ++line, 3, 1);
+        if (web_options != null) {
+            foreach (WebOptions entry in web_options) {
+                label = new Gtk.Label("Web Engine: " + entry.get_name_version());
+                label.selectable = true;
+                attach(label, 0, ++line, 3, 1);
+            }
+        }
+        label = new Gtk.Label("Network Library: libsoup %u.%u.%u".printf(
+            Soup.get_major_version(), Soup.get_minor_version(), Soup.get_micro_version()));
+        label.selectable = true;
+        attach(label, 0, ++line, 3, 1);
 
         show_all();
         hide();

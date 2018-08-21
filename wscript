@@ -357,13 +357,6 @@ def configure(ctx):
             ctx.msg("Branding metadata not found", branding_json, color="RED")
         branding = {}
 
-    ctx.env.WELCOME_XML = "branding/%s/welcome.xml" % ctx.env.BRANDING
-    if os.path.isfile(ctx.env.WELCOME_XML):
-        ctx.msg("Welcome screen", ctx.env.WELCOME_XML, color="GREEN")
-    else:
-        ctx.msg("Welcome screen not found", ctx.env.WELCOME_XML, color="RED")
-        ctx.env.WELCOME_XML = "branding/default/welcome.xml"
-
     ctx.env.APPDATA_XML = "branding/%s/appdata.xml" % ctx.env.BRANDING
     if os.path.isfile(ctx.env.APPDATA_XML):
         ctx.msg("Welcome screen", ctx.env.APPDATA_XML, color="GREEN")
@@ -830,19 +823,6 @@ def build(ctx):
         EXEC = "lxterminal" if ctx.env.ADK else (NUVOLA_SERVICE_INFO if ctx.env.GENUINE else NUVOLA_BIN),
         GENERIC_NAME=GENERIC_NAME,
         WMCLASS = ctx.env.UNIQUE_NAME,
-    )
-
-    ctx(features = 'subst',
-        source = ctx.env.WELCOME_XML,
-        target = 'share/%s/welcome.xml' % APPNAME,
-        install_path = '${PREFIX}/share/%s' % APPNAME,
-        BLURB = BLURB,
-        NAME = ctx.env.NAME,
-        VERSION = ctx.env.RELEASE,
-        FULL_VERSION = ctx.env.VERSION,
-        HELP_URL = ctx.env.HELP_URL,
-        WEB_APP_REQUIREMENTS_HELP_URL = ctx.env.WEB_APP_REQUIREMENTS_HELP_URL,
-        VENDOR = ctx.env.VENDOR,
     )
 
     dbus_name = ctx.env.UNIQUE_NAME

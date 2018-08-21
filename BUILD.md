@@ -24,14 +24,6 @@ A file in JSON format. All keys are optional.
     It should provide information on how to install missing requirements (e.g. Adobe Flash plugin).
     [Default page](https://github.com/tiliado/nuvolaplayer/wiki/Web-App-Requirements).
 
-### File branding/NAME/welcome.xml
-
-A file in XML-like format. A subset of HTML formatting is supported (e.g. h1, h2, p, a, i and b).
-This file is shown in the Welcome tab. It should answer following questions:
-
-  * How to find out which Nuvola apps are available and in which version?
-  * Where to report bugs and how to get support?
-
 Web App Requirements
 --------------------
 
