@@ -42,7 +42,6 @@ public class AppRunnerController: Drtgtk.Application {
     public MasterService master {get; private set;}
     private WebOptions[] available_web_options;
     private WebOptions web_options;
-    private WebkitOptions webkit_options;
     public WebEngine web_engine {get; private set;}
     public Bindings bindings {get; private set;}
     public IpcBus ipc_bus {get; private set; default=null;}
@@ -336,7 +335,6 @@ public class AppRunnerController: Drtgtk.Application {
     }
 
     private void init_web_engine() {
-        webkit_options = (web_options as WebkitOptions) ?? new WebkitOptions(app_storage, connection);
         web_engine = web_options.create_web_engine(web_app);
         web_worker_data["JS_ENGINE"] = web_options.get_name_version();
         web_worker_data["JS_ENGINE_NAME"] = web_options.get_name();
@@ -536,7 +534,7 @@ public class AppRunnerController: Drtgtk.Application {
 
     private void do_show_welcome_dialog() {
         if (welcome_dialog == null) {
-            var welcome_screen = new WelcomeScreen(this, storage, webkit_options.default_context);
+            var welcome_screen = new WelcomeScreen(this, storage);
             welcome_dialog = new WelcomeDialog(main_window, welcome_screen);
             welcome_dialog.response.connect(on_dialog_response);
         }

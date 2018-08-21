@@ -34,7 +34,7 @@ public class MasterUserInterface: GLib.Object {
     private unowned MasterController controller;
     private TiliadoUserAccountWidget? tiliado_widget = null;
     private TiliadoTrialWidget? tiliado_trial = null;
-    private WebkitOptions webkit_options;
+    private WebAppStorage app_storage;
 
     public MasterUserInterface(MasterController controller) {
         this.controller = controller;
@@ -55,12 +55,11 @@ public class MasterUserInterface: GLib.Object {
 
     private void create_main_window() {
         Drt.Storage storage = controller.storage;
-        var app_storage = new WebAppStorage(storage.user_config_dir, storage.user_data_dir, storage.user_cache_dir);
-        webkit_options = new WebkitOptions(app_storage, null);
+        app_storage = new WebAppStorage(storage.user_config_dir, storage.user_data_dir, storage.user_cache_dir);
         main_window = new MasterWindow(controller);
         main_window.page_changed.connect(on_master_stack_page_changed);
 
-        var welcome_screen = new WelcomeScreen(controller, storage, webkit_options.default_context);
+        var welcome_screen = new WelcomeScreen(controller, storage);
         welcome_screen.show();
         main_window.add_page(welcome_screen, PAGE_WELCOME, "Welcome");
 
@@ -141,9 +140,9 @@ public class MasterUserInterface: GLib.Object {
     private void do_about() {
         var dialog = new AboutDialog(main_window, null, {
             #if HAVE_CEF
-            new CefOptions(webkit_options.storage, null),
+            new CefOptions(app_storage, null),
             #endif
-            webkit_options,
+            new WebkitOptions(app_storage, null),
         });
         dialog.run();
         dialog.destroy();
