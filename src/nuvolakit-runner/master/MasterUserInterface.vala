@@ -64,13 +64,6 @@ public class MasterUserInterface: GLib.Object {
         welcome_screen.show();
         main_window.add_page(welcome_screen, PAGE_WELCOME, "Welcome");
 
-        #if FLATPAK && !NUVOLA_ADK
-        var app_index_view = new AppIndexWebView(controller, webkit_options.default_context);
-        app_index_view.load_app_index(Nuvola.REPOSITORY_INDEX, Nuvola.REPOSITORY_ROOT);
-        app_index_view.show();
-        main_window.add_page(app_index_view, "repository", "Repository Index");
-        #endif
-
         if (controller.web_app_reg != null) {
             var model = new WebAppListFilter(new WebAppListModel(controller.web_app_reg), controller.debuging, null);
             web_app_list = new WebAppList(controller, model);
