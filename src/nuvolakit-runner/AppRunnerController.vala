@@ -271,15 +271,19 @@ public class AppRunnerController: Drtgtk.Application {
         var master = new MasterService();
         if (master.init(ipc_bus, this.web_app.id, this.dbus_id)) {
             startup_check.nuvola_service_status = StartupCheck.Status.OK;
+        } else if (master.error is MasterServiceError.OTHER) {
+            startup_check.nuvola_service_status = StartupCheck.Status.OK;
+            startup_check.nuvola_service_message = Markup.printf_escaped(
+                "Failed to connect to Nuvola Apps Service, but it is optional.\n\n<i>Error message: %s</i>",
+                master.error.message);
         } else {
             startup_check.nuvola_service_message = Markup.printf_escaped(
                 "<b>Failed to connect to Nuvola Apps Service.</b>\n\n"
                 + "1. Make sure Nuvola Apps Service is installed.\n"
                 + "2. Make sure Nuvola Apps Service and individual Nuvola Apps are up-to-date.\n"
                 + "3. Close all Nuvola Apps and try launching it again.\n\n"
-                + "<i>Error message: %s</i>", master.error.message);
-            startup_check.nuvola_service_status = ((master.error is MasterServiceError.OTHER)
-                ? StartupCheck.Status.NOT_APPLICABLE : StartupCheck.Status.WARNING);
+                + "", master.error.message);
+            startup_check.nuvola_service_status = StartupCheck.Status.WARNING;
         }
         this.master = master;
     }
