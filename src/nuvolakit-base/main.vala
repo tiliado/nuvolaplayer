@@ -38,10 +38,12 @@ private extern const string VERSION_SUFFIX;
 private extern const string LIBDIR;
 
 public extern const string HELP_URL;
+public extern const string REPORT_BUG_URL;
+public extern const string REQUEST_FEATURE_URL;
+public extern const string ASK_QUESTION_URL;
+public extern const string NEWS_URL;
 public extern const string HELP_URL_TEMPLATE;
 public extern const string WEB_APP_REQUIREMENTS_HELP_URL;
-public extern const string REPOSITORY_INDEX;
-public extern const string REPOSITORY_ROOT;
 public extern const string TILIADO_OAUTH2_SERVER;
 public extern const string TILIADO_OAUTH2_CLIENT_ID;
 public const string TILIADO_OAUTH2_TOKEN_ENDPOINT = TILIADO_OAUTH2_SERVER + "/o/token/";

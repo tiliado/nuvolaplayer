@@ -24,10 +24,12 @@
 
 namespace Nuvola.Actions {
 
+public const string REPORT_BUG = "report-bug";
+public const string ASK_QUESTION = "ask-question";
+public const string REQUEST_FEATURE = "request-feature";
 public const string ABOUT = "about";
 public const string HELP = "help";
 public const string NEWS = "show-news";
-public const string DONATE = "donate";
 public const string ACTIVATE = "activate";
 public const string GO_HOME = "go-home";
 public const string GO_BACK = "go-back";

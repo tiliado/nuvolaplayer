@@ -353,23 +353,19 @@ def configure(ctx):
         ctx.msg("Branding metadata", branding_json, color="GREEN")
         branding = loadjson(branding_json, False)
     else:
-        if ctx.env.BRANDING != "default":
-            ctx.msg("Branding metadata not found", branding_json, color="RED")
-        branding = {}
+        ctx.fatal("Branding metadata not found: '%s'" % branding_json)
 
     ctx.env.APPDATA_XML = "branding/%s/appdata.xml" % ctx.env.BRANDING
     if os.path.isfile(ctx.env.APPDATA_XML):
-        ctx.msg("Welcome screen", ctx.env.APPDATA_XML, color="GREEN")
+        ctx.msg("App data XML", ctx.env.APPDATA_XML, color="GREEN")
     else:
-        ctx.msg("Welcome screen not found", ctx.env.APPDATA_XML, color="RED")
+        ctx.msg("App data XML not found", ctx.env.APPDATA_XML, color="RED")
         ctx.env.APPDATA_XML = "branding/default/appdata.xml"
 
     genuine = branding.get("genuine", False)
     ctx.env.NAME = branding.get("name", "Web Apps")
     ctx.env.SHORT_NAME = branding.get("short_name", ctx.env.NAME)
     ctx.env.VENDOR = branding.get("vendor", "unknown")
-    ctx.env.HELP_URL = branding.get("help_url", DEFAULT_HELP_URL)
-    ctx.env.HELP_URL_TEMPLATE = branding.get("help_url_template", "https://nuvola.tiliado.eu/docs/4/{page}.html?genuine=false")
     ctx.env.WEB_APP_REQUIREMENTS_HELP_URL = branding.get("requirements_help_url", DEFAULT_WEB_APP_REQUIREMENTS_HELP_URL)
     tiliado_api = branding.get("tiliado_api", {})
 
@@ -500,13 +496,11 @@ def configure(ctx):
     ctx.env.NUVOLA_LIBDIR = "%s/%s" % (ctx.env.LIBDIR, APPNAME)
     ctx.define("NUVOLA_TILIADO_OAUTH2_SERVER", tiliado_api.get("server", "https://tiliado.eu"))
     ctx.define("NUVOLA_TILIADO_OAUTH2_CLIENT_ID", tiliado_api.get("client_id", ""))
-    repo_index = branding.get("repository_index", "https://nuvola.tiliado.eu/").split("|")
-    repo_index, repo_root = repo_index if len(repo_index) > 1 else  repo_index + repo_index
-    ctx.define("NUVOLA_REPOSITORY_INDEX", repo_index)
-    ctx.define("NUVOLA_REPOSITORY_ROOT", repo_root)
     ctx.define("NUVOLA_WEB_APP_REQUIREMENTS_HELP_URL", ctx.env.WEB_APP_REQUIREMENTS_HELP_URL)
-    ctx.define("NUVOLA_HELP_URL", ctx.env.HELP_URL)
-    ctx.define("NUVOLA_HELP_URL_TEMPLATE", ctx.env.HELP_URL_TEMPLATE)
+    ctx.define("NUVOLA_NEWS_URL", branding.get("news_url", "https://nuvola.tiliado.eu/docs/4/news/?genuine=false"))
+    ctx.define("NUVOLA_HELP_URL", branding.get("help_url", DEFAULT_HELP_URL))
+    ctx.define("NUVOLA_HELP_URL_TEMPLATE", branding.get(
+        "help_url_template", "https://nuvola.tiliado.eu/docs/4/{page}.html?genuine=false"))
     ctx.define("NUVOLA_LIBDIR", ctx.env.NUVOLA_LIBDIR)
     ctx.define("NUVOLA_CEF_DEFAULT", int(ctx.options.cef_default))
 
@@ -514,6 +508,9 @@ def configure(ctx):
     ctx.define('GLIB_VERSION_MIN_REQUIRED', glib_encode_version(MIN_GLIB))
     ctx.define('GDK_VERSION_MAX_ALLOWED', glib_encode_version(MIN_GTK))
     ctx.define('GDK_VERSION_MIN_REQUIRED', glib_encode_version(MIN_GTK))
+
+    for url in ("report_bug", "request_feature", "ask_question"):
+        ctx.define("NUVOLA_%s_URL" % url.upper(), branding.get(url + "_url", "").strip())
 
     with open("build/secret.h", "wb") as f:
         client_secret = tiliado_api.get("client_secret", "")

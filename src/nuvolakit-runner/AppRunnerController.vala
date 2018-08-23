@@ -201,9 +201,14 @@ public class AppRunnerController: Drtgtk.Application {
             ah.simple_action("main", "app", Actions.NEWS, "News", "_News", null, null, do_show_news),
             ah.simple_action("main", "app", Actions.ABOUT, "About", "_About", null, null, do_about),
             ah.simple_action("main", "app", Actions.HELP, "Help", "_Help", null, "F1", do_help),
+            ah.simple_action("main", "app", Actions.REPORT_BUG, "Report bug", null, null, null, do_report_bug),
+            ah.simple_action("main", "app", Actions.ASK_QUESTION, "Ask question", null, null, null, do_ask_question),
+            ah.simple_action("main", "app", Actions.REQUEST_FEATURE, "Suggest feature", null, null, null, do_request_feature),
         };
         actions.add_actions(actions_spec);
-        set_app_menu_items({Actions.HELP, Actions.NEWS, Actions.ABOUT, Actions.QUIT});
+        set_app_menu_items({
+            Actions.REPORT_BUG, Actions.ASK_QUESTION, Actions.REQUEST_FEATURE,
+            Actions.HELP, Actions.NEWS, Actions.ABOUT, Actions.QUIT});
     }
 
     private void init_ipc() {
@@ -322,7 +327,9 @@ public class AppRunnerController: Drtgtk.Application {
     }
 
     private void load_app() {
-        set_app_menu_items({Actions.PREFERENCES, Actions.HELP, Actions.NEWS, Actions.ABOUT, Actions.QUIT});
+        set_app_menu_items({
+            Actions.PREFERENCES, Actions.REPORT_BUG, Actions.ASK_QUESTION, Actions.REQUEST_FEATURE,
+            Actions.HELP, Actions.NEWS, Actions.ABOUT, Actions.QUIT});
         main_window.set_menu_button_items({
             Actions.ZOOM_IN, Actions.ZOOM_OUT, Actions.ZOOM_RESET, "|",
             Actions.TOGGLE_SIDEBAR, "|", Actions.GO_LOAD_URL});
@@ -522,7 +529,19 @@ public class AppRunnerController: Drtgtk.Application {
     }
 
     private void do_show_news() {
-        show_uri("https://nuvola.tiliado.eu/docs/4/news/");
+        show_uri(Drt.String.not_empty_or(Nuvola.NEWS_URL, Nuvola.HELP_URL));
+    }
+
+    private void do_report_bug() {
+        show_uri(Drt.String.not_empty_or(Nuvola.REPORT_BUG_URL, Nuvola.HELP_URL));
+    }
+
+    private void do_ask_question() {
+        show_uri(Drt.String.not_empty_or(Nuvola.ASK_QUESTION_URL, Nuvola.HELP_URL));
+    }
+
+    private void do_request_feature() {
+        show_uri(Drt.String.not_empty_or(Nuvola.REQUEST_FEATURE_URL, Nuvola.HELP_URL));
     }
 
     private void do_load_url() {

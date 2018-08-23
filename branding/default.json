@@ -1,13 +1,16 @@
 {
-	// "name": "Cloud Apps",
-	// "help_url": "",
-	// "requirements_help_url": "",
-	// "tiliado_api": {
-	//	"enabled": false,
-	//	"server": "https://tiliado.eu",
-	//	"client_id": "",
-	//	"client_secret": ""
-	//	
-	//}
+  "! note": [
+    "All fields are optional but must not be empty if they are specified.",
+    "Keys starting with '#' are field comments containing a field name and expected type.",
+    "Values thereof contain field description."
+  ],
+  "# vendor: string": "Who this build comes from?",
+  "# name: string": "Full name of your derivative.",
+  "# short_name: string": "Short name of your derivative.",
+  "# help_url: string": "Where can users find help?",
+  "# help_url_template: string": "Help URL for individual features. {page} is replaced with page name.",
+  "# report_bug_url: string": "Where should users report bugs?",
+  "# request_feature_url: string": "Where should users request new features?",
+  "# ask_question_url: string": "Where should users ask questions?",
+  "# news_url: string": "Where should users get news?"
 }
-
