@@ -142,22 +142,6 @@ public class PreferencesDialog : Gtk.Dialog {
         grid.margin = 15;
         grid.orientation = Gtk.Orientation.VERTICAL;
         grid.row_spacing = 10;
-        var tip = new Gtk.Grid();
-        tip.margin_bottom = 10;
-        tip.halign = Gtk.Align.CENTER;
-        tip.orientation = Gtk.Orientation.HORIZONTAL;
-        tip.vexpand = tip.hexpand = false;
-        grid.add(tip);
-        var image = new Gtk.Image.from_icon_name("emblem-system-symbolic", Gtk.IconSize.BUTTON);
-        image.margin_start = image.margin_end = 5;
-        tip.add(image);
-        tip.add(new Gtk.Label("⇒ Adjust settings"));
-        image = new Gtk.Image.from_icon_name("system-help-symbolic", Gtk.IconSize.BUTTON);
-        image.margin_start = 45;
-        image.margin_end = 5;
-        tip.add(image);
-        tip.add(new Gtk.Label("⇒ Open help"));
-        tip.show_all();
 
         foreach (unowned SelectorGroup group in groups) {
             unowned string? title = group.title;
