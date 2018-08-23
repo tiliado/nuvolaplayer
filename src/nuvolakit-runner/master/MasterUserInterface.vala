@@ -134,7 +134,7 @@ public class MasterUserInterface: GLib.Object {
     }
 
     private void do_about() {
-        var dialog = new AboutDialog(main_window, null, {
+        var dialog = new AboutDialog(main_window, null, null, {
             #if HAVE_CEF
             new CefOptions(app_storage, null),
             #endif

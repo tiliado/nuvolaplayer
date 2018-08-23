@@ -27,7 +27,6 @@ namespace Nuvola {
 public class PatronBox : Gtk.Grid {
     public PatronBox() {
         orientation = Gtk.Orientation.VERTICAL;
-        margin = 10;
         row_spacing = 20;
         hexpand = vexpand = false;
         valign = halign = Gtk.Align.CENTER;

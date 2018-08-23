@@ -26,6 +26,7 @@ namespace Nuvola.Actions {
 
 public const string ABOUT = "about";
 public const string HELP = "help";
+public const string NEWS = "show-news";
 public const string DONATE = "donate";
 public const string ACTIVATE = "activate";
 public const string GO_HOME = "go-home";
@@ -34,7 +35,6 @@ public const string GO_FORWARD = "go-forward";
 public const string GO_RELOAD = "go-reload";
 public const string GO_LOAD_URL = "go-load-url";
 public const string PREFERENCES = "preferences";
-public const string WELCOME = "welcome";
 public const string TOGGLE_SIDEBAR = "toggle-sidebar";
 public const string ZOOM_IN = "zoom-in";
 public const string ZOOM_OUT = "zoom-out";

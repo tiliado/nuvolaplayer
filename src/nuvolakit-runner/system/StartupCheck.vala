@@ -28,52 +28,22 @@ private const string XDG_DESKTOP_PORTAL_SIGSEGV = "GDBus.Error:org.freedesktop.D
 "Process org.freedesktop.portal.Desktop received signal 11";
 
 /**
- * Class performing a system check on start-up of Nuvola
+ * Class performing a system check on start-up of Nuvola.
+ * Public fields are filled as the check progresses.
  */
 public class StartupCheck : GLib.Object {
-    [Description (nick="XDG Desktop Portal status", blurb="XDG Desktop Portal is required for proxy settings and opening URIs.")]
-    public Status xdg_desktop_portal_status {get; set; default = Status.UNKNOWN;}
-    [Description (nick="XDG Desktop Portal message", blurb="Null unless the check went wrong.")]
-    public string? xdg_desktop_portal_message {get; set; default = null;}
-    [Description (nick="Nuvola Service status", blurb="Status of the connection to Nuvola Service (master process).")]
-    public Status nuvola_service_status {get; set; default = Status.UNKNOWN;}
-    [Description (nick="Nuvola Service message", blurb="Null unless the check went wrong.")]
-    public string? nuvola_service_message {get; set; default = null;}
-    [Description (nick="OpenGL driver status", blurb="If OpenGL driver is misconfigured, WebKitGTK may crash.")]
-    public Status opengl_driver_status {get; set; default = Status.UNKNOWN;}
-    [Description (nick="OpenGL driver message", blurb="Null unless the check went wrong.")]
-    public string? opengl_driver_message {get; set; default = null;}
-    [Description (nick="VA-API driver status", blurb="One of the two APIs for video acceleration.")]
-    public Status vaapi_driver_status {get; set; default = Status.UNKNOWN;}
-    [Description (nick="VA-API driver message", blurb="Null unless the check went wrong.")]
-    public string? vaapi_driver_message {get; set; default = null;}
-    [Description (nick="VDPAU driver status", blurb="One of the two APIs for video acceleration.")]
-    public Status vdpau_driver_status {get; set; default = Status.UNKNOWN;}
-    [Description (nick="VDPAU driver message", blurb="Null unless the check went wrong.")]
-    public string? vdpau_driver_message {get; set; default = null;}
-    [Description (nick="Web App Requirements status", blurb="A web app may have certain requirements, e.g. Flash plugin, MP3 codec, etc.")]
-    public Status app_requirements_status {get; set; default = Status.UNKNOWN;}
-    [Description (nick="Web App Requirements message", blurb="Null unless the check went wrong.")]
-    public string? app_requirements_message {get; set; default = null;}
-    [Description (nick="Number of running tasks", blurb="The current number of running checks.")]
-    public int running_tasks {get; private set; default = 0;}
-    [Description (nick="Number of finished tasks", blurb="The current number of finished checks.")]
-    public int finished_tasks {get; private set; default = 0;}
-    [Description (nick="Final status of all checks.", blurb="Set after mark_finished is called.")]
-    public StartupCheck.Status final_status {get; private set; default = StartupCheck.Status.UNKNOWN;}
-    [Description (nick="Format support info", blurb="Associated format support information to check web app requirements.")]
-    public FormatSupport format_support {get; construct;}
-    #if TILIADO_API
-    [Description (nick="Tiliado Account status", blurb="Tiliado account is required for premium features.")]
-    public Status tiliado_account_status {get; set; default = Status.UNKNOWN;}
-    [Description (nick="Tiliado Account message", blurb="Null unless the check went wrong.")]
-    public string? tiliado_account_message {get; set; default = null;}
-    [Description (nick="Tiliado activation", blurb="Tiliado account activation.")]
-    public TiliadoActivation? activation {get; private set;}
-    #endif
-    [Description (nick="Web App object", blurb="Currently loaded web application")]
-    public WebApp web_app {get; construct;}
-    public WebOptions? web_options {get; private set; default = null;}
+    public WebOptions? web_options = null;
+    public MasterService? master = null;
+    public TiliadoActivation? tiliado_activation = null;
+    public string? machine_hash = null;
+    private StartupResult model;
+    private FormatSupport format_support;
+    private WebApp web_app;
+    private SourceFunc? resume = null;
+    private unowned AppRunnerController app;
+    private AboutDialog dialog;
+    private unowned Gtk.Widget? action_button = null;
+    private Gtk.Label status_label;
 
     /**
      * Create new StartupCheck object.
@@ -81,74 +51,73 @@ public class StartupCheck : GLib.Object {
      * @param web_app           Web application to check its requirements.
      * @param format_support    Information about supported formats and technologies.
      */
-    public StartupCheck(WebApp web_app, FormatSupport format_support) {
-        GLib.Object(format_support: format_support, web_app: web_app);
+    public StartupCheck(
+        AppRunnerController app, StartupResult model, AboutDialog dialog, WebApp web_app, FormatSupport format_support
+    ) {
+        this.model = model;
+        this.format_support = format_support;
+        this.web_app = web_app;
+        this.app = app;
+        this.dialog = dialog;
+
+        status_label = Drtgtk.Labels.markup("%s web app script performs start-up checks...", app.app_name);
+        status_label.hexpand = true;
+        status_label.margin = 10;
+        status_label.halign = Gtk.Align.CENTER;
+        status_label.valign = Gtk.Align.CENTER;
+        status_label.justify = Gtk.Justification.CENTER;
+        dialog.show_progress(status_label);
+        dialog.response.connect(on_dialog_response);
     }
 
     ~StartupCheck() {
+        if (dialog != null) {
+            dialog.response.disconnect(on_dialog_response);
+        }
     }
 
     /**
-     * Emitted when a check is started.
+     * Start start-up check.
      *
-     * @param name    The name of the check.
+     * @param available_web_options    WebOptions to try during requirements check.
      */
-    public virtual signal void task_started(Task task) {
-        running_tasks++;
-    }
-
-    /**
-     * Emitted when a check is finished.
-     *
-     * @param name    The name of the check.
-     */
-    public virtual signal void task_finished(Task task) {
-        running_tasks--;
-        finished_tasks++;
-    }
-
-    /**
-     * Emitted when all checks are considered finished.
-     */
-    public signal void finished(Status final_status);
-
-    /**
-     * Mark all checks as finished.
-     *
-     * Emits {@link finished} signal.
-     *
-     * @return {@link Status.ERROR} if any of checks ended up with {@link Status.ERROR},
-     * {@link Status.WARNING} if there was any warning, finally {@link Status.OK} otherwise.
-     */
-    public Status mark_as_finished() {
-        Status status = get_overall_status();
-        final_status = status;
-        finished(status);
-        return status;
-    }
-
-    /**
-     * Get overall status based on statuses of all checks.
-     *
-     * @return {@link Status.ERROR} if any of checks ended up with {@link Status.ERROR},
-     * {@link Status.WARNING} if there was any warning, finally {@link Status.OK} otherwise.
-     */
-    public Status get_overall_status() {
-        Status result = Status.OK;
-        (unowned ParamSpec)[] properties = get_class().list_properties();
-        foreach (weak ParamSpec property in properties) {
-            if (property.name != "final-status" && property.name.has_suffix("-status")) {
-                Status status = Status.UNKNOWN;
-                this.get(property.name, out status);
-                if (status == Status.ERROR) {
-                    return status;
-                }
-                if (status == Status.WARNING) {
-                    result = status;
+    public async StartupStatus run(WebOptions[] available_web_options) {
+        machine_hash = yield Nuvola.get_machine_hash();
+        model.task_finished.connect_after(on_phase_1_task_finished);
+        check_desktop_portal_available.begin((o, res) => check_desktop_portal_available.end(res));
+        check_app_requirements.begin(available_web_options, (o, res) => check_app_requirements.end(res));
+        check_graphics_drivers.begin((o, res) => check_graphics_drivers.end(res));
+        resume = run.callback;
+        yield;
+        if (model.get_overall_status() != StartupStatus.ERROR) {
+            connect_master_service();
+            #if TILIADO_API
+            if (master != null) {
+                tiliado_activation = new TiliadoActivationClient(master);
+            } else {
+                assert(TILIADO_OAUTH2_CLIENT_ID != null && TILIADO_OAUTH2_CLIENT_ID[0] != '\0');
+                var tiliado = new TiliadoApi2(
+                    TILIADO_OAUTH2_CLIENT_ID, Drt.String.unmask(TILIADO_OAUTH2_CLIENT_SECRET.data),
+                    TILIADO_OAUTH2_API_ENDPOINT, TILIADO_OAUTH2_TOKEN_ENDPOINT, null, "nuvolaplayer");
+                tiliado_activation = new TiliadoActivationLocal(tiliado, config);
+                if (tiliado_activation.get_user_info() == null) {
+                    tiliado_activation.update_user_info_sync();
                 }
             }
+            #endif
+            yield check_tiliado_account(tiliado_activation);
+
         }
-        return result;
+        model.mark_as_finished();
+        yield evaluate_result(model.final_status);
+        return model.final_status;
+    }
+
+    private void on_phase_1_task_finished(StartupResult startup_check, StartupCheck.Task task) {
+        if (startup_check.finished_tasks == 3 && startup_check.running_tasks == 0) {
+            model.task_finished.disconnect(on_phase_1_task_finished);
+            Idle.add((owned) resume);
+        }
     }
 
     /**
@@ -157,27 +126,27 @@ public class StartupCheck : GLib.Object {
      * The {@link xdg_desktop_portal_status} property is populated with the result of this check.
      */
     public async void check_desktop_portal_available() {
-        task_started(Task.DESKTOP_PORTAL);
+        model.task_started(Task.DESKTOP_PORTAL);
         #if FLATPAK
-        xdg_desktop_portal_status = Status.IN_PROGRESS;
+        model.xdg_desktop_portal_status = StartupStatus.IN_PROGRESS;
         try {
             yield Drt.Flatpak.check_desktop_portal_available(null);
-            xdg_desktop_portal_status = Status.OK;
+            model.xdg_desktop_portal_status = StartupStatus.OK;
         } catch (GLib.Error e) {
             if (XDG_DESKTOP_PORTAL_SIGSEGV in e.message) {
-                xdg_desktop_portal_message = ("In case you have the 'xdg-desktop-portal-kde' package installed, "
+                model.xdg_desktop_portal_message = ("In case you have the 'xdg-desktop-portal-kde' package installed, "
                     + "uninstall it and install the 'xdg-desktop-portal-gtk' package instead. Error message: "
                     + e.message);
             } else {
-                xdg_desktop_portal_message = e.message;
+                model.xdg_desktop_portal_message = e.message;
             }
-            xdg_desktop_portal_status = Status.ERROR;
+            model.xdg_desktop_portal_status = StartupStatus.ERROR;
         }
         #else
-        xdg_desktop_portal_status = Status.NOT_APPLICABLE;
+        model.xdg_desktop_portal_status = StartupStatus.NOT_APPLICABLE;
         #endif
         yield Drt.EventLoop.resume_later();
-        task_finished(Task.DESKTOP_PORTAL);
+        model.task_finished(Task.DESKTOP_PORTAL);
     }
 
     /**
@@ -186,9 +155,9 @@ public class StartupCheck : GLib.Object {
      * The {@link app_requirements_status} property is populated with the result of this check.
      */
     public async void check_app_requirements(WebOptions[] available_web_options) {
-        task_started(Task.APP_REQUIREMENTS);
+        model.task_started(Task.APP_REQUIREMENTS);
 
-        app_requirements_status = Status.IN_PROGRESS;
+        model.app_requirements_status = StartupStatus.IN_PROGRESS;
         string? result_message = null;
         try {
             yield format_support.check();
@@ -221,7 +190,7 @@ public class StartupCheck : GLib.Object {
                     "This web app provides invalid metadata about its requirements."
                     + " Please create a bug report. The error message is: %s\n\n%s",
                     e.message, check.web_app.requirements));
-                check_app_requirements_finished(Status.ERROR, (owned) result_message, available_web_options);
+                check_app_requirements_finished(StartupStatus.ERROR, (owned) result_message, available_web_options);
                 return;
             }
         }
@@ -231,7 +200,7 @@ public class StartupCheck : GLib.Object {
             Drt.String.append(ref result_message, "\n",
                 "This web app requires certain technologies to function properly but these requirements "
                 + "have not been satisfied.");
-            check_app_requirements_finished(Status.ERROR, (owned) result_message, available_web_options);
+            check_app_requirements_finished(StartupStatus.ERROR, (owned) result_message, available_web_options);
             warning("Failed requirements: %s", checks[0].parser.failed_requirements ?? "");
             return;
         }
@@ -249,13 +218,13 @@ public class StartupCheck : GLib.Object {
                             "This web app provides invalid metadata about its requirements."
                             + " Please create a bug report. The error message is: %s\n\n%s",
                             e.message, check.web_app.requirements));
-                        check_app_requirements_finished(Status.ERROR, (owned) result_message, available_web_options);
+                        check_app_requirements_finished(StartupStatus.ERROR, (owned) result_message, available_web_options);
                         return;
                     }
                 }
                 if (check.parser.n_unsupported + check.parser.n_unknown == 0) {
                     this.web_options = check.web_options;
-                    check_app_requirements_finished(Status.OK, (owned) result_message, available_web_options);
+                    check_app_requirements_finished(StartupStatus.OK, (owned) result_message, available_web_options);
                     return;
                 }
             }
@@ -267,10 +236,10 @@ public class StartupCheck : GLib.Object {
             + "have not been satisfied.\n\nContact your distributor to get assistance.");
         warning("Failed requirements: %s", checks[0].parser.failed_requirements ?? "");
         warning("Unknown requirements: %s", checks[0].parser.unknown_requirements ?? "");
-        check_app_requirements_finished(Status.ERROR, (owned) result_message, available_web_options);
+        check_app_requirements_finished(StartupStatus.ERROR, (owned) result_message, available_web_options);
     }
 
-    private void check_app_requirements_finished(Status status, owned string? message, WebOptions[] web_options) {
+    private void check_app_requirements_finished(StartupStatus status, owned string? message, WebOptions[] web_options) {
         string msg = (owned) message;
         foreach (WebOptions web_opt in web_options) {
             string[] warnings = web_opt.get_format_support_warnings();
@@ -280,9 +249,9 @@ public class StartupCheck : GLib.Object {
                 }
             }
         }
-        app_requirements_message = (owned) msg;
-        app_requirements_status = status;
-        task_finished(Task.APP_REQUIREMENTS);
+        model.app_requirements_message = (owned) msg;
+        model.app_requirements_status = status;
+        model.task_finished(Task.APP_REQUIREMENTS);
     }
 
     /**
@@ -292,33 +261,33 @@ public class StartupCheck : GLib.Object {
      * properties are populated with the result of this check.
      */
     public async void check_graphics_drivers() {
-        task_started(Task.GRAPHICS_DRIVERS);
-        opengl_driver_status = Status.IN_PROGRESS;
-        vaapi_driver_status = Status.IN_PROGRESS;
-        vdpau_driver_status = Status.IN_PROGRESS;
+        model.task_started(Task.GRAPHICS_DRIVERS);
+        model.opengl_driver_status = StartupStatus.IN_PROGRESS;
+        model.vaapi_driver_status = StartupStatus.IN_PROGRESS;
+        model.vdpau_driver_status = StartupStatus.IN_PROGRESS;
 
         yield Drt.EventLoop.resume_later();
 
         #if FLATPAK
         string? gl_extension = null;
         if (!Graphics.is_required_gl_extension_mounted(out gl_extension)) {
-            opengl_driver_message = Markup.printf_escaped(
+            model.opengl_driver_message = Markup.printf_escaped(
                 "Graphics driver '%s' for Flatpak has not been found on your system. Please consult "
                 + "<a href=\"https://github.com/tiliado/nuvolaruntime/wiki/Graphics-Drivers\">documentation"
                 + " on graphics drivers</a> to get help with installation.", gl_extension);
-            opengl_driver_status = Status.ERROR;
+            model.opengl_driver_status = StartupStatus.ERROR;
         } else {
-            opengl_driver_status = Status.OK;
+            model.opengl_driver_status = StartupStatus.OK;
         }
         #else
-        opengl_driver_status = Status.NOT_APPLICABLE;
+        model.opengl_driver_status = StartupStatus.NOT_APPLICABLE;
         #endif
 
-        vdpau_driver_status = Status.NOT_APPLICABLE;
-        vaapi_driver_status = Status.NOT_APPLICABLE;
+        model.vdpau_driver_status = StartupStatus.NOT_APPLICABLE;
+        model.vaapi_driver_status = StartupStatus.NOT_APPLICABLE;
 
         yield Drt.EventLoop.resume_later();
-        task_finished(Task.GRAPHICS_DRIVERS);
+        model.task_finished(Task.GRAPHICS_DRIVERS);
     }
 
     /**
@@ -327,26 +296,88 @@ public class StartupCheck : GLib.Object {
      * The {@link tiliado_account_status} property is populated with the result of this check.
      */
     public async void check_tiliado_account(TiliadoActivation? activation) {
-        task_started(Task.TILIADO_ACCOUNT);
+        model.task_started(Task.TILIADO_ACCOUNT);
         #if TILIADO_API
-        tiliado_account_status = Status.IN_PROGRESS;
+        model.tiliado_account_status = StartupStatus.IN_PROGRESS;
         yield Drt.EventLoop.resume_later();
         if (activation != null) {
             this.activation = activation;
             TiliadoApi2.User? user = activation.get_user_info();
             if (user != null) {
-                tiliado_account_message = Markup.printf_escaped("Tiliado account: %s", user.name);
-                tiliado_account_status = Status.OK;
+                model.tiliado_account_message = Markup.printf_escaped("Tiliado account: %s", user.name);
+                model.tiliado_account_status = StartupStatus.OK;
             } else {
-                tiliado_account_message ="No Tiliado account.";
-                tiliado_account_status = Status.OK;
+                model.tiliado_account_message ="No Tiliado account.";
+                model.tiliado_account_status = StartupStatus.OK;
             }
         } else {
-            tiliado_account_status = Status.NOT_APPLICABLE;
+            model.tiliado_account_status = StartupStatus.NOT_APPLICABLE;
         }
         yield Drt.EventLoop.resume_later();
         #endif
-        task_finished(Task.TILIADO_ACCOUNT);
+        model.task_finished(Task.TILIADO_ACCOUNT);
+    }
+
+    private void connect_master_service() {
+        var master = new MasterService();
+        if (master.init(app.ipc_bus, this.web_app.id, app.dbus_id)) {
+            model.nuvola_service_status = StartupStatus.OK;
+        } else if (master.error is MasterServiceError.OTHER) {
+            model.nuvola_service_status = StartupStatus.OK;
+            model.nuvola_service_message = Markup.printf_escaped(
+                "Failed to connect to Nuvola Apps Service, but it is optional.\n\n<i>Error message: %s</i>",
+                master.error.message);
+        } else {
+            model.nuvola_service_message = Markup.printf_escaped(
+                "<b>Failed to connect to Nuvola Apps Service.</b>\n\n"
+                + "1. Make sure Nuvola Apps Service is installed.\n"
+                + "2. Make sure Nuvola Apps Service and individual Nuvola Apps are up-to-date.\n"
+                + "3. Close all Nuvola Apps and try launching it again.\n\n"
+                + "", master.error.message);
+            model.nuvola_service_status = StartupStatus.WARNING;
+        }
+        this.master = master;
+    }
+
+    private async void evaluate_result(StartupStatus final_status) {
+        unowned string? button_label = null;
+        switch (final_status) {
+        case StartupStatus.ERROR:
+            #if GENUINE
+            status_label.label = Markup.printf_escaped(
+                "<b>%s script cannot start.</b> <a href=\"%s\">Get help</a>.",
+                app.app_name, Nuvola.HELP_URL);
+            #else
+            status_label.label = Markup.printf_escaped(
+                "<b>%s script cannot start.</b>\n<a href=\"%s\">Get genuine Nuvola Apps Runtime</a>"
+                + " or contact your distributor.", app.app_name, "https://nuvola.tiliado.eu");
+            #endif
+            button_label = "Quit";
+            break;
+        case StartupStatus.WARNING:
+            status_label.label = Markup.printf_escaped("%s script has a few issues but it can start.", app.app_name);
+            button_label = "Continue";
+            break;
+        case StartupStatus.OK:
+            status_label.label = Markup.printf_escaped("%s will load in a few seconds.", app.app_name);
+            break;
+        }
+
+        if (button_label != null && dialog != null) {
+            action_button = dialog.show_action(
+                status_label, button_label, Gtk.ResponseType.OK, Gtk.MessageType.ERROR);
+            dialog.show_tab(AboutDialog.TAB_STARTUP);
+            resume = evaluate_result.callback;
+            yield;
+        }
+    }
+
+    private void on_dialog_response(int response_id) {
+        dialog.response.disconnect(on_dialog_response);
+        dialog = null;
+        if (action_button != null && resume != null) {
+            Idle.add((owned) resume);
+        }
     }
 
     public enum Task {
@@ -355,87 +386,6 @@ public class StartupCheck : GLib.Object {
         GRAPHICS_DRIVERS,
         TILIADO_ACCOUNT,
         NUVOLA_SERVICE;
-    }
-
-    /**
-     * Statuses of {@link StartupCheck}s.
-     */
-    public enum Status {
-        /**
-         * The corresponding check hasn't run yet.
-         */
-        UNKNOWN,
-        /**
-         * The check is irrelevant in current environment.
-         */
-        NOT_APPLICABLE,
-        /**
-         * The corresponding check has stared but not finished yet.
-         */
-        IN_PROGRESS,
-        /**
-         * Everything is OK.
-         */
-        OK,
-        /**
-         * There is an issue but it is not so severe. See the corresponding message property for more info.
-         */
-        WARNING,
-        /**
-         * The corresponding check failed. See the corresponding message property for more info.
-         */
-        ERROR;
-
-        /**
-         * Get short string representing the status.
-         *
-         * @return A short status string.
-         */
-        public string get_blurb() {
-            switch (this) {
-            case UNKNOWN:
-                return "Unknown";
-            case IN_PROGRESS:
-                return "In Progress";
-            case OK:
-                return "OK";
-            case WARNING:
-                return "Warning";
-            case ERROR:
-                return "Error";
-            case NOT_APPLICABLE:
-                return "Not Applicable";
-            default:
-                return "";
-            }
-        }
-
-        /**
-         * Return suitable CSS class for a badge.
-         *
-         * @return A suitable CSS class.
-         */
-        public string get_badge_class() {
-            switch (this) {
-            case IN_PROGRESS:
-                return Drtgtk.Css.BADGE_INFO;
-            case OK:
-                return Drtgtk.Css.BADGE_OK;
-            case WARNING:
-                return Drtgtk.Css.BADGE_WARNING;
-            case ERROR:
-                return Drtgtk.Css.BADGE_ERROR;
-            case NOT_APPLICABLE:
-            case UNKNOWN:
-                return Drtgtk.Css.BADGE_DEFAULT;
-            default:
-                return Drtgtk.Css.BADGE_DEFAULT;
-            }
-        }
-
-        public static Status[] all() {
-            return {UNKNOWN, NOT_APPLICABLE, IN_PROGRESS, OK, WARNING, ERROR};
-        }
     }
 
     private class WebOptionsCheck {

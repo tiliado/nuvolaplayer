@@ -41,7 +41,7 @@ public class AppRunnerController: Drtgtk.Application {
     public string? machine_hash {get; private set; default = null;}
     public MasterService master {get; private set;}
     private WebOptions[] available_web_options;
-    private WebOptions web_options;
+    private WebOptions? web_options;
     public WebEngine web_engine {get; private set;}
     public Bindings bindings {get; private set;}
     public IpcBus ipc_bus {get; private set; default=null;}
@@ -56,7 +56,7 @@ public class AppRunnerController: Drtgtk.Application {
     private FormatSupport format_support = null;
     private Drt.Lst<Component> components = null;
     private HashTable<string, Variant>? web_worker_data = null;
-    private StartupWindow? startup_window = null;
+    private StartupResult? startup_model;
     private TiliadoActivation? tiliado_activation = null;
     private URLBar? url_bar = null;
     private HashTable<string, Gtk.InfoBar> info_bars;
@@ -108,69 +108,39 @@ public class AppRunnerController: Drtgtk.Application {
         window_removed.connect(on_window_removed);
         init_settings();
         init_base_actions();
+        init_ipc();
         format_support = new FormatSupport(storage.require_data_file("audio/audiotest.mp3").get_path());
-        var startup_check = new StartupCheck(web_app, format_support);
-        startup_window = new StartupWindow(this, startup_check);
-        startup_window.present();
-        start_startup_check.begin(startup_check, (o, res) => {start_startup_check.end(res);});
+        startup_model = new StartupResult();
+        do_about();
+        web_app.scale_factor = about_dialog.scale_factor * 1.0;
+        debug("Scale factor: %d", about_dialog.scale_factor);
+        hold();
+        var startup_check = new StartupCheck(this, startup_model, about_dialog, web_app, format_support);
+        startup_check.run.begin(available_web_options, on_startup_check_run_done);
     }
 
-    private async void start_startup_check(StartupCheck startup_check) {
-        machine_hash = yield Nuvola.get_machine_hash();
-        web_app.scale_factor = startup_window.scale_factor * 1.0;
-        debug("Scale factor: %d", startup_window.scale_factor);
-        startup_check.task_finished.connect_after(on_startup_check_task_finished);
-        startup_check.check_desktop_portal_available.begin((o, res) => startup_check.check_desktop_portal_available.end(res));
-        startup_check.check_app_requirements.begin(available_web_options, (o, res) => startup_check.check_app_requirements.end(res));
-        startup_check.check_graphics_drivers.begin((o, res) => startup_check.check_graphics_drivers.end(res));
-    }
-
-    private void on_startup_check_task_finished(StartupCheck startup_check, StartupCheck.Task task) {
-        if (startup_check.finished_tasks == 3 && startup_check.running_tasks == 0) {
-            startup_window.ready_to_continue.connect(on_startup_window_ready_to_continue);
-            startup_check.task_finished.disconnect(on_startup_check_task_finished);
-            if (startup_check.get_overall_status() == StartupCheck.Status.ERROR) {
-                startup_check.mark_as_finished();
-            } else {
-                init_ipc();
-                connect_master_service(startup_check);
-                #if TILIADO_API
-                if (ipc_bus.master != null) {
-                    tiliado_activation = new TiliadoActivationClient(ipc_bus.master);
-                } else {
-                    assert(TILIADO_OAUTH2_CLIENT_ID != null && TILIADO_OAUTH2_CLIENT_ID[0] != '\0');
-                    var tiliado = new TiliadoApi2(
-                        TILIADO_OAUTH2_CLIENT_ID, Drt.String.unmask(TILIADO_OAUTH2_CLIENT_SECRET.data),
-                        TILIADO_OAUTH2_API_ENDPOINT, TILIADO_OAUTH2_TOKEN_ENDPOINT, null, "nuvolaplayer");
-                    tiliado_activation = new TiliadoActivationLocal(tiliado, config);
-                    if (tiliado_activation.get_user_info() == null) {
-                        tiliado_activation.update_user_info_sync();
-                    }
-                }
-                #endif
-                startup_check.check_tiliado_account.begin(tiliado_activation, (o, res) => {
-                    startup_check.check_tiliado_account.end(res);
-                    startup_check.mark_as_finished();
-                });
-            }
-        }
-    }
-
-    private void on_startup_window_ready_to_continue(StartupWindow window) {
-        startup_window.ready_to_continue.disconnect(on_startup_window_ready_to_continue);
-        switch (startup_window.model.final_status) {
-        case StartupCheck.Status.WARNING:
-        case StartupCheck.Status.OK:
-            web_options = startup_window.model.web_options;
+    private void on_startup_check_run_done(GLib.Object? object, AsyncResult res) {
+        release();
+        var startup = (StartupCheck) object;
+        assert(startup != null);
+        StartupStatus status = startup.run.end(res);
+        switch (status) {
+        case StartupStatus.WARNING:
+        case StartupStatus.OK:
+            machine_hash = (owned) startup.machine_hash;
+            master = startup.master;
+            tiliado_activation = startup.tiliado_activation;
+            web_options = startup.web_options;
             init_gui();
+            if (about_dialog != null && !about_dialog.show_welcome_note(this.master.config ?? this.config)) {
+                about_dialog.close();
+            }
             init_web_engine();
             break;
         default:
             do_quit();
-            break;
+            break ;
         }
-        startup_window.destroy();
-        startup_window = null;
     }
 
     private void init_settings() {
@@ -228,11 +198,12 @@ public class AppRunnerController: Drtgtk.Application {
             //          Action(group, scope, name, label?, mnemo_label?, icon?, keybinding?, callback?)
             ah.simple_action("main", "app", Actions.ACTIVATE, "Activate main window", null, null, null, do_activate),
             ah.simple_action("main", "app", Actions.QUIT, "Quit", "_Quit", "application-exit", "<ctrl>Q", do_quit),
+            ah.simple_action("main", "app", Actions.NEWS, "News", "_News", null, null, do_show_news),
             ah.simple_action("main", "app", Actions.ABOUT, "About", "_About", null, null, do_about),
             ah.simple_action("main", "app", Actions.HELP, "Help", "_Help", null, "F1", do_help),
         };
         actions.add_actions(actions_spec);
-        set_app_menu_items({Actions.HELP, Actions.ABOUT, Actions.QUIT});
+        set_app_menu_items({Actions.HELP, Actions.NEWS, Actions.ABOUT, Actions.QUIT});
     }
 
     private void init_ipc() {
@@ -265,27 +236,6 @@ public class AppRunnerController: Drtgtk.Application {
         } catch (Drt.IOError e) {
             error("Failed to start IPC server. %s", e.message);
         }
-    }
-
-    private void connect_master_service(StartupCheck startup_check) {
-        var master = new MasterService();
-        if (master.init(ipc_bus, this.web_app.id, this.dbus_id)) {
-            startup_check.nuvola_service_status = StartupCheck.Status.OK;
-        } else if (master.error is MasterServiceError.OTHER) {
-            startup_check.nuvola_service_status = StartupCheck.Status.OK;
-            startup_check.nuvola_service_message = Markup.printf_escaped(
-                "Failed to connect to Nuvola Apps Service, but it is optional.\n\n<i>Error message: %s</i>",
-                master.error.message);
-        } else {
-            startup_check.nuvola_service_message = Markup.printf_escaped(
-                "<b>Failed to connect to Nuvola Apps Service.</b>\n\n"
-                + "1. Make sure Nuvola Apps Service is installed.\n"
-                + "2. Make sure Nuvola Apps Service and individual Nuvola Apps are up-to-date.\n"
-                + "3. Close all Nuvola Apps and try launching it again.\n\n"
-                + "", master.error.message);
-            startup_check.nuvola_service_status = StartupCheck.Status.WARNING;
-        }
-        this.master = master;
     }
 
     private void init_gui() {
@@ -358,7 +308,6 @@ public class AppRunnerController: Drtgtk.Application {
         /* It is necessary to init WebEngine after format support check because WebKitPluginProcess2
          * must not be terminated during plugin discovery process. Issue: tiliado/nuvolaruntime#354 */
         web_engine.init();
-        show_welcome_screen();
     }
 
     private void init_app_runner() {
@@ -373,7 +322,7 @@ public class AppRunnerController: Drtgtk.Application {
     }
 
     private void load_app() {
-        set_app_menu_items({Actions.PREFERENCES, Actions.HELP, Actions.WELCOME, Actions.ABOUT, Actions.QUIT});
+        set_app_menu_items({Actions.PREFERENCES, Actions.HELP, Actions.NEWS, Actions.ABOUT, Actions.QUIT});
         main_window.set_menu_button_items({
             Actions.ZOOM_IN, Actions.ZOOM_OUT, Actions.ZOOM_RESET, "|",
             Actions.TOGGLE_SIDEBAR, "|", Actions.GO_LOAD_URL});
@@ -388,8 +337,8 @@ public class AppRunnerController: Drtgtk.Application {
     public override void activate() {
         if (main_window != null) {
             main_window.present();
-        } else if (startup_window != null) {
-            startup_window.present();
+        } else if (about_dialog != null) {
+            about_dialog.present();
         } else {
             start();
         }
@@ -531,29 +480,28 @@ public class AppRunnerController: Drtgtk.Application {
 
     private void do_about() {
         if (about_dialog == null) {
-            about_dialog = new AboutDialog(main_window, web_app, {web_options}, new PatronBox());
-            about_dialog.response.connect(on_dialog_response);
+            about_dialog = new AboutDialog(
+                main_window, new StartupView(this, startup_model), web_app,
+                web_options != null ? new WebOptions[] {web_options} : available_web_options, new PatronBox());
+            about_dialog.response.connect_after(on_dialog_response);
         }
         about_dialog.present();
     }
 
-    /**
-     * Show welcome screen only if criteria are met.
-     */
-    private void show_welcome_screen() {
-        Drt.KeyValueStorage config = this.master.config ?? this.config;
-        if (config.get_string("nuvola.welcome_screen") != get_welcome_screen_name()) {
-            do_about();
-            config.set_string("nuvola.welcome_screen", get_welcome_screen_name());
-        }
-    }
-
     private void on_dialog_response(Gtk.Dialog dialog, int response_id) {
-        if (dialog == about_dialog) {
-            about_dialog = null;
+        switch (response_id) {
+        case Gtk.ResponseType.DELETE_EVENT:
+        case Gtk.ResponseType.CLOSE:
+            if (dialog == about_dialog) {
+                about_dialog = null;
+            }
+            dialog.response.disconnect(on_dialog_response);
+            dialog.destroy();
+            break;
+        case AboutDialog.RESPONSE_SHOW_NEWS:
+            do_show_news();
+            break;
         }
-        dialog.response.disconnect(on_dialog_response);
-        dialog.destroy();
     }
 
     private void do_toggle_sidebar() {
@@ -571,6 +519,10 @@ public class AppRunnerController: Drtgtk.Application {
 
     private void do_help() {
         show_uri(Nuvola.HELP_URL);
+    }
+
+    private void do_show_news() {
+        show_uri("https://nuvola.tiliado.eu/docs/4/news/");
     }
 
     private void do_load_url() {

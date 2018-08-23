@@ -125,7 +125,7 @@ public class AboutScreen: Gtk.Grid {
         label.selectable = true;
         attach(label, 0, ++line, 3, 1);
         if (web_options != null) {
-            foreach (WebOptions entry in web_options) {
+            foreach (unowned WebOptions entry in web_options) {
                 label = new Gtk.Label("Web Engine: " + entry.get_name_version());
                 label.selectable = true;
                 attach(label, 0, ++line, 3, 1);
