@@ -1,6 +1,6 @@
 ---
 name: "\U0001F41B Report bug"
-about: "If something isn't working as expected \U0001F914."
+about: "Use this template if the genuine builds of Nuvola aren't working as expected \U0001F914."
 
 ---
 

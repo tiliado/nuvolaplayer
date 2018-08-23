@@ -1,6 +1,6 @@
 ---
 name: "\U0001F4AC Ask question"
-about: If you have any question, don't hesitate to ask us.
+about: Use this template if you have a question which is a feature request or bug report.
 
 ---
 

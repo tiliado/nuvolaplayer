@@ -1,6 +1,6 @@
 ---
 name: "\U0001F680 Request feature"
-about: "If you have a suggestion (and may want get it to implemented \U0001F642)!"
+about: "Use this template if you have a suggestion (and may want get it to implemented \U0001F642)."
 
 ---
 
