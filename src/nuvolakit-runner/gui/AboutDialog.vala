@@ -178,7 +178,7 @@ public class AboutDialog: Gtk.Dialog {
         if (force || old_screen_name != get_welcome_screen_name()) {
             string pattern = (old_screen_name == null ?
                 "You have installed <b>%s %s %s</b>." : "You have upgraded to <b>%s %s %s</b>.");
-            Gtk.Label label = Drtgtk.Labels.markup(pattern, get_app_name(), get_short_version(), "Runtime");
+            Gtk.Label label = Drtgtk.Labels.markup(pattern, get_app_name(), "Runtime", get_short_version());
             label.yalign = 0.5f;
             show_tab(TAB_TIPS);
             show_action(label, "What's New", RESPONSE_SHOW_NEWS, Gtk.MessageType.INFO);
