@@ -122,7 +122,8 @@ public class TiliadoActivation : GLib.Object {
 
     public void drop_activation() {
         tiliado.drop_token();
-        update_user_info();
+        cache_user(null);
+        user_info_updated(null);
     }
 
     public TiliadoApi2.User? update_user_info_sync() {
