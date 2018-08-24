@@ -88,7 +88,6 @@ public class TipsWidget : Gtk.Grid {
                 grid = new Gtk.Grid();
                 stack.add(grid);
                 grid.row_spacing = 10;
-                stack.add(grid);
                 grid.orientation = Gtk.Orientation.VERTICAL;
                 Gtk.Label label = plain(sections[i], false, true);
                 label.halign = Gtk.Align.CENTER;
