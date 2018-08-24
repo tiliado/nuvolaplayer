@@ -93,11 +93,15 @@ public class TiliadoActivation : GLib.Object {
     public signal void activation_finished(TiliadoApi2.User? user);
 
     public bool has_user_membership(TiliadoMembership membership) {
+        return get_membership() >= membership;
+    }
+
+    public TiliadoMembership get_membership() {
         TiliadoApi2.User user = get_user_info();
-        if (user == null) {
-            return TiliadoMembership.NONE == membership;
+        if (user != null) {
+            return TiliadoMembership.from_uint(user.membership);
         }
-        return user.membership >= membership;
+        return TiliadoMembership.NONE;
     }
 
     public TiliadoApi2.User? get_user_info() {
