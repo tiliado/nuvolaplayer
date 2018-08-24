@@ -488,7 +488,7 @@ public class AppRunnerController: Drtgtk.Application {
     private void do_about() {
         if (about_dialog == null) {
             about_dialog = new AboutDialog(
-                main_window, new StartupView(this, startup_model), web_app,
+                main_window, storage, new StartupView(this, startup_model), web_app,
                 web_options != null ? new WebOptions[] {web_options} : available_web_options, new PatronBox());
             about_dialog.response.connect_after(on_dialog_response);
         }

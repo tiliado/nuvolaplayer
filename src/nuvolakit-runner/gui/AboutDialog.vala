@@ -65,6 +65,7 @@ public void debug_print_version_info(WebApp? web_app) {
 
 public class AboutDialog: Gtk.Dialog {
     public const string TAB_ABOUT = "about";
+    public const string TAB_TIPS = "startup";
     public const string TAB_STARTUP = "startup";
     public const int RESPONSE_SHOW_NEWS = -9;
     public StartupView? startup {get; private set;}
@@ -75,7 +76,7 @@ public class AboutDialog: Gtk.Dialog {
     private unowned Gtk.Label? status_label;
     private unowned Gtk.Button? action_button;
 
-    public AboutDialog(Gtk.Window? parent, StartupView? startup, WebApp? web_app, WebOptions[]? web_options, Gtk.Widget? sidebar) {
+    public AboutDialog(Gtk.Window? parent, Drt.Storage storage, StartupView? startup, WebApp? web_app, WebOptions[]? web_options, Gtk.Widget? sidebar) {
         GLib.Object(title: "About", transient_for: parent, use_header_bar: 1);
         set_default_size(300, -1);
         var grid = new Gtk.Grid();
@@ -91,6 +92,10 @@ public class AboutDialog: Gtk.Dialog {
         Gtk.Widget screen = new AboutScreen(web_app, web_options);
         screen.show();
         stack.add_titled(screen, TAB_ABOUT, "About");
+        if (web_app != null) {
+            stack.add_titled(new TipsWidget(web_app, storage), TAB_TIPS, "Tips");
+            stack.visible_child_name = TAB_TIPS;
+        }
         if (startup != null) {
             stack.add_titled(startup, TAB_STARTUP, "Start-Up");
         }
@@ -175,7 +180,7 @@ public class AboutDialog: Gtk.Dialog {
                 "You have installed <b>%s %s %s</b>." : "You have upgraded to <b>%s %s %s</b>.");
             Gtk.Label label = Drtgtk.Labels.markup(pattern, get_app_name(), get_short_version(), "Runtime");
             label.yalign = 0.5f;
-            show_tab(TAB_ABOUT);
+            show_tab(TAB_TIPS);
             show_action(label, "What's New", RESPONSE_SHOW_NEWS, Gtk.MessageType.INFO);
             config.set_string("nuvola.welcome_screen", get_welcome_screen_name());
             return true;

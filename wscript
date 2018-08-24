@@ -482,7 +482,7 @@ def configure(ctx):
     ctx.define("NUVOLA_APPNAME", APPNAME)
     ctx.define("NUVOLA_OLDNAME", "nuvolaplayer3")
     ctx.define("NUVOLA_NAME", ctx.env.NAME)
-    ctx.define("NUVOLA_WELCOME_SCREEN_NAME", ctx.env.RELEASE)
+    ctx.define("NUVOLA_WELCOME_SCREEN_NAME", ctx.env.RELEASE + "U9")
     ctx.define("NUVOLA_UNIQUE_NAME", ctx.env.UNIQUE_NAME)
     ctx.define("NUVOLA_APP_ICON", ctx.env.ICON_NAME)
     ctx.define("NUVOLA_RELEASE", ctx.env.RELEASE)
@@ -881,8 +881,9 @@ def build(ctx):
 
     ctx.symlink_as('${PREFIX}/share/%s/www/engine.io.js' % APPNAME, ctx.env.JSDIR + '/engine.io-client/engine.io.js')
 
-    www = ctx.path.find_dir("data/www")
-    ctx.install_files('${PREFIX}/share/' + APPNAME, www.ant_glob('**'), cwd=www.parent, relative_trick=True)
+    for dirname in "www", "tips":
+        directory = ctx.path.find_dir("data/" + dirname)
+        ctx.install_files('${PREFIX}/share/' + APPNAME, directory.ant_glob('**'), cwd=directory.parent, relative_trick=True)
 
     app_icons = ctx.path.find_node("data/icons")
     for size in (16, 22, 24, 32, 48, 64, 128, 256):

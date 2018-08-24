@@ -22,7 +22,7 @@ mk_symlinks()
 {
     build_datadir="./build/share/nuvolaruntime"
     mkdir -p "$build_datadir"
-    datadirs="www"
+    datadirs="www tips"
     for datadir in $datadirs; do
         if [ ! -e "${build_datadir}/${datadir}" ]; then
             ln -sv "../../../data/$datadir" "$build_datadir"
