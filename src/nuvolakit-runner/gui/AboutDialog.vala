@@ -65,7 +65,7 @@ public void debug_print_version_info(WebApp? web_app) {
 
 public class AboutDialog: Gtk.Dialog {
     public const string TAB_ABOUT = "about";
-    public const string TAB_TIPS = "startup";
+    public const string TAB_TIPS = "tips";
     public const string TAB_STARTUP = "startup";
     public const int RESPONSE_SHOW_NEWS = -9;
     public StartupView? startup {get; private set;}
