@@ -320,16 +320,7 @@ public class MasterController : Drtgtk.Application {
     }
 
     private void init_tiliado_account() {
-        #if TILIADO_API
-        assert(TILIADO_OAUTH2_CLIENT_ID != null && TILIADO_OAUTH2_CLIENT_ID[0] != '\0');
-        var tiliado = new TiliadoApi2(
-            TILIADO_OAUTH2_CLIENT_ID, Drt.String.unmask(TILIADO_OAUTH2_CLIENT_SECRET.data),
-            TILIADO_OAUTH2_API_ENDPOINT, TILIADO_OAUTH2_TOKEN_ENDPOINT, null, "nuvolaplayer");
-        activation = new TiliadoActivationManager(tiliado, server, config);
-        if (activation.get_user_info() == null) {
-            activation.update_user_info_sync();
-        }
-        #endif
+        activation = TiliadoActivation.create_if_enabled(config);
     }
 }
 

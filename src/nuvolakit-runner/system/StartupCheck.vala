@@ -91,20 +91,7 @@ public class StartupCheck : GLib.Object {
         yield;
         if (model.get_overall_status() != StartupStatus.ERROR) {
             connect_master_service();
-            #if TILIADO_API
-            if (app.ipc_bus.master != null) {
-                tiliado_activation = new TiliadoActivationClient(app.ipc_bus.master);
-            } else {
-                assert(TILIADO_OAUTH2_CLIENT_ID != null && TILIADO_OAUTH2_CLIENT_ID[0] != '\0');
-                var tiliado = new TiliadoApi2(
-                    TILIADO_OAUTH2_CLIENT_ID, Drt.String.unmask(TILIADO_OAUTH2_CLIENT_SECRET.data),
-                    TILIADO_OAUTH2_API_ENDPOINT, TILIADO_OAUTH2_TOKEN_ENDPOINT, null, "nuvolaplayer");
-                tiliado_activation = new TiliadoActivationLocal(tiliado, app.config);
-                if (tiliado_activation.get_user_info() == null) {
-                    tiliado_activation.update_user_info_sync();
-                }
-            }
-            #endif
+            tiliado_activation = TiliadoActivation.create_if_enabled(master.config ?? app.config);
             yield check_tiliado_account(tiliado_activation);
 
         }
