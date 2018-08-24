@@ -92,14 +92,14 @@ public class StartupCheck : GLib.Object {
         if (model.get_overall_status() != StartupStatus.ERROR) {
             connect_master_service();
             #if TILIADO_API
-            if (master != null) {
-                tiliado_activation = new TiliadoActivationClient(master);
+            if (app.ipc_bus.master != null) {
+                tiliado_activation = new TiliadoActivationClient(app.ipc_bus.master);
             } else {
                 assert(TILIADO_OAUTH2_CLIENT_ID != null && TILIADO_OAUTH2_CLIENT_ID[0] != '\0');
                 var tiliado = new TiliadoApi2(
                     TILIADO_OAUTH2_CLIENT_ID, Drt.String.unmask(TILIADO_OAUTH2_CLIENT_SECRET.data),
                     TILIADO_OAUTH2_API_ENDPOINT, TILIADO_OAUTH2_TOKEN_ENDPOINT, null, "nuvolaplayer");
-                tiliado_activation = new TiliadoActivationLocal(tiliado, config);
+                tiliado_activation = new TiliadoActivationLocal(tiliado, app.config);
                 if (tiliado_activation.get_user_info() == null) {
                     tiliado_activation.update_user_info_sync();
                 }
@@ -301,7 +301,6 @@ public class StartupCheck : GLib.Object {
         model.tiliado_account_status = StartupStatus.IN_PROGRESS;
         yield Drt.EventLoop.resume_later();
         if (activation != null) {
-            this.activation = activation;
             TiliadoApi2.User? user = activation.get_user_info();
             if (user != null) {
                 model.tiliado_account_message = Markup.printf_escaped("Tiliado account: %s", user.name);
