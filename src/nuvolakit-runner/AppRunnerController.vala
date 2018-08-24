@@ -63,7 +63,6 @@ public class AppRunnerController: Drtgtk.Application {
     private MainLoopAdaptor? mainloop = null;
     private AboutDialog? about_dialog = null;
     private PreferencesDialog? preferences_dialog = null;
-    string? theme_not_found = null;
 
     public AppRunnerController(
         Drt.Storage storage, WebApp web_app, WebAppStorage app_storage) {
@@ -186,7 +185,6 @@ public class AppRunnerController: Drtgtk.Application {
             warning("GTK+ theme '%s' does not exist, using Greybird theme instead.", theme);
             Drtgtk.DesktopShell.set_gtk_theme("Greybird");
             config.set_string(ConfigKey.GTK_THEME, "Greybird");
-            theme_not_found = (owned) theme;
         }
         #endif
     }
@@ -283,13 +281,6 @@ public class AppRunnerController: Drtgtk.Application {
         show_error.connect(on_show_error);
         show_warning.connect(on_show_warning);
         info_bar_response.connect(on_info_bar_response);
-
-        if (theme_not_found != null) {
-            string text = "A fallback GTK+ theme is in use because '%s' theme for Flatpak has not been found.".printf(
-                theme_not_found);
-            show_info_bar("theme-warning", Gtk.MessageType.WARNING, text, {"Change theme", "Install themes"});
-            theme_not_found = null;
-        }
     }
 
     private void init_web_engine() {
