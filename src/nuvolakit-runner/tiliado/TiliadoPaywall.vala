@@ -28,16 +28,19 @@ public class TiliadoPaywall : GLib.Object {
     public TiliadoMembership tier {get; private set; default = TiliadoMembership.NONE;}
     public bool unlocked {get; private set; default = false;}
     private TiliadoActivation? tiliado = null;
+    private TiliadoGumroad gumroad;
     private Drtgtk.Application app;
     private bool activation_pending = false;
 
-    public TiliadoPaywall(TiliadoActivation tiliado, Drtgtk.Application app) {
+    public TiliadoPaywall(Drtgtk.Application app, TiliadoActivation tiliado, TiliadoGumroad gumroad) {
         this.tiliado = tiliado;
+        this.gumroad = gumroad;
         this.app = app;
         tiliado.activation_started.connect(on_activation_started);
         tiliado.activation_failed.connect(on_activation_failed);
         tiliado.activation_finished.connect(on_activation_finished);
         tiliado.user_info_updated.connect(on_user_info_updated);
+        gumroad.notify["cached-license"].connect_after(on_gumroad_license_changed);
         update_tier_info();
     }
 
@@ -46,6 +49,7 @@ public class TiliadoPaywall : GLib.Object {
         tiliado.activation_failed.disconnect(on_activation_failed);
         tiliado.activation_finished.disconnect(on_activation_finished);
         tiliado.user_info_updated.disconnect(on_user_info_updated);
+        gumroad.notify["cached-license"].disconnect(on_gumroad_license_changed);
     }
 
     public signal void tier_info_updated();
@@ -57,6 +61,12 @@ public class TiliadoPaywall : GLib.Object {
     public signal void tiliado_account_linking_failed(string message);
 
     public signal void tiliado_account_linking_finished();
+
+    public signal void verifying_gumroad_license();
+
+    public signal void gumroad_license_verification_failed(string? reason);
+
+    public signal void gumroad_license_invalid();
 
     public bool has_tier(TiliadoMembership tier) {
         return this.tier >= tier;
@@ -86,9 +96,24 @@ public class TiliadoPaywall : GLib.Object {
         return tiliado.has_user_membership(TiliadoMembership.BASIC);
     }
 
+    private bool has_gumroad_license() {
+        return gumroad.cached_license != null;
+    }
+
+    public TiliadoLicense? get_gumroad_license() {
+        return gumroad.cached_license;
+    }
+
+    public TiliadoMembership get_gumroad_license_tier() {
+        return gumroad.get_tier();
+    }
+
     public void refresh() {
         if (tiliado.get_user_info() == null) {
             tiliado.update_user_info_sync();
+        }
+        if (gumroad.needs_refresh) {
+            gumroad.refresh_license_sync();
         }
         update_tier_info();
     }
@@ -111,10 +136,13 @@ public class TiliadoPaywall : GLib.Object {
     }
 
     private void update_tier_info() {
-        unlocked = is_tiliado_developer() || has_tiliado_account_purchases();
+        unlocked = is_tiliado_developer() || has_tiliado_account_purchases() || has_gumroad_license();
         TiliadoMembership result = TiliadoMembership.NONE;
         TiliadoMembership candidate = TiliadoMembership.NONE;
         if ((candidate = get_tiliado_account_tier()) > result) {
+            result = candidate;
+        }
+        if ((candidate = gumroad.get_tier()) > result) {
             result = candidate;
         }
         this.tier = result;
@@ -158,6 +186,40 @@ public class TiliadoPaywall : GLib.Object {
         if (!activation_pending) {
             update_tier_info();
         }
+    }
+
+    // Gumroad license
+
+    public void drop_gumroad_license() {
+        gumroad.drop_license();
+        update_tier_info();
+    }
+
+    public void verify_gumroad_license(string key) {
+        verifying_gumroad_license();
+        gumroad.verify_license.begin(key, false, on_gumroad_license_verified);
+    }
+
+    private void on_gumroad_license_verified(GLib.Object? o, AsyncResult res) {
+        GumroadLicense? license;
+        TiliadoMembership tier;
+        bool valid;
+        try {
+            valid = gumroad.verify_license.end(res, out license, out tier);
+        } catch (Oauth2Error e) {
+            gumroad_license_verification_failed(e.message);
+            return;
+        }
+        if (valid) {
+            gumroad.cache_license(license);
+            update_tier_info();
+        } else {
+            gumroad_license_invalid();
+        }
+    }
+
+    private void on_gumroad_license_changed(GLib.Object emitter, ParamSpec param) {
+        update_tier_info();
     }
 }
 

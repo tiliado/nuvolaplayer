@@ -322,7 +322,8 @@ public class MasterController : Drtgtk.Application {
     private void init_tiliado_account() {
         TiliadoActivation? activation = TiliadoActivation.create_if_enabled(config);
         if (activation != null) {
-            paywall = new TiliadoPaywall(activation, this);
+            var gumroad = new TiliadoGumroad(config, Drt.String.unmask(TILIADO_OAUTH2_CLIENT_SECRET.data));
+            paywall = new TiliadoPaywall(this, activation, gumroad);
             paywall.refresh();
         }
     }
