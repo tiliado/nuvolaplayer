@@ -33,6 +33,7 @@ public class MediaKeysComponent: Component {
 
     public MediaKeysComponent(Drtgtk.Application app, Bindings bindings, Drt.KeyValueStorage config, IpcBus bus, string web_app_id) {
         base("mediakeys", "Multimedia keys", "Handles multimedia keys of your keyboard.", "media_keys");
+        this.required_membership = TiliadoMembership.BASIC;
         this.bindings = bindings;
         this.app = app;
         this.bus = bus;

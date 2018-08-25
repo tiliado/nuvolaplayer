@@ -44,6 +44,7 @@ public class AudioScrobblerComponent: Component {
     public AudioScrobblerComponent(
         Drtgtk.Application app, Bindings bindings, Drt.KeyValueStorage? global_config, Drt.KeyValueStorage config, Soup.Session connection) {
         base("scrobbler", "Audio Scrobbling", "Integration with an audio scrobbling service - Last FM.", "scrobbling");
+        this.required_membership = TiliadoMembership.BASIC;
         this.bindings = bindings;
         this.app = app;
         this.global_config = global_config ?? config;

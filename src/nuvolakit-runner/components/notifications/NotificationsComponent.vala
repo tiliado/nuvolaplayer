@@ -33,6 +33,7 @@ public class NotificationsComponent: Component {
 
     public NotificationsComponent(AppRunnerController app, Bindings bindings, ActionsHelper actions_helper) {
         base("notifications", "Notifications", "Shows desktop notifications.", "notifications");
+        this.required_membership = TiliadoMembership.BASIC;
         this.bindings = bindings;
         this.actions_helper = actions_helper;
         this.app = app;
