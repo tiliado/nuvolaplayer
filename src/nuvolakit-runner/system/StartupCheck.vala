@@ -34,7 +34,7 @@ private const string XDG_DESKTOP_PORTAL_SIGSEGV = "GDBus.Error:org.freedesktop.D
 public class StartupCheck : GLib.Object {
     public WebOptions? web_options = null;
     public MasterService? master = null;
-    public TiliadoActivation? tiliado_activation = null;
+    public TiliadoPaywall? paywall = null;
     public string? machine_hash = null;
     private StartupResult model;
     private FormatSupport format_support;
@@ -91,8 +91,9 @@ public class StartupCheck : GLib.Object {
         yield;
         if (model.get_overall_status() != StartupStatus.ERROR) {
             connect_master_service();
-            tiliado_activation = TiliadoActivation.create_if_enabled(master.config ?? app.config);
-            yield check_tiliado_account(tiliado_activation);
+            TiliadoActivation? activation = TiliadoActivation.create_if_enabled(master.config ?? app.config);
+            paywall = activation != null ? new TiliadoPaywall(activation, app) : null;
+            yield check_tiliado_account(paywall);
 
         }
         model.mark_as_finished();
@@ -282,18 +283,18 @@ public class StartupCheck : GLib.Object {
      *
      * The {@link tiliado_account_status} property is populated with the result of this check.
      */
-    public async void check_tiliado_account(TiliadoActivation? activation) {
+    public async void check_tiliado_account(TiliadoPaywall? paywall) {
         model.task_started(Task.TILIADO_ACCOUNT);
         #if TILIADO_API
         model.tiliado_account_status = StartupStatus.IN_PROGRESS;
         yield Drt.EventLoop.resume_later();
-        if (activation != null) {
-            TiliadoApi2.User? user = activation.get_user_info();
-            if (user != null) {
-                model.tiliado_account_message = Markup.printf_escaped("Tiliado account: %s", user.name);
+        if (paywall != null) {
+            paywall.refresh();
+            if (paywall.unlocked) {
+                model.tiliado_account_message = Markup.printf_escaped("Features Tier: %s", paywall.tier.get_label());
                 model.tiliado_account_status = StartupStatus.OK;
             } else {
-                model.tiliado_account_message ="No Tiliado account.";
+                model.tiliado_account_message = "Features Tier: Free";
                 model.tiliado_account_status = StartupStatus.OK;
             }
         } else {

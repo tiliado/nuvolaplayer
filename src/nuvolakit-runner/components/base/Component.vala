@@ -47,9 +47,9 @@ public abstract class Component: GLib.Object {
             help_url: create_help_url(help_page));
     }
 
-    public bool is_membership_ok(TiliadoActivation? activation) {
+    public bool is_membership_ok(TiliadoPaywall? paywall) {
         return (required_membership == TiliadoMembership.NONE
-        || activation == null || activation.has_user_membership(required_membership));
+        || paywall == null || paywall.has_tier(required_membership));
     }
 
     public virtual void toggle(bool enabled) {

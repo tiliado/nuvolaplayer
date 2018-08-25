@@ -107,7 +107,7 @@ public class PreferencesDialog : Gtk.Dialog {
 
         // Panel groups
         SelectorGroup[] groups = {
-            new SelectorGroup("General Preferences"),
+            new SelectorGroup(),
             components_manager
         };
 
@@ -163,6 +163,17 @@ public class PreferencesDialog : Gtk.Dialog {
         }
         main_panel = new SimplePanel("Preferences", null, grid);
         change_panel(main_panel, false);
+
+        if (components_manager.tier_widget != null) {
+            components_manager.tier_widget.show_paywall.connect(on_show_paywall);
+            components_manager.membership_widget.tier_widget.show_paywall.connect(on_show_paywall);
+        }
+    }
+
+    ~PreferencesDialog() {
+        if (components_manager.tier_widget != null) {
+            components_manager.tier_widget.show_paywall.disconnect(on_show_paywall);
+        }
     }
 
     private void change_panel(Panel panel, bool forward) {
@@ -222,6 +233,21 @@ public class PreferencesDialog : Gtk.Dialog {
         if (url != null) {
             app.show_uri(url);
         }
+    }
+
+    private void on_show_paywall(TiliadoPaywall paywall) {
+        var widget = new TiliadoPaywallWidget(paywall);
+        widget.vexpand = widget.hexpand = false;
+        widget.valign = widget.halign = Gtk.Align.CENTER;
+        widget.show();
+        widget.close.connect(on_close_paywall);
+        stack.add(widget);
+        stack.visible_child = widget;
+    }
+
+    private void on_close_paywall(TiliadoPaywallWidget widget) {
+        widget.close.disconnect(on_close_paywall);
+        stack.remove(widget);
     }
 
     public abstract class Panel: GLib.Object {
@@ -338,7 +364,7 @@ public class PreferencesDialog : Gtk.Dialog {
         public Gtk.Widget? extra_widget = null;
         public SList<Panel> panels;
 
-        public SelectorGroup(owned string? title, owned SList<Panel>? panels = null) {
+        public SelectorGroup(owned string? title=null, owned SList<Panel>? panels=null) {
             this.title = (owned) title;
             this.panels = (owned) panels;
         }
@@ -519,6 +545,29 @@ public class PreferencesDialog : Gtk.Dialog {
             }
 
         }
+    }
+}
+
+public class UpgradeRequiredWidget : Gtk.Grid {
+    public unowned TiliadoTierWidget tier_widget;
+    private Gtk.Label label;
+
+    public UpgradeRequiredWidget(TiliadoPaywall paywall) {
+        orientation = Gtk.Orientation.VERTICAL;
+        label = Drtgtk.Labels.markup("");
+        label.halign = Gtk.Align.CENTER;
+        label.show();
+        add(label);
+        var tier_widget = new TiliadoTierWidget(paywall);
+        this.tier_widget = tier_widget;
+        tier_widget.show();
+        add(tier_widget);
+    }
+
+    public UpgradeRequiredWidget change_component(Component component) {
+        label.set_markup(Markup.printf_escaped(
+            "This feature reguires <b>%s</b> Tier.", component.required_membership.get_label()));
+        return this;
     }
 }
 

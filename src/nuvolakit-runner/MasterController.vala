@@ -35,7 +35,7 @@ public class MasterController : Drtgtk.Application {
     public Drt.Storage storage {get; private set; default = null;}
     public WebAppRegistry? web_app_reg {get; private set; default = null;}
     public Config config {get; private set; default = null;}
-    public TiliadoActivation? activation {get; private set; default = null;}
+    public TiliadoPaywall? paywall {get; private set; default = null;}
     public bool debuging {get; private set; default = false;}
     public string? machine_hash {get; private set; default = null;}
     private string[] exec_cmd;
@@ -320,7 +320,11 @@ public class MasterController : Drtgtk.Application {
     }
 
     private void init_tiliado_account() {
-        activation = TiliadoActivation.create_if_enabled(config);
+        TiliadoActivation? activation = TiliadoActivation.create_if_enabled(config);
+        if (activation != null) {
+            paywall = new TiliadoPaywall(activation, this);
+            paywall.refresh();
+        }
     }
 }
 

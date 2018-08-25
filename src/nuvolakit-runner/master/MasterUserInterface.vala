@@ -31,8 +31,7 @@ public class MasterUserInterface: GLib.Object {
     public MasterWindow? main_window {get; private set; default = null;}
     public WebAppList? web_app_list {get; private set; default = null;}
     private unowned MasterController controller;
-    private TiliadoUserAccountWidget? tiliado_widget = null;
-    private TiliadoTrialWidget? tiliado_trial = null;
+    private TiliadoTierWidget? tiliado_widget = null;
     private WebAppStorage app_storage;
     private Drt.Storage storage;
 
@@ -68,11 +67,14 @@ public class MasterUserInterface: GLib.Object {
             main_window.add_page(web_app_list, "scripts", "Installed Apps");
         }
 
-        if (controller.activation != null) {
-            tiliado_trial = new TiliadoTrialWidget(controller.activation, controller, TiliadoMembership.BASIC);
-            main_window.top_grid.attach(tiliado_trial, 0, 4, 1, 1);
-            tiliado_widget = new TiliadoUserAccountWidget(controller.activation);
+        if (controller.paywall != null) {
+            tiliado_widget = new TiliadoTierWidget(controller.paywall);
+            tiliado_widget.margin = 0;
+            tiliado_widget.vexpand = false;
+            tiliado_widget.valign = Gtk.Align.CENTER;
             main_window.header_bar.pack_end(tiliado_widget);
+            tiliado_widget.show_paywall.connect(on_show_paywall);
+            tiliado_widget.show();
         }
 
         #if FLATPAK
@@ -165,6 +167,29 @@ public class MasterUserInterface: GLib.Object {
             set_toolbar({});
             controller.reset_menubar();
         }
+    }
+
+    private void on_show_paywall(TiliadoPaywall paywall) {
+        List<unowned Gtk.Widget> children = main_window.stack.get_children();
+        foreach (unowned Gtk.Widget child in children) {
+            if (child is TiliadoPaywallWidget) {
+                main_window.stack.visible_child = child;
+                return;
+            }
+        }
+
+        var widget = new TiliadoPaywallWidget(paywall);
+        widget.vexpand = widget.hexpand = false;
+        widget.valign = widget.halign = Gtk.Align.CENTER;
+        widget.show();
+        widget.close.connect(on_close_paywall);
+        main_window.add_page(widget, "paywal", "License");
+        main_window.stack.visible_child = widget;
+    }
+
+    private void on_close_paywall(TiliadoPaywallWidget widget) {
+        widget.close.disconnect(on_close_paywall);
+        main_window.stack.remove(widget);
     }
 }
 

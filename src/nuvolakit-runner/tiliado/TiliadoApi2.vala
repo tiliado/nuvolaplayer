@@ -36,19 +36,19 @@ public enum TiliadoMembership {
     public string get_label() {
         switch (this) {
         case NONE:
-            return "No membership";
+            return "Free";
         case BASIC:
-            return "Basic account";
+            return "Basic";
         case PREMIUM:
-            return "★ Premium account";
+            return "★ Premium";
         case PREMIUM_PLUS:
-            return "★ Premium+ account";
+            return "★ Premium+";
         case PATRON:
-            return "★ Patron account";
+            return "★ Patron";
         case PATRON_PLUS:
-            return "★ Patron+ account";
+            return "★ Patron+";
         default:
-            return "☢ Developer account";
+            return "☢ Developer";
         }
     }
 
@@ -183,6 +183,10 @@ public class TiliadoApi2 : Oauth2Client {
 
         public bool has_membership(uint membership) {
             return this.membership >= membership;
+        }
+
+        public TiliadoMembership get_paywall_tier() {
+            return TiliadoMembership.from_uint(membership);
         }
 
         public string to_string() {

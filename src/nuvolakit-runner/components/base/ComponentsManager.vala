@@ -27,20 +27,31 @@ namespace Nuvola {
 public class ComponentsManager : PreferencesDialog.SelectorGroup {
     private Drt.Lst<Component> components;
     private Gtk.Widget component_not_available_widget;
-    private TiliadoUserWidget? membership_widget;
-    private TiliadoActivation? tiliado_activation = null;
+    public UpgradeRequiredWidget? membership_widget = null;
+    private TiliadoPaywall? paywall = null;
+    public TiliadoTierWidget? tier_widget = null;
+    private bool needs_refresh = false;
 
-    public ComponentsManager(Drtgtk.Application app, Drt.Lst<Component> components, TiliadoActivation? tiliado_activation) {
-        base("Optional Features", null);
+    public ComponentsManager(Drtgtk.Application app, Drt.Lst<Component> components, TiliadoPaywall? paywall) {
+        base(null, null);
         this.components = components;
-        this.tiliado_activation = tiliado_activation;
+        this.paywall = paywall;
         component_not_available_widget = Drtgtk.Labels.markup(
             "Your distributor has not enabled this feature. It is available in <a href=\"%s\">the genuine flatpak "
             + "builds of Nuvola Apps Runtime</a> though.", "https://nuvola.tiliado.eu");
-        membership_widget = tiliado_activation != null ? new TiliadoUserWidget(tiliado_activation, app) : null;
         add_components_to_group();
-        if (tiliado_activation != null) {
-            tiliado_activation.user_info_updated.connect(on_user_info_updated);
+        if (paywall != null) {
+            tier_widget = new TiliadoTierWidget(paywall);
+            tier_widget.show();
+            extra_widget = tier_widget;
+            membership_widget = new UpgradeRequiredWidget(paywall);
+            paywall.notify.connect_after(on_membership_changed);
+        }
+    }
+
+    ~ComponentsManager() {
+        if (paywall != null) {
+            paywall.notify.disconnect(on_membership_changed);
         }
     }
 
@@ -98,16 +109,20 @@ public class ComponentsManager : PreferencesDialog.SelectorGroup {
 
     private bool is_component_available(Component component) {
         /* If component was enabled before sufficient membership was lost, let it be. */
-        return component.enabled || component.available && component.is_membership_ok(tiliado_activation);
+        return component.enabled || component.available && component.is_membership_ok(paywall);
     }
 
     private bool is_component_membership_ok(Component component) {
         return (component.enabled || !component.available
-        || tiliado_activation == null || component.is_membership_ok(tiliado_activation));
+        || paywall == null || component.is_membership_ok(paywall));
     }
 
-    private void on_user_info_updated(TiliadoApi2.User? user) {
-        refresh();
+    private void on_membership_changed(GLib.Object emitter, ParamSpec param) {
+        switch (param.name) {
+        case "tier":
+            refresh();
+            break;
+        }
     }
 
     private class Panel : PreferencesDialog.Panel {
