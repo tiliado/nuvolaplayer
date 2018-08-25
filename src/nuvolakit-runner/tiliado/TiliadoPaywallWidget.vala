@@ -37,6 +37,7 @@ public class TiliadoPaywallWidget : Gtk.Stack {
     private View? license_key_view = null;
     private View? verifying_gumroad_license_view = null;
     private GumroadLicenseView? gumroad_license_view = null;
+    private MachineTrialView? machine_trial_view = null;
     private View? license_failure_view = null;
     private View? license_invalid_view = null;
     private bool activation_pending = false;
@@ -57,7 +58,7 @@ public class TiliadoPaywallWidget : Gtk.Stack {
             "Upgrade tier",
             "I have Tiliado Developer account",
             "Help",
-            "Close"}, 0, {null, null});
+            "Close"}, 0, {null, null, null});
         main_view.response.connect(on_main_view_response);
         reset();
     }
@@ -85,7 +86,7 @@ public class TiliadoPaywallWidget : Gtk.Stack {
             account_view.buttons[1].get_style_context().add_class(Gtk.STYLE_CLASS_DESTRUCTIVE_ACTION);
             tiliado_account_view = account_view;
             account_view.response.connect(on_tiliado_account_view_response);
-            view.attach(account_view, 0, 1, 1, 1);
+            view.attach(account_view, 0, 2, 1, 1);
         } else if (user == null && tiliado_account_view != null) {
             view.remove(tiliado_account_view);
             tiliado_account_view.response.disconnect(on_tiliado_account_view_response);
@@ -100,7 +101,7 @@ public class TiliadoPaywallWidget : Gtk.Stack {
             license_view.buttons[1].get_style_context().add_class(Gtk.STYLE_CLASS_DESTRUCTIVE_ACTION);
             gumroad_license_view = license_view;
             license_view.response.connect(on_gumroad_license_view_response);
-            view.attach(license_view, 0, 0, 1, 1);
+            view.attach(license_view, 0, 1, 1, 1);
         } else if (license == null && gumroad_license_view != null) {
             view.remove(gumroad_license_view);
             gumroad_license_view.response.disconnect(on_gumroad_license_view_response);
@@ -109,7 +110,20 @@ public class TiliadoPaywallWidget : Gtk.Stack {
             gumroad_license_view.update(license);
         }
 
-        bool purchase = paywall.tier == TiliadoMembership.NONE;
+        MachineTrial? trial = paywall.get_trial();
+        bool in_trial = trial != null && paywall.get_gumroad_license_tier() + paywall.get_tiliado_account_tier() == 0;
+        if ((trial == null || !in_trial) && machine_trial_view != null) {
+            view.remove(machine_trial_view);
+            machine_trial_view = null;
+        } else if (in_trial && machine_trial_view == null) {
+            var trial_view = new MachineTrialView(trial);
+            machine_trial_view = trial_view;
+            view.attach(trial_view, 0, 0, 1, 1);
+        } else if (trial != null && machine_trial_view != null && machine_trial_view.trial != trial) {
+            machine_trial_view.update(trial);
+        }
+
+        bool purchase = paywall.tier == TiliadoMembership.NONE || in_trial;
         bool upgrade = !purchase && paywall.tier < TiliadoMembership.PREMIUM;
         view.buttons[MainAction.PURCHASE].visible = purchase;
         view.buttons[MainAction.PURCHASED].visible = purchase;
@@ -600,9 +614,13 @@ public class TiliadoPaywallWidget : Gtk.Stack {
                 }
             }
             Gtk.Label header = Drtgtk.Labels.markup("<b>%s</b>", title);
+            header.xalign = 0.5f;
+            header.halign = Gtk.Align.CENTER;
             header.yalign = 0.5f;
             attach(header, 0, line, 1, 1);
             var details = new Gtk.Label("");
+            details.xalign = 0.5f;
+            details.halign = Gtk.Align.CENTER;
             details.use_markup = true;
             details.set_line_wrap(true);
             details.max_width_chars = 30;
@@ -677,6 +695,34 @@ public class TiliadoPaywallWidget : Gtk.Stack {
                 "<i>%s</i>\n\nProduct: <a href=\"%s\">%s</a>\nTier: %s", description,
                 "https://gum.co/" + license.license.product_id, license.license.product_name, tier.get_label());
             this.license = license;
+            details.show();
+        }
+    }
+
+    private class MachineTrialView : Info {
+        public unowned MachineTrial? trial = null;
+
+        public MachineTrialView(MachineTrial trial) {
+            base("Free Trial", null);
+            update(trial);
+        }
+
+        public void update(MachineTrial trial) {
+            TiliadoMembership tier = trial.tier;
+            string started = Drt.Utils.human_datetime(trial.created);
+            string expires = Drt.Utils.human_datetime(trial.expires);
+            if (trial.has_expired()) {
+                details.label = Markup.printf_escaped(
+                    "<i>%s</i>\n\nName: %s\nTier: %s\nStarted: %s\nExpired: %s",
+                    "Your trial has expired.",
+                    trial.name, tier.get_label(), started, expires);
+            } else {
+                details.label = Markup.printf_escaped(
+                    "<i>%s</i>\n\nName: %s\nTier: %s\nStarted: %s\nExpires: %s",
+                    "Try Nuvola features for free before purchasing.",
+                    trial.name, tier.get_label(), started, expires);
+            }
+            this.trial = trial;
             details.show();
         }
     }

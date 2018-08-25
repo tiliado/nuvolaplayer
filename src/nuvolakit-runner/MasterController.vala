@@ -99,6 +99,7 @@ public class MasterController : Drtgtk.Application {
     public unowned MasterUserInterface get_ui() {
         if (_ui == null) {
             late_init();
+            init_tiliado_account();
             _ui = new MasterUserInterface(this);
         }
         return _ui;
@@ -155,8 +156,6 @@ public class MasterController : Drtgtk.Application {
             quit();
             return;
         }
-
-        init_tiliado_account();
 
         storage_server = new Drt.KeyValueStorageServer(server.api);
         storage_server.add_provider("master.config", config);
@@ -324,7 +323,7 @@ public class MasterController : Drtgtk.Application {
         if (activation != null) {
             var gumroad = new TiliadoGumroad(config, Drt.String.unmask(TILIADO_OAUTH2_CLIENT_SECRET.data));
             paywall = new TiliadoPaywall(this, activation, gumroad);
-            paywall.refresh();
+            paywall.refresh_data.begin((o, res) => {paywall.refresh_data.end(res);});
         }
     }
 }

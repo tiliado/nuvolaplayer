@@ -144,6 +144,29 @@ public class TiliadoApi2 : Oauth2Client {
             response.get_int_or("membership_rank", 0));
     }
 
+    public async MachineTrial? get_trial_for_machine(string machine) throws Oauth2Error {
+        if (project_id == null) {
+            return null;
+        }
+        try {
+            Drt.JsonObject response = yield call("funding/trial_of_machine/%s/%s/".printf(project_id, machine));
+            return new MachineTrial.from_json(response);
+        } catch (Oauth2Error e) {
+            if (e is Oauth2Error.HTTP_NOT_FOUND) {
+                return null;
+            }
+            throw e;
+        }
+    }
+
+    public async MachineTrial? start_trial_for_machine(string machine) throws Oauth2Error {
+        if (project_id == null) {
+            return null;
+        }
+        Drt.JsonObject response = yield post("funding/trial_of_machine/%s/%s/".printf(project_id, machine));
+        return new MachineTrial.from_json(response);
+    }
+
     public class User {
         public int id {get; private set;}
         public string? username {get; private set;}

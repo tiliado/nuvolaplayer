@@ -293,7 +293,7 @@ public class StartupCheck : GLib.Object {
         model.tiliado_account_status = StartupStatus.IN_PROGRESS;
         yield Drt.EventLoop.resume_later();
         if (paywall != null) {
-            paywall.refresh();
+            yield paywall.refresh_data();
             if (paywall.unlocked) {
                 model.tiliado_account_message = Markup.printf_escaped("Features Tier: %s", paywall.tier.get_label());
                 model.tiliado_account_status = StartupStatus.OK;

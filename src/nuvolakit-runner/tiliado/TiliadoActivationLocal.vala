@@ -33,6 +33,8 @@ public class TiliadoActivation : GLib.Object {
     private const string TILIADO_ACCOUNT_USER = "tiliado.account2.user";
     private const string TILIADO_ACCOUNT_EXPIRES = "tiliado.account2.expires";
     private const string TILIADO_ACCOUNT_SIGNATURE = "tiliado.account2.signature";
+    private const string TILIADO_TRIAL = "tiliado.trial";
+    private const string TILIADO_TRIAL_SIGNATURE = "tiliado.trial_signature";
 
     public static TiliadoActivation? create_if_enabled(Drt.KeyValueStorage config) {
         #if TILIADO_API
@@ -40,11 +42,7 @@ public class TiliadoActivation : GLib.Object {
         var tiliado = new TiliadoApi2(
             TILIADO_OAUTH2_CLIENT_ID, Drt.String.unmask(TILIADO_OAUTH2_CLIENT_SECRET.data),
             TILIADO_OAUTH2_API_ENDPOINT, TILIADO_OAUTH2_TOKEN_ENDPOINT, null, "nuvolaplayer");
-        var tiliado_activation = new TiliadoActivation(tiliado, config);
-        if (tiliado_activation.get_user_info() == null) {
-            tiliado_activation.update_user_info_sync();
-        }
-        return tiliado_activation;
+        return new TiliadoActivation(tiliado, config);
         #else
         return null;
         #endif
@@ -53,7 +51,9 @@ public class TiliadoActivation : GLib.Object {
     public TiliadoApi2 tiliado {get; construct;}
     public Drt.KeyValueStorage config {get; construct;}
     private TiliadoApi2.User? cached_user = null;
+    private MachineTrial? cached_trial = null;
     private uint update_timeout = 0;
+    private uint trial_update_timeout = 0;
 
     public TiliadoActivation(TiliadoApi2 tiliado, Drt.KeyValueStorage config) {
         GLib.Object(tiliado: tiliado, config: config);
@@ -67,6 +67,7 @@ public class TiliadoActivation : GLib.Object {
         tiliado.device_code_grant_cancelled.connect(on_device_code_grant_cancelled);
         tiliado.device_code_grant_finished.connect(on_device_code_grant_finished);
         load_cached_data();
+        load_cached_trial();
         config.changed.connect(on_config_changed);
     }
 
@@ -79,6 +80,8 @@ public class TiliadoActivation : GLib.Object {
         tiliado.device_code_grant_cancelled.disconnect(on_device_code_grant_cancelled);
         tiliado.device_code_grant_finished.disconnect(on_device_code_grant_finished);
     }
+
+    public signal void trial_updated(MachineTrial? trial);
 
     public signal void user_info_updated(TiliadoApi2.User? user);
 
@@ -132,6 +135,26 @@ public class TiliadoActivation : GLib.Object {
         } else {
             return update_user_info_sync_internal();
         }
+    }
+
+    public MachineTrial? get_machine_trial() {
+        return cached_trial;
+    }
+
+    public async MachineTrial? get_fresh_machine_trial() throws Oauth2Error {
+        MachineTrial? trial =  yield tiliado.get_trial_for_machine(yield Nuvola.get_machine_hash());
+        warning(trial.to_string());
+        cache_trial(trial);
+        return trial;
+    }
+
+    public async bool start_trial() throws Oauth2Error {
+        MachineTrial? trial =  yield tiliado.start_trial_for_machine(yield Nuvola.get_machine_hash());
+        if (trial != null) {
+            cache_trial(trial);
+            return true;
+        }
+        return false;
     }
 
     protected TiliadoApi2.User? update_user_info_sync_internal() {
@@ -210,12 +233,23 @@ public class TiliadoActivation : GLib.Object {
                 Source.remove(update_timeout);
             }
             update_timeout = Timeout.add(50, load_from_updated_cache);
+        } else if (key.has_prefix("tiliado.trial")) {
+            if (trial_update_timeout != 0) {
+                Source.remove(trial_update_timeout);
+            }
+            trial_update_timeout = Timeout.add(50, load_trial_from_updated_cache);
         }
     }
 
     private bool load_from_updated_cache() {
         update_timeout = 0;
         load_cached_data();
+        return false;
+    }
+
+    private bool load_trial_from_updated_cache() {
+        trial_update_timeout = 0;
+        load_cached_trial();
         return false;
     }
 
@@ -255,6 +289,33 @@ public class TiliadoActivation : GLib.Object {
         }
         user_info_updated(cached_user);
         tiliado.notify["token"].connect_after(on_api_token_changed);
+    }
+
+    private void load_cached_trial() {
+        string? trial_json = config.get_string(TILIADO_TRIAL);
+        string? trial_signature = config.get_string(TILIADO_TRIAL_SIGNATURE);
+        if (Drt.String.is_empty(trial_json) || Drt.String.is_empty(trial_signature) ||
+            !tiliado.hmac_sha1_verify_string(trial_json, trial_signature)) {
+            cached_trial = null;
+        } else {
+            cached_trial = new MachineTrial.from_string(trial_json);
+        }
+        trial_updated(cached_trial);
+    }
+
+    private void cache_trial(MachineTrial? trial) {
+        this.cached_trial = trial;
+        config.changed.disconnect(on_config_changed);
+        if (trial == null) {
+            config.unset(TILIADO_TRIAL);
+            config.unset(TILIADO_TRIAL_SIGNATURE);
+        } else {
+            string trial_json = trial.to_string();
+            config.set_string(TILIADO_TRIAL, trial_json);
+            config.set_string(TILIADO_TRIAL_SIGNATURE, tiliado.hmac_sha1_for_string(trial_json));
+        }
+        config.changed.connect(on_config_changed);
+        trial_updated(trial);
     }
 
     /**
