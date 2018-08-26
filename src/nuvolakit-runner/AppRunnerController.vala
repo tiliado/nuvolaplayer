@@ -744,7 +744,7 @@ public class AppRunnerController: Drtgtk.Application {
 
     private void on_component_enabled_changed(GLib.Object object, ParamSpec param) {
         var component = object as Component;
-        return_if_fail(component != null);
+        return_if_fail(component != null && web_engine != null);
         string signal_name = component.enabled ? "ComponentLoaded" : "ComponentUnloaded";
         var payload = new Variant("(sss)", signal_name, component.id, component.name);
         try {
@@ -813,7 +813,7 @@ public class AppRunnerController: Drtgtk.Application {
     }
 
     private void on_action_changed(Drtgtk.Action action, ParamSpec p) {
-        if (p.name != "enabled") {
+        if (web_engine == null || p.name != "enabled") {
             return;
         }
         var payload = new Variant("(ssb)", "ActionEnabledChanged", action.name, action.enabled);
@@ -839,7 +839,7 @@ public class AppRunnerController: Drtgtk.Application {
             Gtk.Settings.get_default().gtk_application_prefer_dark_theme = config.get_bool(ConfigKey.DARK_THEME);
             break;
         }
-        if (web_engine.web_worker.ready) {
+        if (web_engine != null && web_engine.web_worker.ready) {
             var payload = new Variant("(ss)", "ConfigChanged", key);
             web_engine.web_worker.call_function.begin("Nuvola.config.emit", payload, false, (o, res) => {
                 try {
