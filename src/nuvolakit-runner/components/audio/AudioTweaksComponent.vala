@@ -40,7 +40,6 @@ public class AudioTweaksComponent: Component {
         this.has_settings = true;
         this.bindings = bindings;
         this.controller = controller;
-        config.bind_object_property(NAMESPACE, this, "enabled").set_default(false).update_property();
         config.bind_object_property(NAMESPACE, this, "mute_on_headphones_disconnect")
         .set_default(false).update_property();
         config.bind_object_property(NAMESPACE, this, "pause_on_headphones_disconnect")

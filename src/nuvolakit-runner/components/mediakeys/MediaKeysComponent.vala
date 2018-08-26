@@ -39,7 +39,6 @@ public class MediaKeysComponent: Component {
         this.bus = bus;
         this.web_app_id = web_app_id;
         this.available = bus.master != null;
-        config.bind_object_property("component.mediakeys.", this, "enabled").set_default(true).update_property();
         auto_activate = false;
     }
 

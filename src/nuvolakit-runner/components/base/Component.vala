@@ -34,6 +34,7 @@ public abstract class Component: GLib.Object {
     public string? help_url {get; construct;}
     public bool hidden {get; protected set; default = false;}
     public bool enabled {get; protected set; default = false;}
+    public bool enabled_by_default {get; protected set; default = true;}
     public bool loaded {get; protected set; default = false;}
     public bool active {get; protected set; default = false;}
     public bool auto_activate {get; protected set; default = true;}
@@ -45,6 +46,24 @@ public abstract class Component: GLib.Object {
         GLib.Object(
             id: id, name: name, description: description,
             help_url: create_help_url(help_page));
+    }
+
+    public void setup(Drt.KeyValueStorage config, TiliadoPaywall? paywall) {
+        string enabled_key = "component.%s.enabled".printf(id);
+        if (available) {
+            if (!is_membership_ok(paywall)) {
+                config.set_bool(enabled_key, false);
+            }
+            config.bind_object_property(enabled_key, this, "enabled")
+            .set_default(enabled_by_default).update_property();
+        }
+        if (enabled) {
+            if (available) {
+                auto_load();
+            } else {
+                toggle(false);
+            }
+        }
     }
 
     public bool is_membership_ok(TiliadoPaywall? paywall) {

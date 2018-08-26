@@ -36,7 +36,7 @@ public class DeveloperComponent: Component {
             "https://tiliado.github.io/nuvolaplayer/development/");
         this.bindings = bindings;
         this.app = app;
-        config.bind_object_property("component.%s.".printf(id), this, "enabled").set_default(false).update_property();
+        this.enabled_by_default = false;
     }
 
     protected override bool activate() {

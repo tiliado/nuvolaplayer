@@ -37,7 +37,6 @@ public class NotificationsComponent: Component {
         this.bindings = bindings;
         this.actions_helper = actions_helper;
         this.app = app;
-        app.config.bind_object_property("component.%s.".printf(id), this, "enabled").set_default(false).update_property();
     }
 
     protected override bool activate() {

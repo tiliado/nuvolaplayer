@@ -51,7 +51,6 @@ public class AudioScrobblerComponent: Component {
         this.config = config;
         this.connection = connection;
         has_settings = true;
-        config.bind_object_property("component.%s.".printf(id), this, "enabled").set_default(true).update_property();
         auto_activate = false;
     }
 

@@ -589,16 +589,7 @@ public class AppRunnerController: Drtgtk.Application {
         components.reverse();
 
         foreach (Component component in components) {
-            if (!component.is_membership_ok(tiliado_paywall)) {
-                component.toggle(false);
-            }
-            if (component.enabled) {
-                if (component.available) {
-                    component.auto_load();
-                } else {
-                    component.toggle(false);
-                }
-            }
+            component.setup(config, tiliado_paywall);
             debug("Component %s (%s) available=%s, enabled=%s", component.id, component.name,
                 component.available.to_string(), component.enabled.to_string());
             component.notify["enabled"].connect_after(on_component_enabled_changed);

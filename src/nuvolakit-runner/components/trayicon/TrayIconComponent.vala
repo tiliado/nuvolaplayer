@@ -44,13 +44,11 @@ public class TrayIconComponent: Component {
         this.bindings = bindings;
         this.controller = controller;
         config.bind_object_property(NAMESPACE, this, "always_close_to_tray")
-        .set_default(true).update_property();
+        .set_default(false).update_property();
         config.bind_object_property(NAMESPACE, this, "use_x11_icon")
         .set_default(false).update_property();
         config.bind_object_property(NAMESPACE, this, "use_appindicator")
-        .set_default(false).update_property();
-        config.bind_object_property(NAMESPACE, this, "enabled")
-        .set_default(false).update_property();
+        .set_default(true).update_property();
         #else
         available = false;
         #endif
