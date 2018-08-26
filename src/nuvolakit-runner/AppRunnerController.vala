@@ -589,7 +589,7 @@ public class AppRunnerController: Drtgtk.Application {
         components.reverse();
 
         foreach (Component component in components) {
-            component.setup(config, tiliado_paywall);
+            component.setup(tiliado_paywall);
             debug("Component %s (%s) available=%s, enabled=%s", component.id, component.name,
                 component.available.to_string(), component.enabled.to_string());
             component.notify["enabled"].connect_after(on_component_enabled_changed);

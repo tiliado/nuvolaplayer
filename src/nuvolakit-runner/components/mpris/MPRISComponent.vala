@@ -31,7 +31,7 @@ public class MPRISComponent: Component {
 
     public MPRISComponent(Drtgtk.Application app, Bindings bindings, Drt.KeyValueStorage config) {
         base(
-            "mpris", "Media Player DBus Interface",
+            config, "mpris", "Media Player DBus Interface",
             "Implementation of Media Player Remote Interface Specification (MPRIS 2) used by various applets.",
             "mpris");
         this.required_membership = TiliadoMembership.NONE;

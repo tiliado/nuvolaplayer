@@ -25,7 +25,6 @@
 namespace Nuvola {
 
 public class AudioTweaksComponent: Component {
-    private const string NAMESPACE = "component.audio_tweaks.";
     public bool mute_on_headphones_disconnect {get; set; default = false;}
     public bool pause_on_headphones_disconnect {get; set; default = false;}
     public bool play_on_headphones_connect {get; set; default = false;}
@@ -35,17 +34,14 @@ public class AudioTweaksComponent: Component {
     private HeadPhonesWatch? headphones_watch = null;
 
     public AudioTweaksComponent(AppRunnerController controller, Bindings bindings, Drt.KeyValueStorage config) {
-        base("audio_tweaks", "Audio Tweaks", "Tweaks for PulseAudio integration.", "audio_tweaks");
+        base(config, "audio_tweaks", "Audio Tweaks", "Tweaks for PulseAudio integration.", "audio_tweaks");
         this.required_membership = TiliadoMembership.PREMIUM;
         this.has_settings = true;
         this.bindings = bindings;
         this.controller = controller;
-        config.bind_object_property(NAMESPACE, this, "mute_on_headphones_disconnect")
-        .set_default(false).update_property();
-        config.bind_object_property(NAMESPACE, this, "pause_on_headphones_disconnect")
-        .set_default(false).update_property();
-        config.bind_object_property(NAMESPACE, this, "play_on_headphones_connect")
-        .set_default(false).update_property();
+        bind_config_property("mute_on_headphones_disconnect", false);
+        bind_config_property("pause_on_headphones_disconnect", false);
+        bind_config_property("play_on_headphones_connect", false);
     }
 
     protected override bool activate() {

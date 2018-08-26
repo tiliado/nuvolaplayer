@@ -36,7 +36,7 @@ public class PasswordManagerComponent: Component {
 
     public PasswordManagerComponent(Drt.KeyValueStorage config, IpcBus ipc_bus, WebWorker web_worker, string web_app_id, WebkitEngine engine) {
         base(
-            "passwordmanager", "Password Manager (Experimental)",
+            config, "passwordmanager", "Password Manager (Experimental)",
             "Stores passwords from login forms in a keyring.", null);
         #if EXPERIMENTAL
         this.required_membership = TiliadoMembership.PREMIUM;
@@ -44,7 +44,6 @@ public class PasswordManagerComponent: Component {
         this.web_worker = web_worker;
         this.web_app_id = web_app_id;
         this.engine = engine;
-        config.bind_object_property("component.passwordmanager.", this, "enabled").set_default(false).update_property();
         #else
         available = false;
         #endif

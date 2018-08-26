@@ -41,14 +41,16 @@ public abstract class Component: GLib.Object {
     public bool has_settings {get; protected set; default = false;}
     public bool available {get; protected set; default = true;}
     public TiliadoMembership required_membership {get; protected set; default = TiliadoMembership.NONE;}
+    protected Drt.KeyValueStorage config;
 
-    public Component(string id, string name, string description, string? help_page) {
+    public Component(Drt.KeyValueStorage config, string id, string name, string description, string? help_page) {
         GLib.Object(
             id: id, name: name, description: description,
             help_url: create_help_url(help_page));
+        this.config = config;
     }
 
-    public void setup(Drt.KeyValueStorage config, TiliadoPaywall? paywall) {
+    public void setup(TiliadoPaywall? paywall) {
         string enabled_key = "component.%s.enabled".printf(id);
         if (available) {
             if (!is_membership_ok(paywall)) {
@@ -146,6 +148,11 @@ public abstract class Component: GLib.Object {
 
     protected virtual bool deactivate() {
         return false;
+    }
+
+    protected void bind_config_property(string name, Variant? default_value=null) {
+        config.bind_object_property("component.%s.".printf(id), this, name)
+        .set_default(default_value).update_property();
     }
 }
 
