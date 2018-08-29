@@ -332,7 +332,7 @@ public class StartupCheck : GLib.Object {
                 + "1. Make sure Nuvola Apps Service is installed.\n"
                 + "2. Make sure Nuvola Apps Service and individual Nuvola Apps are up-to-date.\n"
                 + "3. Close all Nuvola Apps and try launching it again.\n\n"
-                + "", master.error.message);
+                + "<i>Error message: %s</i>", master.error.message);
             model.nuvola_service_status = StartupStatus.WARNING;
         }
         this.master = master;
