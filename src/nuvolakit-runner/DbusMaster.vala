@@ -39,9 +39,10 @@ public class MasterDbusApi: GLib.Object {
         revision = Nuvola.get_revision();
     }
 
-    public void get_connection(string app_id, string dbus_id, out Socket? socket, out string? token)
+    public void get_connection(string app_id, string dbus_id, out Socket? socket, out string? token, GLib.BusName sender_id)
     throws GLib.Error {
-        if (controller.start_app_from_dbus(app_id, dbus_id, out token)) {
+        debug("Connection request: '%s' '%s'", dbus_id, sender_id);
+        if (controller.start_app_from_dbus(app_id, dbus_id, sender_id, out token)) {
             socket = Drt.SocketChannel.create_socket_from_name(build_master_ipc_id()).socket;
         } else {
             throw new Drt.Error.ACCESS_DENIED("Nuvola refused connection.");

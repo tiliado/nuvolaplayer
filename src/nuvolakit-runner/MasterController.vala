@@ -273,15 +273,15 @@ public class MasterController : Drtgtk.Application {
         #endif
     }
 
-    public bool start_app_from_dbus(string app_id, string dbus_id, out string token) {
+    public bool start_app_from_dbus(string app_id, string dbus_id, GLib.BusName sender_id, out string token) {
         token = null;
         hold();
         late_init();
         AppRunner runner;
         token = null;
-        debug("Launch app runner for '%s': %s", app_id, dbus_id);
+        debug("Launch app runner for '%s': %s %s", app_id, dbus_id, sender_id);
         try {
-            runner = new DbusAppRunner(app_id, dbus_id, server.router.hex_token);
+            runner = new DbusAppRunner(app_id, dbus_id, sender_id, server.router.hex_token);
             token = server.router.hex_token;
         } catch (GLib.Error e) {
             warning("Failed to launch app runner for '%s'. %s", app_id, e.message);

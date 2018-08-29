@@ -120,10 +120,12 @@ public abstract class AppRunner : GLib.Object {
 
 public class DbusAppRunner : AppRunner {
     private uint watch_id = 0;
+    private string dbus_id;
 
-    public DbusAppRunner(string app_id, string dbus_id, string api_token) throws GLib.Error {
+    public DbusAppRunner(string app_id, string dbus_id, GLib.BusName sender_id, string api_token) throws GLib.Error {
         base(app_id, api_token);
-        watch_id = Bus.watch_name(BusType.SESSION, dbus_id, 0, on_name_appeared, on_name_vanished);
+        this.dbus_id = dbus_id;
+        watch_id = Bus.watch_name(BusType.SESSION, sender_id, 0, on_name_appeared, on_name_vanished);
     }
 
     private void on_name_appeared(DBusConnection conn, string name, string name_owner) {
@@ -131,6 +133,7 @@ public class DbusAppRunner : AppRunner {
     }
 
     private void on_name_vanished(DBusConnection conn, string name) {
+        debug("%s %s vanished", dbus_id, name);
         Bus.unwatch_name(watch_id);
         running = false;
         exited();
