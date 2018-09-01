@@ -55,6 +55,22 @@ public class TiliadoLicense {
         return valid;
     }
 
+    public unowned string? get_reason() {
+        if (license.refunded) {
+            return "The license has been refunded.";
+        }
+        if (license.chargebacked) {
+            return "The license has been chargebacked.";
+        }
+        if (license.cancelled_at != null) {
+            return "The license subscription has been cancelled.";
+        }
+        if (license.failed_at != null) {
+            return "The payment for the license subscription has failed.";
+        }
+        return null;
+    }
+
     public Drt.JsonBuilder to_json() {
         var builder = new Drt.JsonBuilder();
         builder.begin_object();
