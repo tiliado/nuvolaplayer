@@ -24,7 +24,7 @@
 
 namespace Nuvola {
 
-public class TiliadoGumroad : GumroadApi {
+public class TiliadoGumroad : GLib.Object {
     private const string TILIADO_GUMROAD_LICENSE = "tiliado.gumroad.license";
     private const string TILIADO_GUMROAD_EXPIRES = "tiliado.gumroad.expires";
     private const string TILIADO_GUMROAD_SIGNATURE = "tiliado.gumroad.signature";
@@ -38,6 +38,7 @@ public class TiliadoGumroad : GumroadApi {
     private static string[] premium_products;
     private static string[] patron_products;
     private bool ignore_config_changed = false;
+    private GumroadApi gumroad;
 
     static construct {
         basic_products = {"nuvolabasic"};
@@ -45,10 +46,10 @@ public class TiliadoGumroad : GumroadApi {
         patron_products = {"nuvolapatron"};
     }
 
-    public TiliadoGumroad(Drt.KeyValueStorage config, string sign_key, string? api_endpoint=null) {
-        base(api_endpoint);
+    public TiliadoGumroad(Drt.KeyValueStorage config, string sign_key, GumroadApi? gumroad=null) {
         this.config = config;
         this.sign_key = sign_key;
+        this.gumroad = gumroad ?? new GumroadApi(null);
         load_cached_data();
         config.changed.connect(on_config_changed);
     }
@@ -58,54 +59,49 @@ public class TiliadoGumroad : GumroadApi {
     }
 
     public async bool verify_license(
-        string license_key, bool increment_uses_count, out GumroadLicense license, out TiliadoMembership membership
+        string license_key, bool increment_uses_count, out TiliadoLicense license
     ) throws Oauth2Error {
         foreach (unowned string product_id in patron_products) {
-            try {
-                license = yield get_license(product_id, license_key, increment_uses_count);
-                if (license.valid) {
-                    membership = TiliadoMembership.PATRON;
-                    return true;
-                }
-            } catch (Oauth2Error e) {
-                if (!(e is Oauth2Error.HTTP_NOT_FOUND)) {
-                    throw e;
-                }
+            license = yield get_license(product_id, license_key, TiliadoMembership.PATRON, increment_uses_count);
+            if (license != null) {
+                cache_license(license);
+                return true;
             }
         }
         foreach (unowned string product_id in premium_products) {
-            try {
-                license = yield get_license(product_id, license_key, increment_uses_count);
-                if (license.valid) {
-                    membership = TiliadoMembership.PREMIUM;
-                    return true;
-                }
-            } catch (Oauth2Error e) {
-                if (!(e is Oauth2Error.HTTP_NOT_FOUND)) {
-                    throw e;
-                }
+            license = yield get_license(product_id, license_key, TiliadoMembership.PREMIUM, increment_uses_count);
+            if (license != null) {
+                cache_license(license);
+                return true;
             }
         }
         foreach (unowned string product_id in basic_products) {
-            try {
-                license = yield get_license(product_id, license_key, increment_uses_count);
-                if (license.valid) {
-                    membership = TiliadoMembership.BASIC;
-                    return true;
-                }
-            } catch (Oauth2Error e) {
-                if (!(e is Oauth2Error.HTTP_NOT_FOUND)) {
-                    throw e;
-                }
+            license = yield get_license(product_id, license_key, TiliadoMembership.BASIC, increment_uses_count);
+            if (license != null) {
+                cache_license(license);
+                return true;
             }
         }
         license = null;
-        membership = TiliadoMembership.NONE;
         return false;
     }
 
-    public void cache_license(GumroadLicense license) {
-        cached_license = new TiliadoLicense(license, get_tier_for_license(license));
+    private async TiliadoLicense? get_license(
+        string product_id, string license_key, TiliadoMembership tier, bool increment_uses_count
+    ) throws Oauth2Error {
+        try {
+            GumroadLicense? license = yield gumroad.get_license(product_id, license_key, increment_uses_count);
+            return new TiliadoLicense(license, tier, license.valid);
+        } catch (Oauth2Error e) {
+            if (!(e is Oauth2Error.HTTP_NOT_FOUND)) {
+                throw e;
+            }
+        }
+        return null;
+    }
+
+    public void cache_license(TiliadoLicense license) {
+        cached_license = license;
         cached_license_key = null;
         int64 expires = new DateTime.now_utc().add_weeks(4).to_unix();
         string license_json = license.to_compact_string();
@@ -127,31 +123,8 @@ public class TiliadoGumroad : GumroadApi {
         ignore_config_changed = false;
     }
 
-    public TiliadoMembership get_tier_for_license(GumroadLicense license) {
-        if (license != null && license.valid) {
-            unowned string? license_product_id = license.product_id;
-            assert(license_product_id != null);
-            foreach (unowned string product_id in patron_products) {
-                if (license_product_id == product_id) {
-                    return TiliadoMembership.PATRON;
-                }
-            }
-            foreach (unowned string product_id in premium_products) {
-                if (license_product_id == product_id) {
-                    return TiliadoMembership.PREMIUM;
-                }
-            }
-            foreach (unowned string product_id in basic_products) {
-                if (license_product_id == product_id) {
-                    return TiliadoMembership.BASIC;
-                }
-            }
-        }
-        return TiliadoMembership.NONE;
-    }
-
     public TiliadoMembership get_tier() {
-        return cached_license != null ? cached_license.tier : TiliadoMembership.NONE;
+        return cached_license != null ? cached_license.effective_tier : TiliadoMembership.NONE;
     }
 
     public bool has_tier(TiliadoMembership tier) {
@@ -166,19 +139,17 @@ public class TiliadoGumroad : GumroadApi {
                 int64 expires = config.get_int64(TILIADO_GUMROAD_EXPIRES);
                 string gumroad_info_str = concat_gumroad_info(license_json, expires);
                 try {
-                    var license = new GumroadLicense.from_string(license_json);
-                    if (license.valid) {
-                        if (expires >= new DateTime.now_utc().to_unix()
-                        && Hmac.sha1_verify_string(sign_key, gumroad_info_str, signature)) {
-                            cached_license = new TiliadoLicense(license, get_tier_for_license(license));
-                            cached_license_key = null;
-                        } else {
-                            /* Needs refresh */
-                            cached_license = null;
-                            cached_license_key = license.license_key;
-                        }
-                        return;
+                    var license = new TiliadoLicense.from_string(license_json);
+                    if (expires >= new DateTime.now_utc().to_unix()
+                    && Hmac.sha1_verify_string(sign_key, gumroad_info_str, signature)) {
+                        cached_license = license;
+                        cached_license_key = null;
+                    } else {
+                        /* Needs refresh */
+                        cached_license = null;
+                        cached_license_key = license.license.license_key;
                     }
+                    return;
                 } catch (Drt.JsonError e) {
                     warning("Failed to load cached license: %s", e.message);
                 }
@@ -196,9 +167,9 @@ public class TiliadoGumroad : GumroadApi {
             return false;
         }
         try {
-            GumroadLicense? license = null;
-            if (yield verify_license(cached_license_key, false, out license, null)) {
-                cache_license(license);
+            TiliadoLicense? license = null;
+            yield verify_license(cached_license_key, false, out license);
+            if (license != null) {
                 return true;
             }
         } catch (Oauth2Error e) {

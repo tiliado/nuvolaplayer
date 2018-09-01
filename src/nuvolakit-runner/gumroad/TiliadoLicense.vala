@@ -25,16 +25,52 @@
 namespace Nuvola {
 
 public class TiliadoLicense {
+    private const string KEY_GUMROAD = "gumroad";
+    private const string KEY_TIER = "tier";
+    private const string KEY_VALID = "valid";
+    public bool valid {get; private set;}
     public GumroadLicense license {get; private set;}
-    public TiliadoMembership tier {get; private set;}
+    public TiliadoMembership license_tier {get; private set;}
+    public TiliadoMembership effective_tier {get; private set;}
 
-    public TiliadoLicense(GumroadLicense license, TiliadoMembership tier) {
+    public TiliadoLicense(GumroadLicense license, TiliadoMembership tier, bool valid) {
+        this.valid = valid;
         this.license = license;
-        this.tier = tier;
+        this.license_tier = tier;
+        this.effective_tier = valid ? tier : TiliadoMembership.NONE;
+    }
+
+    public TiliadoLicense.from_json(Drt.JsonObject json) {
+        this(
+            new GumroadLicense.from_json(json.get_object(KEY_GUMROAD)),
+            TiliadoMembership.from_int(json.get_int_or(KEY_TIER, 0)),
+            json.get_bool_or(KEY_VALID, false));
+    }
+
+    public TiliadoLicense.from_string(string json) throws Drt.JsonError {
+        this.from_json(Drt.JsonParser.load_object(json));
     }
 
     public bool is_valid() {
-        return license.valid;
+        return valid;
+    }
+
+    public Drt.JsonBuilder to_json() {
+        var builder = new Drt.JsonBuilder();
+        builder.begin_object();
+        builder.set_member(KEY_GUMROAD).add(license.to_json().root);
+        builder.set_int(KEY_TIER, (int) license_tier);
+        builder.set_bool(KEY_VALID, valid);
+        builder.end_object();
+        return builder;
+    }
+
+    public string to_string() {
+        return to_json().to_pretty_string();
+    }
+
+    public string to_compact_string() {
+        return to_json().to_compact_string();
     }
 }
 

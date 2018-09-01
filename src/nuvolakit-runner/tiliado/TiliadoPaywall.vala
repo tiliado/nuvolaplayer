@@ -251,17 +251,15 @@ public class TiliadoPaywall : GLib.Object {
     }
 
     private void on_gumroad_license_verified(GLib.Object? o, AsyncResult res) {
-        GumroadLicense? license;
-        TiliadoMembership tier;
-        bool valid;
+        TiliadoLicense? license;
+        bool success;
         try {
-            valid = gumroad.verify_license.end(res, out license, out tier);
+            success = gumroad.verify_license.end(res, out license);
         } catch (Oauth2Error e) {
             gumroad_license_verification_failed(e.message);
             return;
         }
-        if (valid) {
-            gumroad.cache_license(license);
+        if (success) {
             update_tier_info();
         } else {
             gumroad_license_invalid();

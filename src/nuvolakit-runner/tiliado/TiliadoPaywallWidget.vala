@@ -685,15 +685,18 @@ public class TiliadoPaywallWidget : Gtk.Stack {
 
         public void update(TiliadoLicense license) {
             unowned string? description = null;
-            TiliadoMembership tier = license.tier;
+            TiliadoMembership tier = license.effective_tier;
             if (tier >= TiliadoMembership.DEVELOPER) {
                 description = "Thank you for your work.";
-            } else {
+            } else if (tier > TiliadoMembership.NONE) {
                 description = "Thank you for purchasing Nuvola.";
+            } else {
+                description = "License key is not valid.";
             }
             details.label = Markup.printf_escaped(
                 "<i>%s</i>\n\nProduct: <a href=\"%s\">%s</a>\nTier: %s", description,
-                "https://gum.co/" + license.license.product_id, license.license.product_name, tier.get_label());
+                "https://gum.co/" + license.license.product_id, license.license.product_name,
+                license.license_tier.get_label());
             this.license = license;
             details.show();
         }
