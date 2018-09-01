@@ -39,6 +39,7 @@ public class TiliadoGumroad : GLib.Object {
     private static string[] patron_products;
     private bool ignore_config_changed = false;
     private GumroadApi gumroad;
+    private TiliadoApi2 tiliado;
 
     static construct {
         basic_products = {"nuvolabasic"};
@@ -46,10 +47,11 @@ public class TiliadoGumroad : GLib.Object {
         patron_products = {"nuvolapatron"};
     }
 
-    public TiliadoGumroad(Drt.KeyValueStorage config, string sign_key, GumroadApi? gumroad=null) {
+    public TiliadoGumroad(Drt.KeyValueStorage config, string sign_key, TiliadoApi2 tiliado, GumroadApi? gumroad=null) {
         this.config = config;
         this.sign_key = sign_key;
         this.gumroad = gumroad ?? new GumroadApi(null);
+        this.tiliado = tiliado;
         load_cached_data();
         config.changed.connect(on_config_changed);
     }
@@ -91,7 +93,11 @@ public class TiliadoGumroad : GLib.Object {
     ) throws Oauth2Error {
         try {
             GumroadLicense? license = yield gumroad.get_license(product_id, license_key, increment_uses_count);
-            return new TiliadoLicense(license, tier, license.valid);
+            bool valid = license.valid;
+            if (!valid && license.is_invalid_due_to_cancelled_subscription()) {
+                valid = yield tiliado.is_gumroad_key_still_valid(license_key);
+            }
+            return new TiliadoLicense(license, tier, valid);
         } catch (Oauth2Error e) {
             if (!(e is Oauth2Error.HTTP_NOT_FOUND)) {
                 throw e;

@@ -94,7 +94,8 @@ public class StartupCheck : GLib.Object {
             TiliadoActivation? activation = TiliadoActivation.create_if_enabled(master.config ?? app.config);
             if (activation != null) {
                 var gumroad = new TiliadoGumroad(
-                    master.config ?? app.config, Drt.String.unmask(TILIADO_OAUTH2_CLIENT_SECRET.data));
+                    master.config ?? app.config, Drt.String.unmask(TILIADO_OAUTH2_CLIENT_SECRET.data),
+                    activation.tiliado);
                 paywall = new TiliadoPaywall(app, activation, gumroad);
             }
             yield check_tiliado_account(paywall);

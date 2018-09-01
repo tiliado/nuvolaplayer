@@ -167,6 +167,19 @@ public class TiliadoApi2 : Oauth2Client {
         return new MachineTrial.from_json(response);
     }
 
+    public async bool is_gumroad_key_still_valid(string key) throws Oauth2Error {
+        try {
+            Drt.JsonObject response = yield call("../accounts/gumroad-license/%s/".printf(key));
+            return response.get_bool_or("valid", false);
+        } catch (Oauth2Error e) {
+            if (e is Oauth2Error.HTTP_NOT_FOUND) {
+                return false;
+            }
+            throw e;
+        }
+        return false;
+    }
+
     public class User {
         public int id {get; private set;}
         public string? username {get; private set;}
