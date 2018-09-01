@@ -255,7 +255,7 @@ public class TiliadoPaywall : GLib.Object {
         bool success;
         try {
             success = gumroad.verify_license.end(res, out license);
-        } catch (Oauth2Error e) {
+        } catch (GumroadError e) {
             gumroad_license_verification_failed(e.message);
             return;
         }

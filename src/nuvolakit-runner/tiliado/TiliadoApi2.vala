@@ -80,11 +80,11 @@ public class TiliadoApi2 : Oauth2Client {
     }
 
     public async User fetch_current_user() throws Oauth2Error {
-        Drt.JsonObject response = yield call("me/");
+        Drt.JsonObject response = yield fetch_json(call("me/"));
         if (response.get_bool_or("is_authenticated", false) == false) {
             // Try refreshing the token to get an authenticated user
             yield refresh_token();
-            response = yield call("me/");
+            response = yield fetch_json(call("me/"));
         }
         int[] groups;
         if (!response.get_int_array("groups", out groups)) {
@@ -121,7 +121,7 @@ public class TiliadoApi2 : Oauth2Client {
     }
 
     public async Project get_project(string id) throws Oauth2Error {
-        Drt.JsonObject response = yield call("projects/projects/%s".printf(id));
+        Drt.JsonObject response = yield fetch_json(call("projects/projects/%s".printf(id)));
         int[] groups;
         if (!response.get_int_array("patron_groups", out groups)) {
             groups = {};
@@ -133,7 +133,7 @@ public class TiliadoApi2 : Oauth2Client {
     }
 
     public async Group get_group(int id) throws Oauth2Error {
-        Drt.JsonObject response = yield call("auth/groups/%d".printf(id));
+        Drt.JsonObject response = yield fetch_json(call("auth/groups/%d".printf(id)));
         int[] groups;
         if (!response.get_int_array("patron_groups", out groups)) {
             groups = {};
@@ -149,7 +149,8 @@ public class TiliadoApi2 : Oauth2Client {
             return null;
         }
         try {
-            Drt.JsonObject response = yield call("funding/trial_of_machine/%s/%s/".printf(project_id, machine));
+            Drt.JsonObject response = yield fetch_json(
+                call("funding/trial_of_machine/%s/%s/".printf(project_id, machine)));
             return new MachineTrial.from_json(response);
         } catch (Oauth2Error e) {
             if (e is Oauth2Error.HTTP_NOT_FOUND) {
@@ -163,13 +164,14 @@ public class TiliadoApi2 : Oauth2Client {
         if (project_id == null) {
             return null;
         }
-        Drt.JsonObject response = yield post("funding/trial_of_machine/%s/%s/".printf(project_id, machine));
+        Drt.JsonObject response = yield fetch_json(
+            post("funding/trial_of_machine/%s/%s/".printf(project_id, machine)));
         return new MachineTrial.from_json(response);
     }
 
     public async bool is_gumroad_key_still_valid(string key) throws Oauth2Error {
         try {
-            Drt.JsonObject response = yield call("../accounts/gumroad-license/%s/".printf(key));
+            Drt.JsonObject response = yield fetch_json(call("../accounts/gumroad-license/%s/".printf(key)));
             return response.get_bool_or("valid", false);
         } catch (Oauth2Error e) {
             if (e is Oauth2Error.HTTP_NOT_FOUND) {
@@ -177,7 +179,6 @@ public class TiliadoApi2 : Oauth2Client {
             }
             throw e;
         }
-        return false;
     }
 
     public class User {

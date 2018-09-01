@@ -62,7 +62,7 @@ public class TiliadoGumroad : GLib.Object {
 
     public async bool verify_license(
         string license_key, bool increment_uses_count, out TiliadoLicense license
-    ) throws Oauth2Error {
+    ) throws GumroadError {
         foreach (unowned string product_id in patron_products) {
             license = yield get_license(product_id, license_key, TiliadoMembership.PATRON, increment_uses_count);
             if (license != null) {
@@ -90,20 +90,20 @@ public class TiliadoGumroad : GLib.Object {
 
     private async TiliadoLicense? get_license(
         string product_id, string license_key, TiliadoMembership tier, bool increment_uses_count
-    ) throws Oauth2Error {
-        try {
-            GumroadLicense? license = yield gumroad.get_license(product_id, license_key, increment_uses_count);
-            bool valid = license.valid;
-            if (!valid && license.is_invalid_due_to_cancelled_subscription()) {
+    ) throws GumroadError {
+        GumroadLicense? license = yield gumroad.get_license(product_id, license_key, increment_uses_count);
+        if (license == null) {
+            return null;
+        }
+        bool valid = license.valid;
+        if (!valid && license.is_invalid_due_to_cancelled_subscription()) {
+            try {
                 valid = yield tiliado.is_gumroad_key_still_valid(license_key);
-            }
-            return new TiliadoLicense(license, tier, valid);
-        } catch (Oauth2Error e) {
-            if (!(e is Oauth2Error.HTTP_NOT_FOUND)) {
-                throw e;
+            } catch (Oauth2Error e) {
+                throw new GumroadError.LICENSE_ERROR(Drt.error_to_string(e));
             }
         }
-        return null;
+        return new TiliadoLicense(license, tier, valid);
     }
 
     public void cache_license(TiliadoLicense license) {
@@ -178,7 +178,7 @@ public class TiliadoGumroad : GLib.Object {
             if (license != null) {
                 return true;
             }
-        } catch (Oauth2Error e) {
+        } catch (GumroadError e) {
             warning("Failed to verify the license key: %s", e.message);
         }
         return false;
