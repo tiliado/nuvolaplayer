@@ -390,7 +390,14 @@ public class TiliadoPaywallWidget : Gtk.Stack {
             license_key_view.response.connect(on_license_key_view_response);
         }
         switch_view(license_key_view);
-        license_key_view.extra_widgets[0].grab_focus();
+        var entry = (Gtk.Entry) license_key_view.extra_widgets[0];
+        if (Drt.String.is_empty(entry.get_text())) {
+            TiliadoLicense? license = paywall.get_gumroad_license();
+            if (license != null) {
+                entry.set_text(license.license.license_key);
+            }
+        }
+        entry.grab_focus();
     }
 
     private void on_license_key_view_response(int index, Gtk.Button button) {
