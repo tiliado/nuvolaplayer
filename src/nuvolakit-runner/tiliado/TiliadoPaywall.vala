@@ -162,8 +162,7 @@ public class TiliadoPaywall : GLib.Object {
     }
 
     public void show_help_page() {
-        // FIXME: activation2.html
-        app.show_uri("https://tiliado.github.io/nuvolaplayer/documentation/4/activation.html");
+        app.show_uri("https://nuvola.tiliado.eu/docs/4/activation/");
     }
 
     public void open_purchase_page() {
