@@ -34,12 +34,12 @@ public class UnityLauncherComponent: Component {
 
     public UnityLauncherComponent(Drtgtk.Application app, Bindings bindings, Drt.KeyValueStorage config) {
         base(
-            "unity_launcher", "Extra Dock Actions",
+            config, "unity_launcher", "Extra Dock Actions",
             "Adds extra actions to the menu of the application icon in Unity Launcher or elementaryOS dock.", "docks");
         #if UNITY
+        this.required_membership = TiliadoMembership.BASIC;
         this.bindings = bindings;
         this.app = app;
-        config.bind_object_property("component.%s.".printf(id), this, "enabled").set_default(true).update_property();
         #else
         available = false;
         #endif

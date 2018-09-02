@@ -37,20 +37,15 @@ public class TrayIconComponent: Component {
     #endif
 
     public TrayIconComponent(AppRunnerController controller, Bindings bindings, Drt.KeyValueStorage config) {
-        base("tray_icon", "Tray Icon", "Small icon with menu shown in the notification area.", "tray_icon");
-        this.required_membership = TiliadoMembership.NONE;
+        base(config, "tray_icon", "Tray Icon", "Small icon with menu shown in the notification area.", "tray_icon");
+        this.required_membership = TiliadoMembership.BASIC;
         this.has_settings = true;
         #if APPINDICATOR
         this.bindings = bindings;
         this.controller = controller;
-        config.bind_object_property(NAMESPACE, this, "always_close_to_tray")
-        .set_default(true).update_property();
-        config.bind_object_property(NAMESPACE, this, "use_x11_icon")
-        .set_default(false).update_property();
-        config.bind_object_property(NAMESPACE, this, "use_appindicator")
-        .set_default(false).update_property();
-        config.bind_object_property(NAMESPACE, this, "enabled")
-        .set_default(false).update_property();
+        bind_config_property("always_close_to_tray", false);
+        bind_config_property("use_x11_icon", false);
+        bind_config_property("use_appindicator", true);
         #else
         available = false;
         #endif

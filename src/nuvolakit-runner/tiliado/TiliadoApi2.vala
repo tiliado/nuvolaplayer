@@ -36,19 +36,19 @@ public enum TiliadoMembership {
     public string get_label() {
         switch (this) {
         case NONE:
-            return "No membership";
+            return "Free";
         case BASIC:
-            return "Basic account";
+            return "Basic";
         case PREMIUM:
-            return "★ Premium account";
+            return "★ Premium";
         case PREMIUM_PLUS:
-            return "★ Premium+ account";
+            return "★ Premium+";
         case PATRON:
-            return "★ Patron account";
+            return "★ Patron";
         case PATRON_PLUS:
-            return "★ Patron+ account";
+            return "★ Patron+";
         default:
-            return "☢ Developer account";
+            return "☢ Developer";
         }
     }
 
@@ -80,11 +80,11 @@ public class TiliadoApi2 : Oauth2Client {
     }
 
     public async User fetch_current_user() throws Oauth2Error {
-        Drt.JsonObject response = yield call("me/");
+        Drt.JsonObject response = yield fetch_json(call("me/"));
         if (response.get_bool_or("is_authenticated", false) == false) {
             // Try refreshing the token to get an authenticated user
             yield refresh_token();
-            response = yield call("me/");
+            response = yield fetch_json(call("me/"));
         }
         int[] groups;
         if (!response.get_int_array("groups", out groups)) {
@@ -121,7 +121,7 @@ public class TiliadoApi2 : Oauth2Client {
     }
 
     public async Project get_project(string id) throws Oauth2Error {
-        Drt.JsonObject response = yield call("projects/projects/%s".printf(id));
+        Drt.JsonObject response = yield fetch_json(call("projects/projects/%s".printf(id)));
         int[] groups;
         if (!response.get_int_array("patron_groups", out groups)) {
             groups = {};
@@ -133,7 +133,7 @@ public class TiliadoApi2 : Oauth2Client {
     }
 
     public async Group get_group(int id) throws Oauth2Error {
-        Drt.JsonObject response = yield call("auth/groups/%d".printf(id));
+        Drt.JsonObject response = yield fetch_json(call("auth/groups/%d".printf(id)));
         int[] groups;
         if (!response.get_int_array("patron_groups", out groups)) {
             groups = {};
@@ -142,6 +142,43 @@ public class TiliadoApi2 : Oauth2Client {
             response.get_int_or("id", id),
             response.get_string_or("name", id.to_string()),
             response.get_int_or("membership_rank", 0));
+    }
+
+    public async MachineTrial? get_trial_for_machine(string machine) throws Oauth2Error {
+        if (project_id == null) {
+            return null;
+        }
+        try {
+            Drt.JsonObject response = yield fetch_json(
+                call("funding/trial_of_machine/%s/%s/".printf(project_id, machine)));
+            return new MachineTrial.from_json(response);
+        } catch (Oauth2Error e) {
+            if (e is Oauth2Error.HTTP_NOT_FOUND) {
+                return null;
+            }
+            throw e;
+        }
+    }
+
+    public async MachineTrial? start_trial_for_machine(string machine) throws Oauth2Error {
+        if (project_id == null) {
+            return null;
+        }
+        Drt.JsonObject response = yield fetch_json(
+            post("funding/trial_of_machine/%s/%s/".printf(project_id, machine)));
+        return new MachineTrial.from_json(response);
+    }
+
+    public async bool is_gumroad_key_still_valid(string key) throws Oauth2Error {
+        try {
+            Drt.JsonObject response = yield fetch_json(call("../accounts/gumroad-license/%s/".printf(key)));
+            return response.get_bool_or("valid", false);
+        } catch (Oauth2Error e) {
+            if (e is Oauth2Error.HTTP_NOT_FOUND) {
+                return false;
+            }
+            throw e;
+        }
     }
 
     public class User {
@@ -183,6 +220,10 @@ public class TiliadoApi2 : Oauth2Client {
 
         public bool has_membership(uint membership) {
             return this.membership >= membership;
+        }
+
+        public TiliadoMembership get_paywall_tier() {
+            return TiliadoMembership.from_uint(membership);
         }
 
         public string to_string() {

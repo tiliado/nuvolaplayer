@@ -34,22 +34,43 @@ public abstract class Component: GLib.Object {
     public string? help_url {get; construct;}
     public bool hidden {get; protected set; default = false;}
     public bool enabled {get; protected set; default = false;}
+    public bool enabled_by_default {get; protected set; default = true;}
     public bool loaded {get; protected set; default = false;}
     public bool active {get; protected set; default = false;}
     public bool auto_activate {get; protected set; default = true;}
     public bool has_settings {get; protected set; default = false;}
     public bool available {get; protected set; default = true;}
     public TiliadoMembership required_membership {get; protected set; default = TiliadoMembership.NONE;}
+    protected Drt.KeyValueStorage config;
 
-    public Component(string id, string name, string description, string? help_page) {
+    public Component(Drt.KeyValueStorage config, string id, string name, string description, string? help_page) {
         GLib.Object(
             id: id, name: name, description: description,
             help_url: create_help_url(help_page));
+        this.config = config;
     }
 
-    public bool is_membership_ok(TiliadoActivation? activation) {
+    public void setup(TiliadoPaywall? paywall) {
+        string enabled_key = "component.%s.enabled".printf(id);
+        if (available) {
+            if (!is_membership_ok(paywall)) {
+                config.set_bool(enabled_key, false);
+            }
+            config.bind_object_property(enabled_key, this, "enabled")
+            .set_default(enabled_by_default).update_property();
+        }
+        if (enabled) {
+            if (available) {
+                auto_load();
+            } else {
+                toggle(false);
+            }
+        }
+    }
+
+    public bool is_membership_ok(TiliadoPaywall? paywall) {
         return (required_membership == TiliadoMembership.NONE
-        || activation == null || activation.has_user_membership(required_membership));
+        || paywall == null || paywall.has_tier(required_membership));
     }
 
     public virtual void toggle(bool enabled) {
@@ -127,6 +148,11 @@ public abstract class Component: GLib.Object {
 
     protected virtual bool deactivate() {
         return false;
+    }
+
+    protected void bind_config_property(string name, Variant? default_value=null) {
+        config.bind_object_property("component.%s.".printf(id), this, name)
+        .set_default(default_value).update_property();
     }
 }
 

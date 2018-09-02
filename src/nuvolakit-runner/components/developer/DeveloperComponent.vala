@@ -32,11 +32,11 @@ public class DeveloperComponent: Component {
 
     public DeveloperComponent(AppRunnerController app, Bindings bindings, Drt.KeyValueStorage config) {
         base(
-            "developer", "Developer's tools", "Enables developer's sidebar.",
+            config, "developer", "Developer's tools", "Enables developer's sidebar.",
             "https://tiliado.github.io/nuvolaplayer/development/");
         this.bindings = bindings;
         this.app = app;
-        config.bind_object_property("component.%s.".printf(id), this, "enabled").set_default(false).update_property();
+        this.enabled_by_default = false;
     }
 
     protected override bool activate() {

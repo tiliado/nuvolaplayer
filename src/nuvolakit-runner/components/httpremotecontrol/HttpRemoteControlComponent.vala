@@ -33,16 +33,16 @@ public class Component: Nuvola.Component {
 
     public Component(AppRunnerController app, Bindings bindings, Drt.KeyValueStorage config, IpcBus ipc_bus) {
         base(
-            "httpremotecontrol", "Remote control over HTTP (experimental)",
+            config, "httpremotecontrol", "Remote control over HTTP (experimental)",
             "Remote media player HTTP interface for control over network.", "http_control");
         this.required_membership = TiliadoMembership.PREMIUM;
         this.has_settings = true;
+        this.enabled_by_default = false;
         #if EXPERIMENTAL
         this.bindings = bindings;
         this.app = app;
         this.ipc_bus = ipc_bus;
         this.available = ipc_bus.master != null;
-        config.bind_object_property("component.httpremotecontrol.", this, "enabled").set_default(false).update_property();
         #else
         available = false;
         #endif

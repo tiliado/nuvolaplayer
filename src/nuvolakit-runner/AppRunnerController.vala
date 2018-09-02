@@ -57,7 +57,7 @@ public class AppRunnerController: Drtgtk.Application {
     private Drt.Lst<Component> components = null;
     private HashTable<string, Variant>? web_worker_data = null;
     private StartupResult? startup_model;
-    private TiliadoActivation? tiliado_activation = null;
+    private TiliadoPaywall? tiliado_paywall = null;
     private URLBar? url_bar = null;
     private HashTable<string, Gtk.InfoBar> info_bars;
     private MainLoopAdaptor? mainloop = null;
@@ -128,7 +128,7 @@ public class AppRunnerController: Drtgtk.Application {
         case StartupStatus.OK:
             machine_hash = (owned) startup.machine_hash;
             master = startup.master;
-            tiliado_activation = startup.tiliado_activation;
+            tiliado_paywall = startup.paywall;
             web_options = startup.web_options;
             init_gui();
             if (about_dialog != null && !about_dialog.show_welcome_note(this.master.config ?? this.config)) {
@@ -258,10 +258,6 @@ public class AppRunnerController: Drtgtk.Application {
         }
         if (config.get_bool(ConfigKey.WINDOW_MAXIMIZED)) {
             main_window.maximize();
-        }
-        if (tiliado_activation != null) {
-            var trial_widget = new TiliadoTrialWidget(this.tiliado_activation, this, TiliadoMembership.BASIC);
-            main_window.top_grid.add(trial_widget);
         }
         main_window.present();
         main_window.window_state_event.connect(on_window_state_event);
@@ -440,7 +436,7 @@ public class AppRunnerController: Drtgtk.Application {
             this, main_window, new NetworkSettings(connection), new AppearanceSettings(config),
             new KeybindingsSettings(
                 this, actions, config, global_keybindings != null ? global_keybindings.keybinder : null),
-            new ComponentsManager(this, components, tiliado_activation), form);
+            new ComponentsManager(this, components, tiliado_paywall), form);
         preferences_dialog.response.connect(on_preferences_dialog_response);
         preferences_dialog.present();
     }
@@ -593,16 +589,7 @@ public class AppRunnerController: Drtgtk.Application {
         components.reverse();
 
         foreach (Component component in components) {
-            if (!component.is_membership_ok(tiliado_activation)) {
-                component.toggle(false);
-            }
-            if (component.enabled) {
-                if (component.available) {
-                    component.auto_load();
-                } else {
-                    component.toggle(false);
-                }
-            }
+            component.setup(tiliado_paywall);
             debug("Component %s (%s) available=%s, enabled=%s", component.id, component.name,
                 component.available.to_string(), component.enabled.to_string());
             component.notify["enabled"].connect_after(on_component_enabled_changed);
@@ -748,7 +735,7 @@ public class AppRunnerController: Drtgtk.Application {
 
     private void on_component_enabled_changed(GLib.Object object, ParamSpec param) {
         var component = object as Component;
-        return_if_fail(component != null);
+        return_if_fail(component != null && web_engine != null);
         string signal_name = component.enabled ? "ComponentLoaded" : "ComponentUnloaded";
         var payload = new Variant("(sss)", signal_name, component.id, component.name);
         try {
@@ -817,7 +804,7 @@ public class AppRunnerController: Drtgtk.Application {
     }
 
     private void on_action_changed(Drtgtk.Action action, ParamSpec p) {
-        if (p.name != "enabled") {
+        if (web_engine == null || p.name != "enabled") {
             return;
         }
         var payload = new Variant("(ssb)", "ActionEnabledChanged", action.name, action.enabled);
@@ -843,7 +830,7 @@ public class AppRunnerController: Drtgtk.Application {
             Gtk.Settings.get_default().gtk_application_prefer_dark_theme = config.get_bool(ConfigKey.DARK_THEME);
             break;
         }
-        if (web_engine.web_worker.ready) {
+        if (web_engine != null && web_engine.web_worker.ready) {
             var payload = new Variant("(ss)", "ConfigChanged", key);
             web_engine.web_worker.call_function.begin("Nuvola.config.emit", payload, false, (o, res) => {
                 try {

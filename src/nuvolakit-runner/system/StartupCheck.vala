@@ -34,7 +34,7 @@ private const string XDG_DESKTOP_PORTAL_SIGSEGV = "GDBus.Error:org.freedesktop.D
 public class StartupCheck : GLib.Object {
     public WebOptions? web_options = null;
     public MasterService? master = null;
-    public TiliadoActivation? tiliado_activation = null;
+    public TiliadoPaywall? paywall = null;
     public string? machine_hash = null;
     private StartupResult model;
     private FormatSupport format_support;
@@ -91,21 +91,14 @@ public class StartupCheck : GLib.Object {
         yield;
         if (model.get_overall_status() != StartupStatus.ERROR) {
             connect_master_service();
-            #if TILIADO_API
-            if (app.ipc_bus.master != null) {
-                tiliado_activation = new TiliadoActivationClient(app.ipc_bus.master);
-            } else {
-                assert(TILIADO_OAUTH2_CLIENT_ID != null && TILIADO_OAUTH2_CLIENT_ID[0] != '\0');
-                var tiliado = new TiliadoApi2(
-                    TILIADO_OAUTH2_CLIENT_ID, Drt.String.unmask(TILIADO_OAUTH2_CLIENT_SECRET.data),
-                    TILIADO_OAUTH2_API_ENDPOINT, TILIADO_OAUTH2_TOKEN_ENDPOINT, null, "nuvolaplayer");
-                tiliado_activation = new TiliadoActivationLocal(tiliado, app.config);
-                if (tiliado_activation.get_user_info() == null) {
-                    tiliado_activation.update_user_info_sync();
-                }
+            TiliadoActivation? activation = TiliadoActivation.create_if_enabled(master.config ?? app.config);
+            if (activation != null) {
+                var gumroad = new TiliadoGumroad(
+                    master.config ?? app.config, Drt.String.unmask(TILIADO_OAUTH2_CLIENT_SECRET.data),
+                    activation.tiliado);
+                paywall = new TiliadoPaywall(app, activation, gumroad);
             }
-            #endif
-            yield check_tiliado_account(tiliado_activation);
+            yield check_tiliado_account(paywall);
 
         }
         model.mark_as_finished();
@@ -295,18 +288,18 @@ public class StartupCheck : GLib.Object {
      *
      * The {@link tiliado_account_status} property is populated with the result of this check.
      */
-    public async void check_tiliado_account(TiliadoActivation? activation) {
+    public async void check_tiliado_account(TiliadoPaywall? paywall) {
         model.task_started(Task.TILIADO_ACCOUNT);
         #if TILIADO_API
         model.tiliado_account_status = StartupStatus.IN_PROGRESS;
         yield Drt.EventLoop.resume_later();
-        if (activation != null) {
-            TiliadoApi2.User? user = activation.get_user_info();
-            if (user != null) {
-                model.tiliado_account_message = Markup.printf_escaped("Tiliado account: %s", user.name);
+        if (paywall != null) {
+            yield paywall.refresh_data();
+            if (paywall.unlocked) {
+                model.tiliado_account_message = Markup.printf_escaped("Features Tier: %s", paywall.tier.get_label());
                 model.tiliado_account_status = StartupStatus.OK;
             } else {
-                model.tiliado_account_message ="No Tiliado account.";
+                model.tiliado_account_message = "Features Tier: Free";
                 model.tiliado_account_status = StartupStatus.OK;
             }
         } else {

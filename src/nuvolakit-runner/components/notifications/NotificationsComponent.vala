@@ -32,11 +32,11 @@ public class NotificationsComponent: Component {
 
 
     public NotificationsComponent(AppRunnerController app, Bindings bindings, ActionsHelper actions_helper) {
-        base("notifications", "Notifications", "Shows desktop notifications.", "notifications");
+        base(app.config, "notifications", "Notifications", "Shows desktop notifications.", "notifications");
+        this.required_membership = TiliadoMembership.BASIC;
         this.bindings = bindings;
         this.actions_helper = actions_helper;
         this.app = app;
-        app.config.bind_object_property("component.%s.".printf(id), this, "enabled").set_default(false).update_property();
     }
 
     protected override bool activate() {

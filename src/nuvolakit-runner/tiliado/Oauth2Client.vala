@@ -34,17 +34,16 @@ public errordomain Oauth2Error {
     HTTP_UNAUTHORIZED,
     INVALID_GRANT,
     UNAUTHORIZED_CLIENT,
-    UNSUPPORTED_GRANT_TYPE;
+    UNSUPPORTED_GRANT_TYPE,
+    NETWORK_ERROR;
 }
 
-public class Oauth2Client : GLib.Object {
+public class Oauth2Client : HttpClient {
     private static bool debug_soup;
     public string client_id;
     public string? client_secret;
-    public string api_endpoint;
     public Oauth2Token? token {get; set;}
     public string? token_endpoint;
-    private Soup.Session soup;
     private string? device_code_endpoint = null;
     private string? device_code = null;
     private uint device_code_cb_id = 0;
@@ -54,13 +53,9 @@ public class Oauth2Client : GLib.Object {
     }
 
     public Oauth2Client(string client_id, string? client_secret, string api_endpoint, string? token_endpoint, Oauth2Token? token) {
-        soup = new Soup.Session();
-        if (debug_soup) {
-            soup.add_feature(new Soup.Logger(Soup.LoggerLogLevel.BODY, -1));
-        }
+        base(api_endpoint, debug_soup);
         this.client_id = client_id;
         this.client_secret = client_secret;
-        this.api_endpoint = api_endpoint;
         this.token_endpoint = token_endpoint;
         this.token = token;
     }
@@ -77,38 +72,7 @@ public class Oauth2Client : GLib.Object {
         warning("Device code grant error: %s. %s", code, description ?? "(null)");
     }
 
-    public virtual async Drt.JsonObject call(string? method, HashTable<string, string>? params=null,
-        HashTable<string, string>? headers=null)
-    throws Oauth2Error {
-        var uri = new Soup.URI(api_endpoint + (method ?? ""));
-        if (params != null) {
-            uri.set_query_from_form(params);
-        }
-        var msg = new Soup.Message.from_uri("GET", uri);
-        debug("Oauth2 GET %s", uri.to_string(false));
-        if (headers != null) {
-            headers.for_each(msg.request_headers.replace);
-        }
-        return yield send_message(msg, true);
-    }
-
-    public virtual async Drt.JsonObject post(string? method, HashTable<string, string>? params=null,
-        HashTable<string, string>? headers=null)
-    throws Oauth2Error {
-        var uri = new Soup.URI(api_endpoint + (method ?? ""));
-        if (params != null) {
-            uri.set_query_from_form(params);
-        }
-        var msg = new Soup.Message.from_uri("POST", uri);
-        debug("Oauth2 POST %s", uri.to_string(false));
-        if (headers != null) {
-            headers.for_each(msg.request_headers.replace);
-        }
-        return yield send_message(msg, true);
-    }
-
-    public async bool refresh_token()
-    throws Oauth2Error {
+    public async bool refresh_token() throws Oauth2Error {
         if (token == null || token.refresh_token == null) {
             return false;
         }
@@ -118,29 +82,12 @@ public class Oauth2Client : GLib.Object {
             msg.request_headers.replace("Authorization",
                 "Basic " + Base64.encode("%s:%s".printf(client_id, client_secret).data));
         }
-        SourceFunc resume_cb = refresh_token.callback;
-        soup.queue_message(msg, (s, m) => Idle.add((owned) resume_cb));
-        yield;
 
-        unowned string response_data = (string) msg.response_body.flatten().data;
-        Drt.JsonObject response;
-        try {
-            response = Drt.JsonParser.load_object(response_data);
-        }
-        catch (GLib.Error e) {
-            throw new Oauth2Error.PARSE_ERROR(e.message);
-        }
-
-        if (msg.status_code < 200 || msg.status_code >= 300) {
-            string error_code; string? error_description;
-            parse_error(response, out error_code, out error_description);
-            if (error_description == null) {
-                error_description = error_code;
-            } else {
-                error_description = "%s: %s".printf(error_code, error_description);
-            }
-
-            switch (error_code) {
+        Drt.JsonObject? response = null;
+        HttpRequest request = create_request(msg);
+        if (!yield request.send()) {
+            string? error_description;
+            switch (parse_error(request, out error_description)) {
             case "invalid_request":
                 token = null;
                 throw new Oauth2Error.INVALID_REQUEST(error_description);
@@ -157,7 +104,7 @@ public class Oauth2Client : GLib.Object {
                 token = null;
                 throw new Oauth2Error.UNSUPPORTED_GRANT_TYPE(error_description);
             default:
-                switch (msg.status_code) {
+                switch (request.status_code) {
                 case 404:
                     throw new Oauth2Error.HTTP_NOT_FOUND("%s. %u: %s".printf(
                         error_description, msg.status_code, Soup.Status.get_phrase(msg.status_code)));
@@ -168,6 +115,11 @@ public class Oauth2Client : GLib.Object {
             }
         }
 
+        try {
+            response = request.get_json_object();
+        } catch (Drt.JsonError e) {
+            throw new Oauth2Error.PARSE_ERROR(Drt.error_to_string(e));
+        }
         string? access_token;
         response.get_string("access_token", out access_token);
         string? refresh_token;
@@ -181,7 +133,10 @@ public class Oauth2Client : GLib.Object {
         return true;
     }
 
-    public void start_device_code_grant(string device_code_endpoint) {
+    public async void start_device_code_grant(string device_code_endpoint) {
+        if (token != null) {
+            token = null;
+        }
         Soup.Message msg = Soup.Form.request_new("POST", device_code_endpoint, "response_type", "tiliado_device_code",
             "client_id", client_id);
         if (client_secret != null) {
@@ -189,22 +144,19 @@ public class Oauth2Client : GLib.Object {
                 "Basic " + Base64.encode("%s:%s".printf(client_id, client_secret).data));
         }
 
-        soup.send_message(msg);
-        unowned string response_data = (string) msg.response_body.flatten().data;
-        Drt.JsonObject response;
-        try {
-            response = Drt.JsonParser.load_object(response_data);
-        }
-        catch (GLib.Error e) {
-            device_code_grant_error("parse_error", e.message);
+        HttpRequest request = create_request(msg);
+        if (!yield request.send()) {
+            string? error_description;
+            string error_code = parse_error(request, out error_description);
+            device_code_grant_error(error_code, error_description);
             return;
         }
 
-        if (msg.status_code != 200) {
-            string error_code;
-            string? error_description;
-            parse_error(response, out error_code, out error_description);
-            device_code_grant_error(error_code, error_description);
+        Drt.JsonObject? response = null;
+        try {
+            response = request.get_json_object();
+        } catch (Drt.JsonError e) {
+            device_code_grant_error("parse_error", Drt.error_to_string(e));
             return;
         }
 
@@ -255,49 +207,37 @@ public class Oauth2Client : GLib.Object {
         return client_secret != null ? Hmac.verify_string(checksum, client_secret, data, hmac): false;
     }
 
-    private async Drt.JsonObject send_message(Soup.Message msg, bool retry)
-    throws Oauth2Error {
-        if (token != null) {
-            msg.request_headers.replace("Authorization", "%s %s".printf(token.token_type, token.access_token));
-        }
-        SourceFunc resume_cb = send_message.callback;
-        soup.queue_message(msg, (s, m ) => {Idle.add((owned) resume_cb);});
-        yield;
-        unowned string response_data = (string) msg.response_body.flatten().data;
-        if (msg.status_code < 200 || msg.status_code >= 300) {
-            string? err_str = null;
-            try {
-                Drt.JsonArray array = Drt.JsonParser.load_array(response_data);
-                if (array.length > 0 && !array.get_string(0, out err_str)) {
-                    err_str = null;
-                }
+    protected async Drt.JsonObject fetch_json(HttpRequest request) throws Oauth2Error {
+        if (!yield request.send()) {
+            if (request.is_network_error()) {
+                throw new Oauth2Error.NETWORK_ERROR(request.get_reason());
             }
-            catch (GLib.Error e) {
-            }
-            string http_error = "%u: %s".printf(msg.status_code, err_str ?? Soup.Status.get_phrase(msg.status_code));
-            warning("Oauth2 Response error. %s.\n%s", http_error, response_data);
-            switch (msg.status_code) {
+            switch (request.status_code) {
             case 404:
-                throw new Oauth2Error.HTTP_NOT_FOUND(http_error);
+                throw new Oauth2Error.HTTP_NOT_FOUND(request.get_reason());
             case 401:
-                assert(token != null);
-                if (token != null && retry) {
-                    message("Failed to send a message. Will try refreshing token. Reason: %s", http_error);
-                    if (yield refresh_token()) {
-                        return yield send_message(msg, false);
-                    }
-                }
-                throw new Oauth2Error.HTTP_UNAUTHORIZED(http_error);
+            case 403:
+                throw new Oauth2Error.HTTP_UNAUTHORIZED(request.get_reason());
             default:
-                throw new Oauth2Error.HTTP_ERROR(http_error);
+                throw new Oauth2Error.HTTP_ERROR(request.get_reason());
             }
         }
-
         try {
-            return Drt.JsonParser.load_object(response_data);
+            return request.get_json_object();
+        } catch (Drt.JsonError e) {
+            throw new Oauth2Error.PARSE_ERROR(Drt.error_to_string(e));
         }
-        catch (GLib.Error e) {
-            throw new Oauth2Error.PARSE_ERROR(e.message);
+    }
+
+    protected override async bool authorize() {
+        if (token == null) {
+            return false;
+        }
+        try {
+            return yield refresh_token();
+        } catch (Oauth2Error e) {
+            Drt.warn_error(e, "Failed to refresh access token.");
+            return false;
         }
     }
 
@@ -305,51 +245,55 @@ public class Oauth2Client : GLib.Object {
         if (device_code_endpoint == null || device_code == null) {
             return false;
         }
+        finish_device_code_grant.begin((o, res) => { finish_device_code_grant.end(res); });
+        return true;
+    }
 
+    private async void finish_device_code_grant() {
         Soup.Message msg = Soup.Form.request_new("POST", device_code_endpoint, "grant_type", "tiliado_device_code",
             "client_id", client_id, "code", device_code);
         if (client_secret != null) {
             msg.request_headers.replace("Authorization",
                 "Basic " + Base64.encode("%s:%s".printf(client_id, client_secret).data));
         }
-        soup.send_message(msg);
 
+        HttpRequest request = create_request(msg);
+        yield request.send();
+        Drt.JsonObject? response = null;
         if (device_code_endpoint == null || device_code == null) {
-            return false;
+            return;
         }
-
-        unowned string response_data = (string) msg.response_body.flatten().data;
-        Drt.JsonObject response;
-        try {
-            response = Drt.JsonParser.load_object(response_data);
-        }
-        catch (GLib.Error e) {
-            device_code_grant_error("parse_error", e.message);
-            cancel_device_code_grant();
-            return false;
-        }
-        if (msg.status_code != 200) {
-            string error_code;
-            string? error_description;
-            parse_error(response, out error_code, out error_description);
+        if (!request.is_ok()) {
+            string error_description;
+            string error_code = parse_error(request, out error_description);
             switch (error_code) {
             case "slow_down":
             case "authorization_pending":
                 debug("Device code grant error: %s. %s", error_code, error_description);
-                return true;
+                break;
             default:
                 device_code_grant_error(error_code, error_description);
                 cancel_device_code_grant();
-                return false;
+                break;
             }
+            return;
+        }
+
+        try {
+            response = request.get_json_object();
+        } catch (Drt.JsonError e) {
+            device_code_grant_error("parse_error", "parse_error: " + Drt.error_to_string(e));
+            cancel_device_code_grant();
+            return;
         }
 
         string access_token;
         if (!response.get_string("access_token", out access_token)) {
             device_code_grant_error("response_error", "The 'access_token' member is missing.");
             cancel_device_code_grant();
-            return false;
+            return;
         }
+
         string? refresh_token = response.get_string_or("refresh_token", null);
         string? token_type = response.get_string_or("token_type", null);
         string? scope = response.get_string_or("scope", null);
@@ -359,15 +303,44 @@ public class Oauth2Client : GLib.Object {
         this.device_code = null;
         this.device_code_endpoint = null;
         device_code_grant_finished(token);
-        return false;
     }
 
-    private void parse_error(Drt.JsonObject response, out string error_code, out string? error_description) {
+    private string parse_error(HttpRequest request, out string error_description) {
+        Drt.JsonObject? response = null;
+        try {
+            response = request.get_json_object();
+        } catch (Drt.JsonError e) {
+            try {
+                Drt.JsonArray array = request.get_json_array();
+                string? err_str = null;
+                if (array.length > 0 && array.get_string(0, out err_str) && err_str != null) {
+                    error_description = "other_error: " + err_str;
+                    return "other_error";
+                }
+            } catch (Drt.JsonError e) {
+            }
+            error_description = "parse_error: " + Drt.error_to_string(e);
+            return "parse_error";
+        }
+
+        string error_code;
         if (!response.get_string("error", out error_code)) {
             error_code = "response_error";
             error_description = "The 'error' member is missing.";
         } else {
-            error_description =response.get_string_or("description", null);
+            error_description = response.get_string_or("description", null);
+        }
+        if (error_description == null) {
+            error_description = error_code;
+        } else {
+            error_description = "%s: %s".printf(error_code, error_description);
+        }
+        return error_code;
+    }
+
+    protected override void add_headers(Soup.Message msg) {
+        if (token != null && msg.request_headers.get_one("Authorization") == null) {
+            msg.request_headers.replace("Authorization", "%s %s".printf(token.token_type, token.access_token));
         }
     }
 }

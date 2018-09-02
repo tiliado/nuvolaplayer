@@ -35,7 +35,7 @@ public class MasterController : Drtgtk.Application {
     public Drt.Storage storage {get; private set; default = null;}
     public WebAppRegistry? web_app_reg {get; private set; default = null;}
     public Config config {get; private set; default = null;}
-    public TiliadoActivation? activation {get; private set; default = null;}
+    public TiliadoPaywall? paywall {get; private set; default = null;}
     public bool debuging {get; private set; default = false;}
     public string? machine_hash {get; private set; default = null;}
     private string[] exec_cmd;
@@ -99,6 +99,7 @@ public class MasterController : Drtgtk.Application {
     public unowned MasterUserInterface get_ui() {
         if (_ui == null) {
             late_init();
+            init_tiliado_account();
             _ui = new MasterUserInterface(this);
         }
         return _ui;
@@ -155,8 +156,6 @@ public class MasterController : Drtgtk.Application {
             quit();
             return;
         }
-
-        init_tiliado_account();
 
         storage_server = new Drt.KeyValueStorageServer(server.api);
         storage_server.add_provider("master.config", config);
@@ -320,16 +319,13 @@ public class MasterController : Drtgtk.Application {
     }
 
     private void init_tiliado_account() {
-        #if TILIADO_API
-        assert(TILIADO_OAUTH2_CLIENT_ID != null && TILIADO_OAUTH2_CLIENT_ID[0] != '\0');
-        var tiliado = new TiliadoApi2(
-            TILIADO_OAUTH2_CLIENT_ID, Drt.String.unmask(TILIADO_OAUTH2_CLIENT_SECRET.data),
-            TILIADO_OAUTH2_API_ENDPOINT, TILIADO_OAUTH2_TOKEN_ENDPOINT, null, "nuvolaplayer");
-        activation = new TiliadoActivationManager(tiliado, server, config);
-        if (activation.get_user_info() == null) {
-            activation.update_user_info_sync();
+        TiliadoActivation? activation = TiliadoActivation.create_if_enabled(config);
+        if (activation != null) {
+            var gumroad = new TiliadoGumroad(
+                config, Drt.String.unmask(TILIADO_OAUTH2_CLIENT_SECRET.data), activation.tiliado);
+            paywall = new TiliadoPaywall(this, activation, gumroad);
+            paywall.refresh_data.begin((o, res) => {paywall.refresh_data.end(res);});
         }
-        #endif
     }
 }
 
