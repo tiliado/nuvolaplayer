@@ -143,7 +143,6 @@ public class TiliadoActivation : GLib.Object {
 
     public async MachineTrial? get_fresh_machine_trial() throws Oauth2Error {
         MachineTrial? trial =  yield tiliado.get_trial_for_machine(yield Nuvola.get_machine_hash());
-        warning(trial.to_string());
         cache_trial(trial);
         return trial;
     }
