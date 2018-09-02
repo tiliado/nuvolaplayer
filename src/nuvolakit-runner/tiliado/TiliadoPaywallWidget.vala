@@ -32,7 +32,6 @@ public class TiliadoPaywallWidget : Gtk.Stack {
     private View? tiliado_account_error_view = null;
     private TiliadoAccountView? tiliado_account_view = null;
     private View? invalid_tiliado_account_view = null;
-    private View? purchase_confirmation_needed = null;
     private View? purchase_options_view = null;
     private View? license_key_view = null;
     private View? verifying_gumroad_license_view = null;
@@ -193,8 +192,7 @@ public class TiliadoPaywallWidget : Gtk.Stack {
                 phase = Phase.LICENSE_KEY;
                 enter_license_key();
             } else {
-                phase = Phase.TILIADO_ACCOUNT;
-                show_purchase_confirmation_needed();
+                connect_tiliado_account(false);
             }
             break;
         case 1:
@@ -302,33 +300,6 @@ public class TiliadoPaywallWidget : Gtk.Stack {
                 "You don't have a Tiliado Developer account.\n\n<b>User:</b> %s\n<b>Tier:</b> %s",
                 user.name, TiliadoMembership.from_uint(user.membership).get_label()));
             switch_view(invalid_tiliado_account_view);
-        }
-    }
-
-    private void show_purchase_confirmation_needed() {
-        if (purchase_confirmation_needed == null) {
-            purchase_confirmation_needed = new View(
-                Drtgtk.Labels.markup(
-                    "<b>You should have received activation instructions from Tiliado. Please read them carefully.</b>\n\n"
-                    + "Once a Nuvola developer confirms that your Gumroad and Tiliado accounts were linked, you "
-                    + "can activate Nuvola with the button below."),
-                {"I have received the confirmation", "I am still waiting for the confirmation", "Help"}, 0);
-            purchase_confirmation_needed.response.connect(on_purchase_confirmation_needed_response);
-        }
-        switch_view(purchase_confirmation_needed);
-    }
-
-    private void on_purchase_confirmation_needed_response(int index, Gtk.Button button) {
-        switch (index) {
-        case 0:
-            connect_tiliado_account(false);
-            break;
-        case 2:
-            paywall.show_help_page();
-            break;
-        default:
-            choose_purchase_option();
-            break;
         }
     }
 
