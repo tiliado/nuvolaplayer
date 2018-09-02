@@ -599,7 +599,8 @@ public class TiliadoPaywallWidget : Gtk.Stack {
 
         public Info(string title, owned string?[]? icon_buttons=null) {
             hexpand = false;
-            halign = Gtk.Align.FILL;
+            vexpand = true;
+            valign = halign = Gtk.Align.FILL;
             margin = 20;
             column_spacing = row_spacing = 10;
             orientation = Gtk.Orientation.VERTICAL;
@@ -622,12 +623,12 @@ public class TiliadoPaywallWidget : Gtk.Stack {
             }
             Gtk.Label header = Drtgtk.Labels.markup("<b>%s</b>", title);
             header.xalign = 0.5f;
-            header.halign = Gtk.Align.CENTER;
+            header.halign = Gtk.Align.START;
             header.yalign = 0.5f;
             attach(header, 0, line, 1, 1);
             var details = new Gtk.Label("");
-            details.xalign = 0.5f;
-            details.halign = Gtk.Align.CENTER;
+            details.xalign = 0.0f;
+            details.halign = Gtk.Align.START;
             details.use_markup = true;
             details.set_line_wrap(true);
             details.max_width_chars = 30;
