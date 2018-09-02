@@ -42,9 +42,9 @@ public class TiliadoGumroad : GLib.Object {
     private TiliadoApi2 tiliado;
 
     static construct {
-        basic_products = {"nuvolabasic"};
-        premium_products = {"nuvolapremium"};
-        patron_products = {"nuvolapatron"};
+        basic_products = {"nuv1", "nuvolabasic"};
+        premium_products = {"nuv3", "nuvolapremium", "nuvolatest1"};
+        patron_products = {"nuv10", "nuvolapatron"};
     }
 
     public TiliadoGumroad(Drt.KeyValueStorage config, string sign_key, TiliadoApi2 tiliado, GumroadApi? gumroad=null) {
