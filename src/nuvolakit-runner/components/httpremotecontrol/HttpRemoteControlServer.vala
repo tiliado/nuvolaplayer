@@ -399,9 +399,6 @@ public class Server: Soup.Server {
         Variant? result = data;
         if (data == null || !data.get_type().is_subtype_of(VariantType.DICTIONARY)) {
             var builder = new VariantBuilder(new VariantType("a{smv}"));
-            if (data != null) {
-                g_variant_ref(data);
-            } // FIXME: How to avoid this hack
             builder.add("{smv}", "result", data);
             result = builder.end();
         }
@@ -570,8 +567,5 @@ public class Server: Soup.Server {
 }
 
 } // namespace Nuvola.HttpRemoteControl
-
-// FIXME
-private extern Variant* g_variant_ref(Variant* variant);
 #endif
 

@@ -279,10 +279,6 @@ public class CefJSApi : GLib.Object {
         Assert.on_glib_thread();
         var args = new Variant("(imvmv)", (int32) id, response,
             error == null ? null : new Variant.string(error.message));
-        if (response != null) {
-            // FIXME: How are we losing a reference here?
-            g_variant_ref(response);
-        }
         call_function_sync("Nuvola.Async.respond", args, false);
     }
 
@@ -633,6 +629,3 @@ public class CefJSApi : GLib.Object {
 }
 
 } // namespace Nuvola
-
-// FIXME
-private extern Variant* g_variant_ref(Variant* variant);

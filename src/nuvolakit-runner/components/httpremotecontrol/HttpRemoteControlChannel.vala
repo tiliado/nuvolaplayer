@@ -56,9 +56,6 @@ public class Channel: Engineio.Channel {
             Variant variant_result = yield http_server.handle_eio_request(socket, type, method, params);
             if (variant_result == null || !variant_result.get_type().is_subtype_of(VariantType.DICTIONARY)) {
                 var builder = new VariantBuilder(new VariantType("a{smv}"));
-                if (variant_result != null) {
-                    g_variant_ref(variant_result);
-                } // FIXME: How to avoid this hack
                 builder.add("{smv}", "result", variant_result);
                 result = Json.gvariant_serialize(builder.end());
             } else {
@@ -83,9 +80,6 @@ public class Channel: Engineio.Channel {
         Json.Node? result = null;
         if (data == null || !data.get_type().is_subtype_of(VariantType.DICTIONARY)) {
             var builder = new VariantBuilder(new VariantType("a{smv}"));
-            if (data != null) {
-                g_variant_ref(data);
-            } // FIXME: How to avoid this hack
             builder.add("{smv}", "result", data);
             result = Json.gvariant_serialize(builder.end());
         } else {
@@ -95,5 +89,6 @@ public class Channel: Engineio.Channel {
         socket.send_message(msg);
     }
 }
+
 } // namespace Nuvola.HttpRemoteControl
 #endif
