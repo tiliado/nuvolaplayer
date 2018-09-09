@@ -31,7 +31,7 @@ public errordomain CefWidevineDownloaderError {
     PLUGIN_NOT_FOUND;
 }
 
-public class CefWidevineDownloader : GLib.Object {
+public class CefWidevineDownloader : GLib.Object, CefPluginDownloader {
     public const string CHROME_EULA_URL = "https://www.google.com/intl/en/chrome/browser/privacy/eula_text.html";
     public const string CHROME_DEB_URL = "https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb";
     public string? chrome_version {get; private set; default = null;}
@@ -78,8 +78,6 @@ public class CefWidevineDownloader : GLib.Object {
             return !(e is GLib.KeyFileError.KEY_NOT_FOUND);
         }
     }
-
-    public signal void progress_text(string text);
 
     public async void download(Cancellable? cancellable=null) throws GLib.Error {
         yield make_backup(version_file, cancellable);

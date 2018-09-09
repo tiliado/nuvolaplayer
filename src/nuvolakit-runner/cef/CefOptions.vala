@@ -31,8 +31,10 @@ public class CefOptions : WebOptions {
     public bool widevine_required {get; set; default = false;}
     public bool flash_required {get; private set; default = false;}
     public File widevine_dir {get; private set;}
+    public File flash_dir {get; private set;}
     public CefGtk.InitFlags flags {get; private set;}
     public bool widevine_found {get; private set; default = false;}
+    public bool flash_found {get; private set; default = false;}
 
     public CefOptions(WebAppStorage storage, Connection? connection) {
         base(storage, connection);
@@ -41,6 +43,7 @@ public class CefOptions : WebOptions {
     construct {
         engine_version = VersionTuple.parse(Cef.get_chromium_version());
         widevine_dir = storage.data_dir.get_child("widevine");
+        flash_dir = storage.data_dir.get_child("flash");
         flags = new CefGtk.InitFlags();
         flags.auto_play_policy = CefGtk.AutoPlayPolicy.NO_USER_GESTURE_REQUIRED;
     }
@@ -65,6 +68,25 @@ public class CefOptions : WebOptions {
             }
         } else {
             widevine_found = true;
+        }
+        if (flash_required && connection != null) {
+            var fd = new CefFlashDownloader(connection, flash_dir);
+            try {
+                if (fd.exists()) {
+                    yield fd.check_latest();
+                }
+            } catch (CefFlashDownloaderError e) {
+                Drt.warn_error(e, "Failed to get Flash info.");
+            }
+            flash_found = fd.exists() && !fd.needs_update();
+            if (!flash_found) {
+                var dialog = new CefFlashDownloaderDialog(fd, web_app.name);
+                yield dialog.wait_for_result();
+                dialog.destroy();
+                flash_found = fd.exists() && !fd.needs_update();
+            }
+        } else {
+            flash_found = true;
         }
         init(web_app);
         CefGtk.InitializationResult result = CefGtk.get_init_result();
@@ -109,7 +131,7 @@ public class CefOptions : WebOptions {
                 flags,
                 web_app.scale_factor,
                 widevine_required && widevine_found ? widevine_dir.get_path() : null,
-                flash_required,
+                flash_required && flash_found ? flash_dir.get_path() : null,
                 user_agent, product,
                 proxy_type, proxy_server, (uint) proxy_port);
             default_context = new CefGtk.WebContext(storage.create_data_subdir("cef").get_path());

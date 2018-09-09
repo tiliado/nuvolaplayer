@@ -25,25 +25,24 @@
 #if HAVE_CEF
 namespace Nuvola {
 
-public class CefWidevineDownloaderDialog : CefPluginDownloaderDialog {
-
-    public CefWidevineDownloaderDialog(CefWidevineDownloader downloader, string web_app_name) {
+public class CefFlashDownloaderDialog : CefPluginDownloaderDialog {
+    public CefFlashDownloaderDialog(CefFlashDownloader downloader, string web_app_name) {
         bool needs_update = downloader.needs_update();
         Gtk.Label label = Drtgtk.Labels.markup(
             (
-                "<b>%s web app requires a proprietary Widevine plugin. Would you like to install it?</b>\n\n"
-                + "Upon your approval, Nuvola will download Google Chrome and extract the Widevine plugin. "
-                + "You need to accept <a href=\"%s\">Google Chrome End User License Agreement</a> to proceed."
+                "<b>%s web app requires a proprietary Flash plugin. Would you like to install it?</b>\n\n"
+                + "Upon your approval, Nuvola will download the Flash plugin from Adobe. "
+                + "You need to accept <a href=\"%s\">Adobe Software Licensing Agreement</a> to proceed."
             ),
-            web_app_name, CefWidevineDownloader.CHROME_EULA_URL);
-        unowned string title = needs_update ? "Widevine Plugin Update Required" : "Widevine Plugin Required";
+            web_app_name, CefFlashDownloader.FLASH_EULA_URL);
+        unowned string title = needs_update ? "Flash Plugin Update Required" : "Flash Plugin Required";
         base(
-            downloader, title, label, "I accept Google Chrome End User License Agreement.",
+            downloader, title, label, "I accept Adobe Software Licensing Agreement.",
             needs_update ? "Update plugin" : "Install plugin");
         if (needs_update) {
-            warning("Widevine needs update from %s.", downloader.chrome_version);
+            warning("Flash needs update to %s.", downloader.latest_version);
         } else {
-            debug("Need to install Widevine.");
+            debug("Need to install Flash.");
         }
     }
 }

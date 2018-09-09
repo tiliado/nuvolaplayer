@@ -25,27 +25,10 @@
 #if HAVE_CEF
 namespace Nuvola {
 
-public class CefWidevineDownloaderDialog : CefPluginDownloaderDialog {
+public interface CefPluginDownloader : GLib.Object {
+    public abstract async void download(Cancellable? cancellable=null) throws GLib.Error;
 
-    public CefWidevineDownloaderDialog(CefWidevineDownloader downloader, string web_app_name) {
-        bool needs_update = downloader.needs_update();
-        Gtk.Label label = Drtgtk.Labels.markup(
-            (
-                "<b>%s web app requires a proprietary Widevine plugin. Would you like to install it?</b>\n\n"
-                + "Upon your approval, Nuvola will download Google Chrome and extract the Widevine plugin. "
-                + "You need to accept <a href=\"%s\">Google Chrome End User License Agreement</a> to proceed."
-            ),
-            web_app_name, CefWidevineDownloader.CHROME_EULA_URL);
-        unowned string title = needs_update ? "Widevine Plugin Update Required" : "Widevine Plugin Required";
-        base(
-            downloader, title, label, "I accept Google Chrome End User License Agreement.",
-            needs_update ? "Update plugin" : "Install plugin");
-        if (needs_update) {
-            warning("Widevine needs update from %s.", downloader.chrome_version);
-        } else {
-            debug("Need to install Widevine.");
-        }
-    }
+    public signal void progress_text(string text);
 }
 
 } // namespace Nuvola
