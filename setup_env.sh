@@ -18,6 +18,20 @@ prompt_prefix='\[\033[1;33m\]Nuvola\[\033[00m\]'
 [[ "$PS1" = "$prompt_prefix"* ]] || export PS1="$prompt_prefix $PS1"
 unset prompt_prefix
 
+commands() {
+    echo "Commands:"
+    echo reconfigure
+    echo rebuild
+    echo build
+    echo run-service
+    echo run-app
+    echo run-tests
+    echo debug-service
+    echo debug-app
+    echo fatal_criticals
+    echo fatal_criticals_off
+}
+
 mk_symlinks()
 {
     build_datadir="./build/share/nuvolaruntime"
@@ -61,7 +75,7 @@ mk_symlinks()
         ln -s "$DATADIR/javascript/engine.io-client/engine.io.js" "${build_datadir}/www/engine.io.js"
 }
 
-reconf()
+reconfigure()
 {
     python3 ./waf -v distclean configure \
             $WAF_CONFIGURE "$@"
@@ -74,7 +88,7 @@ rebuild()
         && build/run-nuvolaruntime-tests
 }
 
-run()
+run-service()
 {
         mk_symlinks
         python3 ./waf -v && build/nuvola -D "$@"
@@ -87,19 +101,19 @@ build()
     python3 ./waf -v
 }
 
-tests()
+run-tests()
 {
     mk_symlinks
     python3 ./waf -v && build/run-nuvolaruntime-tests
 }
 
-dbus()
+run-app()
 {
         mk_symlinks
         python3 ./waf -v && build/nuvolaruntime -D -a "$@"
 }
 
-debug_dbus()
+debug-app()
 {
         mk_symlinks
         python3 ./waf -v && gdb --args build/nuvolaruntime -D -a "$@"
@@ -110,55 +124,20 @@ ctl()
     python3 ./waf -v && build/nuvolactl -D "$@"
 }
 
-debug()
+debug-service()
 {
         mk_symlinks
         python3 ./waf -v && gdb --args build/nuvola -D "$@"
 }
 
-debug_criticals()
+fatal_criticals()
 {
-        mk_symlinks
-        python3 ./waf -v && G_DEBUG=fatal-criticals \
-        gdb  --args build/nuvola -D "$@"
+    export G_DEBUG=fatal-criticals
 }
 
-debug_app_runner()
+fatal_criticals_off()
 {
-        mk_symlinks
-        python3 ./waf -v && NUVOLA_APP_RUNNER_GDB_SERVER='localhost:9090' build/nuvola -D "$@"
-}
-
-debug_app_runner_criticals()
-{
-        mk_symlinks
-        python3 ./waf -v && G_DEBUG=fatal-criticals NUVOLA_APP_RUNNER_GDB_SERVER='localhost:9090' \
-        build/nuvola -D "$@"
-}
-
-debug_app_runner_join()
-{
-        mk_symlinks
-        echo Wait for App Runner process to start, then type "'target remote localhost:9090'" and "'continue'"
-        libtool --mode=execute gdb build/apprunner
-}
-
-debug_web_worker()
-{
-        mk_symlinks
-        python3 ./waf -v && NUVOLA_WEB_WORKER_SLEEP=30 build/nuvola -D "$@"
-}
-
-debug_web_worker_criticals()
-{
-        mk_symlinks
-        python3 ./waf -v && G_DEBUG=fatal-criticals NUVOLA_WEB_WORKER_SLEEP=30 \
-        build/nuvola -D "$@"
-}
-
-watch_and_build()
-{
-        while true; do inotifywait -e delete -e create -e modify -r src; sleep 1; ./waf; done
+    export G_DEBUG=
 }
 
 build_webgen_doc()
@@ -177,3 +156,5 @@ ulimit -c unlimited
 ulimit -a
 echo "--- Core dump pattern ---"
 echo "'`cat /proc/sys/kernel/core_pattern`'"
+echo
+commands
