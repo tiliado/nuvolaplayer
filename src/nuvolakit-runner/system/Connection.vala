@@ -45,16 +45,10 @@ public class Connection : GLib.Object {
     }
 
     public async bool download_file(string uri, File local_file, out Soup.Message msg=null) {
-        msg = new Soup.Message("GET", uri);
-        SourceFunc resume = download_file.callback;
-        session.queue_message(msg, (session, msg) => {resume();});
-        yield;
-
-        if (msg.status_code < 200 && msg.status_code >= 300) {
+        GLib.Bytes data;
+        if (!yield download_data(uri, out data, out msg)) {
             return false;
         }
-
-        unowned Soup.MessageBody body = msg.response_body;
         File dir = local_file.get_parent();
         if (!dir.query_exists(null)) {
             try {
@@ -75,7 +69,7 @@ public class Connection : GLib.Object {
         }
 
         try {
-            stream.write_all(body.data, null, null);
+            stream.write_all(data.get_data(), null, null);
         }
         catch (IOError e) {
             critical("Unable to store remote file: %s", e.message);
@@ -87,6 +81,22 @@ public class Connection : GLib.Object {
         catch (IOError e) {
             warning("Unable to close stream: %s", e.message);
         }
+        return true;
+    }
+
+    public async bool download_data(string uri, out GLib.Bytes data, out Soup.Message msg=null) {
+        msg = new Soup.Message("GET", uri);
+        data = null;
+        SourceFunc resume = download_data.callback;
+        session.queue_message(msg, (session, msg) => {resume();});
+        yield;
+
+        if (msg.status_code < 200 && msg.status_code >= 300) {
+            return false;
+        }
+
+        unowned Soup.MessageBody body = msg.response_body;
+        data = body.flatten().get_as_bytes();
         return true;
     }
 
