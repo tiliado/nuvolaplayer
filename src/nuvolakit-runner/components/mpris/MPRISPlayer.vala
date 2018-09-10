@@ -39,13 +39,25 @@ public class MPRISPlayer : GLib.Object {
         position = player.track_position;
         _volume = player.volume;
         playback_status = map_playback_state();
+        loop_status = map_repeat_state_to_string();
         pending_update = new HashTable<string, Variant>(str_hash, str_equal);
         can_go_next = player.can_go_next;
         can_go_previous = player.can_go_previous;
         can_seek = player.can_seek;
     }
 
-    public string playback_status {get; private set;}
+    private string _loop_status = "None";
+    public string loop_status {
+        get { return _loop_status;}
+        set {
+            _loop_status = value;
+            if (_loop_status != map_repeat_state_to_string()) {
+                player.change_repeat(map_repeat_state_to_enum());
+            }
+        }
+    }
+
+    public string playback_status {get; private set; default = "None";}
     /* If the media player has no ability to play at speeds other than the normal playback rate,
      * this must still be implemented, and must return 1.0. The MinimumRate and MaximumRate properties
      * must also be set to 1.0.  A value of 0.0 set by the client should act as though Pause was called. */
@@ -157,8 +169,15 @@ public class MPRISPlayer : GLib.Object {
                 pending_update["Volume"] = _volume = player.volume;
             }
             break;
+        case "repeat":
+            unowned string repeat = map_repeat_state_to_string();
+            if (_loop_status == repeat) {
+                return;
+            }
+            pending_update["LoopStatus"] = _loop_status = repeat;
+            break;
         case "state":
-            string status = map_playback_state();
+            unowned string status = map_playback_state();
             if (playback_status == status) {
                 return;
             }
@@ -252,7 +271,7 @@ public class MPRISPlayer : GLib.Object {
         return metadata;
     }
 
-    private string map_playback_state() {
+    private unowned string map_playback_state() {
         switch (player.state) {
         case "paused":
             return "Paused";
@@ -260,6 +279,28 @@ public class MPRISPlayer : GLib.Object {
             return "Playing";
         default:
             return "Stopped";
+        }
+    }
+
+    private unowned string map_repeat_state_to_string() {
+        switch (player.repeat) {
+        case PlaybackRepeat.TRACK:
+            return "Track";
+        case PlaybackRepeat.PLAYLIST:
+            return "Playlist";
+        default:
+            return "None";
+        }
+    }
+
+    private PlaybackRepeat map_repeat_state_to_enum() {
+        switch (_loop_status) {
+        case "Track":
+            return PlaybackRepeat.TRACK;
+        case "Playlist":
+            return PlaybackRepeat.PLAYLIST;
+        default:
+            return PlaybackRepeat.NONE;
         }
     }
 }

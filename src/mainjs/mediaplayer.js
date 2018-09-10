@@ -76,7 +76,29 @@ var PlayerAction = {
     /**
      * Change volume
      */
-  CHANGE_VOLUME: 'change-volume'
+  CHANGE_VOLUME: 'change-volume',
+  /**
+   * Repeat status
+   */
+  REPEAT: 'repeat'
+}
+
+/**
+ * @enum Media player repeat status
+ */
+var PlayerRepeat = {
+  /**
+   * The playback will stop when there are no more tracks to play.
+   */
+  NONE: 0,
+  /**
+   * The current track will start again from the beginning once it has finished playing.
+   */
+  TRACK: 1,
+  /**
+   * The playback loops through a list of tracks.
+   */
+  PLAYLIST: 2
 }
 
 /**
@@ -96,6 +118,13 @@ var PlaybackState = {
      */
   PLAYING: 2
 }
+
+var repeatOptions = [
+    // stateId, label, mnemo_label, icon, keybinding
+    [PlayerRepeat.NONE, _('No repeat'), null, null, null, null],
+    [PlayerRepeat.TRACK, _('Repeat track'), null, null, null, null],
+    [PlayerRepeat.PLAYLIST, _('Repeat playlist'), null, null, null, null]
+]
 
 // New key
 var RUN_IN_BACKGROUND = 'player.run_in_background'
@@ -146,6 +175,10 @@ MediaPlayer.$init = function () {
   this._extraActions = []
   this._artworkLoop = 0
   this._baseActions = [PlayerAction.TOGGLE_PLAY, PlayerAction.PLAY, PlayerAction.PAUSE, PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG]
+  this._repeatActions = []
+  for (var i = 0; i <= PlayerRepeat.PLAYLIST; i++) {
+    this._repeatActions.push(PlayerAction.REPEAT + '::' + i)
+  }
   this._notification = null
   this._trackPosition = 0
   this._volume = 1.0
@@ -401,6 +434,7 @@ MediaPlayer._onInitAppRunner = function (emitter) {
   Nuvola.actions.addAction('playback', 'win', PlayerAction.CHANGE_VOLUME, 'Change volume', null, null, null, -1.0)
     // FIXME: remove action if notifications compoment is disabled
   Nuvola.actions.addAction('playback', 'win', PlayerAction.PLAYBACK_NOTIFICATION, 'Show playback notification', null, null, null)
+  Nuvola.actions.addRadioAction('playback', 'win', PlayerAction.REPEAT, 0, repeatOptions)
 
   Nuvola.core.connect('ComponentLoaded', this)
   Nuvola.core.connect('ComponentUnloaded', this)
@@ -454,7 +488,7 @@ MediaPlayer._onActionActivated = function (emitter, name, param) {
 
 MediaPlayer._setActions = function () {
   var actions = [this._state === PlaybackState.PLAYING ? PlayerAction.PAUSE : PlayerAction.PLAY, PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG]
-  actions = actions.concat(this._extraActions)
+  actions = actions.concat(this._repeatActions).concat(this._extraActions)
   actions.push('quit')
   Nuvola.launcher.setActions(actions)
 }
@@ -471,7 +505,7 @@ MediaPlayer._sendDevelInfo = function () {
     'length': this._track.length || 0,
     'artworkLocation': this._track.artLocation || null,
     'artworkFile': this._artworkFile || null,
-    'playbackActions': this._baseActions.concat(this._extraActions),
+    'playbackActions': this._baseActions.concat(this._repeatActions).concat(this._extraActions),
     'state': ['unknown', 'paused', 'playing'][this._state]
   }
   Nuvola._callIpcMethodVoid('/nuvola/mediaplayer/set-track-info', info)
@@ -600,4 +634,5 @@ MediaPlayer._onConfigChanged = function (emitter, key) {
 // export public items
 Nuvola.PlayerAction = PlayerAction
 Nuvola.PlaybackState = PlaybackState
+Nuvola.PlayerRepeat = PlayerRepeat
 Nuvola.MediaPlayer = MediaPlayer

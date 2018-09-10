@@ -28,6 +28,7 @@ public class Nuvola.MediaPlayer: GLib.Object, Nuvola.MediaPlayerModel {
     public string? album {get; set; default = null;}
     public double rating {get; set; default = 0.0;}
     public string? state {get; set; default = null;}
+    public PlaybackRepeat repeat {get; set; default = PlaybackRepeat.NONE;}
     public string? artwork_location {get; set; default = null;}
     public string? artwork_file {get; set; default = null;}
     public int64 track_length {get; set; default = 0;}
@@ -46,6 +47,33 @@ public class Nuvola.MediaPlayer: GLib.Object, Nuvola.MediaPlayerModel {
 
     public MediaPlayer(Drtgtk.Actions actions) {
         this.actions = actions;
+        if (!bind_repeat_action()) {
+            actions.action_added.connect(on_action_added);
+        }
+    }
+
+    ~MediaPlayer() {
+        Drtgtk.Action? repeat_action = actions.get_action("repeat");
+        if (repeat_action != null) {
+            repeat_action.notify["state"].disconnect(on_repeat_action_changed);
+        }
+    }
+
+    private void on_action_added(Drtgtk.Action action) {
+        if (action.name == "repeat") {
+            bind_repeat_action();
+            actions.action_added.disconnect(on_action_added);
+        }
+    }
+
+    private bool bind_repeat_action() {
+        Drtgtk.Action? repeat_action = actions.get_action("repeat");
+        if (repeat_action == null) {
+            return false;
+        }
+        repeat_action.notify["state"].connect_after(on_repeat_action_changed);
+        repeat = (PlaybackRepeat) (double) repeat_action.state;
+        return true;
     }
 
     protected void handle_set_track_info(
@@ -93,9 +121,18 @@ public class Nuvola.MediaPlayer: GLib.Object, Nuvola.MediaPlayerModel {
         activate_action("change-volume", volume);
     }
 
+    public void change_repeat(PlaybackRepeat repeat) {
+        activate_action("repeat", new Variant.double((double) repeat));
+    }
+
     private void activate_action(string name, Variant? parameter=null) {
         if (!actions.activate_action(name, parameter)) {
             critical("Failed to activate action '%s'.", name);
         }
+    }
+
+    private void on_repeat_action_changed(GLib.Object emitter, ParamSpec parameter) {
+        var action = (Drtgtk.Action) emitter;
+        repeat = (PlaybackRepeat) (double) action.state;
     }
 }

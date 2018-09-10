@@ -22,12 +22,19 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+public enum PlaybackRepeat {
+    NONE,
+    TRACK,
+    PLAYLIST;
+}
+
 public interface Nuvola.MediaPlayerModel: GLib.Object {
     public abstract string? title {get; set; default = null;}
     public abstract string? artist {get; set; default = null;}
     public abstract string? album {get; set; default = null;}
     public abstract double rating {get; set; default = 0.0;}
     public abstract string? state {get; set; default = null;}
+    public abstract PlaybackRepeat repeat {get; set; default = PlaybackRepeat.NONE;}
     public abstract string? artwork_location {get; set; default = null;}
     public abstract string? artwork_file {get; set; default = null;}
     public abstract int64 track_length {get; set; default = 0;}
@@ -67,6 +74,8 @@ public interface Nuvola.MediaPlayerModel: GLib.Object {
     public abstract void seek(int64 position);
 
     public abstract void change_volume(double volume);
+
+    public abstract void change_repeat(PlaybackRepeat repeat);
 
     public signal void set_rating(double rating);
 }
