@@ -39,7 +39,7 @@ public class MPRISPlayer : GLib.Object {
         position = player.track_position;
         _volume = player.volume;
         playback_status = map_playback_state();
-        loop_status = map_repeat_state_to_string();
+        _loop_status = map_repeat_state_to_string(player.repeat);
         pending_update = new HashTable<string, Variant>(str_hash, str_equal);
         can_go_next = player.can_go_next;
         can_go_previous = player.can_go_previous;
@@ -50,9 +50,8 @@ public class MPRISPlayer : GLib.Object {
     public string loop_status {
         get { return _loop_status;}
         set {
-            _loop_status = value;
-            if (_loop_status != map_repeat_state_to_string()) {
-                player.change_repeat(map_repeat_state_to_enum());
+            if (value != map_repeat_state_to_string(player.repeat)) {
+                player.change_repeat(map_repeat_state_to_enum(value));
             }
         }
     }
@@ -170,7 +169,7 @@ public class MPRISPlayer : GLib.Object {
             }
             break;
         case "repeat":
-            unowned string repeat = map_repeat_state_to_string();
+            unowned string repeat = map_repeat_state_to_string(player.repeat);
             if (_loop_status == repeat) {
                 return;
             }
@@ -282,8 +281,8 @@ public class MPRISPlayer : GLib.Object {
         }
     }
 
-    private unowned string map_repeat_state_to_string() {
-        switch (player.repeat) {
+    private static unowned string map_repeat_state_to_string(PlaybackRepeat repeat) {
+        switch (repeat) {
         case PlaybackRepeat.TRACK:
             return "Track";
         case PlaybackRepeat.PLAYLIST:
@@ -293,8 +292,8 @@ public class MPRISPlayer : GLib.Object {
         }
     }
 
-    private PlaybackRepeat map_repeat_state_to_enum() {
-        switch (_loop_status) {
+    private static PlaybackRepeat map_repeat_state_to_enum(string repeat) {
+        switch (repeat) {
         case "Track":
             return PlaybackRepeat.TRACK;
         case "Playlist":
