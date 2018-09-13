@@ -211,7 +211,7 @@ public class MPRISPlayer : GLib.Object {
         }
 
         if (pending_update_id == 0) {
-            pending_update_id = Timeout.add(200, update_cb);
+            pending_update_id = Timeout.add(50, update_cb);
         }
     }
 
