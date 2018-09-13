@@ -158,9 +158,9 @@ public class MPRISPlayer : GLib.Object {
         case "track-position":
             int64 delta = player.track_position - position;
             position = player.track_position;
-            pending_update["Position"] = position;
-            if (delta > 2 || delta < -2) {
+            if (delta > 2000000 || delta < -2000000) {
                 seeked(position);
+                pending_update["Position"] = position;
             }
             break;
         case "volume":
