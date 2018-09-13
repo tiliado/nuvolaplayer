@@ -40,6 +40,7 @@ public interface Nuvola.MediaPlayerModel: GLib.Object {
     public abstract int64 track_length {get; set; default = 0;}
     public abstract int64 track_position {get; set; default = 0;}
     public abstract double volume {get; set; default = 1.0;}
+    public abstract bool shuffle {get; set;}
     public abstract bool can_go_next {get; set;}
     public abstract bool can_go_previous {get; set;}
     public abstract bool can_play {get; set;}
@@ -76,6 +77,8 @@ public interface Nuvola.MediaPlayerModel: GLib.Object {
     public abstract void change_volume(double volume);
 
     public abstract void change_repeat(PlaybackRepeat repeat);
+
+    public abstract void change_shuffle(bool shuffle);
 
     public signal void set_rating(double rating);
 }

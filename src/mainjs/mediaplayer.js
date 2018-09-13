@@ -80,7 +80,11 @@ var PlayerAction = {
   /**
    * Repeat status
    */
-  REPEAT: 'repeat'
+  REPEAT: 'repeat',
+  /**
+   * Shuffle status.
+   */
+  SHUFFLE: 'shuffle'
 }
 
 /**
@@ -174,7 +178,10 @@ MediaPlayer.$init = function () {
   this._canChangeVolume = null
   this._extraActions = []
   this._artworkLoop = 0
-  this._baseActions = [PlayerAction.TOGGLE_PLAY, PlayerAction.PLAY, PlayerAction.PAUSE, PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG]
+  this._baseActions = [
+    PlayerAction.TOGGLE_PLAY, PlayerAction.PLAY, PlayerAction.PAUSE, PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG,
+    PlayerAction.SHUFFLE
+  ]
   this._repeatActions = []
   for (var i = 0; i <= PlayerRepeat.PLAYLIST; i++) {
     this._repeatActions.push(PlayerAction.REPEAT + '::' + i)
@@ -432,6 +439,7 @@ MediaPlayer._onInitAppRunner = function (emitter) {
   Nuvola.actions.addAction('playback', 'win', PlayerAction.NEXT_SONG, 'Next song', null, 'media-skip-forward', null)
   Nuvola.actions.addAction('playback', 'win', PlayerAction.SEEK, 'Seek', null, null, null, 0)
   Nuvola.actions.addAction('playback', 'win', PlayerAction.CHANGE_VOLUME, 'Change volume', null, null, null, -1.0)
+  Nuvola.actions.addAction('playback', 'win', PlayerAction.SHUFFLE, 'Shuffle tracks', null, null, null, false)
     // FIXME: remove action if notifications compoment is disabled
   Nuvola.actions.addAction('playback', 'win', PlayerAction.PLAYBACK_NOTIFICATION, 'Show playback notification', null, null, null)
   Nuvola.actions.addRadioAction('playback', 'win', PlayerAction.REPEAT, 0, repeatOptions)
@@ -487,7 +495,9 @@ MediaPlayer._onActionActivated = function (emitter, name, param) {
 }
 
 MediaPlayer._setActions = function () {
-  var actions = [this._state === PlaybackState.PLAYING ? PlayerAction.PAUSE : PlayerAction.PLAY, PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG]
+  var actions = [
+    this._state === PlaybackState.PLAYING ? PlayerAction.PAUSE : PlayerAction.PLAY,
+    PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG, PlayerAction.SHUFFLE]
   actions = actions.concat(this._repeatActions).concat(this._extraActions)
   actions.push('quit')
   Nuvola.launcher.setActions(actions)

@@ -34,6 +34,7 @@ public class Nuvola.MediaPlayer: GLib.Object, Nuvola.MediaPlayerModel {
     public int64 track_length {get; set; default = 0;}
     public int64 track_position {get; set; default = 0;}
     public double volume {get; set; default = 1.0;}
+    public bool shuffle {get; set; default = false;}
     public bool can_go_next {get; set; default = false;}
     public bool can_go_previous {get; set; default = false;}
     public bool can_play {get; set; default = false;}
@@ -47,32 +48,34 @@ public class Nuvola.MediaPlayer: GLib.Object, Nuvola.MediaPlayerModel {
 
     public MediaPlayer(Drtgtk.Actions actions) {
         this.actions = actions;
-        if (!bind_repeat_action()) {
-            actions.action_added.connect(on_action_added);
-        }
+        bind_action("repeat");
+        bind_action("shuffle");
+        actions.action_added.connect(on_action_added);
     }
 
     ~MediaPlayer() {
-        Drtgtk.Action? repeat_action = actions.get_action("repeat");
-        if (repeat_action != null) {
-            repeat_action.notify["state"].disconnect(on_repeat_action_changed);
+        actions.action_added.disconnect(on_action_added);
+        foreach (unowned string name in new (unowned string)[] {"repeat", "shuffle"}) {
+            Drtgtk.Action? action = actions.get_action(name);
+            if (action != null) {
+                action.notify["state"].disconnect(on_action_changed);
+            }
         }
     }
 
     private void on_action_added(Drtgtk.Action action) {
-        if (action.name == "repeat") {
-            bind_repeat_action();
-            actions.action_added.disconnect(on_action_added);
+        if (action.name == "repeat" || action.name == "shuffle") {
+            bind_action(action.name);
         }
     }
 
-    private bool bind_repeat_action() {
-        Drtgtk.Action? repeat_action = actions.get_action("repeat");
-        if (repeat_action == null) {
+    private bool bind_action(string name) {
+        Drtgtk.Action? action = actions.get_action(name);
+        if (action == null) {
             return false;
         }
-        repeat_action.notify["state"].connect_after(on_repeat_action_changed);
-        repeat = (PlaybackRepeat) (double) repeat_action.state;
+        action.notify["state"].connect_after(on_action_changed);
+        update_action(action);
         return true;
     }
 
@@ -125,14 +128,29 @@ public class Nuvola.MediaPlayer: GLib.Object, Nuvola.MediaPlayerModel {
         activate_action("repeat", new Variant.double((double) repeat));
     }
 
+    public void change_shuffle(bool shuffle) {
+        activate_action("shuffle", shuffle);
+    }
+
+    private void update_action(Drtgtk.Action action) {
+        switch (action.name) {
+        case "repeat":
+            repeat = (PlaybackRepeat) (double) action.state;
+            break;
+        case "shuffle":
+            shuffle = action.state.get_boolean();
+            break;
+        }
+    }
+
     private void activate_action(string name, Variant? parameter=null) {
         if (!actions.activate_action(name, parameter)) {
             critical("Failed to activate action '%s'.", name);
         }
     }
 
-    private void on_repeat_action_changed(GLib.Object emitter, ParamSpec parameter) {
+    private void on_action_changed(GLib.Object emitter, ParamSpec parameter) {
         var action = (Drtgtk.Action) emitter;
-        repeat = (PlaybackRepeat) (double) action.state;
+        update_action(action);
     }
 }

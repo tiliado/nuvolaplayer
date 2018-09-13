@@ -40,6 +40,7 @@ public class MPRISPlayer : GLib.Object {
         _volume = player.volume;
         playback_status = map_playback_state();
         _loop_status = map_repeat_state_to_string(player.repeat);
+        _shuffle = player.shuffle;
         pending_update = new HashTable<string, Variant>(str_hash, str_equal);
         can_go_next = player.can_go_next;
         can_go_previous = player.can_go_previous;
@@ -77,6 +78,15 @@ public class MPRISPlayer : GLib.Object {
     public bool can_go_previous {get; private set; default = false;}
     public bool can_seek {get; private set; default = false;}
     public bool can_control {get {return true;}}
+    private bool _shuffle = false;
+    public bool shuffle {
+        get {return _shuffle;}
+        set {
+            if (player.shuffle != value) {
+                player.change_shuffle(value);
+            }
+        }
+    }
     public bool nuvola_can_rate {get; private set; default = false;}
     public HashTable<string, Variant> metadata {get; private set; default = null;}
 
@@ -174,6 +184,12 @@ public class MPRISPlayer : GLib.Object {
                 return;
             }
             pending_update["LoopStatus"] = _loop_status = repeat;
+            break;
+        case "shuffle":
+            if (_shuffle == player.shuffle) {
+                return;
+            }
+            pending_update["Shuffle"] = _shuffle = player.shuffle;
             break;
         case "state":
             unowned string status = map_playback_state();
