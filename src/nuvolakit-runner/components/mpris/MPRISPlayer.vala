@@ -217,6 +217,9 @@ public class MPRISPlayer : GLib.Object {
 
     private bool update_cb() {
         pending_update_id = 0;
+        if (pending_update.length == 0) {
+            return false;
+        }
         var builder = new VariantBuilder(VariantType.ARRAY);
         HashTableIter<string, Variant> iter = HashTableIter<string, Variant>(pending_update);
         unowned string name;
