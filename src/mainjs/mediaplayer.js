@@ -39,6 +39,8 @@ var C_ = Nuvola.Translate.pgettext
 
 /**
  * @enum Base media player @link{Actions|actions}
+ *
+ * @since Nuvola 4.13: `REPEAT` and `SHUFFLE` actions were added.
  */
 var PlayerAction = {
     /**
@@ -89,6 +91,8 @@ var PlayerAction = {
 
 /**
  * @enum Media player repeat status
+ *
+ * @since Nuvola 4.13
  */
 var PlayerRepeat = {
   /**
