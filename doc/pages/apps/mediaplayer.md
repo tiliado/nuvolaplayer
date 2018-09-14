@@ -129,7 +129,8 @@ WebApp._getElements = function () {
     shuffle: document.getElementById('shuffle'),
     progressbar: document.getElementById('progressbar'),
     volumebar: document.getElementById('volume-bar'),
-    repeat: document.getElementById('repeat')
+    repeat: document.getElementById('repeat'),
+    shuffle: document.getElementById('shuffle')
   }
 
   // Ignore disabled buttons
@@ -462,6 +463,46 @@ WebApp._onActionActivated = function (emitter, name, param) {
 ```
 
 ![Repeat tracks](:images/guide/tracks_repeat.png)
+
+Shuffle Status
+--------------
+
+Since **Nuvola 4.12.86**, it is possible to integrate the **shuffle status**.
+
+  * It is implemented as an action [PlayerAction.SHUFFLE](apiref>Nuvola.PlayerAction.SHUFFLE) with two states:
+    `true` (shuffle tracks) and `false` (do not shuffle).
+  * Use [Actions.updateEnabledFlag](apiref>Nuvola.Actions.updateEnabledFlag) to enable the action
+    and [Actions.updateState](apiref>Nuvola.Actions.updateState) to update the current state.
+  * The [PlayerAction.SHUFFLE](apiref>Nuvola.PlayerAction.SHUFFLE) is emitted whenever the shuffle status is
+    changed remotely. The parameter is the new shuffle status.
+
+
+```js
+WebApp._getShuffle = function () {
+  var elm = this._getElements().shuffle
+  return elm ? elm.classList.contains('btn-info') : null
+}
+
+WebApp.update = function () {
+  ...
+  var shuffle = this._getShuffle()
+  Nuvola.actions.updateEnabledFlag(PlayerAction.SHUFFLE, shuffle !== null)
+  Nuvola.actions.updateState(PlayerAction.SHUFFLE, !!shuffle)
+  ...
+}
+
+WebApp._onActionActivated = function (emitter, name, param) {
+  ...
+  switch (name) {
+    ...
+    case PlayerAction.SHUFFLE:
+      Nuvola.clickOnElement(elms.shuffle)
+      break
+  }
+}
+```
+
+![Shuffle tracks](:images/guide/tracks_shuffle.png)
 
 Track Rating
 ------------
