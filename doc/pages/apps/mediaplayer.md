@@ -128,7 +128,8 @@ WebApp._getElements = function () {
     repeat: document.getElementById('repeat'),
     shuffle: document.getElementById('shuffle'),
     progressbar: document.getElementById('progressbar'),
-    volumebar: document.getElementById('volume-bar')
+    volumebar: document.getElementById('volume-bar'),
+    repeat: document.getElementById('repeat')
   }
 
   // Ignore disabled buttons
@@ -408,6 +409,59 @@ WebApp._onActionActivated = function (emitter, name, param) {
 ```
 
 ![Playback volume](:images/guide/volume_management.png)
+
+Repeat Status
+-------------
+
+Since **Nuvola 4.12.86**, it is possible to integrate the **repeat status**.
+
+  * It is implemented as an action [PlayerAction.REPEAT](apiref>Nuvola.PlayerAction.REPEAT) with three states:
+    [PlayerRepeat.NONE](apiref>Nuvola.PlayerRepeat.NONE) (default, don't repeat),
+    [PlayerRepeat.TRACK](apiref>Nuvola.PlayerRepeat.TRACK) (repeat a single track), and
+    [PlayerRepeat.PLAYLIST](apiref>Nuvola.PlayerRepeat.PLAYLIST) (repeat the whole playlist).
+  * Use [Actions.updateEnabledFlag](apiref>Nuvola.Actions.updateEnabledFlag) to enable the action
+    and [Actions.updateState](apiref>Nuvola.Actions.updateState) to update the current state.
+  * The [PlayerAction.REPEAT](apiref>Nuvola.PlayerAction) is emitted whenever the repeat status is changed remotely.
+    The parameter is the new repeat status.
+
+```js
+WebApp._getRepeat = function () {
+  var elm = this._getElements().repeat
+  if (!elm) {
+    return null
+  }
+  if (elm.firstChild.src.endsWith('ic_repeat_one_48px.svg')) {
+    return Nuvola.PlayerRepeat.TRACK
+  }
+  return elm.classList.contains('btn-info') ? Nuvola.PlayerRepeat.PLAYLIST : Nuvola.PlayerRepeat.NONE
+}
+
+WebApp._setRepeat = function (repeat) {
+  while (this._getRepeat() !== repeat) {
+    Nuvola.clickOnElement(this._getElements().repeat)
+  }
+}
+
+WebApp.update = function () {
+  ...
+  var repeat = this._getRepeat()
+  Nuvola.actions.updateEnabledFlag(PlayerAction.REPEAT, repeat !== null)
+  Nuvola.actions.updateState(PlayerAction.REPEAT, repeat || 0)
+  ...
+}
+
+WebApp._onActionActivated = function (emitter, name, param) {
+  ...
+  switch (name) {
+    ...
+    case PlayerAction.REPEAT:
+      this._setRepeat(param)
+      break
+  }
+}
+```
+
+![Repeat tracks](:images/guide/tracks_repeat.png)
 
 Track Rating
 ------------
