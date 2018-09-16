@@ -467,12 +467,12 @@ WebApp._onActionActivated = function (emitter, name, param) {
 Shuffle Status
 --------------
 
-Since **Nuvola 4.12.86**, it is possible to integrate the **shuffle status**.
+Since **Nuvola 4.12.91**, it is possible to integrate the **shuffle status**.
 
   * It is implemented as an action [PlayerAction.SHUFFLE](apiref>Nuvola.PlayerAction.SHUFFLE) with two states:
     `true` (shuffle tracks) and `false` (do not shuffle).
-  * Use [Actions.updateEnabledFlag](apiref>Nuvola.Actions.updateEnabledFlag) to enable the action
-    and [Actions.updateState](apiref>Nuvola.Actions.updateState) to update the current state.
+  * Use [MediaPlayer.setCanShuffle](apiref>Nuvola.MediaPlayer.setCanShuffle) to enable the action
+    and [MediaPlayer.setShuffleState](apiref>Nuvola.MediaPlayer.setShuffleState) to update the current state.
   * The [PlayerAction.SHUFFLE](apiref>Nuvola.PlayerAction.SHUFFLE) is emitted whenever the shuffle status is
     changed remotely. The parameter is the new shuffle status.
 
@@ -486,8 +486,8 @@ WebApp._getShuffle = function () {
 WebApp.update = function () {
   ...
   var shuffle = this._getShuffle()
-  Nuvola.actions.updateEnabledFlag(PlayerAction.SHUFFLE, shuffle !== null)
-  Nuvola.actions.updateState(PlayerAction.SHUFFLE, !!shuffle)
+  player.setCanShuffle(shuffle !== null)
+  player.setShuffleState(shuffle)
   ...
 }
 

@@ -408,6 +408,32 @@ MediaPlayer.setCanChangeVolume = function (canChangeVolume) {
 }
 
 /**
+ * Set whether it is possible to shuffle playlist.
+ *
+ * If the argument is same as in the previous call, this method does nothing.
+ *
+ * @since Nuvola 4.13
+ *
+ * @param Boolean canShuffle    true if shuffle state should be allowed
+ */
+MediaPlayer.setCanShuffle = function (canShuffle) {
+  Nuvola.actions.updateEnabledFlag(PlayerAction.SHUFFLE, canShuffle)
+}
+
+/**
+ * Set the current shuffle state.
+ *
+ * If the argument is same as in the previous call, this method does nothing.
+ *
+ * @since Nuvola 4.13
+ *
+ * @param Boolean shuffle    true if the playback is in the shuffle mode
+ */
+MediaPlayer.setShuffleState = function (shuffle) {
+  Nuvola.actions.updateState(PlayerAction.SHUFFLE, !!shuffle)
+}
+
+/**
  * Add actions for media player capabilities
  *
  * For example: star rating, thumbs up/down, like/love/unlike.
