@@ -434,6 +434,30 @@ MediaPlayer.setShuffleState = function (shuffle) {
 }
 
 /**
+ * Set whether it is possible to repeat a track or a playlist.
+ *
+ * If the argument is same as in the previous call, this method does nothing.
+ *
+ * @since Nuvola 4.13
+ *
+ * @param Boolean canRepeat    true if the repeat state can be changed.
+ */
+MediaPlayer.setCanRepeat = function (canRepeat) {
+  Nuvola.actions.updateEnabledFlag(PlayerAction.REPEAT, canRepeat)
+}
+
+/**
+ * Set the current repeat state.
+ *
+ * If the current state is same as the previous one, this method does nothing.
+ *
+ * @param PlayerRepeat repeat    The current repeat state.
+ */
+MediaPlayer.setRepeatState = function (repeat) {
+  Nuvola.actions.updateState(PlayerAction.REPEAT, 1 * (repeat || 0))
+}
+
+/**
  * Add actions for media player capabilities
  *
  * For example: star rating, thumbs up/down, like/love/unlike.

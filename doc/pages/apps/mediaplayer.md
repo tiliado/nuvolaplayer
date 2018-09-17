@@ -414,14 +414,14 @@ WebApp._onActionActivated = function (emitter, name, param) {
 Repeat Status
 -------------
 
-Since **Nuvola 4.12.86**, it is possible to integrate the **repeat status**.
+Since **Nuvola 4.12.92**, it is possible to integrate the **repeat status**.
 
   * It is implemented as an action [PlayerAction.REPEAT](apiref>Nuvola.PlayerAction.REPEAT) with three states:
     [PlayerRepeat.NONE](apiref>Nuvola.PlayerRepeat.NONE) (default, don't repeat),
     [PlayerRepeat.TRACK](apiref>Nuvola.PlayerRepeat.TRACK) (repeat a single track), and
     [PlayerRepeat.PLAYLIST](apiref>Nuvola.PlayerRepeat.PLAYLIST) (repeat the whole playlist).
-  * Use [Actions.updateEnabledFlag](apiref>Nuvola.Actions.updateEnabledFlag) to enable the action
-    and [Actions.updateState](apiref>Nuvola.Actions.updateState) to update the current state.
+  * Use [MediaPlayer.setCanRepeat](apiref>Nuvola.MediaPlayer.setCanRepeat) to enable the action
+    and [MediaPlayer.setRepeatState](apiref>Nuvola.MediaPlayer.setRepeatState) to update the current state.
   * The [PlayerAction.REPEAT](apiref>Nuvola.PlayerAction) is emitted whenever the repeat status is changed remotely.
     The parameter is the new repeat status.
 
@@ -446,8 +446,8 @@ WebApp._setRepeat = function (repeat) {
 WebApp.update = function () {
   ...
   var repeat = this._getRepeat()
-  Nuvola.actions.updateEnabledFlag(PlayerAction.REPEAT, repeat !== null)
-  Nuvola.actions.updateState(PlayerAction.REPEAT, repeat || 0)
+  player.setCanRepeat(repeat !== null)
+  player.setRepeatState(repeat)
   ...
 }
 
