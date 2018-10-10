@@ -2,22 +2,23 @@ version: 2
 jobs:
   build:
     docker:
-      - image: fedora:latest
+      - image: fedora:28
     working_directory: ~/workdir
     steps:
-      - run: 
+      - run:
           name: Install deps
           command: |
             dnf update -y > /dev/null
-            dnf install -y git openssh-clients \
+            dnf install -y git openssh-clients wget tar xz \
               gcc vala gobject-introspection-devel 'pkgconfig(python3)' \
-              'pkgconfig(gtk+-3.0)' sqlite-devel python3-pyparsing valadoc \
+              'pkgconfig(gtk+-3.0)' sqlite-devel python3-pyparsing \
+              make autoconf automake glib2-devel graphviz-devel flex bison libxslt \
               desktop-file-utils 'pkgconfig(gstreamer-1.0)' 'pkgconfig(json-glib-1.0)' \
               'pkgconfig(libnotify)' 'pkgconfig(libsoup-2.4)' 'pkgconfig(libsecret-1)' \
               'pkgconfig(uuid)' 'pkgconfig(webkit2gtk-4.0)' 'pkgconfig(sqlite3)' \
               'pkgconfig(libarchive)' 'pkgconfig(libpulse)' libappstream-glib \
-              xorg-x11-util-macros libdrm-devel make patch \
-              'pkgconfig(x11)' 'pkgconfig(xext)' 'pkgconfig(xextproto)' 
+              xorg-x11-util-macros libdrm-devel patch \
+              'pkgconfig(x11)' 'pkgconfig(xext)' 'pkgconfig(xextproto)'
             dnf clean all > /dev/null
             git clone https://github.com/robclark/libdri2.git
             cd libdri2
@@ -26,10 +27,23 @@ jobs:
             make install
             /sbin/ldconfig
             rm -rf ../libdri2
-      - run: 
+      - run:
+          name: Download Vala
+          command: |
+            wget http://download.gnome.org/sources/vala/0.42/vala-0.42.2.tar.xz
+            tar -xJf vala-0.42.2.tar.xz
+      - run:
+          name: Build Vala
+          working_directory: ~/workdir/vala-0.42.2
+          command: |
+            ./configure --prefix=/usr --disable-dependency-tracking
+            make all
+            dnf remove -y vala valadoc
+            make install
+      - run:
           name: Checkout Diorite
           command: git clone https://github.com/tiliado/diorite.git
-      - run: 
+      - run:
           name: Build and run tests of Diorite
           working_directory: ~/workdir/diorite
           command: |
@@ -38,7 +52,7 @@ jobs:
             LD_LIBRARY_PATH=./build ./build/run-dioritetests
       - checkout:
           path: ~/workdir/nuvolaruntime
-      - run: 
+      - run:
           name: Build and run Nuvola
           working_directory: ~/workdir/nuvolaruntime
           command: |
