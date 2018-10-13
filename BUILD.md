@@ -45,9 +45,11 @@ Dependencies
 ------------
 
   * [Python 3](http://python.org) >= 3.4
-  * [Vala](https://wiki.gnome.org/Projects/Vala) >= 0.40.4 && < 0.41.
-    If you use Vala >= 0.41, modify `wscript` and check that the `vapi/*.patch`
-    patches still apply cleanly.
+  * [Vala compiler](https://wiki.gnome.org/Projects/Vala) >= 0.42.0 && < 0.43.
+    If your system contains a different version of Vala, we cannot guarantee that Nuvola builds correctly and it
+    may lead to memory leaks or [invalid memory access](https://github.com/tiliado/nuvolaruntime/issues/464).
+    We recommend [building the correct Vala version from source](https://github.com/tiliado/nuvolaruntime/commit/eb2332ee6802e89537d68a9c859f1aa51db6abcf)
+    prior to building Nuvola. You can then throw it away as Vala compiler is not needed after Nuvola is built.
   * [Diorite library](https://github.com/tiliado/diorite) (version number is in sync with Nuvola)
   * [glib-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.52.0
   * [gio-2.0](https://wiki.gnome.org/Projects/GLib) >= 2.52.0

@@ -38,7 +38,7 @@ DEFAULT_HELP_URL = "https://github.com/tiliado/nuvolaruntime/wiki/Third-Party-Bu
 DEFAULT_WEB_APP_REQUIREMENTS_HELP_URL = DEFAULT_HELP_URL
 
 MIN_DIORITE = "4.12.0"
-MIN_VALA = "0.40.4"
+MIN_VALA = "0.42.0"
 MIN_GLIB = "2.52.0"
 MIN_GTK = "3.22.0"
 LEGACY_WEBKIT = "2.18.0"
@@ -605,7 +605,7 @@ def build(ctx):
         packages += " valacef valacefgtk"
         uselib += " VALACEF VALACEFGTK"
 
-    vapi_to_patch = [] if ctx.env.VALAC_SERIES == "0.42" else ["glib-2.0"]
+    vapi_to_patch = []
     if ctx.env.with_unity:
         vapi_to_patch.append('unity')
         vapi_to_patch.append('gee-1.0')
