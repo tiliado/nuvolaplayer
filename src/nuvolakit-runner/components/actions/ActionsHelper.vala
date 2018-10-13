@@ -107,7 +107,7 @@ public class Nuvola.ActionsHelper: GLib.Object, ActionsInterface {
 
     public Drtgtk.SimpleAction simple_action(string group, string scope, string name, string? label, string? mnemo_label, string? icon, string? keybinding, owned Drtgtk.ActionCallback? callback) {
         string? kbd = config.get_string("nuvola.keybindings." + name) ?? keybinding;
-        if (kbd == "") {
+        if (kbd == "" || is_multimedia_key(kbd)) {
             kbd = null;
         }
         return new Drtgtk.SimpleAction(group, scope, name, label, mnemo_label, icon, kbd, (owned) callback);
@@ -115,6 +115,9 @@ public class Nuvola.ActionsHelper: GLib.Object, ActionsInterface {
 
     public Drtgtk.ToggleAction toggle_action(string group, string scope, string name, string? label, string? mnemo_label, string? icon, string? keybinding, owned Drtgtk.ActionCallback? callback, Variant state) {
         string? kbd = config.get_string("nuvola.keybindings." + name) ?? keybinding;
+        if (kbd == "" || is_multimedia_key(kbd)) {
+            kbd = null;
+        }
         return new Drtgtk.ToggleAction(group, scope, name, label, mnemo_label, icon, kbd, (owned) callback, state);
     }
 

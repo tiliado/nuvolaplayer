@@ -39,7 +39,11 @@ public class GlobalActionsKeyBinder : GLib.Object, ActionsKeyBinder {
     }
 
     public string? get_keybinding(string action) {
-        return config.get_string(CONF_PREFIX + action);
+        string keybinding = config.get_string(CONF_PREFIX + action);
+        if (keybinding != null && (keybinding == "" || is_multimedia_key(keybinding))) {
+            keybinding = null;
+        }
+        return keybinding;
     }
 
     public bool set_keybinding(string action, string? keybinding) {

@@ -24,6 +24,10 @@
 
 namespace Nuvola {
 
+public static bool is_multimedia_key(string? keybinding) {
+    return keybinding != null && (keybinding.has_prefix("Audio") || keybinding.has_prefix("XF86Audio"));
+}
+
 public class KeybindingsSettings : Gtk.Grid {
     private Drtgtk.Actions actions_reg;
     private Config config;
@@ -136,8 +140,19 @@ public class KeybindingsSettings : Gtk.Grid {
         view.show();
     }
 
+    private bool check_not_multimedia_key(string keybinding) {
+        if (is_multimedia_key(keybinding)) {
+            set_error("Cannot set '%s'. Use Multimedia keys feature to handle multimedia keys.".printf(keybinding));
+            return false;
+        }
+        return true;
+    }
+
     private void on_accel_edited(string path_string, uint accel_key, Gdk.ModifierType accel_mods, uint hardware_keycode) {
         string keybinding = Gtk.accelerator_name(accel_key, accel_mods);
+        if (!check_not_multimedia_key(keybinding)) {
+            return;
+        }
         Gtk.TreePath path = new Gtk.TreePath.from_string(path_string);
         Gtk.TreeIter iter;
         model.get_iter(out iter, path);
@@ -149,6 +164,7 @@ public class KeybindingsSettings : Gtk.Grid {
         Drtgtk.Action? action = actions_reg.get_action(name);
         return_if_fail(action != null);
         action.keybinding = keybinding;
+        set_error(null);
     }
 
     private void on_accel_cleared(string path_string) {
@@ -162,11 +178,15 @@ public class KeybindingsSettings : Gtk.Grid {
         Drtgtk.Action? action = actions_reg.get_action(name);
         return_if_fail(action != null);
         action.keybinding = null;
+        set_error(null);
     }
 
     private void on_glob_accel_edited(string path_string, uint accel_key, Gdk.ModifierType accel_mods, uint hardware_keycode) {
         assert(global_keybindings != null);
         string keybinding = Gtk.accelerator_name(accel_key, accel_mods);
+        if (!check_not_multimedia_key(keybinding)) {
+            return;
+        }
         var path = new Gtk.TreePath.from_string(path_string);
         Gtk.TreeIter iter;
         model.get_iter(out iter, path);
