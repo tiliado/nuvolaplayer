@@ -7,6 +7,92 @@ Nuvola Apps Changelog
     [Nuvola Devel mailing list](https://groups.google.com/d/forum/nuvola-player-devel)
     to receive more technical announcements and important information about future development.
 
+Release 4.13.0 - October 14th, 2018
+-----------------------------------
+
+### What’s New for Users
+
+Nuvola 4.13 gathers all goodies that were continuously released to
+[the genuine flatpak builds of Nuvola](https://nuvola.tiliado.eu/) since July 21st, 2018.
+If you read Nuvola News blog regularly, chances are that you are already aware of most of the changes described below.
+Also, [Nuvola News articles](https://medium.com/nuvola-news), unlike this changelog,
+contain screenshots to better illustrate the changes.
+
+  * **Spotify: Widevine Plugin Update Required.** Nuvola 4.12.20 was updated to use Chromium 68.0.3440.75 (a bit
+    delayed by [another issue](https://github.com/tiliado/valacef/issues/12)) to solve the incompatibility of Widevine
+    plugin. Users who use any of the older versions of the Widevine plugin will be asked to update it to achieve
+    maximal compatibility. If you encounter any issues, please don’t hesitate to report them.
+    [[GitHub ticket](https://github.com/tiliado/nuvolaruntime/issues/462)]
+
+  * **Some Apps Use Dark Theme by Default.**
+    [Nuvola 4.11.60](https://medium.com/nuvola-news/nuvola-brings-redesigned-preferences-dialog-more-appearance-settings-and-bug-fixes-6545325b35f3)
+    brought back the option to use a dark theme variant. Nuvola 4.12.20 goes further and enables the dark theme by
+    default for 9 scripts whose user interface is rather dark. Other apps use a light variant by default if the theme
+    provides it. As always, you can change these default settings in the preferences.
+
+  * **Tweaked Scrollbars.** After the dark theme option was reintroduced, the default ugly Chromium scrollbars became
+    the last noisy element ruining the otherwise pleasant visual experience. Nuvola 4.12.20 tackles that with new dark
+    scrollbars (enabled by default for the 9 dark apps). Other apps use new light scrollbars. As always, you can change
+    these default settings in the preferences.
+
+  * **About Dialog with Tips Shown on Start-Up.** Nuvola performs start-up checks to make sure all dependencies are
+    satisfied. It used to show a simple start-up to present the progress, bit it now shows a set of useful tips
+    instead: how to add an app to favorites or pin to a dock for faster access; how to open Preferences and a help
+    corresponding to individual features; how to report a bug, suggest a feature or ask a question. When all start-up
+    checks are finished, the dialog usually closes automatically. You can show the tips anytime later, just click the
+    *Menu* button, then *About*.
+
+  * **New Documentation Written from Scratch.**
+    [Nuvola has finally received new documentation](https://nuvola.tiliado.eu/docs/4/). I’ve been writing it from
+    scratch for a while and hope it will be more useful than the old one. You can now open help pages of individual
+    features with a single click from the
+    [recently redesigned preferences dialog](https://medium.com/nuvola-news/nuvola-brings-redesigned-preferences-dialog-more-appearance-settings-and-bug-fixes-6545325b35f3).
+
+  * **Two Clicks to Report Bug and New Issue Templates.** Nuvola now provides extra menu actions to report bugs, ask
+    questions or suggest features more easily. The actions point directly to the new issue templates on GitHub.
+
+  * **Repeat & Shuffle States.** Web app integration scripts can now export repeat and shuffle states. You can change
+    them from [Media Player Indicator](https://nuvola.tiliado.eu/docs/4/mpris.html#gnome-extension) applet or
+    [a tray icon](https://nuvola.tiliado.eu/docs/4/tray_icon.html), for example.
+
+  * **Flash Plugin Update.** Good news is that BBC iPlayer 1.5.7 has recently joined the no-Flash party, which makes
+    Amazon Cloud Player the last script which needs Flash plugin for audio playback. While the long-term goal is to get
+    rid of the Flash plugin entirely, Nuvola comes with a small security improvement: If you use Amazon Cloud Player,
+    Nuvola will ask you to confirm the upgrade of Flash plugin every time a new release is available. Nuvola will then
+    download and install the new version for you. (This applies only to builds with Chromium Embedded Framework.)
+
+  * **New Releases of Scripts.** Amazon Cloud Player 5.8, BBC iPlayer 1.6, Deezer 3.1, Google Play Music 6.2,
+    Jango 2.5, Jupiter Broadcasting 1.3, KEXP 1.4, Mixcloud 4.2, ownCloud Music 1.4, Plex 1.5, Pocket Casts 1.2,
+    Qobuz 1.2, SoundCloud 1.5, Spotify 3.1, Yandex Music 1.7, YouTube 2.1 and YouTube Music 1.3. See individual
+    changelogs for details.
+
+
+Other changes since release 4.12.0:
+
+  * Individual Nuvola apps check whether the installed Nuvola Apps Service does have the same version to prevent compatibility issues. (Nuvola Apps Service is an optional background service that provides individual Nuvola apps with globally shared resources such as global configuration storage, global keyboard shortcuts, an HTTP remote control server, and a command-line controller.)
+  * Some labels in Preferences dialog were tweaked.
+  * The list of Patrons was replaced with a static widget instead of a web page.
+  * The Welcome screen was removed, the About dialog with tips is shown instead.
+  * Nuvola no longer warns if a matching GTK+ theme for Flatpak is not installed. One of the start-up tips guides users to open Preferences, and the Appearance tweaks are the very first item there.
+  * The permissions of Flatpak builds were tweaked to require specific DBus services instead of the unrestricted access to session/system DBus. [[GitHub ticket](http://tiliado/nuvolaruntime#312)]
+  * Nuvola no longer allows a user to set multimedia keys as in-app/global keybinding because it clashes with the system handling of these keys, especially in GNOME. Instead, take a look at [Multimedia keys](https://nuvola.tiliado.eu/docs/4/media_keys.html) feature which is designed to avoid the conflicts. [[GitHub ticket](https://github.com/tiliado/nuvolaruntime/issues/473)]
+  * Memory leaks with Vala 0.42 were fixed.
+  * Various minor bug fixes, performance improvements, and clean-up of the codebase.
+
+### What’s New for Script Maintainers
+
+  * The demo player example in Nuvola SDK was updated with shuffle/repeat functionality. [[GitHub ticket 1](https://github.com/tiliado/nuvolaruntime/issues/20), [GitHub ticket 2](https://github.com/tiliado/nuvolaruntime/issues/21)]
+  * Nuvola SDK commands `new-project` and `convert-project`: CircleCI configuration was added to run `nuvolasdk check-project` when a new commit is pushed. Look at [Tiliado projet at CircleCI](https://circleci.com/gh/tiliado) to see the results. [[GitHub ticket](https://github.com/tiliado/nuvolaruntime/issues/420)]
+
+### What’s New for Third-Party Packagers
+
+  * Several scripts now require Nuvola 4.13. See individual changelogs for details.
+  * Diorite & Nuvola now require **Valac 0.42** because it contains **fixes for GLib.Variant reference counting bugs** and Diorite & Nuvola removed workarounds for these issues. If you decide to use older Valac, you can expect [crashes because of invalid memory access](https://github.com/tiliado/nuvolaruntime/issues/464). We recommend [building the correct Vala version from source](https://github.com/tiliado/diorite/commit/d56e4cf528237492cf30608d00fc6cd416e11437) prior to building Diorite/Nuvola. Note that Vala is only a build-time dependency, you don’t need to include it in the resulting package.
+  * Diorite and Nuvola: Dependencies were increased: **glib-2.0 >= 2.56.1, gtk+-3.0 >= 3.22.30**.
+  * Diorite: GIR is no longer built by default. Use `--gir` configure flag to build it.
+  * Diorite: All deprecation warnings were resolved. [[GitHub ticket](https://github.com/tiliado/diorite/issues/20)]
+  * Diorite: Diorite is now built with **fatal warnings** but you can pass `--no-strict` to disable that.
+
 Release 4.12.0 - July 21st, 2018
 --------------------------------
 
@@ -66,7 +152,7 @@ changes to list them here again, so I’m kindly asking you to read the previous
     [[GitHub ticket](https://github.com/tiliado/nuvolaruntime/issues/440)]
   * [Service Integrations Tutorial](https://tiliado.github.io/nuvolaplayer/development/apps/tutorial.html) and
     [Media Player Integration](https://tiliado.github.io/nuvolaplayer/development/apps/mediaplayer.html) pages were
-    updated to use [a new demo player](https://groups.google.com/d/msg/nuvola-player-devel/xGOeh7hN0VE/xdIbhnHiAwAJ). 
+    updated to use [a new demo player](https://groups.google.com/d/msg/nuvola-player-devel/xGOeh7hN0VE/xdIbhnHiAwAJ).
 
 ### What’s New for Third-Party Packagers
 

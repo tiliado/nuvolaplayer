@@ -31,13 +31,13 @@ out = 'build'
 APPNAME = "nuvolaruntime"
 NUVOLA_BIN = "nuvola"
 NUVOLACTL_BIN = "nuvolactl"
-VERSION = "4.12.0"
+VERSION = "4.13.0"
 GENERIC_NAME = "Web Apps"
 BLURB = "Tight integration of web apps with your Linux desktop"
 DEFAULT_HELP_URL = "https://github.com/tiliado/nuvolaruntime/wiki/Third-Party-Builds"
 DEFAULT_WEB_APP_REQUIREMENTS_HELP_URL = DEFAULT_HELP_URL
 
-MIN_DIORITE = "4.12.0"
+MIN_DIORITE = "4.13.0"
 MIN_VALA = "0.42.0"
 MIN_GLIB = "2.56.1"
 MIN_GTK = "3.22.30"
@@ -482,7 +482,7 @@ def configure(ctx):
     ctx.define("NUVOLA_APPNAME", APPNAME)
     ctx.define("NUVOLA_OLDNAME", "nuvolaplayer3")
     ctx.define("NUVOLA_NAME", ctx.env.NAME)
-    ctx.define("NUVOLA_WELCOME_SCREEN_NAME", ctx.env.RELEASE + "U9")
+    ctx.define("NUVOLA_WELCOME_SCREEN_NAME", ctx.env.RELEASE)
     ctx.define("NUVOLA_UNIQUE_NAME", ctx.env.UNIQUE_NAME)
     ctx.define("NUVOLA_APP_ICON", ctx.env.ICON_NAME)
     ctx.define("NUVOLA_RELEASE", ctx.env.RELEASE)
