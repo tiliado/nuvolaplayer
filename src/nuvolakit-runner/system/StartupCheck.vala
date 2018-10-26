@@ -39,11 +39,8 @@ public class StartupCheck : GLib.Object {
     private StartupResult model;
     private FormatSupport format_support;
     private WebApp web_app;
-    private SourceFunc? resume = null;
     private unowned AppRunnerController app;
-    private AboutDialog dialog;
-    private unowned Gtk.Widget? action_button = null;
-    private Gtk.Label status_label;
+    private SourceFunc? resume = null;
 
     /**
      * Create new StartupCheck object.
@@ -58,22 +55,14 @@ public class StartupCheck : GLib.Object {
         this.format_support = format_support;
         this.web_app = web_app;
         this.app = app;
-        this.dialog = dialog;
 
-        status_label = Drtgtk.Labels.markup("%s web app script performs start-up checks...", app.app_name);
+        Gtk.Label status_label = Drtgtk.Labels.markup("%s web app script performs start-up checks...", app.app_name);
         status_label.hexpand = true;
         status_label.margin = 10;
         status_label.halign = Gtk.Align.CENTER;
         status_label.valign = Gtk.Align.CENTER;
         status_label.justify = Gtk.Justification.CENTER;
         dialog.show_progress(status_label);
-        dialog.response.connect(on_dialog_response);
-    }
-
-    ~StartupCheck() {
-        if (dialog != null) {
-            dialog.response.disconnect(on_dialog_response);
-        }
     }
 
     /**
@@ -102,7 +91,6 @@ public class StartupCheck : GLib.Object {
 
         }
         model.mark_as_finished();
-        yield evaluate_result(model.final_status);
         return model.final_status;
     }
 
@@ -329,47 +317,6 @@ public class StartupCheck : GLib.Object {
             model.nuvola_service_status = StartupStatus.WARNING;
         }
         this.master = master;
-    }
-
-    private async void evaluate_result(StartupStatus final_status) {
-        unowned string? button_label = null;
-        switch (final_status) {
-        case StartupStatus.ERROR:
-            #if GENUINE
-            status_label.label = Markup.printf_escaped(
-                "<b>%s script cannot start.</b> <a href=\"%s\">Get help</a>.",
-                app.app_name, Nuvola.HELP_URL);
-            #else
-            status_label.label = Markup.printf_escaped(
-                "<b>%s script cannot start.</b>\n<a href=\"%s\">Get genuine Nuvola Apps Runtime</a>"
-                + " or contact your distributor.", app.app_name, "https://nuvola.tiliado.eu");
-            #endif
-            button_label = "Quit";
-            break;
-        case StartupStatus.WARNING:
-            status_label.label = Markup.printf_escaped("%s script has a few issues but it can start.", app.app_name);
-            button_label = "Continue";
-            break;
-        case StartupStatus.OK:
-            status_label.label = Markup.printf_escaped("%s will load in a few seconds.", app.app_name);
-            break;
-        }
-
-        if (button_label != null && dialog != null) {
-            action_button = dialog.show_action(
-                status_label, button_label, Gtk.ResponseType.OK, Gtk.MessageType.ERROR);
-            dialog.show_tab(AboutDialog.TAB_STARTUP);
-            resume = evaluate_result.callback;
-            yield;
-        }
-    }
-
-    private void on_dialog_response(int response_id) {
-        dialog.response.disconnect(on_dialog_response);
-        dialog = null;
-        if (action_button != null && resume != null) {
-            Idle.add((owned) resume);
-        }
     }
 
     public enum Task {

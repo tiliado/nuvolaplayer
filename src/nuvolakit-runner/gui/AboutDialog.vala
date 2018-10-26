@@ -115,8 +115,17 @@ public class AboutDialog: Gtk.Dialog {
         box.show_all();
     }
 
+    public void show_close_button(bool show) {
+        ((Gtk.HeaderBar) get_header_bar()).show_close_button = show;
+    }
+
+    public override bool delete_event(Gdk.EventAny event) {
+        return true;
+    }
+
     public void show_tab(string tab) {
         stack.visible_child_name = tab;
+        show();
     }
 
     public void show_progress(Gtk.Label label) {
@@ -169,6 +178,7 @@ public class AboutDialog: Gtk.Dialog {
         label.margin_start = 20;
         label.margin_end = 20;
         status.get_content_area().add(label);
+        label.yalign = 0.5f;
         label.show();
     }
 

@@ -63,6 +63,7 @@ public class AppRunnerController: Drtgtk.Application {
     private MainLoopAdaptor? mainloop = null;
     private AboutDialog? about_dialog = null;
     private PreferencesDialog? preferences_dialog = null;
+    private StartupPhase startup_phase = StartupPhase.NONE;
 
     public AppRunnerController(
         Drt.Storage storage, WebApp web_app, WebAppStorage app_storage) {
@@ -110,6 +111,7 @@ public class AppRunnerController: Drtgtk.Application {
         init_ipc();
         format_support = new FormatSupport(storage.require_data_file("audio/audiotest.mp3").get_path());
         startup_model = new StartupResult();
+        startup_phase = StartupPhase.IN_PROGRESS;
         do_about();
         web_app.scale_factor = about_dialog.scale_factor * 1.0;
         debug("Scale factor: %d", about_dialog.scale_factor);
@@ -123,22 +125,56 @@ public class AppRunnerController: Drtgtk.Application {
         var startup = (StartupCheck) object;
         assert(startup != null);
         StartupStatus status = startup.run.end(res);
+        machine_hash = (owned) startup.machine_hash;
+        master = startup.master;
+        tiliado_paywall = startup.paywall;
+        web_options = startup.web_options;
+
         switch (status) {
         case StartupStatus.WARNING:
+            startup_phase = StartupPhase.WARNING;
+            Gtk.Label label = Drtgtk.Labels.markup("%s script has a few issues but it can start.", app_name);
+            about_dialog.show_action(label, "Continue", Gtk.ResponseType.OK, Gtk.MessageType.WARNING);
+            about_dialog.show_tab(AboutDialog.TAB_STARTUP);
+            break;
         case StartupStatus.OK:
-            machine_hash = (owned) startup.machine_hash;
-            master = startup.master;
-            tiliado_paywall = startup.paywall;
-            web_options = startup.web_options;
-            init_gui();
-            if (about_dialog != null && !about_dialog.show_welcome_note(this.master.config ?? this.config)) {
-                about_dialog.close();
-            }
-            init_web_engine();
+            startup_phase = StartupPhase.CHECKS_DONE;
+            show_welcome_note_or_continue();
             break;
         default:
-            do_quit();
-            break ;
+            startup_phase = StartupPhase.ERROR;
+            #if GENUINE
+            Gtk.Label label = Drtgtk.Labels.markup(
+                "<b>%s script cannot start.</b> <a href=\"%s\">Get help</a>.",
+                app_name, Nuvola.HELP_URL);
+            #else
+            Gtk.Label label = Drtgtk.Labels.markup(
+                "<b>%s script cannot start.</b>\n<a href=\"%s\">Get genuine Nuvola Apps Runtime</a>"
+                + " or contact your distributor.", app_name, "https://nuvola.tiliado.eu");
+            #endif
+            about_dialog.show_action(label, "Quit", Gtk.ResponseType.OK, Gtk.MessageType.ERROR);
+            about_dialog.show_tab(AboutDialog.TAB_STARTUP);
+            break;
+        }
+    }
+
+    private void show_welcome_note_or_continue() {
+        if (about_dialog.show_welcome_note(this.master.config ?? this.config)) {
+            startup_phase = StartupPhase.WELCOME;
+        } else {
+
+            finish_startup();
+        }
+    }
+
+    private void finish_startup() {
+        Gtk.Label label = Drtgtk.Labels.markup("%s will load in a few seconds.", app_name);
+        about_dialog.show_progress(label);
+        startup_phase = StartupPhase.ALL_DONE;
+        init_gui();
+        init_web_engine();
+        if (about_dialog != null) {
+            about_dialog.close();
         }
     }
 
@@ -363,7 +399,7 @@ public class AppRunnerController: Drtgtk.Application {
             window.hide();
         }
         Timeout.add(50, () => {quit_mainloop(); quit(); return false;});
-        Timeout.add_seconds(10, () => {warning("Force quit after timeout."); GLib.Process.exit(0);});
+        Timeout.add_seconds(5, () => {warning("Force quit after timeout."); GLib.Process.exit(0);});
     }
 
     public void shutdown_engines() {
@@ -477,21 +513,32 @@ public class AppRunnerController: Drtgtk.Application {
             about_dialog = new AboutDialog(
                 main_window, storage, new StartupView(this, startup_model), web_app,
                 web_options != null ? new WebOptions[] {web_options} : available_web_options, new PatronBox());
-            about_dialog.response.connect_after(on_dialog_response);
+            about_dialog.show_close_button(startup_phase == StartupPhase.ALL_DONE);
+            about_dialog.response.connect_after(on_about_dialog_response);
         }
         about_dialog.present();
     }
 
-    private void on_dialog_response(Gtk.Dialog dialog, int response_id) {
-        switch (response_id) {
-        case Gtk.ResponseType.DELETE_EVENT:
-        case Gtk.ResponseType.CLOSE:
-        case Gtk.ResponseType.OK:
-            if (dialog == about_dialog) {
-                about_dialog = null;
-            }
-            dialog.response.disconnect(on_dialog_response);
+    private void on_about_dialog_response(Gtk.Dialog dialog, int response_id) {
+        switch (startup_phase) {
+        case StartupPhase.IN_PROGRESS:
+        case StartupPhase.ERROR:
+            dialog.hide();
+            do_quit();
+            break;
+        case StartupPhase.WARNING:
+            show_welcome_note_or_continue();
+            break;
+        case StartupPhase.WELCOME:
+            finish_startup();
+            break;
+        case StartupPhase.ALL_DONE:
+            about_dialog = null;
+            dialog.response.disconnect(on_about_dialog_response);
             dialog.destroy();
+            break;
+        default:
+            warning("Unexpected start-up phase: %s (response id %d).", startup_phase.to_string(), response_id);
             break;
         }
     }
