@@ -82,6 +82,22 @@ public class TiliadoPaywall : GLib.Object {
         return get_trial() != null;
     }
 
+    /**
+     * Refresh free trial data.
+     *
+     * @return `true` on success, `false` on failure.
+     */
+    public async bool refresh_trial() {
+        try {
+            yield tiliado.get_fresh_machine_trial();
+            update_tier_info();
+            return true;
+        } catch (Oauth2Error e) {
+            Drt.warn_error(e, "Failed to refresh trial.");
+            return false;
+        }
+    }
+
     public TiliadoMembership get_trial_tier() {
         MachineTrial? trial = get_trial();
         return trial != null && !trial.has_expired() ? trial.tier : TiliadoMembership.NONE;
@@ -145,19 +161,14 @@ public class TiliadoPaywall : GLib.Object {
         }
         update_tier_info();
         if (!unlocked && !has_trial()) {
-            try {
-                yield tiliado.get_fresh_machine_trial();
-                if (!has_trial()) {
-                    try {
-                        yield start_trial();
-                    } catch (Oauth2Error e) {
-                        Drt.warn_error(e, "Failed to start trial.");
-                    }
+            if ((yield refresh_trial()) && !has_trial()) {
+                try {
+                    yield start_trial();
+                    update_tier_info();
+                } catch (Oauth2Error e) {
+                    Drt.warn_error(e, "Failed to start trial.");
                 }
-            } catch (Oauth2Error e) {
-                Drt.warn_error(e, "Failed to get trial.");
             }
-            update_tier_info();
         }
     }
 
