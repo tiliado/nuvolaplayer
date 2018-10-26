@@ -486,14 +486,12 @@ public class AppRunnerController: Drtgtk.Application {
         switch (response_id) {
         case Gtk.ResponseType.DELETE_EVENT:
         case Gtk.ResponseType.CLOSE:
+        case Gtk.ResponseType.OK:
             if (dialog == about_dialog) {
                 about_dialog = null;
             }
             dialog.response.disconnect(on_dialog_response);
             dialog.destroy();
-            break;
-        case AboutDialog.RESPONSE_SHOW_NEWS:
-            do_show_news();
             break;
         }
     }

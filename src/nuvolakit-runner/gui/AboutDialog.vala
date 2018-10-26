@@ -67,7 +67,6 @@ public class AboutDialog: Gtk.Dialog {
     public const string TAB_ABOUT = "about";
     public const string TAB_TIPS = "tips";
     public const string TAB_STARTUP = "startup";
-    public const int RESPONSE_SHOW_NEWS = -9;
     public StartupView? startup {get; private set;}
     public Gtk.Stack stack {get; private set;}
     public Gtk.Grid grid {get; private set;}
@@ -176,13 +175,18 @@ public class AboutDialog: Gtk.Dialog {
     public bool show_welcome_note(Drt.KeyValueStorage config, bool force=false) {
         string? old_screen_name = config.get_string("nuvola.welcome_screen");
         if (force || old_screen_name != get_welcome_screen_name()) {
-            string pattern = (old_screen_name == null ?
-                "You have installed <b>%s %s %s</b>." : "You have upgraded to <b>%s %s %s</b>.");
-            Gtk.Label label = Drtgtk.Labels.markup(pattern, get_app_name(), "Runtime", get_short_version());
+            string pattern = (Drt.String.is_empty(old_screen_name)
+                ? "You have installed <b>%s %s %s</b>. <a href=\"%s\">What's new?</a>"
+                : "You have upgraded to <b>%s %s %s</b>. <a href=\"%s\">What's new?</a>"
+            );
+            Gtk.Label label = Drtgtk.Labels.markup(
+                pattern, get_app_name(), "Runtime", get_short_version(),
+                Drt.String.not_empty_or(Nuvola.NEWS_URL, Nuvola.HELP_URL));
             label.yalign = 0.5f;
             show_tab(TAB_TIPS);
-            show_action(label, "What's New", RESPONSE_SHOW_NEWS, Gtk.MessageType.INFO);
+            show_action(label, "Continue", Gtk.ResponseType.OK, Gtk.MessageType.INFO);
             config.set_string("nuvola.welcome_screen", get_welcome_screen_name());
+            present();
             return true;
         }
         return false;
