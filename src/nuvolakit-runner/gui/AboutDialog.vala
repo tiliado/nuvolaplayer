@@ -68,6 +68,7 @@ public class AboutDialog: Gtk.Dialog {
     public const string TAB_TIPS = "tips";
     public const string TAB_STARTUP = "startup";
     public const string TAB_TERMS = "terms";
+    public const int TERMS_VERSION = 1;
     public StartupView? startup {get; private set;}
     public Gtk.Stack stack {get; private set;}
     public Gtk.Grid grid {get; private set;}
@@ -243,6 +244,16 @@ public class AboutDialog: Gtk.Dialog {
             return true;
         }
         return false;
+    }
+
+    public void show_terms() {
+        Gtk.Label label = Drtgtk.Labels.markup(
+            "You need to agree with <a href=\"%s\">Privacy Policy</a>.", "https://tiliado.eu/privacy/");
+        label.yalign = 0.5f;
+        show_tab(TAB_TERMS);
+        show_action(label, "Accept", Gtk.ResponseType.ACCEPT, Gtk.MessageType.INFO);
+        add_status_action("Decline", Gtk.ResponseType.REJECT);
+        present();
     }
 }
 

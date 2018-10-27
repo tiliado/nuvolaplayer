@@ -12,6 +12,7 @@ public enum StartupPhase {
     ERROR,
     CHECKS_DONE,
     WELCOME,
+    TERMS,
     ALL_DONE;
 }
 

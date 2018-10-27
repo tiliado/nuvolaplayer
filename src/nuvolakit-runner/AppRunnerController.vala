@@ -162,9 +162,28 @@ public class AppRunnerController: Drtgtk.Application {
         if (about_dialog.show_welcome_note(this.master.config ?? this.config)) {
             startup_phase = StartupPhase.WELCOME;
         } else {
+            show_terms();
+        }
+    }
 
+    private void show_terms() {
+        #if FLATPAK
+        Drt.KeyValueStorage config = this.master.config ?? this.config;
+        if (AboutDialog.TERMS_VERSION > config.get_int64("nuvola.terms")) {
+            startup_phase = StartupPhase.TERMS;
+            about_dialog.show_terms();
+        } else {
             finish_startup();
         }
+        #else
+        finish_startup();
+        #endif
+    }
+
+    private void terms_accepted() {
+        Drt.KeyValueStorage config = this.master.config ?? this.config;
+        config.set_int64("nuvola.terms", AboutDialog.TERMS_VERSION);
+        finish_startup();
     }
 
     private void finish_startup() {
@@ -530,7 +549,15 @@ public class AppRunnerController: Drtgtk.Application {
             show_welcome_note_or_continue();
             break;
         case StartupPhase.WELCOME:
-            finish_startup();
+            show_terms();
+            break;
+        case StartupPhase.TERMS:
+            if (response_id == Gtk.ResponseType.ACCEPT) {
+                terms_accepted();
+            } else {
+                dialog.hide();
+                do_quit();
+            }
             break;
         case StartupPhase.ALL_DONE:
             about_dialog = null;
