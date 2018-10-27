@@ -156,6 +156,7 @@ public class AboutDialog: Gtk.Dialog {
     public void show_progress(Gtk.Label label) {
         set_status_label(label);
         status.message_type = Gtk.MessageType.INFO;
+        remove_buttons();
 
         if (this.spinner == null) {
             var spinner = new Gtk.Spinner();
@@ -171,18 +172,15 @@ public class AboutDialog: Gtk.Dialog {
     }
 
     public unowned Gtk.Button show_action(Gtk.Label label, string action, int response_id, Gtk.MessageType type) {
-        if (spinner != null) {
-            spinner.get_parent().remove(spinner);
-            spinner = null;
-        }
-        if (action_button != null) {
-            action_button.get_parent().remove(action_button);
-            action_button = null;
-        }
+        remove_spinner();
+        remove_buttons();
         set_status_label(label);
         status.message_type = type;
+        return (action_button = add_status_action(action, response_id));
+    }
 
-        return (action_button = status.add_button(action, response_id));
+    public unowned Gtk.Button add_status_action(string action, int response_id) {
+        return status.add_button(action, response_id);
     }
 
     private void set_status_label(Gtk.Label label) {
@@ -205,6 +203,26 @@ public class AboutDialog: Gtk.Dialog {
         status.get_content_area().add(label);
         label.yalign = 0.5f;
         label.show();
+    }
+
+    private void remove_spinner() {
+        if (spinner != null) {
+            spinner.get_parent().remove(spinner);
+            spinner = null;
+        }
+    }
+
+    private void remove_buttons() {
+        if (action_button != null) {
+            action_button.get_parent().remove(action_button);
+            action_button = null;
+        }
+        var actions = (Gtk.Container) status.get_action_area();
+        foreach (unowned Gtk.Widget child in actions.get_children()) {
+            if (child is Gtk.Button) {
+                actions.remove(child);
+            }
+        }
     }
 
     public bool show_welcome_note(Drt.KeyValueStorage config, bool force=false) {
