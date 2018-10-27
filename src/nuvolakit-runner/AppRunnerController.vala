@@ -190,6 +190,16 @@ public class AppRunnerController: Drtgtk.Application {
         Gtk.Label label = Drtgtk.Labels.markup("%s will load in a few seconds.", app_name);
         about_dialog.show_progress(label);
         startup_phase = StartupPhase.ALL_DONE;
+
+        if (tiliado_paywall != null && !tiliado_paywall.unlocked) {
+            var loop = new MainLoop();
+            tiliado_paywall.start_trial.begin((o, res) => {
+                tiliado_paywall.start_trial.end(res);
+                loop.quit();
+            });
+            loop.run();
+        }
+
         init_gui();
         init_web_engine();
         if (about_dialog != null) {

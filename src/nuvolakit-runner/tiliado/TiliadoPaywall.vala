@@ -108,8 +108,16 @@ public class TiliadoPaywall : GLib.Object {
     }
 
     public async bool start_trial() {
+        if (!has_trial()) {
+            yield refresh_trial();
+        }
+        if (has_trial()) {
+            return false;
+        }
         try {
-            return yield tiliado.start_trial();
+            bool result = yield tiliado.start_trial();
+            update_tier_info();
+            return result;
         } catch (Oauth2Error e) {
             Drt.warn_error(e, "Failed to start trial.");
             return false;
@@ -160,16 +168,6 @@ public class TiliadoPaywall : GLib.Object {
             gumroad.refresh_license_sync();
         }
         update_tier_info();
-        if (!unlocked && !has_trial()) {
-            if ((yield refresh_trial()) && !has_trial()) {
-                try {
-                    yield start_trial();
-                    update_tier_info();
-                } catch (Oauth2Error e) {
-                    Drt.warn_error(e, "Failed to start trial.");
-                }
-            }
-        }
     }
 
     public void show_help_page() {
