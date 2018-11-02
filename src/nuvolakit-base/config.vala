@@ -24,15 +24,13 @@
 
 namespace Nuvola {
 
-public class Config : GLib.Object, Drt.KeyValueStorage {
-    public Drt.Lst<Drt.PropertyBinding> property_bindings {get; protected set;}
+public class Config : Drt.KeyValueStorage {
     public File file {get; private set;}
     public HashTable<string, Variant> defaults {get; private set;}
     private Json.Node? root;
     private uint save_cb_id = 0;
 
     public Config(File file, HashTable<string, Variant>? defaults = null) {
-        property_bindings = new Drt.Lst<Drt.PropertyBinding>();
         this.file = file;
         this.defaults = defaults != null ? defaults : new HashTable<string, Variant>(str_hash, str_equal);
         load();
@@ -76,13 +74,13 @@ public class Config : GLib.Object, Drt.KeyValueStorage {
         return generator.to_data(null);
     }
 
-    public bool has_key(string key) {
+    public override bool has_key(string key) {
         string? member_name;
         unowned Json.Object? object = get_parent_object(key, out member_name);
         return object != null && object.has_member(member_name);
     }
 
-    public Variant? get_value(string key) {
+    public override Variant? get_value(string key) {
         string? member_name;
         unowned Json.Object? object = get_parent_object(key, out member_name);
         if (object == null || !object.has_member(member_name)) {
@@ -98,7 +96,7 @@ public class Config : GLib.Object, Drt.KeyValueStorage {
         }
     }
 
-    protected void set_value_unboxed(string key, Variant? value) {
+    protected override void set_value_unboxed(string key, Variant? value) {
         string? member_name;
         unowned Json.Object? object = create_parent_object(key, out member_name);
         return_if_fail(object != null);
@@ -125,7 +123,7 @@ public class Config : GLib.Object, Drt.KeyValueStorage {
         }
     }
 
-    protected void set_default_value_unboxed(string key, Variant? value) {
+    protected override void set_default_value_unboxed(string key, Variant? value) {
         if (value == null) {
             defaults.remove(key);
         } else {
@@ -133,7 +131,7 @@ public class Config : GLib.Object, Drt.KeyValueStorage {
         }
     }
 
-    public void unset(string key) {
+    public override void unset(string key) {
         set_value(key, null);
     }
 
@@ -235,27 +233,27 @@ public class Config : GLib.Object, Drt.KeyValueStorage {
         return false;
     }
 
-    public async bool has_key_async(string key) {
+    public override async bool has_key_async(string key) {
         yield Drt.EventLoop.resume_later();
         return has_key(key);
     }
 
-    public async Variant? get_value_async(string key) {
+    public override async Variant? get_value_async(string key) {
         yield Drt.EventLoop.resume_later();
         return get_value(key);
     }
 
-    public async void unset_async(string key) {
+    public override async void unset_async(string key) {
         unset(key);
         yield Drt.EventLoop.resume_later();
     }
 
-    protected async void set_value_unboxed_async(string key, Variant? value) {
+    protected override async void set_value_unboxed_async(string key, Variant? value) {
         set_value_unboxed(key, value);
         yield Drt.EventLoop.resume_later();
     }
 
-    protected async void set_default_value_unboxed_async(string key, Variant? value) {
+    protected override async void set_default_value_unboxed_async(string key, Variant? value) {
         set_default_value_unboxed(key, value);
         yield Drt.EventLoop.resume_later();
     }
