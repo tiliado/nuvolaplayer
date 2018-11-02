@@ -130,7 +130,7 @@ public class Nuvola.ActionsHelper: GLib.Object, ActionsInterface {
         return Binding.CONTINUE;
     }
 
-    public bool list_group_actions(string group, out SList<Drtgtk.Action> actions) {
+    public bool list_group_actions(string group, out List<Drtgtk.Action> actions) {
         actions = this.actions.get_group(group);
         return Binding.CONTINUE;
     }

@@ -41,5 +41,5 @@ public interface Nuvola.ActionsInterface: GLib.Object {
 
     public abstract bool list_groups(out List<unowned string> groups);
 
-    public abstract bool list_group_actions(string group, out SList<Drtgtk.Action> actions);
+    public abstract bool list_group_actions(string group, out List<Drtgtk.Action> actions);
 }

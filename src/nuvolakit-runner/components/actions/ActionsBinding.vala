@@ -246,7 +246,7 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface> {
         string? group_name = request.pop_string();
         var builder = new VariantBuilder(new VariantType("aa{sv}"));
         foreach (ActionsInterface object in objects) {
-            SList<Drtgtk.Action> actions_list;
+            List<Drtgtk.Action> actions_list;
             bool done = object.list_group_actions(group_name, out actions_list);
             foreach (Drtgtk.Action action in actions_list) {
                 builder.open(new VariantType("a{sv}"));
