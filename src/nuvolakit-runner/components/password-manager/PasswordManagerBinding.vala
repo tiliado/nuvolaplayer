@@ -55,13 +55,14 @@ public class PasswordManagerBinding : ModelBinding<PasswordManager> {
 
     private void handle_get_passwords(Drt.RpcRequest request) throws Drt.RpcError {
         var builder = new VariantBuilder(new VariantType("a(sss)"));
-        HashTable<string, Drt.Lst<LoginCredentials>> passwords = model.get_passwords();
+        HashTable<string, GenericArray<LoginCredentials>?>? passwords = model.get_passwords();
         if (passwords != null) {
-            HashTableIter<string, Drt.Lst<LoginCredentials>> iter = HashTableIter<string, Drt.Lst<LoginCredentials>>(passwords);
+            HashTableIter<string, GenericArray<LoginCredentials>?> iter = HashTableIter<string, GenericArray<LoginCredentials>?>(passwords);
             string hostname = null;
-            Drt.Lst<LoginCredentials> credentials = null;
+            unowned GenericArray<LoginCredentials>? credentials = null;
             while (iter.next(out hostname, out credentials)) {
-                foreach (LoginCredentials item in credentials) {
+                for (int i = 0, size = credentials.length; i < size; i++) {
+                    unowned LoginCredentials item = credentials[i];
                     builder.add("(sss)", hostname, item.username, item.password);
                 }
             }

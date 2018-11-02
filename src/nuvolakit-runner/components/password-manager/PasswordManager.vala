@@ -31,7 +31,7 @@ public class PasswordManager {
     private const string SCHEMA_USERNAME = "username";
     private string app_id;
     private Secret.Schema secret_schema;
-    private HashTable<string, Drt.Lst<LoginCredentials>>? passwords = null;
+    private HashTable<string, GenericArray<LoginCredentials>?>? passwords = null;
     private WebkitEngine web_engine;
 
     public PasswordManager(WebkitEngine web_engine, string app_id) {
@@ -52,7 +52,7 @@ public class PasswordManager {
 
     public signal void prefill_username(int username_index);
 
-    public HashTable<string, Drt.Lst<LoginCredentials>>? get_passwords() {
+    public HashTable<string, GenericArray<LoginCredentials>?>? get_passwords() {
         return passwords;
     }
 
@@ -63,26 +63,18 @@ public class PasswordManager {
         attributes[SCHEMA_APP_ID] = app_id;
         Secret.SearchFlags flags = Secret.SearchFlags.ALL|Secret.SearchFlags.UNLOCK|Secret.SearchFlags.LOAD_SECRETS;
         List<Secret.Item> items = yield collection.search(secret_schema, attributes, flags, null);
-        var credentials = new HashTable<string, Drt.Lst<LoginCredentials>>(str_hash, str_equal);
-        foreach (Secret.Item item in items) {
+        var credentials = new HashTable<string, GenericArray<LoginCredentials>?>(str_hash, str_equal);
+        foreach (unowned Secret.Item item in items) {
             attributes = item.get_attributes();
             string? hostname = attributes[SCHEMA_HOSTNAME];
             string? username = attributes[SCHEMA_USERNAME];
             string? password = item.get_secret().get_text();
-            Drt.Lst<LoginCredentials> entries = credentials[hostname];
+            GenericArray<LoginCredentials>? entries = credentials[hostname];
             if (entries == null) {
-                entries = new Drt.Lst<LoginCredentials>(LoginCredentials.username_equals);
-                entries.prepend(new LoginCredentials(username, password));
+                entries = new GenericArray<LoginCredentials>(1);
                 credentials[hostname] = entries;
-            } else {
-                var entry = new LoginCredentials(username, password);
-                int index = entries.index(entry);
-                if (index >= 0) {
-                    entries[index] = entry;
-                } else {
-                    entries.prepend(entry);
-                }
             }
+            entries.add(new LoginCredentials(username, password));
         }
         this.passwords = credentials;
     }

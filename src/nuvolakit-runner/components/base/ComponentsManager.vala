@@ -25,14 +25,14 @@
 namespace Nuvola {
 
 public class ComponentsManager : PreferencesDialog.SelectorGroup {
-    private Drt.Lst<Component> components;
+    private unowned SList<Component> components;
     private Gtk.Widget component_not_available_widget;
     public UpgradeRequiredWidget? membership_widget = null;
     private TiliadoPaywall? paywall = null;
     public TiliadoTierWidget? tier_widget = null;
     private bool needs_refresh = false;
 
-    public ComponentsManager(Drtgtk.Application app, Drt.Lst<Component> components, TiliadoPaywall? paywall) {
+    public ComponentsManager(Drtgtk.Application app, SList<Component> components, TiliadoPaywall? paywall) {
         base(null, null);
         this.components = components;
         this.paywall = paywall;
@@ -77,7 +77,6 @@ public class ComponentsManager : PreferencesDialog.SelectorGroup {
     }
 
     private void add_components_to_group() {
-        List<Component> components = this.components.to_list();
         foreach (unowned Component component in components) {
             if (component.hidden && !component.enabled) {
                 continue;

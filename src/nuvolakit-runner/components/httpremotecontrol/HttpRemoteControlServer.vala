@@ -44,10 +44,10 @@ public class Server: Soup.Server {
     private bool running = false;
     private File[] www_roots;
     private Channel eio_channel;
-    private HashTable<string, Drt.Lst<Subscription>> subscribers;
+    private HashTable<string, GenericArray<Subscription>?> subscribers;
     private Nm.NetworkManager? nm = null;
     private string? nm_error = null;
-    private Drt.Lst<Address> addresses;
+    private List<Address> addresses;
 
     public Server(
         MasterController app, MasterBus bus,
@@ -59,9 +59,9 @@ public class Server: Soup.Server {
         this.www_roots = www_roots;
         app.config.set_default_value(PORT_KEY, new Variant.int64(8089));
         service_port = (int) app.config.get_int64(PORT_KEY);
-        addresses = new Drt.Lst<Address>(Address.equals);
+        addresses = new List<Address>();
         registered_runners = new GenericSet<string>(str_hash, str_equal);
-        subscribers = new HashTable<string, Drt.Lst<Subscription>>(str_hash, str_equal);
+        subscribers = new HashTable<string, GenericArray<Subscription>?>(str_hash, str_equal);
         bus.router.add_method("/nuvola/httpremotecontrol/register", Drt.RpcFlags.PRIVATE|Drt.RpcFlags.WRITABLE,
             null, handle_register, {
                 new Drt.StringParam("id", true, false)
@@ -103,7 +103,7 @@ public class Server: Soup.Server {
             return;
         }
 
-        foreach (Address addr in addresses) {
+        foreach (unowned Address addr in addresses) {
             if (!addr.enabled) {
                 continue;
             }
@@ -138,7 +138,7 @@ public class Server: Soup.Server {
     }
 
     public void refresh_addresses() {
-        this.addresses.clear();
+        this.addresses = null;
         Config config = app.config;
         var addr_str = "127.0.0.1";
         string key = mk_address_enabled_key(addr_str);
@@ -307,9 +307,9 @@ public class Server: Soup.Server {
 
     public async void subscribe(string? app_id, string path, bool subscribe, string? detail, Engineio.Socket socket) throws GLib.Error {
         string abs_path = app_id != null ? "/app/%s/nuvola%s".printf(app_id, path) : "/master/nuvola%s".printf(path);
-        Drt.Lst<Subscription>? subscribers = this.subscribers[abs_path];
+        GenericArray<Subscription>? subscribers = this.subscribers[abs_path];
         if (subscribers == null) {
-            subscribers = new Drt.Lst<Subscription>(Subscription.equals);
+            subscribers = new GenericArray<Subscription>(1);
             this.subscribers[abs_path] = subscribers;
         }
 
@@ -317,11 +317,14 @@ public class Server: Soup.Server {
         var subscription = new Subscription(this, socket, app_id, path, detail);
         if (subscribe) {
             call_to_subscribe = subscribers.length == 0;
-            subscribers.append(subscription);
+            subscribers.add(subscription);
             socket.closed.connect(subscription.unsubscribe);
         } else {
             socket.closed.disconnect(subscription.unsubscribe);
-            subscribers.remove(subscription);
+            uint index = 0;
+            if (subscribers.find_with_equal_func(subscription, Subscription.equals, out index)) {
+                subscribers.remove_index(index);
+            }
             call_to_subscribe = subscribers.length == 0;
         }
         if (call_to_subscribe) {
@@ -473,27 +476,27 @@ public class Server: Soup.Server {
             return;
         }
         string full_path = "/master" + path;
-        Drt.Lst<Subscription>? subscribers = this.subscribers[full_path];
+        GenericArray<Subscription>? subscribers = this.subscribers[full_path];
         if (subscribers == null) {
             warning("No subscriber for %s!", full_path);
             return;
         }
         string path_without_nuvola = "/master" + path.substring(7);
-        foreach (Subscription subscriber in subscribers) {
-            eio_channel.send_notification(subscriber.socket, path_without_nuvola, data);
+        for (int i = 0, size = subscribers.length; i < size; i++) {
+            eio_channel.send_notification(subscribers[i].socket, path_without_nuvola, data);
         }
     }
 
     private void on_app_notification(AppRunner app, string path, string? detail, Variant? data) {
         string full_path = "/app/" + app.app_id + path;
-        Drt.Lst<Subscription>? subscribers = this.subscribers[full_path];
+        GenericArray<Subscription>? subscribers = this.subscribers[full_path];
         if (subscribers == null) {
             warning("No subscriber for %s!", full_path);
             return;
         }
         string path_without_nuvola = "/app/" + app.app_id + path.substring(7);
-        foreach (Subscription subscriber in subscribers) {
-            eio_channel.send_notification(subscriber.socket, path_without_nuvola, data);
+        for (int i = 0, size = subscribers.length; i < size; i++) {
+            eio_channel.send_notification(subscribers[i].socket, path_without_nuvola, data);
         }
     }
 

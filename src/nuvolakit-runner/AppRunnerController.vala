@@ -54,7 +54,7 @@ public class AppRunnerController: Drtgtk.Application {
     private MenuBar menu_bar;
     private Drtgtk.Form? init_form = null;
     private FormatSupport format_support = null;
-    private Drt.Lst<Component> components = null;
+    private SList<Component> components = null;
     private HashTable<string, Variant>? web_worker_data = null;
     private StartupResult? startup_model;
     private TiliadoPaywall? tiliado_paywall = null;
@@ -654,7 +654,7 @@ public class AppRunnerController: Drtgtk.Application {
         bindings.add_binding(new MediaPlayerBinding(router, web_worker, new MediaPlayer(actions)));
         bindings.add_object(actions_helper);
 
-        components = new Drt.Lst<Component>();
+        components = new SList<Component>();
         components.prepend(new TrayIconComponent(this, bindings, config));
         components.prepend(new AudioTweaksComponent(this, bindings, config));
         components.prepend(new UnityLauncherComponent(this, bindings, config));
@@ -841,7 +841,7 @@ public class AppRunnerController: Drtgtk.Application {
     private void handle_get_component_info(Drt.RpcRequest request) throws Drt.RpcError {
         string? id = request.pop_string();
         if (components != null) {
-            foreach (Component component in components) {
+            foreach (unowned Component component in components) {
                 if (id == component.id) {
                     var builder = new VariantBuilder(new VariantType("a{smv}"));
                     builder.add("{smv}", "name", new Variant.string(component.name));
@@ -864,7 +864,7 @@ public class AppRunnerController: Drtgtk.Application {
         string? id = request.pop_string();
         bool active = request.pop_bool();
         if (components != null) {
-            foreach (Component component in components) {
+            foreach (unowned Component component in components) {
                 if (id == component.id) {
                     request.respond(new Variant.boolean(component.toggle_active(active)));
                     return;
