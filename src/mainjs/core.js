@@ -35,167 +35,167 @@ var Core = Nuvola.$prototype(null, Nuvola.SignalsMixin)
  * Initializes new Core instance object
  */
 Core.$init = function () {
-    /**
-     * Emitted at start-up when initialization of the app runner process is needed.
-     * You can use it to perform own initialization routine.
-     */
+  /**
+   * Emitted at start-up when initialization of the app runner process is needed.
+   * You can use it to perform own initialization routine.
+   */
   this.addSignal('InitAppRunner')
 
-    /**
-     * Emitted at start-up when initialization form is being built.
-     *
-     * @param Object values                       mapping between form field names and their values
-     * @param "Array of FormFieldArray" fields    specification of form fields, see
-     *     @link{doc>apps/initialization-and-preferences-forms.html|Initialization and Preferences Forms}
-     *     for details
-     */
+  /**
+   * Emitted at start-up when initialization form is being built.
+   *
+   * @param Object values                       mapping between form field names and their values
+   * @param "Array of FormFieldArray" fields    specification of form fields, see
+   *     @link{doc>apps/initialization-and-preferences-forms.html|Initialization and Preferences Forms}
+   *     for details
+   */
   this.addSignal('InitializationForm')
 
-    /**
-     * @signal InitWebWorker     initialize web worker process hook
-     *
-     * This signal is emitted every time just before a web page is loaded in the main frame of the web view.
-     */
+  /**
+   * @signal InitWebWorker     initialize web worker process hook
+   *
+   * This signal is emitted every time just before a web page is loaded in the main frame of the web view.
+   */
   this.addSignal('InitWebWorker')
 
-    /**
-     * @signal InitWebWorkerHelper     initialize web worker helper hook
-     *
-     * This signal is emitted only once just before a web page is loaded in the main frame of the web view.
-     */
+  /**
+   * @signal InitWebWorkerHelper     initialize web worker helper hook
+   *
+   * This signal is emitted only once just before a web page is loaded in the main frame of the web view.
+   */
   this.addSignal('InitWebWorkerHelper')
 
-    /**
-     * Emitted on request for home page URL.
-     *
-     * See @link{doc>apps/variable-home-page-url.html|Web apps with a variable home page URL}.
-     *
-     * @param String request.url    property to assign home page url to
-     *
-     * ```
-     * var _onHomePageRequest = function (emitter, request) {
-     *   request.url = "http://tiliado.eu"
-     * }
-     * ```
-     */
+  /**
+   * Emitted on request for home page URL.
+   *
+   * See @link{doc>apps/variable-home-page-url.html|Web apps with a variable home page URL}.
+   *
+   * @param String request.url    property to assign home page url to
+   *
+   * ```
+   * var _onHomePageRequest = function (emitter, request) {
+   *   request.url = "http://tiliado.eu"
+   * }
+   * ```
+   */
   this.addSignal('HomePageRequest')
 
-    /**
-     * Emitted on request for navigation to a new web page.
-     *
-     * @since API 4.12: You can overwrite  `request.url` field to force redirect.
-     * @param String request.url           URL of the new page, you can overwrite this field to force redirect
-     * @param Boolean request.newWindow    whether to open request in a new window, you can overwrite this field
-     * @param Boolean request.approved     whether the navigation is approved, set to ``false`` when
-     *     the ``request.url`` should be opened in user's default web browser
-     *
-     * ```
-     * var _onNavigationRequest = function (emitter, request) {
-     *   request.approved = isAddressAllowed(request.url)
-     * }
-     * ```
-     */
+  /**
+   * Emitted on request for navigation to a new web page.
+   *
+   * @since API 4.12: You can overwrite  `request.url` field to force redirect.
+   * @param String request.url           URL of the new page, you can overwrite this field to force redirect
+   * @param Boolean request.newWindow    whether to open request in a new window, you can overwrite this field
+   * @param Boolean request.approved     whether the navigation is approved, set to ``false`` when
+   *     the ``request.url`` should be opened in user's default web browser
+   *
+   * ```
+   * var _onNavigationRequest = function (emitter, request) {
+   *   request.approved = isAddressAllowed(request.url)
+   * }
+   * ```
+   */
   this.addSignal('NavigationRequest')
 
-    /**
-     * Emitted on request for web page settings.
-     *
-     * @param String request.url            URL of the new page
-     * @param Boolean request.newWindow     whether to open request in a new window, you can overwrite this field
-     * @param Boolean request.javascript    whether javascript should be enabled
-     * @param String request.userAgent       whether to override user agent string
-     *
-     * ```
-     * var _onPageSettings = function (emitter, request) {
-     *   request.userAgent = (
-     *     request.url.startsWith("https://accounts.google.com/")
-     *     || request.url.startsWith("https://accounts.youtube.com/")
-     *     ? "WEBKIT" : null
-     *     )
-     * }
-     * ```
-     */
+  /**
+   * Emitted on request for web page settings.
+   *
+   * @param String request.url            URL of the new page
+   * @param Boolean request.newWindow     whether to open request in a new window, you can overwrite this field
+   * @param Boolean request.javascript    whether javascript should be enabled
+   * @param String request.userAgent       whether to override user agent string
+   *
+   * ```
+   * var _onPageSettings = function (emitter, request) {
+   *   request.userAgent = (
+   *     request.url.startsWith("https://accounts.google.com/")
+   *     || request.url.startsWith("https://accounts.youtube.com/")
+   *     ? "WEBKIT" : null
+   *     )
+   * }
+   * ```
+   */
   this.addSignal('PageSettings')
 
-    /**
-     * Emitted on request for loading a web resource.
-     *
-     * @param String request.url           URL of the resource (can be overwritten)
-     * @param Boolean request.approved     whether the resource loading is approved
-     *
-     * ```
-     * var _onResourceRequest = function (emitter, request) {
-     *   request.url = request.url.replace("webcomponents.js", "webcomponents2.js")
-     * }
-     * ```
-     */
+  /**
+   * Emitted on request for loading a web resource.
+   *
+   * @param String request.url           URL of the resource (can be overwritten)
+   * @param Boolean request.approved     whether the resource loading is approved
+   *
+   * ```
+   * var _onResourceRequest = function (emitter, request) {
+   *   request.url = request.url.replace("webcomponents.js", "webcomponents2.js")
+   * }
+   * ```
+   */
   this.addSignal('ResourceRequest')
 
-    /**
-     * Emitted on request for the last visited URL.
-     *
-     * @param String|null result.url    property to assign the last visited URL to
-     *
-     * ```
-     * var _onLastPageRequest = function (emitter, result) {
-     *   request.url = Nuvola.config.get("last_uri") || null
-     * }
-     * ```
-     */
+  /**
+   * Emitted on request for the last visited URL.
+   *
+   * @param String|null result.url    property to assign the last visited URL to
+   *
+   * ```
+   * var _onLastPageRequest = function (emitter, result) {
+   *   request.url = Nuvola.config.get("last_uri") || null
+   * }
+   * ```
+   */
   this.addSignal('LastPageRequest')
 
-    /**
-     * Emitted on request to quit the application by closing the main window.
-     *
-     * This signal is emitted in both App Runner and Web Worker processes.
-     *
-     * @param bool result.approved    Whether application can quit. If false, application will continue
-     *     running in background.
-     *
-     * ```
-     * var _onQuitRequest = function (emitter, result) {
-     *   if (Nuvola.config.get("myapp.run_in_background")) {
-     *     result.approved = false
-     *   }
-     * }
-     * ```
-     */
+  /**
+   * Emitted on request to quit the application by closing the main window.
+   *
+   * This signal is emitted in both App Runner and Web Worker processes.
+   *
+   * @param bool result.approved    Whether application can quit. If false, application will continue
+   *     running in background.
+   *
+   * ```
+   * var _onQuitRequest = function (emitter, result) {
+   *   if (Nuvola.config.get("myapp.run_in_background")) {
+   *     result.approved = false
+   *   }
+   * }
+   * ```
+   */
   this.addSignal('QuitRequest')
 
-    /**
-     * Emitted after @link{Core::NavigationRequest|approved navigation} to a new page URL.
-     *
-     * @param string uri    URI of the new page
-     *
-     * ```
-     * var _onUriChanged = function(emitter, uri) {
-     *   Nuvola.config.set("last_uri", uri)
-     * }
-     * ```
-     */
+  /**
+   * Emitted after @link{Core::NavigationRequest|approved navigation} to a new page URL.
+   *
+   * @param string uri    URI of the new page
+   *
+   * ```
+   * var _onUriChanged = function(emitter, uri) {
+   *   Nuvola.config.set("last_uri", uri)
+   * }
+   * ```
+   */
   this.addSignal('UriChanged')
 
-    /**
-     * Emitted when preferences dialog is being built.
-     *
-     * @param Object values                       mapping between form field names and their values
-     * @param "Array of FormFieldArray" entries   specification of form fields, see
-     *     @link{doc>apps/initialization-and-preferences-forms.html|Initialization and Preferences Forms}
-     *     for details
-     */
+  /**
+   * Emitted when preferences dialog is being built.
+   *
+   * @param Object values                       mapping between form field names and their values
+   * @param "Array of FormFieldArray" entries   specification of form fields, see
+   *     @link{doc>apps/initialization-and-preferences-forms.html|Initialization and Preferences Forms}
+   *     for details
+   */
   this.addSignal('PreferencesForm')
-    /**
-     * Emitted when a component has been loaded.
-     *
-     * @param string name    the name of the component
-     */
+  /**
+   * Emitted when a component has been loaded.
+   *
+   * @param string name    the name of the component
+   */
   this.addSignal('ComponentLoaded')
-    /**
-     * Emitted when a component has been unloaded.
-     *
-     * @param string id      the id of the component
-     * @param string name    the name of the component
-     */
+  /**
+   * Emitted when a component has been unloaded.
+   *
+   * @param string id      the id of the component
+   * @param string name    the name of the component
+   */
   this.addSignal('ComponentUnloaded')
 }
 

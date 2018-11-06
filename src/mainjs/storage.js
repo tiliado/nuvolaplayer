@@ -190,11 +190,11 @@ var ConfigStorage = Nuvola.$prototype(KeyValueStorage, Nuvola.SignalsMixin)
 ConfigStorage.$init = function () {
   KeyValueStorage.$init.call(this, 0)
 
-    /**
-     * Emitted when a configuration key is changed
-     *
-     * @param String key    key name
-     */
+  /**
+   * Emitted when a configuration key is changed
+   *
+   * @param String key    key name
+   */
   this.addSignal('ConfigChanged')
 }
 

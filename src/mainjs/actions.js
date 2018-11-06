@@ -41,40 +41,40 @@ var Actions = Nuvola.$prototype(null, Nuvola.SignalsMixin)
  * Initializes new Actions object
  */
 Actions.$init = function () {
-    /**
-     * Emitted when an action is activated.
-     *
-     * @param String name      action name
-     * @param Variant param    action parameter, usually null
-     *
-     * ```
-     * MyObject.$init = function () {
-     *   Nuvola.actions.connect('ActionActivated', this)
-     * }
-     *
-     * MyObject._onActionActivated = function (emitter, name, param) {
-     *   console.log('Action activated: ' + name)
-     * }
-     * ```
-     */
+  /**
+   * Emitted when an action is activated.
+   *
+   * @param String name      action name
+   * @param Variant param    action parameter, usually null
+   *
+   * ```
+   * MyObject.$init = function () {
+   *   Nuvola.actions.connect('ActionActivated', this)
+   * }
+   *
+   * MyObject._onActionActivated = function (emitter, name, param) {
+   *   console.log('Action activated: ' + name)
+   * }
+   * ```
+   */
   this.addSignal('ActionActivated')
 
-    /**
-     * Emitted when an action has been enabled or disabled.
-     *
-     * @param String name        action name
-     * @param Boolean enabled    true if the action is enabled
-     *
-     * ```
-     * MyObject.$init = function () {
-     *   Nuvola.actions.connect('ActionEnabledChanged', this)
-     * }
-     *
-     * MyObject._ActionEnabledChanged = function (emitter, name, enabled) {
-     *   console.log('Action ' + name + ' ' + (enabled ? 'enabled' : 'disabled') + '.')
-     * }
-     * ```
-     */
+  /**
+   * Emitted when an action has been enabled or disabled.
+   *
+   * @param String name        action name
+   * @param Boolean enabled    true if the action is enabled
+   *
+   * ```
+   * MyObject.$init = function () {
+   *   Nuvola.actions.connect('ActionEnabledChanged', this)
+   * }
+   *
+   * MyObject._ActionEnabledChanged = function (emitter, name, enabled) {
+   *   console.log('Action ' + name + ' ' + (enabled ? 'enabled' : 'disabled') + '.')
+   * }
+   * ```
+   */
   this.addSignal('ActionEnabledChanged')
   this.connect('ActionActivated', this)
   this.connect('ActionEnabledChanged', this)

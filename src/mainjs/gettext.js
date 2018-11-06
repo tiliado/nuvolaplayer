@@ -68,7 +68,7 @@ var Translate = {}
  * ```
  */
 Translate.gettext = function (text) {
-    // TODO: string g_dgettext(string domain, string msgid);
+  // TODO: string g_dgettext(string domain, string msgid);
   return text
 }
 
@@ -104,7 +104,7 @@ Translate.pgettext = function (context, text) {
     return Translate.gettext(text)
   }
 
-    // TODO: string g_dpgettext2 (string domain, string context, string msgid)
+  // TODO: string g_dpgettext2 (string domain, string context, string msgid)
   return text
 }
 
@@ -145,7 +145,7 @@ Translate.pgettext = function (context, text) {
  * ```
  */
 Translate.ngettext = function (text1, text2, n) {
-    // TODO: //  string g_dngettext (string domain, string msgid1, string msgid2, ulong n)
+  // TODO: //  string g_dngettext (string domain, string msgid1, string msgid2, ulong n)
   return n === 1 ? text1 : text2
 }
 

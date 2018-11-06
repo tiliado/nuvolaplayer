@@ -121,8 +121,8 @@ Nuvola.clickOnElement = function (elm, x, y) {
  */
 Nuvola.setInputValueWithEvent = function (elm, value) {
   elm.value = value
-  elm.dispatchEvent(new window.Event('input', {'bubbles': true, 'cancelable': true}))
-  elm.dispatchEvent(new window.Event('change', {'bubbles': true, 'cancelable': true}))
+  elm.dispatchEvent(new window.Event('input', { 'bubbles': true, 'cancelable': true }))
+  elm.dispatchEvent(new window.Event('change', { 'bubbles': true, 'cancelable': true }))
 }
 
 /**

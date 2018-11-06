@@ -56,7 +56,7 @@ Notification.update = function (title, text, iconName, iconPath, resident) {
   if (resident == null) { resident = this.resident } else { this.resident = !!resident }
 
   Nuvola._callIpcMethodVoid('/nuvola/notification/update',
-        [this.name, title, text, iconName || '', iconPath || '', !!resident, this.category])
+    [this.name, title, text, iconName || '', iconPath || '', !!resident, this.category])
 }
 
 /**
@@ -134,7 +134,7 @@ Notifications.isPersistenceSupportedAsync = function () {
  */
 Notifications.showNotification = function (title, text, iconName, iconPath, force, category) {
   Nuvola._callIpcMethodVoid('/nuvola/notifications/show-notification',
-        [title, text || '', iconName || '', iconPath || '', !!force, category || ''])
+    [title, text || '', iconName || '', iconPath || '', !!force, category || ''])
 }
 
 // export public items

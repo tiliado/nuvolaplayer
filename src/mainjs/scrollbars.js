@@ -38,11 +38,11 @@ Scrollbars.$init = function () {
 
 Scrollbars._updateScrollbars = function () {
   Nuvola.config.getAsync(DARK_SCROLLBAR)
-  .then((value) => {
-    this.dark = value
-    this.setTheme()
-  })
-  .catch(console.log.bind(console))
+    .then((value) => {
+      this.dark = value
+      this.setTheme()
+    })
+    .catch(console.log.bind(console))
 }
 
 Scrollbars.setTheme = function () {

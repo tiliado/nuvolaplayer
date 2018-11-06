@@ -28,21 +28,21 @@ require('prototype')
  * @enum Names on browser's @link{Actions|actions}
  */
 var BrowserAction = {
-    /**
-     * Go back to the previous page
-     */
+  /**
+   * Go back to the previous page
+   */
   GO_BACK: 'go-back',
-    /**
-     * Go forward
-     */
+  /**
+   * Go forward
+   */
   GO_FORWARD: 'go-forward',
-    /**
-     * Go to the web app's home page.
-     */
+  /**
+   * Go to the web app's home page.
+   */
   GO_HOME: 'go-home',
-    /**
-     * Reload page
-     */
+  /**
+   * Reload page
+   */
   RELOAD: 'reload'
 }
 

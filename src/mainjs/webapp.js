@@ -78,7 +78,7 @@ WebApp._onHomePageRequest = function (emitter, result) {
  * Signal handler for @link{Core::LastPageRequest}
  */
 WebApp._onLastPageRequest = function (emitter, request) {
-    // TODO: @async
+  // TODO: @async
   request.url = Nuvola.config.get(this.LAST_URI) || null
 }
 

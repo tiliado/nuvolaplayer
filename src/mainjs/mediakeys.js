@@ -29,25 +29,25 @@ require('signals')
  * @enum Identifiers of media keys
  */
 var MediaKey = {
-    /**
-     * Play key
-     */
+  /**
+   * Play key
+   */
   PLAY: 'Play',
-    /**
-     * Pause key
-     */
+  /**
+   * Pause key
+   */
   PAUSE: 'Pause',
-    /**
-     * Stop key
-     */
+  /**
+   * Stop key
+   */
   STOP: 'Stop',
-    /**
-     * Go to the previous track key
-     */
+  /**
+   * Go to the previous track key
+   */
   PREV: 'Previous',
-    /**
-     * Go to the next track key
-     */
+  /**
+   * Go to the next track key
+   */
   NEXT: 'Next'
 }
 
@@ -60,11 +60,11 @@ var MediaKeys = Nuvola.$prototype(null, Nuvola.SignalsMixin)
  * Initializes new MediaKeys object.
  */
 MediaKeys.$init = function () {
-    /**
-     * Emitted when a media key is pressed.
-     *
-     * @param MediaKey key    the pressed key
-     */
+  /**
+   * Emitted when a media key is pressed.
+   *
+   * @param MediaKey key    the pressed key
+   */
   this.addSignal('MediaKeyPressed')
 }
 

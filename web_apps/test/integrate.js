@@ -105,7 +105,7 @@
     this.testTranslation()
   }
 
-// Page is ready for magic
+  // Page is ready for magic
   WebApp._onPageReady = function () {
     var actions = [ACTION_WONDERFUL]
     for (var i = 0; i <= 5; i++) {
@@ -115,7 +115,7 @@
 
     try {
       document.getElementsByTagName('h1')[0].innerText = Nuvola.format(
-            'Nuvola {1}, {2}, libsoup {3}', fmtv(Nuvola.VERSION), Nuvola.ENGINE, fmtv(Nuvola.LIBSOUP_VERSION))
+        'Nuvola {1}, {2}, libsoup {3}', fmtv(Nuvola.VERSION), Nuvola.ENGINE, fmtv(Nuvola.LIBSOUP_VERSION))
     } catch (e) {
     }
 
@@ -155,7 +155,7 @@
           break
       }
     } catch (e) {
-        // Always expect errors, e.g. document.getElementById("status") might be null
+      // Always expect errors, e.g. document.getElementById("status") might be null
       state = PlaybackState.UNKNOWN
     }
 
@@ -163,18 +163,18 @@
       artLocation: null // always null
     }
 
-    var idMap = {title: 'track', artist: 'artist', album: 'album'}
+    var idMap = { title: 'track', artist: 'artist', album: 'album' }
     for (var key in idMap) {
       try {
         track[key] = document.getElementById(idMap[key]).innerText || null
       } catch (e) {
-            // Always expect errors, e.g. document.getElementById() might return null
+        // Always expect errors, e.g. document.getElementById() might return null
         track[key] = null
       }
     }
 
     try {
-        // Parse rating
+      // Parse rating
       switch (document.getElementById('rating').innerText || null) {
         case 'good':
           track.rating = 1.0 // five stars
@@ -251,7 +251,7 @@
     setTimeout(this.update.bind(this), 500)
   }
 
-// Handler of playback actions
+  // Handler of playback actions
   WebApp._onActionActivated = function (emitter, name, param) {
     switch (name) {
       case PlayerAction.TOGGLE_PLAY:
@@ -373,19 +373,19 @@
     var ngettext = Nuvola.Translate.ngettext
     var eggs = 5
     var text = ngettext(
-        /// You can use tree slashes to add comment for translators.
-        /// It has to be on a line preceding the singular string though.
-        /// {1} will be replaced by number of eggs in both forms,
-        /// but can be omitted as shown in singular form.
-        'There is one egg in the fridge.',
-        'There are {1} eggs in the fridge.',
-        eggs)
+      /// You can use tree slashes to add comment for translators.
+      /// It has to be on a line preceding the singular string though.
+      /// {1} will be replaced by number of eggs in both forms,
+      /// but can be omitted as shown in singular form.
+      'There is one egg in the fridge.',
+      'There are {1} eggs in the fridge.',
+      eggs)
     console.log(Nuvola.format(text, eggs))
     eggs = 1
     text = ngettext(
-        'There is one egg in the fridge.',
-        'There are {1} eggs in the fridge.',
-        eggs)
+      'There is one egg in the fridge.',
+      'There are {1} eggs in the fridge.',
+      eggs)
     console.log(Nuvola.format(text, eggs))
 
     var C_ = Nuvola.Translate.pgettext
@@ -401,15 +401,15 @@
 
     eggs = 5
     text = Nuvola.Translate.ngettext(
-        'There is one child in the fridge.',
-        'There are {1} children in the fridge.',
-        eggs)
+      'There is one child in the fridge.',
+      'There are {1} children in the fridge.',
+      eggs)
     console.log(Nuvola.format(text, eggs))
     eggs = 1
     text = Nuvola.Translate.ngettext(
-        'There is one child in the fridge!',
-        'There are {1} children in the fridge!',
-        eggs)
+      'There is one child in the fridge!',
+      'There are {1} children in the fridge!',
+      eggs)
     console.log(Nuvola.format(text, eggs))
 
     console.log(Nuvola.Translate.pgettext('Navigation', 'Forward'))
@@ -448,4 +448,4 @@
   }
 
   WebApp.start()
-})(this)  // function(Nuvola)
+})(this) // function(Nuvola)

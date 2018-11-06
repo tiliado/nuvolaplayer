@@ -43,41 +43,41 @@ var C_ = Nuvola.Translate.pgettext
  * @since Nuvola 4.13: `REPEAT` and `SHUFFLE` actions were added.
  */
 var PlayerAction = {
-    /**
-     * Start playback
-     */
+  /**
+   * Start playback
+   */
   PLAY: 'play',
-    /**
-     * Toggle playback (play/pause)
-     */
+  /**
+   * Toggle playback (play/pause)
+   */
   TOGGLE_PLAY: 'toggle-play',
-    /**
-     * Pause playback
-     */
+  /**
+   * Pause playback
+   */
   PAUSE: 'pause',
-    /**
-     * Stop playback
-     */
+  /**
+   * Stop playback
+   */
   STOP: 'stop',
-    /**
-     * Skip to next track
-     */
+  /**
+   * Skip to next track
+   */
   PREV_SONG: 'prev-song',
-    /**
-     * Skip to previous track
-     */
+  /**
+   * Skip to previous track
+   */
   NEXT_SONG: 'next-song',
-    /**
-     * Show playback notification
-     */
+  /**
+   * Show playback notification
+   */
   PLAYBACK_NOTIFICATION: 'playback-notification',
-    /**
-     * Seek to a new position
-     */
+  /**
+   * Seek to a new position
+   */
   SEEK: 'seek',
-    /**
-     * Change volume
-     */
+  /**
+   * Change volume
+   */
   CHANGE_VOLUME: 'change-volume',
   /**
    * Repeat status
@@ -113,25 +113,25 @@ var PlayerRepeat = {
  * @enum Media player playback states
  */
 var PlaybackState = {
-    /**
-     * Track is not playing nor paused.
-     */
+  /**
+   * Track is not playing nor paused.
+   */
   UNKNOWN: 0,
-    /**
-     * Playback is paused.
-     */
+  /**
+   * Playback is paused.
+   */
   PAUSED: 1,
-    /**
-     * Track is playing.
-     */
+  /**
+   * Track is playing.
+   */
   PLAYING: 2
 }
 
 var repeatOptions = [
-    // stateId, label, mnemo_label, icon, keybinding
-    [PlayerRepeat.NONE, _('No repeat'), null, null, null, null],
-    [PlayerRepeat.TRACK, _('Repeat track'), null, null, null, null],
-    [PlayerRepeat.PLAYLIST, _('Repeat playlist'), null, null, null, null]
+  // stateId, label, mnemo_label, icon, keybinding
+  [PlayerRepeat.NONE, _('No repeat'), null, null, null, null],
+  [PlayerRepeat.TRACK, _('Repeat track'), null, null, null, null],
+  [PlayerRepeat.PLAYLIST, _('Repeat playlist'), null, null, null, null]
 ]
 
 // New key
@@ -140,9 +140,9 @@ var RUN_IN_BACKGROUND = 'player.run_in_background'
 var BACKGROUND_PLAYBACK = 'player.background_playback'
 
 var RUN_IN_BACKGROUND_OPTIONS = [
-    ['always', C_('Background playback', 'Always')],
-    ['playing', C_('Background playback', 'When song is playing')],
-    ['never', C_('Background playback', 'Never')]
+  ['always', C_('Background playback', 'Always')],
+  ['playing', C_('Background playback', 'When song is playing')],
+  ['never', C_('Background playback', 'Never')]
 ]
 
 var COMPONENT_NOTIFICATIONS = 'notifications'
@@ -159,15 +159,15 @@ var MediaPlayer = Nuvola.$prototype(null, Nuvola.SignalsMixin)
 MediaPlayer.$init = function () {
   Nuvola.mediaPlayer = this
 
-    /**
-     * Emitted when a rating is set.
-     *
-     * Note that rating has to be enabled first with a method @link{MediaPlayer.setCanRate}.
-     *
-     * @since API 3.1
-     *
-     * @param Number rating    Ratting from `0.0` to `1.0`.
-     */
+  /**
+   * Emitted when a rating is set.
+   *
+   * Note that rating has to be enabled first with a method @link{MediaPlayer.setCanRate}.
+   *
+   * @since API 3.1
+   *
+   * @param Number rating    Ratting from `0.0` to `1.0`.
+   */
   this.addSignal('RatingSet')
 
   this._appRunner = false
@@ -494,7 +494,7 @@ MediaPlayer._onInitAppRunner = function (emitter) {
   Nuvola.actions.addAction('playback', 'win', PlayerAction.SEEK, 'Seek', null, null, null, 0)
   Nuvola.actions.addAction('playback', 'win', PlayerAction.CHANGE_VOLUME, 'Change volume', null, null, null, -1.0)
   Nuvola.actions.addAction('playback', 'win', PlayerAction.SHUFFLE, 'Shuffle tracks', null, null, null, false)
-    // FIXME: remove action if notifications compoment is disabled
+  // FIXME: remove action if notifications compoment is disabled
   Nuvola.actions.addAction('playback', 'win', PlayerAction.PLAYBACK_NOTIFICATION, 'Show playback notification', null, null, null)
   Nuvola.actions.addRadioAction('playback', 'win', PlayerAction.REPEAT, 0, repeatOptions)
 
@@ -504,13 +504,13 @@ MediaPlayer._onInitAppRunner = function (emitter) {
   for (var i = 0; i < COMPONENTS_TO_ACTIVATE.length; i++) {
     this._activateComponent(COMPONENTS_TO_ACTIVATE[i])
   }
-    // Take into account the old BACKGROUND_PLAYBACK value
+  // Take into account the old BACKGROUND_PLAYBACK value
   Nuvola.config.setDefaultAsync(BACKGROUND_PLAYBACK, true)
-        .then(() => Nuvola.config.getAsync(BACKGROUND_PLAYBACK))
-        .then((enabled) => {
-          var defaultOption = RUN_IN_BACKGROUND_OPTIONS[enabled ? 1 : 2][0]
-          return Nuvola.config.setDefaultAsync(RUN_IN_BACKGROUND, defaultOption)
-        }).catch(console.log.bind(console))
+    .then(() => Nuvola.config.getAsync(BACKGROUND_PLAYBACK))
+    .then((enabled) => {
+      var defaultOption = RUN_IN_BACKGROUND_OPTIONS[enabled ? 1 : 2][0]
+      return Nuvola.config.setDefaultAsync(RUN_IN_BACKGROUND, defaultOption)
+    }).catch(console.log.bind(console))
 
   this._updateMenu()
   Nuvola.core.connect('PreferencesForm', this)
@@ -536,8 +536,8 @@ MediaPlayer._onInitWebWorker = function (emitter) {
 
   Nuvola.config.connect('ConfigChanged', this)
   Nuvola.config.getAsync(RUN_IN_BACKGROUND)
-        .then((value) => { this._runInBackground = value })
-        .catch(console.log.bind(console))
+    .then((value) => { this._runInBackground = value })
+    .catch(console.log.bind(console))
 }
 
 MediaPlayer._onActionActivated = function (emitter, name, param) {
@@ -633,7 +633,7 @@ MediaPlayer._onQuitRequest = function (emitter, result) {
 }
 
 MediaPlayer._onPreferencesForm = function (object, values, entries) {
-    // TODO: @async
+  // TODO: @async
   values[RUN_IN_BACKGROUND] = Nuvola.config.get(RUN_IN_BACKGROUND)
   entries.push(['label', _('Run in background when window is closed')])
   for (var i = 0; i < RUN_IN_BACKGROUND_OPTIONS.length; i++) {
@@ -690,8 +690,8 @@ MediaPlayer._toggleNotifications = function (enabled) {
 MediaPlayer._onConfigChanged = function (emitter, key) {
   if (key === RUN_IN_BACKGROUND) {
     Nuvola.config.getAsync(RUN_IN_BACKGROUND)
-        .then((value) => { this._runInBackground = value })
-        .catch(console.log.bind(console))
+      .then((value) => { this._runInBackground = value })
+      .catch(console.log.bind(console))
   }
 }
 
