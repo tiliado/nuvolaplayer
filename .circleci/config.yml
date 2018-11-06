@@ -18,7 +18,8 @@ jobs:
               'pkgconfig(uuid)' 'pkgconfig(webkit2gtk-4.0)' 'pkgconfig(sqlite3)' \
               'pkgconfig(libarchive)' 'pkgconfig(libpulse)' libappstream-glib \
               xorg-x11-util-macros libdrm-devel patch \
-              'pkgconfig(x11)' 'pkgconfig(xext)' 'pkgconfig(xextproto)'
+              'pkgconfig(x11)' 'pkgconfig(xext)' 'pkgconfig(xextproto)' \
+              nodejs npm
             dnf clean all > /dev/null
             git clone https://github.com/robclark/libdri2.git
             cd libdri2
@@ -26,7 +27,9 @@ jobs:
             make all
             make install
             /sbin/ldconfig
-            rm -rf ../libdri2
+            cd ..
+            rm -rf libdri2
+            npm install standard --global
       - run:
           name: Install Valalint
           command: |
@@ -53,5 +56,5 @@ jobs:
           working_directory: ~/workdir/nuvolaruntime
           command: |
             ./waf configure build install \
-              --no-unity --no-appindicator --no-cef --no-js-lint
+              --no-unity --no-appindicator --no-cef
             LD_LIBRARY_PATH=./build ./build/run-nuvolaruntime-tests
