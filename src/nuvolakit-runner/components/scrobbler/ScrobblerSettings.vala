@@ -151,8 +151,7 @@ public class ScrobblerSettings: Gtk.Grid {
             info_bar.response.connect(on_response);
             info_bar.show_all();
             attach(info_bar, 0, 1, 2, 1);
-        }
-        catch (AudioScrobblerError e) {
+        } catch (AudioScrobblerError e) {
             warning("Failed to get auth URL: %s", e.message);
             add_info_bar(
                 "Attempt to get authorization URL has failed.", "Retry", Gtk.MessageType.ERROR, 1);
@@ -167,8 +166,7 @@ public class ScrobblerSettings: Gtk.Grid {
             add_info_bar(
                 "You have connected account: %s".printf(scrobbler.username ?? "(unknown)"),
                 "Disconnect", Gtk.MessageType.INFO, 3);
-        }
-        catch (AudioScrobblerError e) {
+        } catch (AudioScrobblerError e) {
             warning("Failed to retrieve confirmed authorization: %s", e.message);
             add_info_bar(
                 "Failed to retrieve confirmed authorization.", "Retry", Gtk.MessageType.ERROR, 1);

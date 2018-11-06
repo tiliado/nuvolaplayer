@@ -72,8 +72,7 @@ public class WebAppWindow : Drtgtk.ApplicationWindow {
         });
         try {
             icon = Gtk.IconTheme.get_default().load_icon(app.icon, 48, 0);
-        }
-        catch (Error e) {
+        } catch (Error e) {
             warning("Unable to load application icon.");
         }
 

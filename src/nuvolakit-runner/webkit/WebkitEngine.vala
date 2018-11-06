@@ -139,15 +139,13 @@ public class WebkitEngine : WebEngine {
             try {
                 api.inject(env, Utils.extract_js_properties(worker_data));
                 api.initialize(env);
-            }
-            catch (JSError e) {
+            } catch (JSError e) {
                 runner_app.fatal_error("Initialization error", e.message);
             }
             try {
                 var args = new Variant("(s)", "InitAppRunner");
                 env.call_function_sync("Nuvola.core.emit", ref args);
-            }
-            catch (GLib.Error e) {
+            } catch (GLib.Error e) {
                 runner_app.fatal_error("Initialization error",
                     "%s failed to initialize app runner. Initialization exited with error:\n\n%s".printf(
                         runner_app.app_name, e.message));
@@ -183,8 +181,7 @@ public class WebkitEngine : WebEngine {
                 }
                 runner_app.show_error("Invalid page URL", "The web app integration script has not provided a valid page URL '%s'.".printf(url));
             }
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             runner_app.show_error("Initialization error", "%s failed to retrieve a last visited page from previous session. Initialization exited with error:\n\n%s".printf(runner_app.app_name, e.message));
         }
 
@@ -199,8 +196,7 @@ public class WebkitEngine : WebEngine {
             } else if (!load_uri(url)) {
                 runner_app.fatal_error("Invalid home page URL", "The web app integration script has not provided a valid home page URL '%s'.".printf(url));
             }
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             runner_app.fatal_error("Initialization error", "%s failed to retrieve a home page of  a web app. Initialization exited with error:\n\n%s".printf(runner_app.app_name, e.message));
         }
     }
@@ -287,8 +283,7 @@ public class WebkitEngine : WebEngine {
         var args = new Variant("(s@a{sv}@av)", "PreferencesForm", new Variant.array(new VariantType("{sv}"), {}), new Variant.array(VariantType.VARIANT, {}));
         try {
             env.call_function_sync("Nuvola.core.emit", ref args);
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             runner_app.show_error("Integration error", "%s failed to load preferences with error:\n\n%s".printf(runner_app.app_name, e.message));
         }
         args.get("(s@a{smv}@av)", null, out values, out entries);
@@ -304,8 +299,7 @@ public class WebkitEngine : WebEngine {
         var args = new Variant("(s@a{sv}@av)", "InitializationForm", new Variant.array(new VariantType("{sv}"), {}), new Variant.array(VariantType.VARIANT, {}));
         try {
             env.call_function_sync("Nuvola.core.emit", ref args);
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             runner_app.fatal_error("Initialization error", "%s failed to crate initialization form. Initialization exited with error:\n\n%s".printf(runner_app.app_name, e.message));
             return false;
         }
@@ -521,14 +515,12 @@ public class WebkitEngine : WebEngine {
         File dir = storage.cache_dir.get_child("api-downloads");
         try {
             dir.make_directory_with_parents();
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
         }
         File file = dir.get_child(basename);
         try {
             file.@delete();
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
         }
         WebKit.Download download = web_context.download_uri(uri);
         download.set_destination(file.get_uri());
@@ -539,8 +531,7 @@ public class WebkitEngine : WebEngine {
                 var payload = new Variant(
                     "(dbusss)", cb_id, true, d.get_response().status_code, d.get_response().status_code.to_string(), file.get_path(), file.get_uri());
                 web_worker.call_function_sync("Nuvola.browser._downloadDone", ref payload);
-            }
-            catch (GLib.Error e) {
+            } catch (GLib.Error e) {
                 warning("Communication failed: %s", e.message);
             }
             download.disconnect(handler_ids[0]);
@@ -559,8 +550,7 @@ public class WebkitEngine : WebEngine {
                 var payload = new Variant(
                     "(dbusss)", cb_id, false, d.get_response().status_code, d.get_response().status_code.to_string(), "", "");
                 web_worker.call_function_sync("Nuvola.browser._downloadDone", ref payload);
-            }
-            catch (GLib.Error e) {
+            } catch (GLib.Error e) {
                 warning("Communication failed: %s", e.message);
             }
             download.disconnect(handler_ids[0]);
@@ -668,8 +658,7 @@ public class WebkitEngine : WebEngine {
         var args = new Variant("(s@a{smv})", "NavigationRequest", builder.end());
         try {
             env.call_function_sync("Nuvola.core.emit", ref args);
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             runner_app.show_error("Integration script error", "The web app integration script has not provided a valid response and caused an error: %s".printf(e.message));
             return true;
         }
@@ -698,8 +687,7 @@ public class WebkitEngine : WebEngine {
         var args = new Variant("(s@a{smv})", "PageSettings", builder.end());
         try {
             env.call_function_sync("Nuvola.core.emit", ref args);
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             runner_app.show_error("Integration script error", "The web app integration script has not provided a valid response and caused an error: %s".printf(e.message));
             return;
         }
@@ -724,8 +712,7 @@ public class WebkitEngine : WebEngine {
         var args = new Variant("(sms)", "UriChanged", web_view.uri);
         try {
             env.call_function_sync("Nuvola.core.emit", ref args);
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             runner_app.show_error("Integration script error", "The web app integration caused an error: %s".printf(e.message));
         }
     }

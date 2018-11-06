@@ -74,8 +74,7 @@ public class Component: Nuvola.Component {
         string method = "/nuvola/httpremotecontrol/" + (register ? "register" : "unregister");
         try {
             ipc_bus.master.call_sync(method, new Variant("(s)", app.web_app.id));
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             warning("Remote call %s failed: %s", method, e.message);
         }
     }
@@ -167,8 +166,7 @@ public class Component: Nuvola.Component {
                     attach(label, 0, ++line, 4, 1);
                 }
                 show_all();
-            }
-            catch (GLib.Error e) {
+            } catch (GLib.Error e) {
                 warning("Failed to get addresses. %s", e.message);
             }
         }
@@ -178,8 +176,7 @@ public class Component: Nuvola.Component {
             unowned string address = o.get_data<string>("address");
             try {
                 ipc_bus.master.call_sync("/nuvola/httpremotecontrol/set-address-enabled", new Variant("(sb)", address, toggle.active));
-            }
-            catch (GLib.Error e) {
+            } catch (GLib.Error e) {
                 warning("Failed to set address enabled. %s", e.message);
             }
         }
@@ -189,8 +186,7 @@ public class Component: Nuvola.Component {
             port = (uint) spin.get_value_as_int();
             try {
                 ipc_bus.master.call_sync("/nuvola/httpremotecontrol/set-port", new Variant("(i)", spin.get_value_as_int()));
-            }
-            catch (GLib.Error e) {
+            } catch (GLib.Error e) {
                 warning("Failed to set address enabled. %s", e.message);
             }
         }

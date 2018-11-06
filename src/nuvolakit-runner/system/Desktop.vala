@@ -55,20 +55,17 @@ public string? get_desktop_category_name(string id) {
 public void move_old_xdg_dirs(Drt.Storage old_storage, Drt.Storage new_storage) {
     try {
         Drt.System.move_dir_if_target_not_found(old_storage.user_config_dir, new_storage.user_config_dir);
-    }
-    catch (GLib.Error e) {
+    } catch (GLib.Error e) {
         warning("Failed to move old config dir. %s", e.message);
     }
     try {
         Drt.System.move_dir_if_target_not_found(old_storage.user_data_dir, new_storage.user_data_dir);
-    }
-    catch (GLib.Error e) {
+    } catch (GLib.Error e) {
         warning("Failed to move old data dir. %s", e.message);
     }
     try {
         Drt.System.move_dir_if_target_not_found(old_storage.user_cache_dir, new_storage.user_cache_dir);
-    }
-    catch (GLib.Error e) {
+    } catch (GLib.Error e) {
         warning("Failed to move old cache dir. %s", e.message);
     }
 }

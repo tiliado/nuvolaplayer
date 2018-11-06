@@ -54,8 +54,7 @@ public abstract class AppRunner : GLib.Object {
             }
             dict.insert_value("capabilities", capatibilities_array.end());
             return dict.end();
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             warning("Failed to query metadata: %s", e.message);
             return null;
         }

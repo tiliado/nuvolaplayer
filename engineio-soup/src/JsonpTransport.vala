@@ -50,8 +50,7 @@ public class JsonpTransport: PollingTransport {
                     result.append(match.fetch(1) == "\\\\" ? "\\" : "\\\\");
                     return false;
                 });
-            }
-            catch (RegexError e) {
+            } catch (RegexError e) {
                 critical("RegexError %s", e.message);
             }
         }

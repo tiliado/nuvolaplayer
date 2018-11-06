@@ -161,8 +161,7 @@ public abstract class PollingTransport: Transport {
                 }
                 yield handle_incoming_packet(packet);
             }
-        }
-        catch (Parser.Error e) {
+        } catch (Parser.Error e) {
             handle_decode_error(e);
         }
     }

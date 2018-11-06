@@ -47,8 +47,7 @@ public class Channel: Engineio.Channel {
             if (node != null) {
                 try {
                     params = Json.gvariant_deserialize(node, "a{smv}");
-                }
-                catch (GLib.Error e) {
+                } catch (GLib.Error e) {
                     throw new ChannelError.PARSE_ERROR("Failed to parse JSON params: %s. Ensure you have passed an object/mapping/dictionary.", e.message);
                 }
             }
@@ -62,8 +61,7 @@ public class Channel: Engineio.Channel {
                 result = Json.gvariant_serialize(variant_result);
             }
             status = "OK";
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             status = "ERROR";
             var builder = new VariantBuilder(new VariantType("a{sv}"));
             builder.add("{sv}", "error", new Variant.int32(e.code));

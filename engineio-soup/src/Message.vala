@@ -105,8 +105,7 @@ public bool deserialize_message(string message, out MessageType type, out int id
                 var parser = new Json.Parser();
                 try {
                     parser.load_from_data(message.substring(i, size));
-                }
-                catch (GLib.Error e) {
+                } catch (GLib.Error e) {
                     data = null;
                     return false;
                 }

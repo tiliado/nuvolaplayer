@@ -53,8 +53,7 @@ public void webkit_web_extension_initialize_with_user_data(WebKit.WebExtension e
         var channel = new Drt.RpcChannel.from_name(0, worker_data["RUNNER_BUS_NAME"].dup_string(), null,
             worker_data["NUVOLA_API_ROUTER_TOKEN"].dup_string(), 5000);
         Nuvola.extension = new Nuvola.WebExtension(extension, channel, worker_data);
-    }
-    catch (GLib.Error e) {
+    } catch (GLib.Error e) {
         error("Failed to connect to app runner. %s", e.message);
     }
 }

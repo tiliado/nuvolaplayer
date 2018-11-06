@@ -40,8 +40,7 @@ public class AZLyricsFetcher : GLib.Object, LyricsFetcher {
         GLib.Object(session: session);
         try {
             html_tags = new Regex("</?\\w+?( /)?>", RegexCompileFlags.CASELESS);
-        }
-        catch (RegexError e) {
+        } catch (RegexError e) {
             error("RegexError: %s", e.message);
         }
     }
@@ -84,8 +83,7 @@ public class AZLyricsFetcher : GLib.Object, LyricsFetcher {
                 string lyrics = response.slice(start_pos, end_pos);
                 try {
                     lyrics = html_tags.replace_literal(lyrics, lyrics.length, 0, "");
-                }
-                catch (RegexError e) {
+                } catch (RegexError e) {
                     warning("RegexError: %s", e.message);
                 }
                 return replace_html_entities(lyrics.strip()) + "\n";

@@ -120,8 +120,7 @@ public abstract class Transport: GLib.Object {
             if (packet != null) {
                 yield handle_incoming_packet(packet);
             }
-        }
-        catch (Parser.Error e) {
+        } catch (Parser.Error e) {
             handle_decode_error(e);
         }
     }

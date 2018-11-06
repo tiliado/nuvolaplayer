@@ -106,8 +106,7 @@ public class ActionsKeyBinderServer : GLib.Object {
                     debug("Action %s was handled in %s.", name, app_runner.app_id);
                     break;
                 }
-            }
-            catch (GLib.Error e) {
+            } catch (GLib.Error e) {
                 warning("Communication with app runner %s for action %s failed. %s", app_runner.app_id, name, e.message);
             }
         }

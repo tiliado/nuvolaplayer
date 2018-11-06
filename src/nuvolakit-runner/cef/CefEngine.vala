@@ -640,8 +640,7 @@ public class CefEngine : WebEngine {
         var args = new Variant("(s@a{smv})", "NavigationRequest", builder.end());
         try {
             env.call_function_sync("Nuvola.core.emit", ref args);
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             runner_app.show_error("Integration script error", "The web app integration script has not provided a valid response and caused an error: %s".printf(e.message));
             return true;
         }

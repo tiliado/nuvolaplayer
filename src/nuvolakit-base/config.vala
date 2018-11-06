@@ -51,8 +51,7 @@ public class Config : Drt.KeyValueStorage {
         try {
             parser.load_from_data(data);
             root = parser.get_root();
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             root = null;
             debug("Json Error: %s", e.message);
         }
@@ -89,8 +88,7 @@ public class Config : Drt.KeyValueStorage {
 
         try {
             return Json.gvariant_deserialize(object.get_member(member_name), null);
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             warning("Failed to deserialize key '%s'. %s", key, e.message);
             return defaults.get(key);
         }
@@ -104,8 +102,7 @@ public class Config : Drt.KeyValueStorage {
         if (object.has_member(member_name)) {
             try {
                 old_value = Json.gvariant_deserialize(object.get_member(member_name), null);
-            }
-            catch (GLib.Error e) {
+            } catch (GLib.Error e) {
                 assert_not_reached();
             }
         }
@@ -141,8 +138,7 @@ public class Config : Drt.KeyValueStorage {
         try {
             parser.load_from_file(file.get_path());
             root = parser.get_root();
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             root = null;
             debug("Json Error: %s", e.message);
         }
@@ -220,14 +216,12 @@ public class Config : Drt.KeyValueStorage {
         generator.pretty = true;
         try {
             file.get_parent().make_directory_with_parents();
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
         }
         try {
             generator.to_file(file.get_path());
             message("Config saved to %s", file.get_path());
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             warning("Failed to save file %s. %s", file.get_path(), e.message);
         }
         return false;

@@ -138,8 +138,7 @@ public class DeveloperSidebar: Gtk.ScrolledWindow {
             string icon_name = broken ? "dialog-error": "audio-x-generic";
             Gdk.Pixbuf pixbuf = Gtk.IconTheme.get_default().load_icon(icon_name, 80, Gtk.IconLookupFlags.FORCE_SIZE);
             artwork.set_from_pixbuf(pixbuf);
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             warning("Pixbuf error: %s", e.message);
             artwork.clear();
         }
@@ -155,8 +154,7 @@ public class DeveloperSidebar: Gtk.ScrolledWindow {
                 try {
                     var pixbuf = new Gdk.Pixbuf.from_file_at_scale(player.artwork_file, 80, 80, true);
                     artwork.set_from_pixbuf(pixbuf);
-                }
-                catch (GLib.Error e) {
+                } catch (GLib.Error e) {
                     warning("Pixbuf error: %s", e.message);
                     clear_artwork(true);
                 }
@@ -227,8 +225,7 @@ public class DeveloperSidebar: Gtk.ScrolledWindow {
             Variant target_value;
             try {
                 GLib.Action.parse_detailed_name(action.scope + "." + detailed_name, out action_name, out target_value);
-            }
-            catch (GLib.Error e) {
+            } catch (GLib.Error e) {
                 critical("Failed to parse '%s': %s", action.scope + "." + detailed_name, e.message);
                 return;
             }

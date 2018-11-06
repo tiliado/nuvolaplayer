@@ -48,8 +48,7 @@ public class MediaKeysClient : GLib.Object, MediaKeysInterface {
             Variant? data = conn.call_sync(METHOD, new Variant("(s)", app_id));
             Drt.Rpc.check_type_string(data, "b");
             managed = data.get_boolean();
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             warning("Remote call %s failed: %s", METHOD, e.message);
         }
     }
@@ -64,8 +63,7 @@ public class MediaKeysClient : GLib.Object, MediaKeysInterface {
             Variant? data = conn.call_sync(METHOD, new Variant("(s)", app_id));
             Drt.Rpc.check_type_string(data, "b");
             managed = !data.get_boolean();
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             warning("Remote call %s failed: %s", METHOD, e.message);
         }
     }

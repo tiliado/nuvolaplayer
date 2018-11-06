@@ -178,8 +178,7 @@ public class WebApp : GLib.Object {
         string metadata;
         try {
             metadata = Drt.System.read_file(metadata_file).strip();
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             throw new WebAppError.LOADING_FAILED("Cannot read '%s'. %s", metadata_file.get_path(), e.message);
         }
         this.from_metadata(metadata, dir);
@@ -195,8 +194,7 @@ public class WebApp : GLib.Object {
         Drt.JsonObject meta;
         try {
             meta = Drt.JsonParser.load_object(metadata);
-        }
-        catch (Drt.JsonError e) {
+        } catch (Drt.JsonError e) {
             throw new WebAppError.INVALID_METADATA("Invalid metadata file. %s", e.message);
         }
 
@@ -301,8 +299,7 @@ public class WebApp : GLib.Object {
         if (info != null) {
             try {
                 return info.load_icon().copy();
-            }
-            catch (GLib.Error e) {
+            } catch (GLib.Error e) {
                 warning("Icon pixbuf %d: %s", size, e.message);
             }
         }
@@ -316,8 +313,7 @@ public class WebApp : GLib.Object {
                     if (pixbuf != null) {
                         return pixbuf;
                     }
-                }
-                catch (GLib.Error e) {
+                } catch (GLib.Error e) {
                     warning("Failed to load icon from file %s: %s", icon.path, e.message);
                 }
             }
@@ -363,8 +359,7 @@ public class WebApp : GLib.Object {
                 int size = path.has_suffix(".svg") ? 0 : int.min(width, height);
                 icons.prepend( {path, size});
             }
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             if (!(e is GLib.IOError.NOT_FOUND)) {
                 warning("Enumeration of icons failed (%s): %s", icons_dir.get_path(), e.message);
             }

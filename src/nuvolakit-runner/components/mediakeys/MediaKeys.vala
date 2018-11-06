@@ -93,8 +93,7 @@ public class MediaKeys: GLib.Object, MediaKeysInterface {
             gnome_media_keys.release_media_player_keys(app_id);
             gnome_media_keys.media_player_key_pressed.disconnect(on_media_key_pressed);
             gnome_media_keys = null;
-        }
-        catch (IOError e) {
+        } catch (IOError e) {
             warning("Unable to get proxy for GNOME Media keys: %s", e.message);
             gnome_media_keys = null;
         }
@@ -140,8 +139,7 @@ public class MediaKeys: GLib.Object, MediaKeysInterface {
             gnome_media_keys.media_player_key_pressed.connect(on_media_key_pressed);
             return true;
 
-        }
-        catch (IOError e) {
+        } catch (IOError e) {
             warning("Unable to get proxy for GNOME Media keys: %s", e.message);
             return false;
         }

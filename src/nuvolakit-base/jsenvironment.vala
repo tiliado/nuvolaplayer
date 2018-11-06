@@ -75,8 +75,7 @@ public class JsEnvironment: GLib.Object, JSExecutor {
         string code;
         try {
             code = Drt.System.read_file(file);
-        }
-        catch (Error e) {
+        } catch (Error e) {
             throw new JSError.READ_ERROR("Unable to read script %s: %s",
                 file.get_path(), e.message);
         }

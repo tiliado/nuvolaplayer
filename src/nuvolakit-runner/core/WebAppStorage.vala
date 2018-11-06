@@ -35,8 +35,7 @@ public class WebAppStorage : GLib.Object {
             Drt.System.make_dirs(config_dir);
             Drt.System.make_dirs(data_dir);
             Drt.System.make_dirs(cache_dir);
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             error("Failed to create directory. %s", e.message);
         }
     }
@@ -51,8 +50,7 @@ public class WebAppStorage : GLib.Object {
         File dir = cache_dir.get_child(path);
         try {
             Drt.System.make_dirs(dir);
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             warning("Failed to create directory '%s'. %s", dir.get_path(), e.message);
         }
         return dir;
@@ -68,8 +66,7 @@ public class WebAppStorage : GLib.Object {
         File dir = data_dir.get_child(path);
         try {
             Drt.System.make_dirs(dir);
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             warning("Failed to create directory '%s'. %s", dir.get_path(), e.message);
         }
         return dir;

@@ -33,8 +33,7 @@ public int print_web_app_version(FileStream output, File web_app_dir) {
         var web_app = new WebApp.from_dir(web_app_dir);
         Nuvola.print_version_info(output, web_app);
         return 0;
-    }
-    catch (WebAppError e) {
+    } catch (WebAppError e) {
         output.puts("### Failed to load web app! ###\n");
         output.printf("### %s ###\n", e.message);
         Nuvola.print_version_info(output, null);

@@ -39,8 +39,7 @@ public class Nuvola.MediaKeysBinding: ObjectBinding<MediaKeysInterface> {
         try {
             var payload = new Variant("(ss)", "MediaKeyPressed", key);
             call_web_worker("Nuvola.mediaKeys.emit", ref payload);
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             warning("Communication failed: %s", e.message);
         }
     }

@@ -205,8 +205,7 @@ public class JSApi : GLib.Object {
 
         try {
             env.execute_script_from_file(main_js);
-        }
-        catch (JSError e) {
+        } catch (JSError e) {
             throw new JSError.INITIALIZATION_FAILED("Failed to initialize a core component main.js located at '%s'. Initialization exited with error:\n\n%s", main_js.get_path(), e.message);
         }
 
@@ -218,8 +217,7 @@ public class JSApi : GLib.Object {
         string meta_json_data;
         try {
             meta_json_data = Drt.System.read_file(meta_json);
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             throw new JSError.INITIALIZATION_FAILED("Failed load a web app component %s. This probably means the web app integration has not been installed correctly or that component has been accidentally deleted.\n\n%s", META_JSON, e.message);
         }
 
@@ -240,8 +238,7 @@ public class JSApi : GLib.Object {
 
         try {
             env.execute_script_from_file(integrate_js);
-        }
-        catch (JSError e) {
+        } catch (JSError e) {
             throw new JSError.INITIALIZATION_FAILED("Failed to initialize a web app component %s located at '%s'. Initialization exited with error:\n\n%s", INTEGRATE_JS, integrate_js.get_path(), e.message);
         }
     }
@@ -617,8 +614,7 @@ public class JSApi : GLib.Object {
             } else {
                 try {
                     debug("Nuvola.log: %s", variant_from_value(ctx, args[i]).print(false));
-                }
-                catch (JSError e) {
+                } catch (JSError e) {
                     warning("Nuvola.log (JSError): %s", e.message);
                 }
             }
@@ -634,8 +630,7 @@ public class JSApi : GLib.Object {
             } else {
                 try {
                     warning("Nuvola.warn: %s", variant_from_value(ctx, args[i]).print(false));
-                }
-                catch (JSError e) {
+                } catch (JSError e) {
                     warning("Nuvola.warn (JSError): %s", e.message);
                 }
             }

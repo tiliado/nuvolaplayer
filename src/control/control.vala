@@ -89,8 +89,7 @@ public int main(string[] args) {
         opt_context.set_ignore_unknown_options(false);
         opt_context.set_description(DESCRIPTION);
         opt_context.parse(ref args);
-    }
-    catch (OptionError e) {
+    } catch (OptionError e) {
         stderr.printf("Error: Option parsing failed: %s\n", e.message);
         return 1;
     }
@@ -141,8 +140,7 @@ public int main(string[] args) {
             }
 
             message("Using '%s' as web app id.", Args.app);
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             return quit(2, "Error: Communication with %s master instance failed: %s\n", Nuvola.get_app_name(), e.message);
         }
     }
@@ -156,8 +154,7 @@ public int main(string[] args) {
             BusType.SESSION, uid, path,
             DBusProxyFlags.DO_NOT_CONNECT_SIGNALS|DBusProxyFlags.DO_NOT_LOAD_PROPERTIES);
         app_api.get_connection(out socket);
-    }
-    catch (GLib.Error e) {
+    } catch (GLib.Error e) {
         return quit(2, "Error: Failed to connect to %s instance for %s. %s\n", Nuvola.get_app_name(), Args.app, e.message);
     }
     if (socket == null) {
@@ -166,8 +163,7 @@ public int main(string[] args) {
 
     try {
         client = new Drt.RpcChannel(2, new Drt.SocketChannel.from_socket(2, socket, 500), null, null);
-    }
-    catch (GLib.Error e) {
+    } catch (GLib.Error e) {
         return quit(2, "Error: Failed to connect to %s instance for %s. %s\n", Nuvola.get_app_name(), Args.app, e.message);
     }
 
@@ -203,8 +199,7 @@ public int main(string[] args) {
             try {
                 var master = new Drt.RpcChannel.from_name(1, build_master_ipc_id(), null, null, 500);
                 return call_api_method(master, Args.command, 1);
-            }
-            catch (GLib.Error e) {
+            } catch (GLib.Error e) {
                 return quit(2, "Error: Communication with %s master instance failed: %s\n", Nuvola.get_app_name(), e.message);
             }
         case "api-app":
@@ -213,15 +208,13 @@ public int main(string[] args) {
             }
             try {
                 return call_api_method(client, Args.command, 1);
-            }
-            catch (GLib.Error e) {
+            } catch (GLib.Error e) {
                 return quit(2, "Error: Communication with %s instance for %s failed. %s\n", Nuvola.get_app_name(), Args.app, e.message);
             }
         default:
             return quit(1, "Error: Unknown command '%s'.\n", command);
         }
-    }
-    catch (GLib.Error e) {
+    } catch (GLib.Error e) {
         return quit(2, "Error: Communication with %s instance failed: %s\n", Nuvola.get_app_name(), e.message);
     }
 }
@@ -289,8 +282,7 @@ class Control {
             ? new Variant.maybe(VariantType.BYTE, null)
             :  Variant.parse(null, parameter_str);
 
-        }
-        catch (VariantParseError e) {
+        } catch (VariantParseError e) {
             return quit(1,
                 "Failed to parse Variant from string %s: %s\n\n"
                 + "See https://developer.gnome.org/glib/stable/gvariant-text.html for format specification.\n",

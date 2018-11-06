@@ -43,8 +43,7 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder {
             string? keybinding = null;
             data.get("ms", &keybinding);
             return keybinding;
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             warning("Remote call %s failed: %s", METHOD, e.message);
             return null;
         }
@@ -56,8 +55,7 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder {
             Variant? data = conn.call_sync(METHOD, new Variant("(sms)", action, keybinding));
             Drt.Rpc.check_type_string(data, "b");
             return data.get_boolean();
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             warning("Remote call %s failed: %s", METHOD, e.message);
             return false;
         }
@@ -69,8 +67,7 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder {
             Variant? data = conn.call_sync(METHOD, new Variant("(s)", action));
             Drt.Rpc.check_type_string(data, "b");
             return data.get_boolean();
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             warning("Remote call %s failed: %s", METHOD, e.message);
             return false;
         }
@@ -82,8 +79,7 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder {
             Variant? data = conn.call_sync(METHOD, new Variant("(s)", action));
             Drt.Rpc.check_type_string(data, "b");
             return data.get_boolean();
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             warning("Remote call %s failed: %s", METHOD, e.message);
             return false;
         }
@@ -97,8 +93,7 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder {
             string? action = null;
             data.get("ms", &action);
             return action;
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             warning("Remote call %s failed: %s", METHOD, e.message);
             return null;
         }
@@ -110,8 +105,7 @@ public class ActionsKeyBinderClient : GLib.Object, ActionsKeyBinder {
             Variant? data = conn.call_sync(METHOD, new Variant("(s)", keybinding));
             Drt.Rpc.check_type_string(data, "b");
             return data.get_boolean();
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             warning("Remote call %s failed: %s", METHOD, e.message);
             return false;
         }

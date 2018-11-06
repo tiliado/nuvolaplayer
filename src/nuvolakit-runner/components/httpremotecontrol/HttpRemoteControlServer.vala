@@ -111,8 +111,7 @@ public class Server: Soup.Server {
                 message("Start HttpRemoteControlServer at %s:%u", addr.address, service_port);
                 listen(new InetSocketAddress.from_string(addr.address, service_port), 0);
                 running = true;
-            }
-            catch (GLib.Error e) {
+            } catch (GLib.Error e) {
                 critical("Cannot start HttpRemoteControlServer at %s:%u: %s", addr.address, service_port, e.message);
             }
         }
@@ -278,8 +277,7 @@ public class Server: Soup.Server {
                 try {
                     Json.Node data = send_app_request(app_id, app_request);
                     request.respond_json(200, data);
-                }
-                catch (GLib.Error e) {
+                } catch (GLib.Error e) {
                     var builder = new VariantBuilder(new VariantType("a{sv}"));
                     builder.add("{sv}", "error", new Variant.int32(e.code));
                     builder.add("{sv}", "message", new Variant.string(e.message));
@@ -292,8 +290,7 @@ public class Server: Soup.Server {
             try {
                 Json.Node data = send_local_request(path.substring(6), request);
                 request.respond_json(200, data);
-            }
-            catch (GLib.Error e) {
+            } catch (GLib.Error e) {
                 var builder = new VariantBuilder(new VariantType("a{sv}"));
                 builder.add("{sv}", "error", new Variant.int32(e.code));
                 builder.add("{sv}", "message", new Variant.string(e.message));
@@ -503,8 +500,7 @@ public class Server: Soup.Server {
     private void on_nm_client_created(GLib.Object? o, AsyncResult res) {
         try {
             nm = Nm.get_client.end(res);
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             warning("Failed to create NM client: %s", e.message);
             nm = null;
             nm_error = e.message;
@@ -557,8 +553,7 @@ public class Server: Soup.Server {
             try {
                 this.unref(); // free
                 server.subscribe.end(res);
-            }
-            catch (GLib.Error e) {
+            } catch (GLib.Error e) {
                 warning("Failed to unsubscribe a closed socket: %s %s", app_id, path);
             }
         }

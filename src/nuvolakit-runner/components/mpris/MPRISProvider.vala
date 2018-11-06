@@ -71,8 +71,7 @@ public class MPRISProvider {
             registered_objects[0] = conn.register_object("/org/mpris/MediaPlayer2", mpris_app);
             registered_objects[1] = conn.register_object("/org/mpris/MediaPlayer2", mpris_player);
             this.conn = conn;
-        }
-        catch(IOError e) {
+        } catch(IOError e) {
             critical("Unable to register objects: %s", e.message);
         }
     }

@@ -238,8 +238,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler {
                 var parser = new Json.Parser();
                 try {
                     parser.load_from_data(response);
-                }
-                catch (GLib.Error e) {
+                } catch (GLib.Error e) {
                     var data = (string) request.data;
                     if ("Your request timed out" in data) {
                         throw new AudioScrobblerError.RETRY("%s", data);
@@ -270,8 +269,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler {
                     }
                 }
                 return root_object;
-            }
-            catch (AudioScrobblerError e) {
+            } catch (AudioScrobblerError e) {
                 if (retry == 0 && !(e is AudioScrobblerError.RETRY)) {
                     throw e;
                 }

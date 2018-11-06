@@ -73,8 +73,7 @@ public class Notification {
                 // Pass actual image data over dbus instead of a filename to
                 // prevent caching. LP:1099825
                 notification.set_image_from_pixbuf(new Gdk.Pixbuf.from_file(icon_path));
-            }
-            catch(GLib.Error e) {
+            } catch(GLib.Error e) {
                 warning("Failed to icon %s: %s", icon_path, e.message);
             }
         }
@@ -113,8 +112,7 @@ public class Notification {
                 notification.close();
             }
             return true;
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             warning("Failed to close notification: %s", e.message);
             return false;
         }
@@ -125,8 +123,7 @@ public class Notification {
 
         try {
             notification.show();
-        }
-        catch(Error e) {
+        } catch(Error e) {
             warning("Unable to show notification: %s", e.message);
         }
         return false;

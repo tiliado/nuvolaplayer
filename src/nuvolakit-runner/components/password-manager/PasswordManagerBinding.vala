@@ -73,8 +73,7 @@ public class PasswordManagerBinding : ModelBinding<PasswordManager> {
     private void on_prefil_username(int index) {
         try {
             web_worker.call_sync("/nuvola/passwordmanager/prefill-username", new Variant("(i)", index));
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             warning("Request to prefill username %d failed. %s", index, e.message);
         }
     }

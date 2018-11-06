@@ -66,8 +66,7 @@ public class WebExtension: GLib.Object {
             data_dir = File.new_for_path(response.get_string());
             response = yield channel.call("/nuvola/core/get-user-config-dir", null);
             user_config_dir = File.new_for_path(response.get_string());
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             error("Runner client error: %s", e.message);
         }
 
@@ -93,8 +92,7 @@ public class WebExtension: GLib.Object {
         channel.call.begin("/nuvola/core/web-worker-initialized", null, (o, res) => {
             try {
                 channel.call.end(res);
-            }
-            catch (GLib.Error e) {
+            } catch (GLib.Error e) {
                 error("Runner client error: %s", e.message);
             }
         });
@@ -141,8 +139,7 @@ public class WebExtension: GLib.Object {
         }
         try {
             env.execute_script_from_file(script);
-        }
-        catch (JSError e) {
+        } catch (JSError e) {
             warning("Failed to find webkitgtk fixes script '%s':\n%s", script.get_path(), e.message);
         }
     }
@@ -155,8 +152,7 @@ public class WebExtension: GLib.Object {
         try {
             js_api.inject(bridge, js_properties);
             js_api.integrate(bridge);
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             show_error("Failed to inject JavaScript API. %s".printf(e.message));
         }
         this.bridge = bridge;
@@ -257,16 +253,14 @@ public class WebExtension: GLib.Object {
             channel.call.begin("/nuvola/core/web-worker-ready", null, (o, res) => {
                 try {
                     channel.call.end(res);
-                }
-                catch (GLib.Error e) {
+                } catch (GLib.Error e) {
                     warning("Runner client error: %s", e.message);
                 }
             });
             try {
                 var args = new Variant("(s)", "InitWebWorker");
                 bridge.call_function_sync("Nuvola.core.emit", ref args);
-            }
-            catch (GLib.Error e) {
+            } catch (GLib.Error e) {
                 show_error("Failed to inject JavaScript API. %s".printf(e.message));
             }
         }

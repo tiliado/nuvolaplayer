@@ -60,8 +60,7 @@ public class LyricsFetcherCache : GLib.Object, LyricsFetcher {
             if (lyrics != null && lyrics != "") {
                 return lyrics;
             }
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             if (e.code != 1) {
                 warning("Unable to load cached lyrics: [%d] ]%s", e.code, e.message);
                 throw new LyricsError.NOT_FOUND(@"Unable to load song $song from cache");
@@ -88,8 +87,7 @@ public class LyricsFetcherCache : GLib.Object, LyricsFetcher {
         try {
             File cached_file = lyrics_cache.get_child(FILE_FORMAT.printf(fixed_artist, fixed_song));
             yield Drt.System.overwrite_file_async(cached_file, lyrics);
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             warning("Unable to store lyrics: %s", e.message);
         }
     }

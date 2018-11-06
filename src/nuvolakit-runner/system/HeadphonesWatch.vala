@@ -33,8 +33,7 @@ public class HeadPhonesWatch: GLib.Object {
         GLib.Object(client: client);
         if (client.state == PulseAudio.Context.State.READY) {
             start();
-        }
-        else {
+        } else {
             client.notify["state"].connect_after(on_client_state_changed);
         }
     }

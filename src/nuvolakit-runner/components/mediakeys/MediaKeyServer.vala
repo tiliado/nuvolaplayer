@@ -84,8 +84,7 @@ public class MediaKeysServer: GLib.Object {
                         warning("/nuvola/mediakeys/media-key-pressed got invalid response from %s instance %s: %s\n", Nuvola.get_app_name(), app_id,
                             response == null ? "null" : response.print(true));
                     }
-                }
-                catch (GLib.Error e) {
+                } catch (GLib.Error e) {
                     warning("Communication with app runner %s for action %s failed. %s", app_id, key, e.message);
                 }
 

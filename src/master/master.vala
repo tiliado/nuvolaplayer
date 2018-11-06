@@ -59,8 +59,7 @@ public int main(string[] args) {
         opt_context.add_main_entries(Args.options, null);
         opt_context.set_ignore_unknown_options(true);
         opt_context.parse(ref args);
-    }
-    catch (OptionError e) {
+    } catch (OptionError e) {
         stderr.printf("option parsing failed: %s\n", e.message);
         return 1;
     }

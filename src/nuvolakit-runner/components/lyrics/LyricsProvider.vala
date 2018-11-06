@@ -94,8 +94,7 @@ public class LyricsProvider: GLib.Object {
                     yield cache.store(artist, song, lyrics);
                 }
                 return;
-            }
-            catch (GLib.Error e) {
+            } catch (GLib.Error e) {
                 debug("Fetch error: %s", e.message);
             }
         }

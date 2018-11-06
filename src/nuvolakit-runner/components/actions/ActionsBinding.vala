@@ -277,8 +277,7 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface> {
         try {
             var payload = new Variant("(ssmv)", "ActionActivated", name, parameter);
             call_web_worker("Nuvola.actions.emit", ref payload);
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             warning("Communication failed: %s", e.message);
         }
     }

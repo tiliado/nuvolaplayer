@@ -249,8 +249,7 @@ public class MPRISPlayer : GLib.Object {
         try {
             conn.emit_signal(null, "/org/mpris/MediaPlayer2", "org.freedesktop.DBus.Properties", "PropertiesChanged",
                 payload);
-        }
-        catch (Error e) {
+        } catch (Error e) {
             warning("Unable to emit PropertiesChanged signal: %s", e.message);
         }
         return false;

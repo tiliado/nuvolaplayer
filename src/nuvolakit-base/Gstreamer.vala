@@ -32,8 +32,7 @@ public void init_gstreamer() {
         check_gstreamer_cache();
         #endif
         Gst.init_check(ref b);
-    }
-    catch(Error e) {
+    } catch(Error e) {
         debug("Unable to init %s: %s", Gst.version_string(), e.message);
     }
 }
@@ -49,8 +48,7 @@ private void check_gstreamer_cache() {
             }
             Drt.System.make_dirs(gstreamer_cache_dir);
             Drt.System.overwrite_file(gstreamer_nuvola_tag, "Nuvola");
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             warning("Failed to purge gstreamer cache. %s", e.message);
         }
     }

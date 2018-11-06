@@ -107,13 +107,11 @@ public class WebAppRegistry: GLib.Object {
                                 result[id] = app;
                             }
                         }
-                    }
-                    catch (WebAppError e) {
+                    } catch (WebAppError e) {
                         warning("Unable to load app from %s: %s", app_dir.get_path(), e.message);
                     }
                 }
-            }
-            catch (GLib.Error e) {
+            } catch (GLib.Error e) {
                 warning("Filesystem error: %s", e.message);
             }
         }

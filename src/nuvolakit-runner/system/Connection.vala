@@ -53,8 +53,7 @@ public class Connection : GLib.Object {
         if (!dir.query_exists(null)) {
             try {
                 dir.make_directory_with_parents(null);
-            }
-            catch (GLib.Error e) {
+            } catch (GLib.Error e) {
                 critical("Unable to create directory: %s", e.message);
             }
         }
@@ -62,23 +61,20 @@ public class Connection : GLib.Object {
         FileOutputStream stream;
         try {
             stream = local_file.replace(null, false, FileCreateFlags.REPLACE_DESTINATION, null);
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             critical("Unable to create local file: %s", e.message);
             return false;
         }
 
         try {
             stream.write_all(data.get_data(), null, null);
-        }
-        catch (IOError e) {
+        } catch (IOError e) {
             critical("Unable to store remote file: %s", e.message);
             return false;
         }
         try {
             stream.close();
-        }
-        catch (IOError e) {
+        } catch (IOError e) {
             warning("Unable to close stream: %s", e.message);
         }
         return true;

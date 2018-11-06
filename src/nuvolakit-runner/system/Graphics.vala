@@ -48,8 +48,7 @@ public string? get_required_gl_extension() {
                 nvidia_version, (int) i915, (int) bumblebeed, (int) ignored);
             return ignored ? null : "nvidia-" + nvidia_version.replace(".", "-");
         }
-    }
-    catch (GLib.Error e) {
+    } catch (GLib.Error e) {
         if (!(e is GLib.IOError.NOT_FOUND)) {
             error("Unexpected error: %s", e.message);
         }

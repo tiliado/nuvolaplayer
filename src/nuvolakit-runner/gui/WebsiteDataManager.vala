@@ -95,8 +95,7 @@ public class WebsiteDataManager: Gtk.Grid {
     private void on_data_cleared(GLib.Object? o, AsyncResult res) {
         try {
             data_manager.clear.end(res);
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             warning("Failed to clear data: %s", e.message);
         }
         clear_button.sensitive = true;

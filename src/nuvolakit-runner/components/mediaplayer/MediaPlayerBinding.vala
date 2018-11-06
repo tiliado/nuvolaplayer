@@ -210,8 +210,7 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel> {
         try {
             var payload = new Variant("(sd)", "RatingSet", rating);
             call_web_worker("Nuvola.mediaPlayer.emit", ref payload);
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             warning("Communication failed: %s", e.message);
         }
     }

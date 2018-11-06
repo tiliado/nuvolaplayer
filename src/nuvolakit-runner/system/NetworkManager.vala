@@ -34,8 +34,7 @@ private static T[]? get_proxies<T>(BusType bus, string name, ObjectPath[]? entri
             result[i] = Bus.get_proxy_sync<T>(bus, name, entries[i], 0, null);
         }
         return result;
-    }
-    catch (GLib.Error e) {
+    } catch (GLib.Error e) {
         debug("Failed to get DBus proxy. %s", e.message);
         return null;
     }
@@ -68,8 +67,7 @@ public interface ActiveConnection : GLib.Object {
         }
         try {
             return Bus.get_proxy_sync<Ip4Config>(BusType.SYSTEM, BUS_NAME, path, 0, null);
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             debug("Failed to get DBus proxy for '%s'. %s", path, e.message);
             return null;
         }

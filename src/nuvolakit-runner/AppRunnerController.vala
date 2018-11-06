@@ -490,8 +490,7 @@ public class AppRunnerController: Drtgtk.Application {
             web_engine.get_preferences(out extra_form_values, out extra_form_entries);
             form.add_values(Drt.variant_to_hashtable(extra_form_values));
             form.add_entries(extra_form_entries);
-        }
-        catch (Drtgtk.FormError e) {
+        } catch (Drtgtk.FormError e) {
             show_error("Preferences form error",
                 "Some entries of the Preferences form haven't been shown because of malformed form specification: %s"
                 .printf(e.message));
@@ -783,8 +782,7 @@ public class AppRunnerController: Drtgtk.Application {
             try {
                 Variant? response = ipc_bus.master.call_sync("/nuvola/core/runner-activated", new Variant("(s)", web_app.id));
                 warn_if_fail(response.equal(new Variant.boolean(true)));
-            }
-            catch (GLib.Error e) {
+            } catch (GLib.Error e) {
                 critical("Communication with master process failed: %s", e.message);
             }
         }
@@ -956,8 +954,7 @@ public class AppRunnerController: Drtgtk.Application {
                 } else {
                     debug("WebWorker not ready");
                 }
-            }
-            catch (GLib.Error e) {
+            } catch (GLib.Error e) {
                 warning("QuitRequest failed in web worker: %s", e.message);
             }
             try {
@@ -967,8 +964,7 @@ public class AppRunnerController: Drtgtk.Application {
                 } else {
                     debug("WebEngine not ready");
                 }
-            }
-            catch (GLib.Error e) {
+            } catch (GLib.Error e) {
                 warning("QuitRequest failed in web engine: %s", e.message);
             }
         }
@@ -993,8 +989,7 @@ public class AppRunnerController: Drtgtk.Application {
             init_form.attach_next_to(button, null, Gtk.PositionType.BOTTOM, 2, 1);
             main_window.grid.add(init_form);
             init_form.show();
-        }
-        catch (Drtgtk.FormError e) {
+        } catch (Drtgtk.FormError e) {
             show_error("Initialization form error",
                 "Initialization form hasn't been shown because of malformed form specification: %s"
                 .printf(e.message));

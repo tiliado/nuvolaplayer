@@ -182,8 +182,7 @@ public class AudioScrobblerComponent: Component {
         return_if_fail(scrobbler != null);
         try {
             scrobbler.update_now_playing.end(res);
-        }
-        catch (AudioScrobblerError e) {
+        } catch (AudioScrobblerError e) {
             warning("Update now playing failed for %s (%s): %s", scrobbler.name, scrobbler.id, e.message);
             app.show_warning(
                 "%s Error".printf(scrobbler.name),
@@ -208,8 +207,7 @@ public class AudioScrobblerComponent: Component {
         return_if_fail(scrobbler != null);
         try {
             scrobbler.scrobble_track.end(res);
-        }
-        catch (AudioScrobblerError e) {
+        } catch (AudioScrobblerError e) {
             warning("Scrobbling failed for %s (%s): %s", scrobbler.name, scrobbler.id, e.message);
             app.show_warning(
                 "%s Error".printf(scrobbler.name),

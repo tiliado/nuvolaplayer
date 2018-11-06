@@ -40,8 +40,7 @@ public class KeyValueProxy: Drt.KeyValueStorage {
                 return response.get_boolean();
             }
             critical("Invalid response to KeyValueProxy.has_key: %s", response.print(false));
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             critical("Master client error: %s", e.message);
         }
         return false;
@@ -64,8 +63,7 @@ public class KeyValueProxy: Drt.KeyValueStorage {
         try {
             Variant response = channel.call_sync("/nuvola/core/"+ prefix + "-get-value", new Variant("(s)", key));
             return response;
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             critical("Master client error: %s", e.message);
             return null;
         }
@@ -83,8 +81,7 @@ public class KeyValueProxy: Drt.KeyValueStorage {
     protected override void set_value_unboxed(string key, Variant? value) {
         try {
             channel.call_sync("/nuvola/core/" + prefix + "-set-value", new Variant("(smv)", key, value));
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             critical("Master client error: %s", e.message);
         }
     }
@@ -100,8 +97,7 @@ public class KeyValueProxy: Drt.KeyValueStorage {
     protected override void set_default_value_unboxed(string key, Variant? value) {
         try {
             channel.call_sync("/nuvola/core/" + prefix + "-set-default-value", new Variant("(smv)", key, value));
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             critical("Master client error: %s", e.message);
         }
     }
