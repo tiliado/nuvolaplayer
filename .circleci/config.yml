@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: fedora:28
+      - image: fedora:29
     working_directory: ~/workdir
     steps:
       - run:
@@ -10,7 +10,7 @@ jobs:
           command: |
             dnf update -y > /dev/null
             dnf install -y git openssh-clients wget tar xz \
-              gcc vala gobject-introspection-devel 'pkgconfig(python3)' \
+              gcc vala valadoc gobject-introspection-devel 'pkgconfig(python3)' \
               'pkgconfig(gtk+-3.0)' sqlite-devel python3-pyparsing \
               make autoconf automake glib2-devel graphviz-devel flex bison libxslt \
               desktop-file-utils 'pkgconfig(gstreamer-1.0)' 'pkgconfig(json-glib-1.0)' \
@@ -27,19 +27,6 @@ jobs:
             make install
             /sbin/ldconfig
             rm -rf ../libdri2
-      - run:
-          name: Download Vala
-          command: |
-            wget http://download.gnome.org/sources/vala/0.42/vala-0.42.2.tar.xz
-            tar -xJf vala-0.42.2.tar.xz
-      - run:
-          name: Build Vala
-          working_directory: ~/workdir/vala-0.42.2
-          command: |
-            ./configure --prefix=/usr --disable-dependency-tracking
-            make all
-            dnf remove -y vala valadoc
-            make install
       - run:
           name: Checkout Diorite
           command: git clone https://github.com/tiliado/diorite.git
