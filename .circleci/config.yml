@@ -10,7 +10,7 @@ jobs:
           command: |
             dnf update -y > /dev/null
             dnf install -y git openssh-clients wget tar xz \
-              gcc vala valadoc gobject-introspection-devel 'pkgconfig(python3)' \
+              gcc vala valadoc vala-devel gobject-introspection-devel 'pkgconfig(python3)' \
               'pkgconfig(gtk+-3.0)' sqlite-devel python3-pyparsing \
               make autoconf automake glib2-devel graphviz-devel flex bison libxslt \
               desktop-file-utils 'pkgconfig(gstreamer-1.0)' 'pkgconfig(json-glib-1.0)' \
@@ -28,6 +28,15 @@ jobs:
             /sbin/ldconfig
             rm -rf ../libdri2
       - run:
+          name: Install Valalint
+          command: |
+            git clone https://github.com/tiliado/valalint.git
+            cd valalint
+            make all
+            make install
+            cd ..
+            rm -rf valalint
+      - run:
           name: Checkout Diorite
           command: git clone https://github.com/tiliado/diorite.git
       - run:
@@ -44,5 +53,5 @@ jobs:
           working_directory: ~/workdir/nuvolaruntime
           command: |
             ./waf configure build install \
-              --no-vala-lint --no-unity --no-appindicator --no-cef --no-js-lint
+              --no-unity --no-appindicator --no-cef --no-js-lint
             LD_LIBRARY_PATH=./build ./build/run-nuvolaruntime-tests
