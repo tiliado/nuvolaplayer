@@ -109,10 +109,11 @@ public class AboutDialog: Gtk.Dialog {
             + "when a free trial period ends. We ask users for the payment to cover the project's expenses and to "
             + "provide them with support beyond the usual open-source standard. It also motivates us to focus on "
             + "quality and to develop Nuvola further even though some obstacles may seem too demanding.\n\n"
-            + "By purchasing Nuvola, you tell us: \"Don't give up, we appreciate your work.\"\n\n\n\n"
+            + "By purchasing Nuvola, you tell us: \"Don't give up, we appreciate your work.\"\n\n\n"
             + "By using Nuvola, you agree with <a href=\"%4$s\">Tiliado Privacy Policy</a>. The short version is: "
             + "We collect only the data we need to provide you with our services. We don't sell your personal "
-            + "information. If you have any doubts, contact support: <a href=\"mailto:%5$s\">%5$s</a>",
+            + "information. If you have any questions, feedback or a data removal request, "
+            + "don't hesitate to contact support: <a href=\"mailto:%5$s\">%5$s</a>",
             "https://github.com/tiliado/nuvolaruntime",
             "https://github.com/tiliado/nuvolaruntime/blob/master/LICENSE",
             "https://nuvola.tiliado.eu/pricing/",
