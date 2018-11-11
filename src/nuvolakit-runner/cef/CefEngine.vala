@@ -54,6 +54,7 @@ public class CefEngine : WebEngine {
         allowed_uri_patterns = {
             new PatternSpec("https://www.facebook.com/v*/dialog/oauth*"),
             new PatternSpec("https://www.facebook.com/dialog/oauth*"),
+            new PatternSpec("https://www.facebook.com/login*"),
             new PatternSpec("https://accounts.google.com/o/oauth2/*"),
             new PatternSpec("https://accounts.google.com/ServiceLogin*"),
             new PatternSpec("https://accounts.google.com/CheckCookie*"),
