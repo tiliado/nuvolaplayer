@@ -169,7 +169,7 @@ public class AppRunnerController: Drtgtk.Application {
     private void show_terms() {
         #if FLATPAK
         Drt.KeyValueStorage config = this.master.config ?? this.config;
-        if (AboutDialog.TERMS_VERSION > config.get_int64("nuvola.terms")) {
+        if (tiliado_paywall != null && AboutDialog.TERMS_VERSION > config.get_int64("nuvola.terms")) {
             startup_phase = StartupPhase.TERMS;
             about_dialog.show_terms();
         } else {
