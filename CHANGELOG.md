@@ -7,6 +7,82 @@ Nuvola Apps Changelog
     [Nuvola Devel mailing list](https://groups.google.com/d/forum/nuvola-player-devel)
     to receive more technical announcements and important information about future development.
 
+Release 4.14.0 - November 11th, 2018
+------------------------------------
+
+This is a concise changelog. Refer to [Nuvola News](https://medium.com/nuvola-news) for a more verbose one and to see some screenshots.
+
+### What’s New for Users
+
+  * **New Scripts:** Tidal and MentorFM (both maintained by Jiří Janoušek).
+  * **Updated Installation Instructions:** Removed: Ubuntu 16.10 Yakkety Yak, Fedora 25 and 26.
+    Added: [Ubuntu 18.10 Cosmic Cuttlefish](https://nuvola.tiliado.eu/nuvola/ubuntu/cosmic/)
+    [[GitHub ticket](https://github.com/tiliado/nuvola.tiliado.eu/issues/13)],
+    [elementaryOS 5 Juno](https://nuvola.tiliado.eu/nuvola/elementary/juno/)
+    [[GitHub ticket](https://github.com/tiliado/nuvola.tiliado.eu/issues/14)],
+    and [Fedora 29](https://nuvola.tiliado.eu/nuvola/fedora/fc29/)
+    [[GitHub ticket](https://github.com/tiliado/nuvola.tiliado.eu/issues/15)].
+  * **Upgraded Library Stack:** Nuvola now uses GNOME Platform 3.30 instead of 3.28. This is a significant change
+    because [the base of this runtime](https://blogs.gnome.org/alexl/2018/08/10/the-birth-of-a-new-runtime/) and
+    [the way it is built have changed completely](https://mail.gnome.org/archives/desktop-devel-list/2018-September/msg00013.html).
+    Chromium engine was updated from 68.0.3440.75 to 70.0.3538.77 bringing the latest bug fixes and enhancements
+    [[GitHub ticket](https://github.com/tiliado/nuvolaruntime/issues/477)]. It is now built with Ubuntu 18.04 LTS
+    toolchain instead of Ubuntu 16.04 LTS.
+
+Other changes
+
+  * Application entries of individual Nuvola apps in GNOME software and other software centers using AppStream metadata
+    now contain their own screenshot. Previously, the screenshot of Deezer was used for all apps which might have been
+    confusing. [[GitHub ticket](https://github.com/tiliado/nuvolasdk/issues/5)]
+
+  * The Start-up dialog was tweaked to achieve more straightforward flow. For example, if you have just upgraded,
+    Nuvola shows an info bar “You have upgraded to Nuvola X.Y.Z.” with a link “What’s New?” and a “Continue” button.
+    Previously, users needed to click the close button of the window to continue, which might not have been clear.
+
+  * Nuvola now links to [Tiliado Privacy Policy](https://tiliado.eu/privacy/). The short version is: We collect only
+    the data we need to provide you with our services. We don’t sell your personal information. If you have any
+    questions, feedback or a data removal request, don’t hesitate to contact support:
+    [support@tiliado.eu](mailto:support@tiliado.eu)
+
+### What’s New for Script Maintainers
+
+  * Nuvola [CDK](https://github.com/tiliado/nuvolaruntime/wiki/Nuvola-Core-Developer-Kit) and
+    [ADK](https://github.com/tiliado/nuvolaruntime/wiki/Nuvola-App-Developer-Kit) no longer ship LxTerminal.
+    It depends on GTK+ 2 which isn’t included in GNOME Platform 3.30.
+  * **Chromium** engine was updated from 68.0.3440.75 to 70.0.3538.77.
+    [[GitHub ticket](https://github.com/tiliado/nuvolaruntime/issues/477)]
+  * **Nuvola ADK**: The [Standard JavaScript style checker](https://standardjs.com/) was upgraded from 10.0.3 to
+    **12.0.1**, which introduced a few new rules and made some of the already present rules more strict. Please
+    [consult the changelog](https://github.com/standard/standard/blob/b8741d066c95a280d41f2a1e4649a491fcaf0d8c/CHANGELOG.md)
+    to find out whether you need to fix your scripts. Don’t forget that you can run `standard --fix` to fix some style
+    violations automatically. [[GitHub ticket](https://github.com/tiliado/nuvolaruntime/issues/479)]
+  * The URL `https://www.facebook.com/login*` pattern was white-listed in the filter of external addresses.
+    It is used by MentorFM, for example.
+
+### What’s New for Third-Party Packagers
+
+  * Various incompatibility issues with Python 3.7 were fixed
+    [[GitHub ticket 1](https://github.com/tiliado/diorite/issues/26),
+    [GitHub ticket 2](https://github.com/tiliado/diorite/issues/27)].
+  * Nuvola is now tested with GNOME Platform 3.30
+    [[GitHub ticket](https://github.com/tiliado/nuvolaruntime/issues/469)] and
+    [Chromium Embedded Framework branch 3538](https://bitbucket.org/chromiumembedded/cef/src/3538/)
+    [[GitHub ticket](https://github.com/tiliado/nuvolaruntime/issues/477)].
+  * [Continuous Integration](https://circleci.com/gh/tiliado) is now run with Fedora 29.
+  * New scripts: [MentorFM](https://github.com/tiliado/nuvola-app-mentorfm)
+    and [Tidal](https://github.com/tiliado/nuvola-app-tidal).
+  * Diorite: Configure script `configure` was removed. Use `waf --configure` instead.
+
+### Under the Hood
+
+Nuvola codebase is quite old and it bugs me that it doesn’t reflect all my knowledge and experience I have gained over
+the past few years. Now, I have finally enough time to change that, so Diorite library, the utility and widget library
+for Nuvola Runtime, undergoes a significant refactoring.
+
+[Continuous Integration](https://circleci.com/gh/tiliado) of Diorite and Nuvola was improved: The code style of Diorite
+and Nuvola is checked with [Vala Linter](https://github.com/tiliado/valalint) (Vala code)
+and [StandardJS linter](https://standardjs.com/) (JavaScript code).
+
 Release 4.13.0 - October 14th, 2018
 -----------------------------------
 
