@@ -61,7 +61,13 @@ public bool is_required_gl_extension_mounted(out string? gl_extension) {
     if (gl_extension == null) {
         return true;
     } else {
-        return File.new_for_path("/usr/lib/GL").get_child(gl_extension).query_exists();
+        (unowned string)[] GL_PATHS = {"/usr/lib/x86_64-linux-gnu/GL", "/usr/lib/GL"};
+        foreach (unowned string gl_path in GL_PATHS) {
+            if (File.new_for_path(gl_path).get_child(gl_extension).query_exists()) {
+                return true;
+            }
+        }
+        return false;
     }
 }
 
