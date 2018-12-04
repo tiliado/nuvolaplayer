@@ -344,7 +344,12 @@ public class JSApi : GLib.Object {
             int id = -1;
             if (args.length > 2) {
                 try {
-                    id = (int) Drt.variant_to_double(variant_from_value(ctx, args[2]));
+                    double id_double;
+                    if (!Drt.VariantUtils.get_double(variant_from_value(ctx, args[2]), out id_double)) {
+                        exception = create_exception(ctx, "Argument %d: must be a number.".printf(2));
+                        return undefined;
+                    }
+                    id = (int) id_double;
                 } catch (JSError e) {
                     exception = create_exception(ctx, "Argument %d: %s".printf(2, e.message));
                     return undefined;

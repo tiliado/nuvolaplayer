@@ -389,8 +389,21 @@ public class Server: Soup.Server {
 
     private Variant? serialize_params(string? form_data) {
         if (form_data != null) {
-            HashTable<string, string> query_params = Soup.Form.decode(form_data);
-            return Drt.str_table_to_variant_dict(query_params);
+            HashTable<unowned string, unowned string> query_params = Soup.Form.decode(form_data);
+            HashTableIter<unowned string, unowned string> iter = (
+                HashTableIter<unowned string, unowned string>(query_params));
+            unowned string key;
+            unowned string val;
+            var builder = new VariantBuilder(new VariantType("a{smv}"));
+            while (iter.next(out key, out val)) {
+                Variant? variant = Drt.VariantUtils.parse_typed_value(val);
+                if (variant != null) {
+                    builder.add("{smv}", key, variant);
+                } else {
+                    warning("Cannot parse '%s'.", val);
+                }
+            }
+            return builder.end();
         }
         return null;
     }

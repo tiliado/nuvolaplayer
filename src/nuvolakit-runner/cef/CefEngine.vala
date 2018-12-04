@@ -284,7 +284,7 @@ public class CefEngine : WebEngine {
             return false;
         }
         args.get("(s@a{smv}@av)", null, out values, out entries);
-        HashTable<string, Variant> values_hashtable = Drt.variant_to_hashtable(values);
+        HashTable<string, Variant> values_hashtable = Drt.VariantUtils.to_hash_table(values);
         if (values_hashtable.size() > 0) {
             debug("Init form requested");
             init_form(values_hashtable, entries);

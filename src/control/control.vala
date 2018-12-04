@@ -220,7 +220,22 @@ public int main(string[] args) {
 }
 
 private int call_api_method(Drt.RpcChannel connection, string[] args, int offset) throws GLib.Error {
-    Variant? response = connection.call_sync(args[offset], Drt.strv_to_variant_dict(args, offset + 1));
+    var builder = new VariantBuilder(new VariantType("a{smv}"));
+    for (int i = offset + 1; i < args.length; i++) {
+        string[] parts = args[i].split("=", 2);
+        if (parts.length != 2) {
+            stderr.printf("Invalid argument %d - must be in format 'key=value': %s\n", i, args[i]);
+            return 1;
+        }
+        unowned string key = parts[0];
+        if (Drt.String.is_empty(key)) {
+            stderr.printf("Invalid argument %d - must be in format 'key=value': %s\n", i, args[i]);
+            return 1;
+        }
+        Variant? val = Drt.VariantUtils.parse_typed_value(parts[1]);
+        builder.add("{smv}", key, val);
+    }
+    Variant? response = connection.call_sync(args[offset], builder.end());
     if (response != null) {
         Json.Node node = Json.gvariant_serialize(response);
         var generator = new Json.Generator();
@@ -292,9 +307,9 @@ class Control {
         Variant? response = conn.call_sync("/nuvola/actions/activate",
             new Variant.tuple({new Variant.string(name), parameter}));
         bool handled = false;
-        if (!Drt.variant_bool(response, ref handled)) {
+        if (!Drt.VariantUtils.get_bool(response, out handled)) {
             return quit(2, "Got invalid response from %s instance: %s\n", Nuvola.get_app_name(),
-                response == null ? "null" : response.print(true));
+                Drt.VariantUtils.print(response));
         }
         if (!handled) {
             return quit(3, "%s instance doesn't understand requested action '%s'.\n", Nuvola.get_app_name(), name);
@@ -314,13 +329,22 @@ class Control {
 
     public int track_info(string? key=null) throws GLib.Error {
         Variant? response = conn.call_sync("/nuvola/mediaplayer/track-info", null);
-        string? title = Drt.variant_dict_str(response, "title");
-        string? artist = Drt.variant_dict_str(response, "artist");
-        string? album = Drt.variant_dict_str(response, "album");
-        string? state = Drt.variant_dict_str(response, "state");
-        string? artwork_location = Drt.variant_dict_str(response, "artworkLocation");
-        string? artwork_file = Drt.variant_dict_str(response, "artworkFile");
-        double rating = Drt.variant_dict_double(response, "rating", 0.0);
+        string? title;
+        Drt.VariantUtils.get_maybe_string_item(response, "title", out title);
+        string? artist;
+        Drt.VariantUtils.get_maybe_string_item(response, "artist", out artist);
+        string? album;
+        Drt.VariantUtils.get_maybe_string_item(response, "album", out album);
+        string? state;
+        Drt.VariantUtils.get_maybe_string_item(response, "state", out state);
+        string? artwork_location;
+        Drt.VariantUtils.get_maybe_string_item(response, "artworkLocation", out artwork_location);
+        string? artwork_file;
+        Drt.VariantUtils.get_maybe_string_item(response, "artworkFile", out artwork_file);
+        double rating;
+        if (!Drt.VariantUtils.get_double_item(response, "rating", out rating)) {
+            rating = 0.0;
+        }
 
         if (key == null || key == "all") {
             if (title != null) {

@@ -99,10 +99,12 @@ public class ActionsKeyBinderServer : GLib.Object {
         foreach (AppRunner app_runner in head) {
             try {
                 Variant? response = app_runner.call_sync("/nuvola/actionkeybinder/action-activated", new Variant("(s)", name));
-                if (!Drt.variant_bool(response, ref handled)) {
+                bool call_handled = false;
+                if (!Drt.VariantUtils.get_bool(response, out call_handled)) {
                     warning("Got invalid response from %s instance %s: %s\n", Nuvola.get_app_name(), app_runner.app_id,
                         response == null ? "null" : response.print(true));
-                } else if (handled) {
+                } else if (call_handled) {
+                    handled = call_handled;
                     debug("Action %s was handled in %s.", name, app_runner.app_id);
                     break;
                 }

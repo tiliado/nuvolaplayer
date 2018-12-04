@@ -94,7 +94,10 @@ public class Component: Nuvola.Component {
         private async void load() {
             try {
                 Variant addresses = yield ipc_bus.master.call("/nuvola/httpremotecontrol/get-addresses", null);
-                port = Drt.variant_to_uint(yield ipc_bus.master.call("/nuvola/httpremotecontrol/get-port", null));
+                if (!Drt.VariantUtils.get_uint(yield ipc_bus.master.call("/nuvola/httpremotecontrol/get-port", null), out port)
+                || port == 0 ) {
+                    critical("Invalid port: %u", port);
+                }
                 return_if_fail(addresses != null);
                 VariantIter iter;
                 string? nm_error;

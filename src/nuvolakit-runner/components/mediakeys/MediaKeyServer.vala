@@ -80,16 +80,16 @@ public class MediaKeysServer: GLib.Object {
             if (app_id in clients) {
                 try {
                     Variant? response = app_runner.call_sync("/nuvola/mediakeys/media-key-pressed", new Variant("(s)", key));
-                    if (!Drt.variant_bool(response, ref handled)) {
+                    bool call_handled = false;
+                    if (!Drt.VariantUtils.get_bool(response, out handled)) {
                         warning("/nuvola/mediakeys/media-key-pressed got invalid response from %s instance %s: %s\n", Nuvola.get_app_name(), app_id,
                             response == null ? "null" : response.print(true));
+                    } else if (call_handled) {
+                        handled = call_handled;
+                        break;
                     }
                 } catch (GLib.Error e) {
                     warning("Communication with app runner %s for action %s failed. %s", app_id, key, e.message);
-                }
-
-                if (handled) {
-                    break;
                 }
             }
         }

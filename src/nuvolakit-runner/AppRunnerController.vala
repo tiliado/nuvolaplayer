@@ -488,7 +488,7 @@ public class AppRunnerController: Drtgtk.Application {
             Variant? extra_form_values = null;
             Variant? extra_form_entries = null;
             web_engine.get_preferences(out extra_form_values, out extra_form_entries);
-            form.add_values(Drt.variant_to_hashtable(extra_form_values));
+            form.add_values(Drt.VariantUtils.to_hash_table(extra_form_values));
             form.add_entries(extra_form_entries);
         } catch (Drtgtk.FormError e) {
             show_error("Preferences form error",

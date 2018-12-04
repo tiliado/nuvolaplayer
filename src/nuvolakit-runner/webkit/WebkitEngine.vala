@@ -73,7 +73,7 @@ public class WebkitEngine : WebEngine {
         string webkit_extension_dir = Nuvola.get_libdir();
         debug("Nuvola WebKit Extension directory: %s", webkit_extension_dir);
         web_context.set_web_extensions_directory(webkit_extension_dir);
-        Variant web_extension_data = Drt.variant_from_hashtable(worker_data);
+        Variant web_extension_data = Drt.VariantUtils.from_hash_table(worker_data);
         debug("Nuvola WebKit Extension data: %s", web_extension_data.print(true));
         web_context.set_web_extensions_initialization_user_data(web_extension_data);
 
@@ -305,7 +305,7 @@ public class WebkitEngine : WebEngine {
         }
 
         args.get("(s@a{smv}@av)", null, out values, out entries);
-        HashTable<string, Variant> values_hashtable = Drt.variant_to_hashtable(values);
+        HashTable<string, Variant> values_hashtable = Drt.VariantUtils.to_hash_table(values);
         if (values_hashtable.size() > 0) {
             debug("Init form requested");
             init_form(values_hashtable, entries);
@@ -702,7 +702,9 @@ public class WebkitEngine : WebEngine {
                 javascript_enabled = value != null ? value.get_boolean() : false;
                 break;
             case "userAgent":
-                user_agent = Drt.variant_to_string(value);
+                if (!Drt.VariantUtils.get_string(value, out user_agent)) {
+                    warning("User agent is not a string. %s", Drt.VariantUtils.print(value));
+                }
                 break;
             }
         }

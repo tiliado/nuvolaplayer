@@ -48,7 +48,7 @@ public void webkit_web_extension_initialize_with_user_data(WebKit.WebExtension e
         error("Web Worker abort requested.");
     }
 
-    HashTable<string, Variant> worker_data = Drt.variant_to_hashtable(data);
+    HashTable<string, Variant> worker_data = Drt.VariantUtils.to_hash_table(data);
     try {
         var channel = new Drt.RpcChannel.from_name(0, worker_data["RUNNER_BUS_NAME"].dup_string(), null,
             worker_data["NUVOLA_API_ROUTER_TOKEN"].dup_string(), 5000);

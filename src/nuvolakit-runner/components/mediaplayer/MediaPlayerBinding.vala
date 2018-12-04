@@ -116,12 +116,12 @@ public class Nuvola.MediaPlayerBinding: ModelBinding<MediaPlayerModel> {
     private void handle_get_track_info(Drt.RpcRequest request) throws Drt.RpcError {
         check_not_empty();
         var builder = new VariantBuilder(new VariantType("a{smv}"));
-        builder.add("{smv}", "title", Drt.new_variant_string_or_null(model.title));
-        builder.add("{smv}", "artist", Drt.new_variant_string_or_null(model.artist));
-        builder.add("{smv}", "album", Drt.new_variant_string_or_null(model.album));
-        builder.add("{smv}", "state", Drt.new_variant_string_or_null(model.state));
-        builder.add("{smv}", "artworkLocation", Drt.new_variant_string_or_null(model.artwork_location));
-        builder.add("{smv}", "artworkFile", Drt.new_variant_string_or_null(model.artwork_file));
+        builder.add("{smv}", "title", Drt.VariantUtils.from_string_if_not_null(model.title));
+        builder.add("{smv}", "artist", Drt.VariantUtils.from_string_if_not_null(model.artist));
+        builder.add("{smv}", "album", Drt.VariantUtils.from_string_if_not_null(model.album));
+        builder.add("{smv}", "state", Drt.VariantUtils.from_string_if_not_null(model.state));
+        builder.add("{smv}", "artworkLocation", Drt.VariantUtils.from_string_if_not_null(model.artwork_location));
+        builder.add("{smv}", "artworkFile", Drt.VariantUtils.from_string_if_not_null(model.artwork_file));
         builder.add("{smv}", "rating", new Variant.double(model.rating));
         request.respond(builder.end());
     }
