@@ -43,7 +43,7 @@ public class TiliadoGumroad : GLib.Object {
 
     static construct {
         basic_products = {"nuv1", "nuvolabasic"};
-        premium_products = {"nuv3", "nuvolapremium", "nuvolatest1"};
+        premium_products = {"nuv3", "nuvolapremium", "nuvolatest1", "nuvola-pwyw"};
         patron_products = {"nuv10", "nuvolapatron"};
     }
 
