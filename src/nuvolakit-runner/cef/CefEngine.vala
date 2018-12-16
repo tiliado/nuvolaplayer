@@ -56,8 +56,11 @@ public class CefEngine : WebEngine {
             new PatternSpec("https://www.facebook.com/dialog/oauth*"),
             new PatternSpec("https://www.facebook.com/login*"),
             new PatternSpec("https://accounts.google.com/o/oauth2/*"),
+            new PatternSpec("https://accounts.google.com/signin/oauth*"),
             new PatternSpec("https://accounts.google.com/ServiceLogin*"),
             new PatternSpec("https://accounts.google.com/CheckCookie*"),
+            new PatternSpec("https://accounts.google.com/AccountChooser*"),
+            new PatternSpec("https://accounts.youtube.com/accounts/SetSID?*"),
         };
     }
     public CefEngine(CefOptions web_options, WebApp web_app) {
