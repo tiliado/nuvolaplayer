@@ -14,6 +14,10 @@ if [ -e /etc/fedora-release ]; then
     export PKG_CONFIG_PATH="/usr/local/lib64/pkgconfig:/usr/lib64/pkgconfig"
 fi
 
+# Memory corruption checks
+export MALLOC_CHECK_=3
+export MALLOC_PERTURB_=$(($RANDOM % 255 + 1))
+
 prompt_prefix='\[\033[1;33m\]Nuvola\[\033[00m\]'
 [[ "$PS1" = "$prompt_prefix"* ]] || export PS1="$prompt_prefix $PS1"
 unset prompt_prefix
