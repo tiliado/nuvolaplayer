@@ -608,7 +608,6 @@ def build(ctx):
     vapi_to_patch = []
     if ctx.env.with_unity:
         vapi_to_patch.append('unity')
-        vapi_to_patch.append('gee-1.0')
     for vapi in vapi_to_patch:
         all_vapi_dirs = [path.format(vala=ctx.env.VALAC_SERIES) for path in (
             '/app/share/vala-{vala}/vapi', '/usr/share/vala-{vala}/vapi', '/app/share/vala/vapi', '/usr/share/vala/vapi'
