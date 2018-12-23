@@ -58,7 +58,7 @@ public class PasswordManagerBinding : ModelBinding<PasswordManager> {
         HashTable<string, GenericArray<LoginCredentials>?>? passwords = model.get_passwords();
         if (passwords != null) {
             HashTableIter<string, GenericArray<LoginCredentials>?> iter = HashTableIter<string, GenericArray<LoginCredentials>?>(passwords);
-            string hostname = null;
+            unowned string hostname = null;
             unowned GenericArray<LoginCredentials>? credentials = null;
             while (iter.next(out hostname, out credentials)) {
                 for (int i = 0, size = credentials.length; i < size; i++) {

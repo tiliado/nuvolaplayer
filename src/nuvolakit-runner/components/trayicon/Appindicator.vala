@@ -135,7 +135,7 @@ public class Appindicator: GLib.Object {
 
     private void clean_radio_groups() {
         HashTableIter<string, Gtk.RadioMenuItem> iter = HashTableIter<string, Gtk.RadioMenuItem>(radio_groups);
-        Gtk.RadioMenuItem item = null;
+        unowned Gtk.RadioMenuItem item = null;
         while (iter.next(null, out item)) {
             Drtgtk.Action? action = item.get_data<Drtgtk.Action?>("diorite_action");
             action.notify["state"].disconnect(on_radio_action_state_changed);
