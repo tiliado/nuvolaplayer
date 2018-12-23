@@ -65,6 +65,7 @@ Dependencies
   * [gstreamer](https://gstreamer.freedesktop.org/) >= 1.8.3 (>= 1.12 for MSE)
   * [libdri2](https://github.com/robclark/libdri2) >= 1.0.0
   * [libdrm](https://dri.freedesktop.org/libdrm/) >= 2.2
+  * gee-0.8 >= 0.20.1
   * libuuid
   * libsecret-1 >= 0.16
   * libarchive >= 3.2

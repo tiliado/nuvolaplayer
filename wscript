@@ -41,6 +41,7 @@ MIN_DIORITE = "4.14.0"
 MIN_VALA = "0.42.0"
 MIN_GLIB = "2.56.1"
 MIN_GTK = "3.22.30"
+MIN_GEE = "0.20.1"
 LEGACY_WEBKIT = "2.18.0"
 FLATPAK_WEBKIT = "2.18.1"
 
@@ -405,6 +406,7 @@ def configure(ctx):
     pkgconfig(ctx, 'gtk+-3.0', 'GTK+', MIN_GTK)
     pkgconfig(ctx, 'gdk-3.0', 'GDK', MIN_GTK)
     pkgconfig(ctx, 'gdk-x11-3.0', 'GDKX11', MIN_GTK)
+    pkgconfig(ctx, 'gee-0.8', 'GEE', MIN_GEE)
     pkgconfig(ctx, 'x11', 'X11', "0")
     pkgconfig(ctx, 'sqlite3', 'SQLITE', "3.7")
     pkgconfig(ctx, 'dioriteglib' + TARGET_DIORITE, 'DIORITEGLIB', MIN_DIORITE)
@@ -585,8 +587,8 @@ def build(ctx):
 
     packages = 'dioritegtk{0} dioriteglib{0} '.format(TARGET_DIORITE)
     packages += 'javascriptcore javascriptcoregtk-4.0 libnotify libarchive gtk+-3.0 gdk-3.0 gdk-x11-3.0 x11 posix json-glib-1.0 glib-2.0 gio-2.0'
-    packages += ' libpulse-mainloop-glib'
-    uselib = 'NOTIFY JSCORE LIBARCHIVE DIORITEGTK DIORITEGLIB GTK+ GDK GDKX11 X11 JSON-GLIB GLIB GIO LIBPULSE LIBPULSE-GLIB'
+    packages += ' libpulse-mainloop-glib gee-0.8'
+    uselib = 'NOTIFY JSCORE LIBARCHIVE DIORITEGTK DIORITEGLIB GTK+ GDK GDKX11 X11 JSON-GLIB GLIB GIO LIBPULSE LIBPULSE-GLIB GEE'
 
     vapi_dirs = ['build', 'vapi', 'engineio-soup/vapi']
     env_vapi_dir = os.environ.get("VAPIDIR")
@@ -751,7 +753,7 @@ def build(ctx):
         target = NUVOLAKIT_WORKER,
         source_dir = 'src/nuvolakit-worker',
         packages = "dioriteglib{0} {1} {2}".format(TARGET_DIORITE, 'webkit2gtk-web-extension-4.0', 'javascriptcoregtk-4.0'),
-        uselib = "SOUP DIORITEGLIB DIORITEGTK WEBKITEXT JSCORE",
+        uselib = "SOUP DIORITEGLIB DIORITEGTK WEBKITEXT JSCORE GEE",
         use = [NUVOLAKIT_BASE],
         vala_defines = vala_defines,
         cflags = ['-DG_LOG_DOMAIN="Nuvola"'],
@@ -765,7 +767,7 @@ def build(ctx):
             target = NUVOLAKIT_CEF_WORKER,
             source_dir = 'src/nuvolakit-cef-worker',
             packages = "dioriteglib{0} dioritegtk{0} {1} {2} javascriptcoregtk-4.0".format(TARGET_DIORITE, 'valacef', 'valacefgtk'),
-            uselib = "SOUP DIORITEGLIB DIORITEGTK VALACEF VALACEFGTK JSCORE",
+            uselib = "SOUP DIORITEGLIB DIORITEGTK VALACEF VALACEFGTK JSCORE GEE",
             use = [NUVOLAKIT_BASE],
             vala_defines = vala_defines,
             cflags = ['-DG_LOG_DOMAIN="Nuvola"'],
