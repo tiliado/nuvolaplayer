@@ -24,27 +24,23 @@
 
 namespace Nuvola {
 
-/**
- * Struct containing command line arguments. Check Args.options for their meaning.
- */
-struct Args {
-    static bool debug;
-    static bool verbose;
-    static bool version;
-    #if !FLATPAK || !NUVOLA_RUNTIME
-    static string? apps_dir = null;
-    #endif
+static bool opt_debug;
+static bool opt_verbose;
+static bool opt_version;
+#if !FLATPAK || !NUVOLA_RUNTIME
+static string? opt_apps_dir = null;
+#endif
 
-    public const OptionEntry[] options = {
-        #if !FLATPAK || !NUVOLA_RUNTIME
-        { "apps-dir", 'A', 0, GLib.OptionArg.FILENAME, ref Args.apps_dir, "Search for web app integrations only in directory DIR and disable service management.", "DIR" },
-        #endif
-        { "verbose", 'v', 0, OptionArg.NONE, ref Args.verbose, "Print informational messages", null },
-        { "debug", 'D', 0, OptionArg.NONE, ref Args.debug, "Print debugging messages", null },
-        { "version", 'V', 0, OptionArg.NONE, ref Args.version, "Print version and exit", null },
-        { null }
-    };
-}
+public const OptionEntry[] opt_options = {
+    #if !FLATPAK || !NUVOLA_RUNTIME
+    { "apps-dir", 'A', 0, GLib.OptionArg.FILENAME, ref opt_apps_dir, "Search for web app integrations only in directory DIR and disable service management.", "DIR" },
+    #endif
+    { "verbose", 'v', 0, OptionArg.NONE, ref opt_verbose, "Print informational messages", null },
+    { "debug", 'D', 0, OptionArg.NONE, ref opt_debug, "Print debugging messages", null },
+    { "version", 'V', 0, OptionArg.NONE, ref opt_version, "Print version and exit", null },
+    { null }
+};
+
 
 public int main(string[] args) {
     /* We are not ready for Wayland yet.
@@ -56,7 +52,7 @@ public int main(string[] args) {
     try {
         var opt_context = new OptionContext("- %s".printf(Nuvola.get_app_name()));
         opt_context.set_help_enabled(true);
-        opt_context.add_main_entries(Args.options, null);
+        opt_context.add_main_entries(opt_options, null);
         opt_context.set_ignore_unknown_options(true);
         opt_context.parse(ref args);
     } catch (OptionError e) {
@@ -64,14 +60,14 @@ public int main(string[] args) {
         return 1;
     }
 
-    if (Args.version) {
+    if (opt_version) {
         print_version_info(stdout, null);
         return 0;
     }
 
     var local_only_args = false;
-    Drt.Logger.init(stderr, Args.debug ? GLib.LogLevelFlags.LEVEL_DEBUG
-        : (Args.verbose ? GLib.LogLevelFlags.LEVEL_INFO: GLib.LogLevelFlags.LEVEL_WARNING), true,
+    Drt.Logger.init(stderr, opt_debug ? GLib.LogLevelFlags.LEVEL_DEBUG
+        : (opt_verbose ? GLib.LogLevelFlags.LEVEL_INFO: GLib.LogLevelFlags.LEVEL_WARNING), true,
         "Master");
 
     /* Disable compositing mode in WebKitGTK < 2.13.4 as some websites may crash system with it:
@@ -96,13 +92,13 @@ public int main(string[] args) {
     move_old_xdg_dirs(new Drt.XdgStorage.for_project(Nuvola.get_old_id()), storage);
 
     #if !FLATPAK || !NUVOLA_RUNTIME
-    if (Args.apps_dir == null) {
-        Args.apps_dir = Environment.get_variable("NUVOLA_WEB_APPS_DIR");
+    if (opt_apps_dir == null) {
+        opt_apps_dir = Environment.get_variable("NUVOLA_WEB_APPS_DIR");
     }
 
-    if (Args.apps_dir != null && Args.apps_dir != "") {
+    if (opt_apps_dir != null && opt_apps_dir != "") {
         local_only_args = true;
-        web_app_reg = new WebAppRegistry(File.new_for_path(Args.apps_dir), {});
+        web_app_reg = new WebAppRegistry(File.new_for_path(opt_apps_dir), {});
     } else {
         Drt.Storage web_apps_storage = storage.get_child("web_apps");
         web_app_reg = new WebAppRegistry(web_apps_storage.user_data_dir, web_apps_storage.data_dirs());
@@ -117,15 +113,15 @@ public int main(string[] args) {
     }
 
     exec_cmd += Nuvola.get_app_runner_path();
-    if (Args.debug) {
+    if (opt_debug) {
         local_only_args = true;
         exec_cmd += "-D";
-    } else if (Args.verbose) {
+    } else if (opt_verbose) {
         local_only_args = true;
         exec_cmd += "-v";
     }
 
-    var controller = new MasterController(storage, web_app_reg, (owned) exec_cmd, Args.debug);
+    var controller = new MasterController(storage, web_app_reg, (owned) exec_cmd, opt_debug);
     var controller_args = new string[] {args[0]};
     for (var i = 1; i < args.length; i++) {
         controller_args += args[i];

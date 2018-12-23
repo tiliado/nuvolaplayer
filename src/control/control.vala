@@ -24,25 +24,24 @@
 
 namespace Nuvola {
 
-struct Args {
-    static bool debug = false;
-    static bool verbose = false;
-    static bool version;
-    static string? app;
-    static string? log_file;
-    [CCode (array_length = false, array_null_terminated = true)]
-    static string?[] command;
+static bool opt_debug = false;
+static bool opt_verbose = false;
+static bool opt_version;
+static string? opt_app;
+static string? opt_log_file;
+[CCode (array_length = false, array_null_terminated = true)]
+static string?[] opt_command;
 
-    public const OptionEntry[] main_options = {
-        { "app", 'a', 0, GLib.OptionArg.FILENAME, ref Args.app, "Web app to control.", "ID" },
-        { "verbose", 'v', 0, OptionArg.NONE, ref Args.verbose, "Print informational messages", null },
-        { "debug", 'D', 0, OptionArg.NONE, ref Args.debug, "Print debugging messages", null },
-        { "version", 'V', 0, OptionArg.NONE, ref Args.version, "Print version and exit", null },
-        { "log-file", 'L', 0, OptionArg.FILENAME, ref Args.log_file, "Log to file", "FILE" },
-        { "", 0, 0, GLib.OptionArg.STRING_ARRAY, ref Args.command, "Command.", "COMMAND PARAMS..."},
-        { null }
-    };
-}
+public const OptionEntry[] opt_main_options = {
+    { "app", 'a', 0, GLib.OptionArg.FILENAME, ref opt_app, "Web app to control.", "ID" },
+    { "verbose", 'v', 0, OptionArg.NONE, ref opt_verbose, "Print informational messages", null },
+    { "debug", 'D', 0, OptionArg.NONE, ref opt_debug, "Print debugging messages", null },
+    { "version", 'V', 0, OptionArg.NONE, ref opt_version, "Print version and exit", null },
+    { "log-file", 'L', 0, OptionArg.FILENAME, ref opt_log_file, "Log to file", "FILE" },
+    { "", 0, 0, GLib.OptionArg.STRING_ARRAY, ref opt_command, "Command.", "COMMAND PARAMS..."},
+    { null }
+};
+
 
 [PrintfFormat]
 private static int quit(int code, string format, ...) {
@@ -85,7 +84,7 @@ public int main(string[] args) {
     try {
         var opt_context = new OptionContext("- Control %s".printf(Nuvola.get_app_name()));
         opt_context.set_help_enabled(true);
-        opt_context.add_main_entries(Args.main_options, null);
+        opt_context.add_main_entries(opt_main_options, null);
         opt_context.set_ignore_unknown_options(false);
         opt_context.set_description(DESCRIPTION);
         opt_context.parse(ref args);
@@ -94,25 +93,25 @@ public int main(string[] args) {
         return 1;
     }
 
-    if (Args.version) {
+    if (opt_version) {
         stdout.printf("%s %s\n", Nuvola.get_app_name(), Nuvola.get_version());
         return 0;
     }
 
     FileStream? log = null;
-    if (Args.log_file != null) {
-        log = FileStream.open(Args.log_file, "w");
+    if (opt_log_file != null) {
+        log = FileStream.open(opt_log_file, "w");
         if (log == null) {
-            stderr.printf("Error: Cannot open log file '%s' for writing.\n", Args.log_file);
+            stderr.printf("Error: Cannot open log file '%s' for writing.\n", opt_log_file);
             return 1;
         }
     }
 
-    Drt.Logger.init(log != null ? log : stderr, Args.debug ? GLib.LogLevelFlags.LEVEL_DEBUG
-        : (Args.verbose ? GLib.LogLevelFlags.LEVEL_INFO: GLib.LogLevelFlags.LEVEL_WARNING),
+    Drt.Logger.init(log != null ? log : stderr, opt_debug ? GLib.LogLevelFlags.LEVEL_DEBUG
+        : (opt_verbose ? GLib.LogLevelFlags.LEVEL_INFO: GLib.LogLevelFlags.LEVEL_WARNING),
         true, "Control");
 
-    if (Args.command.length < 1) {
+    if (opt_command.length < 1) {
         #if FLATPAK
         // It might happen that nuvolactl is launched from the Nuvola Apps Service entry in GNOME Software.
         stderr.printf("Error: No command specified. Type `%s --help` for help.\nLaunching service info...\n", args[0]);
@@ -127,19 +126,19 @@ public int main(string[] args) {
         #endif
     }
 
-    if (Args.app == null) {
+    if (opt_app == null) {
         try {
             var master = new Drt.RpcChannel.from_name(1, build_master_ipc_id(), null, null, 500);
 
             Variant? response = master.call_sync("/nuvola/core/get_top_runner", null);
             Drt.Rpc.check_type_string(response, "ms");
-            response.get("ms", out Args.app);
+            response.get("ms", out opt_app);
 
-            if (Args.app == null || Args.app == "") {
+            if (opt_app == null || opt_app == "") {
                 return quit(1, "Error: No %s instance is running.\n", Nuvola.get_app_name());
             }
 
-            message("Using '%s' as web app id.", Args.app);
+            message("Using '%s' as web app id.", opt_app);
         } catch (GLib.Error e) {
             return quit(2, "Error: Communication with %s master instance failed: %s\n", Nuvola.get_app_name(), e.message);
         }
@@ -148,68 +147,68 @@ public int main(string[] args) {
     Drt.RpcChannel client;
     GLib.Socket? socket = null;
     try {
-        string uid = WebApp.build_uid_from_app_id(Args.app, Nuvola.get_dbus_id());
+        string uid = WebApp.build_uid_from_app_id(opt_app, Nuvola.get_dbus_id());
         string path = "/" + uid.replace(".", "/");
         AppDbusIfce app_api = Bus.get_proxy_sync<AppDbusIfce>(
             BusType.SESSION, uid, path,
             DBusProxyFlags.DO_NOT_CONNECT_SIGNALS|DBusProxyFlags.DO_NOT_LOAD_PROPERTIES);
         app_api.get_connection(out socket);
     } catch (GLib.Error e) {
-        return quit(2, "Error: Failed to connect to %s instance for %s. %s\n", Nuvola.get_app_name(), Args.app, e.message);
+        return quit(2, "Error: Failed to connect to %s instance for %s. %s\n", Nuvola.get_app_name(), opt_app, e.message);
     }
     if (socket == null) {
-        return quit(2, "Error: Failed to connect to %s instance for %s. Null socket.\n", Nuvola.get_app_name(), Args.app);
+        return quit(2, "Error: Failed to connect to %s instance for %s. Null socket.\n", Nuvola.get_app_name(), opt_app);
     }
 
     try {
         client = new Drt.RpcChannel(2, new Drt.SocketChannel.from_socket(2, socket, 500), null, null);
     } catch (GLib.Error e) {
-        return quit(2, "Error: Failed to connect to %s instance for %s. %s\n", Nuvola.get_app_name(), Args.app, e.message);
+        return quit(2, "Error: Failed to connect to %s instance for %s. %s\n", Nuvola.get_app_name(), opt_app, e.message);
     }
 
 
-    string command = Args.command[0];
+    string command = opt_command[0];
     var control = new Control(client);
     try {
         switch (command) {
         case "action":
-            if (Args.command.length < 2) {
+            if (opt_command.length < 2) {
                 return quit(1, "Error: No action specified.\n");
             }
-            return control.activate_action(Args.command[1], Args.command.length == 2 ? null : Args.command[2]);
+            return control.activate_action(opt_command[1], opt_command.length == 2 ? null : opt_command[2]);
         case "list-actions":
-            if (Args.command.length > 1) {
+            if (opt_command.length > 1) {
                 return quit(1, "Error: Too many arguments.\n");
             }
             return control.list_actions();
         case "action-state":
-            if (Args.command.length < 2) {
+            if (opt_command.length < 2) {
                 return quit(1, "Error: No action specified.\n");
             }
-            return control.action_state(Args.command[1]);
+            return control.action_state(opt_command[1]);
         case "track-info":
-            if (Args.command.length > 2) {
+            if (opt_command.length > 2) {
                 return quit(1, "Error: Too many arguments.\n");
             }
-            return control.track_info(Args.command.length == 2 ? Args.command[1] : null);
+            return control.track_info(opt_command.length == 2 ? opt_command[1] : null);
         case "api-master":
-            if (Args.command.length < 2) {
+            if (opt_command.length < 2) {
                 return quit(1, "Error: No API method specified.\n");
             }
             try {
                 var master = new Drt.RpcChannel.from_name(1, build_master_ipc_id(), null, null, 500);
-                return call_api_method(master, Args.command, 1);
+                return call_api_method(master, opt_command, 1);
             } catch (GLib.Error e) {
                 return quit(2, "Error: Communication with %s master instance failed: %s\n", Nuvola.get_app_name(), e.message);
             }
         case "api-app":
-            if (Args.command.length < 2) {
+            if (opt_command.length < 2) {
                 return quit(1, "Error: No API method specified.\n");
             }
             try {
-                return call_api_method(client, Args.command, 1);
+                return call_api_method(client, opt_command, 1);
             } catch (GLib.Error e) {
-                return quit(2, "Error: Communication with %s instance for %s failed. %s\n", Nuvola.get_app_name(), Args.app, e.message);
+                return quit(2, "Error: Communication with %s instance for %s failed. %s\n", Nuvola.get_app_name(), opt_app, e.message);
             }
         default:
             return quit(1, "Error: Unknown command '%s'.\n", command);
