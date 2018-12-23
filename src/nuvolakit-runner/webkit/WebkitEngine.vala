@@ -598,10 +598,6 @@ public class WebkitEngine : WebEngine {
         var load_uri = false;
         bool new_window_override = new_window;
         bool approved = navigation_request(uri, ref new_window_override);
-        var javascript_enabled = true;
-        const string KEEP_USER_AGENT = "KEEP_USER_AGENT";
-        string? user_agent = KEEP_USER_AGENT;
-        ask_page_settings(uri, new_window_override, ref javascript_enabled, ref user_agent);
 
         WebKit.NavigationType type = action.get_navigation_type();
         bool user_gesture = action.is_user_gesture();
@@ -676,38 +672,6 @@ public class WebkitEngine : WebEngine {
             }
         }
         return approved;
-    }
-
-    private void ask_page_settings(string url, bool new_window, ref bool javascript_enabled, ref string? user_agent) {
-        var builder = new VariantBuilder(new VariantType("a{smv}"));
-        builder.add("{smv}", "url", new Variant.string(url));
-        builder.add("{smv}", "newWindow", new Variant.boolean(new_window));
-        builder.add("{smv}", "javascript", new Variant.boolean(javascript_enabled));
-        builder.add("{smv}", "userAgent", user_agent != null ? new Variant.string(user_agent) : new Variant("mv", null));
-        var args = new Variant("(s@a{smv})", "PageSettings", builder.end());
-        try {
-            env.call_function_sync("Nuvola.core.emit", ref args);
-        } catch (GLib.Error e) {
-            runner_app.show_error("Integration script error", "The web app integration script has not provided a valid response and caused an error: %s".printf(e.message));
-            return;
-        }
-        VariantIter iter = args.iterator();
-        assert(iter.next("s", null));
-        assert(iter.next("a{smv}", &iter));
-        string key = null;
-        Variant value = null;
-        while (iter.next("{smv}", &key, &value)) {
-            switch (key) {
-            case "javascript":
-                javascript_enabled = value != null ? value.get_boolean() : false;
-                break;
-            case "userAgent":
-                if (!Drt.VariantUtils.get_string(value, out user_agent)) {
-                    warning("User agent is not a string. %s", Drt.VariantUtils.print(value));
-                }
-                break;
-            }
-        }
     }
 
     private void on_uri_changed(GLib.Object o, ParamSpec p) {
