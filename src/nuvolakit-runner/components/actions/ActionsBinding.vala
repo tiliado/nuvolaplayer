@@ -135,18 +135,23 @@ public class Nuvola.ActionsBinding: ObjectBinding<ActionsInterface> {
         Variant? parameter = null;
         Drtgtk.RadioOption[] options = new Drtgtk.RadioOption[options_iter.n_children()];
         var i = 0;
-        Variant? array = null;
-        while (options_iter.next("v", &array)) {
+        Variant? array = null; // "v" (new reference)
+        while (options_iter.next("v", out array)) {
             Variant? value = array.get_child_value(0);
             parameter = value.get_variant();
-            array.get_child(1, "v", &value);
+            value = null;
+            array.get_child(1, "v", out value);
             label = value.is_of_type(VariantType.STRING) ? value.get_string() : null;
-            array.get_child(2, "v", &value);
+            value = null;
+            array.get_child(2, "v", out value);
             mnemo_label = value.is_of_type(VariantType.STRING) ? value.get_string() : null;
-            array.get_child(3, "v", &value);
+            value = null;
+            array.get_child(3, "v", out value);
             icon = value.is_of_type(VariantType.STRING) ? value.get_string() : null;
-            array.get_child(4, "v", &value);
+            value = null;
+            array.get_child(4, "v", out value);
             keybinding = value.is_of_type(VariantType.STRING) ? value.get_string() : null;
+            value = null;
             options[i++] = new Drtgtk.RadioOption(parameter, label, mnemo_label, icon, keybinding);
         }
         foreach (ActionsInterface object in objects) {

@@ -272,12 +272,13 @@ public unowned JsCore.Value value_from_variant(JsCore.Context ctx, Variant? vari
     var object_type = new VariantType("a{s*}");
     if (type.is_subtype_of(object_type)) {
         unowned JsCore.Object object = ctx.make_object();
-        VariantIter iter = null;
-        variant.get("a{s*}", &iter);
-        string key = null;
-        Variant value = null;
-        while (iter.next("{s*}", &key, &value)) {
+        VariantIter iter = null; // "a{s*}" (new allocation)
+        variant.get("a{s*}", out iter);
+        unowned string? key = null; // "&s" (unowned)
+        Variant? value = null; // "*" (new reference)
+        while (iter.next("{&s*}", out key, out value)) {
             object.set_property(ctx, new JsCore.String(key), value_from_variant(ctx, value));
+            value = null; // https://gitlab.gnome.org/GNOME/vala/issues/722
         }
         return object;
     }

@@ -98,9 +98,9 @@ public class PasswordManager {
             data.get("(sas)", out name, out iter);
             if (name == "prefill-password") {
                 var usernames = new WebKit.ContextMenu();
-                string username = null;
                 var i = 0;
-                while (iter.next("s", out username)) {
+                unowned string? username = null; // "&s" (unowned)
+                while (iter.next("&s", out username)) {
                     var action = new Gtk.Action("prefill-password-%d".printf(i++), username, null, null);
                     action.activate.connect(on_prefill_menu_item_activated);
                     usernames.append(new WebKit.ContextMenuItem(action));

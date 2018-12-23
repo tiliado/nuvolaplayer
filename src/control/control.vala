@@ -257,33 +257,37 @@ class Control {
         Variant? response = conn.call_sync("/nuvola/actions/list-groups", null);
         stdout.printf("Available actions\n\nFormat: NAME (is enabled?) - label\n");
         VariantIter iter = response.iterator();
-        string group_name = null;
-        while (iter.next("s", out group_name)) {
+        unowned string? group_name = null; // "&s" (unowned)
+        while (iter.next("&s", out group_name)) {
             stdout.printf("\nGroup: %s\n\n", group_name);
             Variant? actions = conn.call_sync("/nuvola/actions/list-group-actions", new Variant("(s)", group_name));
-            Variant action = null;
             VariantIter actions_iter = actions.iterator();
+            Variant action = null; // "@*" (new reference)
             while (actions_iter.next("@*", out action)) {
-                string name = null;
-                string label = null;
+                unowned string name = null;
+                unowned string label = null;
                 bool enabled = false;
-                Variant options = null;
-                assert(action.lookup("name", "s", out name));
-                assert(action.lookup("label", "s", out label));
+                assert(action.lookup("name", "&s", out name));
+                assert(action.lookup("label", "&s", out label));
                 assert(action.lookup("enabled", "b", out enabled));
+                Variant options = null;
                 if (action.lookup("options", "@*", out options)) {
                     stdout.printf(" *  %s (%s) - %s\n", name, enabled ? "enabled" : "disabled", "invoke with following parameters:");
-                    Variant option = null;
                     VariantIter options_iter = options.iterator();
+                    Variant option = null; // "@*" (new reference)
                     while (options_iter.next("@*", out option)) {
                         Variant parameter = null;
                         assert(option.lookup("param", "@*", out parameter));
-                        assert(option.lookup("label", "s", out label));
+                        assert(option.lookup("label", "&s", out label));
                         stdout.printf("    %s %s - %s\n", name, parameter.print(false), label != "" ? label : "(No label specified.)");
+                        parameter = null;
+                        option = null; // https://gitlab.gnome.org/GNOME/vala/issues/722
                     }
+                    options = null;
                 } else {
                     stdout.printf(" *  %s (%s) - %s\n", name, enabled ? "enabled" : "disabled", label != "" ? label : "(No label specified.)");
                 }
+                action = null; // https://gitlab.gnome.org/GNOME/vala/issues/722
             }
         }
         return 0;

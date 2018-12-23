@@ -90,13 +90,14 @@ public interface Ip4Config : GLib.Object {
         }
 
         VariantIter iter = addresses.iterator();
-        VariantIter iter2 = null;
+        VariantIter? iter2 = null; // "au" (new allocation)
         while (iter.next("au", out iter2)) {
             uint32 ip4 = 0;
             while (iter2.next("u", out ip4)) {
                 result += ip4;
                 break;
             }
+            iter2 = null; // https://gitlab.gnome.org/GNOME/vala/issues/722
         }
         return result.length > 0 ? result : null;
     }

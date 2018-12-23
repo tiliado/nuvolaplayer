@@ -54,13 +54,15 @@ public interface JSExecutor: GLib.Object {
         call_function_sync("Nuvola.core.emit", ref args, false);
         VariantIter iter = args.iterator();
         assert(iter.next("s", null));
-        assert(iter.next("a{smv}", &iter));
-        string dict_key = null;
-        Variant value = null;
-        while (iter.next("{smv}", &dict_key, &value)) {
+        VariantIter? dict = null; // "a{smv}" (new allocation)
+        assert(iter.next("a{smv}", out dict));
+        unowned string dict_key = null; // "&s" (unowned)
+        Variant? value = null; // "mv" (new reference)
+        while (dict.next("{&smv}", out dict_key, out value)) {
             if (dict_key == key) {
-                return value;
+                return (owned) value;
             }
+            value = null; // https://gitlab.gnome.org/GNOME/vala/issues/722
         }
         return null;
     }

@@ -658,18 +658,23 @@ public class WebkitEngine : WebEngine {
             runner_app.show_error("Integration script error", "The web app integration script has not provided a valid response and caused an error: %s".printf(e.message));
             return true;
         }
+
         VariantIter iter = args.iterator();
         assert(iter.next("s", null));
-        assert(iter.next("a{smv}", &iter));
-        string key = null;
-        Variant value = null;
+        VariantIter? dict = null; // "a{smv}" (new allocation)
+        assert(iter.next("a{smv}", out dict));
+        unowned string key = null; // "&s" (unowned)
+        Variant? value = null; // "mv" (new reference)
         bool approved = false;
-        while (iter.next("{smv}", &key, &value)) {
+        while (dict.next("{&smv}", out key, out value)) {
             if (key == "approved") {
                 approved = value != null ? value.get_boolean() : false;
             } else if (key == "newWindow" && value != null) {
                 new_window = value.get_boolean();
+            } else if (key == "url" && value != null) {
+                url = value.get_string();
             }
+            value = null; // https://gitlab.gnome.org/GNOME/vala/issues/722
         }
         return approved;
     }

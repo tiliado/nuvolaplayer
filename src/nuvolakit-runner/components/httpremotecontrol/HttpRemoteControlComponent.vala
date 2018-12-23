@@ -99,10 +99,10 @@ public class Component: Nuvola.Component {
                     critical("Invalid port: %u", port);
                 }
                 return_if_fail(addresses != null);
-                VariantIter iter;
-                string? nm_error;
-                addresses.get("(a(ssb)ms)", out iter, out nm_error);
-                string? address; string? name; bool enabled;
+                VariantIter iter; // "a(ssb)" (new allocation)
+                unowned string? nm_error; // "m&s" (unowned)
+                addresses.get("(a(ssb)m&s)", out iter, out nm_error);
+
                 int line = 0;
                 var label = new Gtk.Label("<b>Security Warning</b>");
                 label.use_markup = true;
@@ -135,7 +135,11 @@ public class Component: Nuvola.Component {
                 spin.halign = Gtk.Align.CENTER;
                 spin.notify["value"].connect_after(on_spin_value_changed);
                 attach(spin, 2, line, 1, 1);
-                while (iter.next("(ssb)", out address, out name, out enabled)) {
+
+                unowned string? address; // "&s" (unowned)
+                unowned string? name; // "&s" (unowned)
+                bool enabled = false; // "b"
+                while (iter.next("(&s&sb)", out address, out name, out enabled)) {
                     line++;
                     label = new Gtk.Label(name);
                     label.hexpand = true;
