@@ -93,11 +93,11 @@ public abstract class Nuvola.Binding<ObjectType>: GLib.Object {
 }
 
 public abstract class Nuvola.ObjectBinding<ObjectType>: Binding<ObjectType> {
-    protected SList<ObjectType> objects;
+    protected Gee.List<ObjectType> objects;
 
     public ObjectBinding(Drt.RpcRouter router, WebWorker web_worker, string name) {
         base(router, web_worker, name);
-        objects = new SList<ObjectType>();
+        objects = new Gee.LinkedList<ObjectType>();
     }
 
     public bool add(GLib.Object object) {
@@ -105,8 +105,8 @@ public abstract class Nuvola.ObjectBinding<ObjectType>: Binding<ObjectType> {
             return false;
         }
 
-        bool was_empty = objects == null;
-        objects.prepend(object);
+        bool was_empty = objects.is_empty;
+        objects.add(object);
         if (was_empty) {
             bind_methods();
             active = true;
@@ -121,7 +121,7 @@ public abstract class Nuvola.ObjectBinding<ObjectType>: Binding<ObjectType> {
         }
 
         objects.remove((ObjectType) object);
-        if (objects == null) {
+        if (objects.is_empty) {
             unbind_methods();
         }
 

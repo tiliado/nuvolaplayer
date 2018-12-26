@@ -28,7 +28,7 @@ namespace Nuvola {
 public class WebView: WebKit.WebView {
     public const double ZOOM_DEFAULT = 1.0;
     public const double ZOOM_STEP = 1.2;
-    private SList<WebWindow> web_windows = null;
+    private Gee.List<WebWindow> web_windows = new Gee.LinkedList<WebWindow>();
 
     public WebView(WebKit.WebContext context) {
         GLib.Object(web_context: context);
@@ -78,7 +78,7 @@ public class WebView: WebKit.WebView {
         var web_view = new WebView(web_context);
         var web_window = new WebWindow(web_view);
         web_window.destroy.connect(on_web_window_destroy);
-        web_windows.prepend(web_window);
+        web_windows.add(web_window);
         return web_view;
     }
 

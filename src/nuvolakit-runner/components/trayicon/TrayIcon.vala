@@ -171,7 +171,7 @@ public class TrayIcon: GLib.Object {
             menu.detach();
         }
 
-        GLib.MenuModel model = actions_reg.build_menu(slist_strings_to_array(model.actions), false, true);
+        GLib.MenuModel model = actions_reg.build_menu(model.actions.to_array(), false, true);
         menu = new Gtk.Menu.from_model(model);
         menu.attach_to_widget(controller.main_window, null);
     }

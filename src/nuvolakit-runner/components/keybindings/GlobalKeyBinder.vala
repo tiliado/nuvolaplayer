@@ -27,7 +27,7 @@ namespace Nuvola {
 public class GlobalKeybinder: GLib.Object {
     public delegate void HandlerFunc(string accelerator, Gdk.Event event);
 
-    private List<Keybinding> keybindings = null;
+    private Gee.List<Keybinding> keybindings = new Gee.LinkedList<Keybinding>();
     private static Gdk.ModifierType[] lock_modifiers = {
         0,
         Gdk.ModifierType.MOD2_MASK, // NUM_LOCK
@@ -62,7 +62,7 @@ public class GlobalKeybinder: GLib.Object {
         }
 
         var keybinding = new Keybinding(accelerator, keycode, modifiers, (owned) handler);
-        keybindings.prepend(keybinding);
+        keybindings.insert(0, keybinding);
         return true;
     }
 
@@ -71,14 +71,11 @@ public class GlobalKeybinder: GLib.Object {
             return false;
         }
 
-        unowned List<Keybinding> iter = keybindings.first();
-        while (iter != null) {
-            unowned List<Keybinding> next = iter.next;
-            unowned Keybinding keybinding = iter.data;
-            if (keybinding.accelerator == accelerator) {
-                keybindings.delete_link(iter);
+        Gee.Iterator<Keybinding> iter = keybindings.iterator();
+        while (iter.next()) {
+            if (iter.get().accelerator == accelerator) {
+                iter.remove();
             }
-            iter = next;
         }
 
         return true;

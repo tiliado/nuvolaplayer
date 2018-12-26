@@ -38,7 +38,7 @@ public class PreferencesDialog : Gtk.Dialog {
     private Gtk.Button help_button;
     private Gtk.Stack stack;
     private Panel main_panel;
-    private SList<Panel> current_panels = null;
+    private Gee.List<Panel> current_panels = new Gee.LinkedList<Panel>();
 
     /**
      * Constructs new main window
@@ -207,7 +207,7 @@ public class PreferencesDialog : Gtk.Dialog {
                 }
             }
         }
-        current_panels.prepend(panel);
+        current_panels.insert(0, panel);
     }
 
     public override bool delete_event(Gdk.EventAny event) {
@@ -215,16 +215,16 @@ public class PreferencesDialog : Gtk.Dialog {
     }
 
     private void on_back_button_clicked() {
-        if (current_panels != null) {
-            current_panels.delete_link(current_panels);
-            assert(current_panels != null);
-            change_panel(current_panels.data, false);
+        if (!current_panels.is_empty) {
+            current_panels.remove_at(0);
+            assert(!current_panels.is_empty);
+            change_panel(current_panels.first(), false);
         }
     }
 
     private void on_help_button_clicked() {
-        if (current_panels != null) {
-            on_open_help(current_panels.data);
+        if (!current_panels.is_empty) {
+            on_open_help(current_panels.first());
         }
     }
 

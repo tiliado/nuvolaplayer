@@ -24,13 +24,13 @@
 
 public class Nuvola.LauncherModel: GLib.Object {
     public string? tooltip {get; set; default = null;}
-    public SList<string> actions {get; owned set; default = null;}
+    public Gee.List<string> actions {get; set; default = new Gee.LinkedList<string>();}
 
     public LauncherModel() {
     }
 
     public void add_action(string name) {
-        actions.append(name);
+        actions.add(name);
     }
 
     public void remove_action(string name) {
@@ -38,6 +38,6 @@ public class Nuvola.LauncherModel: GLib.Object {
     }
 
     public void remove_actions() {
-        actions = null;
+        actions.clear();
     }
 }
