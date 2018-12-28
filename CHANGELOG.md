@@ -7,10 +7,74 @@ Nuvola Apps Changelog
     [Nuvola Devel mailing list](https://groups.google.com/d/forum/nuvola-player-devel)
     to receive more technical announcements and important information about future development.
 
+Release 4.15.0 - December 28th, 2018
+------------------------------------
+
+This is a concise changelog. Refer to [Nuvola News](https://medium.com/nuvola-news) for a more verbose one and to see
+some screenshots.
+
+### What’s New for Users
+
+ * New streaming service: Jamendo (maintained by Jiří Janoušek).
+
+ * Nuvola team now officially supports OpenSUSE Leap 15.0 and Tumbleweed.
+
+ * Client-side decorations are now default. During testing Nuvola with *KDE Plasma* desktop environment, I noticed
+   thick white borders around the Nuvola main window, which are quite ugly
+   [[GitHub ticket](https://github.com/tiliado/nuvolaruntime/issues/486)]. Client-side window decorations don’t suffer
+   from this theming inconsistency issues and are now used by default for that reason. However, you can still change
+   window decorations or theme in Appearance preferences.
+
+ * NPR One release 1.2: The filter of external addresses, which are opened in the user’s default web browser,
+   was adjusted to allow NPR One login pages inside Nuvola
+   [[GitHub ticket](https://github.com/tiliado/nuvolaruntime/issues/481)]. Thanks to *Evan D* for reporting the issue.
+
+  * A broken detection of the presence of **Nvidia GL drivers** was fixed
+    [[GitHub ticket](https://github.com/tiliado/nuvolaruntime/issues/480)]. Thanks to *Artem Hluvchynskyi* for
+    reporting this issue.
+
+  * **A memory corruption**, which was silent unless special run-time memory checks of GNU C library were enabled, was
+    fixed [[GitHub ticket](https://github.com/tiliado/nuvolaruntime/issues/488)]. Thanks to *Frederic Crozat* for
+    reporting the issue. The memory checks are now enabled during the development of Nuvola to avoid similar bugs in
+    future [[GitHub ticket](https://github.com/tiliado/nuvolaruntime/issues/490)].
+
+  * The filter of external addresses was adjusted to allow *Google Sign-In* pages used by *Jamendo*.
+
+  * Various **memory leaks** and invalid memory access issues were fixed in an ongoing effort to improve the quality
+    of Nuvola & Diorite codebase. More details are provided in the *Under the hood section* below.
+
+### What’s New for Script Maintainers
+
+  * Nuvola SDK commands `new-project`and `convert-project`new-project, update modification time of files with zero
+    modification time, which were typically copied from within
+    [Nuvola ADK](https://github.com/tiliado/nuvolaruntime/wiki/Nuvola-App-Developer-Kit)
+    [[GitHub ticket](https://github.com/tiliado/nuvolasdk/issues/10)]. They might pose problems to some software, e.g.
+    [Unison file synchronizer](https://www.cis.upenn.edu/~bcpierce/unison/).
+
+  * Nuvola SDK command `check-project` detects files with zero modification times.
+    [[GitHub ticket](https://github.com/tiliado/nuvolasdk/issues/10)]
+
+### What’s New for Packagers
+
+  * New release: **NPR One 1.2** [[Source code](https://github.com/tiliado/nuvola-app-npr-one)]: The filter of external
+    addresses was adjusted to allow NPR One login pages.
+    [[GitHub ticket](https://github.com/tiliado/nuvolaruntime/issues/481)]
+  * New script: **Jamendo** [[Source code](https://github.com/tiliado/nuvola-app-jamendo)].
+  * Diorite & Nuvola Runtime: New dependency: gee-0.8 >= 0.20.1.
+  * Diorite & Nuvola Runtime: Build errors with Valac 0.43.x were addressed.
+  * Diorite: The code style checker Valalint is run by default unless`--no-vala-lint` is passed.
+  * Diorite & Nuvola Runtime: A few memory leaks and memory corruption issues were fixed.
+
+### Under the hood
+
+The effort to improve documentation, unit tests and the quality of Diorite & Nuvola Runtime codebase continues.
+See the full release announcement for details.
+
 Release 4.14.0 - November 11th, 2018
 ------------------------------------
 
-This is a concise changelog. Refer to [Nuvola News](https://medium.com/nuvola-news) for a more verbose one and to see some screenshots.
+This is a concise changelog. Refer to [Nuvola News](https://medium.com/nuvola-news) for a more verbose one and to see
+some screenshots.
 
 ### What’s New for Users
 
