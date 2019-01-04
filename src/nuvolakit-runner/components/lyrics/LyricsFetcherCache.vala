@@ -76,7 +76,7 @@ public class LyricsFetcherCache : GLib.Object, LyricsFetcher {
      * @param song      song name
      * @param lyrics    lyrics text
      */
-    public async void store(string artist, string song, string lyrics) {
+    public async void store(string artist, string song, owned string lyrics) {
         string fixed_artist = escape_name(artist.down());
         string fixed_song = escape_name(song.down());
 
@@ -86,7 +86,7 @@ public class LyricsFetcherCache : GLib.Object, LyricsFetcher {
 
         try {
             File cached_file = lyrics_cache.get_child(FILE_FORMAT.printf(fixed_artist, fixed_song));
-            yield Drt.System.overwrite_file_async(cached_file, lyrics);
+            yield Drt.System.write_to_file_async(cached_file, (owned) lyrics);
         } catch (GLib.Error e) {
             warning("Unable to store lyrics: %s", e.message);
         }

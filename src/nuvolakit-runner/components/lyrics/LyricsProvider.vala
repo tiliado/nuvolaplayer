@@ -91,7 +91,7 @@ public class LyricsProvider: GLib.Object {
                 string lyrics = yield fetcher.fetch_lyrics(artist, song);
                 lyrics_available(artist, song, lyrics);
                 if (cache != null && fetcher != cache) {
-                    yield cache.store(artist, song, lyrics);
+                    yield cache.store(artist, song, (owned) lyrics);
                 }
                 return;
             } catch (GLib.Error e) {
