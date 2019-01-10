@@ -17,7 +17,7 @@ jobs:
               'pkgconfig(libnotify)' 'pkgconfig(libsoup-2.4)' 'pkgconfig(libsecret-1)' \
               'pkgconfig(uuid)' 'pkgconfig(webkit2gtk-4.0)' 'pkgconfig(sqlite3)' \
               'pkgconfig(libarchive)' 'pkgconfig(libpulse)' libappstream-glib \
-              'pkgconfig(gee-0.8)' \
+              'pkgconfig(gee-0.8)' git autoconf-archive \
               xorg-x11-util-macros libdrm-devel patch \
               'pkgconfig(x11)' 'pkgconfig(xext)' 'pkgconfig(xextproto)' \
               nodejs npm
@@ -31,6 +31,18 @@ jobs:
             cd ..
             rm -rf libdri2
             npm install standard --global
+      - run:
+          name: Download Vala
+          command: |
+            git clone https://gitlab.gnome.org/GNOME/vala.git
+      - run:
+          name: Build Vala
+          working_directory: ~/workdir/vala
+          command: |
+            ./autogen.sh --prefix=/usr
+            make all
+            dnf remove -y vala valadoc
+            make install
       - run:
           name: Install Valalint
           command: |
