@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2018 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2019 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,14 +25,14 @@
 namespace Nuvola {
 
 public class AudioScrobblerComponent: Component {
-    private const int SCROBBLE_SONG_DELAY = 60;
+    private const int SCROBBLE_SONG_DELAY = 20;
 
     private Bindings bindings;
     private Drtgtk.Application app;
     private Soup.Session connection;
     private unowned Drt.KeyValueStorage config;
     private unowned Drt.KeyValueStorage global_config;
-    private AudioScrobbler? scrobbler = null;
+    private AudioScrobbler[]? scrobblers = null;
     private MediaPlayerModel? player = null;
     private uint scrobble_timeout = 0;
     private string? scrobble_title = null;
@@ -55,46 +55,51 @@ public class AudioScrobblerComponent: Component {
     }
 
     public override Gtk.Widget? get_settings() {
-        if (scrobbler == null) {
+        if (scrobblers == null || scrobblers.length == 0) {
             return null;
         }
 
         var grid = new Gtk.Grid();
         grid.orientation = Gtk.Orientation.VERTICAL;
-        var label = new Gtk.Label(Markup.printf_escaped("<b>%s</b>", scrobbler.name));
-        label.use_markup = true;
-        label.vexpand = false;
-        label.hexpand = true;
-        grid.add(label);
-        Gtk.Widget? widget = scrobbler.get_settings(app);
-        if (widget != null) {
-            grid.add(widget);
+        foreach (unowned AudioScrobbler scrobbler in scrobblers) {
+            var label = new Gtk.Label(Markup.printf_escaped("<b>%s</b>", scrobbler.name));
+            label.use_markup = true;
+            label.vexpand = false;
+            label.hexpand = true;
+            grid.add(label);
+            Gtk.Widget? widget = scrobbler.get_settings(app);
+            if (widget != null) {
+                grid.add(widget);
+            }
         }
         grid.show_all();
         return grid;
     }
 
     protected override bool activate() {
-        var scrobbler = new LastfmScrobbler(connection);
-        this.scrobbler = scrobbler;
-        string base_key = "component.%s.%s.".printf(id, scrobbler.id);
-        config.bind_object_property(base_key, scrobbler, "scrobbling_enabled").set_default(true).update_property();
-        global_config.bind_object_property(base_key, scrobbler, "session").update_property();
-        global_config.bind_object_property(base_key, scrobbler, "username").update_property();
-
-        if (scrobbler.has_session) {
-            scrobbler.retrieve_username.begin();
-        }
         player = bindings.get_model<MediaPlayerModel>();
         player.set_track_info.connect(on_set_track_info);
-        scrobbler.notify.connect_after(on_scrobbler_notify);
+        scrobblers = {new LastfmScrobbler(connection)};
+        foreach (unowned AudioScrobbler scrobbler in scrobblers) {
+            string base_key = "component.%s.%s.".printf(id, scrobbler.id);
+            config.bind_object_property(base_key, scrobbler, "scrobbling_enabled").set_default(true).update_property();
+            global_config.bind_object_property(base_key, scrobbler, "session").update_property();
+            global_config.bind_object_property(base_key, scrobbler, "username").update_property();
+            var lastfm_compatible = scrobbler as LastfmCompatibleScrobbler;
+            if (lastfm_compatible != null && lastfm_compatible.has_session) {
+                lastfm_compatible.retrieve_username.begin();
+            }
+            scrobbler.notify.connect_after(on_scrobbler_notify);
+        }
         on_set_track_info(player.title, player.artist, player.album, player.state);
         return true;
     }
 
     protected override bool deactivate() {
-        scrobbler.notify.disconnect(on_scrobbler_notify);
-        scrobbler = null;
+        foreach (unowned AudioScrobbler scrobbler in scrobblers) {
+            scrobbler.notify.disconnect(on_scrobbler_notify);
+        }
+        scrobblers = null;
         player.set_track_info.disconnect(on_set_track_info);
         player = null;
         cancel_scrobbling();
@@ -158,20 +163,24 @@ public class AudioScrobblerComponent: Component {
 
         track_info_cb_id = Timeout.add_seconds(1, () => {
             track_info_cb_id = 0;
-            if (scrobbler == null) {
+            if (scrobblers == null) {
                 // Scrobbling had been disabled before this callback was dispatched.
                 return false;
             }
-            if (scrobbler.can_update_now_playing) {
-                if (title != null && artist != null && state == "playing" ) {
-                    scrobbler.update_now_playing.begin(title, artist, on_update_now_playing_done);
+            foreach (unowned AudioScrobbler scrobbler in scrobblers) {
+                if (scrobbler.can_update_now_playing) {
+                    if (title != null && artist != null && state == "playing" ) {
+                        scrobbler.update_now_playing.begin(title, artist, on_update_now_playing_done);
+                    }
                 }
             }
 
             cancel_scrobbling();
 
-            if (scrobbler.can_scrobble) {
-                schedule_scrobbling(title, artist, album, state);
+            foreach (unowned AudioScrobbler scrobbler in scrobblers) {
+                if (scrobbler.can_scrobble) {
+                    schedule_scrobbling(title, artist, album, state);
+                }
             }
             return false;
         });
@@ -193,11 +202,13 @@ public class AudioScrobblerComponent: Component {
 
     private bool scrobble_cb() {
         scrobble_timeout = 0;
-        if (scrobbler.can_scrobble) {
-            scrobbled = true;
-            var datetime = new DateTime.now_utc();
-            scrobbler.scrobble_track.begin(
-                scrobble_title, scrobble_artist, scrobble_album, datetime.to_unix(), on_scrobble_track_done);
+        foreach (unowned AudioScrobbler scrobbler in scrobblers) {
+            if (scrobbler.can_scrobble) {
+                scrobbled = true;
+                var datetime = new DateTime.now_utc();
+                scrobbler.scrobble_track.begin(
+                    scrobble_title, scrobble_artist, scrobble_album, datetime.to_unix(), on_scrobble_track_done);
+            }
         }
         return false;
     }
