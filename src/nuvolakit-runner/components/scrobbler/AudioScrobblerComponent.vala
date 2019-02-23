@@ -43,7 +43,9 @@ public class AudioScrobblerComponent: Component {
 
     public AudioScrobblerComponent(
         Drtgtk.Application app, Bindings bindings, Drt.KeyValueStorage? global_config, Drt.KeyValueStorage config, Soup.Session connection) {
-        base(config, "scrobbler", "Audio Scrobbling", "Integration with an audio scrobbling service - Last FM.", "scrobbling");
+        base(
+            config, "scrobbler", "Audio Scrobbling",
+            "Integration with audio scrobbling services - Last FM and Libre FM.", "scrobbling");
         this.required_membership = TiliadoMembership.BASIC;
         this.bindings = bindings;
         this.app = app;
@@ -79,7 +81,7 @@ public class AudioScrobblerComponent: Component {
     protected override bool activate() {
         player = bindings.get_model<MediaPlayerModel>();
         player.set_track_info.connect(on_set_track_info);
-        scrobblers = {new LastfmScrobbler(connection)};
+        scrobblers = {new LastfmScrobbler(connection), new LibrefmScrobbler(connection)};
         foreach (unowned AudioScrobbler scrobbler in scrobblers) {
             string base_key = "component.%s.%s.".printf(id, scrobbler.id);
             config.bind_object_property(base_key, scrobbler, "scrobbling_enabled").set_default(true).update_property();

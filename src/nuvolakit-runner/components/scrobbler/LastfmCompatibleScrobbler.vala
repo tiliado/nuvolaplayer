@@ -30,12 +30,12 @@ public class LastfmCompatibleScrobbler: AudioScrobbler {
 
     public string? session {get; protected set; default = null;}
     public override bool has_session { get { return session != null; }}
-    private Soup.Session connection;
-    private string api_key;
-    private string api_secret;
-    private string api_root;
-    private string auth_endpoint;
-    private string? token = null;
+    protected Soup.Session connection;
+    protected string api_key;
+    protected string api_secret;
+    protected string api_root;
+    protected string auth_endpoint;
+    protected string? token = null;
 
     public LastfmCompatibleScrobbler(
         Soup.Session connection, string id,

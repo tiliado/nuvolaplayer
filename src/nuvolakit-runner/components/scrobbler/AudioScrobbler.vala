@@ -33,7 +33,9 @@ public errordomain AudioScrobblerError {
     LASTFM_ERROR,
     WRONG_RESPONSE,
     NO_SESSION,
-    RETRY
+    RETRY,
+    BANNED,
+    BAD_TIME
 }
 
 
