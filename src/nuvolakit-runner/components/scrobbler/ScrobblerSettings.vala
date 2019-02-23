@@ -33,6 +33,7 @@ public class ScrobblerSettings: Gtk.Grid {
         Object(orientation: Gtk.Orientation.VERTICAL, column_spacing: 10, row_spacing: 10);
         this.scrobbler = scrobbler;
         this.app = app;
+        hexpand = true;
 
         var row = 2;
         checkbox = new Gtk.Switch();
