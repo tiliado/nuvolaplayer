@@ -30,7 +30,7 @@ public class PatronBox : Gtk.Grid {
         row_spacing = 20;
         hexpand = vexpand = false;
         valign = halign = Gtk.Align.CENTER;
-        string?[] patrons = {
+        (unowned string?)[] patrons = {
             "Andrew Azores", null,
             "Christian Dannie Storgaard", null,
             "José Antonio Rey", "https://google.com/+JoséAntonioRey",
@@ -42,7 +42,6 @@ public class PatronBox : Gtk.Grid {
             "Balázs", null,
             "Denton Davenport", null,
             "Ben MacLeod", null,
-            "Duco van Amstel", null,
             "David Wiczer", null,
             "Andrew Allen", null,
             "Nathan Warkentin", "https://www.facebook.com/fur0n",
