@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2018 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2019 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,11 +25,11 @@
 namespace Nuvola {
 
 public class ScrobblerSettings: Gtk.Grid {
-    private LastfmCompatibleScrobbler scrobbler;
+    private AudioScrobbler scrobbler;
     private unowned Drtgtk.Application app;
     private Gtk.Switch checkbox;
 
-    public ScrobblerSettings(LastfmCompatibleScrobbler scrobbler, Drtgtk.Application app) {
+    public ScrobblerSettings(AudioScrobbler scrobbler, Drtgtk.Application app) {
         Object(orientation: Gtk.Orientation.VERTICAL, column_spacing: 10, row_spacing: 10);
         this.scrobbler = scrobbler;
         this.app = app;

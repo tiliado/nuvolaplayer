@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2018 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2019 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -29,8 +29,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler {
     public const string HTTP_POST = "POST";
 
     public string? session {get; protected set; default = null;}
-    public bool has_session { get { return session != null; }}
-    public string? username { get; protected set; default = null;}
+    public override bool has_session { get { return session != null; }}
     private Soup.Session connection;
     private string api_key;
     private string api_secret;
@@ -63,7 +62,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler {
      * @return authorization URL
      * @throws AudioScrobblerError on failure
      */
-    public async string request_authorization() throws AudioScrobblerError {
+    public override async string request_authorization() throws AudioScrobblerError {
         // http://www.last.fm/api/show/auth.getToken
         const string API_METHOD = "auth.getToken";
         var params = new HashTable<string, string>(str_hash, str_equal);
@@ -90,7 +89,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler {
      *
      * @throws AudioScrobblerError on failure
      */
-    public async void finish_authorization() throws AudioScrobblerError {
+    public override async void finish_authorization() throws AudioScrobblerError {
         // http://www.last.fm/api/show/auth.getSession
         const string API_METHOD = "auth.getSession";
         var params = new HashTable<string, string>(str_hash, str_equal);
@@ -124,12 +123,12 @@ public class LastfmCompatibleScrobbler: AudioScrobbler {
         token = null;
     }
 
-    public void drop_session() {
+    public override void drop_session() {
         session = null;
         username = null;
     }
 
-    public async void retrieve_username() throws AudioScrobblerError {
+    public override async void retrieve_username() throws AudioScrobblerError {
         const string API_METHOD = "user.getInfo";
         if (session == null) {
             throw new AudioScrobblerError.NO_SESSION("%s %s: There is no authorized session.", id, API_METHOD);

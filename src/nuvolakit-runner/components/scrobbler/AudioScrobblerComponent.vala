@@ -85,10 +85,7 @@ public class AudioScrobblerComponent: Component {
             config.bind_object_property(base_key, scrobbler, "scrobbling_enabled").set_default(true).update_property();
             global_config.bind_object_property(base_key, scrobbler, "session").update_property();
             global_config.bind_object_property(base_key, scrobbler, "username").update_property();
-            var lastfm_compatible = scrobbler as LastfmCompatibleScrobbler;
-            if (lastfm_compatible != null && lastfm_compatible.has_session) {
-                lastfm_compatible.retrieve_username.begin();
-            }
+            scrobbler.retrieve_username.begin();
             scrobbler.notify.connect_after(on_scrobbler_notify);
         }
         on_set_track_info(player.title, player.artist, player.album, player.state);
