@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2018 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2019 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -45,6 +45,7 @@ public class ComponentsManager : PreferencesDialog.SelectorGroup {
             tier_widget.show();
             extra_widget = tier_widget;
             membership_widget = new UpgradeRequiredWidget(paywall);
+            membership_widget.paywall_widget.close.connect(on_paywall_widget_closed);
             paywall.notify.connect_after(on_membership_changed);
         }
     }
@@ -120,8 +121,13 @@ public class ComponentsManager : PreferencesDialog.SelectorGroup {
         switch (param.name) {
         case "tier":
             refresh();
+            panel_closed();
             break;
         }
+    }
+
+    private void on_paywall_widget_closed(TiliadoPaywallWidget paywall_widget) {
+        panel_closed();
     }
 
     private class Panel : PreferencesDialog.Panel {

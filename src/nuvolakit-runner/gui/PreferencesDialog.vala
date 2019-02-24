@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2018 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2019 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -77,7 +77,7 @@ public class PreferencesDialog : Gtk.Dialog {
         title_bar.show();
         back_button = new Gtk.Button.from_icon_name("go-previous-symbolic");
         back_button.no_show_all = true;
-        back_button.clicked.connect(on_back_button_clicked);
+        back_button.clicked.connect(go_back);
         help_button = new Gtk.Button.from_icon_name("system-help-symbolic");
         help_button.no_show_all = true;
         help_button.clicked.connect(on_help_button_clicked);
@@ -144,6 +144,7 @@ public class PreferencesDialog : Gtk.Dialog {
         grid.row_spacing = 10;
 
         foreach (unowned SelectorGroup group in groups) {
+            group.panel_closed.connect(go_back);
             unowned string? title = group.title;
             if (title != null) {
                 Gtk.Label label = Drtgtk.Labels.markup("<b>%s</b>", title);
@@ -166,7 +167,6 @@ public class PreferencesDialog : Gtk.Dialog {
 
         if (components_manager.tier_widget != null) {
             components_manager.tier_widget.show_paywall.connect(on_show_paywall);
-            components_manager.membership_widget.tier_widget.show_paywall.connect(on_show_paywall);
         }
     }
 
@@ -214,7 +214,7 @@ public class PreferencesDialog : Gtk.Dialog {
         return false;
     }
 
-    private void on_back_button_clicked() {
+    private void go_back() {
         if (!current_panels.is_empty) {
             current_panels.remove_at(0);
             assert(!current_panels.is_empty);
@@ -363,6 +363,8 @@ public class PreferencesDialog : Gtk.Dialog {
         public string? title;
         public Gtk.Widget? extra_widget = null;
         public SList<Panel> panels;
+
+        public signal void panel_closed();
 
         public SelectorGroup(owned string? title=null, owned SList<Panel>? panels=null) {
             this.title = (owned) title;
@@ -549,19 +551,28 @@ public class PreferencesDialog : Gtk.Dialog {
 }
 
 public class UpgradeRequiredWidget : Gtk.Grid {
-    public unowned TiliadoTierWidget tier_widget;
+    public unowned TiliadoPaywallWidget paywall_widget;
     private Gtk.Label label;
 
     public UpgradeRequiredWidget(TiliadoPaywall paywall) {
         orientation = Gtk.Orientation.VERTICAL;
-        label = Drtgtk.Labels.markup("This feature is not available in <b>Free Tier</b>");
+        label = Drtgtk.Labels.markup("This feature is <b>not available in the free tier</b>. A purchase is required.");
+        label.hexpand = true;
         label.halign = Gtk.Align.CENTER;
         label.show();
-        add(label);
-        var tier_widget = new TiliadoTierWidget(paywall);
-        this.tier_widget = tier_widget;
-        tier_widget.show();
-        add(tier_widget);
+
+        var info_bar = new Gtk.InfoBar();
+        info_bar.message_type = Gtk.MessageType.INFO;
+        info_bar.get_content_area().add(label);
+        add(info_bar);
+        info_bar.show_all();
+
+        var paywall_widget = new TiliadoPaywallWidget(paywall);
+        paywall_widget.hexpand = false;
+        paywall_widget.halign = Gtk.Align.CENTER;
+        paywall_widget.show();
+        add(paywall_widget);
+        this.paywall_widget = paywall_widget;
     }
 }
 
