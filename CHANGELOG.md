@@ -7,6 +7,62 @@ Nuvola Apps Changelog
     [Nuvola Devel mailing list](https://groups.google.com/d/forum/nuvola-player-devel)
     to receive more technical announcements and important information about future development.
 
+Release 4.16.0 - February 24th, 2019
+------------------------------------
+
+This is a concise changelog. Refer to [Nuvola News](https://medium.com/nuvola-news) for a more verbose one and to see
+some screenshots.
+
+### What’s New for Users
+
+  * **Libre.fm Scrobbling Reintroduced:** [Libre.fm](https://libre.fm/) is a free/open-source alternative to
+    [Last.fm](https://www.last.fm/) scrobbling service. Libre.fm which was supported by Nuvola 2 until it broke and was
+    not included in Nuvola 3 for that reason. It was now fixed and reintroduced
+    [[GitHub ticket](https://github.com/tiliado/nuvolaruntime/issues/17)].
+
+  * **New Adwaita Theme:** The GNOME Runtime used by Nuvola updated GTK+ to version 3.24.5, which comes with new Adwaita
+    theme: [GTK+ Development Blog — Theme changes in GTK 3](https://blog.gtk.org/2019/01/14/theme-changes-in-gtk-3/),
+    [GTK+ Development Blog — Theme changes, revisited](https://blog.gtk.org/2019/01/21/theme-changes-revisited/).
+
+  * **New streaming service:** Ivoox (maintained by Jiří Janoušek)
+
+  * **Deezer 3.2:** The play/pause action in Deezer Podcasts was fixed.
+    [[GitHub ticket](https://github.com/tiliado/nuvolaruntime/issues/495)]
+
+  * **Pocket Casts 1.3:** Adjusted to the switch of the stable web player interface: The beta version of the new player
+    interface, previously used only for *playbeta.pocketcasts.com*, has become the new stable interface for
+    *play.pocketcasts.com*. [GitHub ticket]
+
+  * **Amazon Cloud Player 5.9:** Widevine is used instead of the Flash plugin. This also fixes the warning “Chrome
+    version soon not supported anymore”. [[GitHub ticket 1](https://github.com/tiliado/nuvolaruntime/issues/497),
+    [ticket 2](https://github.com/tiliado/nuvola-app-amazon-cloud-player/issues/33)]
+
+  * **Jupiter Broadcasting 1.4:** Add *chooselinux.show* site support. Fix volume controls for non-YouTube media.
+
+  * Crash when opening Preferences was fixed[[GitHub ticket](https://github.com/tiliado/nuvolaruntime/issues/493)].
+  * Chromium updated to 71.0.3578.80 and then to 73.0.3683.27.
+  * The quest to improve the quality of Nuvola & Diorite codebase continues.
+
+### What’s New for Script Maintainers
+
+There are no changes that should concern script maintainers.
+
+### What’s New for Packagers
+
+  * **New script: **Ivoox ([source code](https://github.com/tiliado/nuvola-app-ivoox)).
+  * **Updated scripts:** Deezer 3.2 ([Source code](https://nuvola.tiliado.eu/app/deezer/)),
+    Pocket Casts 1.3 ([Source code](https://github.com/tiliado/nuvola-app-pocket-casts)),
+    Amazon Cloud Player 5.9 ([Source code](https://github.com/tiliado/nuvola-app-amazon-cloud-player)),
+    Jupiter Broadcasting 1.4 ([Source code](https://github.com/tiliado/nuvola-app-jupiter-broadcasting)).
+  * **Nuvola, Diorite:** Vala 0.44.x is recommended as it fixes some memory leaks.
+  * **Diorite:** Valadoc is now run with `--fatal-warnings`. This requires Vala 0.44.x but can be disabled with
+    `./waf configure — no-strict`.
+  * **Diorite:** Fixed bug — Don’t pass null to VariantUtils.to_strv
+    [[GitHub ticket](https://github.com/tiliado/nuvolaruntime/issues/493)]
+  * **Diorite:** Refactoring continues, test cases and documentation are improved. Asynchronous tests were fixed.
+    Various C warnings were fixed and marked as fatal to be caught in the future. Several classes/methods were dropped
+    or renamed, see changelog for details.
+
 Release 4.15.0 - December 28th, 2018
 ------------------------------------
 
