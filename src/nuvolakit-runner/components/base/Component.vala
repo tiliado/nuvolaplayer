@@ -40,7 +40,7 @@ public abstract class Component: GLib.Object {
     public bool auto_activate {get; protected set; default = true;}
     public bool has_settings {get; protected set; default = false;}
     public bool available {get; protected set; default = true;}
-    public TiliadoMembership required_membership {get; protected set; default = TiliadoMembership.NONE;}
+    public bool premium {get; protected set; default = false;}
     protected Drt.KeyValueStorage config;
 
     public Component(Drt.KeyValueStorage config, string id, string name, string description, string? help_page) {
@@ -69,8 +69,7 @@ public abstract class Component: GLib.Object {
     }
 
     public bool is_membership_ok(TiliadoPaywall? paywall) {
-        return (required_membership == TiliadoMembership.NONE
-        || paywall == null || paywall.has_tier(required_membership));
+        return !premium || paywall == null || paywall.has_tier(TiliadoMembership.BASIC);
     }
 
     public virtual void toggle(bool enabled) {

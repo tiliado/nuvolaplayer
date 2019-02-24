@@ -35,7 +35,7 @@ public class Component: Nuvola.Component {
         base(
             config, "httpremotecontrol", "Remote control over HTTP (experimental)",
             "Remote media player HTTP interface for control over network.", "http_control");
-        this.required_membership = TiliadoMembership.PREMIUM;
+        this.premium = true;
         this.has_settings = true;
         this.enabled_by_default = false;
         #if EXPERIMENTAL

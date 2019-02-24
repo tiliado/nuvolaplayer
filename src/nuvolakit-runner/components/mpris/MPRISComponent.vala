@@ -34,7 +34,7 @@ public class MPRISComponent: Component {
             config, "mpris", "Media Player DBus Interface",
             "Implementation of Media Player Remote Interface Specification (MPRIS 2) used by various applets.",
             "mpris");
-        this.required_membership = TiliadoMembership.BASIC;
+        this.premium = true;
         this.bindings = bindings;
         this.app = app;
         auto_activate = false;

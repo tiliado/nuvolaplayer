@@ -46,7 +46,7 @@ public class AudioScrobblerComponent: Component {
         base(
             config, "scrobbler", "Audio Scrobbling",
             "Integration with audio scrobbling services - Last FM and Libre FM.", "scrobbling");
-        this.required_membership = TiliadoMembership.BASIC;
+        this.premium = true;
         this.bindings = bindings;
         this.app = app;
         this.global_config = global_config ?? config;

@@ -88,7 +88,7 @@ public class ComponentsManager : PreferencesDialog.SelectorGroup {
     public Gtk.Widget? get_alert_widget(Component component) {
         Gtk.Widget? widget = null;
         if (!is_component_membership_ok(component)) {
-            widget = membership_widget.change_component(component);
+            widget = membership_widget;
         } else if (!is_component_available(component)) {
             widget = create_component_not_available_widget(component);
         }

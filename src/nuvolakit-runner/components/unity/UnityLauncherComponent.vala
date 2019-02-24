@@ -37,7 +37,7 @@ public class UnityLauncherComponent: Component {
             config, "unity_launcher", "Extra Dock Actions",
             "Adds extra actions to the menu of the application icon in Unity Launcher or elementaryOS dock.", "docks");
         #if UNITY
-        this.required_membership = TiliadoMembership.BASIC;
+        this.premium = true;
         this.bindings = bindings;
         this.app = app;
         #else

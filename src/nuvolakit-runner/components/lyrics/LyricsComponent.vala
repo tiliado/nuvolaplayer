@@ -31,7 +31,7 @@ public class LyricsComponent: Component {
 
     public LyricsComponent(AppRunnerController app, Bindings bindings, Drt.KeyValueStorage config) {
         base(config, "lyrics", "Lyrics", "Shows lyrics for the current song.", "lyrics");
-        this.required_membership = TiliadoMembership.BASIC;
+        this.premium = true;
         this.bindings = bindings;
         this.app = app;
         auto_activate = false;

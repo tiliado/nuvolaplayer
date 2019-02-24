@@ -554,7 +554,7 @@ public class UpgradeRequiredWidget : Gtk.Grid {
 
     public UpgradeRequiredWidget(TiliadoPaywall paywall) {
         orientation = Gtk.Orientation.VERTICAL;
-        label = Drtgtk.Labels.markup("");
+        label = Drtgtk.Labels.markup("This feature is not available in <b>Free Tier</b>");
         label.halign = Gtk.Align.CENTER;
         label.show();
         add(label);
@@ -562,12 +562,6 @@ public class UpgradeRequiredWidget : Gtk.Grid {
         this.tier_widget = tier_widget;
         tier_widget.show();
         add(tier_widget);
-    }
-
-    public UpgradeRequiredWidget change_component(Component component) {
-        label.set_markup(Markup.printf_escaped(
-            "This feature reguires <b>%s</b> Tier.", component.required_membership.get_label()));
-        return this;
     }
 }
 
