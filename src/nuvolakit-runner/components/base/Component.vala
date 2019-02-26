@@ -129,14 +129,16 @@ public abstract class Component: GLib.Object {
         }
         bool result = false;
         if (this.active != active) {
+            // FIXME: This is a workaround for weird double activation.
+            this.active = active;
             message("%s: %s %s", active ? "Activate" : "Deactivate", id, name);
             result = active ? activate() : deactivate();
             if (!result) {
                 warning("Failed to %s: %s %s", active ? "activate" : "deactivate", id, name);
             }
         }
-        if (result) {
-            this.active = active;
+        if (!result) {
+            this.active = !active;
         }
         return result;
     }
