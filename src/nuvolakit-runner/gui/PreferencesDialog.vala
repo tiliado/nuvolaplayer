@@ -215,7 +215,7 @@ public class PreferencesDialog : Gtk.Dialog {
     }
 
     private void go_back() {
-        if (!current_panels.is_empty) {
+        if (current_panels.size > 1) {
             current_panels.remove_at(0);
             assert(!current_panels.is_empty);
             change_panel(current_panels.first(), false);
