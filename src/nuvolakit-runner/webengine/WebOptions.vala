@@ -33,7 +33,7 @@ public abstract class WebOptions : GLib.Object {
     public Connection? connection {get; construct;}
     public abstract VersionTuple engine_version {get; protected set;}
 
-    public WebOptions(WebAppStorage storage, Connection? connection) {
+    protected WebOptions(WebAppStorage storage, Connection? connection) {
         GLib.Object(storage: storage, connection: connection);
     }
 

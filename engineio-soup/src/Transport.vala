@@ -39,7 +39,7 @@ public abstract class Transport: GLib.Object {
     public ReadyState ready_state {get; protected set; default = ReadyState.OPEN;}
     public bool supports_binary {get; set; default = false;}
 
-    public Transport(Request request) {
+    protected Transport(Request request) {
     }
 
     public void send_one(Packet packet) {

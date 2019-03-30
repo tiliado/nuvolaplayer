@@ -27,7 +27,7 @@ namespace Nuvola {
 public abstract class MainLoopAdaptor {
     private MainLoopAdaptor? replacement = null;
 
-    public MainLoopAdaptor() {
+    protected MainLoopAdaptor() {
     }
 
     public abstract void run();

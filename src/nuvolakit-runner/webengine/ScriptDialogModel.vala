@@ -39,7 +39,7 @@ public abstract class ScriptDialogModel : GLib.Object {
     public bool result {get; set; default = false;}
     public bool handled {get; set; default = false;}
 
-    public ScriptDialogModel(
+    protected ScriptDialogModel(
         ScriptDialogType type, string? url, string? message, string? user_input = null, Gdk.Pixbuf? snapshot=null
     ) {
         this.dialog_type = type;

@@ -1,0 +1,11 @@
+--- /usr/share/vala/vapi/libsoup-2.4.vapi	1970-01-01 01:00:00.000000000 +0100
++++ vapi/libsoup-2.4.vapi	2019-03-30 12:21:05.818140720 +0100
+@@ -148,7 +148,7 @@
+ 	[CCode (cheader_filename = "libsoup/soup.h", type_id = "soup_auth_get_type ()")]
+ 	public abstract class Auth : GLib.Object {
+ 		[CCode (has_construct_function = false)]
+-		public Auth (GLib.Type type, Soup.Message msg, string auth_header);
++		protected Auth (GLib.Type type, Soup.Message msg, string auth_header);
+ 		public virtual void authenticate (string username, string password);
+ 		[Version (since = "2.54")]
+ 		public virtual bool can_authenticate ();

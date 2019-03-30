@@ -36,7 +36,7 @@ public abstract class AppRunner : GLib.Object {
         gdb = Environment.get_variable("NUVOLA_APP_RUNNER_GDB_SERVER") != null;
     }
 
-    public AppRunner(string app_id, string api_token) throws GLib.Error {
+    protected AppRunner(string app_id, string api_token) throws GLib.Error {
         this.app_id = app_id;
         this.capatibilities = new GenericSet<string>(str_hash, str_equal);
     }

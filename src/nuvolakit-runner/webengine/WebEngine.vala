@@ -35,7 +35,7 @@ public abstract class WebEngine : GLib.Object, JSExecutor {
     public bool is_loading { get; protected set; default = false;}
     public WebWorker web_worker {get; protected set;}
 
-    public WebEngine(WebOptions options, WebApp web_app) {
+    protected WebEngine(WebOptions options, WebApp web_app) {
         GLib.Object(options: options, storage: options.storage, web_app: web_app);
     }
 

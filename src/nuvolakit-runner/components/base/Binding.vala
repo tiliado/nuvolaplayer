@@ -33,7 +33,7 @@ public abstract class Nuvola.Binding<ObjectType>: GLib.Object {
     protected WebWorker web_worker;
     private SList<string> handlers = null;
 
-    public Binding(Drt.RpcRouter router, WebWorker web_worker, string name) {
+    protected Binding(Drt.RpcRouter router, WebWorker web_worker, string name) {
         GLib.Object(name: name);
         this.web_worker = web_worker;
         this.router = router;
@@ -95,7 +95,7 @@ public abstract class Nuvola.Binding<ObjectType>: GLib.Object {
 public abstract class Nuvola.ObjectBinding<ObjectType>: Binding<ObjectType> {
     protected Gee.List<ObjectType> objects;
 
-    public ObjectBinding(Drt.RpcRouter router, WebWorker web_worker, string name) {
+    protected ObjectBinding(Drt.RpcRouter router, WebWorker web_worker, string name) {
         base(router, web_worker, name);
         objects = new Gee.LinkedList<ObjectType>();
     }
@@ -145,7 +145,7 @@ public abstract class Nuvola.ObjectBinding<ObjectType>: Binding<ObjectType> {
 public abstract class Nuvola.ModelBinding<ModelType>: Binding<ModelType> {
     public ModelType model {get; private set;}
 
-    public ModelBinding(Drt.RpcRouter router, WebWorker web_worker, string name, ModelType model) {
+    protected ModelBinding(Drt.RpcRouter router, WebWorker web_worker, string name, ModelType model) {
         base(router, web_worker, name);
         this.model = model;
         bind_methods();

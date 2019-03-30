@@ -607,9 +607,10 @@ def build(ctx):
         packages += " valacef valacefgtk"
         uselib += " VALACEF VALACEFGTK"
 
-    vapi_to_patch = []
+    vapi_to_patch = ['libsoup-2.4']
     if ctx.env.with_unity:
         vapi_to_patch.append('unity')
+
     for vapi in vapi_to_patch:
         all_vapi_dirs = [path.format(vala=ctx.env.VALAC_SERIES) for path in (
             '/app/share/vala-{vala}/vapi', '/usr/share/vala-{vala}/vapi', '/app/share/vala/vapi', '/usr/share/vala/vapi'

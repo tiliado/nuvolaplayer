@@ -50,7 +50,7 @@ public abstract class PollingTransport: Transport {
         }
     }
 
-    public PollingTransport(Request request) {
+    protected PollingTransport(Request request) {
         base(request);
         this.name = "polling";
         this.close_timeout = 30 * 1000;

@@ -43,7 +43,7 @@ public abstract class Component: GLib.Object {
     public bool premium {get; protected set; default = false;}
     protected Drt.KeyValueStorage config;
 
-    public Component(Drt.KeyValueStorage config, string id, string name, string description, string? help_page) {
+    protected Component(Drt.KeyValueStorage config, string id, string name, string description, string? help_page) {
         GLib.Object(
             id: id, name: name, description: description,
             help_url: create_help_url(help_page));
