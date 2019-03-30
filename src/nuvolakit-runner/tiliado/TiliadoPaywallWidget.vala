@@ -168,17 +168,27 @@ public class TiliadoPaywallWidget : Gtk.Stack {
         if (purchase_options_view == null) {
             Gtk.Widget[] options = new Gtk.Widget[2];
             options[0] = new Gtk.RadioButton.with_label_from_widget(null,
-                "I purchased Nuvola Runtime and received a license key.");
+                "A license key (new purchases).");
             options[1] = new Gtk.RadioButton.with_label_from_widget(
                 options[0] as Gtk.RadioButton,
-                "I haven't received any license key, but my purchase was linked to my Tiliado account.");
+                "A Tiliado account (really old purchases).");
             foreach (unowned Gtk.Widget widget in options) {
                 var label = ((Gtk.Bin) widget).get_child() as Gtk.Label;
                 label.wrap = true;
-                label.max_width_chars = 20;
+                label.max_width_chars = 40;
             }
             purchase_options_view = new View(
-                Drtgtk.Labels.markup("<b>Have you received a license key?</b>"),
+                Drtgtk.Labels.markup(
+                    "<b>When did you purchase Nuvola Runtime?</b>\n\n"
+                    + "<b>September 3rd, 2018, or later:</b>\n\nYou need a <b>license key</b> from "
+                    + "<a href=\"https://www.gumroad.com/library\">your Gumroad library</a> "
+                    + "or your email receipt from Gumroad (it should arrive within a few minutes after the purchase, "
+                    + "please look into the spam folder too). If you cannot find the key, contact "
+                    + "<a href=\"mailto:support@tiliado.eu\">support@tiliado.eu</a>.\n\n"
+                    + "<b>September 2nd, 2018, or earlier:</b>\n\n"
+                    + "Your purchases were linked to your <b>Tiliado account</b>. This is a legacy option for "
+                    + "really old purchases and subscriptions.\n\n"
+                    + "<b>I will continue with:</b>"),
                 {"Continue", "Help", "Cancel"}, 0, (owned) options);
             purchase_options_view.response.connect(on_purchase_options_view_response);
         }
@@ -356,7 +366,12 @@ public class TiliadoPaywallWidget : Gtk.Stack {
     private void enter_license_key() {
         if (license_key_view == null) {
             license_key_view = new View(
-                Drtgtk.Labels.markup("Enter the license key:"),
+                Drtgtk.Labels.markup(
+                    "<b>Enter the license key:</b>\n\nIt can be found in "
+                    + "<a href=\"https://www.gumroad.com/library\">your Gumroad library</a> "
+                    + "or your email receipt from Gumroad (it should arrive within a few minutes after the purchase, "
+                    + "please look into the spam folder too). If you cannot find the key, contact "
+                    + "<a href=\"mailto:support@tiliado.eu\">support@tiliado.eu</a>."),
                 {"Continue", "Help", "Cancel"}, 0, {new Gtk.Entry()});
             license_key_view.response.connect(on_license_key_view_response);
         }
@@ -505,7 +520,7 @@ public class TiliadoPaywallWidget : Gtk.Stack {
                 this.text_label = text_label;
             }
             text_label.no_show_all = true;
-            text_label.max_width_chars = 30;
+            text_label.max_width_chars = 40;
             text_label.justify = Gtk.Justification.FILL;
             attach(text_label, 0, line++, 1, 1);
 
