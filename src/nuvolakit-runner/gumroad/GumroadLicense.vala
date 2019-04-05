@@ -40,8 +40,10 @@ public class GumroadLicense : GLib.Object {
     public string? created_at {get; construct;}
     // Only for subscriptions
     public string? cancelled_at {get; construct;}
+    public bool cancelled {get; construct;}
     // Only for subscriptions
     public string? failed_at {get; construct;}
+    public bool failed {get; construct;}
 
     public GumroadLicense.from_json(Drt.JsonObject? json) {
         string? product_id = null;
@@ -56,7 +58,9 @@ public class GumroadLicense : GLib.Object {
         string? email = null;
         string? created_at = null;
         string? cancelled_at = null;
+        bool cancelled = false;
         string? failed_at = null;
+        bool failed = false;
         if (json != null) {
             success = json.get_bool_or("success", false);
             license_key = json.get_string_or("x_license_key");
@@ -72,24 +76,22 @@ public class GumroadLicense : GLib.Object {
                 created_at = purchase.get_string_or("created_at");
                 // it records cancellation date but not the remaining pre-paid period
                 cancelled_at = purchase.get_string_or("subscription_cancelled_at");
+                cancelled = cancelled_at != null;
                 failed_at = purchase.get_string_or("subscription_failed_at");
-                valid = success && !refunded && !chargebacked && cancelled_at == null && failed_at == null;
+                failed = failed_at != null;
+                valid = success && !refunded && !chargebacked;
             }
         }
         GLib.Object(
             success: success, valid: valid, refunded: refunded, chargebacked: chargebacked,
             id: id, product_id: product_id, product_name: product_name, license_key: license_key,
-            email: email, full_name: full_name,
-            created_at: created_at, cancelled_at: cancelled_at, failed_at: failed_at
+            email: email, full_name: full_name, created_at: created_at,
+            cancelled_at: cancelled_at, cancelled: cancelled, failed_at: failed_at, failed: failed
         );
     }
 
     public GumroadLicense.from_string(string json) throws Drt.JsonError {
         this.from_json(Drt.JsonParser.load_object(json));
-    }
-
-    public bool is_invalid_due_to_cancelled_subscription() {
-        return success && !refunded && !chargebacked && (cancelled_at != null || failed_at != null);
     }
 
     public Drt.JsonBuilder to_json() {

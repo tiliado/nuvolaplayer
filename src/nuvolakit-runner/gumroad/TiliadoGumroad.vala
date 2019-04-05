@@ -95,15 +95,7 @@ public class TiliadoGumroad : GLib.Object {
         if (license == null) {
             return null;
         }
-        bool valid = license.valid;
-        if (!valid && license.is_invalid_due_to_cancelled_subscription()) {
-            try {
-                valid = yield tiliado.is_gumroad_key_still_valid(license_key);
-            } catch (Oauth2Error e) {
-                throw new GumroadError.LICENSE_ERROR(Drt.error_to_string(e));
-            }
-        }
-        return new TiliadoLicense(license, tier, valid);
+        return new TiliadoLicense(license, tier, license.valid);
     }
 
     public void cache_license(TiliadoLicense license) {
