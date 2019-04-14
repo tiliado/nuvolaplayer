@@ -65,7 +65,14 @@ jobs:
             rm -rf valalint
       - run:
           name: Checkout Diorite
-          command: git clone https://github.com/tiliado/diorite.git
+          command: |
+            if [ -z "$(git ls-remote --heads https://github.com/tiliado/diorite.git "$CIRCLE_BRANCH")" ]; then
+              DIORITE_BRANCH="devel"
+            else
+              DIORITE_BRANCH="$CIRCLE_BRANCH"
+            fi
+            echo "Cloning Diorite branch $DIORITE_BRANCH:"
+            git clone https://github.com/tiliado/diorite.git -b "$DIORITE_BRANCH"
       - run:
           name: Build and run tests of Diorite
           working_directory: ~/workdir/diorite
