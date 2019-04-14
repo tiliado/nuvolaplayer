@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # coding: utf-8
 
-# Copyright 2014-2018 Jiří Janoušek <janousek.jiri@gmail.com>
+# Copyright 2014-2019 Jiří Janoušek <janousek.jiri@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met: 

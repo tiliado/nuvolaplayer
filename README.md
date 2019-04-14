@@ -55,6 +55,6 @@ Legal
 
 ### Copyright
 
-  * Copyright 2011-2018 Jiří Janoušek <janousek.jiri@gmail.com> and other Nuvola contributors
+  * Copyright 2011-2019 Jiří Janoušek <janousek.jiri@gmail.com> and other Nuvola contributors
   * Licensed under the [BSD-2-Clause license](./LICENSE)
 
