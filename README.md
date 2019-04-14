@@ -12,7 +12,8 @@ nd more), but progress is being made to support generic web apps (e.g. Google Ca
 
 **Features of Nuvola:** Desktop launchers, integration with media applets (e.g. in GNOME Shell and Ubuntu sound menu),
 Unity launcher quick list actions, lyrics fetching, Last.fm audio scrobbler, tray icon, desktop notifications,
-media keys binding, password manager, remote control over HTTP and more.
+media keys binding, remote control over HTTP and more.
+[Explore all features and the documentation](https://nuvola.tiliado.eu/docs/4/#features).
 
 
 Installation
