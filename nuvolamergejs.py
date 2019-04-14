@@ -4,14 +4,14 @@
 # Copyright 2014-2019 Jiří Janoušek <janousek.jiri@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are met: 
-# 
+# modification, are permitted provided that the following conditions are met:
+#
 # 1. Redistributions of source code must retain the above copyright notice, this
-#    list of conditions and the following disclaimer. 
+#    list of conditions and the following disclaimer.
 # 2. Redistributions in binary form must reproduce the above copyright notice,
 #    this list of conditions and the following disclaimer in the documentation
-#    and/or other materials provided with the distribution. 
-# 
+#    and/or other materials provided with the distribution.
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -27,99 +27,99 @@ import os
 from codecs import open
 
 class Source:
-	def __init__(self, name, path, requires, data):
-		self.path = path
-		self.name = name
-		self.requires = requires
-		self.data = data
-		self.merged = False
-		self.visited = 0
+    def __init__(self, name, path, requires, data):
+        self.path = path
+        self.name = name
+        self.requires = requires
+        self.data = data
+        self.merged = False
+        self.visited = 0
 
 class RecursionError(Exception):
-	def __init__(self, path):
-		Exception.__init__(self, "Maximal recursion depth reached at '%s'." % path)
+    def __init__(self, path):
+        Exception.__init__(self, "Maximal recursion depth reached at '%s'." % path)
 
 class ParseError(Exception):
-	def __init__(self, path, lineno, line):
-		Exception.__init__(self, "Parse error %s:%d %s" % (path, lineno, line))
+    def __init__(self, path, lineno, line):
+        Exception.__init__(self, "Parse error %s:%d %s" % (path, lineno, line))
 
 class NotFoundError(Exception):
-	def __init__(self, path, requirement):
-		Exception.__init__(self, "File '%s' requires dependency '%s' that hasn't been found." % (path, requirement))
+    def __init__(self, path, requirement):
+        Exception.__init__(self, "File '%s' requires dependency '%s' that hasn't been found." % (path, requirement))
 
 def parse_sources(files):
-	sources = {}
-	for path in files:
-		name = os.path.basename(path).rsplit(".", 1)[0]
-		requires = []
-		data = []
-		head = True
-		
-		with open(path, encoding="utf-8") as f:
-			lineno = 0
-			for line in f:
-				bare_line = line.strip()
-				lineno += 1
-				if bare_line and not bare_line.startswith(("/*", "*", "//")):
-					if head:
-						if bare_line.startswith("require("):
-							for q in ('"', "'"):
-								parts = bare_line.split(q)
-								if len(parts) == 3:
-									requires.append(parts[1])
-									break
-							else:
-								raise ParseError(path, lineno, bare_line)
-						else:
-							head = False
-							data.append(line)
-					else:
-						data.append(line)
-		sources[name] = Source(name, path, requires, data)
-	
-	return sources
+    sources = {}
+    for path in files:
+        name = os.path.basename(path).rsplit(".", 1)[0]
+        requires = []
+        data = []
+        head = True
+
+        with open(path, encoding="utf-8") as f:
+            lineno = 0
+            for line in f:
+                bare_line = line.strip()
+                lineno += 1
+                if bare_line and not bare_line.startswith(("/*", "*", "//")):
+                    if head:
+                        if bare_line.startswith("require("):
+                            for q in ('"', "'"):
+                                parts = bare_line.split(q)
+                                if len(parts) == 3:
+                                    requires.append(parts[1])
+                                    break
+                            else:
+                                raise ParseError(path, lineno, bare_line)
+                        else:
+                            head = False
+                            data.append(line)
+                    else:
+                        data.append(line)
+        sources[name] = Source(name, path, requires, data)
+
+    return sources
 
 def add_source(output, sources, source):
-	source.visited += 1
-	if source.visited > 25:
-		raise RecursionError(source.path)
-	
-	if not source.merged:
-		for dep_name in source.requires:
-			dep_source = sources.get(dep_name)
-			
-			if not dep_source:
-				raise NotFoundError(source.path, dep_name)
-			
-			add_source(output, sources, dep_source)
-	
-	if not source.merged:
-		output.append("// Included file '%s'\n" % source.path)
-		output.extend(source.data)
-		source.merged = True
+    source.visited += 1
+    if source.visited > 25:
+        raise RecursionError(source.path)
+
+    if not source.merged:
+        for dep_name in source.requires:
+            dep_source = sources.get(dep_name)
+
+            if not dep_source:
+                raise NotFoundError(source.path, dep_name)
+
+            add_source(output, sources, dep_source)
+
+    if not source.merged:
+        output.append("// Included file '%s'\n" % source.path)
+        output.extend(source.data)
+        source.merged = True
 
 def merge_sources(sources, main):
-	output = [
-		"var global = (function (){return (function(){return this;}).call(null);})();\n",
-		"(function(Nuvola)\n{\n    'use strict';\n"]
-	
-	main = sources.get(main)
-	if main:
-		add_source(output, sources, main)
-	
-	for source in sources.values():
-		add_source(output, sources, source)
-	
-	output.append("})(this);  // function(Nuvola)\n")
-	return "".join(output)
+    output = [
+        "var global = (function (){return (function(){return this;}).call(null);})();\n",
+        "(function(Nuvola)\n{\n    'use strict';\n"]
+
+    main = sources.get(main)
+    if main:
+        add_source(output, sources, main)
+
+    for source in sources.values():
+        add_source(output, sources, source)
+
+    output.append("})(this);  // function(Nuvola)\n")
+    return "".join(output)
 
 def mergejs(sources, main="main"):
-	sources = parse_sources(sources)
-	output = merge_sources(sources, main)
-	return output
+    sources = parse_sources(sources)
+    output = merge_sources(sources, main)
+    return output
 
 if __name__ == "__main__":
-	import sys
-	files = sys.argv[1:]
-	output = mergejs(files)
-	print(output)
+    import sys
+    files = sys.argv[1:]
+    output = mergejs(files)
+    print(output)

@@ -38,80 +38,80 @@ Error = namedtuple("Error", "path line code flag")
 
 
 def check_definitions_in_files(definitions, buffers):
-	errors = []
-	for buffer in buffers:
-		check_definitions_in_file(definitions, buffer, errors)
-	return errors
+    errors = []
+    for buffer in buffers:
+        check_definitions_in_file(definitions, buffer, errors)
+    return errors
 
 
 def check_definitions_in_file(definitions, buffer, errors):
-	for line, code in enumerate(buffer):
-		code = code.strip()
-		try:
-			if code.startswith("#if"):
-				check_expression(code[3:], definitions)
-			elif code.startswith("#elif"):
-				check_expression(codee[5:], definitions)
-		except ValueError as e:
-			errors.append(Error(buffer.name, line, code, e.args[0]))
+    for line, code in enumerate(buffer):
+        code = code.strip()
+        try:
+            if code.startswith("#if"):
+                check_expression(code[3:], definitions)
+            elif code.startswith("#elif"):
+                check_expression(codee[5:], definitions)
+        except ValueError as e:
+            errors.append(Error(buffer.name, line, code, e.args[0]))
 
 
 def check_expression(expr, definitions):
-	flags = _NOT_IDENTIFIER_CHARS_RE.sub(' ', expr).split()
-	for flag in flags:
-		if flag and flag not in definitions:
-			raise ValueError(flag)
+    flags = _NOT_IDENTIFIER_CHARS_RE.sub(' ', expr).split()
+    for flag in flags:
+        if flag and flag not in definitions:
+            raise ValueError(flag)
 
 
 def print_errors(errors, *, output=sys.stderr, count=True):
-	if count:
-		print("%s Errors:" % len(errors), file=output)
-	for error in errors:
-		print("Error {path}:{line}\n=> `{code}` => {flag} not allowed".format(**error._asdict()), file=output)
+    if count:
+        print("%s Errors:" % len(errors), file=output)
+    for error in errors:
+        print("Error {path}:{line}\n=> `{code}` => {flag} not allowed".format(**error._asdict()), file=output)
 
 
 def scan_dirs_for_vala_source(buffers, directories):
-	buffers.extend(
-		open(joinpath(root, path), "rt", encoding="utf-8") 
-		for directory in directories
-		for root, dirs, files in os.walk(directory)
-		for path in files if path.endswith(".vala"))
+    buffers.extend(
+        open(joinpath(root, path), "rt", encoding="utf-8")
+        for directory in directories
+        for root, dirs, files in os.walk(directory)
+        for path in files if path.endswith(".vala"))
 
 
 def main(argv):
-	parser = ArgumentParser(
-		argv[0],
-		description=__doc__,
-		epilog="Returns 0 on success, 1 when there are errors, 2 on unexpected failure.")
-	parser.add_argument("-D", "--define", action='append', help="Add allowed Vala definition")
-	parser.add_argument("-d", "--directory", action='append', help="Add source directory")
-	parser.add_argument("files", type=FileType('rt', encoding="utf-8"), nargs='*', help="Source files *.vala")
-	args = parser.parse_args(argv[1:])
-	return run(definitions=args.define, buffers=args.files, directories=args.directory)
+    parser = ArgumentParser(
+        argv[0],
+        description=__doc__,
+        epilog="Returns 0 on success, 1 when there are errors, 2 on unexpected failure.")
+    parser.add_argument("-D", "--define", action='append', help="Add allowed Vala definition")
+    parser.add_argument("-d", "--directory", action='append', help="Add source directory")
+    parser.add_argument("files", type=FileType('rt', encoding="utf-8"), nargs='*', help="Source files *.vala")
+    args = parser.parse_args(argv[1:])
+    return run(definitions=args.define, buffers=args.files, directories=args.directory)
 
 
 def run(*, definitions=None, files=None, buffers=None, directories=None, output=sys.stderr):
-	definitions = set(definitions or ())
-	if not buffers:
-		buffers = []
-	if files:
-		buffers.extend(open(path, "rt", encoding="utf-8") for path in files)
-	if directories:
-		scan_dirs_for_vala_source(buffers, directories)
-	errors = check_definitions_in_files(definitions, buffers)
-	if not errors:
-		return 0
-	else:
-		print_errors(errors, output=output)
-		return 1
+    definitions = set(definitions or ())
+    if not buffers:
+        buffers = []
+    if files:
+        buffers.extend(open(path, "rt", encoding="utf-8") for path in files)
+    if directories:
+        scan_dirs_for_vala_source(buffers, directories)
+    errors = check_definitions_in_files(definitions, buffers)
+    if not errors:
+        return 0
+    else:
+        print_errors(errors, output=output)
+        return 1
 
 
 if __name__ == "__main__":
-	try:
-		code = main(sys.argv)
-	except Exception as e:
-		import traceback
-		print("Unexpected failure:", file=sys.stderr)
-		traceback.print_exc()
-		code = 2
-	sys.exit(code)
+    try:
+        code = main(sys.argv)
+    except Exception as e:
+        import traceback
+        print("Unexpected failure:", file=sys.stderr)
+        traceback.print_exc()
+        code = 2
+    sys.exit(code)
