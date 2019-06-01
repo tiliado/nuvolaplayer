@@ -33,7 +33,7 @@ public class GraphicsTest: Drt.TestCase
         catch (Graphics.DriError e)
         {
             if (!(e is Graphics.DriError.NO_X_DISPLAY))
-                expectation_failed("Unexpected error: %s %d %s", e.domain.to_string(), e.code, e.message);
+                unexpected_error(e, "Only Graphics.DriError.NO_X_DISPLAY allowed.");
         }
     }
 
@@ -60,14 +60,14 @@ public class GraphicsTest: Drt.TestCase
     {
         string[] names = {"i965", "i915", "r300", "r600", "radeon", "radeonsi", "nouveau"};
         foreach (var name in names)
-            expect_true(Graphics.have_vdpau_driver(name), "VDPAU: %s", name);
+            expect_true(Graphics.have_vdpau_driver(name), @"VDPAU: $name");
     }
 
     public void test_have_vaapi_drivers()
     {
         string[] names = {"i965", "i915", "r300", "r600", "radeon", "radeonsi", "nouveau"};
         foreach (var name in names)
-            expect_true(Graphics.have_vaapi_driver(name), "VA-API: %s", name);
+            expect_true(Graphics.have_vaapi_driver(name), @"VA-API: $name");
     }
     #endif
 }
