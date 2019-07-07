@@ -38,8 +38,9 @@ public class DeveloperSidebar: Gtk.ScrolledWindow {
     private Drtgtk.Actions? actions_reg;
     private Gtk.Grid grid;
     private Gtk.Image? artwork = null;
-    private TimePositionButton time_pos;
     private Gtk.VolumeButton volume_button;
+    private Gtk.Scale track_position_slider;
+    private Gtk.Label track_position_label;
     private Gtk.Label? song = null;
     private Gtk.Label? artist = null;
     private Gtk.Label? album = null;
@@ -68,22 +69,30 @@ public class DeveloperSidebar: Gtk.ScrolledWindow {
         }
         #endif
         artwork = new Gtk.Image();
-        artwork.margin_top = artwork.margin_bottom = 10;
+        artwork.margin_top = 10;
         clear_artwork(false);
         grid.add(artwork);
-        time_pos = new TimePositionButton(0, (int)(player.track_length / 1000000), (int)(player.track_position/1000000));
-        time_pos.position_changed.connect_after(on_time_position_changed);
+        double track_length_sec = player.track_length / 1000000.0;
+        track_position_slider = new Gtk.Scale.with_range(
+            Gtk.Orientation.HORIZONTAL, 0.0, double.max(track_length_sec, 0.1), 1.0);
+        track_position_slider.vexpand = true;
+        track_position_slider.set_size_request(200, -1);
+        track_position_slider.format_value.connect(format_time_double);
+        track_position_slider.value_changed.connect_after(on_time_position_changed);
+        track_position_label = new Gtk.Label("");
+        update_position_label();
         volume_button = new Gtk.VolumeButton();
         volume_button.use_symbolic = true;
         volume_button.value = player.volume;
         volume_button.value_changed.connect_after(on_volume_changed);
-        var box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 5);
-        box.add(time_pos);
-        box.add(volume_button);
-        grid.attach_next_to(box, artwork, Gtk.PositionType.BOTTOM, 1, 1);
+        var box = new Gtk.Grid();
+        box.attach(track_position_slider, 0, 0, 2, 1);
+        box.attach(track_position_label, 0, 1, 1, 1);
+        box.attach(volume_button, 1, 1, 1, 1);
+
         var label = new HeaderLabel("Song");
         label.halign = Gtk.Align.START;
-        grid.attach_next_to(label, box, Gtk.PositionType.BOTTOM, 1, 1);
+        grid.attach_next_to(label, artwork, Gtk.PositionType.BOTTOM, 1, 1);
         song = new Gtk.Label(player.title ?? "(null)");
         song.set_line_wrap(true);
         song.halign = Gtk.Align.START;
@@ -119,6 +128,11 @@ public class DeveloperSidebar: Gtk.ScrolledWindow {
         rating.secondary_icon_activatable = true;
         rating.icon_press.connect(on_rating_icon_pressed);
         grid.attach_next_to(rating, label, Gtk.PositionType.BOTTOM, 1, 1);
+        label = new HeaderLabel("Playback Actions");
+        label.halign = Gtk.Align.START;
+        label.show();
+        grid.add(label);
+        grid.add(box);
         set_actions(player.playback_actions);
 
         add(grid);
@@ -129,6 +143,7 @@ public class DeveloperSidebar: Gtk.ScrolledWindow {
 
     ~DeveloperSidebar() {
         player.notify.disconnect(on_player_notify);
+        track_position_slider.value_changed.disconnect(on_time_position_changed);
         action_widgets = null;
         radios = null;
     }
@@ -173,10 +188,12 @@ public class DeveloperSidebar: Gtk.ScrolledWindow {
             state.label = player.state ?? "(null)";
             break;
         case "track-length":
-            time_pos.end_sec = (int)(player.track_length / 1000000);
+            track_position_slider.adjustment.upper = (int)(player.track_length / 1000000);
+            update_position_label();
             break;
         case "track-position":
-            time_pos.position_sec = (int)(player.track_position / 1000000);
+            track_position_slider.adjustment.value = (int)(player.track_position / 1000000);
+            update_position_label();
             break;
         case "volume":
             volume_button.value = player.volume;
@@ -193,6 +210,29 @@ public class DeveloperSidebar: Gtk.ScrolledWindow {
         }
     }
 
+    private void update_position_label() {
+        track_position_label.label = "%s/%s".printf(
+            format_time((int)(player.track_position / 1000000)),
+            format_time((int)(player.track_length / 1000000)));
+    }
+
+    private string format_time(int seconds) {
+        int hours = seconds / 3600;
+        string result = (hours > 0) ? "%02d:".printf(hours) : "";
+        seconds = (seconds - hours * 3600);
+        int minutes = seconds / 60;
+        seconds = (seconds - minutes * 60);
+        return result + "%02d:%02d".printf(minutes, seconds);
+    }
+
+    private string format_time_double(double seconds) {
+        return format_time(round_sec(seconds));
+    }
+
+    private inline int round_sec(double sec) {
+        return (int) Math.round(sec);
+    }
+
     private void set_actions(SList<string> playback_actions) {
         lock (action_widgets) {
             if (action_widgets != null) {
@@ -201,12 +241,6 @@ public class DeveloperSidebar: Gtk.ScrolledWindow {
 
             action_widgets = null;
             radios.remove_all();
-
-            var label = new HeaderLabel("Playback Actions");
-            label.halign = Gtk.Align.START;
-            label.show();
-            action_widgets.prepend(label);
-            grid.add(label);
 
             radios_frozen = true;
             foreach (unowned string full_name in playback_actions) {
@@ -313,8 +347,9 @@ public class DeveloperSidebar: Gtk.ScrolledWindow {
 
     private void on_time_position_changed() {
         Drtgtk.Action? action = actions_reg.get_action("seek");
-        if (action != null) {
-            action.activate(new Variant.double(time_pos.position_sec * 1000000.0));
+        int position = round_sec(track_position_slider.adjustment.value);
+        if (action != null && position != round_sec(player.track_position / 1000000.0)) {
+            action.activate(new Variant.double(position * 1000000.0));
         }
     }
 
