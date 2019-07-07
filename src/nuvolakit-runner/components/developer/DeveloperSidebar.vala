@@ -72,15 +72,14 @@ public class DeveloperSidebar: Gtk.ScrolledWindow {
         artwork.margin_top = 10;
         clear_artwork(false);
         grid.add(artwork);
-        double track_length_sec = player.track_length / 1000000.0;
         track_position_slider = new Gtk.Scale.with_range(
-            Gtk.Orientation.HORIZONTAL, 0.0, double.max(track_length_sec, 0.1), 1.0);
+            Gtk.Orientation.HORIZONTAL, 0.0, 1.0, 1.0);
         track_position_slider.vexpand = true;
         track_position_slider.set_size_request(200, -1);
         track_position_slider.format_value.connect(format_time_double);
         track_position_slider.value_changed.connect_after(on_time_position_changed);
         track_position_label = new Gtk.Label("");
-        update_position_label();
+        update_track_position();
         volume_button = new Gtk.VolumeButton();
         volume_button.use_symbolic = true;
         volume_button.value = player.volume;
@@ -188,12 +187,8 @@ public class DeveloperSidebar: Gtk.ScrolledWindow {
             state.label = player.state ?? "(null)";
             break;
         case "track-length":
-            track_position_slider.adjustment.upper = (int)(player.track_length / 1000000);
-            update_position_label();
-            break;
         case "track-position":
-            track_position_slider.adjustment.value = (int)(player.track_position / 1000000);
-            update_position_label();
+            update_track_position();
             break;
         case "volume":
             volume_button.value = player.volume;
@@ -210,10 +205,26 @@ public class DeveloperSidebar: Gtk.ScrolledWindow {
         }
     }
 
-    private void update_position_label() {
+    private void update_track_position() {
+        // Use actual values for the label not to hide any erroneous values.
+        double track_position = player.track_position / 1000000.0;
+        double track_length = player.track_length / 1000000.0;
         track_position_label.label = "%s/%s".printf(
-            format_time((int)(player.track_position / 1000000)),
-            format_time((int)(player.track_length / 1000000)));
+            format_time(round_sec(track_position)),
+            format_time(round_sec(track_length)));
+
+        // Adjust the values to fit Gtk.Scale.
+        track_position = double.max(0.0, track_position);
+        track_length = double.max(1.0, track_length);
+        track_length = double.max(track_position, track_length);
+        assert(track_length >= track_position);
+        if (track_length >= track_position_slider.adjustment.upper) {
+            track_position_slider.adjustment.upper = track_length;
+            track_position_slider.adjustment.value = track_position;
+        } else {
+            track_position_slider.adjustment.value = track_position;
+            track_position_slider.adjustment.upper = track_length;
+        }
     }
 
     private string format_time(int seconds) {
