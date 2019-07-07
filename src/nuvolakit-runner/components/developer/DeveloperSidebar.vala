@@ -75,8 +75,8 @@ public class DeveloperSidebar: Gtk.ScrolledWindow {
         track_position_slider = new Gtk.Scale.with_range(
             Gtk.Orientation.HORIZONTAL, 0.0, 1.0, 1.0);
         track_position_slider.vexpand = true;
+        track_position_slider.draw_value = false;
         track_position_slider.set_size_request(200, -1);
-        track_position_slider.format_value.connect(format_time_double);
         track_position_slider.value_changed.connect_after(on_time_position_changed);
         track_position_label = new Gtk.Label("");
         update_track_position();
@@ -234,10 +234,6 @@ public class DeveloperSidebar: Gtk.ScrolledWindow {
         int minutes = seconds / 60;
         seconds = (seconds - minutes * 60);
         return result + "%02d:%02d".printf(minutes, seconds);
-    }
-
-    private string format_time_double(double seconds) {
-        return format_time(round_sec(seconds));
     }
 
     private inline int round_sec(double sec) {
