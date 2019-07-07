@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: fedora:29
+      - image: fedora:latest
     working_directory: ~/workdir
     steps:
       - run:
