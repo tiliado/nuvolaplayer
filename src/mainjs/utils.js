@@ -121,8 +121,8 @@ Nuvola.clickOnElement = function (elm, x, y) {
  */
 Nuvola.setInputValueWithEvent = function (elm, value) {
   elm.value = value
-  elm.dispatchEvent(new window.Event('input', { 'bubbles': true, 'cancelable': true }))
-  elm.dispatchEvent(new window.Event('change', { 'bubbles': true, 'cancelable': true }))
+  elm.dispatchEvent(new window.Event('input', { bubbles: true, cancelable: true }))
+  elm.dispatchEvent(new window.Event('change', { bubbles: true, cancelable: true }))
 }
 
 /**
@@ -163,8 +163,8 @@ Nuvola.makeElement = function (name, attributes, text) {
 Nuvola.objectDiff = function (object1, object2) {
   var changes = []
   for (var property in object1) {
-    if (object1.hasOwnProperty(property) &&
-        (!object2.hasOwnProperty(property) || object1[property] !== object2[property])) { changes.push(property) }
+    if (Object.prototype.hasOwnProperty.call(object1, property) &&
+        (!Object.prototype.hasOwnProperty.call(object2, property) || object1[property] !== object2[property])) { changes.push(property) }
   }
 
   return changes

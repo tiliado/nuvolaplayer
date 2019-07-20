@@ -521,11 +521,11 @@ MediaPlayer._onInitWebWorker = function (emitter) {
   Nuvola.actions.connect('ActionActivated', this)
   Nuvola.core.connect('QuitRequest', this)
   this._track = {
-    'title': undefined,
-    'artist': undefined,
-    'album': undefined,
-    'artLocation': undefined,
-    'rating': undefined
+    title: undefined,
+    artist: undefined,
+    album: undefined,
+    artLocation: undefined,
+    rating: undefined
   }
   this.setPlaybackState(PlaybackState.UNKNOWN)
   this._setActions()
@@ -562,15 +562,15 @@ MediaPlayer._sendDevelInfo = function () {
   if (rating < 0 || isNaN(rating)) { rating = 0.0 } else if (rating > 1) { rating = 1 }
 
   var info = {
-    'title': this._track.title || null,
-    'artist': this._track.artist || null,
-    'album': this._track.album || null,
-    'rating': rating,
-    'length': this._track.length || 0,
-    'artworkLocation': this._track.artLocation || null,
-    'artworkFile': this._artworkFile || null,
-    'playbackActions': this._baseActions.concat(this._repeatActions).concat(this._extraActions),
-    'state': ['unknown', 'paused', 'playing'][this._state]
+    title: this._track.title || null,
+    artist: this._track.artist || null,
+    album: this._track.album || null,
+    rating: rating,
+    length: this._track.length || 0,
+    artworkLocation: this._track.artLocation || null,
+    artworkFile: this._artworkFile || null,
+    playbackActions: this._baseActions.concat(this._repeatActions).concat(this._extraActions),
+    state: ['unknown', 'paused', 'playing'][this._state]
   }
   Nuvola._callIpcMethodVoid('/nuvola/mediaplayer/set-track-info', info)
 }
