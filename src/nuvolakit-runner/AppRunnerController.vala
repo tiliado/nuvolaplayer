@@ -910,15 +910,23 @@ public class AppRunnerController: Drtgtk.Application {
             Gtk.Settings.get_default().gtk_application_prefer_dark_theme = config.get_bool(ConfigKey.DARK_THEME);
             break;
         }
-        if (web_engine != null && web_engine.web_worker.ready) {
+        if (web_engine != null) {
             var payload = new Variant("(ss)", "ConfigChanged", key);
-            web_engine.web_worker.call_function.begin("Nuvola.config.emit", payload, false, (o, res) => {
-                try {
-                    web_engine.web_worker.call_function.end(res, null);
-                } catch (GLib.Error e) {
-                    warning("Communication failed: %s", e.message);
-                }
-            });
+            try {
+                web_engine.call_function_sync("Nuvola.config.emit", ref payload, false);
+            } catch (GLib.Error e) {
+                warning("WebEngine communication failed: %s", e.message);
+            }
+            if (web_engine.web_worker != null && web_engine.web_worker.ready) {
+                payload = new Variant("(ss)", "ConfigChanged", key);
+                web_engine.web_worker.call_function.begin("Nuvola.config.emit", payload, false, (o, res) => {
+                    try {
+                        web_engine.web_worker.call_function.end(res, null);
+                    } catch (GLib.Error e) {
+                        warning("WebWorker communication failed: %s", e.message);
+                    }
+                });
+            }
         }
     }
 
