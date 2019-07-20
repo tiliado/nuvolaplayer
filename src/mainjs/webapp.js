@@ -93,6 +93,9 @@ WebApp._onNavigationRequest = function (object, request) {
  * Signal handler for @link{Core::UriChanged}
  */
 WebApp._onUriChanged = function (object, uri) {
+  if (!uri || !(uri.startsWith('http://') || uri.startsWith('https://'))) {
+    uri = null
+  }
   Nuvola.config.setAsync(this.LAST_URI, uri).catch(console.log.bind(console))
 }
 
