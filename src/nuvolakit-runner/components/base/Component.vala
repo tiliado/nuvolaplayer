@@ -135,10 +135,8 @@ public abstract class Component: GLib.Object {
             result = active ? activate() : deactivate();
             if (!result) {
                 warning("Failed to %s: %s %s", active ? "activate" : "deactivate", id, name);
+                this.active = !active;
             }
-        }
-        if (!result) {
-            this.active = !active;
         }
         return result;
     }
