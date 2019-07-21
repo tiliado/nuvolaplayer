@@ -43,7 +43,7 @@ public class LyricsComponent: Component {
         fetchers.append(new AZLyricsFetcher(app.connection.session));
         var provider = new LyricsProvider(bindings.get_model<MediaPlayerModel>(), (owned) fetchers);
         sidebar = new LyricsSidebar(app, provider);
-        app.main_window.sidebar.add_page("lyricssidebar", _("Lyrics"), sidebar);
+        app.main_window.sidebar.add_page("lyricssidebar", _("Lyrics"), sidebar, true);
         return true;
     }
 

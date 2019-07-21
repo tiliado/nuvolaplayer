@@ -25,6 +25,7 @@
 namespace Nuvola {
 
 public class Sidebar : Gtk.Grid {
+    public bool frozen {get; set; default = false;}
     public signal void page_changed();
     public string? page {
         get {return stack.visible_child_name;}
@@ -68,9 +69,15 @@ public class Sidebar : Gtk.Grid {
         return stack.get_child_by_name(name) != null;
     }
 
-    public virtual signal void add_page(string name, string label, Gtk.Widget page) {
+    public virtual signal void add_page(string name, string label, Gtk.Widget page, bool should_show) {
         stack.add_titled(page, name, label);
         page.show();
+        if (!frozen) {
+            if (should_show) {
+                stack.visible_child = page;
+            }
+            this.show();
+        }
     }
 
     public virtual signal void remove_page(Gtk.Widget page) {

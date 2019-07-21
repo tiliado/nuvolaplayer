@@ -41,9 +41,9 @@ public class DeveloperComponent: Component {
 
     protected override bool activate() {
         developer_sidebar = new DeveloperSidebar(app, bindings.get_model<MediaPlayerModel>());
-        app.main_window.sidebar.add_page("developersidebar", _("Developer"), developer_sidebar);
+        app.main_window.sidebar.add_page("developersidebar", _("Developer"), developer_sidebar, true);
         web_view_sidebar = new WebViewSidebar(app);
-        app.main_window.sidebar.add_page("webviewsidebar", _("Web View"), web_view_sidebar);
+        app.main_window.sidebar.add_page("webviewsidebar", _("Web View"), web_view_sidebar, false);
         return true;
     }
 

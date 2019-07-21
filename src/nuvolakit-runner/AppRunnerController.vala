@@ -64,6 +64,7 @@ public class AppRunnerController: Drtgtk.Application {
     private AboutDialog? about_dialog = null;
     private PreferencesDialog? preferences_dialog = null;
     private StartupPhase startup_phase = StartupPhase.NONE;
+    private uint setup_sidebar_timeout_id = 0;
 
     public AppRunnerController(
         Drt.Storage storage, WebApp web_app, WebAppStorage app_storage) {
@@ -329,6 +330,7 @@ public class AppRunnerController: Drtgtk.Application {
         main_window.configure_event.connect(on_configure_event);
         main_window.notify["is-active"].connect_after(on_window_is_active_changed);
         main_window.sidebar.hide();
+        main_window.sidebar.frozen = true;
         main_window.sidebar_position = (int) config.get_int64(ConfigKey.WINDOW_SIDEBAR_POS);
         main_window.notify["sidebar-position"].connect_after((o, p) => {
             config.set_int64(ConfigKey.WINDOW_SIDEBAR_POS, (int64) main_window.sidebar_position);
@@ -674,6 +676,31 @@ public class AppRunnerController: Drtgtk.Application {
             debug("Component %s (%s) available=%s, enabled=%s", component.id, component.name,
                 component.available.to_string(), component.enabled.to_string());
             component.notify["enabled"].connect_after(on_component_enabled_changed);
+        }
+        setup_sidebar();
+    }
+
+    private void setup_sidebar() {
+        /* Components are activated asynchronously so we cannot be sure when all of them are activated and we can
+         * unfreeze the sidebar. Let's wait 200 ms to see if there are any more pages to be added.*/
+        if (setup_sidebar_timeout_id != 0) {
+            Source.remove(setup_sidebar_timeout_id);
+            setup_sidebar_timeout_id = 0;
+        }
+        unowned Sidebar sidebar = main_window.sidebar;
+        if (sidebar.frozen) {
+            setup_sidebar_timeout_id = Timeout.add(200, () => {
+                setup_sidebar_timeout_id = 0;
+                sidebar.frozen = false;
+                string? sidebar_page = config.get_string(ConfigKey.WINDOW_SIDEBAR_PAGE);
+                if (sidebar_page != null && sidebar.has_page(sidebar_page)) {
+                    sidebar.page = sidebar_page;
+                }
+                if (!sidebar.visible && config.get_bool(ConfigKey.WINDOW_SIDEBAR_VISIBLE)) {
+                    sidebar.show();
+                }
+                return false;
+            });
         }
     }
 
@@ -1042,16 +1069,9 @@ public class AppRunnerController: Drtgtk.Application {
         }
     }
 
-    private void on_sidebar_page_added(Sidebar sidebar, string name, string label, Gtk.Widget child) {
+    private void on_sidebar_page_added(Sidebar sidebar, string name, string label, Gtk.Widget child, bool show) {
         actions.get_action(Actions.TOGGLE_SIDEBAR).enabled = !sidebar.is_empty();
-        bool should_be_visible = config.get_bool(ConfigKey.WINDOW_SIDEBAR_VISIBLE);
-        if (!sidebar.visible && should_be_visible) {
-            string? sidebar_page = config.get_string(ConfigKey.WINDOW_SIDEBAR_PAGE);
-            if (sidebar_page != null && sidebar.has_page(sidebar_page)) {
-                sidebar.page = sidebar_page;
-                sidebar.show();
-            }
-        }
+        setup_sidebar();
     }
 
     private void on_sidebar_page_removed(Sidebar sidebar, Gtk.Widget child) {
