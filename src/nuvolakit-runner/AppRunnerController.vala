@@ -691,7 +691,6 @@ public class AppRunnerController: Drtgtk.Application {
         if (sidebar.frozen) {
             setup_sidebar_timeout_id = Timeout.add(200, () => {
                 setup_sidebar_timeout_id = 0;
-                sidebar.frozen = false;
                 string? sidebar_page = config.get_string(ConfigKey.WINDOW_SIDEBAR_PAGE);
                 if (sidebar_page != null && sidebar.has_page(sidebar_page)) {
                     sidebar.page = sidebar_page;
@@ -699,6 +698,7 @@ public class AppRunnerController: Drtgtk.Application {
                 if (!sidebar.visible && config.get_bool(ConfigKey.WINDOW_SIDEBAR_VISIBLE)) {
                     sidebar.show();
                 }
+                sidebar.frozen = false;
                 return false;
             });
         }

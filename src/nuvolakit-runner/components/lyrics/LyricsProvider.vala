@@ -27,7 +27,7 @@ namespace Nuvola {
 public enum LyricsStatus {
     NO_SONG,
     LOADING,
-    DONE,
+    HAVE_LYRICS,
     NOT_FOUND;
 }
 
@@ -80,6 +80,7 @@ public class LyricsProvider: GLib.Object {
     }
 
     private void queue_fetch_lyrics(string artist, string song) {
+        status = LyricsStatus.LOADING;
         lyrics_loading(artist, song);
         fetch_lyrics.begin(artist, song);
     }
@@ -89,6 +90,7 @@ public class LyricsProvider: GLib.Object {
             debug("Fetcher: %s", fetcher.get_type().name());
             try {
                 string lyrics = yield fetcher.fetch_lyrics(artist, song);
+                status = LyricsStatus.HAVE_LYRICS;
                 lyrics_available(artist, song, lyrics);
                 if (cache != null && fetcher != cache) {
                     yield cache.store(artist, song, (owned) lyrics);
@@ -99,6 +101,7 @@ public class LyricsProvider: GLib.Object {
             }
         }
 
+        status = LyricsStatus.NOT_FOUND;
         lyrics_not_found(artist, song);
     }
 
