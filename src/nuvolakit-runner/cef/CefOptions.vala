@@ -49,11 +49,11 @@ public class CefOptions : WebOptions {
     }
 
     public override string get_name_version() {
-        return "Chromium " + Cef.get_chromium_version();
+        return "Chromium %s, ValaCEF %s".printf(Cef.get_chromium_version(), Cef.get_valacef_version());
     }
 
     public override string get_name() {
-        return "Chromium";
+        return "Chromium/ValaCEF";
     }
 
     public override async void gather_format_support_info(WebApp web_app) {

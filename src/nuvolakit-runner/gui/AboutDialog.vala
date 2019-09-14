@@ -44,6 +44,7 @@ public void print_version_info(FileStream output, WebApp? web_app) {
     output.printf("WebKitGTK %u.%u.%u\n", WebKit.get_major_version(), WebKit.get_minor_version(), WebKit.get_micro_version());
     #if HAVE_CEF
     output.printf("Chromium %s\n", Cef.get_chromium_version());
+    output.printf("ValaCEF %s\n", Cef.get_valacef_version());
     #else
     output.printf("Chromium N/A\n");
     #endif
@@ -60,6 +61,7 @@ public void debug_print_version_info(WebApp? web_app) {
     debug("Diorite %s", Drt.get_version());
     #if HAVE_CEF
     debug("Chromium %s", Cef.get_chromium_version());
+    debug("ValaCEF %s", Cef.get_valacef_version());
     #endif
 }
 
