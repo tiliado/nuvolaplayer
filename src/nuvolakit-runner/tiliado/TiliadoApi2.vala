@@ -148,6 +148,7 @@ public class TiliadoApi2 : Oauth2Client {
         if (project_id == null) {
             return null;
         }
+        debug("Get trial for machine: %s/%s", project_id, machine);
         try {
             Drt.JsonObject response = yield fetch_json(
                 call("funding/trial_of_machine/%s/%s/".printf(project_id, machine)));
@@ -164,6 +165,7 @@ public class TiliadoApi2 : Oauth2Client {
         if (project_id == null) {
             return null;
         }
+        debug("Start trial for machine: %s/%s", project_id, machine);
         Drt.JsonObject response = yield fetch_json(
             post("funding/trial_of_machine/%s/%s/".printf(project_id, machine)));
         return new MachineTrial.from_json(response);
