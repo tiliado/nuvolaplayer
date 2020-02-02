@@ -52,13 +52,13 @@ public class HttpRequest {
         client.soup.queue_message(msg, (s, m) => {Drt.EventLoop.add_idle((owned) resume);});
         yield;
 
-        if (retry && attempt <= 10 && (msg.status_code < 200 || msg.status_code >= 500)) {
-            float backoff = attempt > 0 ? 1.0f * (Math.powf(2.0f, (float) (attempt - 1))) : 0.0f;
+        if (retry && attempt <= 6 && (msg.status_code < 200 || msg.status_code >= 500)) {
+            uint backoff = attempt > 0 ? attempt * 100 : 0;
             warning(
-                "HTTP Retry (%u, back off %f) because of %u %s",
+                "HTTP Retry (%u, back off %u ms) because of %u %s",
                 attempt + 1, backoff, msg.status_code, Soup.Status.get_phrase(msg.status_code));
             if (backoff > 0) {
-                yield Drt.EventLoop.sleep((uint) (backoff * 1000));
+                yield Drt.EventLoop.sleep(backoff);
             }
             yield send_internal(retry, attempt + 1);
             return;
