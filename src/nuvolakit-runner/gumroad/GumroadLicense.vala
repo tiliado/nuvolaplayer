@@ -48,7 +48,6 @@ public class GumroadLicense : GLib.Object {
     public GumroadLicense.from_json(Drt.JsonObject? json) {
         string? product_id = null;
         string? license_key = null;
-        bool valid = false;
         bool success = false;
         bool refunded = false;
         bool chargebacked = false;
@@ -79,11 +78,10 @@ public class GumroadLicense : GLib.Object {
                 cancelled = cancelled_at != null;
                 failed_at = purchase.get_string_or("subscription_failed_at");
                 failed = failed_at != null;
-                valid = success && !refunded && !chargebacked;
             }
         }
         GLib.Object(
-            success: success, valid: valid, refunded: refunded, chargebacked: chargebacked,
+            success: success, valid: success, refunded: refunded, chargebacked: chargebacked,
             id: id, product_id: product_id, product_name: product_name, license_key: license_key,
             email: email, full_name: full_name, created_at: created_at,
             cancelled_at: cancelled_at, cancelled: cancelled, failed_at: failed_at, failed: failed
