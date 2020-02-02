@@ -31,6 +31,8 @@ public class TiliadoActivation : GLib.Object {
     private const string TILIADO_ACCOUNT_SCOPE = "tiliado.account2.scope";
     private const string TILIADO_ACCOUNT_MEMBERSHIP = "tiliado.account2.membership";
     private const string TILIADO_ACCOUNT_USER = "tiliado.account2.user";
+    private const string TILIADO_ACCOUNT_USERNAME = "tiliado.account2.username";
+    private const string TILIADO_ACCOUNT_ID = "tiliado.account2.id";
     private const string TILIADO_ACCOUNT_EXPIRES = "tiliado.account2.expires";
     private const string TILIADO_ACCOUNT_SIGNATURE = "tiliado.account2.signature";
     private const string TILIADO_TRIAL = "tiliado.trial";
@@ -270,11 +272,13 @@ public class TiliadoActivation : GLib.Object {
             if (signature != null) {
                 int64 expires = config.get_int64(TILIADO_ACCOUNT_EXPIRES);
                 string? user_name = config.get_string(TILIADO_ACCOUNT_USER);
+                string? user_username = config.get_string(TILIADO_ACCOUNT_USERNAME);
+                int64 user_id = config.get_int64(TILIADO_ACCOUNT_ID);
                 uint membership = (uint) config.get_int64(TILIADO_ACCOUNT_MEMBERSHIP);
-                string user_info_str = concat_tiliado_user_info(user_name, membership, expires);
+                string user_info_str = concat_tiliado_user_info(user_id, user_username, user_name, membership, expires);
                 if (expires >= new DateTime.now_utc().to_unix()
                 && tiliado.hmac_sha1_verify_string(user_info_str, signature)) {
-                    var user = new TiliadoApi2.User(0, null, user_name, true, true, new int[] {});
+                    var user = new TiliadoApi2.User((int) user_id, user_username, user_name, true, true, new int[] {});
                     user.membership = membership;
                     cached_user = user;
                     user_valid = true;
@@ -335,14 +339,18 @@ public class TiliadoActivation : GLib.Object {
         config.changed.disconnect(on_config_changed);
         if (user != null && user.is_valid()) {
             int64 expires = new DateTime.now_utc().add_weeks(5).to_unix();
+            config.set_int64(TILIADO_ACCOUNT_ID, user.id);
+            config.set_string(TILIADO_ACCOUNT_USERNAME, user.username);
             config.set_string(TILIADO_ACCOUNT_USER, user.name);
             config.set_int64(TILIADO_ACCOUNT_MEMBERSHIP, (int64) user.membership);
             config.set_int64(TILIADO_ACCOUNT_EXPIRES, expires);
             string signature = tiliado.hmac_sha1_for_string(
-                concat_tiliado_user_info(user.name, user.membership, expires));
+                concat_tiliado_user_info(user.id, user.username, user.name, user.membership, expires));
             config.set_string(TILIADO_ACCOUNT_SIGNATURE, signature);
             cached_user = user;
         } else {
+            config.unset(TILIADO_ACCOUNT_ID);
+            config.unset(TILIADO_ACCOUNT_USERNAME);
             config.unset(TILIADO_ACCOUNT_USER);
             config.unset(TILIADO_ACCOUNT_MEMBERSHIP);
             config.unset(TILIADO_ACCOUNT_EXPIRES);
@@ -373,8 +381,8 @@ public class TiliadoActivation : GLib.Object {
         config.changed.connect(on_config_changed);
     }
 
-    private inline string concat_tiliado_user_info(string name, uint membership_rank, int64 expires) {
-        return "%s:%u:%s".printf(name, membership_rank, expires.to_string());
+    private inline string concat_tiliado_user_info(int64 id, string? username, string? name, uint membership_rank, int64 expires) {
+        return "%s:%s:%s:%u:%s".printf(id.to_string(), username, name, membership_rank, expires.to_string());
     }
 }
 
