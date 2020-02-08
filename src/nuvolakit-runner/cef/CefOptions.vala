@@ -102,10 +102,7 @@ public class CefOptions : WebOptions {
     public void init(WebApp web_app) {
         if (default_context == null) {
             string? user_agent = WebOptions.make_user_agent(web_app.user_agent);
-            if (user_agent != null) {
-                user_agent += " Nuvola/" + Nuvola.get_short_version();
-            }
-            string? product = "Chrome/%s Nuvola/%s".printf(Cef.get_chromium_version(), Nuvola.get_short_version());
+            string product = "Chrome/%s".printf(Cef.get_chromium_version());
 
             CefGtk.ProxyType proxy_type = CefGtk.ProxyType.SYSTEM;
             string? proxy_server = null;
