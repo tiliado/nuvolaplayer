@@ -43,11 +43,11 @@ public class MediaKeys: GLib.Object, MediaKeysInterface {
         this.app_id = app_id;
         this.key_grabber = key_grabber;
         keymap = new HashTable<string, string>(str_hash, str_equal);
-        keymap["XF86AudioPlay"] = "Play";
-        keymap["XF86AudioPause"] = "Pause";
-        keymap["XF86AudioStop"] = "Stop";
-        keymap["XF86AudioPrev"] = "Previous";
-        keymap["XF86AudioNext"] = "Next";
+        keymap["AudioPlay"] = "Play";
+        keymap["AudioPause"] = "Pause";
+        keymap["AudioStop"] = "Stop";
+        keymap["AudioPrev"] = "Previous";
+        keymap["AudioNext"] = "Next";
 
         if (debug_keys) {
             keymap["<Shift><Super>t"] = "Play";

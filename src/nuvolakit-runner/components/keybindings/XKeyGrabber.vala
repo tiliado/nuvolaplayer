@@ -157,6 +157,7 @@ public class XKeyGrabber: GLib.Object {
 
             string accelerator = Gtk.accelerator_name(keyval, event_mods);
             if (is_grabbed(accelerator)) {
+                debug("Keybinding pressed: %s", accelerator);
                 keybinding_pressed(accelerator, gdk_event.get_time());
             } else {
                 warning("Unknown keybinding %s", accelerator);
