@@ -59,57 +59,20 @@ public abstract class WebOptions : GLib.Object {
     }
 
     public static string? make_user_agent(string? user_agent) {
-        const string APPLE_WEBKIT_VERSION = "604.1";
-        const string SAFARI_VERSION = "11.0";
-        const string FIREFOX_VERSION = "57.0";
-        const string CHROME_VERSION = "63.0.3239.108";
-        string? agent = null;
-        string? browser = null;
-        string? version = null;
-        if (user_agent != null) {
-            agent = user_agent.strip();
-            if (agent[0] == '\0') {
-                agent = null;
-            }
+        if (user_agent == null) {
+            return null;
         }
-
-        if (agent != null) {
-            string[] parts = agent.split_set(" \t", 2);
-            browser = parts[0];
-            if (browser != null) {
-                browser = browser.strip();
-                if (browser[0] == '\0') {
-                    browser = null;
-                }
-            }
-            version = parts[1];
-            if (version != null) {
-                version = version.strip();
-                if (version[0] == '\0') {
-                    version = null;
-                }
-            }
-        }
-
-        switch (browser) {
+        string agent = user_agent.split(" ")[0];
+        switch (agent) {
         case "CHROME":
-            var s = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Safari/537.36";
-            agent = s.printf(version ?? CHROME_VERSION);
-            break;
+            return "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.87 Safari/537.36";
         case "FIREFOX":
-            var s = "Mozilla/5.0 (X11; Linux x86_64; rv:%1$s) Gecko/20100101 Firefox/%1$s";
-            agent = s.printf(version ?? FIREFOX_VERSION);
-            break;
+            return "Mozilla/5.0 (X11; Linux i586; rv:31.0) Gecko/20100101 Firefox/72.0";
         case "SAFARI":
-            var s = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/%1$s (KHTML, like Gecko) Version/%2$s Safari/%1$s";
-            agent = s.printf(APPLE_WEBKIT_VERSION, version ?? SAFARI_VERSION);
-            break;
-        case "WEBKIT":
-            var s = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/%1$s (KHTML, like Gecko) Version/%2$s Safari/%1$s";
-            agent = s.printf(APPLE_WEBKIT_VERSION, version ?? SAFARI_VERSION);
-            break;
+            return "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0 Safari/605.1.15";
+        default:
+            return user_agent;
         }
-        return agent;
     }
 }
 
