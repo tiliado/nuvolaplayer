@@ -113,6 +113,7 @@ public class CefPluginDownloaderDialog : Gtk.Dialog {
 
     public virtual signal void failed(GLib.Error reason) {
         if (resume != null) {
+            warning("%s installation failed: %s", downloader.get_type().name(), reason.message);
             progress_text.label = "";
             result = false;
             progress.hide();

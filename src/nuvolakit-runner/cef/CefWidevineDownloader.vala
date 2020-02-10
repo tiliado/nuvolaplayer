@@ -93,9 +93,11 @@ public class CefWidevineDownloader : GLib.Object, CefPluginDownloader {
             if (!deb_file.query_exists()) {
                 progress_text("Downloading Google Chrome.");
                 yield check_cancelled(cancellable);
-                bool downloaded = yield conn.download_file(CHROME_DEB_URL, deb_file, null);
+                Soup.Message msg;
+                bool downloaded = yield conn.download_file(CHROME_DEB_URL, deb_file, out msg);
                 if (!downloaded) {
-                    throw new CefWidevineDownloaderError.DOWNLOAD_FAILED("Cannot download '%s'.", CHROME_DEB_URL);
+                    throw new CefWidevineDownloaderError.DOWNLOAD_FAILED(
+                        "Cannot download '%s'. %u %s", CHROME_DEB_URL, msg.status_code, msg.reason_phrase);
                 }
             }
             progress_text("Reading downloaded archive.");

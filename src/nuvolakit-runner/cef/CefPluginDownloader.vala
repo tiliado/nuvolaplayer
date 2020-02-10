@@ -28,7 +28,9 @@ namespace Nuvola {
 public interface CefPluginDownloader : GLib.Object {
     public abstract async void download(Cancellable? cancellable=null) throws GLib.Error;
 
-    public signal void progress_text(string text);
+    public virtual signal void progress_text(string text) {
+        debug("Progress: %s", text);
+    }
 }
 
 } // namespace Nuvola
