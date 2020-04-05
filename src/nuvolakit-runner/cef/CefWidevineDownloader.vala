@@ -107,17 +107,21 @@ public class CefWidevineDownloader : GLib.Object, CefPluginDownloader {
             bool found_data = false;
             bool found_control = false;
             while (!(found_data && found_control) && reader.next(out entry)) {
-                if (entry.pathname().has_prefix("data.tar.")) {
+                string pathname = entry.pathname();
+                debug("Archive entry: %s", pathname);
+                if (pathname.has_prefix("data.tar.")) {
                     ArchiveReader reader2 = reader.read_archive();
                     unowned Archive.Entry? entry2 = null;
                     while (!(found && found_adapter) && reader2.next(out entry2)) {
-                        if (entry2.pathname().has_suffix("/libwidevinecdm.so")) {
+                        string pathname2 = entry2.pathname();
+                        debug("Archive entry: %s/%s", pathname, pathname2);
+                        if (pathname2.has_suffix("/libwidevinecdm.so")) {
                             progress_text("Extracting Widevine plugin library.");
                             yield check_cancelled(cancellable);
                             Drt.System.make_dirs(target_dir);
                             reader2.read_data_to_file(libwidevinecdm_file.get_path());
                             found = true;
-                        } else if (entry2.pathname().has_suffix("/libwidevinecdmadapter.so")) {
+                        } else if (pathname2.has_suffix("/libwidevinecdmadapter.so")) {
                             progress_text("Extracting Widevine plugin adapter.");
                             yield check_cancelled(cancellable);
                             Drt.System.make_dirs(target_dir);
@@ -127,11 +131,13 @@ public class CefWidevineDownloader : GLib.Object, CefPluginDownloader {
                         yield check_cancelled(cancellable);
                     }
                     found_data = true;
-                } else if (entry.pathname().has_prefix("control.tar")) {
+                } else if (pathname.has_prefix("control.tar")) {
                     ArchiveReader reader2 = reader.read_archive();
                     unowned Archive.Entry? entry2 = null;
                     while (reader2.next(out entry2)) {
-                        if (entry2.pathname().has_suffix("/control")) {
+                        string pathname2 = entry2.pathname();
+                        debug("Archive entry: %s/%s", pathname, pathname2);
+                        if (pathname2.has_suffix("/control")) {
                             progress_text("Extracting Widevine plugin metadata.");
                             yield check_cancelled(cancellable);
                             Drt.System.make_dirs(target_dir);
