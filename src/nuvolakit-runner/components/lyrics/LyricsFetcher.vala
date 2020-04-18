@@ -35,7 +35,12 @@ public errordomain LyricsError {
     /**
      * Lyrics has not been found
      */
-    NOT_FOUND
+    NOT_FOUND,
+    /**
+     * Failed to handle responses from lyrics provider
+     */
+    PARSE_FAILED
+
 }
 
 

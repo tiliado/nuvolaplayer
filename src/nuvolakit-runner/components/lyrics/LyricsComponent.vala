@@ -46,6 +46,7 @@ public class LyricsComponent: Component {
         SList<LyricsFetcher> fetchers = null;
         fetchers.append(new LyricsFetcherCache(app.storage.get_cache_path("lyrics")));
         fetchers.append(new AZLyricsFetcher(app.connection.session));
+        fetchers.append(new GecimiLyricsFetcher(app.connection.session));
         provider = new LyricsProvider(bindings.get_model<MediaPlayerModel>(), (owned) fetchers);
         sidebar = new LyricsSidebar(app, provider);
         unowned Sidebar app_sidebar = app.main_window.sidebar;
