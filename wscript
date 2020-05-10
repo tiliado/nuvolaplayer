@@ -607,7 +607,7 @@ def build(ctx):
         packages += " valacef valacefgtk"
         uselib += " VALACEF VALACEFGTK"
 
-    vapi_to_patch = ['libsoup-2.4']
+    vapi_to_patch = []
     if ctx.env.with_unity:
         vapi_to_patch.append('unity')
 
