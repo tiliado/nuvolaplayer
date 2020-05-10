@@ -1,27 +1,53 @@
-version: 2
-jobs:
-  build:
+version: 2.1
+
+executors:
+  fedora:
     docker:
-      - image: fedora:latest
-    working_directory: ~/workdir
+     - image: fedora:32
+
+commands:
+
+  install-common-deps:
     steps:
       - run:
-          name: Install deps
+          name: Install common dependencies
           command: |
             dnf update -y > /dev/null
-            dnf install -y git openssh-clients wget tar xz \
-              gcc vala valadoc vala-devel gobject-introspection-devel 'pkgconfig(python3)' \
-              'pkgconfig(gtk+-3.0)' sqlite-devel python3-pyparsing \
-              make autoconf automake glib2-devel graphviz-devel flex bison libxslt \
-              desktop-file-utils 'pkgconfig(gstreamer-1.0)' 'pkgconfig(json-glib-1.0)' \
-              'pkgconfig(libnotify)' 'pkgconfig(libsoup-2.4)' 'pkgconfig(libsecret-1)' \
-              'pkgconfig(uuid)' 'pkgconfig(webkit2gtk-4.0)' 'pkgconfig(sqlite3)' \
-              'pkgconfig(libarchive)' 'pkgconfig(libpulse)' libappstream-glib \
-               git autoconf-archive \
-              xorg-x11-util-macros libdrm-devel patch \
-              'pkgconfig(x11)' 'pkgconfig(xext)' 'pkgconfig(xextproto)' \
-              nodejs npm
-            dnf clean all > /dev/null
+            dnf install -y \
+              desktop-file-utils \
+              git \
+              gcc \
+              glib2-devel \
+              gobject-introspection-devel \
+              libappstream-glib \
+              libdrm-devel \
+              libgee \
+              libgee-devel \
+              make \
+              nodejs \
+              npm \
+              'pkgconfig(gstreamer-1.0)' \
+              'pkgconfig(gtk+-3.0)' \
+              'pkgconfig(json-glib-1.0)' \
+              'pkgconfig(libarchive)' \
+              'pkgconfig(libnotify)' \
+              'pkgconfig(libpulse)' \
+              'pkgconfig(libsecret-1)' \
+              'pkgconfig(libsoup-2.4)' \
+              'pkgconfig(python3)' \
+              'pkgconfig(sqlite3)' \
+              'pkgconfig(uuid)' \
+              'pkgconfig(webkit2gtk-4.0)' \
+              'pkgconfig(x11)' \
+              'pkgconfig(xext)' \
+              'pkgconfig(xextproto)' \
+              patch \
+              python3-pyparsing \
+              sqlite-devel \
+              vala \
+              vala-devel \
+              valadoc \
+              xorg-x11-util-macros
             git clone https://github.com/robclark/libdri2.git
             cd libdri2
             ./autogen.sh --prefix=/usr
@@ -31,38 +57,67 @@ jobs:
             cd ..
             rm -rf libdri2
             npm install standard --global
+
+  build-vala:
+    parameters:
+      branch:
+        type: string
+        default: "master"
+    steps:
       - run:
-          name: Download Vala
+          name: Install Vala dependencies
           command: |
-            git clone https://gitlab.gnome.org/GNOME/vala.git
+            dnf install -y \
+              autoconf \
+              autoconf-archive \
+              automake \
+              bison \
+              flex \
+              gcc \
+              graphviz-devel \
+              make
+            gcc --version
+            valac --version
       - run:
-          name: Build Vala
-          working_directory: ~/workdir/vala
+          name: Build Vala from git
+          working_directory: ~/workdir
           command: |
+            git clone https://gitlab.gnome.org/GNOME/vala.git -b << parameters.branch >> --depth 500
+            cd vala
             ./autogen.sh --prefix=/usr
             make all
-            dnf remove -y vala valadoc
+            dnf remove -y --noautoremove vala vala-devel valadoc
             make install
+  build-gee:
+    steps:
       - run:
-          name: Download Gee
+          name: Build Gee from git
+          working_directory: ~/workdir
           command: |
-            git clone https://gitlab.gnome.org/GNOME/libgee.git
-      - run:
-          name: Build Gee
-          working_directory: ~/workdir/libgee
-          command: |
+            git clone https://gitlab.gnome.org/GNOME/libgee.git --depth=500
+            cd libgee
             ./autogen.sh --prefix=/usr --enable-introspection=no --disable-static --enable-gtk-doc=no
             make all
+            dnf remove -y --noautoremove libgee libgee-devel
             make install
+
+  build-valalint:
+    parameters:
+      branch:
+        type: string
+        default: "master"
+    steps:
       - run:
-          name: Install Valalint
+          name: Build Valalint from git
+          working_directory: ~/workdir
           command: |
-            git clone https://github.com/tiliado/valalint.git
+            git clone https://github.com/tiliado/valalint.git -b << parameters.branch >>
             cd valalint
             make all
             make install
-            cd ..
-            rm -rf valalint
+
+  build-diorite:
+    steps:
       - run:
           name: Checkout Diorite
           command: |
@@ -80,6 +135,10 @@ jobs:
             ./waf configure build install --prefix=/usr
             /sbin/ldconfig
             LD_LIBRARY_PATH=./build ./build/run-dioritetests
+
+
+  checkout-and-build:
+    steps:
       - checkout:
           path: ~/workdir/nuvolaruntime
       - run:
@@ -89,3 +148,49 @@ jobs:
             ./waf configure build install \
               --no-unity --no-appindicator --no-cef
             LD_LIBRARY_PATH=./build ./build/run-nuvolaruntime-tests
+
+jobs:
+
+  build-vala-fedora:
+    executor: fedora
+    working_directory: ~/workdir
+    steps:
+      - install-common-deps
+      - build-valalint:
+          branch: "0.48.x"
+      - build-diorite
+      - checkout-and-build
+
+  build-vala-git-stable:
+    executor: fedora
+    working_directory: ~/workdir
+    steps:
+      - install-common-deps
+      - build-vala:
+          branch: "0.48"
+      - build-valalint:
+          branch: "0.48.x"
+      - build-diorite
+      - checkout-and-build
+
+  build-vala-git-master:
+    executor: fedora
+    working_directory: ~/workdir
+    steps:
+      - install-common-deps
+      - build-vala
+      - build-gee
+      - build-valalint
+      - build-diorite
+      - checkout-and-build
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      # Build with Vala as included in Fedora.
+      - build-vala-fedora
+      # Build with latest stable Vala from git.
+      - build-vala-git-stable
+      # Build with development Vala from git master.
+      - build-vala-git-master
