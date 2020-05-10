@@ -1,6 +1,6 @@
---- /app/share/vala/vapi/unity.vapi	1970-01-01 01:00:00.000000000 +0100
-+++ unity.vapi	2018-07-21 10:54:41.966112032 +0200
-@@ -32,8 +32,6 @@
+--- /app/share/vala/vapi/unity.vapi	2020-05-10 18:13:09.748464995 +0200
++++ build/unity.vapi	2020-05-10 22:31:02.304959076 +0200
+@@ -94,8 +94,6 @@
  		public void clear ();
  		public unowned string[]? get_categories (string id);
  		public static Unity.AppInfoManager get_default ();
