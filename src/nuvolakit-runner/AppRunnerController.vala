@@ -53,7 +53,6 @@ public class AppRunnerController: Drtgtk.Application {
     private uint configure_event_cb_id = 0;
     private MenuBar menu_bar;
     private Drtgtk.Form? init_form = null;
-    private FormatSupport format_support = null;
     private SList<Component> components = null;
     private HashTable<string, Variant>? web_worker_data = null;
     private StartupResult? startup_model;
@@ -110,14 +109,13 @@ public class AppRunnerController: Drtgtk.Application {
         init_settings();
         init_base_actions();
         init_ipc();
-        format_support = new FormatSupport(storage.require_data_file("audio/audiotest.mp3").get_path());
         startup_model = new StartupResult();
         startup_phase = StartupPhase.IN_PROGRESS;
         do_about();
         web_app.scale_factor = about_dialog.scale_factor * 1.0;
         debug("Scale factor: %d", about_dialog.scale_factor);
         hold();
-        var startup_check = new StartupCheck(this, startup_model, about_dialog, web_app, format_support);
+        var startup_check = new StartupCheck(this, startup_model, about_dialog, web_app);
         startup_check.run.begin(available_web_options, on_startup_check_run_done);
     }
 
@@ -234,7 +232,7 @@ public class AppRunnerController: Drtgtk.Application {
         #if HAVE_CEF
         available_web_options = {WebOptions.create(typeof(CefOptions), app_storage, connection)};
         #else
-        available_web_options = {WebOptions.create(typeof(WebkitOptions), app_storage, connection)};
+        available_web_options = {WebOptions.create(typeof(DummyOptions), app_storage, connection)};
         #endif
 
         config.set_default_value(ConfigKey.GTK_THEME, Drtgtk.DesktopShell.get_gtk_theme());

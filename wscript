@@ -1,6 +1,6 @@
 # encoding: utf-8
 #
-# Copyright 2014-2019 Jiří Janoušek <janousek.jiri@gmail.com>
+# Copyright 2014-2020 Jiří Janoušek <janousek.jiri@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -38,12 +38,11 @@ DEFAULT_HELP_URL = "https://github.com/tiliado/nuvolaruntime/wiki/Third-Party-Bu
 DEFAULT_WEB_APP_REQUIREMENTS_HELP_URL = DEFAULT_HELP_URL
 
 MIN_DIORITE = "4.16.0"
-MIN_VALA = "0.42.0"
+MIN_VALA = "0.48.0"
 MIN_GLIB = "2.56.1"
 MIN_GTK = "3.22.30"
 MIN_GEE = "0.20.1"
-LEGACY_WEBKIT = "2.18.0"
-FLATPAK_WEBKIT = "2.18.1"
+MIN_WEBKIT = "2.18.1"
 
 # Extras #
 #========#
@@ -307,14 +306,8 @@ def options(ctx):
         '--no-appindicator', action='store_false', default=True, dest='appindicator',
         help="Don't build functionality dependent on libappindicator.")
     ctx.add_option(
-        '--webkitgtk-supports-mse', action='store_true', default=False, dest='webkit_mse',
-        help="Use only if you are absolutely sure that your particular build of the WebKitGTK library supports Media Source Extension (as of 2.15.3, it is disabled by default)")
-    ctx.add_option(
-        '--no-cef', action='store_false', default=True, dest='cef',
-        help="Don't build experimental CEF backend depending on ValaCEF.")
-    ctx.add_option(
-        '--cef-default', action='store_true', default=False, dest='cef_default',
-        help="Whether the CEF engine should be default.")
+        '--dummy-engine', action='store_true', default=False, dest='dummy_engine',
+        help="Whether to build with a dummy web engine instead of ValaCEF.")
     ctx.add_option(
         '--no-vala-lint', action='store_false', default=True, dest='lint_vala', help="Don't use Vala linter.")
     ctx.add_option(
@@ -374,15 +367,12 @@ def configure(ctx):
     ctx.env.CDK = branding.get("cdk", False)
     ctx.env.ADK = branding.get("adk", False)
     ctx.env.FLATPAK = branding.get("flatpak", False)
-    MIN_WEBKIT = LEGACY_WEBKIT
     if ctx.env.CDK:
         vala_def(ctx, "NUVOLA_CDK")
         ctx.env.UNIQUE_NAME = "eu.tiliado.NuvolaCdk"
-        MIN_WEBKIT = FLATPAK_WEBKIT
     elif ctx.env.ADK:
         vala_def(ctx, "NUVOLA_ADK")
         ctx.env.UNIQUE_NAME = "eu.tiliado.NuvolaAdk"
-        MIN_WEBKIT = FLATPAK_WEBKIT
     else:
         vala_def(ctx, "NUVOLA_RUNTIME")
         if genuine:
@@ -394,7 +384,6 @@ def configure(ctx):
     # Flatpak
     if ctx.env.FLATPAK:
         vala_def(ctx, "FLATPAK")
-        MIN_WEBKIT = FLATPAK_WEBKIT
 
     # Base deps
     ctx.load('compiler_c vala')
@@ -414,9 +403,7 @@ def configure(ctx):
     pkgconfig(ctx, 'json-glib-1.0', 'JSON-GLIB', '0.7')
     pkgconfig(ctx, 'libnotify', 'NOTIFY', '0.7')
     pkgconfig(ctx, 'libsecret-1', 'SECRET', '0.16')
-    pkgconfig(ctx, "gstreamer-1.0", 'GST', "1.11.90" if ctx.options.webkit_mse else "1.8")
-    pkgconfig(ctx, 'webkit2gtk-4.0', 'WEBKIT', MIN_WEBKIT)
-    pkgconfig(ctx, 'webkit2gtk-web-extension-4.0', 'WEBKITEXT', MIN_WEBKIT)
+    pkgconfig(ctx, "gstreamer-1.0", 'GST', "1.12")
     pkgconfig(ctx, 'javascriptcoregtk-4.0', 'JSCORE', MIN_WEBKIT)
     pkgconfig(ctx, 'uuid', 'UUID', '0') # Engine.io
     pkgconfig(ctx, 'libsoup-2.4', 'SOUP', '0') # Engine.io
@@ -441,9 +428,6 @@ def configure(ctx):
     ctx.env.JSDIR = ctx.options.jsdir if ctx.options.jsdir else ctx.env.DATADIR + "/javascript"
 
     # Optional features
-    ctx.env.WEBKIT_MSE = ctx.options.webkit_mse
-    if ctx.options.webkit_mse:
-        vala_def(ctx, "WEBKIT_SUPPORTS_MSE")
     ctx.env.with_unity = ctx.options.unity
     if ctx.env.with_unity:
         pkgconfig(ctx, 'unity', 'UNITY', '3.0')
@@ -453,20 +437,11 @@ def configure(ctx):
     if ctx.env.with_appindicator:
         pkgconfig(ctx, 'ayatana-appindicator3-0.1', 'APPINDICATOR', '0.4')
         vala_def(ctx, "APPINDICATOR")
-    if ctx.options.cef_default:
-        ctx.options.cef = True
-    ctx.env.have_cef = ctx.options.cef
+    ctx.env.have_cef = not ctx.options.dummy_engine
     if ctx.env.have_cef:
         pkgconfig(ctx, 'valacef', 'VALACEF', '3.0')
         pkgconfig(ctx, 'valacefgtk', 'VALACEFGTK', '3.0')
         vala_def(ctx, "HAVE_CEF")
-
-    # Define HAVE_WEBKIT_X_YY Vala compiler definitions
-    webkit_version = tuple(int(i) for i in ctx.check_cfg(modversion='webkit2gtk-4.0').split(".")[0:2])
-    version = (2, 6)
-    while version <= webkit_version:
-        vala_def(ctx, "HAVE_WEBKIT_%d_%d" % version)
-        version = (version[0], version[1] + 2)
 
     vala_series = ctx.env.VALAC_VERSION[:2]
     ctx.env.VALAC_SERIES = '%s.%s' % (vala_series[0], vala_series[1] + 1 if vala_series[1] % 2 else vala_series[1])
@@ -504,7 +479,6 @@ def configure(ctx):
     ctx.define("NUVOLA_HELP_URL_TEMPLATE", branding.get(
         "help_url_template", "https://nuvola.tiliado.eu/docs/4/{page}.html?genuine=false"))
     ctx.define("NUVOLA_LIBDIR", ctx.env.NUVOLA_LIBDIR)
-    ctx.define("NUVOLA_CEF_DEFAULT", int(ctx.options.cef_default))
 
     ctx.define('GLIB_VERSION_MAX_ALLOWED', glib_encode_version(MIN_GLIB))
     ctx.define('GLIB_VERSION_MIN_REQUIRED', glib_encode_version(MIN_GLIB))
@@ -625,7 +599,7 @@ def build(ctx):
             ctx.fatal('Cannot find "%s.vapi" in %s.' % (vapi, all_vapi_dirs))
 
     ctx(features = "checkvaladefs", source = ctx.path.ant_glob('src/**/*.vala'),
-        definitions="FLATPAK TILIADO_API WEBKIT_SUPPORTS_MSE GENUINE UNITY APPINDICATOR EXPERIMENTAL NUVOLA_RUNTIME"
+        definitions="FLATPAK TILIADO_API GENUINE UNITY APPINDICATOR EXPERIMENTAL NUVOLA_RUNTIME"
         + " NUVOLA_ADK NUVOLA_CDK HAVE_CEF FALSE TRUE")
 
     VALALINT_CHECKS = ("space_indent=4 method_call_no_space space_after_keyword space_after_comma no_space_before_comma"
@@ -691,8 +665,8 @@ def build(ctx):
     valalib(
         target = NUVOLAKIT_RUNNER,
         source_dir = 'src/nuvolakit-runner',
-        packages = packages + ' webkit2gtk-4.0 javascriptcoregtk-4.0 gstreamer-1.0 libsecret-1 dri2 libdrm libarchive prctl',
-        uselib =  uselib + ' JSCORE WEBKIT GST SECRET DRI2 DRM LIBARCHIVE',
+        packages = packages + ' javascriptcoregtk-4.0 gstreamer-1.0 libsecret-1 dri2 libdrm libarchive prctl libsoup-2.4',
+        uselib =  uselib + ' JSCORE GST SECRET DRI2 DRM LIBARCHIVE SOUP',
         use = [NUVOLAKIT_BASE, ENGINEIO],
         lib = ['m'],
         includes = ["build"],
@@ -705,8 +679,8 @@ def build(ctx):
     valaprog(
         target = NUVOLA_BIN,
         source_dir = 'src/master',
-        packages = "",
-        uselib = uselib + " SOUP WEBKIT",
+        packages = " libsoup-2.4",
+        uselib = uselib + " SOUP",
         use = [NUVOLAKIT_BASE, NUVOLAKIT_RUNNER],
         vala_defines = vala_defines,
         defines = ['G_LOG_DOMAIN="Nuvola"'],
@@ -717,8 +691,8 @@ def build(ctx):
     valaprog(
         target = NUVOLA_SERVICE_INFO,
         source_dir = 'src/' + NUVOLA_SERVICE_INFO,
-        packages = "",
-        uselib = uselib + " SOUP WEBKIT",
+        packages = " libsoup-2.4",
+        uselib = uselib + " SOUP",
         use = [NUVOLAKIT_BASE, NUVOLAKIT_RUNNER],
         vala_defines = vala_defines,
         defines = ['G_LOG_DOMAIN="Nuvola"'],
@@ -729,8 +703,8 @@ def build(ctx):
     valaprog(
         target = APP_RUNNER,
         source_dir = 'src/apprunner',
-        packages = "",
-        uselib = uselib + " SOUP WEBKIT",
+        packages = " libsoup-2.4",
+        uselib = uselib + " SOUP",
         use = [NUVOLAKIT_BASE, NUVOLAKIT_RUNNER],
         vala_defines = vala_defines,
         defines = ['G_LOG_DOMAIN="Nuvola"'],
@@ -741,8 +715,8 @@ def build(ctx):
     valaprog(
         target = NUVOLACTL_BIN,
         source_dir = 'src/control',
-        packages = "",
-        uselib = uselib + " SOUP WEBKIT",
+        packages = " libsoup-2.4",
+        uselib = uselib + " SOUP",
         use = [NUVOLAKIT_BASE, NUVOLAKIT_RUNNER],
         vala_defines = vala_defines,
         defines = ['G_LOG_DOMAIN="Nuvola"'],
@@ -750,24 +724,12 @@ def build(ctx):
         vala_target_glib = TARGET_GLIB,
     )
 
-    valalib(
-        target = NUVOLAKIT_WORKER,
-        source_dir = 'src/nuvolakit-worker',
-        packages = "dioriteglib{0} {1} {2}".format(TARGET_DIORITE, 'webkit2gtk-web-extension-4.0', 'javascriptcoregtk-4.0'),
-        uselib = "SOUP DIORITEGLIB DIORITEGTK WEBKITEXT JSCORE GEE",
-        use = [NUVOLAKIT_BASE],
-        vala_defines = vala_defines,
-        cflags = ['-DG_LOG_DOMAIN="Nuvola"'],
-        vapi_dirs = vapi_dirs,
-        vala_target_glib = TARGET_GLIB,
-        install_path = ctx.env.NUVOLA_LIBDIR,
-    )
 
     if ctx.env.have_cef:
         valalib(
             target = NUVOLAKIT_CEF_WORKER,
             source_dir = 'src/nuvolakit-cef-worker',
-            packages = "dioriteglib{0} dioritegtk{0} {1} {2} javascriptcoregtk-4.0".format(TARGET_DIORITE, 'valacef', 'valacefgtk'),
+            packages = " libsoup-2.4 dioriteglib{0} dioritegtk{0} {1} {2} javascriptcoregtk-4.0".format(TARGET_DIORITE, 'valacef', 'valacefgtk'),
             uselib = "SOUP DIORITEGLIB DIORITEGTK VALACEF VALACEFGTK JSCORE GEE",
             use = [NUVOLAKIT_BASE],
             vala_defines = vala_defines,
@@ -780,8 +742,8 @@ def build(ctx):
     valalib(
         target = NUVOLAKIT_TESTS,
         source_dir = 'src/tests',
-        packages = packages + ' webkit2gtk-4.0 javascriptcoregtk-4.0 gstreamer-1.0 libsecret-1',
-        uselib =  uselib + ' JSCORE WEBKIT GST SECRET',
+        packages = packages + ' libsoup-2.4  javascriptcoregtk-4.0 gstreamer-1.0 libsecret-1',
+        uselib =  uselib + ' SOUP JSCORE GST SECRET',
         use = [NUVOLAKIT_BASE, NUVOLAKIT_RUNNER, ENGINEIO],
         lib = ['m'],
         includes = ["build"],

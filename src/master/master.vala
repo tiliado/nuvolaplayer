@@ -70,19 +70,6 @@ public int main(string[] args) {
         : (opt_verbose ? GLib.LogLevelFlags.LEVEL_INFO: GLib.LogLevelFlags.LEVEL_WARNING), true,
         "Master");
 
-    /* Disable compositing mode in WebKitGTK < 2.13.4 as some websites may crash system with it:
-     * https://bugs.webkit.org/show_bug.cgi?id=126122
-     * https://github.com/tiliado/nuvolaplayer/issues/245
-     *
-     * Note that WEBKIT_FORCE_COMPOSITING_MODE is honoured since WebKitGTK 2.10.5:
-     * https://trac.webkit.org/wiki/EnvironmentVariables
-     */
-    uint webkit_version = WebKit.get_major_version() * 10000 + WebKit.get_minor_version() * 100 + WebKit.get_micro_version();
-    if (webkit_version < 21304) {
-        Environment.set_variable("WEBKIT_DISABLE_COMPOSITING_MODE", "1", true);
-        debug("Compositing mode disabled because of WebKitGTK < 2.13.4");
-    }
-
     if (Environment.get_variable("NUVOLA_TEST_ABORT") == "master") {
         error("Master abort requested.");
     }

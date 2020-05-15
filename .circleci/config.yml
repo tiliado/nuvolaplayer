@@ -28,6 +28,7 @@ commands:
               npm \
               'pkgconfig(gstreamer-1.0)' \
               'pkgconfig(gtk+-3.0)' \
+              'pkgconfig(javascriptcoregtk-4.0)' \
               'pkgconfig(json-glib-1.0)' \
               'pkgconfig(libarchive)' \
               'pkgconfig(libnotify)' \
@@ -37,7 +38,6 @@ commands:
               'pkgconfig(python3)' \
               'pkgconfig(sqlite3)' \
               'pkgconfig(uuid)' \
-              'pkgconfig(webkit2gtk-4.0)' \
               'pkgconfig(x11)' \
               'pkgconfig(xext)' \
               'pkgconfig(xextproto)' \
@@ -146,7 +146,7 @@ commands:
           working_directory: ~/workdir/nuvolaruntime
           command: |
             ./waf configure build install \
-              --no-unity --no-appindicator --no-cef
+              --no-unity --no-appindicator --dummy-engine
             LD_LIBRARY_PATH=./build ./build/run-nuvolaruntime-tests
 
 jobs:

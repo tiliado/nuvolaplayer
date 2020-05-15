@@ -77,9 +77,9 @@ public class CefEngine : WebEngine {
         this.recent_external_uris = new GenericSet<string>(str_hash, str_equal);
         this.worker_data = worker_data;
         worker_data["NUVOLA_API_ROUTER_TOKEN"] = ipc_bus.router.hex_token;
-        worker_data["WEBKITGTK_MAJOR"] = WebKit.get_major_version();
-        worker_data["WEBKITGTK_MINOR"] = WebKit.get_minor_version();
-        worker_data["WEBKITGTK_MICRO"] = WebKit.get_micro_version();
+        worker_data["WEBKITGTK_MAJOR"] = 0;
+        worker_data["WEBKITGTK_MINOR"] = 0;
+        worker_data["WEBKITGTK_MICRO"] = 0;
         worker_data["LIBSOUP_MAJOR"] = Soup.get_major_version();
         worker_data["LIBSOUP_MINOR"] = Soup.get_minor_version();
         worker_data["LIBSOUP_MICRO"] = Soup.get_micro_version();
@@ -132,10 +132,7 @@ public class CefEngine : WebEngine {
             update_from_web_view("can-go-forward");
 
             env = new JsRuntime();
-            uint[] webkit_version = {
-                WebKit.get_major_version(),
-                WebKit.get_minor_version(),
-                WebKit.get_micro_version()};
+            uint[] webkit_version = {0, 0, 0};
             uint[] libsoup_version = {
                 Soup.get_major_version(),
                 Soup.get_minor_version(),

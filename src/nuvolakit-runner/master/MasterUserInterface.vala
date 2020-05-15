@@ -139,8 +139,9 @@ public class MasterUserInterface: GLib.Object {
         var dialog = new AboutDialog(main_window, storage, null, null, {
             #if HAVE_CEF
             new CefOptions(app_storage, null),
+            #else
+            new DummyOptions(app_storage, null),
             #endif
-            new WebkitOptions(app_storage, null),
         }, new PatronBox());
         dialog.run();
         dialog.destroy();

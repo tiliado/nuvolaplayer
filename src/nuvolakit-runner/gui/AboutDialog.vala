@@ -41,7 +41,6 @@ public void print_version_info(FileStream output, WebApp? web_app) {
     output.printf("Version %s\n", Nuvola.get_version());
     output.printf("Revision %s\n", Nuvola.get_revision());
     output.printf("Diorite %s\n", Drt.get_version());
-    output.printf("WebKitGTK %u.%u.%u\n", WebKit.get_major_version(), WebKit.get_minor_version(), WebKit.get_micro_version());
     #if HAVE_CEF
     output.printf("Chromium %s\n", Cef.get_chromium_version());
     output.printf("ValaCEF %s\n", Cef.get_valacef_version());

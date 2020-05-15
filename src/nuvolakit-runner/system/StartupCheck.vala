@@ -37,7 +37,6 @@ public class StartupCheck : GLib.Object {
     public TiliadoPaywall? paywall = null;
     public string? machine_hash = null;
     private StartupResult model;
-    private FormatSupport format_support;
     private WebApp web_app;
     private unowned AppRunnerController app;
     private SourceFunc? resume = null;
@@ -49,10 +48,9 @@ public class StartupCheck : GLib.Object {
      * @param format_support    Information about supported formats and technologies.
      */
     public StartupCheck(
-        AppRunnerController app, StartupResult model, AboutDialog dialog, WebApp web_app, FormatSupport format_support
+        AppRunnerController app, StartupResult model, AboutDialog dialog, WebApp web_app
     ) {
         this.model = model;
-        this.format_support = format_support;
         this.web_app = web_app;
         this.app = app;
 
@@ -140,20 +138,11 @@ public class StartupCheck : GLib.Object {
 
         model.app_requirements_status = StartupStatus.IN_PROGRESS;
         string? result_message = null;
-        try {
-            yield format_support.check();
-        } catch (GLib.Error e) {
-            result_message = e.message;
-        }
 
         int n_options = available_web_options.length;
         assert(n_options > 0);
         var checks = new WebOptionsCheck[n_options];
         for (var i = 0; i < n_options; i++) {
-            var webkit_options = available_web_options[i] as WebkitOptions;
-            if (webkit_options != null) {
-                webkit_options.format_support = format_support;
-            }
             checks[i] = new WebOptionsCheck(available_web_options[i], web_app);
         }
 
