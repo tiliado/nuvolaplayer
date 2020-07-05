@@ -60,6 +60,7 @@ public class CefEngine : WebEngine {
             new PatternSpec("https://accounts.google.com/ServiceLogin*"),
             new PatternSpec("https://accounts.google.com/CheckCookie*"),
             new PatternSpec("https://accounts.google.com/AccountChooser*"),
+            new PatternSpec("https://accounts.google.com/Logout*"),
             new PatternSpec("https://accounts.youtube.com/accounts/SetSID?*"),
         };
     }
