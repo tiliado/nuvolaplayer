@@ -1,5 +1,6 @@
 /*
  * Copyright 2020 xcffl <xcffl@protonmail.com>
+ * Copyright 2020 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -60,13 +61,7 @@ public class GecimiLyricsFetcher : GLib.Object, LyricsFetcher {
         }
 
         /* Get lrc content */
-        string lrc_url;
-        try {
-            lrc_url = get_lrc_url(response);
-        } catch (Error e) {
-            throw new LyricsError.PARSE_FAILED(@"Failed to handle responses for song $song from Gecimi Lyrics");
-        }
-
+        string lrc_url = get_lrc_url(response);
         if (lrc_url == "") {
             throw new LyricsError.NOT_FOUND(@"Song $song was not found on Gecimi Lyrics");
         }
@@ -87,19 +82,15 @@ public class GecimiLyricsFetcher : GLib.Object, LyricsFetcher {
     }
 
     private string get_lrc_url (string response) throws LyricsError {
-        var parser = new Json.Parser();
         try {
-            parser.load_from_data(response, -1);
-        } catch (Error e) {
-            throw new LyricsError.PARSE_FAILED(@"Failed to handle responses $response");
+            string url;
+            if (Drt.JsonParser.load_object(response).dotget_string("result.0.lrc", out url)) {
+                return url;
+            }
+            throw new LyricsError.NOT_FOUND("No lyrics in response.");
+        } catch (Drt.JsonError e) {
+            throw new LyricsError.PARSE_FAILED("Failed to parse response: %s", e.message);
         }
-
-        var root_object = parser.get_root().get_object();
-        var results = root_object.get_array_member("result");
-        var best_matched = results.get_elements().first().data.get_object();
-        string lrc_url = best_matched.get_string_member("lrc");
-
-        return lrc_url;
     }
 }
 } // namespace Nuvola
