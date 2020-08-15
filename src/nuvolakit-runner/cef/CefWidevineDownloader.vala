@@ -100,6 +100,30 @@ public class CefWidevineDownloader : GLib.Object, CefPluginDownloader {
                         "Cannot download '%s'. %u %s", CHROME_DEB_URL, msg.status_code, msg.reason_phrase);
                 }
             }
+
+            var checksum = new Checksum(ChecksumType.MD5);
+            yield check_cancelled(cancellable);
+            FileInputStream stream = yield deb_file.read_async(Priority.DEFAULT, cancellable);
+
+            uint8[] buffer = new uint8[4096];
+            ssize_t read_total = 0;
+
+            while (true) {
+                yield check_cancelled(cancellable);
+                ssize_t read = yield stream.read_async(buffer, Priority.DEFAULT, cancellable);
+
+                if (read == 0) {
+                    break;
+                }
+
+                read_total += read;
+                checksum.update(buffer, read);
+            }
+
+            debug(
+                "Downloaded '%s': size %s B, md5 %s.",
+                deb_file.get_path(), read_total.to_string(), checksum.get_string());
+
             progress_text("Reading downloaded archive.");
             yield check_cancelled(cancellable);
             var reader = new ArchiveReader(deb_file.get_path(), 4 * 1024);
