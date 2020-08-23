@@ -87,12 +87,15 @@ public class Connection : GLib.Object {
         session.queue_message(msg, (session, msg) => {resume();});
         yield;
 
-        if (msg.status_code < 200 && msg.status_code >= 300) {
+        if (msg.status_code < 200 || msg.status_code >= 300) {
+            warning("Unexpected status code for '%s': %u %s", uri, msg.status_code, msg.reason_phrase);
+            debug("Data: %s", (string) msg.response_body.flatten().data);
             return false;
         }
 
         unowned Soup.MessageBody body = msg.response_body;
         data = body.flatten().get_as_bytes();
+        debug("Downloaded '%s' (%d bytes).", uri, data.length);
         return true;
     }
 
