@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2020 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -53,7 +53,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler {
     }
 
     public override Gtk.Widget? get_settings(Drtgtk.Application app) {
-        return new ScrobblerSettings(this, app);
+        return new LastfmCompatibleScrobblerSettings(this, app);
     }
 
     /**
@@ -62,7 +62,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler {
      * @return authorization URL
      * @throws AudioScrobblerError on failure
      */
-    public override async string request_authorization() throws AudioScrobblerError {
+    public async string request_authorization() throws AudioScrobblerError {
         // http://www.last.fm/api/show/auth.getToken
         const string API_METHOD = "auth.getToken";
         var params = new HashTable<string, string>(str_hash, str_equal);
@@ -89,7 +89,7 @@ public class LastfmCompatibleScrobbler: AudioScrobbler {
      *
      * @throws AudioScrobblerError on failure
      */
-    public override async void finish_authorization() throws AudioScrobblerError {
+    public async void finish_authorization() throws AudioScrobblerError {
         // http://www.last.fm/api/show/auth.getSession
         const string API_METHOD = "auth.getSession";
         var params = new HashTable<string, string>(str_hash, str_equal);

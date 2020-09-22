@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2020 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -62,26 +62,9 @@ public abstract class AudioScrobbler : GLib.Object {
         throw new AudioScrobblerError.NOT_IMPLEMENTED("Update now playing call is not implemented in %s (%s).", name, id);
     }
 
-    /**
-     * Generates authorization URL to authorize request token
-     *
-     * @return authorization URL
-     * @throws AudioScrobblerError on failure
-     */
-    public abstract async string request_authorization() throws AudioScrobblerError;
-
-    /**
-     * Exchanges authorized request token for session key.
-     *
-     * @throws AudioScrobblerError on failure
-     */
-    public abstract async void finish_authorization() throws AudioScrobblerError;
-
     public abstract void drop_session();
 
     public abstract async void retrieve_username() throws AudioScrobblerError;
-
-
 }
 
 
