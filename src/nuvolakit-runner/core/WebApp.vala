@@ -87,6 +87,7 @@ public class WebApp : GLib.Object {
     public bool allow_insecure_content {get; set; default = false;}
     public double scale_factor {get; set; default = 0.0;}
     public GenericSet<string> categories {get; construct;}
+    public string? deprecation_url {get; construct; default = null;}
     private List<IconInfo?> icons = null;
     private bool icons_set = false;
 
@@ -111,7 +112,7 @@ public class WebApp : GLib.Object {
         int version_major, int version_minor, int version_micro, string? version_revision,
         int api_major, int api_minor, File? data_dir,
         string? requirements, GenericSet<string>? categories, int window_width, int window_height,
-        string? home_url=null) throws WebAppError {
+        string? home_url=null, string? deprecation_url=null) throws WebAppError {
         if (!WebApp.validate_id(id)) {
             throw new WebAppError.INVALID_METADATA("Invalid app id '%s'.", id);
         }
@@ -157,7 +158,7 @@ public class WebApp : GLib.Object {
             version_revision: version_revision, api_major: api_major, api_minor: api_minor,
             data_dir: data_dir, window_width: window_width, window_height: window_height,
             categories: categories ?? new GenericSet<string>(str_hash, str_equal),
-            requirements: requirements, home_url: home_url);
+            requirements: requirements, home_url: home_url, deprecation_url: deprecation_url);
     }
 
     /**
@@ -247,12 +248,13 @@ public class WebApp : GLib.Object {
             categories = DEFAULT_CATEGORY;
         }
         string? requirements = meta.get_string_or("requirements");
+        string? deprecation_url = meta.get_string_or("deprecation_url");
 
         this(id, name, maintainer_name, maintainer_link,
             version_major, version_minor, version_micro, version_revision, api_major, api_minor, data_dir,
             requirements, Drt.String.semicolon_separated_set(categories, true),
             meta.get_int_or("window_width"), meta.get_int_or("window_height"),
-            meta.get_string_or("home_url"));
+            meta.get_string_or("home_url"), deprecation_url);
 
         hidden = meta.get_bool_or("hidden", false);
         dark_theme = meta.get_bool_or("dark_theme", false);
@@ -383,6 +385,10 @@ public class WebApp : GLib.Object {
         builder.add("{sv}", "maintainer", new Variant.string(maintainer_name));
         builder.add("{sv}", "categories", categories_variant);
         return builder.end();
+    }
+
+    public bool is_deprecated() {
+        return !Drt.String.is_empty(deprecation_url);
     }
 
     public static inline int cmp_by_name(WebApp a, WebApp b) {

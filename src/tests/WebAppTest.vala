@@ -26,49 +26,49 @@ public class WebAppTest: Drt.TestCase
     public void test_construct()
     {
         expect_no_error(() => new Nuvola.WebApp(
-            "id", "name", "maintainer_name", "http://maintainer_link", 4, 3, 0, null, 3, 1, null, null, null, 1200, 800),
+            "id", "name", "maintainer_name", "http://maintainer_link", 4, 3, 0, null, 3, 1, null, null, null, 1200, 800, null),
             "valid params");
         expect_error(() => new Nuvola.WebApp(
-            "", "name", "maintainer_name", "http://maintainer_link", 4, 3, 0, null, 3, 1, null, null, null, 1200, 800),
+            "", "name", "maintainer_name", "http://maintainer_link", 4, 3, 0, null, 3, 1, null, null, null, 1200, 800, null),
             "*Invalid app id*", "empty id");
         expect_error(() => new Nuvola.WebApp(
-            "-id", "name", "maintainer_name", "http://maintainer_link", 4, 3, 0, null, 3, 1, null, null, null, 1200, 800),
+            "-id", "name", "maintainer_name", "http://maintainer_link", 4, 3, 0, null, 3, 1, null, null, null, 1200, 800, null),
             "*Invalid app id*", "invalid id");
         expect_error(() => new Nuvola.WebApp(
-            "id", "", "maintainer_name", "http://maintainer_link", 4, 3, 0, null, 3, 1, null, null, null, 1200, 800),
+            "id", "", "maintainer_name", "http://maintainer_link", 4, 3, 0, null, 3, 1, null, null, null, 1200, 800, null),
             "*Empty 'name' entry*", "empty name");
         expect_error(() => new Nuvola.WebApp(
-            "id", "name", "", "http://maintainer_link", 4, 3, 0, null, 3, 1, null, null, null, 1200, 800),
+            "id", "name", "", "http://maintainer_link", 4, 3, 0, null, 3, 1, null, null, null, 1200, 800, null),
             "*Empty 'maintainer_name' entry*", "empty maintainer");
         expect_error(() => new Nuvola.WebApp(
-            "id", "name", "maintainer_name", "", 4, 3, 0, null, 3, 1, null, null, null, 1200, 800),
+            "id", "name", "maintainer_name", "", 4, 3, 0, null, 3, 1, null, null, null, 1200, 800, null),
             "*Empty or invalid 'maintainer_link' entry*", "empty maintainer link");
         expect_error(() => new Nuvola.WebApp(
-            "id", "name", "maintainer_name", "file://maintainer_link", 4, 3, 0, null, 3, 1, null, null, null, 1200, 800),
+            "id", "name", "maintainer_name", "file://maintainer_link", 4, 3, 0, null, 3, 1, null, null, null, 1200, 800, null),
             "*Empty or invalid 'maintainer_link' entry*", "invalid maintainer link");
         expect_error(() => new Nuvola.WebApp(
-            "id", "name", "maintainer_name", "http://maintainer_link", 0, 3, 0, null, 3, 1, null, null, null, 1200, 800),
+            "id", "name", "maintainer_name", "http://maintainer_link", 0, 3, 0, null, 3, 1, null, null, null, 1200, 800, null),
             "*Major version must be greater than zero*", "zero major version");
         expect_error(() => new Nuvola.WebApp(
-            "id", "name", "maintainer_name", "http://maintainer_link", -3, 3, 0, null, 3, 1, null, null, null, 1200, 800),
+            "id", "name", "maintainer_name", "http://maintainer_link", -3, 3, 0, null, 3, 1, null, null, null, 1200, 800, null),
             "*Major version must be greater than zero*", "negative major version");
         expect_error(() => new Nuvola.WebApp(
-            "id", "name", "maintainer_name", "http://maintainer_link", 4, -3, 0, null, 3, 1, null, null, null, 1200, 800),
+            "id", "name", "maintainer_name", "http://maintainer_link", 4, -3, 0, null, 3, 1, null, null, null, 1200, 800, null),
             "*Minor version must be greater or equal to zero*", "invalid minor version");
         expect_error(() => new Nuvola.WebApp(
-            "id", "name", "maintainer_name", "http://maintainer_link", 4, 3, 0, null, -3, 1, null, null, null, 1200, 800),
+            "id", "name", "maintainer_name", "http://maintainer_link", 4, 3, 0, null, -3, 1, null, null, null, 1200, 800, null),
             "*Major api_version must be greater than zero*", "invalid api major");
         expect_error(() => new Nuvola.WebApp(
-            "id", "name", "maintainer_name", "http://maintainer_link", 4, 3, 0, null, 0, 1, null, null, null, 1200, 800),
+            "id", "name", "maintainer_name", "http://maintainer_link", 4, 3, 0, null, 0, 1, null, null, null, 1200, 800, null),
             "*Major api_version must be greater than zero*", "invalid api major");
         expect_error(() => new Nuvola.WebApp(
-            "id", "name", "maintainer_name", "http://maintainer_link", 4, 3, 0, null, 3, -1, null, null, null, 1200, 800),
+            "id", "name", "maintainer_name", "http://maintainer_link", 4, 3, 0, null, 3, -1, null, null, null, 1200, 800, null),
             "*Minor api_version must be greater or equal to zero*", "invalid api minor");
         expect_error(() => new Nuvola.WebApp(
-            "id", "name", "maintainer_name", "http://maintainer_link", 4, 3, 0, null, 3, 1, null, null, null, -1200, 800),
+            "id", "name", "maintainer_name", "http://maintainer_link", 4, 3, 0, null, 3, 1, null, null, null, -1200, 800, null),
             "*Property window_width must be greater or equal to zero*", "invalid window width");
         expect_error(() => new Nuvola.WebApp(
-            "id", "name", "maintainer_name", "http://maintainer_link", 4, 3, 0, null, 3, 1, null, null, null, 1200, -800),
+            "id", "name", "maintainer_name", "http://maintainer_link", 4, 3, 0, null, 3, 1, null, null, null, 1200, -800, null),
             "*Property window_height must be greater or equal to zero*", "invalid window height");
     }
 

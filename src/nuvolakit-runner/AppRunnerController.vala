@@ -342,6 +342,25 @@ public class AppRunnerController: Drtgtk.Application {
         show_error.connect(on_show_error);
         show_warning.connect(on_show_warning);
         info_bar_response.connect(on_info_bar_response);
+
+        show_deprecation();
+    }
+
+    private void show_deprecation() {
+        if (web_app.is_deprecated()) {
+            info_bar_response.connect((id, response_id) => {
+                if (id == "deprecation" && response_id == 0) {
+                    show_uri(web_app.deprecation_url);
+                }
+            });
+
+            show_info_bar(
+                "deprecation",
+                Gtk.MessageType.WARNING,
+                Markup.printf_escaped("<b>%s</b> app is deprecated. It may be removed in future versions.", web_app.name),
+                {"More information"}
+            );
+        }
     }
 
     private void init_web_engine() {
