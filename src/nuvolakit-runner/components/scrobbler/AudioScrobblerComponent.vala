@@ -81,7 +81,11 @@ public class AudioScrobblerComponent: Component {
     protected override bool activate() {
         player = bindings.get_model<MediaPlayerModel>();
         player.set_track_info.connect(on_set_track_info);
-        scrobblers = {new LastfmScrobbler(connection), new LibrefmScrobbler(connection)};
+        scrobblers = {
+            new ListenBrainzScrobbler(connection),
+            new LibrefmScrobbler(connection),
+            new LastfmScrobbler(connection)
+        };
         foreach (unowned AudioScrobbler scrobbler in scrobblers) {
             string base_key = "component.%s.%s.".printf(id, scrobbler.id);
             config.bind_object_property(base_key, scrobbler, "scrobbling_enabled").set_default(true).update_property();
