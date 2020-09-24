@@ -45,7 +45,7 @@ public class AudioScrobblerComponent: Component {
         Drtgtk.Application app, Bindings bindings, Drt.KeyValueStorage? global_config, Drt.KeyValueStorage config, Soup.Session connection) {
         base(
             config, "scrobbler", "Audio Scrobbling",
-            "Integration with audio scrobbling services - Last FM and Libre FM.", "scrobbling");
+            "Integration with audio scrobbling services - Last FM, Libre FM and MusicBrainz.", "scrobbling");
         this.premium = true;
         this.bindings = bindings;
         this.app = app;
