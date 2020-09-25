@@ -70,7 +70,6 @@ public class TipsWidget : Gtk.Grid {
         };
         (unowned string)[] links = {
             "https://medium.com/nuvola-news", "Read Nuvola News blog",
-            "https://plus.google.com/110794636546911932554", "Follow Nuvola on Google+",
             "https://www.facebook.com/nuvolaplayer", "Follow Nuvola on Facebook",
             "https://twitter.com/NuvolaPlayer", "Follow Nuvola on Twitter",
             "https://mastodon.cloud/@nuvola", "Follow Nuvola on Mastodon",
