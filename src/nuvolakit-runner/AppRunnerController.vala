@@ -238,6 +238,10 @@ public class AppRunnerController: Drtgtk.Application {
         config.set_default_value(ConfigKey.GTK_THEME, Drtgtk.DesktopShell.get_gtk_theme());
         if (config.has_key(ConfigKey.GTK_THEME)) {
             string theme_name = config.get_string(ConfigKey.GTK_THEME);
+            if (theme_name == Drtgtk.DesktopShell.get_initial_gtk_theme()) {
+                // Unset the value to track user's global theme.
+                config.unset(ConfigKey.GTK_THEME);
+            }
             if (theme_name != null && theme_name != "") {
                 Drtgtk.DesktopShell.set_gtk_theme(theme_name);
             }
@@ -248,7 +252,6 @@ public class AppRunnerController: Drtgtk.Application {
         if (!Drtgtk.DesktopShell.gtk_theme_exists(theme)) {
             warning("GTK+ theme '%s' does not exist, using '%s' theme instead.", theme, Drtgtk.DEFAULT_GTK_THEME);
             Drtgtk.DesktopShell.set_gtk_theme(Drtgtk.DEFAULT_GTK_THEME);
-            config.set_string(ConfigKey.GTK_THEME, Drtgtk.DEFAULT_GTK_THEME);
         }
         #endif
     }
@@ -952,6 +955,12 @@ public class AppRunnerController: Drtgtk.Application {
             break;
         case ConfigKey.DARK_THEME:
             Gtk.Settings.get_default().gtk_application_prefer_dark_theme = config.get_bool(ConfigKey.DARK_THEME);
+            break;
+        case ConfigKey.GTK_THEME:
+            if (config.has_key(key) && config.get_string(key) == Drtgtk.DesktopShell.get_initial_gtk_theme()) {
+                // Unset the value to track user's global theme.
+                config.unset(ConfigKey.GTK_THEME);
+            }
             break;
         }
         if (web_engine != null) {
