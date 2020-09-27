@@ -246,9 +246,9 @@ public class AppRunnerController: Drtgtk.Application {
         #if FLATPAK
         string theme = Drtgtk.DesktopShell.get_gtk_theme();
         if (!Drtgtk.DesktopShell.gtk_theme_exists(theme)) {
-            warning("GTK+ theme '%s' does not exist, using Greybird theme instead.", theme);
-            Drtgtk.DesktopShell.set_gtk_theme("Greybird");
-            config.set_string(ConfigKey.GTK_THEME, "Greybird");
+            warning("GTK+ theme '%s' does not exist, using '%s' theme instead.", theme, Drtgtk.DEFAULT_GTK_THEME);
+            Drtgtk.DesktopShell.set_gtk_theme(Drtgtk.DEFAULT_GTK_THEME);
+            config.set_string(ConfigKey.GTK_THEME, Drtgtk.DEFAULT_GTK_THEME);
         }
         #endif
     }
