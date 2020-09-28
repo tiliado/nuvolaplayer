@@ -7,6 +7,118 @@ Nuvola Apps Changelog
     [Nuvola Devel mailing list](https://groups.google.com/d/forum/nuvola-player-devel)
     to receive more technical announcements and important information about future development.
 
+Release 4.17.0 - September 28, 2020
+-----------------------------------
+
+This is a concise changelog. Refer to [Nuvola News](https://medium.com/nuvola-news) for a more verbose one and to see
+some screenshots.
+
+### What’s New for Users
+
+* **MusicBrainz Scrobbling**: The most popular scrobbling service is [Last.fm](https://www.last.fm/), which is
+  supported by Nuvola for a long time. There is also a free/open-source alternative [Libre.fm](https://libre.fm/),
+  which was reintroduced in Nuvola 4.16. Nuvola 4.17 adds the third service — MusicBrainz
+  [[GitHub ticket](https://github.com/tiliado/nuvolaruntime/issues/617)].
+
+* **New script - Idagio**: IDAGIO is a paid streaming service specializing in classical music. The company is based
+  in Berlin, Germany.
+
+* **New script - DI.FM**: DI.FM (also known as Digitally Imported) is an Internet radio broadcaster consisting of over
+  90 channels dedicated exclusively to electronic music.
+
+* **New script - Primephonic**: Primephonic is a Dutch-American start-up founded by a team of classical music lovers
+  with the ambition to create a better future for classical music by finally developing a streaming service that gets classical right.
+
+* **Amazon Cloud Player 5.10**:
+  * Add Brazil support [[GitHub issue](https://github.com/tiliado/nuvola-app-amazon-cloud-player/issues/43)].
+  * Add India [[GitHub issue](https://github.com/tiliado/nuvola-app-amazon-cloud-player/issues/40)]
+  * Press PlayAll instead of Play after restart
+    [[GitHub issue](https://github.com/tiliado/nuvola-app-amazon-cloud-player/pull/39)]
+
+* **Deezer script 3.3**:
+  * Fix wrong song data when Deezer is switched to Queue view
+    [[GitHub issue](https://github.com/tiliado/nuvolaruntime/issues/609)]
+  * Disable broken volume management.
+  * Fix the repeat button.
+  * Fix the love button in the queue view.
+
+* **Google Play Music script 6.3**:
+  * Mask as Safari to work around Google sign-in issues.
+   [[GitHub issue](https://github.com/tiliado/nuvolaruntime/issues/575)]
+
+* **Jupiter Broadcasting 1.5**:
+  * Adjust to the Jupiter Broadcasting site redesign.
+  * Add the Friday Stream.
+  * Add Jupiter Extras.
+  * Add Linux Headlines.
+
+* **Sirius XM script 1.6**:
+  * Add Canadian variant [[GitHub issue](https://github.com/tiliado/nuvolaruntime/issues/539)].
+  * Adjust metadata parsing to recent Sirius XM changes.
+
+* **Spotify script 3.2**:
+  * Update a web view screenshot.
+  * Fix playback actions [[GitHub issue](https://github.com/tiliado/nuvolaruntime/issues/563)].
+  * Fix song title and artist retrieval [[GitHub pull request](https://github.com/tiliado/nuvola-app-spotify/pull/27)].
+  * Fix album art retrieval.
+  * Fix volume management.
+
+* **Tidal script 1.1:**
+  * Widevine support for Tidal [[GitHub issue](https://github.com/tiliado/nuvolaruntime/issues/524)]
+  * Adjust metadata parsing to recent Tidal changes.
+
+* **YouTube script 2.2**:
+  * Mask as Safari to work around Google sign-in issues.
+    [[GitHub issue](https://github.com/tiliado/nuvolaruntime/issues/575)]
+  * Fix parsing of track title and artist.
+
+* **YouTube Music script 1.4**:
+  * Mask as Safari to work around Google sign-in issues.
+    [[GitHub issue](https://github.com/tiliado/nuvolaruntime/issues/575)]
+  * Fix Logout action [[GitHub issue](https://github.com/tiliado/nuvolaruntime/issues/616)].
+  * Fix play/pause buttons [[GitHub issue](https://github.com/tiliado/nuvolaruntime/issues/526)].
+  * Remove broken code to skip ads. Purchasing YouTube Music Premium is a better option.
+  * Skip metadata parsing when an ad is playing.
+
+* **Installation Instructions Updated**
+  * Added: [Ubuntu 20.04 LTS Focal Fossa](https://nuvola.tiliado.eu/nuvola/ubuntu/focal/)
+    and [elementaryOS 5.1 Hera](https://nuvola.tiliado.eu/nuvola/elementary/hera/)
+  * Improved:  [Debian](https://nuvola.tiliado.eu/nuvola/debian/), [Fedora](https://nuvola.tiliado.eu/nuvola/fedora/),
+    and [Arch Linux instructions](https://nuvola.tiliado.eu/nuvola/archlinux/).
+  * Removed: Various older releases.
+
+* **Non-media-streaming apps are deprecated.** Non-streaming web apps are deprecated and won’t be available in
+  the upcoming **Nuvola 5**.
+
+* **Qobuz service needs a new maintainer.** The original maintainer lost interest in Qobuz. We are looking for
+  a maintainer residing in the countries where Qobuz is available because we couldn’t overcome very strict geographic
+  checks [[GitHub issue](https://github.com/tiliado/nuvolaruntime/issues/634)]:
+
+* **Other changes**:
+  * Added another allowed URL for Facebook login.
+  * Added [instructions on how to use host Nvidia drivers](https://github.com/tiliado/nuvolaruntime/wiki/Graphics-Drivers#host-driver-as-unmanaged-extension)
+   [[GitHub issue](https://github.com/tiliado/nuvolaruntime/issues/513)].
+  * Added workarounds to address Google sign-in issues
+    [[GitHub issue](https://github.com/tiliado/nuvolaruntime/issues/575)].
+  * A bug that prevented the selection of the Adwaita theme was fixed
+   [[GitHub issue](https://github.com/tiliado/nuvolaruntime/issues/586)].
+  * An issue with multimedia keys in KDE was resolved
+    [[GitHub issue](https://github.com/tiliado/nuvolaruntime/issues/582)].
+  * Nuvola now handles network issues better [[GitHub issue](https://github.com/tiliado/nuvolaruntime/issues/578)].
+  * The lyrics’ sidebar is automatically opened when enabled
+    [[GitHub issue](https://github.com/tiliado/nuvolaruntime/issues/205)].
+  * Fixed a crash in preferences dialog during a license key check
+   [[GitHub issue](https://github.com/tiliado/nuvolaruntime/issues/505)].
+
+### What’s New for Script Maintainers
+
+  * We now accept media streaming apps only. Other apps (e.g. Google Calendar and Google Keep) are deprecated
+    [[GitHub issue](https://github.com/tiliado/nuvolaruntime/issues/576)].
+  * Circle CI jobs are robust against network failure [[GitHub issue](https://github.com/tiliado/nuvolasdk/issues/11)].
+  * Nuvola flatpaks were upgraded to 3.36 [[GitHub issue](https://github.com/tiliado/nuvolaruntime/issues/632)].
+  * Nuvola flatpaks were upgraded to use Vala 0.48
+    [[GitHub issue](https://github.com/tiliado/nuvolaruntime/issues/603)].
+
 Release 4.16.0 - February 24th, 2019
 ------------------------------------
 
