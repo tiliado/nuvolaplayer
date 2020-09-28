@@ -97,7 +97,7 @@ public class AboutScreen: Gtk.Grid {
         attach(label, 2, line, 1, 1);
         line++;
         attach(new Gtk.Label("Copyright"), 1, line, 1, 1);
-        label = new Gtk.Label(Markup.printf_escaped("© 2011-2018 %s", "Jiří Janoušek"));
+        label = new Gtk.Label(Markup.printf_escaped("© 2011-2020 %s", "Jiří Janoušek"));
         label.use_markup = true;
         attach(label, 2, line, 1, 1);
 
