@@ -233,6 +233,10 @@ public class AppRunnerController: Drtgtk.Application {
         web_options = WebOptions.create(typeof(DummyOptions), app_storage, connection);
         #endif
 
+        if (Environment.get_variable("NUVOLA_OFFSCREEN_WEB_ENGINE") == "on") {
+            web_options = WebOptions.create(typeof(OffscreenWebEngineOptions), app_storage, connection);
+        }
+
         config.set_default_value(ConfigKey.GTK_THEME, Drtgtk.DesktopShell.get_gtk_theme());
         if (config.has_key(ConfigKey.GTK_THEME)) {
             string theme_name = config.get_string(ConfigKey.GTK_THEME);
