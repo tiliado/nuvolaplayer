@@ -433,6 +433,7 @@ def configure(ctx):
     pkgconfig(ctx, 'libarchive', 'LIBARCHIVE', '3.2')
     pkgconfig(ctx, 'libpulse', 'LIBPULSE', '0.0')
     pkgconfig(ctx, 'libpulse-mainloop-glib', 'LIBPULSE-GLIB', '0.0')
+    pkgconfig(ctx, 'gl', 'GL', '19.2')
 
     ctx.env.LINT_VALA = ctx.options.lint_vala
     if ctx.env.LINT_VALA:
@@ -685,8 +686,8 @@ def build(ctx):
     valalib(
         target = NUVOLAKIT_RUNNER,
         source_dir = 'src/nuvolakit-runner',
-        packages = packages + ' javascriptcoregtk-4.0 gstreamer-1.0 libsecret-1 dri2 libdrm libarchive prctl libsoup-2.4',
-        uselib =  uselib + ' JSCORE GST SECRET DRI2 DRM LIBARCHIVE SOUP',
+        packages = packages + ' javascriptcoregtk-4.0 gstreamer-1.0 libsecret-1 dri2 libdrm libarchive prctl libsoup-2.4 gl',
+        uselib =  uselib + ' JSCORE GST SECRET DRI2 DRM LIBARCHIVE SOUP GL',
         use = [NUVOLAKIT_BASE, ENGINEIO],
         lib = ['m'],
         includes = ["build"],
