@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2018-2020 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -152,6 +152,10 @@ public class TiliadoPaywall : GLib.Object {
         return gumroad.cached_license;
     }
 
+    public bool has_gumroad_license() {
+        return get_gumroad_license() != null;
+    }
+
     public TiliadoMembership get_gumroad_license_tier() {
         return gumroad.get_tier();
     }
@@ -159,6 +163,9 @@ public class TiliadoPaywall : GLib.Object {
     public async void refresh_data() {
         if (tiliado.get_user_info() == null) {
             tiliado.update_user_info_sync();
+        }
+        if (tiliado.get_user_info() != null && !has_gumroad_license()) {
+            yield migrate_tiliado_account_to_license();
         }
         if (gumroad.needs_refresh) {
             gumroad.refresh_license_sync();
@@ -274,6 +281,37 @@ public class TiliadoPaywall : GLib.Object {
 
     private void on_gumroad_license_changed(GLib.Object emitter, ParamSpec param) {
         update_tier_info();
+    }
+
+    private async void migrate_tiliado_account_to_license() {
+        TiliadoApi2.User user = tiliado.get_user_info();
+
+        if (user.id <= 0 || Drt.String.is_empty(user.username)) {
+            warning("Cannot migrate Tiliado account %d %s to license key.", user.id, user.username);
+        }
+
+        string checksum = Checksum.compute_for_string(ChecksumType.MD5, "%d:%s".printf(user.id, user.username));
+        string key = "%s-%s-%s-%s".printf(
+            checksum.substring(0, 8), checksum.substring(8, 8), checksum.substring(16, 8), checksum.substring(24, 8)
+        );
+        debug("Migrating user %d %s to key %s.", user.id, user.username, key);
+
+        TiliadoLicense? license;
+        bool success;
+        try {
+            success = yield gumroad.verify_license(key, true, out license);
+        } catch (GumroadError e) {
+            warning("License verification failed (%d, %s, %s): %s", user.id, user.username, key, e.message);
+            return;
+        }
+        if (success) {
+            debug("Migration of user %d %s to key %s was successful.", user.id, user.username, key);
+            disconnect_tiliado_account();
+            update_tier_info();
+        } else {
+            warning("Migration of user %d %s to key %s failed: invalid key.", user.id, user.username, key);
+            gumroad.drop_license();
+        }
     }
 }
 
