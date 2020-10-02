@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2018-2020 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -689,7 +689,7 @@ public class TiliadoPaywallWidget : Gtk.Stack {
             }
             details.label = Markup.printf_escaped(
                 "<i>%s</i>\n\nProduct: <a href=\"%s\">%s</a>\nTier: %s", description,
-                "https://gum.co/" + license.license.product_id, license.license.product_name,
+                license.license.product_link ?? "https://nuvola.tiliado.eu/pricing/", license.license.product_name,
                 license.license_tier.get_label());
             this.license = license;
             details.show();

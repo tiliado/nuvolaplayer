@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2016-2020 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -59,6 +59,7 @@ public class GumroadApi : HttpClient {
             throw new GumroadError.LICENSE_ERROR(request.get_reason());
         }
         response["x_product_id"] = new Drt.JsonValue.@string(product_id);
+        response["x_product_link"] = new Drt.JsonValue.@string("https://gum.co/" + product_id);
         response["x_license_key"] = new Drt.JsonValue.@string(license_key);
         return new GumroadLicense.from_json(response);
     }

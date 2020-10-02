@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2018-2020 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -33,6 +33,7 @@ public class GumroadLicense : GLib.Object {
     public bool chargebacked {get; construct;}
     public string? id {get; construct;}
     public string? product_id {get; construct;}
+    public string? product_link {get; construct;}
     public string? product_name {get; construct;}
     public string? license_key {get; construct;}
     public string? full_name {get; construct;}
@@ -47,6 +48,7 @@ public class GumroadLicense : GLib.Object {
 
     public GumroadLicense.from_json(Drt.JsonObject? json) {
         string? product_id = null;
+        string? product_link = null;
         string? license_key = null;
         bool success = false;
         bool refunded = false;
@@ -64,6 +66,7 @@ public class GumroadLicense : GLib.Object {
             success = json.get_bool_or("success", false);
             license_key = json.get_string_or("x_license_key");
             product_id = json.get_string_or("x_product_id");
+            product_link = json.get_string_or("x_product_link");
             Drt.JsonObject? purchase = json.get_object("purchase");
             if (purchase != null) {
                 refunded = purchase.get_bool_or("refunded", false);
@@ -83,7 +86,7 @@ public class GumroadLicense : GLib.Object {
         GLib.Object(
             success: success, valid: success, refunded: refunded, chargebacked: chargebacked,
             id: id, product_id: product_id, product_name: product_name, license_key: license_key,
-            email: email, full_name: full_name, created_at: created_at,
+            email: email, full_name: full_name, created_at: created_at, product_link: product_link,
             cancelled_at: cancelled_at, cancelled: cancelled, failed_at: failed_at, failed: failed
         );
     }
