@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2020 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -81,8 +81,8 @@ public class StartupCheck : GLib.Object {
             TiliadoActivation? activation = TiliadoActivation.create_if_enabled(master.config ?? app.config);
             if (activation != null) {
                 var gumroad = new TiliadoGumroad(
-                    master.config ?? app.config, Drt.String.unmask(TILIADO_OAUTH2_CLIENT_SECRET.data),
-                    activation.tiliado);
+                    master.config ?? app.config, Drt.String.unmask(TILIADO_OAUTH2_CLIENT_SECRET.data)
+                );
                 paywall = new TiliadoPaywall(app, activation, gumroad);
             }
             yield check_tiliado_account(paywall);

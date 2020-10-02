@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2018-2020 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -39,7 +39,7 @@ public class TiliadoGumroad : GLib.Object {
     private static string[] patron_products;
     private bool ignore_config_changed = false;
     private GumroadApi gumroad;
-    private TiliadoApi2 tiliado;
+    private StaticTiliadoLicensesApi tiliado;
 
     static construct {
         basic_products = {"nuv1", "nuvolabasic"};
@@ -47,11 +47,16 @@ public class TiliadoGumroad : GLib.Object {
         patron_products = {"nuv10", "nuvolapatron"};
     }
 
-    public TiliadoGumroad(Drt.KeyValueStorage config, string sign_key, TiliadoApi2 tiliado, GumroadApi? gumroad=null) {
+    public TiliadoGumroad(
+        Drt.KeyValueStorage config,
+        string sign_key,
+        StaticTiliadoLicensesApi? tiliado=null,
+        GumroadApi? gumroad=null
+    ) {
         this.config = config;
         this.sign_key = sign_key;
         this.gumroad = gumroad ?? new GumroadApi(null);
-        this.tiliado = tiliado;
+        this.tiliado = tiliado ?? new StaticTiliadoLicensesApi(null);
         load_cached_data();
         config.changed.connect(on_config_changed);
     }
@@ -92,6 +97,9 @@ public class TiliadoGumroad : GLib.Object {
         string product_id, string license_key, TiliadoMembership tier, bool increment_uses_count
     ) throws GumroadError {
         GumroadLicense? license = yield gumroad.get_license(product_id, license_key, increment_uses_count);
+        if (license == null) {
+            license = yield tiliado.get_license(product_id, license_key, increment_uses_count);
+        }
         if (license == null) {
             return null;
         }

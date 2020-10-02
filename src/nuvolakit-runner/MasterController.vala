@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2014-2020 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -322,7 +322,7 @@ public class MasterController : Drtgtk.Application {
         TiliadoActivation? activation = TiliadoActivation.create_if_enabled(config);
         if (activation != null) {
             var gumroad = new TiliadoGumroad(
-                config, Drt.String.unmask(TILIADO_OAUTH2_CLIENT_SECRET.data), activation.tiliado);
+                config, Drt.String.unmask(TILIADO_OAUTH2_CLIENT_SECRET.data));
             paywall = new TiliadoPaywall(this, activation, gumroad);
             paywall.refresh_data.begin((o, res) => {paywall.refresh_data.end(res);});
         }
