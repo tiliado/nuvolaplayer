@@ -37,6 +37,7 @@ public class TiliadoGumroad : GLib.Object {
     private static string[] basic_products;
     private static string[] premium_products;
     private static string[] patron_products;
+    private static string[] developer_products;
     private bool ignore_config_changed = false;
     private GumroadApi gumroad;
     private StaticTiliadoLicensesApi tiliado;
@@ -45,6 +46,7 @@ public class TiliadoGumroad : GLib.Object {
         basic_products = {"nuv1", "nuvolabasic"};
         premium_products = {"nuv3", "nuvolapremium", "nuvolatest1", "nuvola-pwyw"};
         patron_products = {"nuv10", "nuvolapatron"};
+        developer_products = {"nuvoladeveloper"};
     }
 
     public TiliadoGumroad(
@@ -84,6 +86,13 @@ public class TiliadoGumroad : GLib.Object {
         }
         foreach (unowned string product_id in basic_products) {
             license = yield get_license(product_id, license_key, TiliadoMembership.BASIC, increment_uses_count);
+            if (license != null) {
+                cache_license(license);
+                return true;
+            }
+        }
+        foreach (unowned string product_id in developer_products) {
+            license = yield get_license(product_id, license_key, TiliadoMembership.DEVELOPER, increment_uses_count);
             if (license != null) {
                 cache_license(license);
                 return true;
