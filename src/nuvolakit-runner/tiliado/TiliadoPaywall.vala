@@ -255,7 +255,9 @@ public class TiliadoPaywall : GLib.Object {
 
     public void verify_gumroad_license(string key) {
         verifying_gumroad_license();
-        gumroad.verify_license.begin(key, false, on_gumroad_license_verified);
+        TiliadoLicense? old_license = get_gumroad_license();
+        bool increase = old_license == null || old_license.license.uses < 1 || old_license.license.license_key  != key;
+        gumroad.verify_license.begin(key, increase, on_gumroad_license_verified);
     }
 
     private void on_gumroad_license_verified(GLib.Object? o, AsyncResult res) {

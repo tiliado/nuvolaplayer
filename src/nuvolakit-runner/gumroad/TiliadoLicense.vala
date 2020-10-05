@@ -25,6 +25,7 @@
 namespace Nuvola {
 
 public class TiliadoLicense {
+    private const int USES_COUNT_LIMIT = 600; // 10 devices * 12 months * 5 years
     private const string KEY_GUMROAD = "gumroad";
     private const string KEY_TIER = "tier";
     private const string KEY_VALID = "valid";
@@ -37,7 +38,7 @@ public class TiliadoLicense {
         this.valid = valid;
         this.license = license;
         this.license_tier = tier;
-        this.effective_tier = valid ? tier : TiliadoMembership.NONE;
+        this.effective_tier = is_valid() ? tier : TiliadoMembership.NONE;
     }
 
     public TiliadoLicense.from_json(Drt.JsonObject json) {
@@ -52,10 +53,17 @@ public class TiliadoLicense {
     }
 
     public bool is_valid() {
-        return valid;
+        return valid && !reached_uses_count();
+    }
+
+    public bool reached_uses_count() {
+        return license.uses > USES_COUNT_LIMIT;
     }
 
     public unowned string? get_reason() {
+        if (reached_uses_count()) {
+            return "The license key has been canceled because of abuse.";
+        }
         if (license.refunded) {
             return "The license has been refunded.";
         }

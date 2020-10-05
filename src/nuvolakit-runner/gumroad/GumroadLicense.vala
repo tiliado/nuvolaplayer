@@ -45,6 +45,7 @@ public class GumroadLicense : GLib.Object {
     // Only for subscriptions
     public string? failed_at {get; construct;}
     public bool failed {get; construct;}
+    public int uses {get; construct;}
 
     public GumroadLicense.from_json(Drt.JsonObject? json) {
         string? product_id = null;
@@ -62,8 +63,11 @@ public class GumroadLicense : GLib.Object {
         bool cancelled = false;
         string? failed_at = null;
         bool failed = false;
+        int uses = 0;
+
         if (json != null) {
             success = json.get_bool_or("success", false);
+            uses = json.get_int_or("uses", 0);
             license_key = json.get_string_or("x_license_key");
             product_id = json.get_string_or("x_product_id");
             product_link = json.get_string_or("x_product_link");
@@ -87,7 +91,8 @@ public class GumroadLicense : GLib.Object {
             success: success, valid: success, refunded: refunded, chargebacked: chargebacked,
             id: id, product_id: product_id, product_name: product_name, license_key: license_key,
             email: email, full_name: full_name, created_at: created_at, product_link: product_link,
-            cancelled_at: cancelled_at, cancelled: cancelled, failed_at: failed_at, failed: failed
+            cancelled_at: cancelled_at, cancelled: cancelled, failed_at: failed_at, failed: failed,
+            uses: uses
         );
     }
 
@@ -112,7 +117,9 @@ public class GumroadLicense : GLib.Object {
         builder.set_string_or_null("subscription_failed_at", failed_at);
         builder.end_object();
         builder.set_string_or_null("x_product_id", product_id);
+        builder.set_string_or_null("x_product_link", product_link);
         builder.set_string_or_null("x_license_key", license_key);
+        builder.set_int("uses", uses);
         builder.end_object();
         return builder;
     }

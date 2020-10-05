@@ -685,7 +685,7 @@ public class TiliadoPaywallWidget : Gtk.Stack {
             } else if (tier > TiliadoMembership.NONE) {
                 description = "Thank you for purchasing Nuvola.";
             } else {
-                description = license.get_reason() ?? "License key is not valid.";
+                description = license.get_reason() ?? "License key has been canceled.";
             }
             details.label = Markup.printf_escaped(
                 "<i>%s</i>\n\nOwner: %s\nProduct: <a href=\"%s\">%s</a>\nTier: %s",
