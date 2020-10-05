@@ -96,7 +96,7 @@ public class TiliadoPaywallWidget : Gtk.Stack {
 
         TiliadoLicense? license = paywall.get_gumroad_license();
         if (license != null && gumroad_license_view == null) {
-            var license_view = new GumroadLicenseView(license, {"view-refresh-symbolic", "user-trash-symbolic"});
+            var license_view = new GumroadLicenseView(license, {"document-edit-symbolic", "user-trash-symbolic"});
             license_view.buttons[1].get_style_context().add_class(Gtk.STYLE_CLASS_DESTRUCTIVE_ACTION);
             gumroad_license_view = license_view;
             license_view.response.connect(on_gumroad_license_view_response);
@@ -673,7 +673,7 @@ public class TiliadoPaywallWidget : Gtk.Stack {
         public unowned TiliadoLicense? license = null;
 
         public GumroadLicenseView(TiliadoLicense license, owned string?[]? icon_buttons=null) {
-            base("Gumroad License", (owned) icon_buttons);
+            base("License key", (owned) icon_buttons);
             update(license);
         }
 
@@ -688,9 +688,13 @@ public class TiliadoPaywallWidget : Gtk.Stack {
                 description = license.get_reason() ?? "License key is not valid.";
             }
             details.label = Markup.printf_escaped(
-                "<i>%s</i>\n\nProduct: <a href=\"%s\">%s</a>\nTier: %s", description,
-                license.license.product_link ?? "https://nuvola.tiliado.eu/pricing/", license.license.product_name,
-                license.license_tier.get_label());
+                "<i>%s</i>\n\nOwner: %s\nProduct: <a href=\"%s\">%s</a>\nTier: %s",
+                description,
+                license.license.full_name ?? license.license.email,
+                license.license.product_link ?? "https://nuvola.tiliado.eu/pricing/",
+                license.license.product_name,
+                license.license_tier.get_label()
+            );
             this.license = license;
             details.show();
         }
