@@ -25,7 +25,12 @@ namespace Nuvola.Messaging {
 
 public errordomain Error {
     ENCODE,
-    DECODE;
+    DECODE,
+    REMOTE_ERROR,
+    NOT_FOUND,
+    MALFORMED,
+    NO_DATA,
+    WRITE;
 }
 
 public enum Marker {
@@ -41,6 +46,13 @@ public enum Marker {
     DICT_START,
     DICT_END,
     FD;
+}
+
+public enum MessageType {
+    NONE = 0,
+    REQUEST = 1 << 0,
+    RESPONSE = 1 << 1,
+    NOTIFICATION = 1 << 2;
 }
 
 } // namespace Nuvola.Messaging
