@@ -3,7 +3,9 @@
 from __future__ import annotations
 import ctypes
 import os
-from typing import Any, Union, Dict, List, Tuple
+from typing import Any, Union, Dict, List, Tuple, Optional
+
+import trio
 
 INT_SIZE = ctypes.sizeof(ctypes.c_int)
 """The size of an integer in bytes on current platform."""
@@ -22,12 +24,19 @@ Bytes = Union[bytes, bytearray, memoryview]
 """Types holding binary data which may be read only."""
 
 Value = Union[
-    None, bool, int, float, str, bytes, bytearray, memoryview, Fd,
+    None, bool, int, float, str, bytes, bytearray, memoryview, 'Fd',
     Dict[str, 'Value'], List['Value'], Tuple['Value', ...]]
 
 
 class IPCError(Exception):
     """Inter-process communication error."""
+
+
+class ResponseError(IPCError):
+    def __init__(self, code: int, message: str):
+        super().__init__(code, message)
+        self.code = code
+        self.message = message
 
 
 class Fd:
@@ -99,3 +108,46 @@ class Fd:
         return isinstance(other, Fd) and other._value == self._value
 
 
+class Result:
+    """
+    Synchronization primitive for asynchronous result.
+
+    The initiating tasks waits for the results via `wait` until another task sets value/error
+    via `set`/`fail`.
+
+    """
+
+    value: Optional[Value] = None
+    """The result of an asynchronous task."""
+    error: Optional[Exception] = None
+    """The failure of an asynchronous task."""
+
+    def __init__(self):
+        self._event = trio.Event()
+
+    def set(self, value: Optional[Value] = None) -> None:
+        """Set the result of an asynchronous task and mark it as finished."""
+        self.value = value
+        self._event.set()
+
+    def fail(self, error: Exception) -> None:
+        """Set the failure of an asynchronous task and mark it as finished."""
+        self.error = error
+        self._event.set()
+
+    async def wait(self) -> None:
+        """Wait for the result of an asynchronous task."""
+        await self._event.wait()
+
+    def get(self) -> Optional[Value]:
+        """
+        Get the value or raise an error.
+
+        Returns: The value set with `set`.
+
+        Raises:
+            Exception: Any exception set with `fail`.
+        """
+        if self.error is not None:
+            raise self.error
+        return self.value
