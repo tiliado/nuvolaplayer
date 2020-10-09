@@ -582,8 +582,6 @@ def build(ctx):
         uselib += " VALACEF VALACEFGTK"
 
     vapi_to_patch = []
-    if ctx.env.with_unity:
-        vapi_to_patch.append('unity')
 
     for vapi in vapi_to_patch:
         all_vapi_dirs = [path.format(vala=ctx.env.VALAC_SERIES) for path in (
