@@ -4,6 +4,9 @@ executors:
   fedora:
     docker:
      - image: fedora:32
+       auth:
+         username: $DOCKER_USERNAME
+         password: $DOCKER_PASSWORD
 
 commands:
 
@@ -189,8 +192,12 @@ workflows:
   build:
     jobs:
       # Build with Vala as included in Fedora.
-      - build-vala-fedora
+      - build-vala-fedora:
+          context: docker-hub-tiliado
       # Build with latest stable Vala from git.
-      - build-vala-git-stable
+      - build-vala-git-stable:
+          context: docker-hub-tiliado
       # Build with development Vala from git master.
-      - build-vala-git-master
+      - build-vala-git-master:
+          context: docker-hub-tiliado
+
