@@ -187,17 +187,30 @@ jobs:
       - build-diorite
       - checkout-and-build
 
+x-jobs: &jobs
+  jobs:
+    # Build with Vala as included in Fedora.
+    - build-vala-fedora:
+        context: docker-hub-tiliado
+    # Build with latest stable Vala from git.
+    - build-vala-git-stable:
+        context: docker-hub-tiliado
+    # Build with development Vala from git master.
+    - build-vala-git-master:
+        context: docker-hub-tiliado
+
 workflows:
   version: 2
   build:
-    jobs:
-      # Build with Vala as included in Fedora.
-      - build-vala-fedora:
-          context: docker-hub-tiliado
-      # Build with latest stable Vala from git.
-      - build-vala-git-stable:
-          context: docker-hub-tiliado
-      # Build with development Vala from git master.
-      - build-vala-git-master:
-          context: docker-hub-tiliado
+    <<: *jobs
+  nightly:
+    <<: *jobs
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - master
+                - devel
 
