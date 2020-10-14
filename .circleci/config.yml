@@ -170,9 +170,9 @@ jobs:
     steps:
       - install-common-deps
       - build-vala:
-          branch: "0.48"
+          branch: "0.50"
       - build-valalint:
-          branch: "0.48.x"
+          branch: "0.50.x"
       - build-diorite
       - checkout-and-build
 
