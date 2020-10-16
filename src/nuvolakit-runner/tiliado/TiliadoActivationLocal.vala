@@ -118,7 +118,10 @@ public class TiliadoActivation : GLib.Object {
     }
 
     public void start_activation() {
-        tiliado.start_device_code_grant(TILIADO_OAUTH2_DEVICE_CODE_ENDPOINT);
+        tiliado.start_device_code_grant.begin(
+            TILIADO_OAUTH2_DEVICE_CODE_ENDPOINT,
+            (o, res) => {tiliado.start_device_code_grant.end(res);}
+        );
     }
 
     public void cancel_activation() {
