@@ -374,6 +374,9 @@ public class Socket : GLib.Object {
                     bytes_received(packet.bin_data);
                 }
                 break;
+            default:
+                warning("Packed %s ignored.", packet.type.to_string());
+                break;
             }
         } else {
             debug("packet received with closed socket");

@@ -187,7 +187,11 @@ public class AudioClient: GLib.Object {
                 // PulseAudio remembers mute state, let's do reset.
                 apply_global_mute.begin((o, res) => apply_global_mute.end(res));
                 break;
+            default:
+                break;
             }
+            break;
+        default:
             break;
         }
     }

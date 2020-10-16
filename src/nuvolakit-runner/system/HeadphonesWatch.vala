@@ -88,6 +88,8 @@ public class HeadPhonesWatch: GLib.Object {
                 break;
             case PulseAudio.Context.SubscriptionEventType.REMOVE:
                 break;
+            default:
+                break;
             }
         }
     }
