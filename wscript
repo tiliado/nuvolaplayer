@@ -44,6 +44,15 @@ MIN_GTK = "3.22.30"
 MIN_GEE = "0.20.1"
 MIN_WEBKIT = "2.18.1"
 
+IGNORED_DEPRECATIONS = [
+    "Gdk.Screen.width",
+    "Gdk.Screen.height",
+    "Gtk.StatusIcon",
+    "Gtk.Menu.popup",
+    "Gtk.Widget.override_background_color",
+    "Gtk.StyleContext.get_background_color",
+]
+
 # Extras #
 #========#
 
@@ -337,6 +346,9 @@ def configure(ctx):
     if ctx.options.strict:
         ctx.env.append_unique("VALAFLAGS", ["--fatal-warnings"])
         ctx.env.append_unique("VALADOCFLAGS", ["--fatal-warnings"])
+
+        if IGNORED_DEPRECATIONS:  # Patched Vala compiler required so keep it hidden behind `if ctx.options.strict`.
+            ctx.env.append_unique("VALAFLAGS", ["--ignore-deprecated=" + x for x in IGNORED_DEPRECATIONS])
 
     for path in os.environ.get("LD_LIBRARY_PATH", "").split(":"):
         path = path.strip()
