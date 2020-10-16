@@ -566,6 +566,8 @@ def build(ctx):
 
     vapi_dirs = ['build', 'vapi', 'engineio-soup/vapi']
     env_vapi_dir = os.environ.get("VAPIDIR")
+    vapi_to_patch = []
+
     if env_vapi_dir:
         vapi_dirs.extend(os.path.relpath(path) for path in env_vapi_dir.split(":"))
     if ctx.env.SNAPCRAFT:
@@ -574,14 +576,13 @@ def build(ctx):
     if ctx.env.with_unity:
         packages += " unity Dbusmenu-0.4"
         uselib += " UNITY DBUSMENU"
+        vapi_to_patch.append("dee-1.0")
     if ctx.env.with_appindicator:
         packages += " ayatana-appindicator3-0.1"
         uselib += " APPINDICATOR"
     if ctx.env.have_cef:
         packages += " valacef valacefgtk"
         uselib += " VALACEF VALACEFGTK"
-
-    vapi_to_patch = []
 
     for vapi in vapi_to_patch:
         all_vapi_dirs = [path.format(vala=ctx.env.VALAC_SERIES) for path in (

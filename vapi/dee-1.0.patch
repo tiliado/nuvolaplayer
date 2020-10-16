@@ -1,0 +1,13 @@
+dee-1.0.vapi:75.35-75.44: warning: construct properties not supported for specified property type
+		public Dee.ModelReader reader { construct; }
+		                                ^^^^^^^^^^
+--- orig/dee-1.0.vapi	2020-10-16 10:57:50.291601000 +0200
++++ new/dee-1.0.vapi	2020-10-16 11:14:03.495620239 +0200
+@@ -72,7 +72,6 @@
+ 		public unowned Dee.ModelIter lookup_one (string term);
+ 		public Dee.Analyzer analyzer { get; construct; }
+ 		public Dee.Model model { get; construct; }
+-		public Dee.ModelReader reader { construct; }
+ 	}
+ 	[CCode (cheader_filename = "dee.h", ref_function = "", unref_function = "")]
+ 	[Compact]
