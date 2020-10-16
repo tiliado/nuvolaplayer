@@ -318,6 +318,8 @@ def options(ctx):
     ctx.add_option(
         '--lint-js-auto-fix', action='store_true', default=False,
         dest='lint_js_auto_fix', help="Use JavaScript linter and automatically fix errors (dangerous).")
+    ctx.add_option('--no-strict', action='store_false', default=True,
+        dest='strict', help="Disable strict checks (e.g. fatal warnings).")
 
 def configure(ctx):
     add_version_info(ctx)
@@ -331,6 +333,11 @@ def configure(ctx):
     ctx.env.append_unique("VALAFLAGS", "-v")
     ctx.env.append_unique('CFLAGS', ['-w'])
     ctx.env.append_unique("LINKFLAGS", ["-Wl,--no-undefined", "-Wl,--as-needed"])
+
+    if ctx.options.strict:
+        ctx.env.append_unique("VALAFLAGS", ["--fatal-warnings"])
+        ctx.env.append_unique("VALADOCFLAGS", ["--fatal-warnings"])
+
     for path in os.environ.get("LD_LIBRARY_PATH", "").split(":"):
         path = path.strip()
         if path:

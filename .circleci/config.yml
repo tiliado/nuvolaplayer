@@ -149,7 +149,7 @@ commands:
           working_directory: ~/workdir/nuvolaruntime
           command: |
             ./waf configure build install \
-              --no-unity --no-appindicator --dummy-engine
+              --no-unity --no-appindicator --dummy-engine --no-strict
             LD_LIBRARY_PATH=./build ./build/run-nuvolaruntime-tests
 
 jobs:
