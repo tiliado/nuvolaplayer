@@ -30,7 +30,6 @@ public class AudioScrobblerComponent: Component {
     private Bindings bindings;
     private Drtgtk.Application app;
     private Soup.Session connection;
-    private unowned Drt.KeyValueStorage config;
     private unowned Drt.KeyValueStorage global_config;
     private AudioScrobbler[]? scrobblers = null;
     private MediaPlayerModel? player = null;
@@ -50,7 +49,6 @@ public class AudioScrobblerComponent: Component {
         this.bindings = bindings;
         this.app = app;
         this.global_config = global_config ?? config;
-        this.config = config;
         this.connection = connection;
         has_settings = true;
         auto_activate = false;
