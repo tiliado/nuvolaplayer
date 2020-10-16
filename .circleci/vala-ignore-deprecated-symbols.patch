@@ -1,0 +1,77 @@
+diff --git a/compiler/valacompiler.vala b/compiler/valacompiler.vala
+index 4cf66f3c5..b7c754ce5 100644
+--- a/compiler/valacompiler.vala
++++ b/compiler/valacompiler.vala
+@@ -84,6 +84,8 @@ class Vala.Compiler {
+ 	static bool save_temps;
+ 	[CCode (array_length = false, array_null_terminated = true)]
+ 	static string[] defines;
++	[CCode (array_length = false, array_null_terminated = true)]
++	static string[] ignore_deprecated;
+ 	static bool quiet_mode;
+ 	static bool verbose_mode;
+ 	static Profile profile;
+@@ -135,6 +137,7 @@ class Vala.Compiler {
+ 		{ "thread", 0, OptionFlags.OPTIONAL_ARG | OptionFlags.NO_ARG, OptionArg.CALLBACK, (void*) option_deprecated, "Enable multithreading support (DEPRECATED AND IGNORED)", null },
+ 		{ "enable-mem-profiler", 0, 0, OptionArg.NONE, ref mem_profiler, "Enable GLib memory profiler", null },
+ 		{ "define", 'D', 0, OptionArg.STRING_ARRAY, ref defines, "Define SYMBOL", "SYMBOL..." },
++		{ "ignore-deprecated", 'i', 0, OptionArg.STRING_ARRAY, ref ignore_deprecated, "Ignore deprecated SYMBOL", "SYMBOL..." },
+ 		{ "main", 0, 0, OptionArg.STRING, ref entry_point, "Use SYMBOL as entry point", "SYMBOL..." },
+ 		{ "nostdpkg", 0, 0, OptionArg.NONE, ref nostdpkg, "Do not include standard packages", null },
+ 		{ "disable-assert", 0, 0, OptionArg.NONE, ref disable_assert, "Disable assertions", null },
+@@ -315,6 +318,12 @@ class Vala.Compiler {
+ 			}
+ 		}
+ 
++		if (ignore_deprecated != null) {
++			foreach (string deprecated in ignore_deprecated) {
++				context.add_ignored_deprecated (deprecated);
++			}
++		}
++
+ 		if (packages != null) {
+ 			foreach (string package in packages) {
+ 				context.add_external_package (package);
+diff --git a/vala/valacodecontext.vala b/vala/valacodecontext.vala
+index 6b6665274..1e4696bdf 100644
+--- a/vala/valacodecontext.vala
++++ b/vala/valacodecontext.vala
+@@ -211,6 +211,7 @@ public class Vala.CodeContext {
+ 	private List<string> packages = new ArrayList<string> (str_equal);
+ 
+ 	private Set<string> defines = new HashSet<string> (str_hash, str_equal);
++	private Set<string> ignored_deprecated = new HashSet<string> (str_hash, str_equal);
+ 
+ 	static StaticPrivate context_stack_key = StaticPrivate ();
+ 
+@@ -554,6 +555,17 @@ public class Vala.CodeContext {
+ 	public bool is_defined (string define) {
+ 		return (define in defines);
+ 	}
++	
++	public void add_ignored_deprecated (string deprecated) {
++		if (is_ignored_deprecated (deprecated)) {
++			Report.warning (null, "`%s' is already ignored".printf (deprecated));
++		}
++		ignored_deprecated.add (deprecated);
++	}
++
++	public bool is_ignored_deprecated (string deprecated) {
++		return (deprecated in ignored_deprecated);
++	}
+ 
+ 	void add_default_defines () {
+ 		int api_major = 0;
+diff --git a/vala/valaversionattribute.vala b/vala/valaversionattribute.vala
+index ce46406cd..7bdc6b799 100644
+--- a/vala/valaversionattribute.vala
++++ b/vala/valaversionattribute.vala
+@@ -149,7 +149,7 @@ public class Vala.VersionAttribute {
+ 		bool result = false;
+ 
+ 		// deprecation:
+-		if (symbol.external_package && deprecated) {
++		if (symbol.external_package && deprecated && !context.is_ignored_deprecated (symbol.get_full_name ())) {
+ 			string? package_version = symbol.source_reference.file.installed_version;
+ 
+ 			if (!context.deprecated && (package_version == null || deprecated_since == null || VersionAttribute.cmp_versions (package_version, deprecated_since) >= 0)) {

@@ -88,6 +88,7 @@ commands:
             git clone https://gitlab.gnome.org/GNOME/vala.git -b << parameters.branch >> --depth 500
             cd vala
             ./autogen.sh --prefix=/usr
+            patch -p1 < ~/workdir/nuvolaruntime/.circleci/vala-ignore-deprecated-symbols.patch
             make all
             dnf remove -y --noautoremove vala vala-devel valadoc
             make install
@@ -139,11 +140,13 @@ commands:
             /sbin/ldconfig
             LD_LIBRARY_PATH=./build ./build/run-dioritetests
 
-
-  checkout-and-build:
+  checkout-nuvola:
     steps:
       - checkout:
           path: ~/workdir/nuvolaruntime
+
+  build-nuvola:
+    steps:
       - run:
           name: Build and run Nuvola
           working_directory: ~/workdir/nuvolaruntime
@@ -152,40 +155,52 @@ commands:
               --no-unity --no-appindicator --dummy-engine --no-strict
             LD_LIBRARY_PATH=./build ./build/run-nuvolaruntime-tests
 
+  build-nuvola-strict:
+    steps:
+      - run:
+          name: Build and run Nuvola
+          working_directory: ~/workdir/nuvolaruntime
+          command: |
+            ./waf configure build install \
+              --no-unity --no-appindicator --dummy-engine
+            LD_LIBRARY_PATH=./build ./build/run-nuvolaruntime-tests
 jobs:
 
   build-vala-fedora:
     executor: fedora
     working_directory: ~/workdir
     steps:
+      - checkout-nuvola
       - install-common-deps
       - build-valalint:
           branch: "0.48.x"
       - build-diorite
-      - checkout-and-build
+      - build-nuvola
 
   build-vala-git-stable:
     executor: fedora
     working_directory: ~/workdir
     steps:
+      - checkout-nuvola
       - install-common-deps
       - build-vala:
           branch: "0.50"
       - build-valalint:
           branch: "0.50.x"
       - build-diorite
-      - checkout-and-build
+      - build-nuvola-strict
 
   build-vala-git-master:
     executor: fedora
     working_directory: ~/workdir
     steps:
+      - checkout-nuvola
       - install-common-deps
       - build-vala
       - build-gee
       - build-valalint
       - build-diorite
-      - checkout-and-build
+      - build-nuvola-strict
 
 x-jobs: &jobs
   jobs:
