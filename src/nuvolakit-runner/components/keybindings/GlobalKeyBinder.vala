@@ -95,7 +95,7 @@ public class GlobalKeybinder: GLib.Object {
         return_val_if_fail(keysym != 0, false);
 
         /* Translate virtual modifiers (SUPER, etc.) to real modifiers (Mod2, etc.) */
-        Gdk.Keymap keymap = Gdk.Keymap.get_default();
+        Gdk.Keymap keymap = Gdk.Keymap.get_for_display(Gdk.Display.get_default());
         Gdk.ModifierType modifiers = virt_modifiers;
         if (!keymap.map_virtual_modifiers(ref modifiers)) {
             warning("Failed to map virtual modifiers.");
@@ -128,7 +128,7 @@ public class GlobalKeybinder: GLib.Object {
     private Gdk.FilterReturn event_filter(Gdk.XEvent gdk_xevent, Gdk.Event gdk_event) {
         X.Event* xevent = (X.Event*) gdk_xevent;
         if (xevent->type == X.EventType.KeyPress) {
-            Gdk.Keymap keymap = Gdk.Keymap.get_default();
+            Gdk.Keymap keymap = Gdk.Keymap.get_for_display(Gdk.Display.get_default());
             Gdk.ModifierType event_mods = (Gdk.ModifierType) (xevent.xkey.state & ~lock_modifiers[7]);
             Gdk.ModifierType keyboard_state_mods;
             uint keyval;

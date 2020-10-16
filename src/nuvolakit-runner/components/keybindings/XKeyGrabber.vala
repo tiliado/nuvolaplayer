@@ -39,6 +39,7 @@ public class XKeyGrabber: GLib.Object {
 
     private HashTable<string, uint> keybindings;
     private Gdk.X11.Window? root_window = null;
+    Gdk.Display? display = null;
 
     public XKeyGrabber() {
         keybindings = new HashTable<string, uint>(str_hash, str_equal);
@@ -109,7 +110,7 @@ public class XKeyGrabber: GLib.Object {
         return_val_if_fail(keysym != 0, false);
 
         /* Translate virtual modifiers (SUPER, etc.) to real modifiers (Mod2, etc.) */
-        Gdk.Keymap keymap = Gdk.Keymap.get_default();
+        Gdk.Keymap keymap = Gdk.Keymap.get_for_display(display);
         if (!keymap.map_virtual_modifiers(ref modifiers)) {
             warning("Failed to map virtual modifiers.");
             return false;
@@ -139,7 +140,7 @@ public class XKeyGrabber: GLib.Object {
     private Gdk.FilterReturn event_filter(Gdk.XEvent gdk_xevent, Gdk.Event gdk_event) {
         X.Event* xevent = (X.Event*) gdk_xevent;
         if (xevent->type == X.EventType.KeyPress) {
-            Gdk.Keymap keymap = Gdk.Keymap.get_default();
+            Gdk.Keymap keymap = Gdk.Keymap.get_for_display(display);
             Gdk.ModifierType event_mods = (Gdk.ModifierType) (xevent.xkey.state & ~lock_modifiers[7]);
             Gdk.ModifierType keyboard_state_mods;
             uint keyval;
@@ -167,6 +168,9 @@ public class XKeyGrabber: GLib.Object {
     }
 
     private void setup_display(Gdk.Display display) {
+        if (this.display == null) {
+            this.display = display;
+        }
         if (root_window != null) {
             warning("A display '%s' appeared but the root window had been already set.", display.get_name());
         } else {
