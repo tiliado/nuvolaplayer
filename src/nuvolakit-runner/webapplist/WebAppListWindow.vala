@@ -91,7 +91,6 @@ public class WebAppList : Gtk.Grid {
         categories = new AppCategoriesView();
         categories.hexpand = false;
         categories.no_show_all = true;
-        categories.margin_right = 8;
         categories.no_show_all = true;
         categories.hide();
 
