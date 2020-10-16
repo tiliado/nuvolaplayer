@@ -754,7 +754,7 @@ public class AppRunnerController: Drtgtk.Application {
         label.hexpand = true;
         label.halign = Gtk.Align.START;
         label.set_line_wrap(true);
-        (info_bar.get_content_area() as Gtk.Container).add(label);
+        ((Gtk.Container) info_bar.get_content_area()).add(label);
         info_bar.response.connect(on_close_warning);
         info_bar.show_all();
         main_window.info_bars.add(info_bar);
@@ -789,7 +789,7 @@ public class AppRunnerController: Drtgtk.Application {
         label.hexpand = true;
         label.halign = Gtk.Align.START;
         label.set_line_wrap(true);
-        (info_bar.get_content_area() as Gtk.Container).add(label);
+        ((Gtk.Container) info_bar.get_content_area()).add(label);
         if (buttons != null) {
             for (var i = 0; i < buttons.length; i++) {
                 info_bar.add_button(buttons[i], i);
@@ -802,7 +802,7 @@ public class AppRunnerController: Drtgtk.Application {
             info_bar_response(id, response_id);
             if (response_id == Gtk.ResponseType.CLOSE) {
                 emitter.disconnect(handler_id);
-                (emitter.get_parent() as Gtk.Container).remove(emitter);
+                ((Gtk.Container) emitter.get_parent()).remove(emitter);
                 info_bars.remove(id);
                 emitter.destroy();
             }
@@ -811,7 +811,7 @@ public class AppRunnerController: Drtgtk.Application {
     }
 
     private void on_close_warning(Gtk.InfoBar info_bar, int response_id) {
-        (info_bar.get_parent() as Gtk.Container).remove(info_bar);
+        ((Gtk.Container) info_bar.get_parent()).remove(info_bar);
     }
 
     private bool on_window_state_event(Gdk.EventWindowState event) {

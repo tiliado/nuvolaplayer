@@ -51,7 +51,7 @@ public class Nuvola.Bindings: GLib.Object {
     public ModelType? get_model<ModelType>() {
         foreach (Binding binding in bindings) {
             if (binding is ModelBinding) {
-                var model = (binding as ModelBinding<Object>).model as Object;
+                var model = ((ModelBinding<Object>) binding).model as Object;
                 if (model.get_type().is_a(typeof(ModelType))) {
                     return (ModelType) model;
                 }

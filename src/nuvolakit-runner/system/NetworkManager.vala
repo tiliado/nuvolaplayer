@@ -78,7 +78,7 @@ public interface ActiveConnection : GLib.Object {
 public interface Ip4Config : GLib.Object {
     public uint[]? get_addresses() throws GLib.DBusError, GLib.IOError {
         uint[] result = {};
-        Variant? addresses = (this as DBusProxy).get_cached_property("Addresses");
+        Variant? addresses = ((DBusProxy) this).get_cached_property("Addresses");
         if (addresses == null) {
             return null;
         }
