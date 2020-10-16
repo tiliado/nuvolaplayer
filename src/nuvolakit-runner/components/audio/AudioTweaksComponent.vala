@@ -47,7 +47,13 @@ public class AudioTweaksComponent: Component {
     protected override bool activate() {
         if (audio_client == null) {
             audio_client = new AudioClient();
-            audio_client.start();
+            try {
+                audio_client.start();
+            } catch(AudioError e) {
+                audio_client = null;
+                warning("Failed to start audio client: %s", e.message);
+                return false;
+            }
         }
         headphones_watch = new HeadPhonesWatch(audio_client);
         headphones_watch.notify["headphones-plugged"].connect_after(on_headphones_plugged_changed);

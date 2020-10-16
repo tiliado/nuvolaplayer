@@ -145,25 +145,31 @@ public class Server: Soup.Server {
         if (nm != null) {
             Nm.ActiveConnection[]? connections = nm.get_active_connections();
             if (connections != null) {
-                foreach (Nm.ActiveConnection conn in connections) {
-                    Nm.Ip4Config? ip4_config =  conn.get_ip4_config();
-                    if (ip4_config == null) {
-                        continue;
+                try {
+                    foreach (Nm.ActiveConnection conn in connections) {
+                        Nm.Ip4Config? ip4_config =  conn.get_ip4_config();
+                        if (ip4_config == null) {
+                            continue;
+                        }
+                        uint[]? addresses = ip4_config.get_addresses();
+                        if (addresses == null) {
+                            continue;
+                        }
+                        foreach (uint ip4 in addresses) {
+                            addr_str = "%u.%u.%u.%u".printf(
+                                (ip4 & 0xFF),
+                                (ip4 >> 8) & 0xFF,
+                                (ip4 >> 16) & 0xFF,
+                                (ip4 >> 24) & 0xFF);
+                            key = mk_address_enabled_key(addr_str);
+                            bool enabled = config.has_key(key) ? config.get_bool(key) : false;
+                            this.addresses.append(new Address(addr_str, conn.id, enabled));
+                        }
                     }
-                    uint[]? addresses = ip4_config.get_addresses();
-                    if (addresses == null) {
-                        continue;
-                    }
-                    foreach (uint ip4 in addresses) {
-                        addr_str = "%u.%u.%u.%u".printf(
-                            (ip4 & 0xFF),
-                            (ip4 >> 8) & 0xFF,
-                            (ip4 >> 16) & 0xFF,
-                            (ip4 >> 24) & 0xFF);
-                        key = mk_address_enabled_key(addr_str);
-                        bool enabled = config.has_key(key) ? config.get_bool(key) : false;
-                        this.addresses.append(new Address(addr_str, conn.id, enabled));
-                    }
+                } catch (GLib.DBusError e) {
+                    warning("Unexpected DBus error: %s", e.message);
+                } catch (GLib.IOError e) {
+                    warning("Unexpected IOE error: %s", e.message);
                 }
             }
         }

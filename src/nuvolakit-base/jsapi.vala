@@ -139,7 +139,11 @@ public class JSApi : GLib.Object {
         if (this.env != null) {
             var args = new Variant("(imvmv)", (int32) id, response,
                 error == null ? null : new Variant.string(error.message));
-            env.call_function_sync("Nuvola.Async.respond", ref args, false);
+            try {
+                env.call_function_sync("Nuvola.Async.respond", ref args, false);
+            } catch (GLib.Error e) {
+                warning("Failed to send response: %s", e.message);
+            }
         }
     }
 

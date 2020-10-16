@@ -40,9 +40,13 @@ public class MasterService : GLib.Object {
     }
 
     construct {
-        dbus = Bus.get_proxy_sync<MasterDbusIfce>(
-            BusType.SESSION, Nuvola.get_dbus_id(), Nuvola.get_dbus_path(),
-            DBusProxyFlags.DO_NOT_CONNECT_SIGNALS|DBusProxyFlags.DO_NOT_LOAD_PROPERTIES);
+        try {
+            dbus = Bus.get_proxy_sync<MasterDbusIfce>(
+                BusType.SESSION, Nuvola.get_dbus_id(), Nuvola.get_dbus_path(),
+                DBusProxyFlags.DO_NOT_CONNECT_SIGNALS|DBusProxyFlags.DO_NOT_LOAD_PROPERTIES);
+        } catch (GLib.IOError e) {
+            GLib.error("Failed to connect to dbus service: %s", e.message);
+        }
     }
 
     public bool is_connected() {
