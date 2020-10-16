@@ -40,7 +40,6 @@ public class AppRunnerController: Drtgtk.Application {
     public string dbus_id {get; private set;}
     public string? machine_hash {get; private set; default = null;}
     public MasterService master {get; private set;}
-    private WebOptions[] available_web_options;
     private WebOptions? web_options;
     public WebEngine web_engine {get; private set;}
     public Bindings bindings {get; private set;}
@@ -116,7 +115,7 @@ public class AppRunnerController: Drtgtk.Application {
         debug("Scale factor: %d", about_dialog.scale_factor);
         hold();
         var startup_check = new StartupCheck(this, startup_model, about_dialog, web_app);
-        startup_check.run.begin(available_web_options, on_startup_check_run_done);
+        startup_check.run.begin(web_options, on_startup_check_run_done);
     }
 
     private void on_startup_check_run_done(GLib.Object? object, AsyncResult res) {
@@ -127,7 +126,6 @@ public class AppRunnerController: Drtgtk.Application {
         machine_hash = (owned) startup.machine_hash;
         master = startup.master;
         tiliado_paywall = startup.paywall;
-        web_options = startup.web_options;
 
         switch (status) {
         case StartupStatus.WARNING:
@@ -230,9 +228,9 @@ public class AppRunnerController: Drtgtk.Application {
         connection = new Connection(new Soup.Session(), app_storage.cache_dir.get_child("conn"), config);
 
         #if HAVE_CEF
-        available_web_options = {WebOptions.create(typeof(CefOptions), app_storage, connection)};
+        web_options = WebOptions.create(typeof(CefOptions), app_storage, connection);
         #else
-        available_web_options = {WebOptions.create(typeof(DummyOptions), app_storage, connection)};
+        web_options = WebOptions.create(typeof(DummyOptions), app_storage, connection);
         #endif
 
         config.set_default_value(ConfigKey.GTK_THEME, Drtgtk.DesktopShell.get_gtk_theme());
@@ -454,9 +452,7 @@ public class AppRunnerController: Drtgtk.Application {
     }
 
     public void shutdown_engines() {
-        foreach (WebOptions opt in available_web_options) {
-            opt.shutdown();
-        }
+        web_options.shutdown();
     }
 
     public override void startup() {
@@ -562,7 +558,7 @@ public class AppRunnerController: Drtgtk.Application {
         if (about_dialog == null) {
             about_dialog = new AboutDialog(
                 main_window, storage, new StartupView(this, startup_model), web_app,
-                web_options != null ? new WebOptions[] {web_options} : available_web_options, new PatronBox());
+                web_options, new PatronBox());
             about_dialog.show_close_button(startup_phase == StartupPhase.ALL_DONE);
             about_dialog.response.connect_after(on_about_dialog_response);
         }

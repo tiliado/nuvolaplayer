@@ -68,7 +68,7 @@ public class StartupCheck : GLib.Object {
      *
      * @param available_web_options    WebOptions to try during requirements check.
      */
-    public async StartupStatus run(WebOptions[] available_web_options) {
+    public async StartupStatus run(WebOptions available_web_options) {
         machine_hash = yield Nuvola.get_machine_hash();
         model.task_finished.connect_after(on_phase_1_task_finished);
         check_desktop_portal_available.begin((o, res) => check_desktop_portal_available.end(res));
@@ -133,90 +133,31 @@ public class StartupCheck : GLib.Object {
      *
      * The {@link app_requirements_status} property is populated with the result of this check.
      */
-    public async void check_app_requirements(WebOptions[] available_web_options) {
+    public async void check_app_requirements(WebOptions web_options) {
         model.task_started(Task.APP_REQUIREMENTS);
 
         model.app_requirements_status = StartupStatus.IN_PROGRESS;
         string? result_message = null;
 
-        int n_options = available_web_options.length;
-        assert(n_options > 0);
-        var checks = new WebOptionsCheck[n_options];
-        for (var i = 0; i < n_options; i++) {
-            checks[i] = new WebOptionsCheck(available_web_options[i], web_app);
-        }
+        yield web_options.gather_format_support_info(web_app);
 
-        /* The first pass: Perform requirements check for all web engines and asses the results. */
-        var n_engines_without_unsupported = 0;
-        foreach (WebOptionsCheck check in checks) {
-            try {
-                debug("Checking requirements with %s", check.web_options.get_name_version());
-                check.check_requirements();
-                if (check.parser.n_unsupported == 0) {
-                    n_engines_without_unsupported++;
-                }
-            } catch (Drt.RequirementError e) {
-                Drt.String.append(ref result_message, "\n", Markup.printf_escaped(
-                    "This web app provides invalid metadata about its requirements."
-                    + " Please create a bug report. The error message is: %s\n\n%s",
-                    e.message, check.web_app.requirements));
-                check_app_requirements_finished(StartupStatus.ERROR, (owned) result_message, available_web_options);
-                return;
-            }
-        }
-
-        /* If there is no engine without an unsupported requirement, abort early. */
-        if (n_engines_without_unsupported == 0) {
+        if (web_options.supports_widevine() != Drt.RequirementState.SUPPORTED) {
             Drt.String.append(ref result_message, "\n",
                 "This web app requires certain technologies to function properly but these requirements "
-                + "have not been satisfied.");
-            check_app_requirements_finished(StartupStatus.ERROR, (owned) result_message, available_web_options);
-            warning("Failed requirements: %s", checks[0].parser.failed_requirements ?? "");
-            return;
+                + "have not been satisfied.\n\nContact your distributor to get assistance.");
+            check_app_requirements_finished(StartupStatus.ERROR, (owned) result_message, web_options);
+        } else {
+            this.web_options = web_options;
+            check_app_requirements_finished(StartupStatus.OK, (owned) result_message, web_options);
         }
-
-        /* Select the first engine which satisfies requirements. */
-        foreach (WebOptionsCheck check in checks) {
-            if (check.parser.n_unsupported == 0) {
-                if (check.parser.n_unknown > 0) {
-                    yield check.web_options.gather_format_support_info(check.web_app);
-                    try {
-                        debug("Checking requirements with %s", check.web_options.get_name_version());
-                        check.check_requirements();
-                    } catch (Drt.RequirementError e) {
-                        Drt.String.append(ref result_message, "\n", Markup.printf_escaped(
-                            "This web app provides invalid metadata about its requirements."
-                            + " Please create a bug report. The error message is: %s\n\n%s",
-                            e.message, check.web_app.requirements));
-                        check_app_requirements_finished(StartupStatus.ERROR, (owned) result_message, available_web_options);
-                        return;
-                    }
-                }
-                if (check.parser.n_unsupported + check.parser.n_unknown == 0) {
-                    this.web_options = check.web_options;
-                    check_app_requirements_finished(StartupStatus.OK, (owned) result_message, available_web_options);
-                    return;
-                }
-            }
-        }
-
-        /* No engine satisfies requirements */
-        Drt.String.append(ref result_message, "\n",
-            "This web app requires certain technologies to function properly but these requirements "
-            + "have not been satisfied.\n\nContact your distributor to get assistance.");
-        warning("Failed requirements: %s", checks[0].parser.failed_requirements ?? "");
-        warning("Unknown requirements: %s", checks[0].parser.unknown_requirements ?? "");
-        check_app_requirements_finished(StartupStatus.ERROR, (owned) result_message, available_web_options);
     }
 
-    private void check_app_requirements_finished(StartupStatus status, owned string? message, WebOptions[] web_options) {
+    private void check_app_requirements_finished(StartupStatus status, owned string? message, WebOptions web_options) {
         string msg = (owned) message;
-        foreach (WebOptions web_opt in web_options) {
-            string[] warnings = web_opt.get_format_support_warnings();
-            if (warnings.length > 0) {
-                foreach (unowned string entry in warnings) {
-                    warning("%s: %s", web_opt.get_name(), entry);
-                }
+        string[] warnings = web_options.get_format_support_warnings();
+        if (warnings.length > 0) {
+            foreach (unowned string entry in warnings) {
+                warning("%s: %s", web_options.get_name(), entry);
             }
         }
         model.app_requirements_message = (owned) msg;
@@ -314,24 +255,6 @@ public class StartupCheck : GLib.Object {
         GRAPHICS_DRIVERS,
         TILIADO_ACCOUNT,
         NUVOLA_SERVICE;
-    }
-
-    private class WebOptionsCheck {
-        public WebOptions web_options;
-        public RequirementParser parser;
-        public WebApp web_app;
-
-        public WebOptionsCheck(WebOptions web_options, WebApp web_app) {
-            this.web_options = web_options;
-            this.parser = new RequirementParser(web_options);
-            this.web_app = web_app;
-        }
-
-        public void check_requirements() throws Drt.RequirementError {
-            if (web_app.requirements != null) {
-                parser.eval(web_app.requirements);
-            }
-        }
     }
 }
 

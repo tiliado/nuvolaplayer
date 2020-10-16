@@ -136,13 +136,13 @@ public class MasterUserInterface: GLib.Object {
     }
 
     private void do_about() {
-        var dialog = new AboutDialog(main_window, storage, null, null, {
+        var dialog = new AboutDialog(main_window, storage, null, null,
             #if HAVE_CEF
             new CefOptions(app_storage, null),
             #else
             new DummyOptions(app_storage, null),
             #endif
-        }, new PatronBox());
+            new PatronBox());
         dialog.run();
         dialog.destroy();
     }

@@ -888,12 +888,6 @@ def build(ctx):
             target = 'share/%s/js/%s' % (APPNAME, node),
             install_path = '${PREFIX}/share/%s/js' % APPNAME
         )
-    ctx(
-        rule = 'cp -v ${SRC} ${TGT}',
-        source = ctx.path.find_node("data/audio/audiotest.mp3"),
-        target = 'share/%s/audio/audiotest.mp3' % APPNAME,
-        install_path = '${PREFIX}/share/%s/audio' % APPNAME
-    )
 
     ctx.add_group()
     jslint(source_dir = 'src/mainjs', global_vars=['Nuvola'])

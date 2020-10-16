@@ -25,7 +25,7 @@
 namespace Nuvola {
 
 public class AboutScreen: Gtk.Grid {
-    public AboutScreen(WebApp? web_app, WebOptions[]? web_options) {
+    public AboutScreen(WebApp? web_app, WebOptions? web_options) {
         Pango.AttrList attributes = null;
         Gtk.Label label;
         Gtk.Image? img = null;
@@ -125,11 +125,9 @@ public class AboutScreen: Gtk.Grid {
         label.selectable = true;
         attach(label, 0, ++line, 3, 1);
         if (web_options != null) {
-            foreach (unowned WebOptions entry in web_options) {
-                label = new Gtk.Label("Web Engine: " + entry.get_name_version());
-                label.selectable = true;
-                attach(label, 0, ++line, 3, 1);
-            }
+            label = new Gtk.Label("Web Engine: " + web_options.get_name_version());
+            label.selectable = true;
+            attach(label, 0, ++line, 3, 1);
         }
         label = new Gtk.Label("Network Library: libsoup %u.%u.%u".printf(
             Soup.get_major_version(), Soup.get_minor_version(), Soup.get_micro_version()));
