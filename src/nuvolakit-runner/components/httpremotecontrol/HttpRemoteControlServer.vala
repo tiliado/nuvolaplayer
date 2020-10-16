@@ -535,10 +535,6 @@ public class Server: Soup.Server {
             this.name = name;
             this.enabled = enabled;
         }
-
-        public bool equals(Address other) {
-            return this.address == other.address;
-        }
     }
 
     private class Subscription: GLib.Object {

@@ -148,10 +148,6 @@ public class TiliadoPaywall : GLib.Object {
         return tiliado.has_user_membership(TiliadoMembership.BASIC);
     }
 
-    private bool has_gumroad_license() {
-        return gumroad.cached_license != null;
-    }
-
     public TiliadoLicense? get_gumroad_license() {
         return gumroad.cached_license;
     }

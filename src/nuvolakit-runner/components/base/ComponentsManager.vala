@@ -30,7 +30,6 @@ public class ComponentsManager : PreferencesDialog.SelectorGroup {
     public UpgradeRequiredWidget? membership_widget = null;
     private TiliadoPaywall? paywall = null;
     public TiliadoTierWidget? tier_widget = null;
-    private bool needs_refresh = false;
 
     public ComponentsManager(Drtgtk.Application app, SList<Component> components, TiliadoPaywall? paywall) {
         base(null, null);
