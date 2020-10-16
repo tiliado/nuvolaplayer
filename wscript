@@ -350,6 +350,8 @@ def configure(ctx):
         if IGNORED_DEPRECATIONS:  # Patched Vala compiler required so keep it hidden behind `if ctx.options.strict`.
             ctx.env.append_unique("VALAFLAGS", ["--ignore-deprecated=" + x for x in IGNORED_DEPRECATIONS])
 
+        ctx.env.append_unique('CFLAGS', ['-Wall', '-Werror'])
+
     for path in os.environ.get("LD_LIBRARY_PATH", "").split(":"):
         path = path.strip()
         if path:
