@@ -126,7 +126,7 @@ commands:
           name: Checkout Diorite
           command: |
             if [ -z "$(git ls-remote --heads https://github.com/tiliado/diorite.git "$CIRCLE_BRANCH")" ]; then
-              DIORITE_BRANCH="devel"
+              DIORITE_BRANCH="master"
             else
               DIORITE_BRANCH="$CIRCLE_BRANCH"
             fi
@@ -227,5 +227,5 @@ workflows:
             branches:
               only:
                 - master
-                - devel
+                - release-4.x
 
