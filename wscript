@@ -31,13 +31,13 @@ out = 'build'
 APPNAME = "nuvolaruntime"
 NUVOLA_BIN = "nuvola"
 NUVOLACTL_BIN = "nuvolactl"
-VERSION = "4.17.0"
+VERSION = "4.18.0"
 GENERIC_NAME = "Web Apps"
 BLURB = "Tight integration of web apps with your Linux desktop"
 DEFAULT_HELP_URL = "https://github.com/tiliado/nuvolaruntime/wiki/Third-Party-Builds"
 DEFAULT_WEB_APP_REQUIREMENTS_HELP_URL = DEFAULT_HELP_URL
 
-MIN_DIORITE = "4.17.0"
+MIN_DIORITE = "4.18.0"
 MIN_VALA = "0.48.0"
 MIN_GLIB = "2.56.1"
 MIN_GTK = "3.22.30"
@@ -77,16 +77,20 @@ def get_git_version():
     import subprocess
     if os.path.isdir(".git"):
         output = subprocess.check_output(["git", "describe", "--tags", "--long"])
-        return output.decode("utf-8").strip().split("-")
+        return output.decode("utf-8").strip().rsplit("-", 2)
     return VERSION, "0", REVISION_SNAPSHOT
 
 def add_version_info(ctx):
     bare_version, n_commits, revision_id = get_git_version()
     if revision_id != REVISION_SNAPSHOT:
         revision_id = "{}-{}".format(n_commits, revision_id)
-    versions = list(int(i) for i in bare_version.split("."))
-    versions[2] += int(n_commits)
-    version = "{}.{}.{}".format(*versions)
+    numeric, pre_release = bare_version.split("-", 1) if "-" in bare_version else (bare_version, "")
+    versions = [int(i) for i in numeric.split(".")]
+    if pre_release:
+        pre_release = "-{}{}".format(pre_release, n_commits)
+    else:
+        versions[2] += int(n_commits)
+    version = "{}.{}.{}{}".format(*versions, pre_release)
     release = "{}.{}".format(*versions)
     ctx.env.VERSION = version
     ctx.env.VERSIONS = versions
