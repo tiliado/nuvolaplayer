@@ -77,16 +77,20 @@ def get_git_version():
     import subprocess
     if os.path.isdir(".git"):
         output = subprocess.check_output(["git", "describe", "--tags", "--long"])
-        return output.decode("utf-8").strip().split("-")
+        return output.decode("utf-8").strip().rsplit("-", 2)
     return VERSION, "0", REVISION_SNAPSHOT
 
 def add_version_info(ctx):
     bare_version, n_commits, revision_id = get_git_version()
     if revision_id != REVISION_SNAPSHOT:
         revision_id = "{}-{}".format(n_commits, revision_id)
-    versions = list(int(i) for i in bare_version.split("."))
-    versions[2] += int(n_commits)
-    version = "{}.{}.{}".format(*versions)
+    numeric, pre_release = bare_version.split("-", 1) if "-" in bare_version else (bare_version, "")
+    versions = [int(i) for i in numeric.split(".")]
+    if pre_release:
+        pre_release = "-{}{}".format(pre_release, n_commits)
+    else:
+        versions[2] += int(n_commits)
+    version = "{}.{}.{}{}".format(*versions, pre_release)
     release = "{}.{}".format(*versions)
     ctx.env.VERSION = version
     ctx.env.VERSIONS = versions
