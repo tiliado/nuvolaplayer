@@ -49,6 +49,11 @@ public class TiliadoGumroad : GLib.Object {
         developer_products = {"nuvoladeveloper"};
     }
 
+    public static int get_validity_days(string? product_id) {
+        // TODO: Be less forgiving about invalid data (product_id == null)
+        return product_id == "nuvola-pwyw" ? 366 : -1;
+    }
+
     public TiliadoGumroad(
         Drt.KeyValueStorage config,
         string sign_key,
@@ -112,7 +117,7 @@ public class TiliadoGumroad : GLib.Object {
         if (license == null) {
             return null;
         }
-        return new TiliadoLicense(license, tier, license.valid);
+        return new TiliadoLicense(license, tier, license.valid, TiliadoGumroad.get_validity_days(product_id));
     }
 
     public void cache_license(TiliadoLicense license) {

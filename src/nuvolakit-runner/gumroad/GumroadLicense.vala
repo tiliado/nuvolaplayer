@@ -100,6 +100,27 @@ public class GumroadLicense : GLib.Object {
         this.from_json(Drt.JsonParser.load_object(json));
     }
 
+    public bool is_expired(int validity_days) {
+        if (validity_days <= 0) {
+            return false;
+        }
+        if (Drt.String.is_empty(created_at)) {
+            warning("Created at is empty.");
+            return true;
+        }
+
+        var purchased = new GLib.DateTime.from_iso8601(created_at, new GLib.TimeZone.utc());
+        if (purchased == null) {
+            warning("Failed to parse '%s'.", created_at);
+            return true;
+        }
+
+        GLib.DateTime expires = purchased.add_days(validity_days);
+        debug("Purchased: %s, expires: %s.", purchased.format_iso8601(), expires.format_iso8601());
+
+        return expires.compare(new GLib.DateTime.now_utc()) < 0;
+    }
+
     public Drt.JsonBuilder to_json() {
         var builder = new Drt.JsonBuilder();
         builder.begin_object();
