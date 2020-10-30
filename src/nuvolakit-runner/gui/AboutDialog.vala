@@ -78,7 +78,7 @@ public class AboutDialog: Gtk.Dialog {
     private unowned Gtk.Label? status_label;
     private unowned Gtk.Button? action_button;
 
-    public AboutDialog(Gtk.Window? parent, Drt.Storage storage, StartupView? startup, WebApp? web_app, WebOptions[]? web_options, Gtk.Widget? sidebar) {
+    public AboutDialog(Gtk.Window? parent, Drt.Storage storage, StartupView? startup, WebApp? web_app, WebOptions? web_options, Gtk.Widget? sidebar) {
         GLib.Object(title: "About", transient_for: parent, use_header_bar: 1);
         set_default_size(300, -1);
         var grid = new Gtk.Grid();

@@ -7,6 +7,51 @@ Nuvola Apps Changelog
     [Nuvola Devel mailing list](https://groups.google.com/d/forum/nuvola-player-devel)
     to receive more technical announcements and important information about future development.
 
+Release 4.18.0 - October 30, 2020
+---------------------------------
+
+This is a concise changelog. Refer to [Nuvola News](https://medium.com/nuvola-news) for a more verbose one and to see
+some screenshots.
+
+### What’s New for Users
+
+* **New scripts:** Apple Music and Gaana.
+
+* **Qobuz script** adopted by a new maintainer Romain Berger adjusted to the new design.
+
+* **Pocket Casts script 1.4:** Fix integration of play/pause buttons and volume management
+  [[GitHub Ticket](https://github.com/tiliado/nuvolaruntime/issues/659)].
+
+* **Google Play Music is shutting down.** The integration script in Nuvola is deprecated and will be eventually
+  removed. [[GitHub Ticket](https://github.com/tiliado/nuvolaruntime/issues/660)]
+
+* **Users with Tilado account migrated to license keys.** If you use a Tiliado account to activate Nuvola and haven’t
+  received the e-mail with a license key, please get in touch.
+  [[GitHub Ticket](https://github.com/tiliado/nuvolaruntime/issues/556)].
+
+* **Widevine plugin is mandatory** to ensure it is available in case a streaming service needs it for better audio
+  quality. [[GitHub Ticket](https://github.com/tiliado/nuvolaruntime/issues/647)].
+
+* **Nuvola now persists session cookies**, which prevents Jamendo from forgetting an already logged-in user
+  [[GitHub Ticket](https://github.com/tiliado/nuvolaruntime/issues/567)].
+
+### Under the hood
+
+* **Flatpak manifest refactoring.** Flatpak manifests are recipes used to build Flatpak packages and are now publicly
+  available at [the tiliado/nuvola-flatpaks repository on GitHub](https://github.com/tiliado/nuvola-flatpaks).
+  We also upgraded GNOME SDK to the latest version 3.38
+  [[GitHub ticket](https://github.com/tiliado/nuvolaruntime/issues/641)].
+
+*  Flatpak manifests are checked with our new flatpak-manifest-update tool each day to keep our dependencies
+   up-to-date. [[GitHub Ticket](https://github.com/tiliado/nuvola-flatpaks/issues/2)]
+
+* **Compiler warnings are history.** Nuvola now builds without compiler warnings except for a few deprecations
+  [[GitHub Ticket](https://github.com/tiliado/nuvolaruntime/issues/483)].
+
+* **Reorganization of git branches.** Nuvola and Diorite used to have the *master* branch for releases and *devel*
+  branch for development, but the stable release branch is now called *release-4.x* and branch *master* is used for
+  development. [[GitHub Ticket](https://github.com/tiliado/nuvolaruntime/issues/648)]
+
 Release 4.17.0 - September 28, 2020
 -----------------------------------
 
@@ -27,7 +72,8 @@ some screenshots.
   90 channels dedicated exclusively to electronic music.
 
 * **New script - Primephonic**: Primephonic is a Dutch-American start-up founded by a team of classical music lovers
-  with the ambition to create a better future for classical music by finally developing a streaming service that gets classical right.
+  with the ambition to create a better future for classical music by finally developing a streaming service that gets
+  classical right.
 
 * **Amazon Cloud Player 5.10**:
   * Add Brazil support [[GitHub issue](https://github.com/tiliado/nuvola-app-amazon-cloud-player/issues/43)].

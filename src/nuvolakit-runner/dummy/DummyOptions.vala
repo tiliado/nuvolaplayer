@@ -49,18 +49,7 @@ public class DummyOptions : WebOptions {
         return new DummyEngine(this, web_app);
     }
 
-    public override Drt.RequirementState supports_requirement(string type, string? parameter, out string? error) {
-        error = null;
-        return Drt.RequirementState.UNSUPPORTED;
-    }
-
-    public override Drt.RequirementState supports_feature(string name, out string? error) {
-        error = null;
-        return Drt.RequirementState.UNSUPPORTED;
-    }
-
-    public override Drt.RequirementState supports_codec(string name, out string? error) {
-        error = null;
+    public override Drt.RequirementState supports_widevine() {
         return Drt.RequirementState.UNSUPPORTED;
     }
 
