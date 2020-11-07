@@ -27,7 +27,7 @@ require('prototype')
 /**
  * @enum Names on browser's @link{Actions|actions}
  */
-var BrowserAction = {
+const BrowserAction = {
   /**
    * Go back to the previous page
    */
@@ -49,7 +49,7 @@ var BrowserAction = {
 /**
  * Prototype object for web browser management
  */
-var Browser = Nuvola.$prototype(null)
+const Browser = Nuvola.$prototype(null)
 
 /**
  * Initializes new Browser object
@@ -78,14 +78,14 @@ Browser.$init = function () {
  *   * ``data`` - data argument passed to downloadFileAsync
  */
 Browser.downloadFileAsync = function (uri, basename, callback, data) {
-  var id = this._downloadFileAsyncId++
+  const id = this._downloadFileAsyncId++
   if (this._downloadFileAsyncId >= Number.MAX_VALUE - 1) { this._downloadFileAsyncId = 0 }
   this._downloadFileAsyncCallbacks[id] = [callback, data]
   Nuvola._callIpcMethodVoid('/nuvola/browser/download-file-async', [uri, basename, id])
 }
 
 Browser._downloadDone = function (id, success, statusCode, statusText, filePath, fileURI) {
-  var cb = this._downloadFileAsyncCallbacks[id]
+  const cb = this._downloadFileAsyncCallbacks[id]
   delete this._downloadFileAsyncCallbacks[id]
   if (cb) {
     cb[0]({

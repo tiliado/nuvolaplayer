@@ -1,4 +1,4 @@
-var Nuvola = {}
+const Nuvola = {}
 /**
  * Creates HTML text node
  * @param text  text of the node
@@ -16,9 +16,9 @@ Nuvola.makeText = function (text) {
  * @return              new HTML element
  */
 Nuvola.makeElement = function (name, attributes, text) {
-  var elm = document.createElement(name)
+  const elm = document.createElement(name)
   attributes = attributes || {}
-  for (var key in attributes) {
+  for (const key in attributes) {
     elm.setAttribute(key, attributes[key])
   }
   if (text !== undefined && text !== null) {
@@ -27,15 +27,15 @@ Nuvola.makeElement = function (name, attributes, text) {
   return elm
 }
 
-var RATING_TEXT = ['bad', '-', 'good']
+const RATING_TEXT = ['bad', '-', 'good']
 
-var Player = function () {
+const Player = function () {
   this.playlist = document.getElementById('playlist')
-  var self = this
+  const self = this
 
-  for (var i = 0; i < Player.songs.length; i++) {
-    var song = Player.songs[i]
-    var tr = Nuvola.makeElement('tr')
+  for (let i = 0; i < Player.songs.length; i++) {
+    const song = Player.songs[i]
+    const tr = Nuvola.makeElement('tr')
     tr.appendChild(Nuvola.makeElement('td', null, i))
     tr.appendChild(Nuvola.makeElement('td', null, song.name))
     tr.appendChild(Nuvola.makeElement('td', null, song.artist))
@@ -160,8 +160,8 @@ Player.prototype.setStatus = function (status) {
 
 Player.prototype.setPos = function (pos) {
   this.pos = pos
-  var rows = document.querySelectorAll('#playlist tr')
-  for (var i = 0; i < rows.length; i++) {
+  const rows = document.querySelectorAll('#playlist tr')
+  for (let i = 0; i < rows.length; i++) {
     rows[i].className = i === pos ? 'playing' : ''
   }
 
@@ -170,7 +170,7 @@ Player.prototype.setPos = function (pos) {
   this.timer = 5
 
   if (pos >= 0) {
-    var track = Player.songs[pos]
+    const track = Player.songs[pos]
     this.timer = track.time
     this.elm.timer.innerText = this.timer
     this.elm.track.innerText = track.name
@@ -179,7 +179,7 @@ Player.prototype.setPos = function (pos) {
     this.elm.rating.innerText = RATING_TEXT[track.rating + 1]
     this.elm.nowplaying.style.display = 'inline'
     this.elm.progressbar.style.display = 'block'
-    var totaltime = track.time < 10 ? '0' + track.time : track.time
+    const totaltime = track.time < 10 ? '0' + track.time : track.time
     this.elm.timetotal.innerText = '00:' + totaltime
     this.elm.timeelapsed.innerText = '00:00'
     this.elm.progressmark.style.width = 0 + '%'
@@ -261,8 +261,8 @@ Player.prototype.reset = function () {
 }
 
 Player.prototype.updateProgressBar = function () {
-  var total = Player.songs[this.pos].time
-  var elapsed = total - this.timer
+  const total = Player.songs[this.pos].time
+  let elapsed = total - this.timer
   this.elm.progressmark.style.width = (elapsed / total * 100) + '%'
   elapsed = elapsed < 10 ? '0' + elapsed : elapsed
   this.elm.timeelapsed.innerText = '00:' + elapsed
@@ -270,10 +270,10 @@ Player.prototype.updateProgressBar = function () {
 
 Player.prototype._onProgressBarClicked = function (button, event) {
   if (event.button === 0) {
-    var x = event.clientX
-    var rect = button.getBoundingClientRect()
-    var pos = (x - rect.left) / rect.width
-    var total = Player.songs[this.pos].time
+    const x = event.clientX
+    const rect = button.getBoundingClientRect()
+    const pos = (x - rect.left) / rect.width
+    const total = Player.songs[this.pos].time
     this.timer = total - Math.round(pos * total)
     this.updateProgressBar()
   }

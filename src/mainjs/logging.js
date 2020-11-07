@@ -33,8 +33,8 @@ require('utils')
  * @param Variant data...    other arguments will be used as data for replacement
  */
 Nuvola.log = function (template) {
-  var args = Array.prototype.slice.call(arguments)
-  var message = Nuvola.format.apply(Nuvola, args)
+  const args = Array.prototype.slice.call(arguments)
+  const message = Nuvola.format.apply(Nuvola, args)
   Nuvola._log(message)
 }
 
@@ -47,8 +47,8 @@ Nuvola.log = function (template) {
  * @param Variant data...    other arguments will be used as data for replacement
  */
 Nuvola.warn = function (template) {
-  var args = Array.prototype.slice.call(arguments)
-  var message = Nuvola.format.apply(Nuvola, args)
+  const args = Array.prototype.slice.call(arguments)
+  const message = Nuvola.format.apply(Nuvola, args)
   Nuvola._warn(message)
 }
 

@@ -26,9 +26,9 @@ require('logging')
 
 // Make sure some useful functionality does exist even in bare global object
 
-var argsToString = function (args) {
-  var strings = []
-  for (var i = 0; i < args.length; i++) { strings.push('' + args[i]) }
+const argsToString = function (args) {
+  const strings = []
+  for (let i = 0; i < args.length; i++) { strings.push('' + args[i]) }
   return strings.join(' ')
 }
 

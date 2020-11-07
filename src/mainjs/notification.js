@@ -28,7 +28,7 @@ require('async')
 /**
  * Desktop notification.
  */
-var Notification = Nuvola.$prototype(null)
+const Notification = Nuvola.$prototype(null)
 
 /**
  * Creates new named notification.
@@ -87,7 +87,7 @@ Notification.show = function (force) {
 /**
  * Manages desktop notifications.
  */
-var Notifications = Nuvola.$prototype(null)
+const Notifications = Nuvola.$prototype(null)
 
 /**
  * Convenience method to creates new named notification.
