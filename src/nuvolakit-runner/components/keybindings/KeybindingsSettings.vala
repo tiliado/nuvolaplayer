@@ -70,7 +70,7 @@ public class KeybindingsSettings : Gtk.Grid {
 
         if (global_keybindings == null) {
             var widget = new RuntimeServiceNotAvailableReason(
-                app, "Global keyboard shortcuts are disabled because Nuvola Runtime Service is not available.");
+                app, "Global keyboard shortcuts are disabled because Nuvola Player Service is not available.");
             widget.margin = 10;
             widget.show();
             attach(widget, 0, 1, 1, 1);

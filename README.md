@@ -1,14 +1,13 @@
-Nuvola Apps Runtime [![CircleCI](https://circleci.com/gh/tiliado/nuvolaruntime.svg?style=svg)](https://circleci.com/gh/tiliado/nuvolaruntime)
-===================
+Nuvola Player [![CircleCI](https://circleci.com/gh/tiliado/nuvolaplayer.svg?style=svg)](https://circleci.com/gh/tiliado/nuvolaplayer)
+=============
 
 About Nuvola
 ------------
 
-**Nuvola Apps Runtime™** is a runtime for semi-sandboxed web apps providing more native user experience and tighter
+**Nuvola Player™** provides a tight Linux desktop integration for web-based media streaming services
+such as Spotify, YouTube Music, Apple Music and others. The goal is to achieve more native user experience and tighter
 integration with Linux desktop environments than usual web browsers can offer. It tries to feel and look
 like a native application as much as possible.
-Nuvola™ mostly specializes on music streaming web apps (e.g. Google Play Music, Spotify, Amazon Music, Deezer,
-nd more), but progress is being made to support generic web apps (e.g. Google Calendar, Google Keep, etc.).
 
 **Features of Nuvola:** Desktop launchers, integration with media applets (e.g. in GNOME Shell and Ubuntu sound menu),
 Unity launcher quick list actions, lyrics fetching, Last.fm audio scrobbler, tray icon, desktop notifications,
@@ -50,9 +49,9 @@ Legal
 
 ### Trademark
 
-  * Nuvola™, Nuvola Player™, Nuvola Apps™, Nuvola Apps Runtime™ are trademarks held by Jiří Janoušek,
+  * Nuvola™, Nuvola Player™ are trademarks held by Jiří Janoušek,
     the founder of Nuvola project. You should not use these trademarks without permission.
-  * Nuvola Apps Runtime software is not affiliated with the Nuvola icon theme.
+  * Nuvola Player software is not affiliated with the Nuvola icon theme.
 
 ### Copyright
 

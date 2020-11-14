@@ -84,7 +84,7 @@ public class AboutScreen: Gtk.Grid {
         }
 
         string name = Nuvola.get_app_name();
-        label = new Gtk.Label(name + " Runtime");
+        label = new Gtk.Label(name);
         attributes = new Pango.AttrList() ;
         attributes.insert(new Pango.AttrFontDesc(Pango.FontDescription.from_string("bold")));
         label.attributes = (owned) attributes;
@@ -103,7 +103,7 @@ public class AboutScreen: Gtk.Grid {
 
         #if !GENUINE
         label = new Gtk.Label(
-            "<small>This third-party build is not affiliated with, endorsed by nor supported by the Nuvola Apps Project.</small>");
+            "<small>This third-party build is not affiliated with, endorsed by nor supported by the Nuvola Player Project.</small>");
         label.use_markup = true;
         label.margin = 20;
         label.margin_bottom = 10;
@@ -112,7 +112,7 @@ public class AboutScreen: Gtk.Grid {
         label.show();
         line++;
         attach(label, 0, line, 3, 1);
-        var button = new Gtk.LinkButton.with_label("https://nuvola.tiliado.eu", "Get genuine Nuvola Apps Runtime");
+        var button = new Gtk.LinkButton.with_label("https://nuvola.tiliado.eu", "Get genuine Nuvola Player");
         line++;
         attach(button, 0, line, 3, 1);
         #endif

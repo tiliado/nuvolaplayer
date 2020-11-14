@@ -61,7 +61,7 @@ public class WebAppWindow : Drtgtk.ApplicationWindow {
     public WebAppWindow(AppRunnerController app) {
         base(app, true);
         window_state_event.connect(on_window_state_event);
-        title = "%s • %s Runtime".printf(app.app_name, Nuvola.get_app_name());
+        title = "%s • %s".printf(app.app_name, Nuvola.get_app_name());
         headerbar_title = new Drtgtk.HeaderBarTitle(get_titlebar() == header_bar ? title : null);
         headerbar_title.show();
         header_bar.custom_title = headerbar_title;

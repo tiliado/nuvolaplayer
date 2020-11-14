@@ -37,7 +37,7 @@ public class ComponentsManager : PreferencesDialog.SelectorGroup {
         this.paywall = paywall;
         component_not_available_widget = Drtgtk.Labels.markup(
             "Your distributor has not enabled this feature. It is available in <a href=\"%s\">the genuine flatpak "
-            + "builds of Nuvola Apps Runtime</a> though.", "https://nuvola.tiliado.eu");
+            + "builds of Nuvola Player</a> though.", "https://nuvola.tiliado.eu");
         add_components_to_group();
         if (paywall != null) {
             tier_widget = new TiliadoTierWidget(paywall);

@@ -4,13 +4,14 @@
   <pkgname>nuvolaruntime</pkgname>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>BSD-2-Clause</project_license>
-  <name>@FULL_NAME@ Runtime</name>
-  <summary>Tight integration of web apps with your desktop.</summary>
+  <name>@FULL_NAME@</name>
+  <summary>Tight integration of web-based media streaming services with your desktop.</summary>
   <description>
     <p>
-      @FULL_NAME@ Runtime provides web apps with more native user experience
-      and tighter integration with Linux desktop environments than usual web browsers can offer. It tries to feel and
-      look like a native application as much as possible.
+      @FULL_NAME@ provides a tight Linux desktop integration for web-based media streaming services such as Spotify,
+      YouTube Music, Apple Music and others. The goal is to achieve more native user experience and tighter integration
+       with Linux desktop environments than usual web browsers can offer. It tries to feel and look like a native
+       application as much as possible.
     </p>
     <p>
       Features: desktop launchers, integration with media applets (e.g. in GNOME Shell and Ubuntu sound menu),
@@ -22,9 +23,9 @@
       Support: Users of third-party build should contact the customer care of their distributor.
     </p>
   </description>
-  <url type="homepage">https://github.com/tiliado/nuvolaruntime/wiki/Third-Party-Builds</url>
-  <url type="bugtracker">https://github.com/tiliado/nuvolaruntime/wiki/Third-Party-Builds</url>
-  <url type="help">https://github.com/tiliado/nuvolaruntime/wiki/Third-Party-Builds</url>
+  <url type="homepage">https://github.com/tiliado/nuvolaplayer/wiki/Third-Party-Builds</url>
+  <url type="bugtracker">https://github.com/tiliado/nuvolaplayer/wiki/Third-Party-Builds</url>
+  <url type="help">https://github.com/tiliado/nuvolaplayer/wiki/Third-Party-Builds</url>
   <url type="donation">https://tiliado.eu/nuvolaplayer/funding/</url>
   <updatecontact>janousek.jiri@gmail.com</updatecontact>
   <developer_name>Jiří Janoušek</developer_name>

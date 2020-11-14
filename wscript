@@ -32,8 +32,8 @@ APPNAME = SHORT_ID = "nuvolaruntime"
 NUVOLA_BIN = "nuvola"
 NUVOLACTL_BIN = "nuvolactl"
 VERSION = "4.19.0"
-GENERIC_NAME = "Web Apps"
-BLURB = "Tight integration of web apps with your Linux desktop"
+GENERIC_NAME = "Cloud Player"
+BLURB = "Tight integration of web-based media streaming services with your Linux desktop"
 DEFAULT_HELP_URL = "https://github.com/tiliado/nuvolaruntime/wiki/Third-Party-Builds"
 DEFAULT_WEB_APP_REQUIREMENTS_HELP_URL = DEFAULT_HELP_URL
 
@@ -382,7 +382,7 @@ def configure(ctx):
         ctx.env.APPDATA_XML = "branding/default/appdata.xml"
 
     genuine = branding.get("genuine", False)
-    ctx.env.NAME = branding.get("name", "Web Apps")
+    ctx.env.NAME = branding.get("name", "Cloud Player")
     ctx.env.SHORT_NAME = branding.get("short_name", ctx.env.NAME)
     ctx.env.VENDOR = branding.get("vendor", "unknown")
     ctx.env.WEB_APP_REQUIREMENTS_HELP_URL = branding.get("requirements_help_url", DEFAULT_WEB_APP_REQUIREMENTS_HELP_URL)
@@ -863,7 +863,7 @@ def build(ctx):
         FULL_NAME=ctx.env.NAME,
         PRELUDE=(
             "" if ctx.env.GENUINE
-            else '<p>{} software is based on the open source code from the Nuvola Apps™ project.</p>'.format(ctx.env.NAME)
+            else '<p>{} software is based on the open source code from the Nuvola Player™ project.</p>'.format(ctx.env.NAME)
         ),
         UNIQUE_NAME=ctx.env.UNIQUE_NAME,
     )

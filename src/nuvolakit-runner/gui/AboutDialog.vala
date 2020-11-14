@@ -35,7 +35,7 @@ public void print_version_info(FileStream output, WebApp? web_app) {
     #if GENUINE
     var blurb = "Genuine flatpak build";
     #else
-    var blurb = "based on Nuvola Apps™ project";
+    var blurb = "based on Nuvola Player™ project";
     #endif
     output.printf("%s - %s\n", Nuvola.get_app_name(), blurb);
     output.printf("Version %s\n", Nuvola.get_version());
@@ -103,7 +103,7 @@ public class AboutDialog: Gtk.Dialog {
         }
         #if FLATPAK
         Gtk.Label terms = Drtgtk.Labels.markup(
-            "Nuvola Apps is an open-source project. You can <a href=\"%1$s\">download the entire source code</a> "
+            "Nuvola Player is an open-source project. You can <a href=\"%1$s\">download the entire source code</a> "
             + "for free under the <a href=\"%2$s\">BSD-2-Clause license</a>. Feel free to study it, modify it, build "
             + "Nuvola for you, or even distribute it further.\n\n"
             + "The official flatpak builds of Nuvola require <a href=\"%3$s\">a purchase</a> to unlock some features "
@@ -115,8 +115,8 @@ public class AboutDialog: Gtk.Dialog {
             + "We collect only the data we need to provide you with our services. We don't sell your personal "
             + "information. If you have any questions, feedback or a data removal request, "
             + "don't hesitate to contact support: <a href=\"mailto:%5$s\">%5$s</a>",
-            "https://github.com/tiliado/nuvolaruntime",
-            "https://github.com/tiliado/nuvolaruntime/blob/master/LICENSE",
+            "https://github.com/tiliado/nuvolaplayer",
+            "https://github.com/tiliado/nuvolaplayer/blob/master/LICENSE",
             "https://nuvola.tiliado.eu/pricing/",
             "https://tiliado.eu/privacy/",
             "support@tiliado.eu");
@@ -232,11 +232,11 @@ public class AboutDialog: Gtk.Dialog {
         string? old_screen_name = config.get_string("nuvola.welcome_screen");
         if (force || old_screen_name != get_welcome_screen_name()) {
             string pattern = (Drt.String.is_empty(old_screen_name)
-                ? "You have installed <b>%s %s %s</b>. <a href=\"%s\">What's new?</a>"
-                : "You have upgraded to <b>%s %s %s</b>. <a href=\"%s\">What's new?</a>"
+                ? "You have installed <b>%s %s</b>. <a href=\"%s\">What's new?</a>"
+                : "You have upgraded to <b>%s %s</b>. <a href=\"%s\">What's new?</a>"
             );
             Gtk.Label label = Drtgtk.Labels.markup(
-                pattern, get_app_name(), "Runtime", get_short_version(),
+                pattern, get_app_name(), get_short_version(),
                 Drt.String.not_empty_or(Nuvola.NEWS_URL, Nuvola.HELP_URL));
             label.yalign = 0.5f;
             show_tab(TAB_TIPS);

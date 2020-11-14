@@ -143,7 +143,7 @@ public class AppRunnerController: Drtgtk.Application {
                 app_name, Nuvola.HELP_URL);
             #else
             Gtk.Label label = Drtgtk.Labels.markup(
-                "<b>%s script cannot start.</b>\n<a href=\"%s\">Get genuine Nuvola Apps Runtime</a>"
+                "<b>%s script cannot start.</b>\n<a href=\"%s\">Get genuine Nuvola Player</a>"
                 + " or contact your distributor.", app_name, "https://nuvola.tiliado.eu");
             #endif
             about_dialog.show_action(label, "Quit", Gtk.ResponseType.OK, Gtk.MessageType.ERROR);
@@ -761,7 +761,7 @@ public class AppRunnerController: Drtgtk.Application {
                 do_preferences();
                 break;
             case 1:
-                show_uri("https://github.com/tiliado/nuvolaruntime/wiki/GTK-Themes");
+                show_uri("https://github.com/tiliado/nuvolaplayer/wiki/GTK-Themes");
                 break;
             }
             break;

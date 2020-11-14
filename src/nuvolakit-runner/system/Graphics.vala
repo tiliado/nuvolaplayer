@@ -78,7 +78,7 @@ public void ensure_gl_extension_mounted(Gtk.Window? parent_window) {
             parent_window, Gtk.DialogFlags.MODAL, Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE,
             ("<b><big>Missing Graphics Driver</big></b>\n\n"
                 + "Graphics driver '%s' for Flatpak has not been found on your system. "
-                + "Please consult <a href=\"https://github.com/tiliado/nuvolaruntime/wiki/Graphics-Drivers\">documentation "
+                + "Please consult <a href=\"https://github.com/tiliado/nuvolaplayer/wiki/Graphics-Drivers\">documentation "
                 + "on graphics drivers</a> to get help with installation."), gl_extension);
         Timeout.add_seconds(120, () => { dialog.destroy(); return false;});
         dialog.run();

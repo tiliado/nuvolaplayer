@@ -1,4 +1,4 @@
-Nuvola Apps Changelog
+Nuvola Player Changelog
 =======================
 
   * Release announcements for users are posted to [Nuvola News blog](https://medium.com/nuvola-news)

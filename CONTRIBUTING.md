@@ -1,23 +1,23 @@
-Contributing to Nuvola Apps Project
-===================================
+Contributing to Nuvola Player Project
+=====================================
 
-:+1::tada: It seems you would like to contrubute to the Nuvola Apps project. Great to have you here.
+:+1::tada: It seems you would like to contrubute to the Nuvola Player project. Great to have you here.
 Here are a few ways you can help make Nuvola better! :tada::+1:
-_[Nuvola Apps Team](https://tiliado.eu/nuvolaplayer/team/)_
+_[Nuvola Player Team](https://tiliado.eu/nuvolaplayer/team/)_
 
 Bug Reporting
 -------------
 
-Whenever you encounter a bug in Nuvola Apps Runtime, don't hesitate to report it. First of all, it is necessary to
+Whenever you encounter a bug in Nuvola Player, don't hesitate to report it. First of all, it is necessary to
 submit your issue to the right place:
 
 * Contact [Tiliado support](mailto:support@tiliado.eu) to report issues with Tiliado.eu website (tiliado.eu domain),
   your Tiliado account and memberships.
 
-* Use [the Nuvola Apps Users mailing list](https://groups.google.com/d/forum/nuvola-player-users) to ask general
+* Use [the Nuvola Player Users mailing list](https://groups.google.com/d/forum/nuvola-player-users) to ask general
   questions about Nuvola.
 
-* Finally, for reporting issues and bugs of the Nuvola Apps Runtme and supported services, follow
+* Finally, for reporting issues and bugs of the Nuvola Player and supported services, follow
   [the Bug Reporting Guidelines](https://github.com/tiliado/nuvolaruntime/wiki/Bug-Reporting-Guidelines).
 
 Feature Requests
@@ -32,7 +32,7 @@ Please provide as much detail and context as possible.
 Web App Script
 --------------
 
-Web App Scripts (service integration scripts) run in the web interface and communicates with Nuvola Apps Runtime.
+Web App Scripts (service integration scripts) run in the web interface and communicates with Nuvola Player.
 If you want to add support for a new service, follow
 [Service Integration Development guides](http://tiliado.github.io/nuvolaplayer/development/apps.html).
 
@@ -46,7 +46,7 @@ If you want to add support for a new service, follow
 Core Development
 ----------------
 
-Nuvola Apps Runtime is currently badly documented. We hope to improve it in the future.
+Nuvola Player is currently badly documented. We hope to improve it in the future.
 If you are interested in core development, get in touch with us on
 [Nuvola Devel mailing list](https://groups.google.com/d/forum/nuvola-player-devel).
 
