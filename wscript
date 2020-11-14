@@ -657,10 +657,6 @@ def build(ctx):
         source_dir = 'src/control',
         checks=VALALINT_CHECKS
     )
-    valalint(
-        source_dir = 'src/nuvolakit-worker',
-        checks=VALALINT_CHECKS
-    )
 
     ctx.add_group()
 
