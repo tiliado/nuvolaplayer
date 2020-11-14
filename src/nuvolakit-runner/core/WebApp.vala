@@ -266,11 +266,6 @@ public class WebApp : GLib.Object {
         return build_uid_from_app_id(this.id, Nuvola.get_app_uid());
     }
 
-    public string get_dbus_id() {
-        return build_uid_from_app_id(this.id, Nuvola.get_dbus_id())
-        .replace("NuvolaCdkApp", "NuvolaCdk.App").replace("NuvolaAdkApp", "NuvolaAdk.App");
-    }
-
     public string get_icon_name() {
         return get_uid();
     }

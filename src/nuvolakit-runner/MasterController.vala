@@ -57,7 +57,7 @@ public class MasterController : Drtgtk.Application {
 
     public MasterController(Drt.Storage storage, WebAppRegistry? web_app_reg, string[] exec_cmd,
         bool debuging=false) {
-        base(Nuvola.get_app_uid(), Nuvola.get_app_name(), Nuvola.get_dbus_id());
+        base(Nuvola.get_app_uid(), Nuvola.get_app_name());
         icon = Nuvola.get_app_icon();
         version = Nuvola.get_version();
         this.storage = storage;
@@ -163,7 +163,7 @@ public class MasterController : Drtgtk.Application {
         var key_grabber = new XKeyGrabber();
         var key_binder = new GlobalActionsKeyBinder(key_grabber, config);
         actions_key_binder = new ActionsKeyBinderServer(server, key_binder, app_runners);
-        media_keys = new MediaKeysServer(new MediaKeys(this.app_id, key_grabber), server, app_runners);
+        media_keys = new MediaKeysServer(new MediaKeys(this.application_id, key_grabber), server, app_runners);
 
         #if EXPERIMENTAL
         storage.assert_data_file("www/engine.io.js");

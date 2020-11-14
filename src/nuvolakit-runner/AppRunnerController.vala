@@ -37,7 +37,6 @@ public class AppRunnerController: Drtgtk.Application {
     public WebAppWindow? main_window {get; protected set; default = null;}
     public WebApp web_app {get; protected set;}
     public WebAppStorage app_storage {get; protected set;}
-    public string dbus_id {get; private set;}
     public string? machine_hash {get; private set; default = null;}
     public MasterService master {get; private set;}
     private WebOptions? web_options;
@@ -67,11 +66,9 @@ public class AppRunnerController: Drtgtk.Application {
     public AppRunnerController(
         Drt.Storage storage, WebApp web_app, WebAppStorage app_storage) {
         string uid = web_app.get_uid();
-        string dbus_id = web_app.get_dbus_id();
-        base(uid, web_app.name, dbus_id);
+        base(uid, web_app.name);
         this.web_app = web_app;
         this.storage = storage;
-        this.dbus_id = dbus_id;
         this.icon = web_app.get_icon_name();
         this.version = "%d.%d".printf(web_app.version_major, web_app.version_minor);
         this.app_storage = app_storage;

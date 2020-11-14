@@ -147,7 +147,7 @@ public int main(string[] args) {
     Drt.RpcChannel client;
     GLib.Socket? socket = null;
     try {
-        string uid = WebApp.build_uid_from_app_id(opt_app, Nuvola.get_dbus_id());
+        string uid = WebApp.build_uid_from_app_id(opt_app, Nuvola.get_app_uid());
         string path = "/" + uid.replace(".", "/");
         AppDbusIfce app_api = Bus.get_proxy_sync<AppDbusIfce>(
             BusType.SESSION, uid, path,

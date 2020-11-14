@@ -230,7 +230,7 @@ public class StartupCheck : GLib.Object {
 
     private void connect_master_service() {
         var master = new MasterService();
-        if (master.init(app.ipc_bus, this.web_app.id, app.dbus_id)) {
+        if (master.init(app.ipc_bus, this.web_app.id, app.application_id)) {
             model.nuvola_service_status = StartupStatus.OK;
         } else if (master.error is MasterServiceError.OTHER) {
             model.nuvola_service_status = StartupStatus.OK;

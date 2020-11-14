@@ -56,19 +56,15 @@ public string get_app_uid() {
     return UNIQUE_NAME;
 }
 
-public string get_dbus_id() {
-    return get_app_uid();
-}
-
 public string get_dbus_path() {
-    return "/" + get_dbus_id().replace(".", "/");
+    return "/" + get_app_uid().replace(".", "/");
 }
 
 public string get_app_icon() {
     return APP_ICON;
 }
 
-public string get_app_id() {
+public string get_app_short_id() {
     return APPNAME;
 }
 

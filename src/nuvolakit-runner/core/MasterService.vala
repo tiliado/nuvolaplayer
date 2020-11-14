@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2018-2020 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -42,7 +42,7 @@ public class MasterService : GLib.Object {
     construct {
         try {
             dbus = Bus.get_proxy_sync<MasterDbusIfce>(
-                BusType.SESSION, Nuvola.get_dbus_id(), Nuvola.get_dbus_path(),
+                BusType.SESSION, Nuvola.get_app_uid(), Nuvola.get_dbus_path(),
                 DBusProxyFlags.DO_NOT_CONNECT_SIGNALS|DBusProxyFlags.DO_NOT_LOAD_PROPERTIES);
         } catch (GLib.IOError e) {
             GLib.error("Failed to connect to dbus service: %s", e.message);
