@@ -819,18 +819,24 @@ def build(ctx):
     )
 
     PC_CFLAGS = ""
+    # https://www.bassi.io/articles/2018/03/15/pkg-config-and-paths/
+    PREFIX = ctx.env.PREFIX
+    PC_PATHS = {}
+    for name in "LIBDIR", "INCLUDEDIR", "DATADIR":
+        path = getattr(ctx.env, name)
+        PC_PATHS[name] = "${prefix}" + path[len(PREFIX):] if path.startswith(PREFIX + "/") else path
+
     ctx(features = 'subst',
         source='src/nuvolakitbase.pc.in',
         target='{}-base.pc'.format(SHORT_ID),
         install_path='${LIBDIR}/pkgconfig',
         VERSION=ctx.env.RELEASE,
-        PREFIX=ctx.env.PREFIX,
-        INCLUDEDIR = ctx.env.INCLUDEDIR,
-        LIBDIR = ctx.env.LIBDIR,
+        PREFIX=PREFIX,
         SHORT_ID=SHORT_ID,
         PC_CFLAGS=PC_CFLAGS,
         LIBNAME=NUVOLAKIT_BASE,
         DIORITE_GLIB=DIORITE_GLIB,
+        **PC_PATHS,
     )
 
     ctx(features = 'subst',
@@ -838,15 +844,14 @@ def build(ctx):
         target='{}-runner.pc'.format(SHORT_ID),
         install_path='${LIBDIR}/pkgconfig',
         VERSION=ctx.env.RELEASE,
-        PREFIX=ctx.env.PREFIX,
-        INCLUDEDIR = ctx.env.INCLUDEDIR,
-        LIBDIR = ctx.env.LIBDIR,
+        PREFIX=PREFIX,
         SHORT_ID=SHORT_ID,
         PC_CFLAGS=PC_CFLAGS,
         LIBNAME=NUVOLAKIT_RUNNER,
         NUVOLAKIT_BASE=NUVOLAKIT_BASE,
         DIORITE_GLIB=DIORITE_GLIB,
         DIORITE_GTK=DIORITE_GTK,
+        **PC_PATHS,
     )
 
     ctx(

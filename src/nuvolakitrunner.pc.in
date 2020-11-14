@@ -1,5 +1,6 @@
 prefix=@PREFIX@
 libdir=@LIBDIR@
+datadir=@DATADIR@
 includedir=@INCLUDEDIR@
 
 Name: NuvolaKitRunner
