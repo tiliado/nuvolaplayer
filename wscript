@@ -437,6 +437,7 @@ def configure(ctx):
     pkgconfig(ctx, 'libarchive', 'LIBARCHIVE', '3.2')
     pkgconfig(ctx, 'libpulse', 'LIBPULSE', '0.0')
     pkgconfig(ctx, 'libpulse-mainloop-glib', 'LIBPULSE-GLIB', '0.0')
+    pkgconfig(ctx, 'libmusicbrainz5', 'MB5', '5.0')
 
     ctx.env.LINT_VALA = ctx.options.lint_vala
     if ctx.env.LINT_VALA:
@@ -586,8 +587,8 @@ def build(ctx):
 
     packages = 'dioritegtk{0} dioriteglib{0} '.format(TARGET_DIORITE)
     packages += 'javascriptcore javascriptcoregtk-4.0 libnotify libarchive gtk+-3.0 gdk-3.0 gdk-x11-3.0 x11 posix json-glib-1.0 glib-2.0 gio-2.0'
-    packages += ' libpulse-mainloop-glib gee-0.8'
-    uselib = 'NOTIFY JSCORE LIBARCHIVE DIORITEGTK DIORITEGLIB GTK+ GDK GDKX11 X11 JSON-GLIB GLIB GIO LIBPULSE LIBPULSE-GLIB GEE'
+    packages += ' libpulse-mainloop-glib gee-0.8 libmusicbrainz5'
+    uselib = 'NOTIFY JSCORE LIBARCHIVE DIORITEGTK DIORITEGLIB GTK+ GDK GDKX11 X11 JSON-GLIB GLIB GIO LIBPULSE LIBPULSE-GLIB GEE MB5'
 
     vapi_dirs = ['build', 'vapi', 'engineio-soup/vapi']
     env_vapi_dir = os.environ.get("VAPIDIR")

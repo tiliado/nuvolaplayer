@@ -116,6 +116,77 @@ public class AppRunnerController: Drtgtk.Application {
         hold();
         var startup_check = new StartupCheck(this, startup_model, about_dialog, web_app);
         startup_check.run.begin(web_options, on_startup_check_run_done);
+        var q = new Mb5.Query("Nuvola/4");
+        string[] names = {"query", "limit"};
+        string[] values = {"+type:song AND +artist:\"Billy Talent\" AND (+work:\"Surrender\" OR +alias:\"Surrender\")", "1"};
+        Mb5.Metadata data = q.query("work", null, null, names, values);
+        Mb5.Result result = q.get_lastresult();
+        if (result != Mb5.Result.Success || data == null) {
+            warning("Last result: %s", result.to_string());
+            return;
+        }
+        unowned Mb5.WorkList works = data.get_worklist();
+        if (works == null || works.size == 0) {
+            warning("Failed to find");
+            return;
+        }
+
+        unowned Mb5.Work work = works[0];
+        uint8 buffer[256];
+        work.get_id(buffer);
+        var id = (string) buffer;
+        work.get_title(buffer);
+        var title = (string) buffer;
+        warning("'%s' '%s'", id, title);
+
+        names = {"inc"};
+        values = {"url-rels"};
+        data = q.query("work", id, null, names, values);
+        result = q.get_lastresult();
+
+        if (result != Mb5.Result.Success || data == null) {
+            warning("Work fail : %s", result.to_string());
+            return;
+        }
+
+        work = data.get_work();
+        if (work == null) {
+            warning("work null");
+            return;
+        }
+
+        unowned Mb5.RelationListList all_relations = work.get_relationlistlist();
+        if (all_relations == null) {
+            warning("all_relations null");
+            return;
+        }
+
+        for (var i = 0; i < all_relations.size; i++) {
+            warning("all_relations[%d]", i);
+            unowned Mb5.RelationList relations = all_relations[i];
+            if (relations == null) {
+                warning("null relations %d", i);
+                continue;
+            }
+
+            for (var j = 0; j < relations.size; j++) {
+                unowned Mb5.Relation relation = relations[j];
+                relation.get_type(buffer);
+                var type = (string) buffer;
+                relation.get_target(buffer);
+                var target = (string) buffer;
+                warning("%d %d '%s' '%s'", i, j, type, target);
+                if (type == "lyrics") {
+                    warning("Got lyrics URL: %s", target);
+                    break;
+                }
+            }
+        }
+
+
+
+        data = null;
+        q = null;
     }
 
     private void on_startup_check_run_done(GLib.Object? object, AsyncResult res) {
