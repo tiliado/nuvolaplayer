@@ -24,7 +24,6 @@
 
 namespace Nuvola {
 private extern const string APPNAME;
-private extern const string OLDNAME;
 private extern const string NAME;
 private extern const string WELCOME_SCREEN_NAME;
 private extern const string UNIQUE_NAME;
@@ -66,10 +65,6 @@ public string get_app_icon() {
 
 public string get_app_short_id() {
     return APPNAME;
-}
-
-public string get_old_id() {
-    return OLDNAME;
 }
 
 public string get_app_name() {

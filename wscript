@@ -482,7 +482,6 @@ def configure(ctx):
 
     vala_def(ctx, "TRUE")
     ctx.define("NUVOLA_APPNAME", APPNAME)
-    ctx.define("NUVOLA_OLDNAME", "nuvolaplayer3")
     ctx.define("NUVOLA_NAME", ctx.env.NAME)
     ctx.define("NUVOLA_WELCOME_SCREEN_NAME", ctx.env.RELEASE)
     ctx.define("NUVOLA_UNIQUE_NAME", ctx.env.UNIQUE_NAME)
