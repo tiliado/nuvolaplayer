@@ -7,4 +7,4 @@ Description: Nuvola Apps Runner Library
 Version: @VERSION@
 Requires.private: glib-2.0 @DIORITE_GLIB@ @DIORITE_GTK@ @NUVOLAKIT_BASE@
 Libs: -L${libdir} -l@LIBNAME@
-Cflags: -I${includedir}/@APPNAME@-1.0 @PC_CFLAGS@
+Cflags: -I${includedir}/@SHORT_ID@-1.0 @PC_CFLAGS@
