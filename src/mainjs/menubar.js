@@ -27,7 +27,7 @@ require('prototype')
 /**
  * Prototype object for Menubar management
  */
-var MenuBar = Nuvola.$prototype(null)
+const MenuBar = Nuvola.$prototype(null)
 
 /**
  * Adds new menu to the menubar or replaces existing menu with the same id

@@ -27,7 +27,7 @@ require('prototype')
 /**
  * Manages launcher component (Unity dock item, tray icon, ...)
  */
-var Launcher = Nuvola.$prototype(null)
+const Launcher = Nuvola.$prototype(null)
 
 /**
  * Set launcher tooltip.

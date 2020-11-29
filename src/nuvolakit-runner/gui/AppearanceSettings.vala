@@ -54,7 +54,7 @@ public class AppearanceSettings: Gtk.Grid {
             + " A restart is required after the installation of a new theme.");
         attach(label, 0, ++line, 1, 1);
         var link_button = new Gtk.LinkButton.with_label(
-            "https://github.com/tiliado/nuvolaruntime/wiki/GTK-Themes", "Install themes");
+            "https://github.com/tiliado/nuvolaplayer/wiki/GTK-Themes", "Install themes");
         link_button.halign = Gtk.Align.CENTER;
         link_button.hexpand = true;
         attach(link_button, 1, line, 1, 1);

@@ -33,19 +33,24 @@ public class TiliadoLicense {
     public GumroadLicense license {get; private set;}
     public TiliadoMembership license_tier {get; private set;}
     public TiliadoMembership effective_tier {get; private set;}
+    public int validity_days {get; private set;}
 
-    public TiliadoLicense(GumroadLicense license, TiliadoMembership tier, bool valid) {
+    public TiliadoLicense(GumroadLicense license, TiliadoMembership tier, bool valid, int validity_days) {
         this.valid = valid;
         this.license = license;
         this.license_tier = tier;
+        this.validity_days = validity_days;
         this.effective_tier = is_valid() ? tier : TiliadoMembership.NONE;
     }
 
     public TiliadoLicense.from_json(Drt.JsonObject json) {
+        var license = new GumroadLicense.from_json(json.get_object(KEY_GUMROAD));
         this(
-            new GumroadLicense.from_json(json.get_object(KEY_GUMROAD)),
+            license,
             TiliadoMembership.from_int(json.get_int_or(KEY_TIER, 0)),
-            json.get_bool_or(KEY_VALID, false));
+            json.get_bool_or(KEY_VALID, false),
+            TiliadoGumroad.get_validity_days(license.product_id)
+        );
     }
 
     public TiliadoLicense.from_string(string json) throws Drt.JsonError {
@@ -53,14 +58,21 @@ public class TiliadoLicense {
     }
 
     public bool is_valid() {
-        return valid && !reached_uses_count();
+        return valid && !is_expired() && !reached_uses_count();
     }
 
     public bool reached_uses_count() {
         return license.uses > USES_COUNT_LIMIT;
     }
 
+    public bool is_expired() {
+        return license.is_expired(validity_days);
+    }
+
     public unowned string? get_reason() {
+        if (is_expired()) {
+            return "The license key has expired.";
+        }
         if (reached_uses_count()) {
             return "The license key has been canceled because of abuse.";
         }

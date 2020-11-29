@@ -1,4 +1,4 @@
-Nuvola Apps Changelog
+Nuvola Player Changelog
 =======================
 
   * Release announcements for users are posted to [Nuvola News blog](https://medium.com/nuvola-news)
@@ -6,6 +6,42 @@ Nuvola Apps Changelog
   * Developers, maintainers and packagers are supposed to subscribe to
     [Nuvola Devel mailing list](https://groups.google.com/d/forum/nuvola-player-devel)
     to receive more technical announcements and important information about future development.
+
+Release 4.19.0 - November 29, 2020
+----------------------------------
+
+This is a concise changelog. Refer to [Nuvola News](https://medium.com/nuvola-news) for a more verbose one and to see
+some screenshots.
+
+### What’s New for Users
+
+* Two new scripts: **iHeartRADIO** and **Pretzel**.
+
+* **Amazon Cloud Player script 5.11:** Update integration following Amazon Music redesign
+  [[GitHub ticket](https://github.com/tiliado/nuvolaplayer/issues/656)].
+
+* **Spotify script 3.3:** Fix playback actions. [[GitHub ticket](https://github.com/tiliado/nuvolaplayer/issues/677)]
+
+* **YouTube Music script 1.5:** New icons created by Doug Hitchcock.
+
+* Nuvola Apps Runtime renamed back to Nuvola Player following the deprecation of non-media streaming applications.
+  [[GitHub ticket](https://github.com/tiliado/nuvolaplayer/issues/671)].
+
+### Under the hood
+
+* Nuvola upgraded to the latest version of Standard JavaScript code style
+  [[GitHub ticket](https://github.com/tiliado/nuvolaplayer/issues/673)].
+
+* TLS Socket errors during downloading Nuvola flatpaks were resolved
+  [[GitHub ticket](https://github.com/tiliado/nuvolaplayer/issues/653)].
+
+* Various fixes to pkg-config files in Diorite and Nuvola
+  [[GitHub ticket](https://github.com/tiliado/nuvolaplayer/issues/482)].
+
+* Removal of dead code.
+
+* Clean-up of app-id related code
+  [[GitHub ticket](https://github.com/tiliado/diorite/issues/32)].
 
 Release 4.18.0 - October 30, 2020
 ---------------------------------

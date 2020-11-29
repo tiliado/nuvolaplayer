@@ -29,7 +29,7 @@ require('logging')
 /**
  * Prototype object to manage Nuvola Player Core
  */
-var Core = Nuvola.$prototype(null, Nuvola.SignalsMixin)
+const Core = Nuvola.$prototype(null, Nuvola.SignalsMixin)
 
 /**
  * Initializes new Core instance object
@@ -232,7 +232,7 @@ Core.getComponentInfoAsync = function (id) {
  */
 Core.isComponentLoaded = function (id) {
   Nuvola.log('Core.isComponentLoaded is deprecated since Nuvola 4.8. Use async variant instead.')
-  var info = this.getComponentInfo(id)
+  const info = this.getComponentInfo(id)
   return info.loaded
 }
 
@@ -271,7 +271,7 @@ Core.toggleComponentActive = function (id, active) {
  */
 Core.isComponentActive = function (id) {
   Nuvola.log('Core.isComponentActive is deprecated since Nuvola 4.8. Use async variant instead.')
-  var info = this.getComponentInfo(id)
+  const info = this.getComponentInfo(id)
   return info.active
 }
 

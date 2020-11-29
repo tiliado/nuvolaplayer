@@ -27,25 +27,25 @@
 
 (function (Nuvola) {
   // Create media player component
-  var player = Nuvola.$object(Nuvola.MediaPlayer)
+  const player = Nuvola.$object(Nuvola.MediaPlayer)
 
   // Handy aliases
-  var PlaybackState = Nuvola.PlaybackState
-  var PlayerAction = Nuvola.PlayerAction
-  var fmtv = Nuvola.formatVersion
+  const PlaybackState = Nuvola.PlaybackState
+  const PlayerAction = Nuvola.PlayerAction
+  const fmtv = Nuvola.formatVersion
 
   // Translations
-  var _ = Nuvola.Translate.gettext
-  var C_ = Nuvola.Translate.pgettext
+  const _ = Nuvola.Translate.gettext
+  const C_ = Nuvola.Translate.pgettext
 
   // Constants
-  var ADDRESS = 'app.address'
-  var ADDRESS_DEFAULT = 'default'
-  var ADDRESS_CUSTOM = 'custom'
-  var HOST = 'app.host'
-  var PORT = 'app.port'
-  var COUNTRY_VARIANT = 'app.country_variant'
-  var COUNTRY_VARIANTS = [
+  const ADDRESS = 'app.address'
+  const ADDRESS_DEFAULT = 'default'
+  const ADDRESS_CUSTOM = 'custom'
+  const HOST = 'app.host'
+  const PORT = 'app.port'
+  const COUNTRY_VARIANT = 'app.country_variant'
+  const COUNTRY_VARIANTS = [
     ['de', C_('Amazon variant', 'Germany')],
     ['fr', C_('Amazon variant', 'France')],
     ['co.uk', C_('Amazon variant', 'United Kingdom')],
@@ -53,7 +53,7 @@
   ]
 
   // define rating options - 5 states with state id 0-5 representing 0-5 stars
-  var ratingOptions = [
+  const ratingOptions = [
     // stateId, label, mnemo_label, icon, keybinding
     [0, 'Rating: 0 stars', null, null, null, null],
     [1, 'Rating: 1 star', null, null, null, null],
@@ -64,14 +64,14 @@
   ]
 
   // Add new radio action named ``rating`` with initial state ``3`` (3 stars)
-  var ACTION_RATING = 'rating'
+  const ACTION_RATING = 'rating'
   Nuvola.actions.addRadioAction('playback', 'win', ACTION_RATING, 3, ratingOptions)
   // Add new togle action
-  var ACTION_WONDERFUL = 'wonderful'
+  const ACTION_WONDERFUL = 'wonderful'
   Nuvola.actions.addAction('playback', 'win', ACTION_WONDERFUL, 'Wonderful song', null, null, null, true)
 
   // Create new WebApp prototype
-  var WebApp = Nuvola.$WebApp()
+  const WebApp = Nuvola.$WebApp()
 
   WebApp._onInitAppRunner = function (emitter) {
     Nuvola.WebApp._onInitAppRunner.call(this, emitter)
@@ -94,7 +94,7 @@
   WebApp._onInitWebWorker = function (emitter) {
     Nuvola.WebApp._onInitWebWorker.call(this, emitter)
 
-    var state = document.readyState
+    const state = document.readyState
     if (state === 'interactive' || state === 'complete') {
       this._onPageReady()
     } else {
@@ -107,8 +107,8 @@
 
   // Page is ready for magic
   WebApp._onPageReady = function () {
-    var actions = [ACTION_WONDERFUL]
-    for (var i = 0; i <= 5; i++) {
+    const actions = [ACTION_WONDERFUL]
+    for (let i = 0; i <= 5; i++) {
       actions.push(ACTION_RATING + '::' + i)
     }
     player.addExtraActions(actions)
@@ -128,7 +128,7 @@
     this.update()
 
     Nuvola.global._config_set_object = function () {
-      var track = {
+      const track = {
         artist: 'Jane Bobo',
         album: 'Best hits',
         title: 'How I met you'
@@ -141,7 +141,7 @@
 
   // Extract data from the web page
   WebApp.update = function () {
-    var state
+    let state
     try {
       switch (document.getElementById('status').innerText) {
         case 'Playing':
@@ -159,12 +159,12 @@
       state = PlaybackState.UNKNOWN
     }
 
-    var track = {
+    const track = {
       artLocation: null // always null
     }
 
-    var idMap = { title: 'track', artist: 'artist', album: 'album' }
-    for (var key in idMap) {
+    const idMap = { title: 'track', artist: 'artist', album: 'album' }
+    for (const key in idMap) {
       try {
         track[key] = document.getElementById(idMap[key]).innerText || null
       } catch (e) {
@@ -195,14 +195,16 @@
       track.length = null
     }
 
+    let trackPosition
     try {
-      var trackPosition = document.getElementById('timeelapsed').innerText || null
+      trackPosition = document.getElementById('timeelapsed').innerText || null
     } catch (e) {
       trackPosition = null
     }
 
+    let volume
     try {
-      var volume = document.getElementById('volume').innerText / 100 || null
+      volume = document.getElementById('volume').innerText / 100 || null
     } catch (e) {
       volume = null
     }
@@ -215,7 +217,7 @@
     player.setCanSeek(state !== PlaybackState.UNKNOWN)
     player.setCanChangeVolume(state !== PlaybackState.UNKNOWN)
 
-    var enabled
+    let enabled
     try {
       enabled = !document.getElementById('prev').disabled
     } catch (e) {
@@ -230,7 +232,7 @@
     }
     player.setCanGoNext(enabled)
 
-    var playPause = document.getElementById('pp')
+    const playPause = document.getElementById('pp')
     try {
       enabled = playPause.innerText === 'Play'
     } catch (e) {
@@ -275,10 +277,13 @@
       case PlayerAction.CHANGE_VOLUME:
         document.getElementById('volume').innerText = Math.round(param * 100)
         break
-      case PlayerAction.SEEK:
-        var elm = document.getElementById('timetotal')
-        var total = Nuvola.parseTimeUsec(elm ? elm.innerText : null)
-        if (param > 0 && param <= total) { Nuvola.clickOnElement(document.getElementById('progresstext'), param / total, 0.5) }
+      case PlayerAction.SEEK: {
+        const elm = document.getElementById('timetotal')
+        const total = Nuvola.parseTimeUsec(elm ? elm.innerText : null)
+        if (param > 0 && param <= total) {
+          Nuvola.clickOnElement(document.getElementById('progresstext'), param / total, 0.5)
+        }
+      }
         break
     }
   }
@@ -286,7 +291,7 @@
   // Handler for rating
   WebApp._onRatingSet = function (emitter, rating) {
     Nuvola.log('Rating set: {1}', rating)
-    var current = document.getElementById('rating').innerText
+    const current = document.getElementById('rating').innerText
     if (rating <= 0.4) { // 0-2 stars
       document.getElementById('rating').innerText = current === 'bad' ? '-' : 'bad'
     } else if (rating >= 0.8) { // 4-5 stars
@@ -321,7 +326,7 @@
     values[COUNTRY_VARIANT] = Nuvola.config.get(COUNTRY_VARIANT)
     entries.push(['header', _('Amazon Cloud Player')])
     entries.push(['label', _('Preferred national variant')])
-    for (var i = 0; i < COUNTRY_VARIANTS.length; i++) {
+    for (let i = 0; i < COUNTRY_VARIANTS.length; i++) {
       entries.push(['option', COUNTRY_VARIANT, COUNTRY_VARIANTS[i][0], COUNTRY_VARIANTS[i][1]])
     }
   }
@@ -331,7 +336,7 @@
   }
 
   WebApp.testPrototypes = function () {
-    var Building = Nuvola.$prototype(null)
+    const Building = Nuvola.$prototype(null)
 
     Building.$init = function (address) {
       this.address = address
@@ -341,7 +346,7 @@
       console.log(this.address)
     }
 
-    var Shop = Nuvola.$prototype(Building)
+    const Shop = Nuvola.$prototype(Building)
 
     Shop.$init = function (address, goods) {
       Building.$init.call(this, address)
@@ -352,27 +357,27 @@
       console.log(this.goods)
     }
 
-    var house = Nuvola.$object(Building, 'King Street 1024, London')
+    const house = Nuvola.$object(Building, 'King Street 1024, London')
     house.printAddress()
 
-    var candyShop = Nuvola.$object(Shop, 'King Street 1024, London', 'candies')
+    const candyShop = Nuvola.$object(Shop, 'King Street 1024, London', 'candies')
     candyShop.printAddress()
     candyShop.printGoods()
   }
 
   WebApp.testTranslation = function () {
-    var _ = Nuvola.Translate.gettext
+    const _ = Nuvola.Translate.gettext
 
     /// You can use tree slashes to add comment for translators.
     /// It has to be on a line preceding the translated string though.
     console.log(_('Hello world!'))
-    var name = 'Jiří'
+    let name = 'Jiří'
     /// {1} will be replaced by name
     console.log(Nuvola.format(_('Hello {1}!'), name))
 
-    var ngettext = Nuvola.Translate.ngettext
-    var eggs = 5
-    var text = ngettext(
+    const ngettext = Nuvola.Translate.ngettext
+    let eggs = 5
+    let text = ngettext(
       /// You can use tree slashes to add comment for translators.
       /// It has to be on a line preceding the singular string though.
       /// {1} will be replaced by number of eggs in both forms,
@@ -388,7 +393,7 @@
       eggs)
     console.log(Nuvola.format(text, eggs))
 
-    var C_ = Nuvola.Translate.pgettext
+    const C_ = Nuvola.Translate.pgettext
 
     /// You can use tree slashes to add comment for translators.
     /// It has to be on a line preceding the translated string though.

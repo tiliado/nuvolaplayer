@@ -60,6 +60,7 @@ commands:
             cd ..
             rm -rf libdri2
             npm install standard --global
+            standard --version
 
   build-vala:
     parameters:

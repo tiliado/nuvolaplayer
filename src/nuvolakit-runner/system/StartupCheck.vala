@@ -184,7 +184,7 @@ public class StartupCheck : GLib.Object {
         if (!Graphics.is_required_gl_extension_mounted(out gl_extension)) {
             model.opengl_driver_message = Markup.printf_escaped(
                 "Graphics driver '%s' for Flatpak has not been found on your system. Please consult "
-                + "<a href=\"https://github.com/tiliado/nuvolaruntime/wiki/Graphics-Drivers\">documentation"
+                + "<a href=\"https://github.com/tiliado/nuvolaplayer/wiki/Graphics-Drivers\">documentation"
                 + " on graphics drivers</a> to get help with installation.", gl_extension);
             model.opengl_driver_status = StartupStatus.ERROR;
         } else {
@@ -230,19 +230,19 @@ public class StartupCheck : GLib.Object {
 
     private void connect_master_service() {
         var master = new MasterService();
-        if (master.init(app.ipc_bus, this.web_app.id, app.dbus_id)) {
+        if (master.init(app.ipc_bus, this.web_app.id, app.application_id)) {
             model.nuvola_service_status = StartupStatus.OK;
         } else if (master.error is MasterServiceError.OTHER) {
             model.nuvola_service_status = StartupStatus.OK;
             model.nuvola_service_message = Markup.printf_escaped(
-                "Failed to connect to Nuvola Apps Service, but it is optional.\n\n<i>Error message: %s</i>",
+                "Failed to connect to Nuvola Player Service, but it is optional.\n\n<i>Error message: %s</i>",
                 master.error.message);
         } else {
             model.nuvola_service_message = Markup.printf_escaped(
-                "<b>Failed to connect to Nuvola Apps Service.</b>\n\n"
-                + "1. Make sure Nuvola Apps Service is installed.\n"
-                + "2. Make sure Nuvola Apps Service and individual Nuvola Apps are up-to-date.\n"
-                + "3. Close all Nuvola Apps and try launching it again.\n\n"
+                "<b>Failed to connect to Nuvola Player Service.</b>\n\n"
+                + "1. Make sure Nuvola Player Service is installed.\n"
+                + "2. Make sure Nuvola Player Service and individual Nuvola Player integrations are up-to-date.\n"
+                + "3. Close all Nuvola Player instances and try launching it again.\n\n"
                 + "<i>Error message: %s</i>", master.error.message);
             model.nuvola_service_status = StartupStatus.WARNING;
         }

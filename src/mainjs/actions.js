@@ -35,7 +35,7 @@ require('signals')
  * some are created by JavaScript API objects (e. g. @link{PlayerAction|media player actions}) and
  * web app integration scripts can create custom actions with @link{Actions.addAction} or @link{Actions.addRadioAction}.
  */
-var Actions = Nuvola.$prototype(null, Nuvola.SignalsMixin)
+const Actions = Nuvola.$prototype(null, Nuvola.SignalsMixin)
 
 /**
  * Initializes new Actions object
@@ -211,7 +211,7 @@ Actions.updateEnabledFlag = function (name, enabled) {
  * @param Object enabledFlags    mapping of ``action name``: ``enabled flag``
  */
 Actions.updateEnabledFlags = function (enabledFlags) {
-  for (var name in enabledFlags) { this.updateEnabledFlag(name, enabledFlags[name]) }
+  for (const name in enabledFlags) { this.updateEnabledFlag(name, enabledFlags[name]) }
 }
 
 /**
@@ -300,7 +300,7 @@ Actions.updateState = function (name, state) {
  * @param Object states    mapping of ``action name``: ``state``
  */
 Actions.updateStates = function (states) {
-  for (var name in states) { this.updateState(name, states[name]) }
+  for (const name in states) { this.updateState(name, states[name]) }
 }
 
 /**

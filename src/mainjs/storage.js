@@ -29,7 +29,7 @@ require('async')
 /**
  * Prototype object to hold key-value mapping
  */
-var KeyValueStorage = Nuvola.$prototype(null)
+const KeyValueStorage = Nuvola.$prototype(null)
 
 /**
  * Initializes new key-value storage
@@ -182,7 +182,7 @@ KeyValueStorage.setAsync = function (key, value) {
  *
  * Note: Use @link{SessionStorage} for temporary data.
  */
-var ConfigStorage = Nuvola.$prototype(KeyValueStorage, Nuvola.SignalsMixin)
+const ConfigStorage = Nuvola.$prototype(KeyValueStorage, Nuvola.SignalsMixin)
 
 /**
  * Initializes new ConfigStorage object
@@ -203,7 +203,7 @@ ConfigStorage.$init = function () {
  *
  * Note: Use @link{SessionStorage} to store persistent data.
  */
-var SessionStorage = Nuvola.$prototype(KeyValueStorage)
+const SessionStorage = Nuvola.$prototype(KeyValueStorage)
 
 /**
  * Initializes new SessionStorage object.

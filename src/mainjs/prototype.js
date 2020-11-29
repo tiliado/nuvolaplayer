@@ -56,15 +56,15 @@
  * }
  * ```
  */
-var $prototype = function (proto, mixins) {
+const $prototype = function (proto, mixins) {
   if (proto === undefined) { throw new Error('Proto argument must be specified. Can be null.') }
 
-  var object = Object.create(proto)
+  const object = Object.create(proto)
 
-  var len = arguments.length
-  for (var i = 1; i < len; i++) {
-    var mixin = arguments[i]
-    for (var name in mixin) { object[name] = mixin[name] }
+  const len = arguments.length
+  for (let i = 1; i < len; i++) {
+    const mixin = arguments[i]
+    for (const name in mixin) { object[name] = mixin[name] }
   }
 
   return object
@@ -90,10 +90,10 @@ var $prototype = function (proto, mixins) {
  * candyShop.printGoods()
  * ```
  */
-var $object = function (proto, initArgs) {
+const $object = function (proto, initArgs) {
   if (proto === undefined) { throw new Error('Proto argument must be specified. Can be null.') }
 
-  var object = Object.create(proto)
+  const object = Object.create(proto)
 
   if (object.$init) { object.$init.apply(object, [].slice.call(arguments, 1)) }
 

@@ -52,8 +52,8 @@ public class TiliadoPaywallWidget : Gtk.Stack {
         paywall.gumroad_license_invalid.connect(on_gumroad_license_invalid);
 
         main_view = new View(null, {
-            "Purchase Nuvola Runtime",
-            "I purchased Nuvola Runtime",
+            "Purchase Nuvola Player",
+            "I purchased Nuvola Player",
             "Upgrade tier",
             "I have Tiliado Developer account",
             "Help",
@@ -179,7 +179,7 @@ public class TiliadoPaywallWidget : Gtk.Stack {
             }
             purchase_options_view = new View(
                 Drtgtk.Labels.markup(
-                    "<b>When did you purchase Nuvola Runtime?</b>\n\n"
+                    "<b>When did you purchase Nuvola Player?</b>\n\n"
                     + "<b>September 3rd, 2018, or later:</b>\n\nYou need a <b>license key</b> from "
                     + "<a href=\"https://www.gumroad.com/library\">your Gumroad library</a> "
                     + "or your email receipt from Gumroad (it should arrive within a few minutes after the purchase, "
@@ -224,7 +224,7 @@ public class TiliadoPaywallWidget : Gtk.Stack {
         if (connecting_tiliado_account_view == null) {
             connecting_tiliado_account_view = new View(
                 Drtgtk.Labels.markup(
-                    "Follow instructions in a web browser to connect Nuvola Runtime with your Tiliado account."),
+                    "Follow instructions in a web browser to connect Nuvola Player with your Tiliado account."),
                 {"Help", "Cancel"});
             connecting_tiliado_account_view.response.connect(on_connecting_tiliado_account_view_response);
         }

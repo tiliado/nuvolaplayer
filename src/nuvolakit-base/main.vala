@@ -23,8 +23,7 @@
  */
 
 namespace Nuvola {
-private extern const string APPNAME;
-private extern const string OLDNAME;
+private extern const string SHORT_ID;
 private extern const string NAME;
 private extern const string WELCOME_SCREEN_NAME;
 private extern const string UNIQUE_NAME;
@@ -56,24 +55,16 @@ public string get_app_uid() {
     return UNIQUE_NAME;
 }
 
-public string get_dbus_id() {
-    return get_app_uid();
-}
-
 public string get_dbus_path() {
-    return "/" + get_dbus_id().replace(".", "/");
+    return "/" + get_app_uid().replace(".", "/");
 }
 
 public string get_app_icon() {
     return APP_ICON;
 }
 
-public string get_app_id() {
-    return APPNAME;
-}
-
-public string get_old_id() {
-    return OLDNAME;
+public string get_app_short_id() {
+    return SHORT_ID;
 }
 
 public string get_app_name() {

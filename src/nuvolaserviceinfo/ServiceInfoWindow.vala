@@ -61,7 +61,7 @@ public class Nuvola.ServiceInfoWindow : Gtk.Window {
 
     private async void check_nuvola_service_available(Cancellable? cancellable = null) throws GLib.Error {
         DBusConnection bus = yield Bus.get(BusType.SESSION, cancellable);
-        Drt.Dbus.Introspection nuvola = yield Drt.Dbus.introspect(bus, Nuvola.get_dbus_id(), Nuvola.get_dbus_path());
+        Drt.Dbus.Introspection nuvola = yield Drt.Dbus.introspect(bus, Nuvola.get_app_uid(), Nuvola.get_dbus_path());
         nuvola.assert_method("eu.tiliado.Nuvola", "GetConnection");
     }
 

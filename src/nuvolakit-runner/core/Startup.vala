@@ -59,8 +59,7 @@ public int run_web_app_with_dbus_handshake(File web_app_dir, string[] argv) thro
     unowned string[] unowned_empty_argv = empty_argv;
     Gtk.init(ref unowned_empty_argv);
 
-    var storage = new Drt.XdgStorage.for_project(Nuvola.get_app_id());
-    move_old_xdg_dirs(new Drt.XdgStorage.for_project(Nuvola.get_old_id()), storage);
+    var storage = new Drt.XdgStorage.for_project(Nuvola.get_app_short_id());
     var web_app = new WebApp.from_dir(web_app_dir);
     debug_print_version_info(web_app);
     var app_storage = new WebAppStorage(

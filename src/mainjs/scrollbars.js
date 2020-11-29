@@ -25,9 +25,9 @@
 require('core')
 require('storage')
 
-var DARK_SCROLLBAR = 'nuvola.dark_scrollbar'
+const DARK_SCROLLBAR = 'nuvola.dark_scrollbar'
 
-var Scrollbars = Nuvola.$prototype(null)
+const Scrollbars = Nuvola.$prototype(null)
 
 Scrollbars.$init = function () {
   this.pageReady = false
@@ -47,7 +47,7 @@ Scrollbars._updateScrollbars = function () {
 
 Scrollbars.setTheme = function () {
   if (this.pageReady && this.dark !== null) {
-    var old = this.css
+    const old = this.css
     this.css = Nuvola.makeElement('style', {}, this.dark ? this.darkScrollbar() : this.lightScrollbar())
     document.getElementsByTagName('head')[0].appendChild(this.css)
     if (old) {
@@ -59,7 +59,7 @@ Scrollbars.setTheme = function () {
 Scrollbars._onInitWebWorker = function (emitter) {
   Nuvola.config.connect('ConfigChanged', this)
   this._updateScrollbars()
-  var state = document.readyState
+  const state = document.readyState
   if (state === 'interactive' || state === 'complete') {
     this._onPageReady()
   } else {

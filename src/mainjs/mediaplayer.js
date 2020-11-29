@@ -34,15 +34,15 @@ require('core')
 require('gettext')
 
 // Translations
-var _ = Nuvola.Translate.gettext
-var C_ = Nuvola.Translate.pgettext
+const _ = Nuvola.Translate.gettext
+const C_ = Nuvola.Translate.pgettext
 
 /**
  * @enum Base media player @link{Actions|actions}
  *
  * @since Nuvola 4.13: `REPEAT` and `SHUFFLE` actions were added.
  */
-var PlayerAction = {
+const PlayerAction = {
   /**
    * Start playback
    */
@@ -94,7 +94,7 @@ var PlayerAction = {
  *
  * @since Nuvola 4.13
  */
-var PlayerRepeat = {
+const PlayerRepeat = {
   /**
    * The playback will stop when there are no more tracks to play.
    */
@@ -112,7 +112,7 @@ var PlayerRepeat = {
 /**
  * @enum Media player playback states
  */
-var PlaybackState = {
+const PlaybackState = {
   /**
    * Track is not playing nor paused.
    */
@@ -127,7 +127,7 @@ var PlaybackState = {
   PLAYING: 2
 }
 
-var repeatOptions = [
+const repeatOptions = [
   // stateId, label, mnemo_label, icon, keybinding
   [PlayerRepeat.NONE, _('No repeat'), null, null, null, null],
   [PlayerRepeat.TRACK, _('Repeat track'), null, null, null, null],
@@ -135,23 +135,23 @@ var repeatOptions = [
 ]
 
 // New key
-var RUN_IN_BACKGROUND = 'player.run_in_background'
+const RUN_IN_BACKGROUND = 'player.run_in_background'
 // Deprecated key - for backward compatibility
-var BACKGROUND_PLAYBACK = 'player.background_playback'
+const BACKGROUND_PLAYBACK = 'player.background_playback'
 
-var RUN_IN_BACKGROUND_OPTIONS = [
+const RUN_IN_BACKGROUND_OPTIONS = [
   ['always', C_('Background playback', 'Always')],
   ['playing', C_('Background playback', 'When song is playing')],
   ['never', C_('Background playback', 'Never')]
 ]
 
-var COMPONENT_NOTIFICATIONS = 'notifications'
-var COMPONENTS_TO_ACTIVATE = ['mpris', 'lyrics', 'mediakeys', 'scrobbler']
+const COMPONENT_NOTIFICATIONS = 'notifications'
+const COMPONENTS_TO_ACTIVATE = ['mpris', 'lyrics', 'mediakeys', 'scrobbler']
 
 /**
  * Media player controller.
  */
-var MediaPlayer = Nuvola.$prototype(null, Nuvola.SignalsMixin)
+const MediaPlayer = Nuvola.$prototype(null, Nuvola.SignalsMixin)
 
 /**
  * Initializes media player
@@ -187,7 +187,7 @@ MediaPlayer.$init = function () {
     PlayerAction.SHUFFLE
   ]
   this._repeatActions = []
-  for (var i = 0; i <= PlayerRepeat.PLAYLIST; i++) {
+  for (let i = 0; i <= PlayerRepeat.PLAYLIST; i++) {
     this._repeatActions.push(PlayerAction.REPEAT + '::' + i)
   }
   this._notification = null
@@ -211,7 +211,7 @@ MediaPlayer.$init = function () {
  */
 MediaPlayer.setTrack = function (track) {
   track.length = Nuvola.parseTimeUsec(track.length)
-  var changed = Nuvola.objectDiff(this._track, track)
+  const changed = Nuvola.objectDiff(this._track, track)
 
   if (!changed.length) { return }
 
@@ -221,7 +221,7 @@ MediaPlayer.setTrack = function (track) {
 
   if (Nuvola.inArray(changed, 'artLocation') && track.artLocation) {
     this._artworkFile = null
-    var artworkId = this._artworkLoop++
+    const artworkId = this._artworkLoop++
     if (this._artworkLoop > 9) { this._artworkLoop = 0 }
     Nuvola.browser.downloadFileAsync(track.artLocation, 'player.artwork.' + artworkId, this._onArtworkDownloaded.bind(this), changed)
     this._sendDevelInfo()
@@ -467,9 +467,9 @@ MediaPlayer.setRepeatState = function (repeat) {
  * @param "Array of String" actions    names of actions
  */
 MediaPlayer.addExtraActions = function (actions) {
-  var update = false
-  for (var i = 0; i < actions.length; i++) {
-    var action = actions[i]
+  let update = false
+  for (let i = 0; i < actions.length; i++) {
+    const action = actions[i]
     if (!Nuvola.inArray(this._extraActions, action)) {
       this._extraActions.push(action)
       update = true
@@ -501,14 +501,14 @@ MediaPlayer._onInitAppRunner = function (emitter) {
   Nuvola.core.connect('ComponentLoaded', this)
   Nuvola.core.connect('ComponentUnloaded', this)
   Nuvola.core.isComponentLoadedAsync(COMPONENT_NOTIFICATIONS).then((loaded) => this._toggleNotifications(loaded))
-  for (var i = 0; i < COMPONENTS_TO_ACTIVATE.length; i++) {
+  for (let i = 0; i < COMPONENTS_TO_ACTIVATE.length; i++) {
     this._activateComponent(COMPONENTS_TO_ACTIVATE[i])
   }
   // Take into account the old BACKGROUND_PLAYBACK value
   Nuvola.config.setDefaultAsync(BACKGROUND_PLAYBACK, true)
     .then(() => Nuvola.config.getAsync(BACKGROUND_PLAYBACK))
     .then((enabled) => {
-      var defaultOption = RUN_IN_BACKGROUND_OPTIONS[enabled ? 1 : 2][0]
+      const defaultOption = RUN_IN_BACKGROUND_OPTIONS[enabled ? 1 : 2][0]
       return Nuvola.config.setDefaultAsync(RUN_IN_BACKGROUND, defaultOption)
     }).catch(console.log.bind(console))
 
@@ -549,7 +549,7 @@ MediaPlayer._onActionActivated = function (emitter, name, param) {
 }
 
 MediaPlayer._setActions = function () {
-  var actions = [
+  let actions = [
     this._state === PlaybackState.PLAYING ? PlayerAction.PAUSE : PlayerAction.PLAY,
     PlayerAction.PREV_SONG, PlayerAction.NEXT_SONG, PlayerAction.SHUFFLE]
   actions = actions.concat(this._repeatActions).concat(this._extraActions)
@@ -558,10 +558,10 @@ MediaPlayer._setActions = function () {
 }
 
 MediaPlayer._sendDevelInfo = function () {
-  var rating = 1 * this._track.rating
+  let rating = 1 * this._track.rating
   if (rating < 0 || isNaN(rating)) { rating = 0.0 } else if (rating > 1) { rating = 1 }
 
-  var info = {
+  const info = {
     title: this._track.title || null,
     artist: this._track.artist || null,
     album: this._track.album || null,
@@ -587,11 +587,11 @@ MediaPlayer._onArtworkDownloaded = function (res, changed) {
 
 MediaPlayer._updateTrackInfo = function (changed) {
   this._sendDevelInfo()
-  var track = this._track
+  const track = this._track
 
   if (track.title) {
     this._updateNotification()
-    var tooltip = track.artist ? Nuvola.format('{1} by {2}', track.title, track.artist) : track.title
+    const tooltip = track.artist ? Nuvola.format('{1} by {2}', track.title, track.artist) : track.title
     Nuvola.launcher.setTooltip(tooltip)
   } else {
     Nuvola.launcher.setTooltip('Nuvola Player')
@@ -599,10 +599,10 @@ MediaPlayer._updateTrackInfo = function (changed) {
 }
 
 MediaPlayer._updateNotification = function () {
-  var track = this._track
+  const track = this._track
   if (this._notification && track.title) {
-    var title = track.title
-    var message
+    const title = track.title
+    let message
     if (!track.artist && !track.album) { message = 'by unknown artist' } else if (!track.artist) { message = Nuvola.format('from {1}', track.album) } else if (!track.album) { message = Nuvola.format('by {1}', track.artist) } else { message = Nuvola.format('by {1} from {2}', track.artist, track.album) }
 
     this._notification.update(title, message, this._artworkFile ? null : 'nuvolaplayer', this._artworkFile)
@@ -625,7 +625,7 @@ MediaPlayer._updateMenu = function () {
 }
 
 MediaPlayer._onQuitRequest = function (emitter, result) {
-  var option = this._runInBackground
+  const option = this._runInBackground
   if (option === RUN_IN_BACKGROUND_OPTIONS[0][0] ||
     (option === RUN_IN_BACKGROUND_OPTIONS[1][0] && this._state === PlaybackState.PLAYING)) {
     result.approved = false
@@ -636,14 +636,14 @@ MediaPlayer._onPreferencesForm = function (object, values, entries) {
   // TODO: @async
   values[RUN_IN_BACKGROUND] = Nuvola.config.get(RUN_IN_BACKGROUND)
   entries.push(['label', _('Run in background when window is closed')])
-  for (var i = 0; i < RUN_IN_BACKGROUND_OPTIONS.length; i++) {
-    var option = RUN_IN_BACKGROUND_OPTIONS[i]
+  for (let i = 0; i < RUN_IN_BACKGROUND_OPTIONS.length; i++) {
+    const option = RUN_IN_BACKGROUND_OPTIONS[i]
     entries.push(['option', RUN_IN_BACKGROUND, option[0], option[1]])
   }
 }
 
 MediaPlayer._onMediaKeyPressed = function (emitter, key) {
-  var A = Nuvola.actions
+  const A = Nuvola.actions
   switch (key) {
     case Nuvola.MediaKey.PLAY:
     case Nuvola.MediaKey.PAUSE:

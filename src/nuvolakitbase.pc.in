@@ -1,5 +1,6 @@
 prefix=@PREFIX@
 libdir=@LIBDIR@
+datadir=@DATADIR@
 includedir=@INCLUDEDIR@
 
 Name: NuvolaKitBase
@@ -7,4 +8,4 @@ Description: Nuvola Apps Base Library
 Version: @VERSION@
 Requires.private: glib-2.0 @DIORITE_GLIB@
 Libs: -L${libdir} -l@LIBNAME@
-Cflags: -I${includedir}/@APPNAME@-1.0 @PC_CFLAGS@
+Cflags: -I${includedir}/@SHORT_ID@-1.0 @PC_CFLAGS@

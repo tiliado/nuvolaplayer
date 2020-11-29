@@ -49,7 +49,7 @@ public class CefRendererExtension : GLib.Object {
         this.browser_id = browser_id;
         this.channel = channel;
         this.worker_data = worker_data;
-        this.storage = new Drt.XdgStorage.for_project(Nuvola.get_app_id());
+        this.storage = new Drt.XdgStorage.for_project(Nuvola.get_app_short_id());
         ctx.js_context_created.connect(on_js_context_created);
         ctx.js_context_released.connect(on_js_context_released);
         ctx.event_loop.add_idle(() => {init(); return false;});

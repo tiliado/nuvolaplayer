@@ -42,23 +42,23 @@
  * ```
  */
 Nuvola.format = function () {
-  var args = arguments
+  const args = arguments
   return args[0].replace(Nuvola.format._regex, function (item) {
-    var index = parseInt(item.substring(1, item.length - 1))
+    const index = parseInt(item.substring(1, item.length - 1))
     if (index > 0) { return typeof args[index] !== 'undefined' ? args[index] : '' } else if (index === -1) { return '{' } else if (index === -2) { return '}' }
     return ''
   })
 }
 
 Nuvola.formatVersion = function (encodedVersion) {
-  var micro = encodedVersion % 100
+  const micro = encodedVersion % 100
   encodedVersion = (encodedVersion - micro) / 100
-  var minor = encodedVersion % 100
-  var major = (encodedVersion - minor) / 100
+  const minor = encodedVersion % 100
+  const major = (encodedVersion - minor) / 100
   return major + '.' + minor + '.' + micro
 }
 
-Nuvola.format._regex = new RegExp('{-?[0-9]+}', 'g')
+Nuvola.format._regex = /{-?[0-9]+}/g
 
 Nuvola.inArray = function (array, item) {
   return array.indexOf(item) > -1
@@ -75,10 +75,10 @@ Nuvola.inArray = function (array, item) {
  * @param Number y           Relative y position within the element 0.0..1.0 (default 0.5)
  */
 Nuvola.triggerMouseEvent = function (elm, name, x, y) {
-  var rect = elm.getBoundingClientRect()
-  var width = rect.width * (x === undefined ? 0.5 : x)
-  var height = rect.height * (y === undefined ? 0.5 : y)
-  var opts = {
+  const rect = elm.getBoundingClientRect()
+  const width = rect.width * (x === undefined ? 0.5 : x)
+  const height = rect.height * (y === undefined ? 0.5 : y)
+  const opts = {
     view: document.defaultView,
     bubbles: true,
     cancelable: true,
@@ -89,7 +89,7 @@ Nuvola.triggerMouseEvent = function (elm, name, x, y) {
   opts.clientY = rect.top + height
   opts.screenX = window.screenX + opts.clientX
   opts.screenY = window.screenY + opts.clientY
-  var event = new window.MouseEvent(name, opts)
+  const event = new window.MouseEvent(name, opts)
   elm.dispatchEvent(event)
 }
 
@@ -144,9 +144,9 @@ Nuvola.makeText = function (text) {
  * @return new HTML element
  */
 Nuvola.makeElement = function (name, attributes, text) {
-  var elm = document.createElement(name)
+  const elm = document.createElement(name)
   attributes = attributes || {}
-  for (var key in attributes) { elm.setAttribute(key, attributes[key]) }
+  for (const key in attributes) { elm.setAttribute(key, attributes[key]) }
 
   if (text !== undefined && text !== null) { elm.appendChild(Nuvola.makeText(text)) }
 
@@ -161,8 +161,8 @@ Nuvola.makeElement = function (name, attributes, text) {
  * @return Array of names of different properties
  */
 Nuvola.objectDiff = function (object1, object2) {
-  var changes = []
-  for (var property in object1) {
+  const changes = []
+  for (const property in object1) {
     if (Object.prototype.hasOwnProperty.call(object1, property) &&
         (!Object.prototype.hasOwnProperty.call(object2, property) || object1[property] !== object2[property])) { changes.push(property) }
   }
@@ -179,10 +179,10 @@ Nuvola.objectDiff = function (object1, object2) {
 Nuvola.parseTimeUsec = function (time) {
   if (!time) { return 0 }
   if (time * 1 === time) { return time }
-  var parts = time.split(':')
-  var sign = parts[0] * 1 < 0 ? -1 : 1
-  var seconds = 0
-  var item = parts.pop()
+  const parts = time.split(':')
+  const sign = parts[0] * 1 < 0 ? -1 : 1
+  let seconds = 0
+  let item = parts.pop()
   if (item !== undefined) {
     seconds = Math.abs(1 * item)
     item = parts.pop()
@@ -226,8 +226,8 @@ Nuvola.encodeVersion = function (major, minor, micro) {
  * ```
  */
 Nuvola.checkVersion = function (major, minor, micro) {
-  var v1 = Nuvola.encodeVersion(major, minor, micro)
-  var v2 = Nuvola.encodeVersion(Nuvola.VERSION_MAJOR, Nuvola.VERSION_MINOR, Nuvola.VERSION_MICRO)
+  const v1 = Nuvola.encodeVersion(major, minor, micro)
+  const v2 = Nuvola.encodeVersion(Nuvola.VERSION_MAJOR, Nuvola.VERSION_MINOR, Nuvola.VERSION_MICRO)
   return v2 >= v1
 }
 
@@ -241,7 +241,7 @@ Nuvola.checkVersion = function (major, minor, micro) {
  * @return Text content of the element, possibly modified with func, null if element is not found.
  */
 Nuvola.queryText = function (selector, func) {
-  var parent = document
+  let parent = document
   if (Array.isArray(selector)) {
     parent = selector[0]
     selector = selector[1]
@@ -249,8 +249,8 @@ Nuvola.queryText = function (selector, func) {
   if (!parent) {
     return null
   }
-  var elm = parent.querySelector(selector)
-  var value = elm ? elm.textContent.trim() || null : null
+  const elm = parent.querySelector(selector)
+  const value = elm ? elm.textContent.trim() || null : null
   return (value && func) ? func(value, elm) : value
 }
 
@@ -265,7 +265,7 @@ Nuvola.queryText = function (selector, func) {
  * @return The attribute of the element, possibly modified with func, null if element is not found.
  */
 Nuvola.queryAttribute = function (selector, attribute, func) {
-  var parent = document
+  let parent = document
   if (Array.isArray(selector)) {
     parent = selector[0]
     selector = selector[1]
@@ -273,11 +273,11 @@ Nuvola.queryAttribute = function (selector, attribute, func) {
   if (!parent) {
     return null
   }
-  var elm = parent.querySelector(selector)
+  const elm = parent.querySelector(selector)
   if (!elm) {
     return null
   }
-  var value = elm.getAttribute(attribute)
+  const value = elm.getAttribute(attribute)
   return func ? func(value, elm) : value
 }
 
@@ -290,10 +290,10 @@ Nuvola.queryAttribute = function (selector, attribute, func) {
  *     if any error occurred, base64 data-URI otgerwise.
  */
 Nuvola.exportImageAsBase64 = function (url, callback) {
-  var img = new window.Image()
+  const img = new window.Image()
   img.onload = function () {
-    var canvas = document.createElement('canvas')
-    var ctx = canvas.getContext('2d')
+    let canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d')
     canvas.height = img.height
     canvas.width = img.width
     ctx.drawImage(img, 0, 0)

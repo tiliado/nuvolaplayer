@@ -174,7 +174,7 @@ public class Notifications : GLib.Object, NotificationsInterface, NotificationIn
     public Notification get_or_create(string name) {
         Notification notification = notifications[name];
         if (notification == null) {
-            notification = new Notification(app.app_id);
+            notification = new Notification(app.application_id);
             notifications[name] = notification;
         }
 
@@ -217,7 +217,7 @@ public class Notifications : GLib.Object, NotificationsInterface, NotificationIn
 
     public bool show_anonymous(string summary, string body, string? icon_name, string? icon_path, bool force, string category) {
         if (force || !app.main_window.is_active) {
-            var notification = new Notification(app.app_id);
+            var notification = new Notification(app.application_id);
             notification.update(summary, body, icon_name, icon_path, false, category);
             notification.show(false);
         }

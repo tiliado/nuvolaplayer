@@ -4,8 +4,8 @@ Nuvola Build Instructions
 Branding
 --------
 
-To avoid a violation of *Nuvola Apps Runtime™* trademark, the default branding is set to *Web Apps Runtime*.
-You **should not** set it to *Nuvola Apps Runtime* without our permission. You may, however, use any branding that does
+To avoid a violation of *Nuvola Player™* trademark, the default branding is set to *Cloud Player*.
+You **should not** set it to *Nuvola Player* without our permission. You may, however, use any branding that does
 not violate the trademark.
 
 To change branding, pass `--branding=NAME` to `waf configure`, where `NAME` is used to construct paths to relevant
@@ -83,8 +83,8 @@ Dependencies
     (included in the test service - web_apps/test subdirectory)
 
 
-Build & Install Nuvola Runtime
-------------------------------
+Build & Install Nuvola Player
+-----------------------------
 
 ### Waf Build System
 

@@ -29,7 +29,7 @@ public class Nuvola.RuntimeServiceNotAvailableReason : Gtk.InfoBar {
         GLib.Object(message_type: Gtk.MessageType.WARNING, show_close_button: false);
         this.app = app;
         Gtk.Label label = Drtgtk.Labels.markup(
-            text ?? "Some features have been disabled because Nuvola Runtime Service is not available.");
+            text ?? "Some features have been disabled because Nuvola Player Service is not available.");
         label.hexpand = true;
         get_content_area().add(label);
         label.show();

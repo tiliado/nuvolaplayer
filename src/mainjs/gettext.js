@@ -33,7 +33,7 @@ require('logging')
  *
  * See also @link{doc>apps/translations.html|translations documentation}.
  */
-var Translate = {}
+const Translate = {}
 
 /**
  * Translate string.

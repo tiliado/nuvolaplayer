@@ -28,16 +28,16 @@
 top = '.'
 out = 'build'
 
-APPNAME = "nuvolaruntime"
+APPNAME = SHORT_ID = "nuvolaruntime"
 NUVOLA_BIN = "nuvola"
 NUVOLACTL_BIN = "nuvolactl"
-VERSION = "4.18.0"
-GENERIC_NAME = "Web Apps"
-BLURB = "Tight integration of web apps with your Linux desktop"
+VERSION = "4.19.0"
+GENERIC_NAME = "Cloud Player"
+BLURB = "Tight integration of web-based media streaming services with your Linux desktop"
 DEFAULT_HELP_URL = "https://github.com/tiliado/nuvolaruntime/wiki/Third-Party-Builds"
 DEFAULT_WEB_APP_REQUIREMENTS_HELP_URL = DEFAULT_HELP_URL
 
-MIN_DIORITE = "4.18.0"
+MIN_DIORITE = "4.19.0"
 MIN_VALA = "0.48.0"
 MIN_GLIB = "2.56.1"
 MIN_GTK = "3.22.30"
@@ -382,7 +382,7 @@ def configure(ctx):
         ctx.env.APPDATA_XML = "branding/default/appdata.xml"
 
     genuine = branding.get("genuine", False)
-    ctx.env.NAME = branding.get("name", "Web Apps")
+    ctx.env.NAME = branding.get("name", "Cloud Player")
     ctx.env.SHORT_NAME = branding.get("short_name", ctx.env.NAME)
     ctx.env.VENDOR = branding.get("vendor", "unknown")
     ctx.env.WEB_APP_REQUIREMENTS_HELP_URL = branding.get("requirements_help_url", DEFAULT_WEB_APP_REQUIREMENTS_HELP_URL)
@@ -481,8 +481,7 @@ def configure(ctx):
         vala_def(ctx, "TILIADO_API")
 
     vala_def(ctx, "TRUE")
-    ctx.define("NUVOLA_APPNAME", APPNAME)
-    ctx.define("NUVOLA_OLDNAME", "nuvolaplayer3")
+    ctx.define("NUVOLA_SHORT_ID", SHORT_ID)
     ctx.define("NUVOLA_NAME", ctx.env.NAME)
     ctx.define("NUVOLA_WELCOME_SCREEN_NAME", ctx.env.RELEASE)
     ctx.define("NUVOLA_UNIQUE_NAME", ctx.env.UNIQUE_NAME)
@@ -494,8 +493,8 @@ def configure(ctx):
     ctx.define("NUVOLA_VERSION_MINOR", ctx.env.VERSIONS[1])
     ctx.define("NUVOLA_VERSION_BUGFIX", ctx.env.VERSIONS[2])
     ctx.define("NUVOLA_VERSION_SUFFIX", ctx.env.REVISION_ID)
-    ctx.define("GETTEXT_PACKAGE", APPNAME)
-    ctx.env.NUVOLA_LIBDIR = "%s/%s" % (ctx.env.LIBDIR, APPNAME)
+    ctx.define("GETTEXT_PACKAGE", SHORT_ID)
+    ctx.env.NUVOLA_LIBDIR = "%s/%s" % (ctx.env.LIBDIR, SHORT_ID)
     ctx.define("NUVOLA_TILIADO_OAUTH2_SERVER", tiliado_api.get("server", "https://tiliado.eu"))
     ctx.define("NUVOLA_TILIADO_OAUTH2_CLIENT_ID", tiliado_api.get("client_id", ""))
     ctx.define("NUVOLA_WEB_APP_REQUIREMENTS_HELP_URL", ctx.env.WEB_APP_REQUIREMENTS_HELP_URL)
@@ -575,11 +574,11 @@ def build(ctx):
     APP_RUNNER = "nuvolaruntime"
     ENGINEIO = "engineio"
     NUVOLA_SERVICE_INFO = "nuvolaserviceinfo"
-    NUVOLAKIT_RUNNER = APPNAME + "-runner"
-    NUVOLAKIT_BASE = APPNAME + "-base"
-    NUVOLAKIT_WORKER = APPNAME + "-worker"
-    NUVOLAKIT_CEF_WORKER = APPNAME + "-cef-worker"
-    NUVOLAKIT_TESTS = APPNAME + "-tests"
+    NUVOLAKIT_RUNNER = SHORT_ID + "-runner"
+    NUVOLAKIT_BASE = SHORT_ID + "-base"
+    NUVOLAKIT_WORKER = SHORT_ID + "-worker"
+    NUVOLAKIT_CEF_WORKER = SHORT_ID + "-cef-worker"
+    NUVOLAKIT_TESTS = SHORT_ID + "-tests"
     RUN_NUVOLAKIT_TESTS = "run-" + NUVOLAKIT_TESTS
     DIORITE_GLIB = 'dioriteglib' + TARGET_DIORITE
     DIORITE_GTK = 'dioriteglib' + TARGET_DIORITE
@@ -656,10 +655,6 @@ def build(ctx):
     )
     valalint(
         source_dir = 'src/control',
-        checks=VALALINT_CHECKS
-    )
-    valalint(
-        source_dir = 'src/nuvolakit-worker',
         checks=VALALINT_CHECKS
     )
 
@@ -820,34 +815,39 @@ def build(ctx):
     )
 
     PC_CFLAGS = ""
+    # https://www.bassi.io/articles/2018/03/15/pkg-config-and-paths/
+    PREFIX = ctx.env.PREFIX
+    PC_PATHS = {}
+    for name in "LIBDIR", "INCLUDEDIR", "DATADIR":
+        path = getattr(ctx.env, name)
+        PC_PATHS[name] = "${prefix}" + path[len(PREFIX):] if path.startswith(PREFIX + "/") else path
+
     ctx(features = 'subst',
         source='src/nuvolakitbase.pc.in',
-        target='{}-base.pc'.format(APPNAME),
+        target='{}-base.pc'.format(SHORT_ID),
         install_path='${LIBDIR}/pkgconfig',
         VERSION=ctx.env.RELEASE,
-        PREFIX=ctx.env.PREFIX,
-        INCLUDEDIR = ctx.env.INCLUDEDIR,
-        LIBDIR = ctx.env.LIBDIR,
-        APPNAME=APPNAME,
+        PREFIX=PREFIX,
+        SHORT_ID=SHORT_ID,
         PC_CFLAGS=PC_CFLAGS,
         LIBNAME=NUVOLAKIT_BASE,
         DIORITE_GLIB=DIORITE_GLIB,
+        **PC_PATHS,
     )
 
     ctx(features = 'subst',
         source='src/nuvolakitrunner.pc.in',
-        target='{}-runner.pc'.format(APPNAME),
+        target='{}-runner.pc'.format(SHORT_ID),
         install_path='${LIBDIR}/pkgconfig',
         VERSION=ctx.env.RELEASE,
-        PREFIX=ctx.env.PREFIX,
-        INCLUDEDIR = ctx.env.INCLUDEDIR,
-        LIBDIR = ctx.env.LIBDIR,
-        APPNAME=APPNAME,
+        PREFIX=PREFIX,
+        SHORT_ID=SHORT_ID,
         PC_CFLAGS=PC_CFLAGS,
         LIBNAME=NUVOLAKIT_RUNNER,
         NUVOLAKIT_BASE=NUVOLAKIT_BASE,
         DIORITE_GLIB=DIORITE_GLIB,
         DIORITE_GTK=DIORITE_GTK,
+        **PC_PATHS,
     )
 
     ctx(
@@ -859,7 +859,7 @@ def build(ctx):
         FULL_NAME=ctx.env.NAME,
         PRELUDE=(
             "" if ctx.env.GENUINE
-            else '<p>{} software is based on the open source code from the Nuvola Apps™ project.</p>'.format(ctx.env.NAME)
+            else '<p>{} software is based on the open source code from the Nuvola Player™ project.</p>'.format(ctx.env.NAME)
         ),
         UNIQUE_NAME=ctx.env.UNIQUE_NAME,
     )
@@ -867,11 +867,11 @@ def build(ctx):
         '${PREFIX}/share/metainfo/%s.appdata.xml' % ctx.env.UNIQUE_NAME,
         ctx.path.get_bld().find_node(ctx.env.UNIQUE_NAME + '.appdata.xml'))
 
-    ctx.symlink_as('${PREFIX}/share/%s/www/engine.io.js' % APPNAME, ctx.env.JSDIR + '/engine.io-client/engine.io.js')
+    ctx.symlink_as('${PREFIX}/share/%s/www/engine.io.js' % SHORT_ID, ctx.env.JSDIR + '/engine.io-client/engine.io.js')
 
     for dirname in "www", "tips":
         directory = ctx.path.find_dir("data/" + dirname)
-        ctx.install_files('${PREFIX}/share/' + APPNAME, directory.ant_glob('**'), cwd=directory.parent, relative_trick=True)
+        ctx.install_files('${PREFIX}/share/' + SHORT_ID, directory.ant_glob('**'), cwd=directory.parent, relative_trick=True)
 
     app_icons = ctx.path.find_node("data/icons")
     for size in (16, 22, 24, 32, 48, 64, 128, 256):
@@ -880,8 +880,8 @@ def build(ctx):
 
     ctx(features = "mergejs",
         source = ctx.path.ant_glob('src/mainjs/*.js'),
-        target = 'share/%s/js/main.js' % APPNAME,
-        install_path = '${PREFIX}/share/%s/js' % APPNAME
+        target = 'share/%s/js/main.js' % SHORT_ID,
+        install_path = '${PREFIX}/share/%s/js' % SHORT_ID
     )
 
     data_js =  ctx.path.find_dir("data/js")
@@ -889,8 +889,8 @@ def build(ctx):
         ctx(
             rule = 'cp -v ${SRC} ${TGT}',
             source = data_js.find_node(node),
-            target = 'share/%s/js/%s' % (APPNAME, node),
-            install_path = '${PREFIX}/share/%s/js' % APPNAME
+            target = 'share/%s/js/%s' % (SHORT_ID, node),
+            install_path = '${PREFIX}/share/%s/js' % SHORT_ID
         )
 
     ctx.add_group()

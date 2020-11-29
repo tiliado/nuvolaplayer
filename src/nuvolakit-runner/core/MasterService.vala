@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 Jiří Janoušek <janousek.jiri@gmail.com>
+ * Copyright 2018-2020 Jiří Janoušek <janousek.jiri@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -42,7 +42,7 @@ public class MasterService : GLib.Object {
     construct {
         try {
             dbus = Bus.get_proxy_sync<MasterDbusIfce>(
-                BusType.SESSION, Nuvola.get_dbus_id(), Nuvola.get_dbus_path(),
+                BusType.SESSION, Nuvola.get_app_uid(), Nuvola.get_dbus_path(),
                 DBusProxyFlags.DO_NOT_CONNECT_SIGNALS|DBusProxyFlags.DO_NOT_LOAD_PROPERTIES);
         } catch (GLib.IOError e) {
             GLib.error("Failed to connect to dbus service: %s", e.message);
@@ -87,7 +87,7 @@ public class MasterService : GLib.Object {
                     micro == Nuvola.get_version_micro());
                 if (!version_compatible) {
                     throw new MasterServiceError.INCOMPATIBLE_VERSION(
-                        "Version mismatch: Nuvola Service %d.%d.%d (%s) != Nuvola Runtime %s (%s).",
+                        "Version mismatch: Nuvola Service %d.%d.%d (%s) != Nuvola Player %s (%s).",
                         major, minor, micro, this.revision, Nuvola.get_version(), Nuvola.get_revision());
                 }
                 break;
@@ -96,7 +96,7 @@ public class MasterService : GLib.Object {
             } catch (GLib.Error e) {
                 if (e is GLib.DBusError.UNKNOWN_METHOD) {
                     throw new MasterServiceError.NO_VERSION_INFO(
-                        "Failed to get Nuvola Service version. Update Nuvola Runtime Service.");
+                        "Failed to get Nuvola Service version. Update Nuvola Service.");
                 } else if (allowed_timeouts < 1 || !(e is GLib.IOError.TIMED_OUT || e is GLib.DBusError.TIMED_OUT)) {
                     throw new MasterServiceError.OTHER("Failed to get Nuvola Service version. %s", e.message);
                 } else {
@@ -114,16 +114,16 @@ public class MasterService : GLib.Object {
             // TODO: @async
             dbus.get_connection(web_app_id, dbus_id, out socket, out api_token);
         } catch (GLib.Error e) {
-            throw new MasterServiceError.OTHER("Failed to get Nuvola Service socket. %s", e.message);
+            throw new MasterServiceError.OTHER("Failed to get Nuvola Player Service socket. %s", e.message);
         }
         if (socket == null) {
-            throw new MasterServiceError.NULL_SOCKET("Nuvola Service refused to provide socket.");
+            throw new MasterServiceError.NULL_SOCKET("Nuvola Player Service refused to provide socket.");
         }
         try {
             ipc_bus.connect_master_socket(socket, api_token);
         } catch (Drt.IOError e) {
             throw new MasterServiceError.SOCKET_IOERROR(
-                "Failed to connect to Nuvola Service socket. %s", e.message);
+                "Failed to connect to Nuvola Player Service socket. %s", e.message);
         }
         config = new Drt.KeyValueStorageClient(ipc_bus.master).get_proxy("master.config");
         this.socket = socket;
@@ -137,7 +137,7 @@ public class MasterService : GLib.Object {
             assert(response.equal(new Variant.boolean(true)));
         } catch (GLib.Error e) {
             throw new MasterServiceError.REGISTRATION_FAILED(
-                "Failed to register app with Nuvola Apps Service. %s", e.message);
+                "Failed to register app with Nuvola Player Service. %s", e.message);
         }
     }
 }

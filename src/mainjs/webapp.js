@@ -29,7 +29,7 @@ require('core')
 /**
  * Prototype object for web app integration.
  */
-var WebApp = Nuvola.$prototype(null, Nuvola.SignalsMixin)
+const WebApp = Nuvola.$prototype(null, Nuvola.SignalsMixin)
 
 /**
  * @link{ConfigStorage|Configuration} key used to store an address of the last visited page.
@@ -41,7 +41,7 @@ WebApp.LAST_URI = 'web_app.last_uri'
  */
 WebApp.$init = function () {
   this.meta = Nuvola.meta
-  var allowedURI = this.meta.allowed_uri
+  const allowedURI = this.meta.allowed_uri
   this.allowedURI = allowedURI ? new RegExp(allowedURI) : null
   Nuvola.core.connect('HomePageRequest', this)
   Nuvola.core.connect('LastPageRequest', this)

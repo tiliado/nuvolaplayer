@@ -28,7 +28,7 @@ require('signals')
 /**
  * @enum Identifiers of media keys
  */
-var MediaKey = {
+const MediaKey = {
   /**
    * Play key
    */
@@ -54,7 +54,7 @@ var MediaKey = {
 /**
  * Prototype object integrating media keys handling
  */
-var MediaKeys = Nuvola.$prototype(null, Nuvola.SignalsMixin)
+const MediaKeys = Nuvola.$prototype(null, Nuvola.SignalsMixin)
 
 /**
  * Initializes new MediaKeys object.

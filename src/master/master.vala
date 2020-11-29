@@ -75,8 +75,7 @@ public int main(string[] args) {
     }
 
     WebAppRegistry? web_app_reg = null;
-    var storage = new Drt.XdgStorage.for_project(Nuvola.get_app_id());
-    move_old_xdg_dirs(new Drt.XdgStorage.for_project(Nuvola.get_old_id()), storage);
+    var storage = new Drt.XdgStorage.for_project(Nuvola.get_app_short_id());
 
     #if !FLATPAK || !NUVOLA_RUNTIME
     if (opt_apps_dir == null) {

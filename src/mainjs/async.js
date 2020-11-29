@@ -22,13 +22,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-var Async = {}
+const Async = {}
 Async.nextPromiseId = 1
 Async.promises = {}
 Async.MAX_PROMISE_ID = 32767
 
 Async.begin = function (func) {
-  var ctx = {}
+  const ctx = {}
   while (this.promises[this.nextPromiseId]) {
     if (this.nextPromiseId === this.MAX_PROMISE_ID) {
       this.nextPromiseId = 1
@@ -61,7 +61,7 @@ Async.call = function (path, params) {
 }
 
 Async.respond = function (id, response, error) {
-  var ctx = this.promises[id]
+  const ctx = this.promises[id]
   if (ctx) {
     if (error) {
       ctx.reject(error)
