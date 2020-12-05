@@ -75,7 +75,6 @@ public class WebAppTest: Drt.TestCase
     public void test_construct_from_dir()
     {
         expect_no_error(() => new Nuvola.WebApp.from_dir(File.new_for_path("web_apps/test")), "test service");
-        expect_no_error(() => new Nuvola.WebApp.from_dir(File.new_for_path("web_apps/testmse")), "testmse service");
     }
 
     public void test_construct_from_metadata()
