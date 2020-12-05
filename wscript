@@ -884,15 +884,6 @@ def build(ctx):
         install_path = '${PREFIX}/share/%s/js' % SHORT_ID
     )
 
-    data_js =  ctx.path.find_dir("data/js")
-    for node in data_js.listdir():
-        ctx(
-            rule = 'cp -v ${SRC} ${TGT}',
-            source = data_js.find_node(node),
-            target = 'share/%s/js/%s' % (SHORT_ID, node),
-            install_path = '${PREFIX}/share/%s/js' % SHORT_ID
-        )
-
     ctx.add_group()
     jslint(source_dir = 'src/mainjs', global_vars=['Nuvola'])
     jslint(source = ['web_apps/test/home.js', 'web_apps/test/integrate.js'])
