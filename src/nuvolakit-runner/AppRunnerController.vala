@@ -366,6 +366,7 @@ public class AppRunnerController: Drtgtk.Application {
         web_worker_data["JS_ENGINE"] = web_options.get_name_version();
         web_worker_data["JS_ENGINE_NAME"] = web_options.get_name();
         web_worker_data["JS_ENGINE_VERSION"] = web_options.engine_version.to_string();
+        web_worker_data["JS_HOSTNAME"] = Drt.System.get_hostname();
         web_engine.early_init(this, ipc_bus, config, connection, web_worker_data);
         web_engine.init_form.connect(on_init_form);
         web_engine.notify.connect_after(on_web_engine_notify);
