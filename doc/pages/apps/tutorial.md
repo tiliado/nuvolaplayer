@@ -279,43 +279,43 @@ Line 25
 
 :   Use [strict JavaScript mode][JS_STRICT] in your scripts.
 
-Lines 27-28 and 86
+Lines 27 and 83
 
 :   Use [self-executing anonymous function][JS_SEAF] to create closure with [Nuvola object](apiref>).
     (Integration script are executed with ``Nuvola`` object bound to ``this``).
 
-Line 31
+Line 30
 
 :   Create [MediaPlayer](apiref>Nuvola.MediaPlayer) component that adds playback actions and is later used to provide playback
     details.
 
-Line 38
+Line 37
 
 :   Create new WebApp prototype object derived from the [Nuvola.WebApp](apiref>Nuvola.WebApp) prototype that contains
     handy default handlers for initialization routines and signals from Nuvola core.
     You can override them if your web app requires more magic ;-)
 
-Lines 41-50
+Lines 40-49
 
 :   Handler for [Nuvola.Core::InitWebWorker signal](apiref>Core%3A%3AInitWebWorker) signal that
     emitted in clear JavaScript environment with a brand new global ``window`` object. You should
     not touch it, only perform necessary initialization (usually not needed) and set your listener
     for either `document`'s `DOMContentLoaded` event (preferred) or `window`'s `load` event.
 
-Lines 53-60
+Lines 52-58
 
 :   When document object model of a web page is ready, we register a signal handler for playback
     actions and call update() method.
 
-Lines 63-77
+Lines 61-75
 
 :   The update() method periodically extracts playback state and track details.
 
-Lines 81-82
+Lines 78-79
 
 :   Actions handler is used to respond to player actions.
 
-Line 84
+Line 81
 
 :   Convenience method to create and register new instance of your web app integration.
 
