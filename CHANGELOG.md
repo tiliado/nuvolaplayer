@@ -7,6 +7,36 @@ Nuvola Player Changelog
     [Nuvola Devel mailing list](https://groups.google.com/d/forum/nuvola-player-devel)
     to receive more technical announcements and important information about future development.
 
+Release 4.20.0 - December 28, 2020
+----------------------------------
+
+This is a concise changelog. Refer to [Nuvola News](https://medium.com/nuvola-news) for a more verbose one and to see
+some screenshots.
+
+### What’s New for Users
+
+* **Tiliado accounts no longer supported.** If you had activated Nuvola with Tiliado account and the automatic
+  migration failed for any reason, you can always contact support@tiliado.eu to get your license key.
+* **New scripts:* Audible and Emby.
+* **Bandcamp script 2.4:** Fix metadata parsing on the album and track views
+  [[GitHub issue](https://github.com/tiliado/nuvolaplayer/issues/689)].
+
+### What’s new for script maintainers
+
+* The hostname of the user’s machine is exposed as a constant `Nuvola.HOSTNAME`
+  [[GitHub issue](https://github.com/tiliado/nuvolaplayer/issues/684)].
+* The machine id hash of the user’s machine is exposed as a constant `Nuvola.MACHINE_HASH`
+  [[GitHub issue](https://github.com/tiliado/nuvolaplayer/issues/683)].
+* Various fixes in the developer documentation.
+
+### Under the hood
+
+* All scripts have been upgraded to the latest version of Standard JavaScript code style
+  [[GitHub ticket](https://github.com/tiliado/nuvolaplayer/issues/674)].
+* Removal of unused JavaScript code.
+* Added debugging of keyboard events (disabled by default)
+  [[GitHub issue](https://github.com/tiliado/nuvolaplayer/issues/686)].
+
 Release 4.19.0 - November 29, 2020
 ----------------------------------
 
