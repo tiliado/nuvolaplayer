@@ -39,10 +39,10 @@ MODE_CODE = 0
 MODE_DOC = 1
 MODE_SYMBOL = 2
 
-FUNCTION_RE = re.compile(r"^\s*var\s+(\$?\w+(?:\.\$?\w+)*)\s+=\s+function\s*\((.*)\)\s*\{?$")
+FUNCTION_RE = re.compile(r"^\s*(?:var|let|const)\s+(\$?\w+(?:\.\$?\w+)*)\s+=\s+function\s*\((.*)\)\s*\{?$")
 METHOD_RE = re.compile(r"^\s*(\$?\w+(?:\.\$?\w+)*)\s+=\s+function\s*\((.*)\)\s*\{?$")
-PROTOTYPE_RE = re.compile(r"^\s*var\s+(\$?\w+(?:\.\$?\w+)*)\s+=\s+(?:Nuvola\.)?\$prototype\s*\((.*)\)$")
-OBJECT_RE = re.compile(r"^\s*var\s+(\$?\w+(?:\.\$?\w+)*)\s+=\s+\{\s*(?:\})?$")
+PROTOTYPE_RE = re.compile(r"^\s*(?:var|let|const)\s+(\$?\w+(?:\.\$?\w+)*)\s+=\s+(?:Nuvola\.)?\$prototype\s*\((.*)\)$")
+OBJECT_RE = re.compile(r"^\s*(?:var|let|const)\s+(\$?\w+(?:\.\$?\w+)*)\s+=\s+\{\s*(?:\})?$")
 SIGNAL_RE = re.compile(r"^this\.addSignal\s*\((.*)\)$")
 PROPERTY_RE = re.compile(r'^["\']?(\w+)["\']?\s*:\s*(.+)$')
 FIELD_RE = re.compile(r"^\s*(\$?\w+(?:\.\$?\w+)*)\s+=\s+(.*)\s*$")
@@ -91,6 +91,7 @@ class Symbols(object):
         self.symbols = {}
         self.canonical = {}
         self.ns = ns
+        self.last_container = None
 
     def get_symbol_name(self, node):
         parent = node.parent

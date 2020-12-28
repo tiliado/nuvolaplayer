@@ -28,11 +28,6 @@ public class TiliadoPaywallWidget : Gtk.Stack {
     private TiliadoPaywall paywall;
     private Phase phase = Phase.NONE;
     private View? main_view = null;
-    private View? connecting_tiliado_account_view = null;
-    private View? tiliado_account_error_view = null;
-    private TiliadoAccountView? tiliado_account_view = null;
-    private View? invalid_tiliado_account_view = null;
-    private View? purchase_options_view = null;
     private View? license_key_view = null;
     private View? verifying_gumroad_license_view = null;
     private GumroadLicenseView? gumroad_license_view = null;
@@ -44,10 +39,6 @@ public class TiliadoPaywallWidget : Gtk.Stack {
     public TiliadoPaywallWidget(TiliadoPaywall paywall) {
         this.paywall = paywall;
         paywall.tier_info_updated.connect(on_tier_info_updated);
-        paywall.connecting_tiliado_account.connect(on_connecting_tiliado_account);
-        paywall.tiliado_account_linking_cancelled.connect(on_tiliado_account_linking_cancelled);
-        paywall.tiliado_account_linking_failed.connect(on_tiliado_account_linking_failed);
-        paywall.tiliado_account_linking_finished.connect(on_tiliado_account_linking_finished);
         paywall.gumroad_license_verification_failed.connect(on_gumroad_license_verification_failed);
         paywall.gumroad_license_invalid.connect(on_gumroad_license_invalid);
 
@@ -55,7 +46,7 @@ public class TiliadoPaywallWidget : Gtk.Stack {
             "Purchase Nuvola Player",
             "I purchased Nuvola Player",
             "Upgrade tier",
-            "I have Tiliado Developer account",
+            "I have Developer key",
             "Help",
             "Close"}, 0, {null, null, null});
         main_view.response.connect(on_main_view_response);
@@ -64,10 +55,6 @@ public class TiliadoPaywallWidget : Gtk.Stack {
 
     ~TiliadoPaywallWidget() {
         paywall.tier_info_updated.disconnect(on_tier_info_updated);
-        paywall.connecting_tiliado_account.disconnect(on_connecting_tiliado_account);
-        paywall.tiliado_account_linking_cancelled.disconnect(on_tiliado_account_linking_cancelled);
-        paywall.tiliado_account_linking_failed.disconnect(on_tiliado_account_linking_failed);
-        paywall.tiliado_account_linking_finished.disconnect(on_tiliado_account_linking_finished);
         paywall.gumroad_license_verification_failed.disconnect(on_gumroad_license_verification_failed);
         paywall.gumroad_license_invalid.disconnect(on_gumroad_license_invalid);
     }
@@ -78,21 +65,6 @@ public class TiliadoPaywallWidget : Gtk.Stack {
         phase = Phase.NONE;
         unowned View? view = main_view;
         TiliadoPaywall paywall = this.paywall;
-
-        TiliadoApi2.User? user = paywall.get_tiliado_account();
-        if (user != null && tiliado_account_view == null) {
-            var account_view = new TiliadoAccountView(user, {"view-refresh-symbolic", "user-trash-symbolic"});
-            account_view.buttons[1].get_style_context().add_class(Gtk.STYLE_CLASS_DESTRUCTIVE_ACTION);
-            tiliado_account_view = account_view;
-            account_view.response.connect(on_tiliado_account_view_response);
-            view.attach(account_view, 0, 2, 1, 1);
-        } else if (user == null && tiliado_account_view != null) {
-            view.remove(tiliado_account_view);
-            tiliado_account_view.response.disconnect(on_tiliado_account_view_response);
-            tiliado_account_view = null;
-        } else if (user != null && tiliado_account_view.user != user) {
-            tiliado_account_view.update(user);
-        }
 
         TiliadoLicense? license = paywall.get_gumroad_license();
         if (license != null && gumroad_license_view == null) {
@@ -110,7 +82,7 @@ public class TiliadoPaywallWidget : Gtk.Stack {
         }
 
         MachineTrial? trial = paywall.get_trial();
-        bool in_trial = trial != null && paywall.get_gumroad_license_tier() + paywall.get_tiliado_account_tier() == 0;
+        bool in_trial = trial != null && paywall.get_gumroad_license_tier() == 0;
         if ((trial == null || !in_trial) && machine_trial_view != null) {
             view.remove(machine_trial_view);
             machine_trial_view = null;
@@ -139,13 +111,15 @@ public class TiliadoPaywallWidget : Gtk.Stack {
             paywall.open_purchase_page();
             break;
         case MainAction.PURCHASED:
-            choose_purchase_option();
+            phase = Phase.LICENSE_KEY;
+            enter_license_key(false);
             break;
         case MainAction.UPGRADE:
             paywall.open_upgrade_page();
             break;
         case MainAction.DEVELOPER:
-            connect_tiliado_account(true);
+            phase = Phase.DEVELOPER_KEY;
+            enter_license_key(true);
             break;
         case MainAction.HELP:
             paywall.show_help_page();
@@ -164,217 +138,36 @@ public class TiliadoPaywallWidget : Gtk.Stack {
         set_visible_child(view);
     }
 
-    private void choose_purchase_option() {
-        if (purchase_options_view == null) {
-            Gtk.Widget[] options = new Gtk.Widget[2];
-            options[0] = new Gtk.RadioButton.with_label_from_widget(null,
-                "A license key (new purchases).");
-            options[1] = new Gtk.RadioButton.with_label_from_widget(
-                options[0] as Gtk.RadioButton,
-                "A Tiliado account (really old purchases).");
-            foreach (unowned Gtk.Widget widget in options) {
-                var label = ((Gtk.Bin) widget).get_child() as Gtk.Label;
-                label.wrap = true;
-                label.max_width_chars = 40;
+    private void enter_license_key(bool developer) {
+        phase = developer ? Phase.DEVELOPER_KEY : Phase.LICENSE_KEY;
+
+        if (license_key_view != null) {
+            if (license_key_view.get_parent() != null) {
+                remove(license_key_view);
             }
-            purchase_options_view = new View(
-                Drtgtk.Labels.markup(
-                    "<b>When did you purchase Nuvola Player?</b>\n\n"
-                    + "<b>September 3rd, 2018, or later:</b>\n\nYou need a <b>license key</b> from "
-                    + "<a href=\"https://www.gumroad.com/library\">your Gumroad library</a> "
-                    + "or your email receipt from Gumroad (it should arrive within a few minutes after the purchase, "
-                    + "please look into the spam folder too). If you cannot find the key, contact "
-                    + "<a href=\"mailto:support@tiliado.eu\">support@tiliado.eu</a>.\n\n"
-                    + "<b>September 2nd, 2018, or earlier:</b>\n\n"
-                    + "Your purchases were linked to your <b>Tiliado account</b>. This is a legacy option for "
-                    + "really old purchases and subscriptions.\n\n"
-                    + "<b>I will continue with:</b>"),
-                {"Continue", "Help", "Cancel"}, 0, (owned) options);
-            purchase_options_view.response.connect(on_purchase_options_view_response);
+            license_key_view.response.disconnect(on_license_key_view_response);
+            license_key_view = null;
         }
-        switch_view(purchase_options_view);
-    }
 
-    private void on_purchase_options_view_response(int index, Gtk.Button button) {
-        switch (index) {
-        case 0:
-            if (((Gtk.RadioButton) purchase_options_view.extra_widgets[0]).active) {
-                phase = Phase.LICENSE_KEY;
-                enter_license_key();
-            } else {
-                connect_tiliado_account(false);
-            }
-            break;
-        case 1:
-            paywall.show_help_page();
-            break;
-        default:
-            reset();
-            break;
-        }
-    }
-
-    private void connect_tiliado_account(bool developer) {
-        phase = developer ? Phase.DEVELOPER_ACCOUNT : Phase.TILIADO_ACCOUNT;
-        paywall.connect_tiliado_account();
-    }
-
-    private void on_connecting_tiliado_account() {
-        activation_pending = true;
-        if (connecting_tiliado_account_view == null) {
-            connecting_tiliado_account_view = new View(
-                Drtgtk.Labels.markup(
-                    "Follow instructions in a web browser to connect Nuvola Player with your Tiliado account."),
-                {"Help", "Cancel"});
-            connecting_tiliado_account_view.response.connect(on_connecting_tiliado_account_view_response);
-        }
-        switch_view(connecting_tiliado_account_view);
-    }
-
-    private void on_connecting_tiliado_account_view_response(int index, Gtk.Button button) {
-        switch (index) {
-        case 0:
-            paywall.show_help_page();
-            break;
-        default:
-            paywall.cancel_tiliado_account_linking();
-            break;
-        }
-    }
-
-    private void on_tiliado_account_linking_cancelled() {
-        reset();
-        activation_pending = false;
-    }
-
-    private void on_tiliado_account_linking_failed(string message) {
-        activation_pending = false;
-        if (connecting_tiliado_account_view != null && visible_child == connecting_tiliado_account_view) {
-            if (tiliado_account_error_view == null) {
-                tiliado_account_error_view = new View(
-                    Drtgtk.Labels.markup("Failed to ..."),
-                    {"Try again", "Help", "Cancel"});
-                tiliado_account_error_view.response.connect(on_tiliado_account_error_view_response);
-            }
-            tiliado_account_error_view.text_label.set_markup(Markup.printf_escaped(
-                "<b>Failed to connect your Tiliado account:</b>\n\n%s", message));
-            switch_view(tiliado_account_error_view);
-        }
-    }
-
-    private void on_tiliado_account_error_view_response(int index, Gtk.Button button) {
-        switch (index) {
-        case 0:
-            paywall.connect_tiliado_account();
-            break;
-        case 1:
-            paywall.show_help_page();
-            break;
-        default:
-            paywall.cancel_tiliado_account_linking();
-            break;
-        }
-    }
-
-    private void on_tiliado_account_linking_finished() {
-        activation_pending = false;
-        switch (phase) {
-        case Phase.DEVELOPER_ACCOUNT:
-            check_developer_account();
-            break;
-        case Phase.TILIADO_ACCOUNT:
-            check_tiliado_account();
-            break;
-        default:
-            reset();
-            break;
-        }
-    }
-
-    private void check_developer_account() {
-        TiliadoApi2.User? user = paywall.get_tiliado_account();
-        if (user == null) {
-            reset();
-            return;
-        }
-        if (paywall.is_tiliado_developer()) {
-            reset();
+        Gtk.Label label;
+        if (developer) {
+            label = Drtgtk.Labels.markup(
+                "<b>Enter the developer license key:</b>\n\n"
+                + "If you cannot find the key, contact "
+                + "<a href=\"mailto:support@tiliado.eu\">support@tiliado.eu</a>."
+            );
         } else {
-            if (invalid_tiliado_account_view == null) {
-                invalid_tiliado_account_view = new View(
-                    Drtgtk.Labels.markup(""),
-                    {"Refresh account info", "Help", "Cancel"}, 0);
-                invalid_tiliado_account_view.response.connect(on_invalid_tiliado_account_view_response);
-            }
-            invalid_tiliado_account_view.text_label.set_markup(Markup.printf_escaped(
-                "You don't have a Tiliado Developer account.\n\n<b>User:</b> %s\n<b>Tier:</b> %s",
-                user.name, TiliadoMembership.from_uint(user.membership).get_label()));
-            switch_view(invalid_tiliado_account_view);
+            label = Drtgtk.Labels.markup(
+                "<b>Enter the license key:</b>\n\nIt can be found in "
+                + "<a href=\"https://www.gumroad.com/library\">your Gumroad library</a> "
+                + "or your email receipt from Gumroad (it should arrive within a few minutes after the purchase, "
+                + "please look into the spam folder too). If you cannot find the key, contact "
+                + "<a href=\"mailto:support@tiliado.eu\">support@tiliado.eu</a>."
+            );
         }
-    }
+        license_key_view = new View(label, {"Continue", "Help", "Cancel"}, 0, {new Gtk.Entry()});
+        license_key_view.response.connect(on_license_key_view_response);
 
-    private void check_tiliado_account() {
-        TiliadoApi2.User? user = paywall.get_tiliado_account();
-        if (user == null) {
-            reset();
-            return;
-        }
-        if (paywall.has_tiliado_account_purchases()) {
-            reset();
-        } else {
-            if (invalid_tiliado_account_view == null) {
-                invalid_tiliado_account_view = new View(
-                    Drtgtk.Labels.markup(""),
-                    {"Refresh account info", "Help", "Cancel"}, 0);
-                invalid_tiliado_account_view.response.connect(on_invalid_tiliado_account_view_response);
-            }
-            invalid_tiliado_account_view.text_label.set_markup(Markup.printf_escaped(
-                "There is no purchase linked to your Tiliado account.\n\n<b>User:</b> %s\n<b>Tier:</b> %s",
-                user.name, TiliadoMembership.from_uint(user.membership).get_label()));
-            switch_view(invalid_tiliado_account_view);
-        }
-    }
-
-    private void on_invalid_tiliado_account_view_response(int index, Gtk.Button button) {
-        switch (index) {
-        case 0:
-            paywall.connect_tiliado_account();
-            break;
-        case 1:
-            paywall.show_help_page();
-            break;
-        default:
-            reset();
-            break;
-        }
-    }
-
-    private void on_tiliado_account_view_response(int index, Gtk.Button button) {
-        switch (index) {
-        case 0:
-            connect_tiliado_account(false);
-            break;
-        case 1:
-            paywall.disconnect_tiliado_account();
-            break;
-        default:
-            close();
-            break;
-        }
-    }
-
-    private void enter_license_key() {
-        if (license_key_view == null) {
-            license_key_view = new View(
-                Drtgtk.Labels.markup(
-                    "<b>Enter the license key:</b>\n\nIt can be found in "
-                    + "<a href=\"https://www.gumroad.com/library\">your Gumroad library</a> "
-                    + "or your email receipt from Gumroad (it should arrive within a few minutes after the purchase, "
-                    + "please look into the spam folder too). If you cannot find the key, contact "
-                    + "<a href=\"mailto:support@tiliado.eu\">support@tiliado.eu</a>."),
-                {"Continue", "Help", "Cancel"}, 0, {new Gtk.Entry()});
-            license_key_view.response.connect(on_license_key_view_response);
-        }
         switch_view(license_key_view);
         var entry = (Gtk.Entry) license_key_view.extra_widgets[0];
         if (Drt.String.is_empty(entry.get_text())) {
@@ -397,7 +190,7 @@ public class TiliadoPaywallWidget : Gtk.Stack {
             paywall.show_help_page();
             break;
         default:
-            choose_purchase_option();
+            reset();
             break;
         }
     }
@@ -425,7 +218,7 @@ public class TiliadoPaywallWidget : Gtk.Stack {
             paywall.show_help_page();
             break;
         default:
-            enter_license_key();
+            enter_license_key(phase == Phase.DEVELOPER_KEY);
             break;
         }
     }
@@ -436,7 +229,7 @@ public class TiliadoPaywallWidget : Gtk.Stack {
             paywall.show_help_page();
             break;
         default:
-            enter_license_key();
+            enter_license_key(phase == Phase.DEVELOPER_KEY);
             break;
         }
     }
@@ -450,7 +243,7 @@ public class TiliadoPaywallWidget : Gtk.Stack {
             paywall.show_help_page();
             break;
         default:
-            enter_license_key();
+            enter_license_key(phase == Phase.DEVELOPER_KEY);
             break;
         }
     }
@@ -480,7 +273,8 @@ public class TiliadoPaywallWidget : Gtk.Stack {
     private void on_gumroad_license_view_response(int index, Gtk.Button button) {
         switch (index) {
         case 0:
-            enter_license_key();
+            warning("enter key for %s", TiliadoMembership.DEVELOPER.get_label());
+            enter_license_key(paywall.get_gumroad_license_tier() >= TiliadoMembership.DEVELOPER);
             break;
         case 1:
             paywall.drop_gumroad_license();
@@ -644,31 +438,6 @@ public class TiliadoPaywallWidget : Gtk.Stack {
         }
     }
 
-    private class TiliadoAccountView : Info {
-        public unowned TiliadoApi2.User? user = null;
-
-        public TiliadoAccountView(TiliadoApi2.User user, owned string?[]? icon_buttons=null) {
-            base("Tiliado Account", (owned) icon_buttons);
-            update(user);
-        }
-
-        public void update(TiliadoApi2.User user) {
-            TiliadoMembership tier = user.get_paywall_tier();
-            unowned string? description = null;
-            if (tier >= TiliadoMembership.DEVELOPER) {
-                description = "Thank you for your work.";
-            } else if (tier >= TiliadoMembership.BASIC) {
-                description = "Thank you for purchasing Nuvola.";
-            } else {
-                description = "No active purchases found. Try refreshing data.";
-            }
-            details.label = Markup.printf_escaped(
-                "<i>%s</i>\n\nUser: %s\nTier: %s", description, user.name, tier.get_label());
-            this.user = user;
-            details.show();
-        }
-    }
-
     private class GumroadLicenseView : Info {
         public unowned TiliadoLicense? license = null;
 
@@ -730,8 +499,7 @@ public class TiliadoPaywallWidget : Gtk.Stack {
 
     private enum Phase {
         NONE,
-        DEVELOPER_ACCOUNT,
-        TILIADO_ACCOUNT,
+        DEVELOPER_KEY,
         LICENSE_KEY;
     }
 

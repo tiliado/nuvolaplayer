@@ -199,6 +199,17 @@ public class AppRunnerController: Drtgtk.Application {
         if (about_dialog != null) {
             about_dialog.close();
         }
+
+        if (!config.get_bool("infobar.feature_voting_closed")) {
+            show_info_bar(
+                "feature-voting",
+                Gtk.MessageType.INFO,
+                "<b>Nuvola users are going to vote for feature requests in February 2021.</b>\n"
+                + "We need your help to find out which feature requests are most wanted or not relevant anymore. "
+                + "You can propose new features or improve existing requests.",
+                {"More information"}
+            );
+        }
     }
 
     private void init_settings() {
@@ -366,6 +377,8 @@ public class AppRunnerController: Drtgtk.Application {
         web_worker_data["JS_ENGINE"] = web_options.get_name_version();
         web_worker_data["JS_ENGINE_NAME"] = web_options.get_name();
         web_worker_data["JS_ENGINE_VERSION"] = web_options.engine_version.to_string();
+        web_worker_data["JS_HOSTNAME"] = Drt.System.get_hostname();
+        web_worker_data["JS_MACHINE_HASH"] = machine_hash;
         web_engine.early_init(this, ipc_bus, config, connection, web_worker_data);
         web_engine.init_form.connect(on_init_form);
         web_engine.notify.connect_after(on_web_engine_notify);
@@ -762,6 +775,16 @@ public class AppRunnerController: Drtgtk.Application {
                 break;
             case 1:
                 show_uri("https://github.com/tiliado/nuvolaplayer/wiki/GTK-Themes");
+                break;
+            }
+            break;
+        case "feature-voting":
+            switch (response) {
+            case 0:
+                show_uri("https://github.com/tiliado/nuvolaplayer/issues/678");
+                break;
+            case Gtk.ResponseType.CLOSE:
+                config.set_bool("infobar.feature_voting_closed", true);
                 break;
             }
             break;

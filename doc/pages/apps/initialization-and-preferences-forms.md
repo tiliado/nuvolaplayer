@@ -14,7 +14,7 @@ loaded. You should use it only for configuration your service information cannot
 For example, Logitech Media Server integration needs to know an address of server instance,
 because it has no idea what web page to load without this information.
 
-The initialization from is show when ``entries`` parameter of
+The initialization form is shown when ``entries`` parameter of
 [Nuvola.Core::InitializationForm](apiref>Nuvola.Core%3A%3AInitializationForm) signal
 handler is not left empty. The example bellow asks user to provide name to show a greeting.
 API used in ``WebApp.appendPreferences`` will be [described later](#form-specification).

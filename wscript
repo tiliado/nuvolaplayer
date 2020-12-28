@@ -31,13 +31,13 @@ out = 'build'
 APPNAME = SHORT_ID = "nuvolaruntime"
 NUVOLA_BIN = "nuvola"
 NUVOLACTL_BIN = "nuvolactl"
-VERSION = "4.19.0"
+VERSION = "4.20.0"
 GENERIC_NAME = "Cloud Player"
 BLURB = "Tight integration of web-based media streaming services with your Linux desktop"
 DEFAULT_HELP_URL = "https://github.com/tiliado/nuvolaruntime/wiki/Third-Party-Builds"
 DEFAULT_WEB_APP_REQUIREMENTS_HELP_URL = DEFAULT_HELP_URL
 
-MIN_DIORITE = "4.19.0"
+MIN_DIORITE = "4.20.0"
 MIN_VALA = "0.48.0"
 MIN_GLIB = "2.56.1"
 MIN_GTK = "3.22.30"
@@ -883,15 +883,6 @@ def build(ctx):
         target = 'share/%s/js/main.js' % SHORT_ID,
         install_path = '${PREFIX}/share/%s/js' % SHORT_ID
     )
-
-    data_js =  ctx.path.find_dir("data/js")
-    for node in data_js.listdir():
-        ctx(
-            rule = 'cp -v ${SRC} ${TGT}',
-            source = data_js.find_node(node),
-            target = 'share/%s/js/%s' % (SHORT_ID, node),
-            install_path = '${PREFIX}/share/%s/js' % SHORT_ID
-        )
 
     ctx.add_group()
     jslint(source_dir = 'src/mainjs', global_vars=['Nuvola'])
