@@ -461,6 +461,10 @@ public class AppRunnerController: Drtgtk.Application {
         Timeout.add_seconds(5, () => {warning("Force quit after timeout."); GLib.Process.exit(0);});
     }
 
+    public void exit() {
+        do_quit();
+    }
+
     public void shutdown_engines() {
         web_options.shutdown();
     }
