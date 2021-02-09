@@ -333,6 +333,9 @@ def options(ctx):
         dest='lint_js_auto_fix', help="Use JavaScript linter and automatically fix errors (dangerous).")
     ctx.add_option('--no-strict', action='store_false', default=True,
         dest='strict', help="Disable strict checks (e.g. fatal warnings).")
+    ctx.add_option(
+        '--no-vapi-patch', action='store_false', default=True, dest='patch_vapi',
+        help="Don't use a patched copy of system vapi files as needed but use them as is.")
 
 def configure(ctx):
     add_version_info(ctx)
@@ -445,6 +448,8 @@ def configure(ctx):
     ctx.env.LINT_JS = ctx.options.lint_js
     if ctx.env.LINT_JS:
         ctx.find_program('standard', var='JSLINT')
+
+    ctx.env.PATCH_VAPI = ctx.options.patch_vapi
 
     # For tests
     ctx.find_program("diorite-testgen{}".format(TARGET_DIORITE), var="DIORITE_TESTGEN")
@@ -608,6 +613,10 @@ def build(ctx):
         packages += " valacef valacefgtk"
         uselib += " VALACEF VALACEFGTK"
 
+    if not ctx.env.PATCH_VAPI:
+        vapi_to_patch.clear()
+
+    # The vapi files are not patched in-place - the result is stored in our build directory.
     for vapi in vapi_to_patch:
         all_vapi_dirs = [path.format(vala=ctx.env.VALAC_SERIES) for path in (
             '/app/share/vala-{vala}/vapi', '/usr/share/vala-{vala}/vapi', '/app/share/vala/vapi', '/usr/share/vala/vapi'
