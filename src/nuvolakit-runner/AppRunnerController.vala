@@ -204,7 +204,7 @@ public class AppRunnerController: Drtgtk.Application {
             show_info_bar(
                 "feature-voting",
                 Gtk.MessageType.INFO,
-                "<b>Nuvola users are going to vote for feature requests in March 2021.</b>\n"
+                "<b>Nuvola users are going to vote for feature requests in May 2021.</b>\n"
                 + "We need your help to find out which feature requests are most wanted or not relevant anymore. "
                 + "You can propose new features or improve existing requests.",
                 {"More information"}
