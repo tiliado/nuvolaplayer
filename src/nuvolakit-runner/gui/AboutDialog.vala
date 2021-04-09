@@ -69,7 +69,7 @@ public class AboutDialog: Gtk.Dialog {
     public const string TAB_TIPS = "tips";
     public const string TAB_STARTUP = "startup";
     public const string TAB_TERMS = "terms";
-    public const int TERMS_VERSION = 1;
+    public const int TERMS_VERSION = 2;
     public StartupView? startup {get; private set;}
     public Gtk.Stack stack {get; private set;}
     public Gtk.Grid grid {get; private set;}
@@ -106,11 +106,15 @@ public class AboutDialog: Gtk.Dialog {
             "Nuvola Player is an open-source project. You can <a href=\"%1$s\">download the entire source code</a> "
             + "for free under the <a href=\"%2$s\">BSD-2-Clause license</a>. Feel free to study it, modify it, build "
             + "Nuvola for you, or even distribute it further.\n\n"
+            + "Nuvola Player is not affiliated with any service provider. We cannot "
+            + "guarantee that Nuvola will always stay compatible with a particular streaming service. If there is no "
+            + "feasible solution, incompatible services are marked as deprecated with an explanation and may be "
+            + "eventually removed. The affected users may ask for a refund. Each case is assessed individually.\n\n"
             + "The official flatpak builds of Nuvola require <a href=\"%3$s\">a purchase</a> to unlock some features "
             + "when a free trial period ends. We ask users for the payment to cover the project's expenses and to "
             + "provide them with support beyond the usual open-source standard. It also motivates us to focus on "
-            + "quality and to develop Nuvola further even though some obstacles may seem too demanding.\n\n"
-            + "By purchasing Nuvola, you tell us: \"Don't give up, we appreciate your work.\"\n\n\n"
+            + "quality and to develop Nuvola further even though some obstacles may seem too demanding. "
+            + "By purchasing Nuvola, you tell us: \"Don't give up, we appreciate your work.\"\n\n"
             + "By using Nuvola, you agree with <a href=\"%4$s\">Tiliado Privacy Policy</a>. The short version is: "
             + "We collect only the data we need to provide you with our services. We don't sell your personal "
             + "information. If you have any questions, feedback or a data removal request, "
@@ -250,7 +254,7 @@ public class AboutDialog: Gtk.Dialog {
 
     public void show_terms() {
         Gtk.Label label = Drtgtk.Labels.markup(
-            "You need to agree with <a href=\"%s\">Privacy Policy</a>.", "https://tiliado.eu/privacy/");
+            "You need to agree with Terms and <a href=\"%s\">Privacy Policy</a>.", "https://tiliado.eu/privacy/");
         label.yalign = 0.5f;
         show_tab(TAB_TERMS);
         show_action(label, "Accept", Gtk.ResponseType.ACCEPT, Gtk.MessageType.INFO);
