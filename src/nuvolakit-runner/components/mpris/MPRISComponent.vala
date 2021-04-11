@@ -26,10 +26,10 @@ namespace Nuvola {
 
 public class MPRISComponent: Component {
     private Bindings bindings;
-    private Drtgtk.Application app;
+    private AppRunnerController app;
     private MPRISProvider? mpris = null;
 
-    public MPRISComponent(Drtgtk.Application app, Bindings bindings, Drt.KeyValueStorage config) {
+    public MPRISComponent(AppRunnerController app, Bindings bindings, Drt.KeyValueStorage config) {
         base(
             config, "mpris", "Media Player DBus Interface",
             "Implementation of Media Player Remote Interface Specification (MPRIS 2) used by various applets.",

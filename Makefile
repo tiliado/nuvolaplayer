@@ -23,4 +23,7 @@ merge-devel:
 	&& git checkout $(DEVELOP_BRANCH) \
 	&& git merge --ff-only "$$b" \
 	&& git branch -d "$$b" \
+	&& git push origin -d "$$b" \
+	&& git fetch origin \
+	&& git remote prune origin \
 	&& git status -v

@@ -7,6 +7,63 @@ Nuvola Player Changelog
     [Nuvola Devel mailing list](https://groups.google.com/d/forum/nuvola-player-devel)
     to receive more technical announcements and important information about future development.
 
+Release 4.21.0 - April 11th, 2021
+---------------------------------
+
+This is a concise changelog. Refer to [Nuvola News](https://medium.com/nuvola-news) for a more verbose one and to see
+some screenshots.
+
+### What’s New for Users
+
+* New script: Anghami. Maintainer: Jiří Janoušek • [Source code](https://github.com/tiliado/nuvola-app-anghami)
+
+* Official support for Linux Mint, Cinnamon and Mate.e to test environment-specific integration issues.
+
+* Spotify script 3.4
+  * Fix next and repeat actions. [[GitHub PR](https://github.com/tiliado/nuvola-app-spotify/pull/28)]
+  * Fix Google login. [[GitHub ticket](https://github.com/tiliado/nuvolaplayer/issues/719)]
+  * Update metadata parsing.
+
+* Tidal script 1.2
+  * Update metadata parsing. [[GitHub ticket](https://github.com/tiliado/nuvolaplayer/issues/721)]
+
+* Amazon Cloud Player script 5.12
+  * Add Japanese region support. [[GitHub ticket](https://github.com/tiliado/nuvola-app-amazon-cloud-player/issues/46)]
+
+* Audible script 1.1
+  * Add national variants. [[GitHub ticket](https://github.com/tiliado/nuvolaplayer/issues/708)]
+
+* Primephonic script 1.1
+  * Fix Google login. [[GitHub ticket](https://github.com/tiliado/nuvolaplayer/issues/719)]
+  * Update metadata parsing.
+
+* Qobuz script 1.4
+  * Support Qobuz design v5.8.0-b021. [[GitHub ticket](https://github.com/tiliado/nuvolaplayer/issues/715)]
+  * Added personalized icon set.
+  * Added support for seek.
+  * Improve support for stop.
+
+* Pandora script is deprecated until logging in is fixed.
+  [[GitHub ticket](https://github.com/tiliado/nuvolaplayer/issues/720)]
+
+* Plex script  is deprecated until it becomes compatible again.
+  [[GitHub ticket](https://github.com/tiliado/nuvolaplayer/issues/631)]
+
+* Bug fixes
+  * Fix wrong initial state of *Show sidebar* toggle
+    [[GitHub ticket](https://github.com/tiliado/nuvolaplayer/issues/624)].
+  * Fix *Quit* action triggered with Media Player Remote Interface
+    [[GitHub ticket](https://github.com/tiliado/nuvolaplayer/issues/696)].
+
+* All Tiliado accounts from [https://tiliado.eu](https://tiliado.eu/) website have been deleted.
+
+### Other changes
+
+* Maintenance updates of various scripts.
+
+* Add `--no-vapi-patch` configure option to build script.
+  [[GitHub ticket](https://github.com/tiliado/nuvolaplayer/issues/707)]
+
 Release 4.20.0 - December 28, 2020
 ----------------------------------
 

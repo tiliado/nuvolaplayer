@@ -448,6 +448,7 @@ public class AppRunnerController: Drtgtk.Application {
             ah.simple_action("view", "win", Actions.ZOOM_RESET, "Original zoom", null, "zoom-original", "<ctrl>0", web_engine.zoom_reset),
         };
         actions.add_actions(actions_spec);
+        actions.get_action(Actions.TOGGLE_SIDEBAR).enabled = !main_window.sidebar.is_empty();
         actions.get_action(Actions.GO_FORWARD).enabled = web_engine.can_go_forward;
         actions.get_action(Actions.GO_BACK).enabled = web_engine.can_go_back;
     }
@@ -459,6 +460,10 @@ public class AppRunnerController: Drtgtk.Application {
         }
         Timeout.add(50, () => {quit_mainloop(); quit(); return false;});
         Timeout.add_seconds(5, () => {warning("Force quit after timeout."); GLib.Process.exit(0);});
+    }
+
+    public void exit() {
+        do_quit();
     }
 
     public void shutdown_engines() {

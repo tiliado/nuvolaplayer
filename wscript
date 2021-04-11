@@ -31,13 +31,13 @@ out = 'build'
 APPNAME = SHORT_ID = "nuvolaruntime"
 NUVOLA_BIN = "nuvola"
 NUVOLACTL_BIN = "nuvolactl"
-VERSION = "4.20.0"
+VERSION = "4.21.0"
 GENERIC_NAME = "Cloud Player"
 BLURB = "Tight integration of web-based media streaming services with your Linux desktop"
 DEFAULT_HELP_URL = "https://github.com/tiliado/nuvolaruntime/wiki/Third-Party-Builds"
 DEFAULT_WEB_APP_REQUIREMENTS_HELP_URL = DEFAULT_HELP_URL
 
-MIN_DIORITE = "4.20.0"
+MIN_DIORITE = "4.21.0"
 MIN_VALA = "0.48.0"
 MIN_GLIB = "2.56.1"
 MIN_GTK = "3.22.30"
@@ -333,6 +333,9 @@ def options(ctx):
         dest='lint_js_auto_fix', help="Use JavaScript linter and automatically fix errors (dangerous).")
     ctx.add_option('--no-strict', action='store_false', default=True,
         dest='strict', help="Disable strict checks (e.g. fatal warnings).")
+    ctx.add_option(
+        '--no-vapi-patch', action='store_false', default=True, dest='patch_vapi',
+        help="Don't use a patched copy of system vapi files as needed but use them as is.")
 
 def configure(ctx):
     add_version_info(ctx)
@@ -445,6 +448,8 @@ def configure(ctx):
     ctx.env.LINT_JS = ctx.options.lint_js
     if ctx.env.LINT_JS:
         ctx.find_program('standard', var='JSLINT')
+
+    ctx.env.PATCH_VAPI = ctx.options.patch_vapi
 
     # For tests
     ctx.find_program("diorite-testgen{}".format(TARGET_DIORITE), var="DIORITE_TESTGEN")
@@ -608,6 +613,10 @@ def build(ctx):
         packages += " valacef valacefgtk"
         uselib += " VALACEF VALACEFGTK"
 
+    if not ctx.env.PATCH_VAPI:
+        vapi_to_patch.clear()
+
+    # The vapi files are not patched in-place - the result is stored in our build directory.
     for vapi in vapi_to_patch:
         all_vapi_dirs = [path.format(vala=ctx.env.VALAC_SERIES) for path in (
             '/app/share/vala-{vala}/vapi', '/usr/share/vala-{vala}/vapi', '/app/share/vala/vapi', '/usr/share/vala/vapi'

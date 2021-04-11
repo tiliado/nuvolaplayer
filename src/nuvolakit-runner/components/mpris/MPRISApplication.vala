@@ -26,9 +26,9 @@ namespace Nuvola {
 
 [DBus(name = "org.mpris.MediaPlayer2")]
 public class MPRISApplication: GLib.Object {
-    private Drtgtk.Application app;
+    private AppRunnerController app;
 
-    public MPRISApplication(Drtgtk.Application app) {
+    public MPRISApplication(AppRunnerController app) {
         this.app = app;
         string desktop_entry = app.desktop_name;
         this.desktop_entry = desktop_entry[0:desktop_entry.length - 8];
@@ -51,7 +51,7 @@ public class MPRISApplication: GLib.Object {
     }
 
     public void quit() throws GLib.DBusError, GLib.IOError {
-        app.quit();
+        app.exit();
     }
 }
 

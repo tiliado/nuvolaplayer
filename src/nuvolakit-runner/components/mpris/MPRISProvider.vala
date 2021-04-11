@@ -27,13 +27,13 @@ namespace Nuvola {
 public class MPRISProvider {
     private MediaPlayerModel player;
     private uint owner_id = 0;
-    private Drtgtk.Application app;
+    private AppRunnerController app;
     private MPRISApplication? mpris_app = null;
     private MPRISPlayer? mpris_player = null;
     private DBusConnection? conn = null;
     private uint[] registered_objects = new uint[2];
 
-    public MPRISProvider(Drtgtk.Application app, MediaPlayerModel player) {
+    public MPRISProvider(AppRunnerController app, MediaPlayerModel player) {
         this.player = player;
         this.app = app;
     }
