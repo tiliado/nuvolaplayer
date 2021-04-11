@@ -37,7 +37,7 @@ BLURB = "Tight integration of web-based media streaming services with your Linux
 DEFAULT_HELP_URL = "https://github.com/tiliado/nuvolaruntime/wiki/Third-Party-Builds"
 DEFAULT_WEB_APP_REQUIREMENTS_HELP_URL = DEFAULT_HELP_URL
 
-MIN_DIORITE = "4.21.0"
+MIN_DIORITE = "4.22.0"
 MIN_VALA = "0.48.0"
 MIN_GLIB = "2.56.1"
 MIN_GTK = "3.22.30"
