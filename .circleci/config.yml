@@ -3,7 +3,7 @@ version: 2.1
 executors:
   fedora:
     docker:
-     - image: fedora:32
+     - image: fedora:latest
        auth:
          username: $DOCKER_USERNAME
          password: $DOCKER_PASSWORD
