@@ -603,7 +603,15 @@ MediaPlayer._updateNotification = function () {
   if (this._notification && track.title) {
     const title = track.title
     let message
-    if (!track.artist && !track.album) { message = 'by unknown artist' } else if (!track.artist) { message = Nuvola.format('from {1}', track.album) } else if (!track.album) { message = Nuvola.format('by {1}', track.artist) } else { message = Nuvola.format('by {1} from {2}', track.artist, track.album) }
+    if (!track.artist && !track.album) {
+      message = 'by unknown artist'
+    } else if (!track.artist) {
+      message = Nuvola.format('from {1}', track.album)
+    } else if (!track.album) {
+      message = Nuvola.format('by {1}', track.artist)
+    } else {
+      message = Nuvola.format('by {1} from {2}', track.artist, track.album)
+    }
 
     this._notification.update(title, message, this._artworkFile ? null : 'nuvolaplayer', this._artworkFile)
     this._showNotification()
