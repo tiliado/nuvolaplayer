@@ -18,6 +18,7 @@ commands:
             dnf update -y > /dev/null
             dnf install -y \
               desktop-file-utils \
+              file \
               git \
               gcc \
               glib2-devel \
@@ -26,6 +27,7 @@ commands:
               libdrm-devel \
               libgee \
               libgee-devel \
+              libtool \
               make \
               nodejs \
               npm \
@@ -50,10 +52,12 @@ commands:
               vala \
               vala-devel \
               valadoc \
+              which \
               xorg-x11-util-macros
             git clone https://github.com/robclark/libdri2.git
             cd libdri2
-            ./autogen.sh --prefix=/usr
+            #autoreconf -v --install
+            ./configure --prefix=/usr
             make all
             make install
             /sbin/ldconfig
@@ -86,6 +90,9 @@ commands:
           name: Build Vala from git
           working_directory: ~/workdir
           command: |
+            export SHELL=/usr/bin/bash
+            export CONFIG_SHELL=/usr/bin/bash
+            export M4=/usr/bin/m4
             git clone https://gitlab.gnome.org/GNOME/vala.git -b << parameters.branch >> --depth 500
             cd vala
             ./autogen.sh --prefix=/usr
@@ -99,6 +106,9 @@ commands:
           name: Build Gee from git
           working_directory: ~/workdir
           command: |
+            export SHELL=/usr/bin/bash
+            export CONFIG_SHELL=/usr/bin/bash
+            export M4=/usr/bin/m4
             git clone https://gitlab.gnome.org/GNOME/libgee.git --depth=500
             cd libgee
             ./autogen.sh --prefix=/usr --enable-introspection=no --disable-static --enable-gtk-doc=no
