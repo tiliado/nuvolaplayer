@@ -7,6 +7,30 @@ Nuvola Player Changelog
     [Nuvola Devel mailing list](https://groups.google.com/d/forum/nuvola-player-devel)
     to receive more technical announcements and important information about future development.
 
+Release 4.22.0 - May 9th, 2021
+------------------------------
+
+This is a concise changelog. Refer to [Nuvola News](https://medium.com/nuvola-news) for a more verbose one and to see
+some screenshots.
+
+### What’s New for Users
+
+* New script: Airsonic (Maintainer: Jiří Janoušek)
+
+* Deezer script 3.5: Fix Google sign-in. [[GitHub ticket](https://github.com/tiliado/nuvolaplayer/issues/726)]
+
+* iHeartRADIO 1.1: Fix incompatibility of the old web engine by adding a polyfill for Promise.allSettled.
+  [[GitHub ticket](https://github.com/tiliado/nuvolaplayer/issues/727)]
+  Update metadata parsing.
+
+* Spotify script 3.5: Fix artist parsing on the artist page.
+  [[GitHub ticket](https://github.com/tiliado/nuvolaplayer/issues/723)]
+  Fix wrong parsing of track length that caused excessive notifications.
+  [[GitHub ticket](https://github.com/tiliado/nuvolaplayer/issues/725)]
+
+* Apple Music script 1.2: Deprecated until Nuvola Player upgrades its web engine.
+  [[GitHub ticket](https://github.com/tiliado/nuvolaplayer/issues/730)]
+
 Release 4.21.0 - April 11th, 2021
 ---------------------------------
 
