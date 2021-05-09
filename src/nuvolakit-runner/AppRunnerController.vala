@@ -62,6 +62,7 @@ public class AppRunnerController: Drtgtk.Application {
     private PreferencesDialog? preferences_dialog = null;
     private StartupPhase startup_phase = StartupPhase.NONE;
     private uint setup_sidebar_timeout_id = 0;
+    private TiliadoSurvey survey;
 
     public AppRunnerController(
         Drt.Storage storage, WebApp web_app, WebAppStorage app_storage) {
@@ -73,6 +74,7 @@ public class AppRunnerController: Drtgtk.Application {
         this.version = "%d.%d".printf(web_app.version_major, web_app.version_minor);
         this.app_storage = app_storage;
         this.info_bars = new HashTable<string, Gtk.InfoBar>(str_hash, str_equal);
+        this.survey = new TiliadoSurvey(null, "nuvola2021/");
     }
 
     public signal void info_bar_response(string id, int reponse_id);
@@ -200,15 +202,9 @@ public class AppRunnerController: Drtgtk.Application {
             about_dialog.close();
         }
 
-        if (!config.get_bool("infobar.feature_voting_closed")) {
-            show_info_bar(
-                "feature-voting",
-                Gtk.MessageType.INFO,
-                "<b>Nuvola users are going to vote for feature requests in May 2021.</b>\n"
-                + "We need your help to find out which feature requests are most wanted or not relevant anymore. "
-                + "You can propose new features or improve existing requests.",
-                {"More information"}
-            );
+        if (tiliado_paywall != null) {
+            update_survey();
+            tiliado_paywall.tier_info_updated.connect(update_survey);
         }
     }
 
@@ -410,6 +406,7 @@ public class AppRunnerController: Drtgtk.Application {
 
     private void load_app() {
         set_app_menu_items({
+            Actions.SURVEY,
             Actions.PREFERENCES, Actions.REPORT_BUG, Actions.ASK_QUESTION, Actions.REQUEST_FEATURE,
             Actions.HELP, Actions.NEWS, Actions.ABOUT, Actions.QUIT});
         main_window.set_menu_button_items({
@@ -436,6 +433,7 @@ public class AppRunnerController: Drtgtk.Application {
     private void append_actions() {
         unowned ActionsHelper ah = actions_helper;
         Drtgtk.Action[] actions_spec = {
+            ah.simple_action("main", "app", Actions.SURVEY, "Nuvola Survey 2021", null, null, null, do_open_survey),
             ah.simple_action("main", "app", Actions.PREFERENCES, "Preferences", "_Preferences", null, null, do_preferences),
             ah.toggle_action("main", "win", Actions.TOGGLE_SIDEBAR, "Show sidebar", "Show _sidebar", null, null, do_toggle_sidebar, false),
             ah.simple_action("go", "app", Actions.GO_HOME, "Home", "_Home", "go-home", "<alt>Home", web_engine.go_home),
@@ -567,6 +565,29 @@ public class AppRunnerController: Drtgtk.Application {
         preferences_dialog.response.disconnect(on_preferences_dialog_response);
         preferences_dialog.destroy();
         preferences_dialog = null;
+    }
+
+    private void do_open_survey() {
+        show_uri(survey.get_survey_url() ?? TiliadoSurvey.INFO_URL);
+    }
+
+    private void update_survey() {
+        TiliadoLicense? license = tiliado_paywall.get_gumroad_license();
+        if (license == null || !license.is_valid()) {
+            survey.survey_key = null;
+        } else {
+            survey.survey_key = license.license.license_key;
+
+            if (!config.get_bool("infobar.survey_2021_closed")) {
+                show_info_bar(
+                    "feature-voting",
+                    Gtk.MessageType.INFO,
+                    "<b>You may participate in Nuvola Player Survey 2021.</b>\nWe need your help "
+                    + "to obtain the valuable insight we can use to shape the future of the project.",
+                    {"Open survey"}
+                );
+            }
+        }
     }
 
     private void do_about() {
@@ -786,10 +807,10 @@ public class AppRunnerController: Drtgtk.Application {
         case "feature-voting":
             switch (response) {
             case 0:
-                show_uri("https://github.com/tiliado/nuvolaplayer/issues/678");
+                do_open_survey();
                 break;
             case Gtk.ResponseType.CLOSE:
-                config.set_bool("infobar.feature_voting_closed", true);
+                config.set_bool("infobar.survey_2021_closed", true);
                 break;
             }
             break;
