@@ -3,7 +3,7 @@ version: 2.1
 executors:
   fedora:
     docker:
-     - image: fedora:32
+     - image: fedora:33
        auth:
          username: $DOCKER_USERNAME
          password: $DOCKER_PASSWORD
@@ -185,9 +185,9 @@ jobs:
       - checkout-nuvola
       - install-common-deps
       - build-vala:
-          branch: "0.50"
+          branch: "0.52"
       - build-valalint:
-          branch: "0.50.x"
+          branch: "0.52.x"
       - build-diorite
       - build-nuvola-strict
 

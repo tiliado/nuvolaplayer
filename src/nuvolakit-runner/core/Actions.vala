@@ -42,5 +42,6 @@ public const string ZOOM_IN = "zoom-in";
 public const string ZOOM_OUT = "zoom-out";
 public const string ZOOM_RESET = "zoom-reset";
 public const string QUIT = "quit";
+public const string SURVEY = "open-survey";
 
 } // namespace Nuvola.Actions
