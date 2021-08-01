@@ -46,6 +46,7 @@ public class PatronBox : Gtk.Grid {
             "Andrew Allen", null,
             "Nathan Warkentin", "https://www.facebook.com/fur0n",
             "Chuck Talk", "https://www.linkedin.com/in/ctalk",
+            "Peter Tillemans", "https://www.snamellit.com",
         };
         var buffer = new StringBuilder("");
         int count = patrons.length / 2;

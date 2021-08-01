@@ -406,7 +406,6 @@ public class AppRunnerController: Drtgtk.Application {
 
     private void load_app() {
         set_app_menu_items({
-            Actions.SURVEY,
             Actions.PREFERENCES, Actions.REPORT_BUG, Actions.ASK_QUESTION, Actions.REQUEST_FEATURE,
             Actions.HELP, Actions.NEWS, Actions.ABOUT, Actions.QUIT});
         main_window.set_menu_button_items({
@@ -433,7 +432,6 @@ public class AppRunnerController: Drtgtk.Application {
     private void append_actions() {
         unowned ActionsHelper ah = actions_helper;
         Drtgtk.Action[] actions_spec = {
-            ah.simple_action("main", "app", Actions.SURVEY, "Nuvola Survey 2021", null, null, null, do_open_survey),
             ah.simple_action("main", "app", Actions.PREFERENCES, "Preferences", "_Preferences", null, null, do_preferences),
             ah.toggle_action("main", "win", Actions.TOGGLE_SIDEBAR, "Show sidebar", "Show _sidebar", null, null, do_toggle_sidebar, false),
             ah.simple_action("go", "app", Actions.GO_HOME, "Home", "_Home", "go-home", "<alt>Home", web_engine.go_home),
@@ -567,26 +565,12 @@ public class AppRunnerController: Drtgtk.Application {
         preferences_dialog = null;
     }
 
-    private void do_open_survey() {
-        show_uri(survey.get_survey_url() ?? TiliadoSurvey.INFO_URL);
-    }
-
     private void update_survey() {
         TiliadoLicense? license = tiliado_paywall.get_gumroad_license();
         if (license == null || !license.is_valid()) {
             survey.survey_key = null;
         } else {
             survey.survey_key = license.license.license_key;
-
-            if (!config.get_bool("infobar.survey_2021_closed")) {
-                show_info_bar(
-                    "feature-voting",
-                    Gtk.MessageType.INFO,
-                    "<b>You may participate in Nuvola Player Survey 2021.</b>\nWe need your help "
-                    + "to obtain the valuable insight we can use to shape the future of the project.",
-                    {"Open survey"}
-                );
-            }
         }
     }
 
@@ -801,16 +785,6 @@ public class AppRunnerController: Drtgtk.Application {
                 break;
             case 1:
                 show_uri("https://github.com/tiliado/nuvolaplayer/wiki/GTK-Themes");
-                break;
-            }
-            break;
-        case "feature-voting":
-            switch (response) {
-            case 0:
-                do_open_survey();
-                break;
-            case Gtk.ResponseType.CLOSE:
-                config.set_bool("infobar.survey_2021_closed", true);
                 break;
             }
             break;

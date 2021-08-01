@@ -7,6 +7,24 @@ Nuvola Player Changelog
     [Nuvola Devel mailing list](https://groups.google.com/d/forum/nuvola-player-devel)
     to receive more technical announcements and important information about future development.
 
+Release 4.23.0 - August 1st, 2021
+---------------------------------
+
+This is a concise changelog. Refer to [Nuvola News](https://medium.com/nuvola-news) for a more verbose one and to see
+some screenshots.
+
+### What’s New for Users
+
+* SoundCloud script 1.7: Fix Google sign-in.
+
+* Spotify script 3.6:
+  Fix too narrow track list on artist page. [[GitHub ticket](https://github.com/tiliado/nuvolaplayer/issues/732)]
+  Fix playback actions. [[GitHub ticket](https://github.com/tiliado/nuvolaplayer/issues/739)]
+
+* YouTube Music script 1.6: Fix playback state parsing. [[GitHub ticket](https://github.com/tiliado/nuvolaplayer/issues/750)]
+
+* Deprecated scripts: Amazon Music and Tidal services are no longer compatible with Nuvola Player.
+
 Release 4.22.0 - May 9th, 2021
 ------------------------------
 
@@ -41,7 +59,7 @@ some screenshots.
 
 * New script: Anghami. Maintainer: Jiří Janoušek • [Source code](https://github.com/tiliado/nuvola-app-anghami)
 
-* Official support for Linux Mint, Cinnamon and Mate.e to test environment-specific integration issues.
+* Official support for Linux Mint, Cinnamon and Mate to test environment-specific integration issues.
 
 * Spotify script 3.4
   * Fix next and repeat actions. [[GitHub PR](https://github.com/tiliado/nuvola-app-spotify/pull/28)]
