@@ -26,9 +26,7 @@ namespace Nuvola {
 
 public class TiliadoTierWidget : Gtk.Grid {
     private TiliadoPaywall paywall;
-    private Gtk.Label label;
     private Gtk.Button paywall_button;
-    private Gtk.Button upgrade_button;
 
     public TiliadoTierWidget(TiliadoPaywall paywall) {
         this.paywall = paywall;
@@ -39,16 +37,7 @@ public class TiliadoTierWidget : Gtk.Grid {
         hexpand = false;
         vexpand = false;
         halign = Gtk.Align.CENTER;
-        label = Drtgtk.Labels.markup("Tier");
-        label.halign = Gtk.Align.CENTER;
-        label.valign = Gtk.Align.CENTER;
-        label.hexpand = false;
-        label.vexpand = false;
-        label.margin_end = 10;
-        label.margin_start = 10;
-        label.show();
-        add(label);
-        var button = new Gtk.Button();
+        var button = new Gtk.Button.with_label("License information");
         button.hexpand = false;
         button.vexpand = false;
         button.halign = Gtk.Align.CENTER;
@@ -57,49 +46,16 @@ public class TiliadoTierWidget : Gtk.Grid {
         button.show();
         paywall_button = button;
         add(button);
-        button = new Gtk.Button.with_label("Upgrade");
-        button.hexpand = false;
-        button.vexpand = false;
-        button.halign = Gtk.Align.CENTER;
-        button.valign = Gtk.Align.CENTER;
-        button.no_show_all = true;
-        button.clicked.connect(paywall.open_upgrade_page);
-        upgrade_button = button;
-
-        add(button);
-        update();
-        paywall.notify.connect_after(on_paywall_changed);
-
     }
 
     public signal void show_paywall(TiliadoPaywall paywall);
 
     ~TiliadoTierWidget() {
         paywall_button.clicked.disconnect(on_paywall_button_clicked);
-        paywall.notify.disconnect(on_paywall_changed);
-        upgrade_button.clicked.disconnect(paywall.open_upgrade_page);
     }
 
     private void on_paywall_button_clicked() {
         show_paywall(paywall);
-    }
-
-    private void on_paywall_changed(GLib.Object emitter, ParamSpec param) {
-        update();
-    }
-
-    private void update() {
-        if (paywall.tier < TiliadoMembership.BASIC) {
-            upgrade_button.hide();
-            paywall_button.label = "Unlock features";
-            paywall_button.get_style_context().add_class("suggested-action");
-        } else {
-            paywall_button.label = "Info";
-            paywall_button.get_style_context().remove_class("suggested-action");
-            upgrade_button.visible = paywall.tier < TiliadoMembership.PREMIUM;
-        }
-        label.set_markup(Markup.printf_escaped("Features Tier: <b>%s</b>",
-            paywall.unlocked ? paywall.tier.get_label() : "Free"));
     }
 }
 
