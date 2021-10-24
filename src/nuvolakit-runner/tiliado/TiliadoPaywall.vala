@@ -27,21 +27,17 @@ namespace Nuvola {
 public class TiliadoPaywall : GLib.Object {
     public TiliadoMembership tier {get; private set; default = TiliadoMembership.BASIC;}
     public bool unlocked {get; private set; default = false;}
-    private TiliadoActivation? tiliado = null;
     private TiliadoGumroad gumroad;
     private Drtgtk.Application app;
 
-    public TiliadoPaywall(Drtgtk.Application app, TiliadoActivation tiliado, TiliadoGumroad gumroad) {
-        this.tiliado = tiliado;
+    public TiliadoPaywall(Drtgtk.Application app, TiliadoGumroad gumroad) {
         this.gumroad = gumroad;
         this.app = app;
-        tiliado.trial_updated.connect(on_trial_updated);
         gumroad.notify["cached-license"].connect_after(on_gumroad_license_changed);
         update_tier_info();
     }
 
     ~TiliadoPaywall() {
-        tiliado.trial_updated.disconnect(on_trial_updated);
         gumroad.notify["cached-license"].disconnect(on_gumroad_license_changed);
     }
 
@@ -57,55 +53,6 @@ public class TiliadoPaywall : GLib.Object {
         return this.tier >= tier;
     }
 
-    public MachineTrial? get_trial() {
-        return tiliado.get_machine_trial();
-    }
-
-    public bool has_trial() {
-        return get_trial() != null;
-    }
-
-    /**
-     * Refresh free trial data.
-     *
-     * @return `true` on success, `false` on failure.
-     */
-    public async bool refresh_trial() {
-        try {
-            yield tiliado.get_fresh_machine_trial();
-            update_tier_info();
-            return true;
-        } catch (Oauth2Error e) {
-            Drt.warn_error(e, "Failed to refresh trial.");
-            return false;
-        }
-    }
-
-    public TiliadoMembership get_trial_tier() {
-        MachineTrial? trial = get_trial();
-        return trial != null && !trial.has_expired() ? trial.tier : TiliadoMembership.NONE;
-    }
-
-    public bool is_trial_valid() {
-        return get_trial_tier() > TiliadoMembership.NONE;
-    }
-
-    public async bool start_trial() {
-        if (!has_trial()) {
-            yield refresh_trial();
-        }
-        if (has_trial()) {
-            return false;
-        }
-        try {
-            bool result = yield tiliado.start_trial();
-            update_tier_info();
-            return result;
-        } catch (Oauth2Error e) {
-            Drt.warn_error(e, "Failed to start trial.");
-            return false;
-        }
-    }
 
     public TiliadoLicense? get_gumroad_license() {
         return gumroad.cached_license;
@@ -144,19 +91,9 @@ public class TiliadoPaywall : GLib.Object {
         if ((candidate = gumroad.get_tier()) > result) {
             result = candidate;
         }
-        if ((candidate = get_trial_tier()) > result) {
-            result = candidate;
-        }
         unlocked = result > TiliadoMembership.NONE;
         this.tier = result;
         tier_info_updated();
-    }
-
-    // Tiliado trial
-
-
-    private void on_trial_updated(MachineTrial? trial) {
-        update_tier_info();
     }
 
     // Gumroad license

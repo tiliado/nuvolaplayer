@@ -31,7 +31,6 @@ public class TiliadoPaywallWidget : Gtk.Stack {
     private View? license_key_view = null;
     private View? verifying_gumroad_license_view = null;
     private GumroadLicenseView? gumroad_license_view = null;
-    private MachineTrialView? machine_trial_view = null;
     private View? license_failure_view = null;
     private View? license_invalid_view = null;
     private bool activation_pending = false;
@@ -81,21 +80,8 @@ public class TiliadoPaywallWidget : Gtk.Stack {
             gumroad_license_view.update(license);
         }
 
-        MachineTrial? trial = paywall.get_trial();
-        bool in_trial = trial != null && paywall.get_gumroad_license_tier() == 0;
-        if ((trial == null || !in_trial) && machine_trial_view != null) {
-            view.remove(machine_trial_view);
-            machine_trial_view = null;
-        } else if (in_trial && machine_trial_view == null) {
-            var trial_view = new MachineTrialView(trial);
-            machine_trial_view = trial_view;
-            view.attach(trial_view, 0, 0, 1, 1);
-        } else if (trial != null && machine_trial_view != null && machine_trial_view.trial != trial) {
-            machine_trial_view.update(trial);
-        }
-
-        bool purchase = paywall.tier == TiliadoMembership.NONE || in_trial;
-        bool upgrade = !purchase && paywall.tier < TiliadoMembership.PREMIUM;
+        bool purchase = license == null;
+        bool upgrade = false;
         view.buttons[MainAction.PURCHASE].visible = purchase;
         view.buttons[MainAction.PURCHASED].visible = purchase;
         view.buttons[MainAction.UPGRADE].visible = upgrade;
@@ -465,34 +451,6 @@ public class TiliadoPaywallWidget : Gtk.Stack {
                 license.license_tier.get_label()
             );
             this.license = license;
-            details.show();
-        }
-    }
-
-    private class MachineTrialView : Info {
-        public unowned MachineTrial? trial = null;
-
-        public MachineTrialView(MachineTrial trial) {
-            base("Free Trial", null);
-            update(trial);
-        }
-
-        public void update(MachineTrial trial) {
-            TiliadoMembership tier = trial.tier;
-            string started = Drt.Utils.human_datetime(trial.created);
-            string expires = Drt.Utils.human_datetime(trial.expires);
-            if (trial.has_expired()) {
-                details.label = Markup.printf_escaped(
-                    "<i>%s</i>\n\nName: %s\nTier: %s\nStarted: %s\nExpired: %s",
-                    "Your trial has expired.",
-                    trial.name, tier.get_label(), started, expires);
-            } else {
-                details.label = Markup.printf_escaped(
-                    "<i>%s</i>\n\nName: %s\nTier: %s\nStarted: %s\nExpires: %s",
-                    "Try Nuvola features for free before purchasing.",
-                    trial.name, tier.get_label(), started, expires);
-            }
-            this.trial = trial;
             details.show();
         }
     }

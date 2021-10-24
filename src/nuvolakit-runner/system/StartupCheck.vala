@@ -78,13 +78,11 @@ public class StartupCheck : GLib.Object {
         yield;
         if (model.get_overall_status() != StartupStatus.ERROR) {
             connect_master_service();
-            TiliadoActivation? activation = TiliadoActivation.create_if_enabled(master.config ?? app.config);
-            if (activation != null) {
-                var gumroad = new TiliadoGumroad(
-                    master.config ?? app.config, Drt.String.unmask(TILIADO_OAUTH2_CLIENT_SECRET.data)
-                );
-                paywall = new TiliadoPaywall(app, activation, gumroad);
-            }
+            var gumroad = new TiliadoGumroad(
+                master.config ?? app.config, Drt.String.unmask(TILIADO_OAUTH2_CLIENT_SECRET.data)
+            );
+            paywall = new TiliadoPaywall(app, gumroad);
+
             yield check_tiliado_account(paywall);
 
         }

@@ -319,13 +319,10 @@ public class MasterController : Drtgtk.Application {
     }
 
     private void init_tiliado_account() {
-        TiliadoActivation? activation = TiliadoActivation.create_if_enabled(config);
-        if (activation != null) {
-            var gumroad = new TiliadoGumroad(
-                config, Drt.String.unmask(TILIADO_OAUTH2_CLIENT_SECRET.data));
-            paywall = new TiliadoPaywall(this, activation, gumroad);
-            paywall.refresh_data.begin((o, res) => {paywall.refresh_data.end(res);});
-        }
+        var gumroad = new TiliadoGumroad(
+            config, Drt.String.unmask(TILIADO_OAUTH2_CLIENT_SECRET.data));
+        paywall = new TiliadoPaywall(this, gumroad);
+        paywall.refresh_data.begin((o, res) => {paywall.refresh_data.end(res);});
     }
 }
 
