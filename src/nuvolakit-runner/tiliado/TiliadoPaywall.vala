@@ -25,7 +25,7 @@
 namespace Nuvola {
 
 public class TiliadoPaywall : GLib.Object {
-    public TiliadoMembership tier {get; private set; default = TiliadoMembership.NONE;}
+    public TiliadoMembership tier {get; private set; default = TiliadoMembership.BASIC;}
     public bool unlocked {get; private set; default = false;}
     private TiliadoActivation? tiliado = null;
     private TiliadoGumroad gumroad;
@@ -139,7 +139,7 @@ public class TiliadoPaywall : GLib.Object {
     }
 
     private void update_tier_info() {
-        TiliadoMembership result = TiliadoMembership.NONE;
+        TiliadoMembership result = TiliadoMembership.BASIC;
         TiliadoMembership candidate = TiliadoMembership.NONE;
         if ((candidate = gumroad.get_tier()) > result) {
             result = candidate;
