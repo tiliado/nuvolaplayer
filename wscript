@@ -517,18 +517,6 @@ def configure(ctx):
     for url in ("report_bug", "request_feature", "ask_question"):
         ctx.define("NUVOLA_%s_URL" % url.upper(), branding.get(url + "_url", "").strip())
 
-    with open("build/secret.h", "wb") as f:
-        client_secret = tiliado_api.get("client_secret", "")
-        if client_secret:
-            secret = b"{"
-            for i in mask(client_secret):
-                secret += str(i).encode("ascii") + b", "
-            secret += b"0}"
-        else:
-            secret = b'""'
-        f.write(
-            b'#pragma once\nstatic const char NUVOLA_TILIADO_OAUTH2_CLIENT_SECRET[] = '    + secret + b';')
-
 
 def build(ctx):
     def valalint(source_dir=None, **kwargs):

@@ -24,6 +24,8 @@
 
 namespace Nuvola {
 
+public const string TILIADO_OAUTH2_CLIENT_SECRET = "R8YvORjche0jZvntny9644rqIaqGOmuR0NYDSnh7R36SbFcyvtNTV2tVpkv5XSkY5a1UFyNRtJ4AaijWxkpOx006fVQeQMEU4VcVc2SYq88VOxmV0Y3Dw3NqkUcnpwKN";
+
 public enum TiliadoMembership {
     NONE = 0,
     BASIC = 1,
