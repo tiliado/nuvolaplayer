@@ -322,7 +322,7 @@ def options(ctx):
         '--dummy-engine', action='store_true', default=False, dest='dummy_engine',
         help="Whether to build with a dummy web engine instead of ValaCEF.")
     ctx.add_option(
-        '--no-vala-lint', action='store_false', default=True, dest='lint_vala', help="Don't use Vala linter.")
+        '--no-vala-lint', action='store_false', default=False, dest='lint_vala', help="This option has no effect anymore.")
     ctx.add_option(
         '--lint-vala-auto-fix', action='store_true', default=False,
         dest='lint_vala_auto_fix', help="Use Vala linter and automatically fix errors (dangerous).")
