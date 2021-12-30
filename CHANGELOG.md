@@ -7,6 +7,31 @@ Nuvola Player Changelog
     [Nuvola Devel mailing list](https://groups.google.com/d/forum/nuvola-player-devel)
     to receive more technical announcements and important information about future development.
 
+4.24.0 - December 30th, 2021
+----------------------------
+
+Spotify script 3.7
+
+  * Fix artist and track title parsing.
+  * Fix track progress bar integration [[GitHub Ticket](https://github.com/tiliado/nuvolaplayer/issues/761)].
+  * Fix integration of volume bar.
+
+Deezer script 3.6
+
+  * Fix integration of playback controls [[GitHub ticket](https://github.com/tiliado/nuvolaplayer/issues/760)].
+  * Fix repeat action [[GitHub ticket](https://github.com/tiliado/nuvolaplayer/issues/760)].
+  * Fix track title for explicit tracks [[GitHub ticket](https://github.com/tiliado/nuvolaplayer/issues/779)].
+
+Yandex Music script 1.9
+
+  * Update track.artLocation selector.
+  * Update like button selectors.
+
+ Other
+
+  * Text in error dialogs is not selectable to let users copy error messages [[GitHub ticket](https://github.com/tiliado/nuvolaplayer/issues/762)].
+  * GNOME SDK upgraded to version 41 [[GitHub ticket](https://github.com/tiliado/nuvolaplayer/issues/763)].
+
 Release 4.23.0 - August 1st, 2021
 ---------------------------------
 
