@@ -1,6 +1,17 @@
 Nuvola Player [![CircleCI](https://circleci.com/gh/tiliado/nuvolaplayer.svg?style=svg)](https://circleci.com/gh/tiliado/nuvolaplayer)
 =============
 
+![Nuvola Player EOL December 2022](eol.png)
+
+Development Discontinued
+------------------------
+
+Failing to overcome technical challenges in a timely manner, the Nuvola Player project has discontinued active
+development. The project enters a one-year maintenance mode and will deliver integration bug fixes on a best-effort
+basis until the final **End-of-Life on December 31, 2022**.
+
+[You can read more details here](https://medium.com/nuvola-news/nuvola-player-project-enters-maintenance-mode-d9d0e78f87ea).
+
 About Nuvola
 ------------
 
